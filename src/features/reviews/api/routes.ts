@@ -1,0 +1,53 @@
+function encodePathSegment(value: string): string {
+  return encodeURIComponent(value);
+}
+
+export function buildMovieReviewsPath(movieId: string, page = 1, pageSize = 20): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  return `/api/reviews/movies/${encodePathSegment(movieId)}?${params.toString()}`;
+}
+
+export function buildMovieMyReviewPath(movieId: string): string {
+  return `/api/reviews/movies/${encodePathSegment(movieId)}/me`;
+}
+
+export function buildCreateMovieReviewPath(movieId: string): string {
+  return `/api/reviews/movies/${encodePathSegment(movieId)}`;
+}
+
+export function buildUpdateMovieReviewPath(movieId: string): string {
+  return `/api/reviews/movies/${encodePathSegment(movieId)}`;
+}
+
+export function buildDeleteMovieReviewPath(movieId: string): string {
+  return `/api/reviews/movies/${encodePathSegment(movieId)}`;
+}
+
+export function buildTvReviewsPath(tvShowId: string, page = 1, pageSize = 20): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}?${params.toString()}`;
+}
+
+export function buildTvMyReviewPath(tvShowId: string): string {
+  return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}/me`;
+}
+
+export function buildCreateTvReviewPath(tvShowId: string): string {
+  return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}`;
+}
+
+export function buildUpdateTvReviewPath(tvShowId: string): string {
+  return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}`;
+}
+
+export function buildDeleteTvReviewPath(tvShowId: string): string {
+  return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}`;
+}
