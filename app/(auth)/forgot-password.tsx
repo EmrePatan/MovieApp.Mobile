@@ -1,30 +1,30 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Screen } from '@/components/common/Screen';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppInput } from '@/components/inputs/AppInput';
-import { useAuth } from '@/auth/useAuth';
+import { forgotPasswordRequest } from '@/auth/auth-api';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
   hasValidationErrors,
-  validateLoginForm,
-  type LoginFormErrors,
+  validateForgotPasswordForm,
+  type ForgotPasswordFormErrors,
 } from '@/utils/validation';
 import { spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
 
-export default function LoginScreen() {
-  const { login } = useAuth();
+export default function ForgotPasswordScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<LoginFormErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<ForgotPasswordFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleLogin() {
-    const errors = validateLoginForm(email, password);
+  async function handleSubmit() {
+    const errors = validateForgotPasswordForm(email);
     setFieldErrors(errors);
 
     if (hasValidationErrors(errors)) {
@@ -32,15 +32,17 @@ export default function LoginScreen() {
     }
 
     setFormError(null);
+    setSuccessMessage(null);
     setIsSubmitting(true);
 
     try {
-      await login(email.trim(), password);
+      const response = await forgotPasswordRequest({ email: email.trim() });
+      setSuccessMessage(response.message);
     } catch (error) {
       if (isApiError(error)) {
-        setFormError(getUserMessageForAuthError(error.kind, 'login'));
+        setFormError(getUserMessageForAuthError(error.kind, 'forgot-password'));
       } else {
-        setFormError('Unable to sign in. Please try again.');
+        setFormError('Unable to process your request. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -54,9 +56,9 @@ export default function LoginScreen() {
         style={styles.container}
       >
         <View style={styles.header}>
-          <AppText variant="hero">MovieApp</AppText>
+          <AppText variant="title">Forgot password</AppText>
           <AppText variant="body" muted center>
-            Sign in to continue watching
+            Enter your email and we&apos;ll send reset instructions if an account exists.
           </AppText>
         </View>
 
@@ -70,19 +72,15 @@ export default function LoginScreen() {
             autoComplete="email"
             keyboardType="email-address"
             textContentType="emailAddress"
-            returnKeyType="next"
-          />
-          <AppInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            error={fieldErrors.password}
-            secureTextEntry
-            autoComplete="password"
-            textContentType="password"
             returnKeyType="done"
-            onSubmitEditing={() => void handleLogin()}
+            onSubmitEditing={() => void handleSubmit()}
           />
+
+          {successMessage ? (
+            <AppText variant="bodySmall" style={styles.successMessage} accessibilityRole="alert">
+              {successMessage}
+            </AppText>
+          ) : null}
 
           {formError ? (
             <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
@@ -90,11 +88,13 @@ export default function LoginScreen() {
             </AppText>
           ) : null}
 
-          <AppButton title="Sign in" onPress={() => void handleLogin()} loading={isSubmitting} />
+          <AppButton
+            title="Send reset instructions"
+            onPress={() => void handleSubmit()}
+            loading={isSubmitting}
+          />
 
-          <Link href="/(auth)/forgot-password" asChild>
-            <AppButton title="Forgot password?" variant="secondary" />
-          </Link>
+          <AppButton title="Back to sign in" variant="secondary" onPress={() => router.replace('/(auth)/login')} />
 
           <Link href="/(auth)/register" asChild>
             <AppButton title="Create an account" variant="secondary" />
@@ -120,5 +120,8 @@ const styles = StyleSheet.create({
   },
   formError: {
     color: colors.error,
+  },
+  successMessage: {
+    color: colors.success,
   },
 });

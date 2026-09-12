@@ -160,6 +160,45 @@ There is no global exception middleware. Unhandled server errors may return the 
 |--------|-------|------|
 | `400` | Invalid login request. | Validation failure |
 | `401` | Authentication failed. | Invalid credentials (`"Invalid email or password."`) |
+| `429` | Too many requests. | Rate limit exceeded |
+
+---
+
+### `POST /api/auth/forgot-password`
+
+**Auth:** None
+
+**Request:** `{ "email": "user@example.com" }`
+
+**Response `200 OK`:** `{ "message": "If an account exists for this email, you will receive instructions to reset your password." }`
+
+Same response for existing and non-existing emails (no enumeration).
+
+Mobile: `app/(auth)/forgot-password.tsx` → generic success UX.
+
+---
+
+### `POST /api/auth/reset-password`
+
+**Auth:** None
+
+**Request:** `{ "token": "...", "newPassword": "..." }`
+
+**Response `200 OK`:** `{ "message": "Your password has been reset. You can now sign in with your new password." }`
+
+Deep link: `movieapp://reset-password?token=...` → `app/(auth)/reset-password.tsx`
+
+The mobile app hides the raw token field when opened via deep link. Tokens are not logged by the API client. Manual token entry remains available when no query parameter is present.
+
+Invalid/expired/used tokens return `400` with `"Invalid or expired reset token."`
+
+Success rotates `SecurityStamp` (existing JWTs invalidated).
+
+---
+
+### Auth rate limiting
+
+Auth endpoints return `429` when limits are exceeded. Mobile shows: `"Too many attempts. Please try again later."`
 
 ---
 
@@ -1881,6 +1920,8 @@ Kebab-case strings: `recommended-for-you`, `because-you-watched`, `similar-to-fa
 |--------|----------|------|---------|
 | POST | `/api/auth/register` | No | Register new user |
 | POST | `/api/auth/login` | No | Login |
+| POST | `/api/auth/forgot-password` | No | Request password reset |
+| POST | `/api/auth/reset-password` | No | Reset password with token |
 | GET | `/api/auth/me` | JWT | Get current user |
 | GET | `/api/users/me` | JWT | Get current profile |
 | PUT | `/api/users/me/profile` | JWT | Update display name |

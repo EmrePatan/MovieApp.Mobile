@@ -11,6 +11,16 @@ export interface RegisterFormErrors {
   displayName?: string;
 }
 
+export interface ForgotPasswordFormErrors {
+  email?: string;
+}
+
+export interface ResetPasswordFormErrors {
+  token?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
 export function validateLoginForm(email: string, password: string): LoginFormErrors {
   const errors: LoginFormErrors = {};
   const trimmedEmail = email.trim();
@@ -64,6 +74,52 @@ export function validateRegisterForm(
   return errors;
 }
 
-export function hasValidationErrors(errors: LoginFormErrors | RegisterFormErrors): boolean {
+export function validateForgotPasswordForm(email: string): ForgotPasswordFormErrors {
+  const errors: ForgotPasswordFormErrors = {};
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    errors.email = 'Email is required.';
+  } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+    errors.email = 'Enter a valid email address.';
+  } else if (trimmedEmail.length > 320) {
+    errors.email = 'Email must be at most 320 characters.';
+  }
+
+  return errors;
+}
+
+export function validateResetPasswordForm(
+  token: string,
+  newPassword: string,
+  confirmPassword: string,
+): ResetPasswordFormErrors {
+  const errors: ResetPasswordFormErrors = {};
+  const trimmedToken = token.trim();
+
+  if (!trimmedToken) {
+    errors.token = 'Reset token is required.';
+  }
+
+  if (!newPassword) {
+    errors.newPassword = 'Password is required.';
+  } else if (newPassword.length < 8) {
+    errors.newPassword = 'Password must be at least 8 characters.';
+  } else if (newPassword.length > 128) {
+    errors.newPassword = 'Password must be at most 128 characters.';
+  }
+
+  if (!confirmPassword) {
+    errors.confirmPassword = 'Please confirm your password.';
+  } else if (confirmPassword !== newPassword) {
+    errors.confirmPassword = 'Passwords do not match.';
+  }
+
+  return errors;
+}
+
+export function hasValidationErrors(
+  errors: LoginFormErrors | RegisterFormErrors | ForgotPasswordFormErrors | ResetPasswordFormErrors,
+): boolean {
   return Object.values(errors).some(Boolean);
 }

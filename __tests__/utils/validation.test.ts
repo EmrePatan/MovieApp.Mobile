@@ -1,7 +1,9 @@
 import {
   hasValidationErrors,
+  validateForgotPasswordForm,
   validateLoginForm,
   validateRegisterForm,
+  validateResetPasswordForm,
 } from '@/utils/validation';
 
 describe('validation', () => {
@@ -25,5 +27,19 @@ describe('validation', () => {
     const errors = validateRegisterForm('user@example.com', 'securepassword', 'Emre');
 
     expect(hasValidationErrors(errors)).toBe(false);
+  });
+
+  it('validates forgot password email', () => {
+    expect(validateForgotPasswordForm('')).toEqual({
+      email: 'Email is required.',
+    });
+  });
+
+  it('validates reset password form', () => {
+    const errors = validateResetPasswordForm('', 'short', 'other');
+
+    expect(errors.token).toBeTruthy();
+    expect(errors.newPassword).toMatch(/at least 8 characters/);
+    expect(errors.confirmPassword).toBeTruthy();
   });
 });

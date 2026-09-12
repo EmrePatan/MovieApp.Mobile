@@ -77,7 +77,10 @@ export function mapStatusToErrorKind(status: number): ApiErrorKind {
   return 'unknown';
 }
 
-export function getUserMessageForAuthError(kind: ApiErrorKind, context: 'login' | 'register'): string {
+export function getUserMessageForAuthError(
+  kind: ApiErrorKind,
+  context: 'login' | 'register' | 'forgot-password' | 'reset-password',
+): string {
   if (kind === 'unauthorized' && context === 'login') {
     return 'Invalid email or password.';
   }
@@ -86,10 +89,28 @@ export function getUserMessageForAuthError(kind: ApiErrorKind, context: 'login' 
     return 'An account with this email already exists.';
   }
 
+  if (kind === 'rate_limited') {
+    return 'Too many attempts. Please try again later.';
+  }
+
+  if (kind === 'validation' && context === 'reset-password') {
+    return 'Invalid or expired reset token.';
+  }
+
   if (kind === 'validation') {
-    return context === 'register'
-      ? 'Please check your registration details and try again.'
-      : 'Please check your email and password.';
+    if (context === 'register') {
+      return 'Please check your registration details and try again.';
+    }
+
+    if (context === 'forgot-password') {
+      return 'Please enter a valid email address.';
+    }
+
+    if (context === 'reset-password') {
+      return 'Please check your password and try again.';
+    }
+
+    return 'Please check your email and password.';
   }
 
   if (kind === 'network' || kind === 'timeout') {
