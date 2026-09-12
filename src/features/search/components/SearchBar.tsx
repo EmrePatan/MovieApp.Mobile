@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
+import { interaction } from '@/theme/interaction';
 
 interface SearchBarProps {
   value: string;
@@ -23,7 +24,7 @@ export function SearchBar({
 
   return (
     <View style={styles.container}>
-      <Ionicons name="search-outline" size={20} color={colors.textMuted} />
+      <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
       <TextInput
         accessibilityLabel="Search movies and TV shows"
         accessibilityRole="search"
@@ -44,8 +45,9 @@ export function SearchBar({
           accessibilityLabel="Clear search"
           hitSlop={8}
           onPress={onClear}
+          style={({ pressed }) => [styles.clearButton, pressed && styles.clearPressed]}
         >
-          <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+          <Ionicons name="close-circle" size={18} color={colors.textMuted} />
         </Pressable>
       ) : null}
     </View>
@@ -56,18 +58,30 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
     minHeight: 48,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.inputBackground,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
+  },
+  searchIcon: {
+    marginRight: spacing.sm,
   },
   input: {
     flex: 1,
     color: colors.textPrimary,
     fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
     paddingVertical: spacing.sm,
+    paddingRight: spacing.xs,
+  },
+  clearButton: {
+    minWidth: interaction.touchTarget,
+    minHeight: interaction.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: -spacing.xs,
+  },
+  clearPressed: {
+    opacity: interaction.subtlePressedOpacity,
   },
 });

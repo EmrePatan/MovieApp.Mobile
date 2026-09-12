@@ -13,11 +13,19 @@ const FILTERS: { label: string; value: HomeTypeFilter }[] = [
 interface HomeTypeFilterControlProps {
   value: HomeTypeFilter;
   onChange: (value: HomeTypeFilter) => void;
+  overlay?: boolean;
 }
 
-export function HomeTypeFilterControl({ value, onChange }: HomeTypeFilterControlProps) {
+export function HomeTypeFilterControl({
+  value,
+  onChange,
+  overlay = false,
+}: HomeTypeFilterControlProps) {
   return (
-    <View style={styles.container} accessibilityRole="tablist">
+    <View
+      style={[styles.container, overlay && styles.containerOverlay]}
+      accessibilityRole="tablist"
+    >
       {FILTERS.map((filter) => {
         const selected = value === filter.value;
 
@@ -28,9 +36,21 @@ export function HomeTypeFilterControl({ value, onChange }: HomeTypeFilterControl
             accessibilityState={{ selected }}
             accessibilityLabel={`Show ${filter.label}`}
             onPress={() => onChange(filter.value)}
-            style={[styles.chip, selected && styles.chipSelected]}
+            style={[
+              styles.chip,
+              overlay && styles.chipOverlay,
+              selected && styles.chipSelected,
+              selected && overlay && styles.chipSelectedOverlay,
+            ]}
           >
-            <AppText variant="bodySmall" style={selected ? styles.labelSelected : styles.label}>
+            <AppText
+              variant="caption"
+              style={[
+                styles.label,
+                overlay && styles.labelOverlay,
+                selected && styles.labelSelected,
+              ]}
+            >
               {filter.label}
             </AppText>
           </Pressable>
@@ -43,12 +63,16 @@ export function HomeTypeFilterControl({ value, onChange }: HomeTypeFilterControl
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  containerOverlay: {
+    paddingTop: 0,
+    paddingBottom: 0,
   },
   chip: {
-    minHeight: 40,
+    minHeight: 36,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
@@ -57,12 +81,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  chipOverlay: {
+    minHeight: 32,
+    paddingHorizontal: spacing.sm + 2,
+    backgroundColor: 'rgba(20, 20, 28, 0.72)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
   chipSelected: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  chipSelectedOverlay: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
   },
   label: {
     color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  labelOverlay: {
+    color: colors.textPrimary,
   },
   labelSelected: {
     color: colors.textPrimary,

@@ -12,13 +12,18 @@ import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { HomeEmptyState } from '@/features/home/components/HomeEmptyState';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
+import { HomeListHeader } from '@/features/home/components/HomeListHeader';
 import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeSection } from '@/features/home/components/HomeSection';
 import { HomeTypeFilterControl } from '@/features/home/components/HomeTypeFilterControl';
 import { homeQueryKey, useHome } from '@/features/home/hooks/useHome';
 import type { HomeItem, HomeSection as HomeSectionModel, HomeTypeFilter } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
+import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
+import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
+import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function HomeScreen() {
@@ -30,10 +35,13 @@ export default function HomeScreen() {
     DEFAULT_HOME_SECTION_SIZE,
   );
 
-  const sections = useMemo(
-    () => (data?.sections ?? []).filter((section) => section.items.length > 0),
-    [data?.sections],
-  );
+  const { sections, featuredItem } = useMemo(() => {
+    const nonEmptySections = (data?.sections ?? []).filter(
+      (section) => section.items.length > 0,
+    );
+
+    return presentHomeSections(nonEmptySections);
+  }, [data?.sections]);
 
   const handleRefresh = useCallback(() => {
     void queryClient.invalidateQueries({
@@ -64,7 +72,35 @@ export default function HomeScreen() {
     [handleItemPress],
   );
 
-  const listHeader = (
+  const listHeader = useMemo(
+    () => (
+      <HomeListHeader
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        featuredItem={featuredItem}
+        onItemPress={handleItemPress}
+      />
+    ),
+    [typeFilter, featuredItem, handleItemPress],
+  );
+
+  const listContentStyle = useMemo(
+    () => (sections.length === 0 ? styles.emptyContent : styles.content),
+    [sections.length],
+  );
+
+  const refreshControl = useMemo(
+    () => (
+      <RefreshControl
+        refreshing={isFetching && !isLoading}
+        onRefresh={handleRefresh}
+        tintColor={colors.accent}
+      />
+    ),
+    [handleRefresh, isFetching, isLoading],
+  );
+
+  const fallbackChrome = (
     <View>
       <HomeHeader />
       <HomeTypeFilterControl value={typeFilter} onChange={setTypeFilter} />
@@ -74,8 +110,8 @@ export default function HomeScreen() {
   if (isLoading && !data) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
-        <HomeLoadingState />
+        {fallbackChrome}
+        <HomeLoadingState showTopChrome={false} />
       </SafeAreaView>
     );
   }
@@ -84,9 +120,9 @@ export default function HomeScreen() {
     if (isApiError(error) && error.kind === 'unauthorized') {
       return (
         <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-          {listHeader}
+          {fallbackChrome}
           <View style={styles.centered}>
-            <HomeLoadingState />
+            <HomeLoadingState showTopChrome={false} />
           </View>
         </SafeAreaView>
       );
@@ -98,7 +134,7 @@ export default function HomeScreen() {
 
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+        {fallbackChrome}
         <View style={styles.centered}>
           <ErrorView message={message} onRetry={handleRetry} retryLabel="Try Again" />
         </View>
@@ -110,19 +146,18 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
         data={sections}
-        keyExtractor={(section) => `${section.type}-${section.displayOrder}`}
+        keyExtractor={homeSectionKeyExtractor}
         renderItem={renderSection}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={<HomeEmptyState />}
-        contentContainerStyle={sections.length === 0 ? styles.emptyContent : styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={isFetching && !isLoading}
-            onRefresh={handleRefresh}
-            tintColor={colors.accent}
-          />
-        }
+        ListEmptyComponent={HomeEmptyState}
+        contentContainerStyle={listContentStyle}
+        refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
+        getItemLayout={getHomeSectionRowLayout}
+        removeClippedSubviews
       />
     </SafeAreaView>
   );

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Keyboard,
+  Pressable,
   RefreshControl,
   StyleSheet,
   View,
@@ -11,16 +12,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
-import { AppButton } from '@/components/buttons/AppButton';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
-import { SearchBar } from '@/features/search/components/SearchBar';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchHistorySection } from '@/features/search/components/SearchHistorySection';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
+import { SearchScreenHeader } from '@/features/search/components/SearchScreenHeader';
 import { SearchSuggestionList } from '@/features/search/components/SearchSuggestionList';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
@@ -31,9 +31,12 @@ import {
 } from '@/features/search/hooks/useSearchHistory';
 import type { SearchAutocompleteItem, SearchResultItem, SearchTypeFilter } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
+import { getSearchResultItemLayout } from '@/features/search/utils/search-list-layout';
+import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function SearchScreen() {
@@ -62,6 +65,7 @@ export default function SearchScreen() {
     [searchQuery.data?.pages],
   );
 
+  const historyItems = historyQuery.data?.items ?? [];
   const showAutocomplete =
     !hasActiveSearch && isValidSearchQuery(normalizeSearchQuery(debouncedInput));
 
@@ -101,6 +105,7 @@ export default function SearchScreen() {
 
   const handleResultPress = useCallback(
     (item: SearchResultItem) => {
+      Keyboard.dismiss();
       router.push(buildCatalogDetailRoute(item.id, item.type));
     },
     [router],
@@ -153,32 +158,85 @@ export default function SearchScreen() {
     [handleResultPress],
   );
 
-  const listHeader = (
-    <View style={styles.header}>
-      <AppText variant="title" style={styles.title}>
-        Search
-      </AppText>
-      <SearchBar
+  const refreshControl = useMemo(
+    () => (
+      <RefreshControl
+        refreshing={searchQuery.isRefetching && !searchQuery.isFetchingNextPage}
+        onRefresh={handleRefresh}
+        tintColor={colors.accent}
+      />
+    ),
+    [handleRefresh, searchQuery.isFetchingNextPage, searchQuery.isRefetching],
+  );
+
+  const listHeader = useMemo(
+    () => (
+      <SearchScreenHeader
         value={inputText}
         onChangeText={setInputText}
         onSubmit={handleSubmit}
         onClear={handleClear}
-      />
-      {showAutocomplete ? (
-        <SearchSuggestionList
-          suggestions={autocompleteQuery.data?.items ?? []}
-          isLoading={autocompleteQuery.isLoading}
-          onSelect={handleSuggestionSelect}
-        />
-      ) : null}
-      {hasActiveSearch ? <SearchFilterControl value={typeFilter} onChange={setTypeFilter} /> : null}
-      {!hasActiveSearch ? (
-        <View style={styles.discoverLink}>
-          <AppButton title="Discover trending & popular" variant="secondary" onPress={() => router.push('/discover')} />
-        </View>
-      ) : null}
-    </View>
+      >
+        {showAutocomplete ? (
+          <SearchSuggestionList
+            suggestions={autocompleteQuery.data?.items ?? []}
+            isLoading={autocompleteQuery.isLoading}
+            onSelect={handleSuggestionSelect}
+          />
+        ) : null}
+        {hasActiveSearch ? (
+          <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+        ) : null}
+      </SearchScreenHeader>
+    ),
+    [
+      autocompleteQuery.data?.items,
+      autocompleteQuery.isLoading,
+      handleClear,
+      handleSubmit,
+      handleSuggestionSelect,
+      hasActiveSearch,
+      inputText,
+      showAutocomplete,
+      typeFilter,
+    ],
   );
+
+  const initialEmptyState = useMemo(
+    () => (
+      <SearchEmptyState
+        variant="initial"
+        title="Search movies and TV shows"
+        message="Try a title like Inception or Breaking Bad"
+      />
+    ),
+    [],
+  );
+
+  const noResultsState = useMemo(
+    () => (
+      <SearchEmptyState
+        title={`No results for “${normalizedSubmittedQuery}”`}
+        message="Try a different spelling or a broader search term."
+      />
+    ),
+    [normalizedSubmittedQuery],
+  );
+
+  const isAutocompleteActive = showAutocomplete;
+
+  const discoverLink = !hasActiveSearch && !isAutocompleteActive ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Discover trending and popular titles"
+      onPress={() => router.push('/discover')}
+      style={styles.discoverLink}
+    >
+      <AppText variant="bodySmall" style={styles.discoverLinkText}>
+        Discover trending & popular
+      </AppText>
+    </Pressable>
+  ) : null;
 
   if (hasActiveSearch) {
     if (searchQuery.isLoading && results.length === 0) {
@@ -209,14 +267,10 @@ export default function SearchScreen() {
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         <FlatList
           data={results}
-          keyExtractor={(item) => `${item.type}-${item.id}`}
+          keyExtractor={searchResultKeyExtractor}
           renderItem={renderResult}
           ListHeaderComponent={listHeader}
-          ListEmptyComponent={
-            <SearchEmptyState
-              title={`No movies or shows found for “${normalizedSubmittedQuery}”`}
-            />
-          }
+          ListEmptyComponent={noResultsState}
           ListFooterComponent={
             searchQuery.isFetchingNextPage ? (
               <View style={styles.footerLoading}>
@@ -224,21 +278,25 @@ export default function SearchScreen() {
               </View>
             ) : null
           }
-          refreshControl={
-            <RefreshControl
-              refreshing={searchQuery.isRefetching && !searchQuery.isFetchingNextPage}
-              onRefresh={handleRefresh}
-              tintColor={colors.accent}
-            />
-          }
+          refreshControl={refreshControl}
           contentContainerStyle={styles.listContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
+          initialNumToRender={layout.verticalList.initialNumToRender}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+          windowSize={layout.verticalList.windowSize}
+          getItemLayout={getSearchResultItemLayout}
+          removeClippedSubviews
         />
       </SafeAreaView>
     );
   }
+
+  const showInitialEmpty =
+    !isAutocompleteActive &&
+    (!isAuthenticated || (!historyQuery.isLoading && historyItems.length === 0));
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -248,9 +306,9 @@ export default function SearchScreen() {
         ListHeaderComponent={
           <>
             {listHeader}
-            {isAuthenticated ? (
+            {isAuthenticated && !isAutocompleteActive ? (
               <SearchHistorySection
-                items={historyQuery.data?.items ?? []}
+                items={historyItems}
                 isLoading={historyQuery.isLoading}
                 isError={historyQuery.isError}
                 isClearing={clearHistory.isPending}
@@ -261,16 +319,13 @@ export default function SearchScreen() {
                 onRetry={() => void historyQuery.refetch()}
               />
             ) : null}
+            {discoverLink}
           </>
         }
-        ListEmptyComponent={
-          <SearchEmptyState
-            title="Search for a movie or TV show"
-            message="Find titles across the catalog and open details instantly."
-          />
-        }
+        ListEmptyComponent={showInitialEmpty ? initialEmptyState : null}
         contentContainerStyle={styles.listContent}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       />
     </SafeAreaView>
   );
@@ -280,16 +335,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    paddingTop: spacing.md,
-    gap: spacing.sm,
-  },
-  title: {
-    paddingHorizontal: spacing.lg,
-  },
-  discoverLink: {
-    paddingHorizontal: spacing.lg,
   },
   listContent: {
     paddingBottom: spacing.xxl,
@@ -303,5 +348,14 @@ const styles = StyleSheet.create({
   footerLoading: {
     paddingVertical: spacing.lg,
     alignItems: 'center',
+  },
+  discoverLink: {
+    alignSelf: 'center',
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  discoverLinkText: {
+    color: colors.accent,
+    fontWeight: '600',
   },
 });

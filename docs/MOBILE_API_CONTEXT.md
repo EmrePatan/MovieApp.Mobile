@@ -696,11 +696,14 @@ Returns a maximum of **10** suggestions.
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "type": "movie",
-      "title": "Interstellar"
+      "title": "Interstellar",
+      "posterUrl": "/path.jpg"
     }
   ]
 }
 ```
+
+`posterUrl` is a backend-relative catalog image path (same shape as search results). It may be `null` when no poster is stored.
 
 **Status codes:** `200`, `400`
 

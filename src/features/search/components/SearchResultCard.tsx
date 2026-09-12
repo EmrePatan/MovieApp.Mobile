@@ -1,12 +1,16 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchResultItem } from '../types';
-import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
+import {
+  formatCatalogYear,
+  formatContentType,
+  formatRating,
+} from '@/utils/format';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
+import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 interface SearchResultCardProps {
@@ -19,7 +23,18 @@ export const SearchResultCard = memo(function SearchResultCard({
   onPress,
 }: SearchResultCardProps) {
   const year = formatCatalogYear(item.releaseDate, item.year);
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}, rating ${formatRating(item.voteAverage)}`;
+
+  const metadataLine = useMemo(() => {
+    const parts = [
+      formatContentType(item.type),
+      year,
+      item.voteAverage > 0 ? `★ ${formatRating(item.voteAverage)}` : null,
+    ].filter(Boolean);
+
+    return parts.join(' · ');
+  }, [item.type, item.voteAverage, year]);
+
+  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.type)}`;
 
   return (
     <Pressable
@@ -35,22 +50,16 @@ export const SearchResultCard = memo(function SearchResultCard({
         accessibilityLabel={`${item.title} poster`}
       />
       <View style={styles.meta}>
-        <AppText variant="body" numberOfLines={2}>
+        <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
-        <View style={styles.row}>
-          <ContentTypeBadge type={item.type} />
-          {year ? (
-            <AppText variant="caption" muted>
-              {year}
-            </AppText>
-          ) : null}
-          <AppText variant="caption" muted>
-            ★ {formatRating(item.voteAverage)}
+        {metadataLine ? (
+          <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
+            {metadataLine}
           </AppText>
-        </View>
+        ) : null}
         {item.overview ? (
-          <AppText variant="bodySmall" muted numberOfLines={2}>
+          <AppText variant="caption" muted numberOfLines={2} style={styles.overview}>
             {item.overview}
           </AppText>
         ) : null}
@@ -62,22 +71,31 @@ export const SearchResultCard = memo(function SearchResultCard({
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: spacing.md,
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
+    backgroundColor: colors.surface,
   },
   meta: {
     flex: 1,
     gap: spacing.xs,
-    paddingVertical: spacing.xs,
+    paddingTop: spacing.xs,
+    minHeight: layout.posterList.height - spacing.xs,
+    justifyContent: 'center',
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
+  title: {
+    color: colors.textPrimary,
+  },
+  metadata: {
+    letterSpacing: 0.1,
+  },
+  overview: {
+    lineHeight: 16,
   },
 });

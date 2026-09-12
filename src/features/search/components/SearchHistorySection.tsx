@@ -4,7 +4,9 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import type { SearchHistoryItem } from '../types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { layout } from '@/theme/layout';
+import { spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 
 interface SearchHistorySectionProps {
   items: SearchHistoryItem[];
@@ -44,7 +46,7 @@ export function SearchHistorySection({
   if (isLoading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={colors.accent} />
+        <ActivityIndicator color={colors.accent} size="small" />
       </View>
     );
   }
@@ -60,40 +62,44 @@ export function SearchHistorySection({
     );
   }
 
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <AppText variant="subtitle">Recent Searches</AppText>
-        {items.length > 0 ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Clear all search history"
-            disabled={isClearing}
-            onPress={onClearAll}
-          >
-            <AppText variant="bodySmall" style={styles.clearAll}>
-              Clear all
-            </AppText>
-          </Pressable>
-        ) : null}
+        <AppText variant="subtitle" style={styles.title}>Recent Searches</AppText>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Clear all search history"
+          disabled={isClearing}
+          onPress={onClearAll}
+          hitSlop={8}
+        >
+          <AppText variant="caption" style={styles.clearAll}>
+            Clear all
+          </AppText>
+        </Pressable>
       </View>
 
-      {items.length === 0 ? (
-        <AppText variant="bodySmall" muted>
-          Your recent searches will appear here.
-        </AppText>
-      ) : (
-        items.map((item) => (
-          <View key={item.id} style={styles.row}>
+      <View style={styles.list}>
+        {items.map((item, index) => (
+          <View
+            key={item.id}
+            style={[styles.row, index < items.length - 1 && styles.rowBorder]}
+          >
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Search for ${item.query}`}
               onPress={() => onSelect(item.query)}
               style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}
             >
-              <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+              <Ionicons name="time-outline" size={16} color={colors.textMuted} />
               <View style={styles.historyMeta}>
-                <AppText variant="body">{item.query}</AppText>
+                <AppText variant="bodySmall" numberOfLines={1}>
+                  {item.query}
+                </AppText>
                 <AppText variant="caption" muted>
                   {formatSearchedAt(item.searchedAt)}
                 </AppText>
@@ -105,23 +111,24 @@ export function SearchHistorySection({
               disabled={deletingId === item.id}
               onPress={() => onDelete(item.id)}
               hitSlop={8}
+              style={styles.deleteButton}
             >
               {deletingId === item.id ? (
                 <ActivityIndicator color={colors.textMuted} size="small" />
               ) : (
-                <Ionicons name="close" size={18} color={colors.textMuted} />
+                <Ionicons name="close" size={16} color={colors.textMuted} />
               )}
             </Pressable>
           </View>
-        ))
-      )}
+        ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   section: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.lg,
     gap: spacing.sm,
   },
@@ -131,32 +138,48 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.xs,
   },
+  title: {
+    letterSpacing: 0.15,
+  },
   clearAll: {
     color: colors.accent,
+    fontWeight: '600',
+  },
+  list: {
+    borderRadius: spacing.sm,
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingRight: spacing.sm,
+  },
+  rowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
   historyButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    padding: spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   historyMeta: {
     flex: 1,
     gap: 2,
   },
+  deleteButton: {
+    minWidth: 40,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+  },
   pressed: {
-    opacity: 0.85,
+    opacity: interaction.subtlePressedOpacity,
   },
   loading: {
     paddingVertical: spacing.lg,

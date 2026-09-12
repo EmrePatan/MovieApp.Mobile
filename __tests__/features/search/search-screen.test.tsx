@@ -91,13 +91,14 @@ describe('SearchScreen', () => {
 
   it('renders initial empty state', () => {
     render(<SearchScreen />);
-    expect(screen.getByText('Search for a movie or TV show')).toBeTruthy();
+    expect(screen.getByText('Search movies and TV shows')).toBeTruthy();
+    expect(screen.getByText('Try a title like Inception or Breaking Bad')).toBeTruthy();
     expect(screen.getByText('Discover trending & popular')).toBeTruthy();
   });
 
   it('navigates to discover screen', () => {
     render(<SearchScreen />);
-    fireEvent.press(screen.getByText('Discover trending & popular'));
+    fireEvent.press(screen.getByLabelText('Discover trending and popular titles'));
     expect(mockPush).toHaveBeenCalledWith('/discover');
   });
 
@@ -106,6 +107,190 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), '   ');
     fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
     expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+  });
+
+  it('renders autocomplete suggestions while typing', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'tv', title: 'Breaking Bad', posterUrl: null }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'break');
+
+    expect(screen.getByLabelText('Search for Breaking Bad, TV')).toBeTruthy();
+    expect(screen.getByLabelText('TV show suggestion')).toBeTruthy();
+  });
+
+  it('hides initial and discovery content while autocomplete is active', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+
+    expect(screen.getByLabelText('Search for Interstellar, Movie')).toBeTruthy();
+    expect(screen.queryByText('Discover trending & popular')).toBeNull();
+    expect(screen.queryByText('Try a title like Inception or Breaking Bad')).toBeNull();
+  });
+
+  it('hides recent searches while autocomplete is active', () => {
+    (useSearchHistory as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'history-1',
+            query: 'inception',
+            searchedAt: '2026-09-11T14:30:00Z',
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+
+    expect(screen.queryByText('Recent Searches')).toBeNull();
+    expect(screen.queryByText('inception')).toBeNull();
+  });
+
+  it('shows minimal autocomplete empty state instead of initial content', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: { items: [] },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'zzzz');
+
+    expect(screen.getByLabelText('No suggestions')).toBeTruthy();
+    expect(screen.queryByText('Try a title like Inception or Breaking Bad')).toBeNull();
+    expect(screen.queryByText('Discover trending & popular')).toBeNull();
+  });
+
+  it('restores initial content after clearing an autocomplete query', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+    fireEvent.press(screen.getByLabelText('Clear search'));
+
+    expect(screen.getByText('Search movies and TV shows')).toBeTruthy();
+    expect(screen.getByText('Try a title like Inception or Breaking Bad')).toBeTruthy();
+    expect(screen.getByText('Discover trending & popular')).toBeTruthy();
+    expect(screen.queryByLabelText('Search for Interstellar, Movie')).toBeNull();
+  });
+
+  it('submits a query from autocomplete', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+    fireEvent.press(screen.getByLabelText('Search for Interstellar, Movie'));
+
+    expect(useSearchResults).toHaveBeenLastCalledWith('Interstellar', 'all');
+  });
+
+  it('shows loading state for submitted search', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      isFetching: true,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+
+    expect(screen.getByLabelText('Loading search results')).toBeTruthy();
+  });
+
+  it('shows API error state for submitted search', () => {
+    const { ApiError } = require('@/api/errors');
+
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new ApiError({ kind: 'network' }),
+      isFetching: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+
+    expect(screen.getByText('Try Again')).toBeTruthy();
+  });
+
+  it('shows zero-results state distinct from API failure', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [],
+            page: 1,
+            pageSize: 20,
+            totalCount: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'zzzz');
+    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+
+    expect(screen.getByText('No results for “zzzz”')).toBeTruthy();
+    expect(screen.queryByText('Try Again')).toBeNull();
   });
 
   it('navigates to movie detail from result card', () => {
@@ -138,7 +323,94 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'interstellar');
     fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
 
-    fireEvent.press(screen.getByLabelText('Interstellar, Movie, 2014, rating 8.4'));
+    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-id');
+  });
+
+  it('navigates to tv detail from result card', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [
+              {
+                ...mockSearchResult,
+                id: 'tv-id',
+                type: 'tv',
+                title: 'Breaking Bad',
+                releaseDate: '2008-01-20',
+                year: 2008,
+                voteAverage: 8.9,
+              },
+            ],
+            page: 1,
+            pageSize: 20,
+            totalCount: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'breaking');
+    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+
+    fireEvent.press(screen.getByLabelText('Breaking Bad, TV · 2008 · ★ 8.9'));
+    expect(mockPush).toHaveBeenCalledWith('/tv/tv-id');
+  });
+
+  it('renders recent searches when history exists', () => {
+    (useSearchHistory as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'history-1',
+            query: 'inception',
+            searchedAt: '2026-09-11T14:30:00Z',
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+
+    expect(screen.getByText('Recent Searches')).toBeTruthy();
+    expect(screen.getByText('inception')).toBeTruthy();
+    expect(screen.queryByText('Try a title like Inception or Breaking Bad')).toBeNull();
+  });
+
+  it('clears the query from the clear button', () => {
+    render(<SearchScreen />);
+
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inter');
+    fireEvent.press(screen.getByLabelText('Clear search'));
+
+    expect(screen.getByDisplayValue('')).toBeTruthy();
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+  });
+
+  it('changes search type filter after submitting', () => {
+    render(<SearchScreen />);
+
+    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'star');
+    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.press(screen.getByLabelText('Filter TV Shows'));
+
+    expect(useSearchResults).toHaveBeenLastCalledWith('star', 'tv');
   });
 });

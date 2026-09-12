@@ -9,6 +9,7 @@ export interface SearchAutocompleteItem {
   id: string;
   type: 'movie' | 'tv';
   title: string;
+  posterUrl: string | null;
 }
 
 export interface SearchAutocompleteResponse {

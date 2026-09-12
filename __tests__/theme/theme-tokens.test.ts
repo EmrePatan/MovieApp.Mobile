@@ -5,8 +5,8 @@ import { spacing } from '@/theme/spacing';
 
 describe('theme tokens', () => {
   it('defines poster layout presets with 2:3 ratio', () => {
-    expect(layout.posterCarousel.width).toBe(132);
-    expect(layout.posterCarousel.height).toBe(198);
+    expect(layout.posterCarousel.width).toBe(120);
+    expect(layout.posterCarousel.height).toBe(180);
     expect(layout.posterList.width).toBe(72);
     expect(layout.posterList.height).toBe(108);
     expect(layout.posterCarousel.height / layout.posterCarousel.width).toBe(1.5);

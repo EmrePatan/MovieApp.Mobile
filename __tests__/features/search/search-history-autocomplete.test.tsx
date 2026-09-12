@@ -3,8 +3,8 @@ import { SearchHistorySection } from '@/features/search/components/SearchHistory
 import { SearchSuggestionList } from '@/features/search/components/SearchSuggestionList';
 
 describe('search history and autocomplete UI', () => {
-  it('renders empty history state', () => {
-    render(
+  it('renders nothing when history is empty', () => {
+    const { toJSON } = render(
       <SearchHistorySection
         items={[]}
         isLoading={false}
@@ -18,7 +18,7 @@ describe('search history and autocomplete UI', () => {
       />,
     );
 
-    expect(screen.getByText('Your recent searches will appear here.')).toBeTruthy();
+    expect(toJSON()).toBeNull();
   });
 
   it('selects a history item', () => {
@@ -81,7 +81,7 @@ describe('search history and autocomplete UI', () => {
     render(
       <SearchSuggestionList
         suggestions={[
-          { id: '1', type: 'movie', title: 'Interstellar' },
+          { id: '1', type: 'movie', title: 'Interstellar', posterUrl: null },
         ]}
         isLoading={false}
         onSelect={onSelect}
@@ -93,6 +93,87 @@ describe('search history and autocomplete UI', () => {
       id: '1',
       type: 'movie',
       title: 'Interstellar',
+      posterUrl: null,
     });
+  });
+
+  it('renders a movie-specific leading visual', () => {
+    render(
+      <SearchSuggestionList
+        suggestions={[{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: null }]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Movie suggestion')).toBeTruthy();
+  });
+
+  it('renders a TV-specific leading visual', () => {
+    render(
+      <SearchSuggestionList
+        suggestions={[{ id: '2', type: 'tv', title: 'Breaking Bad', posterUrl: null }]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('TV show suggestion')).toBeTruthy();
+  });
+
+  it('renders a poster thumbnail when poster data is present', () => {
+    render(
+      <SearchSuggestionList
+        suggestions={[
+          {
+            id: '1',
+            type: 'movie',
+            title: 'Interstellar',
+            posterUrl: 'https://image.tmdb.org/t/p/w92/interstellar.jpg',
+          },
+        ]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Interstellar poster')).toBeTruthy();
+    expect(screen.queryByLabelText('Movie suggestion')).toBeNull();
+  });
+
+  it('falls back to a type icon when poster data is unavailable', () => {
+    render(
+      <SearchSuggestionList
+        suggestions={[
+          { id: '1', type: 'movie', title: 'Interstellar', posterUrl: null },
+        ]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Movie suggestion')).toBeTruthy();
+    expect(screen.queryByLabelText('Interstellar poster')).toBeNull();
+  });
+
+  it('shows a minimal empty state when autocomplete has no matches', () => {
+    render(
+      <SearchSuggestionList suggestions={[]} isLoading={false} onSelect={jest.fn()} />,
+    );
+
+    expect(screen.getByLabelText('No suggestions')).toBeTruthy();
+    expect(screen.getByText('No suggestions')).toBeTruthy();
+  });
+
+  it('shows a lightweight autocomplete loading state', () => {
+    render(
+      <SearchSuggestionList
+        suggestions={[]}
+        isLoading
+        onSelect={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Loading suggestions')).toBeTruthy();
   });
 });

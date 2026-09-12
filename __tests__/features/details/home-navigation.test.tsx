@@ -22,6 +22,15 @@ jest.mock('@/features/home/hooks/useHome', () => ({
   useHome: jest.fn(),
 }));
 
+jest.mock('@/features/favorites/components/FavoriteButton', () => ({
+  FavoriteButton: () => null,
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 describe('Home detail navigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -47,6 +56,17 @@ describe('Home detail navigation', () => {
                 voteAverage: 8.4,
                 voteCount: 100,
               },
+              {
+                id: 'second-movie-id',
+                contentType: 'movie',
+                title: 'Arrival',
+                originalTitle: 'Arrival',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2016-11-11',
+                voteAverage: 7.9,
+                voteCount: 80,
+              },
             ],
           },
         ],
@@ -60,8 +80,8 @@ describe('Home detail navigation', () => {
     });
 
     render(<HomeScreen />);
-    fireEvent.press(screen.getByLabelText('Interstellar, Movie, rating 8.4'));
-    expect(mockPush).toHaveBeenCalledWith('/movie/movie-id');
+    fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016 · ★ 7.9'));
+    expect(mockPush).toHaveBeenCalledWith('/movie/second-movie-id');
   });
 
   it('navigates to tv detail from home card', () => {
@@ -84,6 +104,17 @@ describe('Home detail navigation', () => {
                 voteAverage: 8.9,
                 voteCount: 100,
               },
+              {
+                id: 'second-tv-id',
+                contentType: 'tv',
+                title: 'Better Call Saul',
+                originalTitle: 'Better Call Saul',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2015-02-08',
+                voteAverage: 8.7,
+                voteCount: 90,
+              },
             ],
           },
         ],
@@ -97,7 +128,7 @@ describe('Home detail navigation', () => {
     });
 
     render(<HomeScreen />);
-    fireEvent.press(screen.getByLabelText('Breaking Bad, TV, rating 8.9'));
-    expect(mockPush).toHaveBeenCalledWith('/tv/tv-id');
+    fireEvent.press(screen.getByLabelText('Better Call Saul, TV · 2015 · ★ 8.7'));
+    expect(mockPush).toHaveBeenCalledWith('/tv/second-tv-id');
   });
 });

@@ -36,15 +36,16 @@ describe('search UI components', () => {
   it('renders empty state', () => {
     render(
       <SearchEmptyState
-        title="Search for a movie or TV show"
-        message="Find titles across the catalog."
+        title="Search movies and TV shows"
+        message="Try a title like Inception or Breaking Bad"
       />,
     );
 
-    expect(screen.getByText('Search for a movie or TV show')).toBeTruthy();
+    expect(screen.getByText('Search movies and TV shows')).toBeTruthy();
+    expect(screen.getByText('Try a title like Inception or Breaking Bad')).toBeTruthy();
   });
 
-  it('renders result card with movie badge', () => {
+  it('renders result card with compact metadata', () => {
     const item: SearchResultItem = {
       id: 'movie-id',
       type: 'movie',
@@ -63,8 +64,8 @@ describe('search UI components', () => {
     render(<SearchResultCard item={item} onPress={onPress} />);
 
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByText('Movie')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Interstellar, Movie, 2014, rating 8.4'));
+    expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
     expect(onPress).toHaveBeenCalledWith(item);
   });
 });

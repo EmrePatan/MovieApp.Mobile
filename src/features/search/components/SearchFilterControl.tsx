@@ -30,7 +30,10 @@ export function SearchFilterControl({ value, onChange }: SearchFilterControlProp
             onPress={() => onChange(filter.value)}
             style={[styles.chip, selected && styles.chipSelected]}
           >
-            <AppText variant="bodySmall" style={selected ? styles.labelSelected : styles.label}>
+            <AppText
+              variant="caption"
+              style={[styles.label, selected && styles.labelSelected]}
+            >
               {filter.label}
             </AppText>
           </Pressable>
@@ -43,13 +46,12 @@ export function SearchFilterControl({ value, onChange }: SearchFilterControlProp
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   chip: {
-    minHeight: 40,
-    paddingHorizontal: spacing.md,
+    minHeight: 32,
+    paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.border,
@@ -63,6 +65,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.textSecondary,
+    fontWeight: '500',
   },
   labelSelected: {
     color: colors.textPrimary,

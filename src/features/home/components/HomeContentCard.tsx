@@ -1,10 +1,13 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { HomeItem } from '../types';
-import { formatContentType, formatRating } from '@/utils/format';
+import {
+  formatCatalogYear,
+  formatContentType,
+  formatRating,
+} from '@/utils/format';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -18,7 +21,17 @@ export const HomeContentCard = memo(function HomeContentCard({
   item,
   onPress,
 }: HomeContentCardProps) {
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.contentType)}, rating ${formatRating(item.voteAverage)}`;
+  const metadataLine = useMemo(() => {
+    const parts = [
+      formatContentType(item.contentType),
+      formatCatalogYear(item.releaseDate, null),
+      item.voteAverage > 0 ? `★ ${formatRating(item.voteAverage)}` : null,
+    ].filter(Boolean);
+
+    return parts.join(' · ');
+  }, [item.contentType, item.releaseDate, item.voteAverage]);
+
+  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.contentType)}`;
 
   return (
     <Pressable
@@ -38,12 +51,11 @@ export const HomeContentCard = memo(function HomeContentCard({
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
-        <View style={styles.row}>
-          <ContentTypeBadge type={item.contentType} />
-          <AppText variant="caption" muted>
-            ★ {formatRating(item.voteAverage)}
+        {metadataLine ? (
+          <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
+            {metadataLine}
           </AppText>
-        </View>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -52,7 +64,7 @@ export const HomeContentCard = memo(function HomeContentCard({
 const styles = StyleSheet.create({
   card: {
     width: layout.posterCarousel.width,
-    marginRight: spacing.md,
+    marginRight: layout.cardGap,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
@@ -64,11 +76,8 @@ const styles = StyleSheet.create({
   title: {
     minHeight: 40,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.xs,
+  metadata: {
+    letterSpacing: 0.1,
   },
 });
 

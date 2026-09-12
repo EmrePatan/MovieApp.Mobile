@@ -14,9 +14,14 @@ import { interaction } from '@/theme/interaction';
 interface FavoriteButtonProps {
   contentType: FavoriteContentType;
   contentId: string;
+  size?: number;
 }
 
-export function FavoriteButton({ contentType, contentId }: FavoriteButtonProps) {
+export function FavoriteButton({
+  contentType,
+  contentId,
+  size = 48,
+}: FavoriteButtonProps) {
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { data: isFavorited = false, isLoading: isStatusLoading } = useFavoriteStatus(
     contentType,
@@ -58,6 +63,7 @@ export function FavoriteButton({ contentType, contentId }: FavoriteButtonProps) 
         onPress={handlePress}
         style={({ pressed }) => [
           styles.button,
+          { width: size, height: size },
           active && styles.buttonActive,
           pressed && !isBusy && styles.pressed,
           isBusy && styles.disabled,
@@ -68,7 +74,7 @@ export function FavoriteButton({ contentType, contentId }: FavoriteButtonProps) 
         ) : (
           <Ionicons
             name={active ? 'heart' : 'heart-outline'}
-            size={22}
+            size={size >= 48 ? 22 : 20}
             color={active ? colors.accent : colors.textPrimary}
           />
         )}
@@ -79,8 +85,6 @@ export function FavoriteButton({ contentType, contentId }: FavoriteButtonProps) 
 
 const styles = StyleSheet.create({
   button: {
-    width: 48,
-    height: 48,
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,

@@ -46,7 +46,7 @@ describe('Home UI components', () => {
 
     expect(screen.getByText('Trending')).toBeTruthy();
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByText('Movie')).toBeTruthy();
+    expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
   });
 
   it('does not render empty sections', () => {
@@ -79,7 +79,7 @@ describe('Home UI components', () => {
     );
 
     expect(screen.getByText('Breaking Bad')).toBeTruthy();
-    expect(screen.getByText('TV')).toBeTruthy();
+    expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();
     expect(screen.queryByText(/%/)).toBeNull();
   });
 });
