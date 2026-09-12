@@ -22,6 +22,20 @@ function invalidateFavoriteQueries(
   invalidateRecommendationQueries(queryClient);
 }
 
+export function invalidateAllFavoriteListQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  void queryClient.invalidateQueries({ queryKey: ['favorites'] });
+}
+
+export function invalidateFavoriteStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  contentType: FavoriteContentType,
+  contentId: string,
+) {
+  void queryClient.invalidateQueries({ queryKey: favoriteStatusQueryKey(contentType, contentId) });
+}
+
 export function useToggleFavorite(contentType: FavoriteContentType, contentId: string) {
   const queryClient = useQueryClient();
 
@@ -63,6 +77,36 @@ export function useToggleFavorite(contentType: FavoriteContentType, contentId: s
     onSuccess: (nextValue) => {
       queryClient.setQueryData(favoriteStatusQueryKey(contentType, contentId), nextValue);
       invalidateFavoriteQueries(queryClient, contentType, contentId);
+    },
+  });
+}
+
+export function useRemoveFavoriteMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      contentType,
+      contentId,
+    }: {
+      contentType: FavoriteContentType;
+      contentId: string;
+    }) => {
+      if (contentType === 'movie') {
+        await removeMovieFavorite(contentId);
+        return;
+      }
+
+      await removeTvFavorite(contentId);
+    },
+    onSuccess: (_result, variables) => {
+      queryClient.setQueryData(
+        favoriteStatusQueryKey(variables.contentType, variables.contentId),
+        false,
+      );
+      invalidateAllFavoriteListQueries(queryClient);
+      invalidateFavoriteStatus(queryClient, variables.contentType, variables.contentId);
+      invalidateRecommendationQueries(queryClient);
     },
   });
 }

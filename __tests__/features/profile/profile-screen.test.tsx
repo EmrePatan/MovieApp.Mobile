@@ -104,6 +104,9 @@ describe('ProfileScreen', () => {
 
     fireEvent.press(screen.getByLabelText('Watch History'));
     expect(mockPush).toHaveBeenCalledWith('/watch-history');
+
+    fireEvent.press(screen.getByLabelText('Favorites'));
+    expect(mockPush).toHaveBeenCalledWith('/favorites');
   });
 
   it('logs out through auth context', () => {

@@ -14,6 +14,7 @@ const POSTER_HEIGHT = 108;
 interface LibraryContentCardProps {
   item: LibraryItem;
   isRemoving?: boolean;
+  removeAccessibilityLabel?: string;
   onPress?: (item: LibraryItem) => void;
   onRemove?: (item: LibraryItem) => void;
 }
@@ -29,6 +30,7 @@ function formatYear(item: LibraryItem): string | null {
 export const LibraryContentCard = memo(function LibraryContentCard({
   item,
   isRemoving = false,
+  removeAccessibilityLabel = 'watchlist',
   onPress,
   onRemove,
 }: LibraryContentCardProps) {
@@ -72,7 +74,7 @@ export const LibraryContentCard = memo(function LibraryContentCard({
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Remove ${item.title} from watchlist`}
+        accessibilityLabel={`Remove ${item.title} from ${removeAccessibilityLabel}`}
         disabled={isRemoving}
         onPress={() => onRemove?.(item)}
         style={styles.removeButton}

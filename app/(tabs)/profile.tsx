@@ -114,6 +114,11 @@ export default function ProfileScreen() {
 
         <ProfileSection title="Library">
           <ProfileMenuRow
+            label="Favorites"
+            subtitle="Movies and TV shows you saved"
+            onPress={() => router.push('/favorites')}
+          />
+          <ProfileMenuRow
             label="Watchlists"
             subtitle="Your personal lists"
             onPress={() => router.push('/(tabs)/watchlist')}

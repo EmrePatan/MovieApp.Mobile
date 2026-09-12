@@ -28,6 +28,7 @@ function RootNavigator() {
         <Stack.Screen name="tv/[id]/season/[seasonNumber]" />
         <Stack.Screen name="tv/[id]/season/[seasonNumber]/episode/[episodeNumber]" />
         <Stack.Screen name="watch-history" />
+        <Stack.Screen name="favorites" />
         <Stack.Screen name="discover" />
         <Stack.Screen name="profile" />
       </Stack>

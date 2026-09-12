@@ -22,3 +22,5 @@ export interface FavoritesResponse extends PaginationMeta {
 }
 
 export type FavoriteContentType = 'movie' | 'tv';
+
+export const DEFAULT_FAVORITES_PAGE_SIZE = 20;

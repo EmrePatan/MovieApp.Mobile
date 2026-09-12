@@ -3,12 +3,18 @@ import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
-export function WatchlistLoadingState() {
+interface WatchlistLoadingStateProps {
+  accessibilityLabel?: string;
+}
+
+export function WatchlistLoadingState({
+  accessibilityLabel = 'Loading watchlist',
+}: WatchlistLoadingStateProps) {
   return (
     <View
       style={styles.container}
       accessibilityRole="progressbar"
-      accessibilityLabel="Loading watchlist"
+      accessibilityLabel={accessibilityLabel}
     >
       {[0, 1, 2].map((index) => (
         <View key={index} style={styles.row}>
