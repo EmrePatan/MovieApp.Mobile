@@ -1,14 +1,11 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { FavoriteButton } from '@/features/favorites/components/FavoriteButton';
 import { BackdropImage } from '@/features/details/shared/components/CatalogImage';
-import { HomeHeader } from './HomeHeader';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
-import { HomeTypeFilterControl } from './HomeTypeFilterControl';
-import type { HomeItem, HomeTypeFilter } from '../types';
+import type { HomeItem } from '../types';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
@@ -17,8 +14,6 @@ import { interaction } from '@/theme/interaction';
 
 interface HomeHeroProps {
   item: HomeItem;
-  typeFilter: HomeTypeFilter;
-  onTypeFilterChange: (value: HomeTypeFilter) => void;
   onPress?: (item: HomeItem) => void;
 }
 
@@ -83,22 +78,11 @@ function HeroScrim() {
 }
 
 function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): boolean {
-  return (
-    previous.item.id === next.item.id &&
-    previous.onPress === next.onPress &&
-    previous.typeFilter === next.typeFilter &&
-    previous.onTypeFilterChange === next.onTypeFilterChange
-  );
+  return previous.item.id === next.item.id && previous.onPress === next.onPress;
 }
 
-export const HomeHero = memo(function HomeHero({
-  item,
-  typeFilter,
-  onTypeFilterChange,
-  onPress,
-}: HomeHeroProps) {
+export const HomeHero = memo(function HomeHero({ item, onPress }: HomeHeroProps) {
   const { width } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const [posterFailed, setPosterFailed] = useState(false);
 
   const heroHeight = useMemo(
@@ -161,14 +145,6 @@ export const HomeHero = memo(function HomeHero({
           )}
           <HeroScrim />
           <View style={styles.layout}>
-            <View style={[styles.topChrome, { paddingTop: insets.top + spacing.xs }]}>
-              <HomeHeader overlay />
-              <HomeTypeFilterControl
-                value={typeFilter}
-                onChange={onTypeFilterChange}
-                overlay
-              />
-            </View>
             <View style={styles.contentSpacer} />
             <View style={[styles.content, { paddingBottom: contentPaddingBottom }]}>
               <View style={styles.contentBlock}>
@@ -244,9 +220,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     zIndex: 2,
     justifyContent: 'space-between',
-  },
-  topChrome: {
-    gap: spacing.xs,
   },
   contentSpacer: {
     flex: 1,

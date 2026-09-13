@@ -8,12 +8,15 @@ import {
   removeTvFromWatchlist,
 } from '../api/watchlists-api';
 import {
+  watchlistItemsInfiniteQueryKey,
   watchlistMembershipQueryKey,
   watchlistQueryKey,
   watchlistsQueryKey,
 } from './watchlist-query-keys';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { removeWatchlistItemFromCache } from '@/features/library/utils/optimistic-watchlist-cache';
 import type { WatchlistContentType } from '../types';
+import { DEFAULT_WATCHLIST_PAGE_SIZE } from '../types';
 
 export function invalidateAllWatchlistItemQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -148,6 +151,31 @@ export function useRemoveWatchlistItemMutation(watchlistId: string | null) {
       }
 
       await removeTvFromWatchlist(watchlistId, contentId);
+    },
+    onMutate: async (variables) => {
+      if (!watchlistId) {
+        return {};
+      }
+
+      const listQueryKey = watchlistItemsInfiniteQueryKey(
+        watchlistId,
+        DEFAULT_WATCHLIST_PAGE_SIZE,
+      );
+      await queryClient.cancelQueries({ queryKey: listQueryKey });
+
+      const previousList = removeWatchlistItemFromCache(
+        queryClient,
+        watchlistId,
+        variables.contentType,
+        variables.contentId,
+      );
+
+      return { previousList, listQueryKey };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousList && context?.listQueryKey) {
+        queryClient.setQueryData(context.listQueryKey, context.previousList);
+      }
     },
     onSuccess: (_result, variables) => {
       if (!watchlistId) {

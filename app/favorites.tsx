@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -19,18 +18,30 @@ import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { useFavoritesItems } from '@/features/favorites/hooks/useFavoritesItems';
 import { useRemoveFavoriteMutation } from '@/features/favorites/hooks/useFavoriteMutations';
 import { flattenFavoritesPages } from '@/features/favorites/utils/favorite-library-items';
-import { LibraryContentCard } from '@/features/watchlists/components/LibraryContentCard';
-import { WatchlistEmptyState } from '@/features/watchlists/components/WatchlistEmptyState';
-import { WatchlistLoadingState } from '@/features/watchlists/components/WatchlistLoadingState';
+import { LibraryContentCard } from '@/features/library/components/LibraryContentCard';
+import { LibraryEmptyState } from '@/features/library/components/LibraryEmptyState';
+import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
+import { LibrarySortControl } from '@/features/library/components/LibrarySortControl';
+import { useLibraryDisplayItems } from '@/features/library/hooks/useLibraryDisplayItems';
+import { getLibraryItemKey } from '@/features/library/utils/library-item-key';
+import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
+import type { LibrarySortOption, LibraryTypeFilter } from '@/features/library/types';
+import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+
+const FAVORITES_SORT_OPTIONS = getAvailableSortOptions(false);
+const DEFAULT_FAVORITES_SORT: LibrarySortOption = 'titleAsc';
 
 export default function FavoritesScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const favoritesQuery = useFavoritesItems();
   const removeFavorite = useRemoveFavoriteMutation();
+  const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>('all');
+  const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_FAVORITES_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
   const [removeFeedback, setRemoveFeedback] = useState<string | null>(null);
 
@@ -39,12 +50,18 @@ export default function FavoritesScreen() {
     [favoritesQuery.data?.pages],
   );
 
+  const displayItems = useLibraryDisplayItems({
+    items,
+    typeFilter,
+    sort,
+  });
+
   const handleSignIn = useCallback(() => {
     router.push('/(auth)/login');
   }, [router]);
 
-  const handleExplore = useCallback(() => {
-    router.push('/discover');
+  const handleBrowse = useCallback(() => {
+    router.push('/(tabs)/search');
   }, [router]);
 
   const handleItemPress = useCallback(
@@ -60,17 +77,13 @@ export default function FavoritesScreen() {
         return;
       }
 
-      const itemKey = `${item.type}-${item.id}`;
+      const itemKey = getLibraryItemKey(item);
       setRemovingItemKey(itemKey);
       removeFavorite.mutate(
         { contentType: item.type, contentId: item.id },
         {
-          onError: (error) => {
-            setRemoveFeedback(
-              isApiError(error)
-                ? error.userMessage
-                : 'Could not remove this favorite. Please try again.',
-            );
+          onError: () => {
+            setRemoveFeedback('Could not remove this favorite. Please try again.');
           },
           onSettled: () => {
             setRemovingItemKey(null);
@@ -105,7 +118,8 @@ export default function FavoritesScreen() {
     ({ item }: { item: LibraryItem }) => (
       <LibraryContentCard
         item={item}
-        isRemoving={removingItemKey === `${item.type}-${item.id}`}
+        isRemoving={removingItemKey === getLibraryItemKey(item)}
+        removeIcon="heart"
         removeAccessibilityLabel="favorites"
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
@@ -114,13 +128,25 @@ export default function FavoritesScreen() {
     [handleItemPress, handleRemoveItem, removingItemKey],
   );
 
+  const listControls = (
+    <View style={styles.controls}>
+      <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+      <LibrarySortControl
+        value={sort}
+        options={FAVORITES_SORT_OPTIONS}
+        onChange={setSort}
+      />
+    </View>
+  );
+
   const listHeader = (
     <View style={styles.header}>
       <DetailBackButton />
       <AppText variant="title">Favorites</AppText>
       <AppText variant="bodySmall" muted>
-        Movies and TV shows you have saved
+        Your saved movies and TV shows
       </AppText>
+      {items.length > 0 ? listControls : null}
       <FeedbackMessage
         message={removeFeedback}
         tone="error"
@@ -133,7 +159,8 @@ export default function FavoritesScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <WatchlistEmptyState
+        <LibraryEmptyState
+          icon="heart"
           title="Sign in to view your favorites"
           message="Movies and TV shows you favorite will appear here after you sign in."
           actionLabel="Sign In"
@@ -147,22 +174,18 @@ export default function FavoritesScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <WatchlistLoadingState accessibilityLabel="Loading favorites" />
+        <LibraryLoadingState accessibilityLabel="Loading favorites" />
       </SafeAreaView>
     );
   }
 
   if (favoritesQuery.isError && items.length === 0) {
-    const message = isApiError(favoritesQuery.error)
-      ? favoritesQuery.error.userMessage
-      : 'Unable to load favorites. Please try again.';
-
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message={message}
+            message="Unable to load favorites. Please try again."
             onRetry={() => void favoritesQuery.refetch()}
             retryLabel="Retry"
           />
@@ -172,26 +195,41 @@ export default function FavoritesScreen() {
   }
 
   const paginationErrorMessage = favoritesQuery.isFetchNextPageError
-    ? isApiError(favoritesQuery.error)
-      ? favoritesQuery.error.userMessage
-      : 'Unable to load more favorites. Please try again.'
+    ? 'Unable to load more favorites. Please try again.'
     : null;
+
+  const filteredEmptyTitle =
+    typeFilter === 'movie'
+      ? 'No movie favorites match this filter'
+      : typeFilter === 'tv'
+        ? 'No TV favorites match this filter'
+        : 'No favorites match this filter';
+
+  const emptyComponent =
+    items.length === 0 ? (
+      <LibraryEmptyState
+        icon="heart"
+        title="You haven't added any favorites yet"
+        message="Save movies and TV shows you love — they'll show up here."
+        actionLabel="Browse"
+        onAction={handleBrowse}
+      />
+    ) : (
+      <LibraryEmptyState
+        icon="heart"
+        title={filteredEmptyTitle}
+        message="Try a different filter or sort option."
+      />
+    );
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
-        data={items}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
+        data={displayItems}
+        keyExtractor={getLibraryItemKey}
         renderItem={renderItem}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={
-          <WatchlistEmptyState
-            title="No favorites yet"
-            message="Movies and TV shows you favorite will appear here."
-            actionLabel="Explore"
-            onAction={handleExplore}
-          />
-        }
+        ListEmptyComponent={emptyComponent}
         ListFooterComponent={
           favoritesQuery.isFetchingNextPage ? (
             <View style={styles.footerLoading}>
@@ -216,6 +254,9 @@ export default function FavoritesScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
       />
     </SafeAreaView>
   );
@@ -228,9 +269,13 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     gap: spacing.sm,
     paddingBottom: spacing.sm,
+  },
+  controls: {
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
   },
   listContent: {
     flexGrow: 1,
@@ -239,14 +284,14 @@ const styles = StyleSheet.create({
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   footerLoading: {
     paddingVertical: spacing.lg,
     alignItems: 'center',
   },
   footerError: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: spacing.lg,
     gap: spacing.sm,
     alignItems: 'center',

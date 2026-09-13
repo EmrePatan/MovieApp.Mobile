@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { LibraryContentCard } from '@/features/watchlists/components/LibraryContentCard';
+import { LibraryContentCard } from '@/features/library/components/LibraryContentCard';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 
 const movieItem: LibraryItem = {
@@ -12,7 +12,7 @@ const movieItem: LibraryItem = {
   createdAt: '2026-09-11T14:30:00Z',
 };
 
-describe('LibraryContentCard (watchlists re-export)', () => {
+describe('LibraryContentCard', () => {
   it('renders movie card and navigates on press', () => {
     const onPress = jest.fn();
     render(<LibraryContentCard item={movieItem} onPress={onPress} />);
@@ -23,9 +23,30 @@ describe('LibraryContentCard (watchlists re-export)', () => {
 
   it('removes item when remove button is pressed', () => {
     const onRemove = jest.fn();
-    render(<LibraryContentCard item={movieItem} onRemove={onRemove} />);
+    render(
+      <LibraryContentCard
+        item={movieItem}
+        removeIcon="bookmark"
+        onRemove={onRemove}
+      />,
+    );
 
     fireEvent.press(screen.getByLabelText('Remove Interstellar from watchlist'));
+    expect(onRemove).toHaveBeenCalledWith(movieItem);
+  });
+
+  it('uses heart remove label for favorites', () => {
+    const onRemove = jest.fn();
+    render(
+      <LibraryContentCard
+        item={movieItem}
+        removeIcon="heart"
+        removeAccessibilityLabel="favorites"
+        onRemove={onRemove}
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText('Remove Interstellar from favorites'));
     expect(onRemove).toHaveBeenCalledWith(movieItem);
   });
 
@@ -40,5 +61,19 @@ describe('LibraryContentCard (watchlists re-export)', () => {
 
     render(<LibraryContentCard item={tvItem} />);
     expect(screen.getByText('TV')).toBeTruthy();
+  });
+
+  it('truncates long titles with numberOfLines', () => {
+    const longTitleItem: LibraryItem = {
+      ...movieItem,
+      title: 'An Extremely Long Movie Title That Should Be Truncated In The UI Layout',
+    };
+
+    render(<LibraryContentCard item={longTitleItem} />);
+    expect(
+      screen.getByText(
+        'An Extremely Long Movie Title That Should Be Truncated In The UI Layout',
+      ),
+    ).toBeTruthy();
   });
 });

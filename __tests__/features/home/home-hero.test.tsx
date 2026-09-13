@@ -4,7 +4,6 @@ import { HomeHero } from '@/features/home/components/HomeHero';
 import type { HomeItem } from '@/features/home/types';
 
 const mockOnPress = jest.fn();
-const mockSetTypeFilter = jest.fn();
 
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
@@ -40,12 +39,7 @@ function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
 
 function renderHero(item: HomeItem = createItem()) {
   return render(
-    <HomeHero
-      item={item}
-      typeFilter="all"
-      onTypeFilterChange={mockSetTypeFilter}
-      onPress={mockOnPress}
-    />,
+    <HomeHero item={item} onPress={mockOnPress} />,
   );
 }
 
@@ -125,11 +119,9 @@ describe('HomeHero', () => {
     ).toBeTruthy();
   });
 
-  it('exposes the favorite action and integrated type filters', () => {
+  it('exposes the favorite action', () => {
     renderHero();
 
     expect(screen.getByLabelText('Add to favorites')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Show Movies'));
-    expect(mockSetTypeFilter).toHaveBeenCalledWith('movie');
   });
 });

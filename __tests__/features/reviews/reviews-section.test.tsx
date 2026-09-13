@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
 import { useAuth } from '@/auth/useAuth';
@@ -48,6 +48,14 @@ jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
   useCreateReviewMutation: jest.fn(),
   useUpdateReviewMutation: jest.fn(),
   useDeleteReviewMutation: jest.fn(),
+}));
+
+const mockScrollToCenter = jest.fn();
+
+jest.mock('@/features/details/shared/context/DetailScrollContext', () => ({
+  useDetailScroll: () => ({
+    scrollToCenter: mockScrollToCenter,
+  }),
 }));
 
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
@@ -128,7 +136,7 @@ describe('ReviewsSection', () => {
     render(<ReviewsSection contentType="movie" contentId={movieId} />);
 
     expect(screen.getByText('Reviews')).toBeTruthy();
-    expect(screen.getByText('1 review')).toBeTruthy();
+    expect(screen.getByLabelText('1 review')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
@@ -153,7 +161,8 @@ describe('ReviewsSection', () => {
     );
 
     render(<ReviewsSection contentType="movie" contentId={movieId} />);
-    expect(screen.getByText('Be the first to review this title.')).toBeTruthy();
+    expect(screen.getByText('No reviews yet')).toBeTruthy();
+    expect(screen.getByText('Be the first to share your thoughts.')).toBeTruthy();
   });
 
   it('shows error with retry', () => {
@@ -181,10 +190,14 @@ describe('ReviewsSection', () => {
     expect(screen.getByText('Please sign in to write a review.')).toBeTruthy();
   });
 
-  it('opens composer and submits a new review', () => {
+  it('opens composer and submits a new review', async () => {
     render(<ReviewsSection contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByText('Write a review'));
+    expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
+    await waitFor(() => {
+      expect(mockScrollToCenter).toHaveBeenCalled();
+    });
     fireEvent.changeText(screen.getByLabelText('Review'), 'Great film.');
     fireEvent.press(screen.getByText('Post review'));
 
@@ -203,7 +216,8 @@ describe('ReviewsSection', () => {
     render(<ReviewsSection contentType="movie" contentId={movieId} />);
 
     expect(screen.getByText('Your review')).toBeTruthy();
-    expect(screen.getByText('Jane Doe · You')).toBeTruthy();
+    expect(screen.getByText('Jane Doe')).toBeTruthy();
+    expect(screen.getByText('You')).toBeTruthy();
     expect(screen.queryByText('Write a review')).toBeNull();
   });
 

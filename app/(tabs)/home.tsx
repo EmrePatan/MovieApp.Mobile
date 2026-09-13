@@ -1,21 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { HomeEmptyState } from '@/features/home/components/HomeEmptyState';
-import { HomeHeader } from '@/features/home/components/HomeHeader';
 import { HomeListHeader } from '@/features/home/components/HomeListHeader';
 import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeSection } from '@/features/home/components/HomeSection';
-import { HomeTypeFilterControl } from '@/features/home/components/HomeTypeFilterControl';
+import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { homeQueryKey, useHome } from '@/features/home/hooks/useHome';
 import type { HomeItem, HomeSection as HomeSectionModel, HomeTypeFilter } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
@@ -73,15 +67,13 @@ export default function HomeScreen() {
   );
 
   const listHeader = useMemo(
-    () => (
-      <HomeListHeader
-        typeFilter={typeFilter}
-        onTypeFilterChange={setTypeFilter}
-        featuredItem={featuredItem}
-        onItemPress={handleItemPress}
-      />
-    ),
-    [typeFilter, featuredItem, handleItemPress],
+    () => <HomeListHeader featuredItem={featuredItem} onItemPress={handleItemPress} />,
+    [featuredItem, handleItemPress],
+  );
+
+  const topChrome = useMemo(
+    () => <HomeTopChrome typeFilter={typeFilter} onTypeFilterChange={setTypeFilter} />,
+    [typeFilter],
   );
 
   const listContentStyle = useMemo(
@@ -100,17 +92,10 @@ export default function HomeScreen() {
     [handleRefresh, isFetching, isLoading],
   );
 
-  const fallbackChrome = (
-    <View>
-      <HomeHeader />
-      <HomeTypeFilterControl value={typeFilter} onChange={setTypeFilter} />
-    </View>
-  );
-
   if (isLoading && !data) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {fallbackChrome}
+        {topChrome}
         <HomeLoadingState showTopChrome={false} />
       </SafeAreaView>
     );
@@ -120,7 +105,7 @@ export default function HomeScreen() {
     if (isApiError(error) && error.kind === 'unauthorized') {
       return (
         <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-          {fallbackChrome}
+          {topChrome}
           <View style={styles.centered}>
             <HomeLoadingState showTopChrome={false} />
           </View>
@@ -134,7 +119,7 @@ export default function HomeScreen() {
 
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {fallbackChrome}
+        {topChrome}
         <View style={styles.centered}>
           <ErrorView message={message} onRetry={handleRetry} retryLabel="Try Again" />
         </View>
@@ -144,6 +129,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      {topChrome}
       <FlatList
         data={sections}
         keyExtractor={homeSectionKeyExtractor}

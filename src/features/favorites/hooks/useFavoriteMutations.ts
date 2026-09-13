@@ -7,10 +7,13 @@ import {
 } from '../api/favorites-api';
 import {
   favoriteStatusQueryKey,
+  favoritesInfiniteQueryKey,
   favoritesListQueryKey,
 } from './favorite-query-keys';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { removeFavoriteFromCache } from '@/features/library/utils/optimistic-favorites-cache';
 import type { FavoriteContentType } from '../types';
+import { DEFAULT_FAVORITES_PAGE_SIZE } from '../types';
 
 function invalidateFavoriteQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -98,6 +101,32 @@ export function useRemoveFavoriteMutation() {
       }
 
       await removeTvFavorite(contentId);
+    },
+    onMutate: async (variables) => {
+      const listQueryKey = favoritesInfiniteQueryKey(DEFAULT_FAVORITES_PAGE_SIZE);
+      await queryClient.cancelQueries({ queryKey: listQueryKey });
+
+      const previousList = removeFavoriteFromCache(
+        queryClient,
+        variables.contentType,
+        variables.contentId,
+      );
+
+      const statusQueryKey = favoriteStatusQueryKey(variables.contentType, variables.contentId);
+      await queryClient.cancelQueries({ queryKey: statusQueryKey });
+      const previousStatus = queryClient.getQueryData<boolean>(statusQueryKey);
+      queryClient.setQueryData(statusQueryKey, false);
+
+      return { previousList, previousStatus, statusQueryKey, listQueryKey };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousList) {
+        queryClient.setQueryData(context.listQueryKey, context.previousList);
+      }
+
+      if (context?.previousStatus !== undefined && context?.statusQueryKey) {
+        queryClient.setQueryData(context.statusQueryKey, context.previousStatus);
+      }
     },
     onSuccess: (_result, variables) => {
       queryClient.setQueryData(

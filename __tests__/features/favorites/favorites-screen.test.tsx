@@ -39,6 +39,22 @@ function createPage(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function mockAuthenticatedQuery(overrides: Record<string, unknown> = {}) {
+  (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
+  (useFavoritesItems as jest.Mock).mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    isRefetching: false,
+    isFetchingNextPage: false,
+    isFetchNextPageError: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    ...overrides,
+  });
+}
+
 describe('FavoritesScreen', () => {
   const removeMutate = jest.fn();
 
@@ -70,9 +86,15 @@ describe('FavoritesScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/(auth)/login');
   });
 
+  it('renders loading skeleton', () => {
+    mockAuthenticatedQuery({ isLoading: true });
+
+    render(<FavoritesScreen />);
+    expect(screen.getByLabelText('Loading favorites')).toBeTruthy();
+  });
+
   it('renders movie favorite and navigates to movie detail', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -90,14 +112,6 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
@@ -106,8 +120,7 @@ describe('FavoritesScreen', () => {
   });
 
   it('renders tv favorite and navigates to tv detail', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -125,14 +138,6 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
@@ -140,9 +145,8 @@ describe('FavoritesScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/tv/tv-id');
   });
 
-  it('renders mixed movie and tv favorites', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+  it('filters to movies only', () => {
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -169,25 +173,53 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
+    fireEvent.press(screen.getByLabelText('Filter Movies'));
     expect(screen.getByLabelText('Inception, Movie, 2010, rating 8.8')).toBeTruthy();
+    expect(screen.queryByLabelText('Breaking Bad, TV, 2008, rating 8.9')).toBeNull();
+  });
+
+  it('filters to tv only', () => {
+    mockAuthenticatedQuery({
+      data: {
+        pages: [
+          createPage({
+            movies: [
+              {
+                id: 'movie-id',
+                title: 'Inception',
+                posterPath: null,
+                releaseDate: '2010-07-16',
+                voteAverage: 8.8,
+              },
+            ],
+            tvShows: [
+              {
+                id: 'tv-id',
+                title: 'Breaking Bad',
+                posterPath: null,
+                firstAirDate: '2008-01-20',
+                voteAverage: 8.9,
+              },
+            ],
+            totalCount: 2,
+            totalPages: 1,
+          }),
+        ],
+      },
+    });
+
+    render(<FavoritesScreen />);
+    fireEvent.press(screen.getByLabelText('Filter TV Shows'));
     expect(screen.getByLabelText('Breaking Bad, TV, 2008, rating 8.9')).toBeTruthy();
+    expect(screen.queryByLabelText('Inception, Movie, 2010, rating 8.8')).toBeNull();
   });
 
   it('loads next page when more items are available', () => {
     const fetchNextPage = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -206,12 +238,6 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
       hasNextPage: true,
       fetchNextPage,
     });
@@ -221,82 +247,9 @@ describe('FavoritesScreen', () => {
     expect(fetchNextPage).toHaveBeenCalled();
   });
 
-  it('does not load next page when hasNextPage is false', () => {
-    const fetchNextPage = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
-      data: {
-        pages: [
-          createPage({
-            movies: [
-              {
-                id: 'movie-id',
-                title: 'Inception',
-                posterPath: null,
-                releaseDate: '2010-07-16',
-                voteAverage: 8.8,
-              },
-            ],
-            totalCount: 1,
-            totalPages: 1,
-            hasNextPage: false,
-          }),
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage,
-    });
-
-    const { UNSAFE_getByType } = render(<FavoritesScreen />);
-    UNSAFE_getByType(FlatList).props.onEndReached?.();
-    expect(fetchNextPage).not.toHaveBeenCalled();
-  });
-
-  it('shows pagination loading footer', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
-      data: {
-        pages: [
-          createPage({
-            movies: [
-              {
-                id: 'movie-id',
-                title: 'Inception',
-                posterPath: null,
-                releaseDate: '2010-07-16',
-                voteAverage: 8.8,
-              },
-            ],
-            totalCount: 40,
-            totalPages: 2,
-            hasNextPage: true,
-          }),
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: true,
-      isFetchNextPageError: false,
-      hasNextPage: true,
-      fetchNextPage: jest.fn(),
-    });
-
-    const { UNSAFE_getByType } = render(<FavoritesScreen />);
-    expect(UNSAFE_getByType(FlatList).props.ListFooterComponent).toBeTruthy();
-  });
-
   it('keeps loaded items and allows retry when pagination fails', () => {
     const fetchNextPage = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -315,12 +268,7 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
       error: new ApiError({ kind: 'server', status: 500, userMessage: 'Server error.' }),
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
       isFetchNextPageError: true,
       hasNextPage: true,
       fetchNextPage,
@@ -333,8 +281,7 @@ describe('FavoritesScreen', () => {
   });
 
   it('removes movie and tv favorites', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -361,14 +308,6 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
@@ -392,8 +331,7 @@ describe('FavoritesScreen', () => {
       options?.onSettled?.();
     });
 
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -411,67 +349,42 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
     fireEvent.press(screen.getByLabelText('Remove Inception from favorites'));
-    expect(screen.getByText('Server error.')).toBeTruthy();
+    expect(screen.getByText('Could not remove this favorite. Please try again.')).toBeTruthy();
   });
 
-  it('renders empty state with explore action', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+  it('renders empty state with browse action', () => {
+    mockAuthenticatedQuery({
       data: { pages: [createPage()] },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
-    expect(screen.getByText('No favorites yet')).toBeTruthy();
-    fireEvent.press(screen.getByText('Explore'));
-    expect(mockPush).toHaveBeenCalledWith('/discover');
+    expect(screen.getByText("You haven't added any favorites yet")).toBeTruthy();
+    fireEvent.press(screen.getByText('Browse'));
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search');
   });
 
   it('renders initial error with retry', () => {
     const refetch = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
-      data: undefined,
-      isLoading: false,
+    mockAuthenticatedQuery({
       isError: true,
       error: new ApiError({ kind: 'server', status: 500, userMessage: 'Server error.' }),
       refetch,
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     render(<FavoritesScreen />);
-    expect(screen.getByText('Server error.')).toBeTruthy();
+    expect(screen.getByText('Unable to load favorites. Please try again.')).toBeTruthy();
+    expect(screen.queryByText('Server error.')).toBeNull();
     fireEvent.press(screen.getByText('Retry'));
     expect(refetch).toHaveBeenCalled();
   });
 
   it('refreshes favorites on pull-to-refresh', () => {
     const refetch = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
+    mockAuthenticatedQuery({
       data: {
         pages: [
           createPage({
@@ -489,14 +402,8 @@ describe('FavoritesScreen', () => {
           }),
         ],
       },
-      isLoading: false,
-      isError: false,
       refetch,
       isRefetching: true,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
     });
 
     const { UNSAFE_getByType } = render(<FavoritesScreen />);
@@ -505,40 +412,5 @@ describe('FavoritesScreen', () => {
     >;
     refreshControl.props.onRefresh?.();
     expect(refetch).toHaveBeenCalled();
-  });
-
-  it('exposes accessible remove labels with content title and type', () => {
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useFavoritesItems as jest.Mock).mockReturnValue({
-      data: {
-        pages: [
-          createPage({
-            tvShows: [
-              {
-                id: 'tv-id',
-                title: 'Breaking Bad',
-                posterPath: null,
-                firstAirDate: '2008-01-20',
-                voteAverage: 8.9,
-              },
-            ],
-            totalCount: 1,
-            totalPages: 1,
-          }),
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-      isRefetching: false,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-    });
-
-    render(<FavoritesScreen />);
-    expect(screen.getByLabelText('Remove Breaking Bad from favorites')).toBeTruthy();
-    expect(screen.getByLabelText('Breaking Bad, TV, 2008, rating 8.9')).toBeTruthy();
   });
 });

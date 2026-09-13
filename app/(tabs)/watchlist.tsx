@@ -9,16 +9,21 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useAuth } from '@/auth/useAuth';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { LibraryContentCard } from '@/features/library/components/LibraryContentCard';
+import { LibraryEmptyState } from '@/features/library/components/LibraryEmptyState';
+import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
+import { LibrarySortControl } from '@/features/library/components/LibrarySortControl';
+import { useLibraryDisplayItems } from '@/features/library/hooks/useLibraryDisplayItems';
+import { getLibraryItemKey } from '@/features/library/utils/library-item-key';
+import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
+import type { LibrarySortOption, LibraryTypeFilter } from '@/features/library/types';
+import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { CreateWatchlistModal } from '@/features/watchlists/components/CreateWatchlistModal';
-import { LibraryContentCard } from '@/features/watchlists/components/LibraryContentCard';
-import { WatchlistEmptyState } from '@/features/watchlists/components/WatchlistEmptyState';
-import { WatchlistLoadingState } from '@/features/watchlists/components/WatchlistLoadingState';
 import { WatchlistSelector } from '@/features/watchlists/components/WatchlistSelector';
 import {
   useDeleteWatchlistMutation,
@@ -28,13 +33,19 @@ import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import { flattenWatchlistPages, type LibraryItem } from '@/features/watchlists/utils/library-items';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+
+const WATCHLIST_SORT_OPTIONS = getAvailableSortOptions(true);
+const DEFAULT_WATCHLIST_SORT: LibrarySortOption = 'recentlyAdded';
 
 export default function WatchlistScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [selectedWatchlistId, setSelectedWatchlistId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>('all');
+  const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
 
   const watchlistsQuery = useWatchlists(isAuthenticated);
@@ -55,6 +66,12 @@ export default function WatchlistScreen() {
     () => flattenWatchlistPages(itemsQuery.data?.pages ?? []),
     [itemsQuery.data?.pages],
   );
+
+  const displayItems = useLibraryDisplayItems({
+    items,
+    typeFilter,
+    sort,
+  });
 
   useEffect(() => {
     if (!isAuthenticated || watchlists.length === 0) {
@@ -77,8 +94,14 @@ export default function WatchlistScreen() {
     router.push('/(auth)/login');
   }, [router]);
 
+  const handleBrowse = useCallback(() => {
+    router.push('/(tabs)/search');
+  }, [router]);
+
   const handleSelectWatchlist = useCallback((watchlistId: string) => {
     setSelectedWatchlistId(watchlistId);
+    setTypeFilter('all');
+    setSort(DEFAULT_WATCHLIST_SORT);
   }, []);
 
   const handleCreatedWatchlist = useCallback((watchlistId: string) => {
@@ -127,7 +150,7 @@ export default function WatchlistScreen() {
         return;
       }
 
-      const itemKey = `${item.type}-${item.id}`;
+      const itemKey = getLibraryItemKey(item);
       setRemovingItemKey(itemKey);
       removeItem.mutate(
         { contentType: item.type, contentId: item.id },
@@ -162,13 +185,26 @@ export default function WatchlistScreen() {
     ({ item }: { item: LibraryItem }) => (
       <LibraryContentCard
         item={item}
-        isRemoving={removingItemKey === `${item.type}-${item.id}`}
+        isRemoving={removingItemKey === getLibraryItemKey(item)}
+        removeIcon="bookmark"
+        removeAccessibilityLabel="watchlist"
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />
     ),
     [handleItemPress, handleRemoveItem, removingItemKey],
   );
+
+  const listControls = items.length > 0 ? (
+    <View style={styles.controls}>
+      <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+      <LibrarySortControl
+        value={sort}
+        options={WATCHLIST_SORT_OPTIONS}
+        onChange={setSort}
+      />
+    </View>
+  ) : null;
 
   const listHeader = (
     <View style={styles.header}>
@@ -199,7 +235,16 @@ export default function WatchlistScreen() {
           />
         </View>
       ) : null}
+      {listControls}
     </View>
+  );
+
+  const createModal = (
+    <CreateWatchlistModal
+      visible={createModalVisible}
+      onClose={() => setCreateModalVisible(false)}
+      onCreated={handleCreatedWatchlist}
+    />
   );
 
   if (!isAuthenticated) {
@@ -208,7 +253,8 @@ export default function WatchlistScreen() {
         <View style={styles.header}>
           <AppText variant="title">Watchlist</AppText>
         </View>
-        <WatchlistEmptyState
+        <LibraryEmptyState
+          icon="bookmark"
           title="Sign in to manage your watchlists"
           message="Your personal lists will appear here after you sign in."
           actionLabel="Sign In"
@@ -222,26 +268,24 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <WatchlistLoadingState />
+        <LibraryLoadingState accessibilityLabel="Loading watchlists" />
+        {createModal}
       </SafeAreaView>
     );
   }
 
   if (watchlistsQuery.isError && watchlists.length === 0) {
-    const message = isApiError(watchlistsQuery.error)
-      ? watchlistsQuery.error.userMessage
-      : 'Unable to load watchlists. Please try again.';
-
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message={message}
+            message="Unable to load watchlists. Please try again."
             onRetry={() => void watchlistsQuery.refetch()}
             retryLabel="Try Again"
           />
         </View>
+        {createModal}
       </SafeAreaView>
     );
   }
@@ -250,16 +294,14 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <WatchlistEmptyState
-          title="You don't have any watchlists yet."
+        <LibraryEmptyState
+          icon="bookmark"
+          title="You don't have any watchlists yet"
+          message="Create a list to save movies and TV shows you want to watch."
           actionLabel="Create Watchlist"
           onAction={() => setCreateModalVisible(true)}
         />
-        <CreateWatchlistModal
-          visible={createModalVisible}
-          onClose={() => setCreateModalVisible(false)}
-          onCreated={handleCreatedWatchlist}
-        />
+        {createModal}
       </SafeAreaView>
     );
   }
@@ -268,53 +310,60 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <WatchlistLoadingState />
-        <CreateWatchlistModal
-          visible={createModalVisible}
-          onClose={() => setCreateModalVisible(false)}
-          onCreated={handleCreatedWatchlist}
-        />
+        <LibraryLoadingState accessibilityLabel="Loading watchlist items" />
+        {createModal}
       </SafeAreaView>
     );
   }
 
   if (itemsQuery.isError && items.length === 0) {
-    const message = isApiError(itemsQuery.error)
-      ? itemsQuery.error.userMessage
-      : 'Unable to load watchlist items. Please try again.';
-
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message={message}
+            message="Unable to load watchlist items. Please try again."
             onRetry={() => void itemsQuery.refetch()}
             retryLabel="Try Again"
           />
         </View>
-        <CreateWatchlistModal
-          visible={createModalVisible}
-          onClose={() => setCreateModalVisible(false)}
-          onCreated={handleCreatedWatchlist}
-        />
+        {createModal}
       </SafeAreaView>
     );
   }
 
+  const filteredEmptyTitle =
+    typeFilter === 'movie'
+      ? 'No movies match this filter'
+      : typeFilter === 'tv'
+        ? 'No TV shows match this filter'
+        : 'No items match this filter';
+
+  const emptyComponent =
+    items.length === 0 ? (
+      <LibraryEmptyState
+        icon="bookmark"
+        title="Your watchlist is empty"
+        message="Add movies and TV shows from their detail pages, or browse to discover something new."
+        actionLabel="Browse"
+        onAction={handleBrowse}
+      />
+    ) : (
+      <LibraryEmptyState
+        icon="bookmark"
+        title={filteredEmptyTitle}
+        message="Try a different filter or sort option."
+      />
+    );
+
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
-        data={items}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
+        data={displayItems}
+        keyExtractor={getLibraryItemKey}
         renderItem={renderItem}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={
-          <WatchlistEmptyState
-            title="This watchlist is empty."
-            message="Add movies and TV shows from their detail pages."
-          />
-        }
+        ListEmptyComponent={emptyComponent}
         ListFooterComponent={
           itemsQuery.isFetchingNextPage ? (
             <View style={styles.footerLoading}>
@@ -335,12 +384,11 @@ export default function WatchlistScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
       />
-      <CreateWatchlistModal
-        visible={createModalVisible}
-        onClose={() => setCreateModalVisible(false)}
-        onCreated={handleCreatedWatchlist}
-      />
+      {createModal}
     </SafeAreaView>
   );
 }
@@ -354,12 +402,17 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     gap: spacing.sm,
   },
+  controls: {
+    gap: spacing.sm,
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingBottom: spacing.xs,
+  },
   selectedHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingBottom: spacing.sm,
   },
   selectedMeta: {
@@ -373,7 +426,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   footerLoading: {
     paddingVertical: spacing.lg,
