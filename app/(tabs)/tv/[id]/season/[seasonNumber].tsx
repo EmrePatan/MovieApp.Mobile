@@ -22,6 +22,7 @@ export default function SeasonDetailScreen() {
   return (
     <DetailQueryState
       query={query}
+      contentLayout="list"
       invalidParamsMessage={invalidParamsMessage}
       notFoundTitle="Season not found"
       notFoundMessage="This season could not be found."

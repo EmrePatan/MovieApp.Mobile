@@ -21,6 +21,10 @@ export interface FavoritesResponse extends PaginationMeta {
   tvShows: FavoriteTvShowItemResponse[];
 }
 
+export interface FavoriteStatusResponse {
+  isFavorited: boolean;
+}
+
 export type FavoriteContentType = 'movie' | 'tv';
 
 export const DEFAULT_FAVORITES_PAGE_SIZE = 20;

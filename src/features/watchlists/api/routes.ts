@@ -6,6 +6,18 @@ export function buildWatchlistsPath(): string {
   return '/api/watchlists';
 }
 
+export function buildWatchlistMembershipPath(
+  mediaType: 'movie' | 'tv',
+  contentId: string,
+): string {
+  const params = new URLSearchParams({
+    mediaType,
+    contentId,
+  });
+
+  return `/api/watchlists/membership?${params.toString()}`;
+}
+
 export function buildWatchlistPath(watchlistId: string): string {
   return `/api/watchlists/${encodePathSegment(watchlistId)}`;
 }

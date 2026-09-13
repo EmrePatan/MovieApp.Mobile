@@ -30,6 +30,11 @@ export interface WatchlistTvShowItemResponse {
   createdAt: string;
 }
 
+export interface WatchlistMembershipResponse {
+  watchlistIds: string[];
+  isInWatchlist: boolean;
+}
+
 export interface WatchlistDetailResponse {
   id: string;
   name: string;

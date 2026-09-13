@@ -122,6 +122,22 @@ export function useWatchlistItemMutation(
       await addTvToWatchlist(watchlistId, contentId);
       return true;
     },
+    onMutate: async ({ watchlistId, isInWatchlist }) => {
+      const membershipKey = watchlistMembershipQueryKey(contentType, contentId);
+      await queryClient.cancelQueries({ queryKey: membershipKey });
+      const previousMembership = queryClient.getQueryData<Record<string, boolean>>(membershipKey);
+      queryClient.setQueryData<Record<string, boolean>>(membershipKey, (current = {}) => ({
+        ...current,
+        [watchlistId]: !isInWatchlist,
+      }));
+
+      return { previousMembership, membershipKey };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.membershipKey) {
+        queryClient.setQueryData(context.membershipKey, context.previousMembership);
+      }
+    },
     onSuccess: (_result, variables) => {
       invalidateWatchlistQueries(
         queryClient,

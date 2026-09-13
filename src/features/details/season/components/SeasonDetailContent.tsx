@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { SeasonProgressInline } from '@/features/watch-history/components/SeasonProgressInline';
@@ -19,26 +18,28 @@ export function SeasonDetailContent({ season }: SeasonDetailContentProps) {
   });
 
   return (
-    <View>
-      <DetailHero
-        title={title}
-        posterPath={season.posterPath}
-        backdropPath={season.posterPath}
-        metadataLine={metadataLine}
-        posterAccessibilityLabel={`${title} poster`}
-      />
-      <DetailOverview overview={season.overview} />
-      <SeasonProgressInline
-        tvShowId={season.tvShowId}
-        seasonNumber={season.seasonNumber}
-        fallbackTotalEpisodes={season.episodeCount}
-      />
-      <EpisodeList
-        key={`${season.tvShowId}-${season.seasonNumber}`}
-        tvShowId={season.tvShowId}
-        seasonNumber={season.seasonNumber}
-        episodes={season.episodes}
-      />
-    </View>
+    <EpisodeList
+      key={`${season.tvShowId}-${season.seasonNumber}`}
+      tvShowId={season.tvShowId}
+      seasonNumber={season.seasonNumber}
+      episodes={season.episodes}
+      listHeader={
+        <>
+          <DetailHero
+            title={title}
+            posterPath={season.posterPath}
+            backdropPath={season.posterPath}
+            metadataLine={metadataLine}
+            posterAccessibilityLabel={`${title} poster`}
+          />
+          <DetailOverview overview={season.overview} />
+          <SeasonProgressInline
+            tvShowId={season.tvShowId}
+            seasonNumber={season.seasonNumber}
+            fallbackTotalEpisodes={season.episodeCount}
+          />
+        </>
+      }
+    />
   );
 }

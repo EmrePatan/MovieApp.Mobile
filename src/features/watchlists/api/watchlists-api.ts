@@ -5,6 +5,7 @@ import {
   buildRemoveMovieFromWatchlistPath,
   buildRemoveTvFromWatchlistPath,
   buildWatchlistItemsPath,
+  buildWatchlistMembershipPath,
   buildWatchlistPath,
   buildWatchlistsPath,
 } from './routes';
@@ -12,8 +13,21 @@ import type {
   CreateWatchlistRequest,
   WatchlistDetailResponse,
   WatchlistItemsResponse,
+  WatchlistMembershipResponse,
   WatchlistSummaryResponse,
 } from '../types';
+import type { WatchlistContentType } from '../types';
+
+export async function getWatchlistMembership(
+  contentType: WatchlistContentType,
+  contentId: string,
+  signal?: AbortSignal,
+): Promise<WatchlistMembershipResponse> {
+  return api.get<WatchlistMembershipResponse>(
+    buildWatchlistMembershipPath(contentType, contentId),
+    { signal },
+  );
+}
 
 export async function getWatchlists(signal?: AbortSignal): Promise<WatchlistSummaryResponse[]> {
   return api.get<WatchlistSummaryResponse[]>(buildWatchlistsPath(), { signal });

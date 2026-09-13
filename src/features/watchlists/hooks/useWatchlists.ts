@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
-import { getWatchlist, getWatchlists } from '../api/watchlists-api';
+import { getWatchlistMembership, getWatchlists } from '../api/watchlists-api';
 import {
   watchlistMembershipQueryKey,
   watchlistsQueryKey,
@@ -18,6 +18,10 @@ export function useWatchlists(enabled = true) {
   });
 }
 
+function toMembershipRecord(watchlistIds: string[]): Record<string, boolean> {
+  return Object.fromEntries(watchlistIds.map((watchlistId) => [watchlistId, true]));
+}
+
 export function useWatchlistMembership(
   contentType: WatchlistContentType,
   contentId: string,
@@ -28,20 +32,8 @@ export function useWatchlistMembership(
   return useQuery({
     queryKey: watchlistMembershipQueryKey(contentType, contentId),
     queryFn: async ({ signal }) => {
-      const watchlists = await getWatchlists(signal);
-      const membership: Record<string, boolean> = {};
-
-      await Promise.all(
-        watchlists.map(async (watchlist) => {
-          const detail = await getWatchlist(watchlist.id, signal);
-          membership[watchlist.id] =
-            contentType === 'movie'
-              ? detail.movies.some((item) => item.id === contentId)
-              : detail.tvShows.some((item) => item.id === contentId);
-        }),
-      );
-
-      return membership;
+      const membership = await getWatchlistMembership(contentType, contentId, signal);
+      return toMembershipRecord(membership.watchlistIds);
     },
     enabled: isAuthenticated && enabled && contentId.length > 0,
     staleTime: 15_000,

@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
-import { useSeasonCatalog } from '@/features/details/season/hooks/useSeasonCatalog';
 import { CatalogImage } from '../../shared/components/CatalogImage';
 import { SeasonProgressBar } from '@/features/watch-history/components/SeasonProgressBar';
 import { useAuth } from '@/auth/useAuth';
@@ -92,24 +91,18 @@ export function SeasonListItem({ tvShowId, season, showWatchedControl }: SeasonL
   const router = useRouter();
   const { requireAuth } = useRequireAuth();
   const progressQuery = useSeasonProgress(tvShowId, season.seasonNumber);
-  const seasonEpisodesQuery = useSeasonCatalog(tvShowId, season.seasonNumber, showWatchedControl);
   const toggleSeasonWatched = useToggleSeasonWatched(tvShowId, season.seasonNumber);
   const [feedback, setFeedback] = useState<string | null>(null);
   const label = season.name ?? `Season ${season.seasonNumber}`;
   const airYear = season.airDate ? season.airDate.slice(0, 4) : null;
-  const episodeIds = useMemo(
-    () => seasonEpisodesQuery.data?.episodes.map((episode) => episode.id) ?? [],
-    [seasonEpisodesQuery.data?.episodes],
-  );
   const totalEpisodes = Math.max(
     progressQuery.data?.totalEpisodes ?? 0,
     season.episodeCount ?? 0,
-    episodeIds.length,
   );
   const watchedEpisodes = progressQuery.data?.watchedEpisodes ?? 0;
   const showProgress = showWatchedControl && totalEpisodes > 0;
   const isFullyWatched = getSeasonProgressState(watchedEpisodes, totalEpisodes) === 'completed';
-  const canToggleSeason = totalEpisodes > 0 || episodeIds.length > 0;
+  const canToggleSeason = totalEpisodes > 0;
 
   const metadata = [
     `Season ${season.seasonNumber}`,
@@ -134,7 +127,7 @@ export function SeasonListItem({ tvShowId, season, showWatchedControl }: SeasonL
       {
         isFullyWatched,
         totalEpisodes,
-        episodeIds,
+        episodeIds: [],
       },
       {
         onError: () => {

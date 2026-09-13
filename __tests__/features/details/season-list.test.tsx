@@ -1,6 +1,5 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { useSeasonCatalog } from '@/features/details/season/hooks/useSeasonCatalog';
 import {
   SeasonList,
   SeasonListItemProgress,
@@ -33,10 +32,6 @@ jest.mock('@/features/watch-history/hooks/useSeasonProgress', () => ({
   useSeasonProgress: jest.fn(),
 }));
 
-jest.mock('@/features/details/season/hooks/useSeasonCatalog', () => ({
-  useSeasonCatalog: jest.fn(),
-}));
-
 jest.mock('@/features/watch-history/hooks/useTvShowProgress', () => ({
   useTvShowProgress: jest.fn(),
 }));
@@ -65,22 +60,6 @@ const seasons = [
 ];
 
 function setupMocks() {
-  (useSeasonCatalog as jest.Mock).mockReturnValue({
-    data: {
-      episodes: Array.from({ length: 22 }, (_, index) => ({
-        id: `episode-${index + 1}`,
-        episodeNumber: index + 1,
-        name: `Episode ${index + 1}`,
-        overview: null,
-        airDate: null,
-        runtimeMinutes: null,
-        stillPath: null,
-        voteAverage: 0,
-      })),
-    },
-    isLoading: false,
-    isError: false,
-  });
   (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
   (useTvShowProgress as jest.Mock).mockReturnValue({
     data: {
@@ -140,7 +119,7 @@ describe('SeasonList progress UI', () => {
       {
         isFullyWatched: false,
         totalEpisodes: 22,
-        episodeIds: expect.arrayContaining(['episode-1', 'episode-22']),
+        episodeIds: [],
       },
       expect.any(Object),
     );

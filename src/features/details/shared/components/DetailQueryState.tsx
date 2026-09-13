@@ -39,6 +39,8 @@ interface DetailQueryStateProps<TData> {
 
   invalidRequestMessage?: string;
 
+  contentLayout?: 'scroll' | 'list';
+
   children: (data: TData) => ReactNode;
 
 }
@@ -78,6 +80,8 @@ export function DetailQueryState<TData>({
   invalidRequestTitle = 'Invalid request',
 
   invalidRequestMessage = 'The requested item could not be loaded.',
+
+  contentLayout = 'scroll',
 
   children,
 
@@ -250,6 +254,18 @@ export function DetailQueryState<TData>({
 
 
 
+  if (contentLayout === 'list') {
+    return (
+      <DetailStateShell>
+        <View style={styles.listContainer}>
+          <DetailScrollLockProvider onScrollLockChange={handleScrollLockChange}>
+            {children(data)}
+          </DetailScrollLockProvider>
+        </View>
+      </DetailStateShell>
+    );
+  }
+
   return (
 
     <DetailStateShell>
@@ -294,6 +310,10 @@ const styles = StyleSheet.create({
 
     flex: 1,
 
+  },
+
+  listContainer: {
+    flex: 1,
   },
 
   content: {

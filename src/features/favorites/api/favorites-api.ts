@@ -3,10 +3,26 @@ import {
   buildAddMovieFavoritePath,
   buildAddTvFavoritePath,
   buildFavoritesPath,
+  buildMovieFavoriteStatusPath,
   buildRemoveMovieFavoritePath,
   buildRemoveTvFavoritePath,
+  buildTvFavoriteStatusPath,
 } from './routes';
-import type { FavoritesResponse } from '../types';
+import type { FavoriteStatusResponse, FavoritesResponse } from '../types';
+
+export async function getMovieFavoriteStatus(
+  movieId: string,
+  signal?: AbortSignal,
+): Promise<FavoriteStatusResponse> {
+  return api.get<FavoriteStatusResponse>(buildMovieFavoriteStatusPath(movieId), { signal });
+}
+
+export async function getTvFavoriteStatus(
+  tvShowId: string,
+  signal?: AbortSignal,
+): Promise<FavoriteStatusResponse> {
+  return api.get<FavoriteStatusResponse>(buildTvFavoriteStatusPath(tvShowId), { signal });
+}
 
 export async function getFavorites(
   page = 1,
