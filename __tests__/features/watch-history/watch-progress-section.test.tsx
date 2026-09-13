@@ -27,7 +27,7 @@ describe('WatchProgressSection', () => {
     });
   });
 
-  it('renders tv show progress', () => {
+  it('renders tv show progress with a progress bar and next episode hierarchy', () => {
     (useTvShowProgress as jest.Mock).mockReturnValue({
       data: {
         tvShowId: 'tv-id',
@@ -47,9 +47,77 @@ describe('WatchProgressSection', () => {
 
     render(<WatchProgressSection tvShowId="tv-id" />);
 
-    expect(screen.getByText('12 / 24 episodes watched')).toBeTruthy();
-    expect(screen.getByText('50% complete')).toBeTruthy();
-    expect(screen.getByText(/Next: S2 E3/)).toBeTruthy();
+    expect(screen.queryByText('0 of 24 episodes')).toBeNull();
+    expect(screen.getByText('12 of 24 episodes')).toBeTruthy();
+    expect(screen.getByText('50%')).toBeTruthy();
+    expect(screen.getByText('Next')).toBeTruthy();
+    expect(screen.getByText('S2 E3 · Bit by a Dead Bee')).toBeTruthy();
+    expect(screen.getByTestId('watch-progress-track')).toBeTruthy();
+  });
+
+  it('renders zero progress with a visible empty track', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 22,
+        watchedEpisodes: 0,
+        progressPercentage: 0,
+        nextEpisode: {
+          episodeId: 'episode-id',
+          seasonNumber: 1,
+          episodeNumber: 1,
+          title: 'Pilot',
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<WatchProgressSection tvShowId="tv-id" />);
+
+    expect(screen.getByText('0 of 22 episodes')).toBeTruthy();
+    expect(screen.getByText('0%')).toBeTruthy();
+    expect(screen.getByText('S1 E1 · Pilot')).toBeTruthy();
+    expect(screen.getByTestId('watch-progress-track')).toBeTruthy();
+  });
+
+  it('renders full progress and a completed state when there is no next episode', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 10,
+        watchedEpisodes: 10,
+        progressPercentage: 100,
+        nextEpisode: null,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<WatchProgressSection tvShowId="tv-id" />);
+
+    expect(screen.getByText('10 of 10 episodes')).toBeTruthy();
+    expect(screen.getByText('100%')).toBeTruthy();
+    expect(screen.getByText('Status')).toBeTruthy();
+    expect(screen.getByText('All episodes watched')).toBeTruthy();
+  });
+
+  it('clamps out-of-range progress percentages', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 10,
+        watchedEpisodes: 10,
+        progressPercentage: 140,
+        nextEpisode: null,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<WatchProgressSection tvShowId="tv-id" />);
+
+    expect(screen.getByText('100%')).toBeTruthy();
   });
 
   it('renders season progress', () => {
@@ -72,9 +140,9 @@ describe('WatchProgressSection', () => {
 
     render(<WatchProgressSection tvShowId="tv-id" seasonNumber={1} />);
 
-    expect(screen.getByText('4 / 10 episodes watched')).toBeTruthy();
-    expect(screen.getByText('40% complete')).toBeTruthy();
-    expect(screen.getByText(/Next: E5/)).toBeTruthy();
+    expect(screen.getByText('4 of 10 episodes')).toBeTruthy();
+    expect(screen.getByText('40%')).toBeTruthy();
+    expect(screen.getByText('E5 · Gray Matter')).toBeTruthy();
   });
 
   it('does not render when logged out', () => {

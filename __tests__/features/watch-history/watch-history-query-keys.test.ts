@@ -3,6 +3,7 @@ import {
   movieWatchStatusQueryKey,
   recentWatchHistoryInfiniteQueryKey,
   seasonProgressQueryKey,
+  seasonWatchedEpisodesQueryKey,
   tvShowProgressQueryKey,
 } from '@/features/watch-history/hooks/watch-history-query-keys';
 
@@ -36,6 +37,14 @@ describe('watch history query keys', () => {
       'season',
       1,
       'progress',
+    ]);
+    expect(seasonWatchedEpisodesQueryKey(tvShowId, 1)).toEqual([
+      'watch-history',
+      'tv',
+      tvShowId,
+      'season',
+      1,
+      'watched-episodes',
     ]);
   });
 });

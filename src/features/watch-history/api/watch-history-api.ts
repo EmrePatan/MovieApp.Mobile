@@ -5,8 +5,13 @@ import {
   buildMarkMovieWatchedPath,
   buildMovieWatchStatusPath,
   buildRecentWatchHistoryPath,
+  buildBulkUpdateEpisodeWatchStatePath,
+  buildMarkThroughEpisodePath,
   buildSeasonProgressPath,
+  buildSeasonWatchStatePath,
+  buildSeasonWatchedEpisodesPath,
   buildTvShowProgressPath,
+  buildTvShowWatchStatePath,
   buildUnmarkEpisodeWatchedPath,
   buildUnmarkMovieWatchedPath,
   buildWatchedEpisodesPath,
@@ -16,7 +21,11 @@ import type {
   EpisodeWatchStatusResponse,
   MovieWatchStatusResponse,
   RecentWatchHistoryResponse,
+  BulkUpdateEpisodeWatchStateRequest,
+  BulkUpdateEpisodeWatchStateResponse,
+  MarkThroughEpisodeResponse,
   SeasonWatchProgressResponse,
+  SeasonWatchedEpisodesResponse,
   TvShowWatchProgressResponse,
   WatchEpisodeResponse,
   WatchMovieResponse,
@@ -93,5 +102,56 @@ export async function getSeasonProgress(
   return api.get<SeasonWatchProgressResponse>(
     buildSeasonProgressPath(tvShowId, seasonNumber),
     { signal },
+  );
+}
+
+export async function getSeasonWatchedEpisodes(
+  tvShowId: string,
+  seasonNumber: number,
+  signal?: AbortSignal,
+): Promise<SeasonWatchedEpisodesResponse> {
+  return api.get<SeasonWatchedEpisodesResponse>(
+    buildSeasonWatchedEpisodesPath(tvShowId, seasonNumber),
+    { signal },
+  );
+}
+
+export async function bulkUpdateEpisodeWatchState(
+  tvShowId: string,
+  request: BulkUpdateEpisodeWatchStateRequest,
+): Promise<BulkUpdateEpisodeWatchStateResponse> {
+  return api.post<BulkUpdateEpisodeWatchStateResponse>(
+    buildBulkUpdateEpisodeWatchStatePath(tvShowId),
+    request,
+  );
+}
+
+export async function markThroughEpisode(
+  tvShowId: string,
+  episodeId: string,
+): Promise<MarkThroughEpisodeResponse> {
+  return api.post<MarkThroughEpisodeResponse>(
+    buildMarkThroughEpisodePath(tvShowId, episodeId),
+  );
+}
+
+export async function bulkUpdateSeasonWatchState(
+  tvShowId: string,
+  seasonNumber: number,
+  watched: boolean,
+): Promise<BulkUpdateEpisodeWatchStateResponse> {
+  return api.post<BulkUpdateEpisodeWatchStateResponse>(
+    buildSeasonWatchStatePath(tvShowId, seasonNumber),
+    { watched },
+  );
+}
+
+export async function bulkUpdateTvShowWatchState(
+  tvShowId: string,
+  watched: boolean,
+): Promise<BulkUpdateEpisodeWatchStateResponse> {
+  return api.post<BulkUpdateEpisodeWatchStateResponse>(
+    buildTvShowWatchStatePath(tvShowId),
+    { watched },
   );
 }

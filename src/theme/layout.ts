@@ -32,6 +32,12 @@ export const layout = {
     maxToRenderPerBatch: 2,
     windowSize: 5,
   },
+  detailHero: {
+    minHeight: 220,
+    maxHeight: 320,
+    widthRatio: 0.52,
+    posterOverlapRatio: 0.35,
+  },
   homeSection: {
     headerHeight: homeSectionHeaderHeight,
     rowHeight:

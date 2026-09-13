@@ -11,7 +11,7 @@ import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 import type { SeasonResponse } from '@/features/details/season/types';
 import type { EpisodeResponse, EpisodeSummaryResponse } from '@/features/details/episode/types';
 import { SeasonListItem } from '@/features/details/tv/components/SeasonList';
-import { EpisodeListItem } from '@/features/details/season/components/EpisodeList';
+import { EpisodeList } from '@/features/details/season/components/EpisodeList';
 
 const mockPush = jest.fn();
 
@@ -19,12 +19,32 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ back: jest.fn(), push: mockPush }),
 }));
 
-jest.mock('@/features/details/shared/components/DetailActionsSection', () => ({
-  DetailActionsSection: () => null,
+jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
+  DetailActionBar: () => null,
 }));
 
-jest.mock('@/features/watch-history/components/WatchProgressSection', () => ({
-  WatchProgressSection: () => null,
+jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
+  DetailInlineRatingSection: () => null,
+}));
+
+jest.mock('@/features/details/shared/components/DetailEpisodeActionBar', () => ({
+  DetailEpisodeActionBar: () => null,
+}));
+
+jest.mock('@/features/watch-history/components/SeasonProgressInline', () => ({
+  SeasonProgressInline: () => null,
+}));
+
+jest.mock('@/features/watch-history/hooks/useTvShowProgress', () => ({
+  useTvShowProgress: () => ({ data: null, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useSeasonProgress', () => ({
+  useSeasonProgress: () => ({ data: null, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/details/season/hooks/useSeasonCatalog', () => ({
+  useSeasonCatalog: () => ({ data: undefined, isLoading: false, isError: false }),
 }));
 
 jest.mock('@/features/watch-history/components/WatchedButton', () => ({
@@ -37,6 +57,32 @@ jest.mock('@/features/reviews/components/ReviewsSection', () => ({
 
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
   SimilarContentSection: () => null,
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true }),
+}));
+
+jest.mock('@/hooks/useRequireAuth', () => ({
+  useRequireAuth: () => ({
+    isAuthenticated: true,
+    requireAuth: () => true,
+  }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useSeasonWatchedEpisodes', () => ({
+  useSeasonWatchedEpisodes: () => ({
+    data: { tvShowId: 'tv-id', seasonNumber: 2, watchedEpisodeIds: [] },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
+  useToggleEpisodeWatched: () => ({ mutate: jest.fn(), isPending: false }),
+  useBulkUpdateEpisodeWatchState: () => ({ mutate: jest.fn(), isPending: false }),
+  useMarkThroughEpisode: () => ({ mutate: jest.fn(), isPending: false }),
+  useToggleSeasonWatched: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 const movie: MovieDetailsResponse = {
@@ -65,6 +111,8 @@ describe('detail UI', () => {
     expect(screen.getByText('Interstellar')).toBeTruthy();
     expect(screen.queryByText('Genres')).toBeNull();
     expect(screen.queryByText('Overview')).toBeNull();
+    expect(screen.queryByText(/IMDb/)).toBeNull();
+    expect(screen.queryByText(/TMDB /)).toBeNull();
   });
 
   it('renders tv detail with empty seasons state', () => {
@@ -89,6 +137,7 @@ describe('detail UI', () => {
     render(<TvShowDetailContent show={show} />);
     expect(screen.getByText('Breaking Bad')).toBeTruthy();
     expect(screen.getByText('No seasons available.')).toBeTruthy();
+    expect(screen.queryByText('Watch Progress')).toBeNull();
   });
 
   it('renders season detail with empty episodes state', () => {
@@ -126,6 +175,7 @@ describe('detail UI', () => {
 
     render(<EpisodeDetailContent episode={episode} />);
     expect(screen.getByText('Pilot')).toBeTruthy();
+    expect(screen.getByText('Season 1 · Episode 1')).toBeTruthy();
   });
 
   it('renders not found state', () => {
@@ -183,6 +233,7 @@ describe('detail UI', () => {
           episodeCount: 13,
           posterPath: null,
         }}
+        showWatchedControl={false}
       />,
     );
 
@@ -203,10 +254,10 @@ describe('detail UI', () => {
     };
 
     render(
-      <EpisodeListItem tvShowId="tv-id" seasonNumber={2} episode={episode} />,
+      <EpisodeList tvShowId="tv-id" seasonNumber={2} episodes={[episode]} />,
     );
 
-    fireEvent.press(screen.getByLabelText('Open Half Measures'));
+    fireEvent.press(screen.getByTestId('episode-content-3'));
     expect(mockPush).toHaveBeenCalledWith('/tv/tv-id/season/2/episode/3');
   });
 });

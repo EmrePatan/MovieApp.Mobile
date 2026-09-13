@@ -60,3 +60,23 @@ export function buildTvShowProgressPath(tvShowId: string): string {
 export function buildSeasonProgressPath(tvShowId: string, seasonNumber: number): string {
   return `/api/watch-history/tvshows/${encodePathSegment(tvShowId)}/seasons/${encodePathSegment(seasonNumber)}`;
 }
+
+export function buildSeasonWatchedEpisodesPath(tvShowId: string, seasonNumber: number): string {
+  return `/api/watch-history/tvshows/${encodePathSegment(tvShowId)}/seasons/${encodePathSegment(seasonNumber)}/episodes`;
+}
+
+export function buildBulkUpdateEpisodeWatchStatePath(tvShowId: string): string {
+  return `/api/watch-history/tvshows/${encodePathSegment(tvShowId)}/episodes/bulk`;
+}
+
+export function buildMarkThroughEpisodePath(tvShowId: string, episodeId: string): string {
+  return `/api/watch-history/tvshows/${encodePathSegment(tvShowId)}/episodes/${encodePathSegment(episodeId)}/mark-through`;
+}
+
+export function buildTvShowWatchStatePath(tvShowId: string): string {
+  return `/api/watch-history/tvshows/${encodePathSegment(tvShowId)}/watch-state`;
+}
+
+export function buildSeasonWatchStatePath(tvShowId: string, seasonNumber: number): string {
+  return `/api/watch-history/tvshows/${encodePathSegment(tvShowId)}/seasons/${encodePathSegment(seasonNumber)}/watch-state`;
+}

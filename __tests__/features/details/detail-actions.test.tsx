@@ -5,13 +5,38 @@ import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDeta
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
-jest.mock('@/features/details/shared/components/DetailActionsSection', () => ({
-  DetailActionsSection: ({ contentType }: { contentType: string }) =>
-    mockReact.createElement('Text', null, `Actions:${contentType}`),
+jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
+  DetailActionBar: ({ contentType, showWatched }: { contentType: string; showWatched?: boolean }) =>
+    mockReact.createElement(
+      'Text',
+      null,
+      `Actions:${contentType}${showWatched ? ':watched' : ''}`,
+    ),
 }));
 
-jest.mock('@/features/watch-history/components/WatchProgressSection', () => ({
-  WatchProgressSection: () => null,
+jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
+  DetailInlineRatingSection: ({ contentType }: { contentType: string }) =>
+    mockReact.createElement('Text', null, `Rating:${contentType}`),
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: false }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useTvShowProgress', () => ({
+  useTvShowProgress: () => ({ data: null, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useSeasonProgress', () => ({
+  useSeasonProgress: () => ({ data: null, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/details/season/hooks/useSeasonCatalog', () => ({
+  useSeasonCatalog: () => ({ data: undefined, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
+  useToggleSeasonWatched: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 jest.mock('@/features/reviews/components/ReviewsSection', () => ({
@@ -57,15 +82,22 @@ const show: TvShowDetailsResponse = {
 };
 
 describe('detail actions integration', () => {
-  it('renders movie detail actions section', () => {
+  it('renders movie detail action set with watched and inline rating', () => {
     render(<MovieDetailContent movie={movie} />);
-    expect(screen.getByText('Actions:movie')).toBeTruthy();
-    expect(screen.getByText('TMDB Rating')).toBeTruthy();
+    expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
+    expect(screen.getByText('Rating:movie')).toBeTruthy();
+    expect(screen.getByText('Movie · 2014 · ★ 8.4 · 2h 49m')).toBeTruthy();
+    expect(screen.queryByText('TMDB Rating')).toBeNull();
+    expect(screen.queryByText(/TMDB /)).toBeNull();
+    expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
   });
 
-  it('renders tv detail actions section', () => {
+  it('renders tv detail action set without watched and inline rating', () => {
     render(<TvShowDetailContent show={show} />);
     expect(screen.getByText('Actions:tv')).toBeTruthy();
-    expect(screen.getByText('TMDB Rating')).toBeTruthy();
+    expect(screen.getByText('Rating:tv')).toBeTruthy();
+    expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();
+    expect(screen.queryByText('TMDB Rating')).toBeNull();
+    expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
   });
 });

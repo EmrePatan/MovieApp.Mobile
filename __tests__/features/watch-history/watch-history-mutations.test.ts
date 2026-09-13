@@ -1,11 +1,15 @@
 import {
+  applyOptimisticSeasonProgressCount,
+  adjustOptimisticTvShowProgressCount,
   invalidateEpisodeWatchHistoryQueries,
   invalidateMovieWatchHistoryQueries,
+  toggleSeasonWatchedEpisodeId,
 } from '@/features/watch-history/hooks/useWatchHistoryMutations';
 import {
   episodeWatchStatusQueryKey,
   movieWatchStatusQueryKey,
   seasonProgressQueryKey,
+  seasonWatchedEpisodesQueryKey,
   tvShowProgressQueryKey,
 } from '@/features/watch-history/hooks/watch-history-query-keys';
 
@@ -45,8 +49,61 @@ describe('watch history cache invalidation', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: seasonProgressQueryKey(tvShowId, 1),
     });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: seasonWatchedEpisodesQueryKey(tvShowId, 1),
+    });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['watch-history', 'recent'] });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['home'] });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['recommendations'] });
+  });
+
+  it('toggles season watched episode ids without duplicates', () => {
+    expect(toggleSeasonWatchedEpisodeId(['a'], 'b', true)).toEqual(['a', 'b']);
+    expect(toggleSeasonWatchedEpisodeId(['a', 'b'], 'b', true)).toEqual(['a', 'b']);
+    expect(toggleSeasonWatchedEpisodeId(['a', 'b'], 'b', false)).toEqual(['a']);
+  });
+
+  it('updates season and TV progress caches optimistically', () => {
+    const setQueryData = jest.fn();
+    const queryClient = {
+      getQueryData: jest.fn((key) => {
+        if (key[5] === 'progress' && key[4] === 1) {
+          return {
+            tvShowId,
+            seasonNumber: 1,
+            totalEpisodes: 22,
+            watchedEpisodes: 8,
+            progressPercentage: 36.36,
+            nextEpisode: null,
+          };
+        }
+
+        return {
+          tvShowId,
+          totalEpisodes: 35,
+          watchedEpisodes: 8,
+          progressPercentage: 22.86,
+          nextEpisode: null,
+        };
+      }),
+      setQueryData,
+    } as never;
+
+    applyOptimisticSeasonProgressCount(queryClient, tvShowId, 1, 13);
+    adjustOptimisticTvShowProgressCount(queryClient, tvShowId, 5);
+
+    expect(setQueryData).toHaveBeenCalledWith(
+      ['watch-history', 'tv', tvShowId, 'season', 1, 'progress'],
+      expect.objectContaining({
+        watchedEpisodes: 13,
+        totalEpisodes: 22,
+      }),
+    );
+    expect(setQueryData).toHaveBeenCalledWith(
+      ['watch-history', 'tv', tvShowId, 'progress'],
+      expect.objectContaining({
+        watchedEpisodes: 13,
+      }),
+    );
   });
 });

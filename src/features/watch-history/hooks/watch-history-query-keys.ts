@@ -29,3 +29,7 @@ export function tvShowProgressQueryKey(tvShowId: string) {
 export function seasonProgressQueryKey(tvShowId: string, seasonNumber: number) {
   return ['watch-history', 'tv', tvShowId, 'season', seasonNumber, 'progress'] as const;
 }
+
+export function seasonWatchedEpisodesQueryKey(tvShowId: string, seasonNumber: number) {
+  return ['watch-history', 'tv', tvShowId, 'season', seasonNumber, 'watched-episodes'] as const;
+}

@@ -15,6 +15,9 @@ describe('theme tokens', () => {
   it('defines interaction and semantic color tokens', () => {
     expect(interaction.touchTarget).toBeGreaterThanOrEqual(44);
     expect(colors.accentTint12).toContain('229');
+    expect(colors.progressTrack).toBeTruthy();
+    expect(colors.progressInProgress).toBeTruthy();
+    expect(colors.progressCompleted).toBeTruthy();
     expect(colors.danger).toBe(colors.error);
     expect(spacing.md).toBe(16);
   });

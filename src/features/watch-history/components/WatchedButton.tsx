@@ -27,9 +27,10 @@ type WatchedTarget =
 
 interface WatchedButtonProps {
   target: WatchedTarget;
+  size?: number;
 }
 
-export function WatchedButton({ target }: WatchedButtonProps) {
+export function WatchedButton({ target, size = 48 }: WatchedButtonProps) {
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const movieStatus = useMovieWatchStatus(target.type === 'movie' ? target.contentId : '');
   const episodeStatus = useEpisodeWatchStatus(target.type === 'episode' ? target.contentId : '');
@@ -78,6 +79,7 @@ export function WatchedButton({ target }: WatchedButtonProps) {
         onPress={handlePress}
         style={({ pressed }) => [
           styles.button,
+          { width: size, height: size },
           active && styles.buttonActive,
           pressed && !isBusy && styles.pressed,
           isBusy && styles.disabled,
@@ -99,8 +101,6 @@ export function WatchedButton({ target }: WatchedButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    width: 48,
-    height: 48,
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,

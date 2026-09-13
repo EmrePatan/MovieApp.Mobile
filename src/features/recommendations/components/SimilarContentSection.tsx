@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -75,20 +75,24 @@ export function SimilarContentSection({
     );
   }
 
+  const items = query.data.items;
+
   return (
     <View style={styles.container}>
       <HomeSectionHeader title={title} />
-      <FlatList
+      <ScrollView
         horizontal
-        data={query.data.items}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
-        renderItem={({ item }) => <RecommendationCard item={item} onPress={handleItemPress} />}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        initialNumToRender={4}
-        maxToRenderPerBatch={6}
-        windowSize={5}
-      />
+      >
+        {items.map((item) => (
+          <RecommendationCard
+            key={`${item.type}-${item.id}`}
+            item={item}
+            onPress={handleItemPress}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -100,6 +104,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    flexDirection: 'row',
   },
   loading: {
     paddingVertical: spacing.lg,

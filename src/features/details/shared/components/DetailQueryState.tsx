@@ -1,137 +1,323 @@
-import { ReactNode } from 'react';
+import { ReactNode, useCallback, useRef, useState } from 'react';
+
 import { ScrollView, StyleSheet, View } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { UseQueryResult } from '@tanstack/react-query';
+
 import { isApiError } from '@/api/errors';
+
 import { ErrorView } from '@/components/common/ErrorView';
-import { LoadingView } from '@/components/loading/LoadingView';
-import { DetailBackButton, DetailScreenScaffold } from './DetailScreenScaffold';
+
+import { DetailScrollProvider } from '../context/DetailScrollContext';
+import { DetailScrollLockProvider } from '../context/DetailScrollLockContext';
+
+import { DetailBackButton } from './DetailBackButton';
+
+import { DetailLoadingSkeleton } from './DetailLoadingSkeleton';
+
 import { DetailNotFound } from './DetailNotFound';
+
+import { DetailScreenScaffold } from './DetailScreenScaffold';
+
 import { spacing } from '@/theme/spacing';
 
+
+
 interface DetailQueryStateProps<TData> {
+
   query: Pick<UseQueryResult<TData>, 'data' | 'error' | 'isLoading' | 'isError' | 'refetch'>;
+
   invalidParamsMessage?: string;
+
   notFoundTitle: string;
+
   notFoundMessage: string;
+
   invalidRequestTitle?: string;
+
   invalidRequestMessage?: string;
+
   children: (data: TData) => ReactNode;
+
 }
 
-export function DetailQueryState<TData>({
-  query,
-  invalidParamsMessage,
-  notFoundTitle,
-  notFoundMessage,
-  invalidRequestTitle = 'Invalid request',
-  invalidRequestMessage = 'The requested item could not be loaded.',
-  children,
-}: DetailQueryStateProps<TData>) {
-  const { data, error, isLoading, isError, refetch } = query;
 
-  if (invalidParamsMessage) {
-    return (
-      <DetailScreenScaffold>
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-          <DetailBackButton />
-          <View style={styles.centered}>
-            <DetailNotFound title={invalidRequestTitle} message={invalidParamsMessage} />
-          </View>
-        </SafeAreaView>
-      </DetailScreenScaffold>
-    );
-  }
 
-  if (isLoading && !data) {
-    return (
-      <DetailScreenScaffold>
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-          <DetailBackButton />
-          <LoadingView message="Loading..." />
-        </SafeAreaView>
-      </DetailScreenScaffold>
-    );
-  }
-
-  if (isError && error && !data) {
-    if (isApiError(error) && error.kind === 'not_found') {
-      return (
-        <DetailScreenScaffold>
-          <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-            <DetailBackButton />
-            <View style={styles.centered}>
-              <DetailNotFound title={notFoundTitle} message={notFoundMessage} />
-            </View>
-          </SafeAreaView>
-        </DetailScreenScaffold>
-      );
-    }
-
-    if (isApiError(error) && error.kind === 'validation') {
-      return (
-        <DetailScreenScaffold>
-          <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-            <DetailBackButton />
-            <View style={styles.centered}>
-              <DetailNotFound title={invalidRequestTitle} message={invalidRequestMessage} />
-            </View>
-          </SafeAreaView>
-        </DetailScreenScaffold>
-      );
-    }
-
-    const message = isApiError(error)
-      ? error.userMessage
-      : 'Unable to load details. Please try again.';
-
-    return (
-      <DetailScreenScaffold>
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-          <DetailBackButton />
-          <View style={styles.centered}>
-            <ErrorView message={message} onRetry={() => void refetch()} retryLabel="Try Again" />
-          </View>
-        </SafeAreaView>
-      </DetailScreenScaffold>
-    );
-  }
-
-  if (!data) {
-    return (
-      <DetailScreenScaffold>
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-          <DetailBackButton />
-          <View style={styles.centered}>
-            <DetailNotFound title={notFoundTitle} message={notFoundMessage} />
-          </View>
-        </SafeAreaView>
-      </DetailScreenScaffold>
-    );
-  }
+function DetailStateShell({ children }: { children: ReactNode }) {
 
   return (
+
     <DetailScreenScaffold>
-      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-          <DetailBackButton />
-          {children(data)}
-        </ScrollView>
+
+      <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
+
+        {children}
+
       </SafeAreaView>
+
     </DetailScreenScaffold>
+
   );
+
 }
 
+
+
+export function DetailQueryState<TData>({
+
+  query,
+
+  invalidParamsMessage,
+
+  notFoundTitle,
+
+  notFoundMessage,
+
+  invalidRequestTitle = 'Invalid request',
+
+  invalidRequestMessage = 'The requested item could not be loaded.',
+
+  children,
+
+}: DetailQueryStateProps<TData>) {
+
+  const { data, error, isLoading, isError, refetch } = query;
+
+  const scrollRef = useRef<ScrollView>(null);
+  const [scrollLocked, setScrollLocked] = useState(false);
+
+  const handleScrollLockChange = useCallback((locked: boolean) => {
+
+    setScrollLocked(locked);
+
+  }, []);
+
+
+
+  if (invalidParamsMessage) {
+
+    return (
+
+      <DetailStateShell>
+
+        <View style={styles.stateContainer}>
+
+          <DetailBackButton variant="inline" />
+
+          <View style={styles.centered}>
+
+            <DetailNotFound title={invalidRequestTitle} message={invalidParamsMessage} />
+
+          </View>
+
+        </View>
+
+      </DetailStateShell>
+
+    );
+
+  }
+
+
+
+  if (isLoading && !data) {
+
+    return (
+
+      <DetailStateShell>
+
+        <DetailLoadingSkeleton />
+
+      </DetailStateShell>
+
+    );
+
+  }
+
+
+
+  if (isError && error && !data) {
+
+    if (isApiError(error) && error.kind === 'not_found') {
+
+      return (
+
+        <DetailStateShell>
+
+          <View style={styles.stateContainer}>
+
+            <DetailBackButton variant="inline" />
+
+            <View style={styles.centered}>
+
+              <DetailNotFound title={notFoundTitle} message={notFoundMessage} />
+
+            </View>
+
+          </View>
+
+        </DetailStateShell>
+
+      );
+
+    }
+
+
+
+    if (isApiError(error) && error.kind === 'validation') {
+
+      return (
+
+        <DetailStateShell>
+
+          <View style={styles.stateContainer}>
+
+            <DetailBackButton variant="inline" />
+
+            <View style={styles.centered}>
+
+              <DetailNotFound title={invalidRequestTitle} message={invalidRequestMessage} />
+
+            </View>
+
+          </View>
+
+        </DetailStateShell>
+
+      );
+
+    }
+
+
+
+    const message = isApiError(error)
+
+      ? error.userMessage
+
+      : 'Unable to load details. Please try again.';
+
+
+
+    return (
+
+      <DetailStateShell>
+
+        <View style={styles.stateContainer}>
+
+          <DetailBackButton variant="inline" />
+
+          <View style={styles.centered}>
+
+            <ErrorView message={message} onRetry={() => void refetch()} retryLabel="Try Again" />
+
+          </View>
+
+        </View>
+
+      </DetailStateShell>
+
+    );
+
+  }
+
+
+
+  if (!data) {
+
+    return (
+
+      <DetailStateShell>
+
+        <View style={styles.stateContainer}>
+
+          <DetailBackButton variant="inline" />
+
+          <View style={styles.centered}>
+
+            <DetailNotFound title={notFoundTitle} message={notFoundMessage} />
+
+          </View>
+
+        </View>
+
+      </DetailStateShell>
+
+    );
+
+  }
+
+
+
+  return (
+
+    <DetailStateShell>
+
+      <ScrollView
+
+        ref={scrollRef}
+
+        scrollEnabled={!scrollLocked}
+
+        showsVerticalScrollIndicator={false}
+
+        keyboardShouldPersistTaps="handled"
+
+        contentContainerStyle={styles.content}
+
+      >
+
+        <DetailScrollProvider scrollRef={scrollRef}>
+
+          <DetailScrollLockProvider onScrollLockChange={handleScrollLockChange}>
+
+            {children(data)}
+
+          </DetailScrollLockProvider>
+
+        </DetailScrollProvider>
+
+      </ScrollView>
+
+    </DetailStateShell>
+
+  );
+
+}
+
+
+
 const styles = StyleSheet.create({
+
   safeArea: {
+
     flex: 1,
+
   },
+
   content: {
+
     paddingBottom: spacing.xxl,
+
   },
-  centered: {
+
+  stateContainer: {
+
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
+
   },
+
+  centered: {
+
+    flex: 1,
+
+    justifyContent: 'center',
+
+    paddingHorizontal: spacing.lg,
+
+  },
+
 });
+
+

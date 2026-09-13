@@ -21,4 +21,8 @@ export const colors = {
   successTint15: 'rgba(46, 204, 113, 0.15)',
   errorTint15: 'rgba(255, 77, 79, 0.15)',
   skeleton: '#1C1C28',
+  progressTrack: '#2A2A38',
+  progressInProgress: '#C4A35A',
+  progressCompleted: '#4CAF82',
+  progressCompletedTint12: 'rgba(76, 175, 130, 0.12)',
 } as const;

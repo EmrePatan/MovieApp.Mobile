@@ -3,8 +3,11 @@ import {
   buildMarkEpisodeWatchedPath,
   buildMarkMovieWatchedPath,
   buildMovieWatchStatusPath,
+  buildBulkUpdateEpisodeWatchStatePath,
+  buildMarkThroughEpisodePath,
   buildRecentWatchHistoryPath,
   buildSeasonProgressPath,
+  buildSeasonWatchedEpisodesPath,
   buildTvShowProgressPath,
   buildUnmarkEpisodeWatchedPath,
   buildUnmarkMovieWatchedPath,
@@ -12,11 +15,14 @@ import {
 import {
   getEpisodeWatchStatus,
   getMovieWatchStatus,
+  bulkUpdateEpisodeWatchState,
   getRecentWatchHistory,
   getSeasonProgress,
+  getSeasonWatchedEpisodes,
   getTvShowProgress,
   markEpisodeWatched,
   markMovieWatched,
+  markThroughEpisode,
   unmarkEpisodeWatched,
   unmarkMovieWatched,
 } from '@/features/watch-history/api/watch-history-api';
@@ -64,6 +70,15 @@ describe('watch history api routes', () => {
     );
     expect(buildSeasonProgressPath(tvShowId, 1)).toBe(
       `/api/watch-history/tvshows/${tvShowId}/seasons/1`,
+    );
+    expect(buildSeasonWatchedEpisodesPath(tvShowId, 1)).toBe(
+      `/api/watch-history/tvshows/${tvShowId}/seasons/1/episodes`,
+    );
+    expect(buildBulkUpdateEpisodeWatchStatePath(tvShowId)).toBe(
+      `/api/watch-history/tvshows/${tvShowId}/episodes/bulk`,
+    );
+    expect(buildMarkThroughEpisodePath(tvShowId, episodeId)).toBe(
+      `/api/watch-history/tvshows/${tvShowId}/episodes/${episodeId}/mark-through`,
     );
   });
 });
@@ -128,6 +143,37 @@ describe('watch history api client', () => {
     expect(api.get).toHaveBeenCalledWith(
       `/api/watch-history/tvshows/${tvShowId}/seasons/1`,
       { signal: undefined },
+    );
+  });
+
+  it('loads season watched episodes and performs bulk updates in one request', async () => {
+    (api.get as jest.Mock).mockResolvedValue({
+      tvShowId,
+      seasonNumber: 1,
+      watchedEpisodeIds: [episodeId],
+    });
+    (api.post as jest.Mock).mockResolvedValue({
+      affectedCount: 2,
+      watchedAt: '2026-09-11T14:30:00Z',
+    });
+
+    await getSeasonWatchedEpisodes(tvShowId, 1);
+    await bulkUpdateEpisodeWatchState(tvShowId, {
+      episodeIds: [episodeId, 'episode-2'],
+      watched: true,
+    });
+    await markThroughEpisode(tvShowId, episodeId);
+
+    expect(api.get).toHaveBeenCalledWith(
+      `/api/watch-history/tvshows/${tvShowId}/seasons/1/episodes`,
+      { signal: undefined },
+    );
+    expect(api.post).toHaveBeenCalledWith(
+      `/api/watch-history/tvshows/${tvShowId}/episodes/bulk`,
+      { episodeIds: [episodeId, 'episode-2'], watched: true },
+    );
+    expect(api.post).toHaveBeenCalledWith(
+      `/api/watch-history/tvshows/${tvShowId}/episodes/${episodeId}/mark-through`,
     );
   });
 });

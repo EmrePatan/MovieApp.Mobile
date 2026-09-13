@@ -113,3 +113,25 @@ export interface SeasonWatchProgressResponse {
   progressPercentage: number;
   nextEpisode: SeasonNextEpisodeResponse | null;
 }
+
+export interface SeasonWatchedEpisodesResponse {
+  tvShowId: string;
+  seasonNumber: number;
+  watchedEpisodeIds: string[];
+}
+
+export interface BulkUpdateEpisodeWatchStateRequest {
+  episodeIds: string[];
+  watched: boolean;
+}
+
+export interface BulkUpdateEpisodeWatchStateResponse {
+  affectedCount: number;
+  watchedAt: string | null;
+}
+
+export interface MarkThroughEpisodeResponse {
+  episodeId: string;
+  affectedCount: number;
+  watchedAt: string;
+}
