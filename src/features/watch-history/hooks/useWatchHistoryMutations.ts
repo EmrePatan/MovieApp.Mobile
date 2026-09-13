@@ -26,6 +26,10 @@ import type {
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { calculateSeasonProgressPercentage } from '../utils/season-progress';
+import {
+  updateTvShowAggregateAllSeasonsWatched,
+  updateTvShowAggregateSeasonProgress,
+} from '../utils/tv-show-progress-cache';
 
 export function invalidateHomeQueries(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: ['home'] });
@@ -101,17 +105,21 @@ export function applyOptimisticSeasonProgressCount(
   tvShowId: string,
   seasonNumber: number,
   watchedEpisodes: number,
+  totalEpisodes?: number,
 ) {
   const key = seasonProgressQueryKey(tvShowId, seasonNumber);
   const current = queryClient.getQueryData<SeasonWatchProgressResponse>(key);
-  const totalEpisodes = current?.totalEpisodes ?? watchedEpisodes;
+  const resolvedTotalEpisodes = totalEpisodes ?? current?.totalEpisodes ?? watchedEpisodes;
 
   queryClient.setQueryData<SeasonWatchProgressResponse>(key, {
     tvShowId,
     seasonNumber,
-    totalEpisodes,
+    totalEpisodes: resolvedTotalEpisodes,
     watchedEpisodes,
-    progressPercentage: calculateSeasonProgressPercentage(watchedEpisodes, totalEpisodes),
+    progressPercentage: calculateSeasonProgressPercentage(
+      watchedEpisodes,
+      resolvedTotalEpisodes,
+    ),
     nextEpisode: current?.nextEpisode ?? null,
   });
 }
@@ -247,7 +255,13 @@ export function useToggleEpisodeWatched(
         seasonNumber,
         nextWatchedIds.length,
       );
-      adjustOptimisticTvShowProgressCount(queryClient, tvShowId, nextWatched ? 1 : -1);
+      updateTvShowAggregateSeasonProgress(
+        queryClient,
+        tvShowId,
+        seasonNumber,
+        nextWatchedIds.length,
+        previousSeasonProgress?.totalEpisodes,
+      );
 
       return {
         previous,
@@ -324,11 +338,14 @@ export function useBulkUpdateEpisodeWatchState(tvShowId: string, seasonNumber: n
         tvShowId,
         seasonNumber,
         nextIds.length,
+        previousSeasonProgress?.totalEpisodes,
       );
-      adjustOptimisticTvShowProgressCount(
+      updateTvShowAggregateSeasonProgress(
         queryClient,
         tvShowId,
-        nextIds.length - currentIds.length,
+        seasonNumber,
+        nextIds.length,
+        previousSeasonProgress?.totalEpisodes,
       );
 
       return { previousSeason, previousSeasonProgress, previousTvProgress };
@@ -421,10 +438,12 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
           progressPercentage: calculateSeasonProgressPercentage(watchedEpisodes, effectiveTotal),
           nextEpisode: previousSeasonProgress?.nextEpisode ?? null,
         });
-        adjustOptimisticTvShowProgressCount(
+        updateTvShowAggregateSeasonProgress(
           queryClient,
           tvShowId,
-          watchedEpisodes - (previousSeasonProgress?.watchedEpisodes ?? 0),
+          seasonNumber,
+          watchedEpisodes,
+          effectiveTotal,
         );
       }
 
@@ -482,11 +501,7 @@ export function useToggleTvShowWatched(tvShowId: string) {
       const watchedEpisodes = isFullyWatched ? 0 : totalEpisodes;
 
       if (totalEpisodes > 0 && previousTvProgress) {
-        queryClient.setQueryData<TvShowWatchProgressResponse>(tvKey, {
-          ...previousTvProgress,
-          watchedEpisodes,
-          progressPercentage: calculateSeasonProgressPercentage(watchedEpisodes, totalEpisodes),
-        });
+        updateTvShowAggregateAllSeasonsWatched(queryClient, tvShowId, !isFullyWatched);
       }
 
       return { previousTvProgress };

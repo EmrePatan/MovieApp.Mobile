@@ -1,10 +1,10 @@
 import {
   applyOptimisticSeasonProgressCount,
-  adjustOptimisticTvShowProgressCount,
   invalidateEpisodeWatchHistoryQueries,
   invalidateMovieWatchHistoryQueries,
   toggleSeasonWatchedEpisodeId,
 } from '@/features/watch-history/hooks/useWatchHistoryMutations';
+import { updateTvShowAggregateSeasonProgress } from '@/features/watch-history/utils/tv-show-progress-cache';
 import {
   episodeWatchStatusQueryKey,
   movieWatchStatusQueryKey,
@@ -84,13 +84,17 @@ describe('watch history cache invalidation', () => {
           watchedEpisodes: 8,
           progressPercentage: 22.86,
           nextEpisode: null,
+          seasons: [
+            { seasonNumber: 1, totalEpisodes: 22, watchedEpisodes: 8, progressPercentage: 36.36 },
+            { seasonNumber: 2, totalEpisodes: 13, watchedEpisodes: 0, progressPercentage: 0 },
+          ],
         };
       }),
       setQueryData,
     } as never;
 
     applyOptimisticSeasonProgressCount(queryClient, tvShowId, 1, 13);
-    adjustOptimisticTvShowProgressCount(queryClient, tvShowId, 5);
+    updateTvShowAggregateSeasonProgress(queryClient, tvShowId, 1, 13, 22);
 
     expect(setQueryData).toHaveBeenCalledWith(
       ['watch-history', 'tv', tvShowId, 'season', 1, 'progress'],

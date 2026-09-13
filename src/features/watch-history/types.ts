@@ -97,12 +97,20 @@ export interface SeasonNextEpisodeResponse {
   title: string | null;
 }
 
+export interface TvShowSeasonProgressResponse {
+  seasonNumber: number;
+  totalEpisodes: number;
+  watchedEpisodes: number;
+  progressPercentage: number;
+}
+
 export interface TvShowWatchProgressResponse {
   tvShowId: string;
   totalEpisodes: number;
   watchedEpisodes: number;
   progressPercentage: number;
   nextEpisode: NextEpisodeResponse | null;
+  seasons: TvShowSeasonProgressResponse[];
 }
 
 export interface SeasonWatchProgressResponse {

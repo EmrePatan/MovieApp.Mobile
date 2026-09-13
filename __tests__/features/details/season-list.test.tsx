@@ -5,8 +5,8 @@ import {
   SeasonListItemProgress,
 } from '@/features/details/tv/components/SeasonList';
 import { useAuth } from '@/auth/useAuth';
-import { useSeasonProgress } from '@/features/watch-history/hooks/useSeasonProgress';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
+import { useSeasonProgress } from '@/features/watch-history/hooks/useSeasonProgress';
 import { useToggleSeasonWatched } from '@/features/watch-history/hooks/useWatchHistoryMutations';
 
 const mockPush = jest.fn();
@@ -68,24 +68,27 @@ function setupMocks() {
       watchedEpisodes: 14,
       progressPercentage: 40,
       nextEpisode: null,
+      seasons: [
+        {
+          seasonNumber: 1,
+          totalEpisodes: 22,
+          watchedEpisodes: 14,
+          progressPercentage: 63.64,
+        },
+        {
+          seasonNumber: 2,
+          totalEpisodes: 13,
+          watchedEpisodes: 0,
+          progressPercentage: 0,
+        },
+      ],
     },
     isLoading: false,
     isError: false,
   });
-  (useSeasonProgress as jest.Mock).mockImplementation(
-    (_tvShowId: string, seasonNumber: number) => ({
-      data: {
-        tvShowId: 'tv-id',
-        seasonNumber,
-        totalEpisodes: seasonNumber === 1 ? 22 : 13,
-        watchedEpisodes: seasonNumber === 1 ? 14 : 0,
-        progressPercentage: seasonNumber === 1 ? 63.64 : 0,
-        nextEpisode: null,
-      },
-      isLoading: false,
-      isError: false,
-    }),
-  );
+  (useSeasonProgress as jest.Mock).mockImplementation(() => {
+    throw new Error('SeasonListItem must not call useSeasonProgress');
+  });
   (useToggleSeasonWatched as jest.Mock).mockReturnValue({
     mutate: mockSeasonMutate,
     isPending: false,
@@ -108,6 +111,8 @@ describe('SeasonList progress UI', () => {
     );
     expect(screen.getAllByTestId('season-list-progress-bar').length).toBe(2);
     expect(screen.getByText('14 / 22')).toBeTruthy();
+    expect(useTvShowProgress).toHaveBeenCalledTimes(1);
+    expect(useSeasonProgress).not.toHaveBeenCalled();
   });
 
   it('marks a season watched from the left control', () => {
@@ -132,6 +137,20 @@ describe('SeasonList progress UI', () => {
       watchedEpisodes: 34,
       progressPercentage: 97,
       nextEpisode: null,
+      seasons: [
+        {
+          seasonNumber: 1,
+          totalEpisodes: 22,
+          watchedEpisodes: 22,
+          progressPercentage: 100,
+        },
+        {
+          seasonNumber: 2,
+          totalEpisodes: 13,
+          watchedEpisodes: 12,
+          progressPercentage: 92.31,
+        },
+      ],
     };
 
     (useTvShowProgress as jest.Mock).mockReturnValue({
@@ -152,6 +171,11 @@ describe('SeasonList progress UI', () => {
         ...progressData,
         watchedEpisodes: 35,
         progressPercentage: 100,
+        seasons: progressData.seasons.map((season) => ({
+          ...season,
+          watchedEpisodes: season.totalEpisodes,
+          progressPercentage: 100,
+        })),
       },
       isLoading: false,
       isError: false,
@@ -177,6 +201,20 @@ describe('SeasonList progress UI', () => {
         watchedEpisodes: 35,
         progressPercentage: 100,
         nextEpisode: null,
+        seasons: [
+          {
+            seasonNumber: 1,
+            totalEpisodes: 22,
+            watchedEpisodes: 22,
+            progressPercentage: 100,
+          },
+          {
+            seasonNumber: 2,
+            totalEpisodes: 13,
+            watchedEpisodes: 13,
+            progressPercentage: 100,
+          },
+        ],
       },
       isLoading: false,
       isError: false,
@@ -197,6 +235,24 @@ describe('SeasonList progress UI', () => {
       episodeCount: 10,
       posterPath: null,
     }));
+
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 80,
+        watchedEpisodes: 0,
+        progressPercentage: 0,
+        nextEpisode: null,
+        seasons: manySeasons.map((season) => ({
+          seasonNumber: season.seasonNumber,
+          totalEpisodes: 10,
+          watchedEpisodes: 0,
+          progressPercentage: 0,
+        })),
+      },
+      isLoading: false,
+      isError: false,
+    });
 
     render(<SeasonList tvShowId="tv-id" seasons={manySeasons} />);
 

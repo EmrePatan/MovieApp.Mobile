@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,8 +8,9 @@ import { CatalogImage } from '../../shared/components/CatalogImage';
 import { SeasonProgressBar } from '@/features/watch-history/components/SeasonProgressBar';
 import { useAuth } from '@/auth/useAuth';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useSeasonProgress } from '@/features/watch-history/hooks/useSeasonProgress';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
+import { buildSeasonProgressMap } from '@/features/watch-history/utils/tv-show-progress-cache';
+import type { TvShowSeasonProgressResponse } from '@/features/watch-history/types';
 import { ShowCompletedBanner } from '@/features/watch-history/components/ShowCompletedBanner';
 import { ShowCompletedConfettiOverlay } from '@/features/watch-history/components/ShowCompletedConfettiOverlay';
 import { useShowCompletionCelebration } from '@/features/watch-history/hooks/useShowCompletionCelebration';
@@ -85,22 +86,29 @@ interface SeasonListItemProps {
   tvShowId: string;
   season: SeasonSummaryResponse;
   showWatchedControl: boolean;
+  seasonProgress?: TvShowSeasonProgressResponse;
+  progressReady: boolean;
 }
 
-export function SeasonListItem({ tvShowId, season, showWatchedControl }: SeasonListItemProps) {
+export function SeasonListItem({
+  tvShowId,
+  season,
+  showWatchedControl,
+  seasonProgress,
+  progressReady,
+}: SeasonListItemProps) {
   const router = useRouter();
   const { requireAuth } = useRequireAuth();
-  const progressQuery = useSeasonProgress(tvShowId, season.seasonNumber);
   const toggleSeasonWatched = useToggleSeasonWatched(tvShowId, season.seasonNumber);
   const [feedback, setFeedback] = useState<string | null>(null);
   const label = season.name ?? `Season ${season.seasonNumber}`;
   const airYear = season.airDate ? season.airDate.slice(0, 4) : null;
   const totalEpisodes = Math.max(
-    progressQuery.data?.totalEpisodes ?? 0,
+    seasonProgress?.totalEpisodes ?? 0,
     season.episodeCount ?? 0,
   );
-  const watchedEpisodes = progressQuery.data?.watchedEpisodes ?? 0;
-  const showProgress = showWatchedControl && totalEpisodes > 0;
+  const watchedEpisodes = seasonProgress?.watchedEpisodes ?? 0;
+  const showProgress = showWatchedControl && progressReady && totalEpisodes > 0;
   const isFullyWatched = getSeasonProgressState(watchedEpisodes, totalEpisodes) === 'completed';
   const canToggleSeason = totalEpisodes > 0;
 
@@ -220,6 +228,13 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
   const { isAuthenticated } = useAuth();
   const [seasonsExpanded, setSeasonsExpanded] = useState(false);
   const tvProgressQuery = useTvShowProgress(tvShowId);
+  const progressBySeason = useMemo(
+    () => buildSeasonProgressMap(tvProgressQuery.data?.seasons),
+    [tvProgressQuery.data?.seasons],
+  );
+  const progressReady =
+    !isAuthenticated ||
+    (!tvProgressQuery.isLoading && !tvProgressQuery.isError && tvProgressQuery.data != null);
 
   const tvProgress = tvProgressQuery.data;
   const watchedEpisodes = tvProgress?.watchedEpisodes ?? 0;
@@ -285,6 +300,8 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
               tvShowId={tvShowId}
               season={season}
               showWatchedControl={isAuthenticated}
+              seasonProgress={progressBySeason.get(season.seasonNumber)}
+              progressReady={progressReady}
             />
             {index < visibleSeasons.length - 1 || canCollapseSeasons ? (
               <View style={[styles.separator, { marginLeft: separatorInset }]} />
