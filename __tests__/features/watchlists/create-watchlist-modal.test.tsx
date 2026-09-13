@@ -1,3 +1,4 @@
+import { TextInput } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { CreateWatchlistModal } from '@/features/watchlists/components/CreateWatchlistModal';
 import { useCreateWatchlistForLibrary } from '@/features/watchlists/hooks/useWatchlistMutations';
@@ -12,11 +13,29 @@ describe('CreateWatchlistModal', () => {
   const onCreated = jest.fn();
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
     (useCreateWatchlistForLibrary as jest.Mock).mockReturnValue({
       mutate,
       isPending: false,
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('focuses the name input when opened', () => {
+    const focusSpy = jest.spyOn(TextInput.prototype, 'focus').mockImplementation(jest.fn());
+
+    render(
+      <CreateWatchlistModal visible onClose={onClose} onCreated={onCreated} />,
+    );
+
+    jest.advanceTimersByTime(280);
+
+    expect(focusSpy).toHaveBeenCalled();
+    focusSpy.mockRestore();
   });
 
   it('shows validation feedback for empty name', () => {

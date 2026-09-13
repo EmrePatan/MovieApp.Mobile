@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -9,7 +10,10 @@ interface AppInputProps extends TextInputProps {
   error?: string;
 }
 
-export function AppInput({ label, error, style, ...props }: AppInputProps) {
+export const AppInput = forwardRef<TextInput, AppInputProps>(function AppInput(
+  { label, error, style, ...props },
+  ref,
+) {
   const inputId = props.nativeID ?? label.toLowerCase().replace(/\s+/g, '-');
 
   return (
@@ -18,6 +22,7 @@ export function AppInput({ label, error, style, ...props }: AppInputProps) {
         {label}
       </AppText>
       <TextInput
+        ref={ref}
         accessibilityLabel={label}
         nativeID={inputId}
         placeholderTextColor={colors.textMuted}
@@ -31,7 +36,7 @@ export function AppInput({ label, error, style, ...props }: AppInputProps) {
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

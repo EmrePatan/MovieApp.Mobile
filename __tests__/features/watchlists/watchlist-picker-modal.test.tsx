@@ -57,7 +57,8 @@ describe('WatchlistPickerModal', () => {
       />,
     );
 
-    expect(screen.getByText('You do not have any watchlists yet.')).toBeTruthy();
+    expect(screen.getByText('No watchlists yet')).toBeTruthy();
+    expect(screen.getByText('Start a new list below.')).toBeTruthy();
   });
 
   it('adds item to selected watchlist', () => {
@@ -75,6 +76,54 @@ describe('WatchlistPickerModal', () => {
       { watchlistId: 'wl-1', isInWatchlist: false },
       expect.any(Object),
     );
+  });
+
+  it('collapses long watchlist lists until expanded', () => {
+    (useWatchlists as jest.Mock).mockReturnValue({
+      data: [
+        { id: 'wl-1', name: 'Action', itemCount: 1, createdAt: '', updatedAt: '' },
+        { id: 'wl-2', name: 'Comedy', itemCount: 2, createdAt: '', updatedAt: '' },
+        { id: 'wl-3', name: 'Drama', itemCount: 3, createdAt: '', updatedAt: '' },
+        { id: 'wl-4', name: 'Sci-Fi', itemCount: 4, createdAt: '', updatedAt: '' },
+      ],
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    render(
+      <WatchlistPickerModal
+        visible
+        contentType="movie"
+        contentId="movie-id"
+        onClose={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Show all 4 lists')).toBeTruthy();
+    expect(screen.getByLabelText('Add to Sci-Fi')).toBeTruthy();
+    expect(screen.getByLabelText('Add to Drama')).toBeTruthy();
+    expect(screen.queryByLabelText('Add to Action')).toBeNull();
+    expect(screen.queryByLabelText('Add to Comedy')).toBeNull();
+
+    fireEvent.press(screen.getByText('Show all 4 lists'));
+    expect(screen.getByLabelText('Add to Action')).toBeTruthy();
+  });
+
+  it('closes when the backdrop is pressed', () => {
+    const onClose = jest.fn();
+
+    render(
+      <WatchlistPickerModal
+        visible
+        contentType="movie"
+        contentId="movie-id"
+        onClose={onClose}
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText('Close watchlist picker'));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('shows error state when watchlists fail to load', () => {

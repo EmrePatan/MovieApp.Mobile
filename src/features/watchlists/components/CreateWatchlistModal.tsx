@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   StyleSheet,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,10 +32,31 @@ export function CreateWatchlistModal({
   onCreated,
 }: CreateWatchlistModalProps) {
   const createWatchlist = useCreateWatchlistForLibrary();
+  const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    const focusTimer = setTimeout(() => {
+      nameInputRef.current?.focus();
+    }, 280);
+
+    return () => {
+      clearTimeout(focusTimer);
+    };
+  }, [visible]);
+
+  const dismissKeyboard = () => {
+    nameInputRef.current?.blur();
+    Keyboard.dismiss();
+  };
+
   const handleClose = () => {
+    dismissKeyboard();
     setName('');
     setFeedback(null);
     onClose();
@@ -45,6 +68,8 @@ export function CreateWatchlistModal({
       setFeedback('Enter a watchlist name.');
       return;
     }
+
+    dismissKeyboard();
 
     createWatchlist.mutate(trimmed, {
       onSuccess: (created) => {
@@ -85,11 +110,15 @@ export function CreateWatchlistModal({
             />
 
             <AppInput
+              ref={nameInputRef}
               label="Watchlist name"
               value={name}
               onChangeText={setName}
               placeholder="My Watchlist"
               maxLength={100}
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleCreate}
             />
 
             <AppButton
