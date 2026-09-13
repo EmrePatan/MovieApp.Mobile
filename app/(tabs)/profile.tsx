@@ -7,13 +7,13 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { Screen } from '@/components/common/Screen';
+import { ProfileAnalyticsDashboard } from '@/features/profile/components/ProfileAnalyticsDashboard';
+import { ProfileHero } from '@/features/profile/components/ProfileHero';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
-import { ProfileStatisticsGrid } from '@/features/profile/components/ProfileStatisticsGrid';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileStatistics } from '@/features/profile/hooks/useProfileStatistics';
-import { formatIsoDate } from '@/utils/format';
-import { borderRadius, spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -73,64 +73,27 @@ export default function ProfileScreen() {
           <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
         }
       >
-        <AppText variant="title">Profile</AppText>
+        {profile ? <ProfileHero profile={profile} /> : null}
 
-        <View style={styles.accountCard}>
-          <AppText variant="subtitle">{profile?.displayName ?? 'MovieApp member'}</AppText>
+        {statisticsQuery.isLoading && !statisticsQuery.data ? (
           <AppText variant="bodySmall" muted>
-            {profile?.email ?? '—'}
+            Loading your insights...
           </AppText>
-          {profile?.userName ? (
-            <AppText variant="caption" muted style={styles.username}>
-              @{profile.userName}
-            </AppText>
-          ) : null}
-          {profile?.createdAt ? (
-            <AppText variant="caption" muted>
-              Member since {formatIsoDate(profile.createdAt.slice(0, 10))}
-            </AppText>
-          ) : null}
-        </View>
-
-        <ProfileSection title="Statistics" variant="plain">
-          {statisticsQuery.isLoading && !statisticsQuery.data ? (
-            <AppText variant="bodySmall" muted>
-              Loading statistics...
-            </AppText>
-          ) : statisticsQuery.isError ? (
-            <ErrorView
-              message={
-                isApiError(statisticsQuery.error)
-                  ? statisticsQuery.error.userMessage
-                  : 'Unable to load statistics.'
-              }
-              onRetry={() => void statisticsQuery.refetch()}
-              retryLabel="Retry"
-            />
-          ) : statisticsQuery.data ? (
-            <ProfileStatisticsGrid statistics={statisticsQuery.data} />
-          ) : null}
-        </ProfileSection>
-
-        <ProfileSection title="Library">
-          <ProfileMenuRow
-            label="Favorites"
-            subtitle="Movies and TV shows you saved"
-            onPress={() => router.push('/favorites')}
+        ) : statisticsQuery.isError ? (
+          <ErrorView
+            message={
+              isApiError(statisticsQuery.error)
+                ? statisticsQuery.error.userMessage
+                : 'Unable to load your statistics.'
+            }
+            onRetry={() => void statisticsQuery.refetch()}
+            retryLabel="Retry"
           />
-          <ProfileMenuRow
-            label="Watchlists"
-            subtitle="Your personal lists"
-            onPress={() => router.push('/(tabs)/watchlist')}
-          />
-          <ProfileMenuRow
-            label="Watch History"
-            subtitle="Recently watched content"
-            onPress={() => router.push('/watch-history')}
-          />
-        </ProfileSection>
+        ) : statisticsQuery.data ? (
+          <ProfileAnalyticsDashboard statistics={statisticsQuery.data} />
+        ) : null}
 
-        <ProfileSection title="Account Settings">
+        <ProfileSection title="Account">
           <ProfileMenuRow
             label="Edit profile"
             onPress={() => router.push('/profile/edit')}
@@ -158,19 +121,8 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    gap: spacing.lg,
+    gap: spacing.xl,
     paddingBottom: spacing.xxl,
-  },
-  accountCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    gap: spacing.xs,
-  },
-  username: {
-    marginTop: spacing.xs,
   },
   loadingContainer: {
     flex: 1,

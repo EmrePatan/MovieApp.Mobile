@@ -23,12 +23,14 @@ import type {
   SeasonWatchedEpisodesResponse,
   TvShowWatchProgressResponse,
 } from '../types';
+import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { calculateSeasonProgressPercentage } from '../utils/season-progress';
 
 export function invalidateHomeQueries(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: ['home'] });
   invalidateRecommendationQueries(queryClient);
+  invalidateProfileStatistics(queryClient);
 }
 
 export function invalidateRecentWatchHistory(queryClient: ReturnType<typeof useQueryClient>) {

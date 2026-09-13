@@ -24,7 +24,7 @@ interface ProfileMenuRowProps {
   label: string;
   subtitle?: string;
   destructive?: boolean;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function ProfileMenuRow({
@@ -33,13 +33,8 @@ export function ProfileMenuRow({
   destructive = false,
   onPress,
 }: ProfileMenuRowProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-    >
+  const content = (
+    <>
       <View style={styles.rowText}>
         <AppText variant="body" style={destructive ? styles.destructive : undefined}>
           {label}
@@ -50,11 +45,32 @@ export function ProfileMenuRow({
           </AppText>
         ) : null}
       </View>
-      <Ionicons
-        name="chevron-forward"
-        size={18}
-        color={destructive ? colors.error : colors.textMuted}
-      />
+      {onPress ? (
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color={destructive ? colors.error : colors.textMuted}
+        />
+      ) : null}
+    </>
+  );
+
+  if (!onPress) {
+    return (
+      <View style={styles.row} accessibilityRole="text" accessibilityLabel={label}>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+    >
+      {content}
     </Pressable>
   );
 }

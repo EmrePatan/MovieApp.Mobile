@@ -14,8 +14,13 @@ export function buildChangePasswordPath(): string {
   return '/api/users/me/password';
 }
 
-export function buildProfileStatisticsPath(): string {
-  return '/api/users/me/statistics';
+export function buildProfileStatisticsPath(timeZone?: string): string {
+  if (!timeZone) {
+    return '/api/users/me/statistics';
+  }
+
+  const params = new URLSearchParams({ timeZone });
+  return `/api/users/me/statistics?${params.toString()}`;
 }
 
 export function buildDeleteAccountPath(): string {

@@ -16,6 +16,10 @@ import {
 } from '@/features/profile/api/profile-api';
 import { api } from '@/api/client';
 
+jest.mock('@/features/profile/utils/profile-timezone', () => ({
+  getProfileStatisticsTimeZone: () => 'Europe/Istanbul',
+}));
+
 jest.mock('@/api/client', () => ({
   api: {
     get: jest.fn(),
@@ -45,7 +49,9 @@ describe('profile api client', () => {
     await getCurrentProfile();
     await getProfileStatistics();
     expect(api.get).toHaveBeenCalledWith('/api/users/me', { signal: undefined });
-    expect(api.get).toHaveBeenCalledWith('/api/users/me/statistics', { signal: undefined });
+    expect(api.get).toHaveBeenCalledWith('/api/users/me/statistics?timeZone=Europe%2FIstanbul', {
+      signal: undefined,
+    });
   });
 
   it('updates profile', async () => {

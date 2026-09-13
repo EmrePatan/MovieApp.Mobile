@@ -7,6 +7,7 @@ import {
   buildProfileStatisticsPath,
   buildUpdateProfilePath,
 } from './routes';
+import { getProfileStatisticsTimeZone } from '../utils/profile-timezone';
 import type {
   ChangeEmailRequest,
   ChangePasswordRequest,
@@ -42,7 +43,8 @@ export async function changePassword(
 export async function getProfileStatistics(
   signal?: AbortSignal,
 ): Promise<UserStatisticsResponse> {
-  return api.get<UserStatisticsResponse>(buildProfileStatisticsPath(), { signal });
+  const timeZone = getProfileStatisticsTimeZone();
+  return api.get<UserStatisticsResponse>(buildProfileStatisticsPath(timeZone), { signal });
 }
 
 export async function deleteAccount(payload: DeleteAccountRequest): Promise<void> {

@@ -10,6 +10,7 @@ import {
   favoritesInfiniteQueryKey,
   favoritesListQueryKey,
 } from './favorite-query-keys';
+import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { removeFavoriteFromCache } from '@/features/library/utils/optimistic-favorites-cache';
 import type { FavoriteContentType } from '../types';
@@ -23,6 +24,7 @@ function invalidateFavoriteQueries(
   void queryClient.invalidateQueries({ queryKey: favoriteStatusQueryKey(contentType, contentId) });
   void queryClient.invalidateQueries({ queryKey: ['favorites'] });
   invalidateRecommendationQueries(queryClient);
+  invalidateProfileStatistics(queryClient);
 }
 
 export function invalidateAllFavoriteListQueries(

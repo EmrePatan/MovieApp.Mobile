@@ -7,7 +7,7 @@ import {
   updateMovieReview,
   updateTvReview,
 } from '../api/reviews-api';
-import { profileStatisticsQueryKey } from '@/features/profile/hooks/profile-query-keys';
+import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import {
   movieMyReviewQueryKey,
   tvMyReviewQueryKey,
@@ -28,12 +28,6 @@ export function invalidateReviewQueries(
 
   void queryClient.invalidateQueries({ queryKey: tvMyReviewQueryKey(contentId) });
   void queryClient.invalidateQueries({ queryKey: ['reviews', 'tv', contentId] });
-}
-
-export function invalidateProfileStatistics(
-  queryClient: ReturnType<typeof useQueryClient>,
-) {
-  void queryClient.invalidateQueries({ queryKey: profileStatisticsQueryKey() });
 }
 
 export function useCreateReviewMutation(contentType: ReviewContentType, contentId: string) {

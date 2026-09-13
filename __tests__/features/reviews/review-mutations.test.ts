@@ -1,8 +1,6 @@
-import {
-  invalidateProfileStatistics,
-  invalidateReviewQueries,
-} from '@/features/reviews/hooks/useReviewMutations';
+import { invalidateReviewQueries } from '@/features/reviews/hooks/useReviewMutations';
 import { profileStatisticsQueryKey } from '@/features/profile/hooks/profile-query-keys';
+import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import {
   movieMyReviewQueryKey,
   tvMyReviewQueryKey,

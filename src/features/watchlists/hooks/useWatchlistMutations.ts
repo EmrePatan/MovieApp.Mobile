@@ -13,6 +13,7 @@ import {
   watchlistQueryKey,
   watchlistsQueryKey,
 } from './watchlist-query-keys';
+import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { removeWatchlistItemFromCache } from '@/features/library/utils/optimistic-watchlist-cache';
 import type { WatchlistContentType } from '../types';
@@ -49,6 +50,7 @@ function invalidateWatchlistQueries(
   invalidateAllWatchlistItemQueries(queryClient, watchlistId);
   invalidateWatchlistMembership(queryClient, contentType, contentId);
   invalidateRecommendationQueries(queryClient);
+  invalidateProfileStatistics(queryClient);
 }
 
 export function useCreateWatchlist(
@@ -72,6 +74,7 @@ export function useCreateWatchlistForLibrary() {
     mutationFn: (name: string) => createWatchlist(name),
     onSuccess: () => {
       invalidateAllWatchlistItemQueries(queryClient);
+      invalidateProfileStatistics(queryClient);
     },
   });
 }
