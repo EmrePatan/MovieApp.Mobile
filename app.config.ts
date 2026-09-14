@@ -17,10 +17,13 @@ const config: ExpoConfig = {
     backgroundColor: '#0A0A0F',
   },
   ios: {
-    supportsTablet: true,
-    bundleIdentifier: 'com.movieapp.mobile',
-    buildNumber: '1',
+  supportsTablet: true,
+  bundleIdentifier: 'com.movieapp.mobile',
+  buildNumber: '1',
+  infoPlist: {
+    ITSAppUsesNonExemptEncryption: false,
   },
+},
   android: {
     adaptiveIcon: {
       backgroundColor: '#0A0A0F',
@@ -40,8 +43,11 @@ const config: ExpoConfig = {
   extra: {
     appEnv: process.env.EXPO_PUBLIC_APP_ENV ?? 'development',
     eas: {
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
-    },
+    projectId:
+      process.env.EAS_PROJECT_ID ??
+      process.env.EXPO_PUBLIC_EAS_PROJECT_ID ??
+      '87854bea-c475-4d4d-85f2-dfc1ecb52997',
+  },
     router: {
       origin: false,
     },
