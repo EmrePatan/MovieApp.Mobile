@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
-import type { Router } from 'expo-router';
+import type { ImperativeRouter } from 'expo-router';
 import { buildCatalogDetailRoute } from '../routes';
 import { prefetchCatalogDetail } from './prefetch-catalog-detail';
 
@@ -58,7 +58,7 @@ export function isRootCatalogDetailRoute(segments: readonly string[]): boolean {
 
 
 export function openCatalogDetailFromTab(
-  router: Router,
+  router: ImperativeRouter,
   id: string,
   type: 'movie' | 'tv',
   origin: CatalogDetailTabOrigin,
@@ -81,7 +81,7 @@ export function openCatalogDetailFromTab(
 
 
 
-export function returnToCatalogDetailOrigin(router: Router): void {
+export function returnToCatalogDetailOrigin(router: ImperativeRouter): void {
 
   const href = lastCatalogDetailOrigin
 
