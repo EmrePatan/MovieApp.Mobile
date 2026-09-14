@@ -1,0 +1,62 @@
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
+import type { UpcomingCatalogItem } from '../types';
+import { UpcomingCard } from './UpcomingCard';
+import { useUpcomingCatalog } from '../hooks/useUpcomingCatalog';
+import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
+import { spacing } from '@/theme/spacing';
+
+interface UpcomingSectionProps {
+  onItemPress?: (item: UpcomingCatalogItem) => void;
+}
+
+export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
+  const upcomingQuery = useUpcomingCatalog();
+  const items = upcomingQuery.data?.pages[0]?.items ?? [];
+
+  if (upcomingQuery.isLoading) {
+    return (
+      <View style={styles.container}>
+        <HomeSectionHeader title="Upcoming" />
+        <View style={styles.loading}>
+          <ActivityIndicator color={colors.accent} />
+        </View>
+      </View>
+    );
+  }
+
+  if (upcomingQuery.isError || items.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      <HomeSectionHeader title="Upcoming" />
+      <FlatList
+        horizontal
+        data={items}
+        keyExtractor={(item) => `${item.type}-${item.id}`}
+        renderItem={({ item }) => <UpcomingCard item={item} onPress={onItemPress} />}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        initialNumToRender={layout.horizontalList.initialNumToRender}
+        maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
+        windowSize={layout.horizontalList.windowSize}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: layout.sectionGap,
+  },
+  listContent: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
+  },
+  loading: {
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+});

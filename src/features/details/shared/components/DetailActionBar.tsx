@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { FavoriteButton } from '@/features/favorites/components/FavoriteButton';
 import { FollowButton } from '@/features/follows/components/FollowButton';
+import { MovieFollowButton } from '@/features/follows/components/MovieFollowButton';
 import { AddToWatchlistButton } from '@/features/watchlists/components/AddToWatchlistButton';
 import { WatchedButton } from '@/features/watch-history/components/WatchedButton';
 import type { FavoriteContentType } from '@/features/favorites/types';
@@ -10,12 +11,14 @@ interface DetailActionBarProps {
   contentType: FavoriteContentType;
   contentId: string;
   showWatched?: boolean;
+  releaseDate?: string | null;
 }
 
 export function DetailActionBar({
   contentType,
   contentId,
   showWatched = false,
+  releaseDate,
 }: DetailActionBarProps) {
   const watchedTarget =
     contentType === 'movie'
@@ -30,6 +33,9 @@ export function DetailActionBar({
         <>
           <WatchedButton target={watchedTarget} variant="detail" />
           {contentType === 'tv' ? <FollowButton tvShowId={contentId} /> : null}
+          {contentType === 'movie' ? (
+            <MovieFollowButton movieId={contentId} releaseDate={releaseDate} />
+          ) : null}
         </>
       ) : null}
     </View>

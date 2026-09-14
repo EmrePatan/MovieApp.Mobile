@@ -18,9 +18,13 @@ import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { DiscoveryKindControl } from '@/features/discovery/components/DiscoveryKindControl';
 import { useDiscoveryResults } from '@/features/discovery/hooks/useDiscovery';
 import type { DiscoveryKind, DiscoveryTypeFilter } from '@/features/discovery/types';
+import { FollowingSection } from '@/features/following/components/FollowingSection';
+import type { FollowingCatalogItem } from '@/features/following/types';
 import { RecommendationSection } from '@/features/recommendations/components/RecommendationSection';
 import { useRecommendationHome } from '@/features/recommendations/hooks/useRecommendationHome';
 import type { RecommendationItem } from '@/features/recommendations/types';
+import { UpcomingSection } from '@/features/upcoming/components/UpcomingSection';
+import type { UpcomingCatalogItem } from '@/features/upcoming/types';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
@@ -53,6 +57,20 @@ export default function DiscoverScreen() {
 
   const handleRecommendationPress = useCallback(
     (item: RecommendationItem) => {
+      router.push(buildCatalogDetailRoute(item.id, item.type));
+    },
+    [router],
+  );
+
+  const handleFollowingPress = useCallback(
+    (item: FollowingCatalogItem) => {
+      router.push(buildCatalogDetailRoute(item.id, item.type));
+    },
+    [router],
+  );
+
+  const handleUpcomingPress = useCallback(
+    (item: UpcomingCatalogItem) => {
       router.push(buildCatalogDetailRoute(item.id, item.type));
     },
     [router],
@@ -111,6 +129,8 @@ export default function DiscoverScreen() {
           />
         </View>
       ) : null}
+      {isAuthenticated ? <FollowingSection onItemPress={handleFollowingPress} /> : null}
+      <UpcomingSection onItemPress={handleUpcomingPress} />
       {isAuthenticated
         ? recommendationSections.map((section) => (
             <RecommendationSection

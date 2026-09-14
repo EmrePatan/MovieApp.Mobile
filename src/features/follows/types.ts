@@ -1,3 +1,7 @@
+export interface MovieFollowStatusResponse {
+  isFollowing: boolean;
+}
+
 export interface TvShowFollowStatusResponse {
   isFollowing: boolean;
   notifyNewSeasons: boolean;

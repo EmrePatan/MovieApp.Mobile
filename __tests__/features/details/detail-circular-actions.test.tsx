@@ -64,6 +64,14 @@ jest.mock('@/features/follows/components/FollowButton', () => {
   };
 });
 
+jest.mock('@/features/follows/components/MovieFollowButton', () => {
+  const { Text } = require('react-native');
+
+  return {
+    MovieFollowButton: () => <Text>MovieFollow</Text>,
+  };
+});
+
 describe('DetailActionBar premium circular actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
