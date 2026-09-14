@@ -29,7 +29,7 @@ export function DetailActionBar({
       {showWatched ? (
         <>
           <WatchedButton target={watchedTarget} variant="detail" />
-          <FollowButton tvShowId={contentId} />
+          {contentType === 'tv' ? <FollowButton tvShowId={contentId} /> : null}
         </>
       ) : null}
     </View>

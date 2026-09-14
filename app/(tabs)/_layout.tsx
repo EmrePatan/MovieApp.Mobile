@@ -59,6 +59,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen name="movie" options={{ href: null }} />
       <Tabs.Screen name="tv/[id]" options={{ href: null }} />
+      <Tabs.Screen name="person/[tmdbId]" options={{ href: null }} />
     </Tabs>
   );
 }

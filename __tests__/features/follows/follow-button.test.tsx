@@ -52,10 +52,6 @@ describe('FollowButton', () => {
       mutate: mockUpdateMutate,
       isPending: false,
     });
-    (useUpdateTvShowFollow as jest.Mock).mockReturnValue({
-      mutate: mockUpdateMutate,
-      isPending: false,
-    });
     (useRemoveTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockRemoveMutate,
       isPending: false,
@@ -63,7 +59,7 @@ describe('FollowButton', () => {
     (ensurePushDeviceRegisteredAsync as jest.Mock).mockResolvedValue('registered');
   });
 
-  it('creates follow when inactive button is tapped', () => {
+  it('opens the modal without creating a follow when inactive button is tapped', () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: {
         isFollowing: false,
@@ -77,7 +73,8 @@ describe('FollowButton', () => {
     render(<FollowButton tvShowId={tvShowId} />);
     fireEvent.press(screen.getByLabelText('Follow this show'));
 
-    expect(mockCreateMutate).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Follow this show')).toBeTruthy();
+    expect(mockCreateMutate).not.toHaveBeenCalled();
   });
 
   it('shows active state when following', () => {
@@ -99,7 +96,7 @@ describe('FollowButton', () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: {
         isFollowing: true,
-        notifyNewSeasons: true,
+        notifyNewSeasons: false,
         notifyNewEpisodes: true,
         baselineEstablished: true,
       },
@@ -110,9 +107,11 @@ describe('FollowButton', () => {
     fireEvent.press(screen.getByLabelText('Manage follow'));
 
     expect(screen.getByText('Follow preferences')).toBeTruthy();
+    expect(screen.getByLabelText('New seasons').props.accessibilityState?.checked).toBe(false);
+    expect(screen.getByLabelText('New episodes').props.accessibilityState?.checked).toBe(true);
   });
 
-  it('registers push device after successful follow when permission granted', async () => {
+  it('registers push device after successful follow confirmation', async () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: {
         isFollowing: false,
@@ -129,13 +128,21 @@ describe('FollowButton', () => {
 
     render(<FollowButton tvShowId={tvShowId} />);
     fireEvent.press(screen.getByLabelText('Follow this show'));
+    fireEvent.press(screen.getByText('Follow show'));
 
     await waitFor(() => {
+      expect(mockCreateMutate).toHaveBeenCalledWith(
+        {
+          notifyNewSeasons: true,
+          notifyNewEpisodes: true,
+        },
+        expect.any(Object),
+      );
       expect(ensurePushDeviceRegisteredAsync).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('keeps follow active when permission is denied', async () => {
+  it('keeps follow active when permission is denied after confirmation', async () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: {
         isFollowing: false,
@@ -152,6 +159,7 @@ describe('FollowButton', () => {
 
     render(<FollowButton tvShowId={tvShowId} />);
     fireEvent.press(screen.getByLabelText('Follow this show'));
+    fireEvent.press(screen.getByText('Follow show'));
 
     await waitFor(() => {
       expect(
@@ -162,7 +170,7 @@ describe('FollowButton', () => {
     });
   });
 
-  it('does not request permission again while create mutation is pending', () => {
+  it('does not register push when follow is confirmed with both options off', async () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: {
         isFollowing: false,
@@ -172,46 +180,28 @@ describe('FollowButton', () => {
       },
       isLoading: false,
     });
-    (useCreateTvShowFollow as jest.Mock).mockReturnValue({
-      mutate: mockCreateMutate,
-      isPending: true,
-    });
 
     render(<FollowButton tvShowId={tvShowId} />);
     fireEvent.press(screen.getByLabelText('Follow this show'));
+    fireEvent.press(screen.getByLabelText('New seasons'));
+    fireEvent.press(screen.getByLabelText('New episodes'));
+    fireEvent.press(screen.getByText('Follow show'));
 
-    expect(mockCreateMutate).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockCreateMutate).not.toHaveBeenCalled();
+      expect(mockRemoveMutate).not.toHaveBeenCalled();
+      expect(ensurePushDeviceRegisteredAsync).not.toHaveBeenCalled();
+    });
   });
 
-  it('shows baseline failure message on 503 without activating follow', () => {
+  it('does not call create while follow status is loading', () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
-      data: {
-        isFollowing: false,
-        notifyNewSeasons: true,
-        notifyNewEpisodes: true,
-        baselineEstablished: false,
-      },
-      isLoading: false,
-    });
-
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onError?.(
-        new ApiError({
-          kind: 'server',
-          status: 503,
-          title: 'Service unavailable',
-          detail: null,
-          userMessage: 'Service unavailable',
-          message: 'Service unavailable',
-        }),
-      );
+      data: undefined,
+      isLoading: true,
     });
 
     render(<FollowButton tvShowId={tvShowId} />);
-    fireEvent.press(screen.getByLabelText('Follow this show'));
 
-    expect(
-      screen.getByText('Could not finish follow setup right now. Please try again.'),
-    ).toBeTruthy();
+    expect(screen.getByLabelText('Follow this show').props.accessibilityState?.busy).toBe(true);
   });
 });

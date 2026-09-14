@@ -47,9 +47,13 @@ jest.mock('@/features/watchlists/hooks/useWatchlists', () => ({
   useWatchlistMembership: jest.fn(),
 }));
 
-jest.mock('@/features/follows/components/FollowButton', () => ({
-  FollowButton: () => null,
-}));
+jest.mock('@/features/follows/components/FollowButton', () => {
+  const { Text } = require('react-native');
+
+  return {
+    FollowButton: () => <Text>Follow</Text>,
+  };
+});
 
 jest.mock('@/features/watchlists/components/WatchlistPickerModal', () => ({
   WatchlistPickerModal: () => null,
@@ -93,6 +97,14 @@ describe('TV Detail watched action', () => {
   it('shows Watched on TV detail action row', () => {
     setupProgress();
     render(<DetailActionBar contentType="tv" contentId={tvShowId} showWatched />);
+    expect(screen.getByText('Watched')).toBeTruthy();
+  });
+
+  it('renders Follow on TV detail action row', () => {
+    setupProgress();
+    render(<DetailActionBar contentType="tv" contentId={tvShowId} showWatched />);
+
+    expect(screen.getByText('Follow')).toBeTruthy();
     expect(screen.getByText('Watched')).toBeTruthy();
   });
 

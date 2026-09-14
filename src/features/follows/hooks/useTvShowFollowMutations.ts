@@ -7,13 +7,7 @@ export function useCreateTvShowFollow(tvShowId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
-      const request: UpsertTvShowFollowRequest = {
-        notifyNewSeasons: true,
-        notifyNewEpisodes: true,
-      };
-      return upsertTvShowFollow(tvShowId, request);
-    },
+    mutationFn: (request: UpsertTvShowFollowRequest) => upsertTvShowFollow(tvShowId, request),
     onSuccess: (status) => {
       queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
     },

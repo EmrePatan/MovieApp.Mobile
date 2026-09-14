@@ -1,5 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { ImperativeRouter } from 'expo-router';
+import { getMovieDetailsByTmdbId } from '../../movie/api/movie-api';
+import { getTvShowDetailsByTmdbId } from '../../tv/api/tv-api';
+import type { PersonFilmographyEntry } from '../../person/types';
 import { buildCatalogDetailRoute } from '../routes';
 import { prefetchCatalogDetail } from './prefetch-catalog-detail';
 
@@ -56,6 +59,33 @@ export function isRootCatalogDetailRoute(segments: readonly string[]): boolean {
 }
 
 
+
+export async function openCatalogDetailFromFilmography(
+  router: ImperativeRouter,
+  entry: PersonFilmographyEntry,
+  options?: OpenCatalogDetailOptions,
+): Promise<string> {
+  if (entry.catalogId) {
+    const href = buildCatalogDetailRoute(entry.catalogId, entry.mediaType);
+    if (options?.queryClient) {
+      prefetchCatalogDetail(options.queryClient, entry.catalogId, entry.mediaType);
+    }
+
+    router.push(href);
+    return entry.catalogId;
+  }
+
+  const details = entry.mediaType === 'movie'
+    ? await getMovieDetailsByTmdbId(entry.tmdbId)
+    : await getTvShowDetailsByTmdbId(entry.tmdbId);
+
+  if (options?.queryClient) {
+    prefetchCatalogDetail(options.queryClient, details.id, entry.mediaType);
+  }
+
+  router.push(buildCatalogDetailRoute(details.id, entry.mediaType));
+  return details.id;
+}
 
 export function openCatalogDetailFromTab(
   router: ImperativeRouter,

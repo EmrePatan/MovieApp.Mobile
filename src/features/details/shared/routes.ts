@@ -6,8 +6,16 @@ export function buildMovieDetailsPath(id: string): string {
   return `/api/movies/${encodePathSegment(id)}`;
 }
 
+export function buildMovieDetailsByTmdbPath(tmdbId: number): string {
+  return `/api/movies/tmdb/${encodePathSegment(tmdbId)}`;
+}
+
 export function buildTvShowDetailsPath(id: string): string {
   return `/api/tvshows/${encodePathSegment(id)}`;
+}
+
+export function buildTvShowDetailsByTmdbPath(tmdbId: number): string {
+  return `/api/tvshows/tmdb/${encodePathSegment(tmdbId)}`;
 }
 
 export function buildSeasonPath(tvShowId: string, seasonNumber: number): string {
@@ -43,6 +51,10 @@ export function buildCatalogDetailRoute(
   type: 'movie' | 'tv',
 ): string {
   return type === 'movie' ? buildMovieDetailRoute(id) : buildTvDetailRoute(id);
+}
+
+export function buildPersonDetailRoute(tmdbId: number): string {
+  return `/person/${encodePathSegment(tmdbId)}`;
 }
 
 export function isValidGuid(value: string | undefined): boolean {

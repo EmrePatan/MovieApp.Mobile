@@ -56,9 +56,13 @@ jest.mock('@/features/watchlists/components/WatchlistPickerModal', () => ({
   WatchlistPickerModal: () => null,
 }));
 
-jest.mock('@/features/follows/components/FollowButton', () => ({
-  FollowButton: () => null,
-}));
+jest.mock('@/features/follows/components/FollowButton', () => {
+  const { Text } = require('react-native');
+
+  return {
+    FollowButton: () => <Text>Follow</Text>,
+  };
+});
 
 describe('DetailActionBar premium circular actions', () => {
   beforeEach(() => {
@@ -95,5 +99,12 @@ describe('DetailActionBar premium circular actions', () => {
     render(<DetailActionBar contentType="movie" contentId="movie-id" showWatched />);
 
     expect(screen.getByLabelText('Add to favorites').props.accessibilityState.busy).toBe(true);
+  });
+
+  it('does not render Follow on movie detail', () => {
+    render(<DetailActionBar contentType="movie" contentId="movie-id" showWatched />);
+
+    expect(screen.queryByText('Follow')).toBeNull();
+    expect(screen.getByText('Watched')).toBeTruthy();
   });
 });

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
@@ -9,11 +9,20 @@ import { spacing } from '@/theme/spacing';
 interface CastRailItemProps {
   member: CastMember;
   size: number;
+  onPress?: (member: CastMember) => void;
 }
 
-export function CastRailItem({ member, size }: CastRailItemProps) {
+export function CastRailItem({ member, size, onPress }: CastRailItemProps) {
+  const isPressable = Boolean(onPress && member.providerPersonId != null);
+
   return (
-    <View style={[styles.item, { width: size + spacing.sm }]} accessibilityRole="text">
+    <Pressable
+      style={[styles.item, { width: size + spacing.sm }]}
+      accessibilityRole={isPressable ? 'button' : 'text'}
+      accessibilityLabel={isPressable ? `View ${member.name}` : undefined}
+      disabled={!isPressable}
+      onPress={() => onPress?.(member)}
+    >
       <View style={[styles.portrait, { width: size, height: size, borderRadius: size / 2 }]}>
         {member.profileImagePath ? (
           <CatalogImage
@@ -37,7 +46,7 @@ export function CastRailItem({ member, size }: CastRailItemProps) {
           {member.character}
         </AppText>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 

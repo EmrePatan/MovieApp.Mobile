@@ -1,8 +1,12 @@
+import { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { useMovieCredits, useTvShowCredits } from '../hooks/useCredits';
+import { buildPersonDetailRoute } from '@/features/details/shared/routes';
+import type { CastMember } from '../types';
 import { CastRailItem } from './CastRailItem';
 import { spacing } from '@/theme/spacing';
 
@@ -15,9 +19,21 @@ interface CastRailProps {
 }
 
 export function CastRail({ contentType, contentId }: CastRailProps) {
+  const router = useRouter();
   const movieQuery = useMovieCredits(contentType === 'movie' ? contentId : '');
   const tvQuery = useTvShowCredits(contentType === 'tv' ? contentId : '');
   const query = contentType === 'movie' ? movieQuery : tvQuery;
+
+  const handleCastPress = useCallback(
+    (member: CastMember) => {
+      if (member.providerPersonId == null) {
+        return;
+      }
+
+      router.push(buildPersonDetailRoute(member.providerPersonId));
+    },
+    [router],
+  );
 
   if (query.isLoading) {
     return (
@@ -59,6 +75,7 @@ export function CastRail({ contentType, contentId }: CastRailProps) {
             key={`${member.providerPersonId ?? member.name}-${index}`}
             member={member}
             size={PORTRAIT_SIZE}
+            onPress={handleCastPress}
           />
         ))}
       </ScrollView>
