@@ -10,7 +10,8 @@ import FavoritesScreen from '../../../app/favorites';
 const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, navigate: jest.fn() }),
+  useSegments: jest.fn(() => []),
 }));
 
 jest.mock('@/auth/useAuth', () => ({

@@ -1,7 +1,12 @@
+import { useCallback } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
+import {
+  isRootCatalogDetailRoute,
+  returnToCatalogDetailOrigin,
+} from '../navigation/catalog-detail-navigation';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -18,15 +23,25 @@ export function DetailBackButton({
   variant = 'inline',
 }: DetailBackButtonProps) {
   const router = useRouter();
+  const segments = useSegments();
   const accessibilityLabel = label ?? (variant === 'overlay' ? 'Go back' : 'Back');
   const displayLabel = label ?? 'Back';
+
+  const handleBack = useCallback(() => {
+    if (isRootCatalogDetailRoute(segments)) {
+      returnToCatalogDetailOrigin(router);
+      return;
+    }
+
+    router.back();
+  }, [router, segments]);
 
   if (variant === 'overlay') {
     return (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        onPress={() => router.back()}
+        onPress={handleBack}
         style={({ pressed }) => [
           styles.overlayButton,
           { top: topOffset },
@@ -42,7 +57,7 @@ export function DetailBackButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      onPress={() => router.back()}
+      onPress={handleBack}
       style={({ pressed }) => [styles.inlineButton, pressed && styles.pressed]}
     >
       <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />

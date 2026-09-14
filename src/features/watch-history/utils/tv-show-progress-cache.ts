@@ -13,15 +13,34 @@ export function buildSeasonProgressMap(
 
 function recalculateAggregate(
   seasons: TvShowSeasonProgressResponse[],
-): Pick<TvShowWatchProgressResponse, 'seasons' | 'totalEpisodes' | 'watchedEpisodes' | 'progressPercentage'> {
+): Pick<
+  TvShowWatchProgressResponse,
+  | 'seasons'
+  | 'totalEpisodes'
+  | 'watchedEpisodes'
+  | 'progressPercentage'
+  | 'regularTotalEpisodes'
+  | 'regularWatchedEpisodes'
+  | 'isFullyWatched'
+> {
   const totalEpisodes = seasons.reduce((sum, season) => sum + season.totalEpisodes, 0);
   const watchedEpisodes = seasons.reduce((sum, season) => sum + season.watchedEpisodes, 0);
+  const regularSeasons = seasons.filter((season) => season.seasonNumber >= 1);
+  const regularTotalEpisodes = regularSeasons.reduce((sum, season) => sum + season.totalEpisodes, 0);
+  const regularWatchedEpisodes = regularSeasons.reduce(
+    (sum, season) => sum + season.watchedEpisodes,
+    0,
+  );
 
   return {
     seasons,
     totalEpisodes,
     watchedEpisodes,
     progressPercentage: calculateSeasonProgressPercentage(watchedEpisodes, totalEpisodes),
+    regularTotalEpisodes,
+    regularWatchedEpisodes,
+    isFullyWatched:
+      regularTotalEpisodes > 0 && regularWatchedEpisodes >= regularTotalEpisodes,
   };
 }
 
@@ -73,25 +92,36 @@ export function updateTvShowAggregateAllSeasonsWatched(
       return;
     }
 
-    const watchedEpisodes = fullyWatched ? current.totalEpisodes : 0;
+    const seasons = (current.seasons ?? []).map((season) =>
+      season.seasonNumber < 1
+        ? season
+        : {
+            ...season,
+            watchedEpisodes: fullyWatched ? season.totalEpisodes : 0,
+            progressPercentage: fullyWatched
+              ? calculateSeasonProgressPercentage(season.totalEpisodes, season.totalEpisodes)
+              : 0,
+          },
+    );
+
     queryClient.setQueryData<TvShowWatchProgressResponse>(key, {
       ...current,
-      watchedEpisodes,
-      progressPercentage: calculateSeasonProgressPercentage(
-        watchedEpisodes,
-        current.totalEpisodes,
-      ),
+      ...recalculateAggregate(seasons),
     });
     return;
   }
 
-  const seasons = current.seasons.map((season) => ({
-    ...season,
-    watchedEpisodes: fullyWatched ? season.totalEpisodes : 0,
-    progressPercentage: fullyWatched
-      ? calculateSeasonProgressPercentage(season.totalEpisodes, season.totalEpisodes)
-      : 0,
-  }));
+  const seasons = current.seasons.map((season) =>
+    season.seasonNumber < 1
+      ? season
+      : {
+          ...season,
+          watchedEpisodes: fullyWatched ? season.totalEpisodes : 0,
+          progressPercentage: fullyWatched
+            ? calculateSeasonProgressPercentage(season.totalEpisodes, season.totalEpisodes)
+            : 0,
+        },
+  );
 
   queryClient.setQueryData<TvShowWatchProgressResponse>(key, {
     ...current,

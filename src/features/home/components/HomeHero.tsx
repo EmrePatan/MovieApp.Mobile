@@ -1,5 +1,7 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getHomeHeroHeight } from '../utils/home-hero-layout';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { FavoriteButton } from '@/features/favorites/components/FavoriteButton';
@@ -15,23 +17,22 @@ import { interaction } from '@/theme/interaction';
 interface HomeHeroProps {
   item: HomeItem;
   onPress?: (item: HomeItem) => void;
+  heroHeight?: number;
+  embedded?: boolean;
+  favoriteIsFavorited?: boolean;
+  favoriteStatusResolved?: boolean;
+  favoriteStatusPending?: boolean;
 }
 
 const HERO_MORE_INFO_MIN_WIDTH = 160;
 const HERO_MORE_INFO_MAX_WIDTH = 180;
 const HERO_FAVORITE_SIZE = 48;
-const HERO_SCRIM_STRIP_COUNT = 40;
-const HERO_BACKGROUND_RGB = '10, 10, 15';
-
-function buildHeroScrimOpacities(stripCount: number): number[] {
-  return Array.from({ length: stripCount }, (_, index) => {
-    const progress = index / (stripCount - 1);
-    const smoothstep = progress * progress * (3 - 2 * progress);
-    return Math.pow(smoothstep, 1.35) * 0.97;
-  });
-}
-
-const HERO_SCRIM_OPACITIES = buildHeroScrimOpacities(HERO_SCRIM_STRIP_COUNT);
+const HERO_SCRIM_COLORS = [
+  'rgba(10, 10, 15, 0)',
+  'rgba(10, 10, 15, 0.45)',
+  'rgba(10, 10, 15, 0.97)',
+] as const;
+const HERO_SCRIM_LOCATIONS = [0, 0.55, 1] as const;
 
 function HeroPosterFallback({
   uri,
@@ -63,31 +64,43 @@ function HeroMediaPlaceholder({ height }: { height: number }) {
 
 function HeroScrim() {
   return (
-    <View style={styles.scrim} pointerEvents="none">
-      {HERO_SCRIM_OPACITIES.map((opacity, index) => (
-        <View
-          key={index}
-          style={[
-            styles.scrimStrip,
-            { backgroundColor: `rgba(${HERO_BACKGROUND_RGB}, ${opacity})` },
-          ]}
-        />
-      ))}
-    </View>
+    <LinearGradient
+      colors={[...HERO_SCRIM_COLORS]}
+      locations={[...HERO_SCRIM_LOCATIONS]}
+      style={styles.scrim}
+      pointerEvents="none"
+    />
   );
 }
 
 function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): boolean {
-  return previous.item.id === next.item.id && previous.onPress === next.onPress;
+  return (
+    previous.item.id === next.item.id &&
+    previous.item.contentType === next.item.contentType &&
+    previous.onPress === next.onPress &&
+    previous.heroHeight === next.heroHeight &&
+    previous.embedded === next.embedded &&
+    previous.favoriteIsFavorited === next.favoriteIsFavorited &&
+    previous.favoriteStatusResolved === next.favoriteStatusResolved &&
+    previous.favoriteStatusPending === next.favoriteStatusPending
+  );
 }
 
-export const HomeHero = memo(function HomeHero({ item, onPress }: HomeHeroProps) {
+export const HomeHero = memo(function HomeHero({
+  item,
+  onPress,
+  heroHeight: heroHeightProp,
+  embedded = false,
+  favoriteIsFavorited,
+  favoriteStatusResolved = false,
+  favoriteStatusPending = false,
+}: HomeHeroProps) {
   const { width } = useWindowDimensions();
   const [posterFailed, setPosterFailed] = useState(false);
 
   const heroHeight = useMemo(
-    () => Math.round(Math.min(520, Math.max(340, width * 0.68))),
-    [width],
+    () => heroHeightProp ?? getHomeHeroHeight(width),
+    [heroHeightProp, width],
   );
 
   const moreInfoWidth = useMemo(
@@ -120,34 +133,41 @@ export const HomeHero = memo(function HomeHero({ item, onPress }: HomeHeroProps)
     .filter(Boolean)
     .join(', ');
 
-  const handleMoreInfo = useCallback(() => {
+  const handleHeroPress = useCallback(() => {
     onPress?.(item);
   }, [item, onPress]);
 
   return (
     <View
-      style={styles.container}
+      style={[styles.container, embedded && styles.containerEmbedded]}
       accessibilityRole="summary"
       accessibilityLabel={accessibilityLabel}
     >
       <View style={[styles.mediaShell, { height: heroHeight }]}>
         <View style={[styles.mediaContainer, { height: heroHeight }]}>
-          {hasBackdrop ? (
-            <BackdropImage path={item.backdropUrl} height={heroHeight} />
-          ) : showPosterFallback ? (
-            <HeroPosterFallback
-              uri={posterUri!}
-              height={heroHeight}
-              onError={() => setPosterFailed(true)}
-            />
-          ) : (
-            <HeroMediaPlaceholder height={heroHeight} />
-          )}
-          <HeroScrim />
-          <View style={styles.layout}>
-            <View style={styles.contentSpacer} />
-            <View style={[styles.content, { paddingBottom: contentPaddingBottom }]}>
-              <View style={styles.contentBlock}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Open ${item.title}`}
+            onPress={handleHeroPress}
+            style={[styles.mediaPressable, { height: heroHeight }]}
+          >
+            {hasBackdrop ? (
+              <BackdropImage path={item.backdropUrl} height={heroHeight} />
+            ) : showPosterFallback ? (
+              <HeroPosterFallback
+                uri={posterUri!}
+                height={heroHeight}
+                onError={() => setPosterFailed(true)}
+              />
+            ) : (
+              <HeroMediaPlaceholder height={heroHeight} />
+            )}
+            <HeroScrim />
+          </Pressable>
+          <View style={styles.layout} pointerEvents="box-none">
+            <View style={styles.contentSpacer} pointerEvents="none" />
+            <View style={[styles.content, { paddingBottom: contentPaddingBottom }]} pointerEvents="box-none">
+              <View style={styles.contentBlock} pointerEvents="none">
                 <HomeHeroMetadata
                   contentType={item.contentType}
                   releaseDate={item.releaseDate}
@@ -156,28 +176,31 @@ export const HomeHero = memo(function HomeHero({ item, onPress }: HomeHeroProps)
                 <AppText variant="title" numberOfLines={2} style={styles.title}>
                   {item.title}
                 </AppText>
-                <View style={styles.actions}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`More info about ${item.title}`}
-                    onPress={handleMoreInfo}
-                    style={({ pressed }) => [
-                      styles.moreInfoButton,
-                      { width: moreInfoWidth },
-                      pressed && styles.moreInfoPressed,
-                    ]}
-                  >
-                    <AppText variant="bodySmall" style={styles.moreInfoLabel}>
-                      More Info
-                    </AppText>
-                  </Pressable>
-                  <View style={styles.favoriteWrap}>
-                    <FavoriteButton
-                      contentType={item.contentType}
-                      contentId={item.id}
-                      size={HERO_FAVORITE_SIZE}
-                    />
-                  </View>
+              </View>
+              <View style={styles.actions}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`More info about ${item.title}`}
+                  onPress={handleHeroPress}
+                  style={({ pressed }) => [
+                    styles.moreInfoButton,
+                    { width: moreInfoWidth },
+                    pressed && styles.moreInfoPressed,
+                  ]}
+                >
+                  <AppText variant="bodySmall" style={styles.moreInfoLabel}>
+                    More Info
+                  </AppText>
+                </Pressable>
+                <View style={styles.favoriteWrap}>
+                  <FavoriteButton
+                    contentType={item.contentType}
+                    contentId={item.id}
+                    size={HERO_FAVORITE_SIZE}
+                    favoriteIsFavorited={favoriteIsFavorited}
+                    favoriteStatusResolved={favoriteStatusResolved}
+                    favoriteStatusPending={favoriteStatusPending}
+                  />
                 </View>
               </View>
             </View>
@@ -192,6 +215,9 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.sm,
   },
+  containerEmbedded: {
+    marginBottom: 0,
+  },
   mediaShell: {
     width: '100%',
     backgroundColor: colors.background,
@@ -200,6 +226,9 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'hidden',
     backgroundColor: colors.surfaceElevated,
+  },
+  mediaPressable: {
+    width: '100%',
   },
   media: {
     width: '100%',
@@ -212,9 +241,6 @@ const styles = StyleSheet.create({
   },
   scrim: {
     ...StyleSheet.absoluteFill,
-  },
-  scrimStrip: {
-    flex: 1,
   },
   layout: {
     ...StyleSheet.absoluteFill,

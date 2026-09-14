@@ -33,7 +33,7 @@ function createSection(
 }
 
 describe('selectFeaturedItem', () => {
-  it('prioritizes ContinueWatching', () => {
+  it('ignores ContinueWatching for hero selection', () => {
     const sections = [
       createSection('Trending', [createItem({ id: 'trending', title: 'Trending Title' })]),
       createSection(
@@ -46,7 +46,7 @@ describe('selectFeaturedItem', () => {
       ),
     ];
 
-    expect(selectFeaturedItem(sections)?.id).toBe('continue');
+    expect(selectFeaturedItem(sections)?.id).toBe('recommended');
   });
 
   it('falls back to RecommendedForYou when ContinueWatching is empty', () => {
@@ -62,7 +62,7 @@ describe('selectFeaturedItem', () => {
     expect(selectFeaturedItem(sections)?.id).toBe('recommended');
   });
 
-  it('falls back to Trending when higher-priority sections are empty', () => {
+  it('falls back to Trending when recommended is empty', () => {
     const sections = [
       createSection('ContinueWatching', []),
       createSection('RecommendedForYou', []),
@@ -73,23 +73,11 @@ describe('selectFeaturedItem', () => {
     expect(selectFeaturedItem(sections)?.id).toBe('trending');
   });
 
-  it('falls back to the first available item in section order', () => {
-    const sections = [
-      createSection('ContinueWatching', []),
-      createSection('RecommendedForYou', []),
-      createSection('Trending', []),
-      createSection('Popular', [createItem({ id: 'popular', title: 'Popular Title' })]),
-      createSection('TopRated', [createItem({ id: 'top-rated', title: 'Top Rated Title' })]),
-    ];
-
-    expect(selectFeaturedItem(sections)?.id).toBe('popular');
-  });
-
   it('returns null for empty sections', () => {
     expect(selectFeaturedItem([])).toBeNull();
   });
 
-  it('returns the source section type using the same priority order', () => {
+  it('returns the source section type using hero candidate priority', () => {
     const sections = [
       createSection('Trending', [createItem({ id: 'trending' })]),
       createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),

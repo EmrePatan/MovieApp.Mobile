@@ -109,6 +109,9 @@ export interface TvShowWatchProgressResponse {
   totalEpisodes: number;
   watchedEpisodes: number;
   progressPercentage: number;
+  regularTotalEpisodes: number;
+  regularWatchedEpisodes: number;
+  isFullyWatched: boolean;
   nextEpisode: NextEpisodeResponse | null;
   seasons: TvShowSeasonProgressResponse[];
 }

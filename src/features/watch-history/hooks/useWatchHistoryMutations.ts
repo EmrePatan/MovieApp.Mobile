@@ -497,10 +497,8 @@ export function useToggleTvShowWatched(tvShowId: string) {
       await queryClient.cancelQueries({ queryKey: tvKey });
 
       const previousTvProgress = queryClient.getQueryData<TvShowWatchProgressResponse>(tvKey);
-      const totalEpisodes = previousTvProgress?.totalEpisodes ?? 0;
-      const watchedEpisodes = isFullyWatched ? 0 : totalEpisodes;
 
-      if (totalEpisodes > 0 && previousTvProgress) {
+      if (previousTvProgress) {
         updateTvShowAggregateAllSeasonsWatched(queryClient, tvShowId, !isFullyWatched);
       }
 

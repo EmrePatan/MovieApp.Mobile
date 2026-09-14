@@ -26,6 +26,9 @@ describe('tv show progress cache helpers', () => {
       totalEpisodes: 18,
       watchedEpisodes: 4,
       progressPercentage: 22.22,
+      regularTotalEpisodes: 18,
+      regularWatchedEpisodes: 4,
+      isFullyWatched: false,
       nextEpisode: null,
       seasons: [
         { seasonNumber: 1, totalEpisodes: 10, watchedEpisodes: 4, progressPercentage: 40 },

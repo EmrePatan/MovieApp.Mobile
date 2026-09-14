@@ -1,35 +1,37 @@
 import type { HomeItem, HomeSection, HomeSectionType } from '../types';
-import {
-  selectFeaturedItem,
-  selectFeaturedSourceSectionType,
-} from './selectFeaturedItem';
+import { selectHeroCandidates } from './selectHeroCandidates';
 
 export interface PresentedHomeFeed {
-  featuredItem: HomeItem | null;
-  featuredSourceType: HomeSectionType | null;
+  heroItems: HomeItem[];
   sections: HomeSection[];
 }
 
 export function presentHomeSections(sections: HomeSection[]): PresentedHomeFeed {
-  const featuredItem = selectFeaturedItem(sections);
-  const featuredSourceType = selectFeaturedSourceSectionType(sections);
+  const heroCandidates = selectHeroCandidates(sections);
+
+  const removalsBySection = new Map<HomeSectionType, Set<string>>();
+  for (const candidate of heroCandidates) {
+    const existing = removalsBySection.get(candidate.sourceType) ?? new Set<string>();
+    existing.add(candidate.item.id);
+    removalsBySection.set(candidate.sourceType, existing);
+  }
 
   const presentedSections = sections
     .map((section) => {
-      if (!featuredItem || section.type !== featuredSourceType) {
+      const idsToRemove = removalsBySection.get(section.type);
+      if (!idsToRemove) {
         return section;
       }
 
       return {
         ...section,
-        items: section.items.filter((item) => item.id !== featuredItem.id),
+        items: section.items.filter((item) => !idsToRemove.has(item.id)),
       };
     })
     .filter((section) => section.items.length > 0);
 
   return {
-    featuredItem,
-    featuredSourceType,
+    heroItems: heroCandidates.map((candidate) => candidate.item),
     sections: presentedSections,
   };
 }

@@ -1,18 +1,20 @@
-import { useLocalSearchParams } from 'expo-router';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import { useTvShowDetails } from '@/features/details/tv/hooks/useTvShowDetails';
-import { isValidGuid } from '@/features/details/shared/routes';
+import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatalogRouteId';
 
 export default function TvShowDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const tvShowId = typeof id === 'string' ? id : undefined;
-  const query = useTvShowDetails(tvShowId);
+  const { resolvedId: tvShowId, isActive, isInvalid } = useCatalogRouteIdState('tv');
+  const query = useTvShowDetails(isActive ? tvShowId : undefined);
+
+  if (!isActive) {
+    return null;
+  }
 
   return (
     <DetailQueryState
       query={query}
-      invalidParamsMessage={!isValidGuid(tvShowId) ? 'The TV show link is invalid.' : undefined}
+      invalidParamsMessage={isInvalid ? 'The TV show link is invalid.' : undefined}
       notFoundTitle="TV show not found"
       notFoundMessage="This TV show could not be found."
     >

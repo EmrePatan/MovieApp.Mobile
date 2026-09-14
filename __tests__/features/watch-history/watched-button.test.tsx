@@ -2,9 +2,11 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { WatchedButton } from '@/features/watch-history/components/WatchedButton';
 import { useEpisodeWatchStatus } from '@/features/watch-history/hooks/useEpisodeWatchStatus';
 import { useMovieWatchStatus } from '@/features/watch-history/hooks/useMovieWatchStatus';
+import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
 import {
   useToggleEpisodeWatched,
   useToggleMovieWatched,
+  useToggleTvShowWatched,
 } from '@/features/watch-history/hooks/useWatchHistoryMutations';
 
 const mockMutate = jest.fn();
@@ -25,8 +27,13 @@ jest.mock('@/features/watch-history/hooks/useEpisodeWatchStatus', () => ({
   useEpisodeWatchStatus: jest.fn(),
 }));
 
+jest.mock('@/features/watch-history/hooks/useTvShowProgress', () => ({
+  useTvShowProgress: jest.fn(),
+}));
+
 jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
   useToggleMovieWatched: jest.fn(),
+  useToggleTvShowWatched: jest.fn(),
   useToggleEpisodeWatched: jest.fn(),
 }));
 
@@ -42,7 +49,19 @@ describe('WatchedButton', () => {
       data: { isWatched: false },
       isLoading: false,
     });
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        isFullyWatched: false,
+        regularTotalEpisodes: 0,
+        regularWatchedEpisodes: 0,
+      },
+      isLoading: false,
+    });
     (useToggleMovieWatched as jest.Mock).mockReturnValue({
+      mutate: mockMutate,
+      isPending: false,
+    });
+    (useToggleTvShowWatched as jest.Mock).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
     });

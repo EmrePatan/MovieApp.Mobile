@@ -16,7 +16,8 @@ import { EpisodeList } from '@/features/details/season/components/EpisodeList';
 const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: jest.fn(), push: mockPush }),
+  useRouter: () => ({ back: jest.fn(), push: mockPush, navigate: jest.fn() }),
+  useSegments: jest.fn(() => ['(tabs)', 'movie', '[id]']),
 }));
 
 jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
@@ -25,6 +26,14 @@ jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
 
 jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
   DetailInlineRatingSection: () => null,
+}));
+
+jest.mock('@/features/details/credits/components/CastRail', () => ({
+  CastRail: () => null,
+}));
+
+jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () => ({
+  WhereToWatchRail: () => null,
 }));
 
 jest.mock('@/features/details/shared/components/DetailEpisodeActionBar', () => ({

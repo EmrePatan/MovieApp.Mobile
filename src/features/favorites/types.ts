@@ -25,6 +25,21 @@ export interface FavoriteStatusResponse {
   isFavorited: boolean;
 }
 
+export interface BatchFavoriteStatusItemRequest {
+  contentType: FavoriteContentType;
+  id: string;
+}
+
+export interface BatchFavoriteStatusItemResponse {
+  contentType: FavoriteContentType;
+  id: string;
+  isFavorited: boolean;
+}
+
+export interface BatchFavoriteStatusResponse {
+  items: BatchFavoriteStatusItemResponse[];
+}
+
 export type FavoriteContentType = 'movie' | 'tv';
 
 export const DEFAULT_FAVORITES_PAGE_SIZE = 20;

@@ -26,6 +26,10 @@ export function buildTvFavoriteStatusPath(tvShowId: string): string {
   return `/api/favorites/tvshows/${encodePathSegment(tvShowId)}/status`;
 }
 
+export function buildBatchFavoriteStatusPath(): string {
+  return '/api/favorites/status/batch';
+}
+
 export function buildFavoritesPath(page = 1, pageSize = 20): string {
   const params = new URLSearchParams({
     page: String(page),

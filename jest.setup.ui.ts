@@ -14,3 +14,12 @@ jest.mock('@expo/vector-icons', () => ({
   Ionicons: ({ name, ...props }: { name: string }) =>
     mockReact.createElement('Icon', { ...props, accessibilityLabel: name }),
 }));
+
+jest.mock('expo-linear-gradient', () => ({
+  LinearGradient: ({
+    children,
+    ...props
+  }: {
+    children?: mockReact.ReactNode;
+  }) => mockReact.createElement('LinearGradient', props, children),
+}));

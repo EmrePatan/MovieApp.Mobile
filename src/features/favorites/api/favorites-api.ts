@@ -2,13 +2,19 @@ import { api } from '@/api/client';
 import {
   buildAddMovieFavoritePath,
   buildAddTvFavoritePath,
+  buildBatchFavoriteStatusPath,
   buildFavoritesPath,
   buildMovieFavoriteStatusPath,
   buildRemoveMovieFavoritePath,
   buildRemoveTvFavoritePath,
   buildTvFavoriteStatusPath,
 } from './routes';
-import type { FavoriteStatusResponse, FavoritesResponse } from '../types';
+import type {
+  BatchFavoriteStatusItemRequest,
+  BatchFavoriteStatusResponse,
+  FavoriteStatusResponse,
+  FavoritesResponse,
+} from '../types';
 
 export async function getMovieFavoriteStatus(
   movieId: string,
@@ -22,6 +28,13 @@ export async function getTvFavoriteStatus(
   signal?: AbortSignal,
 ): Promise<FavoriteStatusResponse> {
   return api.get<FavoriteStatusResponse>(buildTvFavoriteStatusPath(tvShowId), { signal });
+}
+
+export async function getBatchFavoriteStatus(
+  items: BatchFavoriteStatusItemRequest[],
+  signal?: AbortSignal,
+): Promise<BatchFavoriteStatusResponse> {
+  return api.post<BatchFavoriteStatusResponse>(buildBatchFavoriteStatusPath(), { items }, { signal });
 }
 
 export async function getFavorites(

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AccessibilityActionEvent,
   LayoutChangeEvent,
@@ -20,7 +20,6 @@ import {
 } from '../utils/star-rating';
 import { createRatingPanResponder } from '../utils/create-rating-pan-responder';
 import { colors } from '@/theme/colors';
-import { interaction } from '@/theme/interaction';
 
 export const STAR_VISUAL_SIZE = RATING_STAR_VISUAL_SIZE;
 const STAR_GAP = RATING_STAR_GAP;
@@ -34,12 +33,13 @@ interface StarRatingSelectorProps {
   disabled?: boolean;
   onGestureStart?: () => boolean;
   onInteractionActiveChange?: (active: boolean) => void;
+  onPreviewChange?: (rating: number | null) => void;
   onCommit: (starRating: number) => void;
   onClear: () => void;
 }
 
 function StarGlyph({ fill, size }: { fill: StarFillState; size: number }) {
-  const outlineColor = fill === 'empty' ? EMPTY_STAR_COLOR : colors.accent;
+  const outlineColor = fill === 'empty' ? EMPTY_STAR_COLOR : colors.accentStrong;
 
   return (
     <View style={[styles.starGlyph, { width: size, height: size }]}>
@@ -54,7 +54,7 @@ function StarGlyph({ fill, size }: { fill: StarFillState; size: number }) {
             },
           ]}
         >
-          <Ionicons name="star" size={size} color={colors.accent} />
+          <Ionicons name="star" size={size} color={colors.accentStrong} />
         </View>
       ) : null}
     </View>
@@ -66,6 +66,7 @@ export function StarRatingSelector({
   disabled = false,
   onGestureStart,
   onInteractionActiveChange,
+  onPreviewChange,
   onCommit,
   onClear,
 }: StarRatingSelectorProps) {
@@ -76,7 +77,8 @@ export function StarRatingSelector({
   const onClearRef = useRef(onClear);
   const onGestureStartRef = useRef(onGestureStart);
   const onInteractionActiveChangeRef = useRef(onInteractionActiveChange);
-  const [previewRating, setPreviewRating] = useState<number | 'clear' | null>(null);
+  const onPreviewChangeRef = useRef(onPreviewChange);
+  const [localPreviewRating, setLocalPreviewRating] = useState<number | 'clear' | null>(null);
 
   disabledRef.current = disabled;
   valueRef.current = value;
@@ -84,8 +86,30 @@ export function StarRatingSelector({
   onClearRef.current = onClear;
   onGestureStartRef.current = onGestureStart;
   onInteractionActiveChangeRef.current = onInteractionActiveChange;
+  onPreviewChangeRef.current = onPreviewChange;
 
-  const displayRating = previewRating === 'clear' ? null : previewRating ?? value;
+  const handlePreviewChange = (rating: number | 'clear' | null) => {
+    setLocalPreviewRating(rating);
+    if (rating === 'clear' || rating == null) {
+      onPreviewChangeRef.current?.(null);
+      return;
+    }
+
+    onPreviewChangeRef.current?.(rating);
+  };
+
+  const displayRating =
+    localPreviewRating === 'clear' ? null : localPreviewRating ?? value;
+
+  useEffect(() => {
+    if (localPreviewRating != null && localPreviewRating !== 'clear' && value === localPreviewRating) {
+      setLocalPreviewRating(null);
+    }
+
+    if (localPreviewRating === 'clear' && value == null) {
+      setLocalPreviewRating(null);
+    }
+  }, [localPreviewRating, value]);
 
   const { panHandlers, touchHandlers } = useMemo(
     () =>
@@ -95,11 +119,12 @@ export function StarRatingSelector({
         getTrackWidth: () => trackWidthRef.current,
         getStarClusterWidth: () => STAR_CLUSTER_WIDTH,
         onGestureStart: () => onGestureStartRef.current?.() ?? true,
-        onPreviewChange: setPreviewRating,
+        onPreviewChange: handlePreviewChange,
         onCommit: (rating) => onCommitRef.current(rating),
         onClear: () => onClearRef.current(),
         onInteractionActiveChange: (active) =>
           onInteractionActiveChangeRef.current?.(active),
+        retainPreviewOnCommit: true,
       }),
     [],
   );

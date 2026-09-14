@@ -64,6 +64,15 @@ describe('HomeHero', () => {
     expect(mockOnPress).toHaveBeenCalledWith(item);
   });
 
+  it('navigates when pressing the hero artwork', () => {
+    const item = createItem();
+
+    renderHero(item);
+    fireEvent.press(screen.getByLabelText('Open Interstellar'));
+
+    expect(mockOnPress).toHaveBeenCalledWith(item);
+  });
+
   it('renders movie and TV heroes with accessible labels', () => {
     renderHero(
       createItem({

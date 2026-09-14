@@ -42,7 +42,7 @@ export function ProfileTasteSection({ genres }: ProfileTasteSectionProps) {
               valueLabel={`${percent}%`}
               progress={percent / 100}
               accessibilityLabel={`${genre.name}: ${percent} percent of watched titles.`}
-              accentColor={colors.progressInProgress}
+              accentColor={colors.accent}
             />
           );
         })}

@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
+import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useWatchlistMembership } from '../hooks/useWatchlists';
 import { isContentInAnyWatchlist } from '../utils/watchlist-membership';
@@ -15,7 +16,7 @@ import { interaction } from '@/theme/interaction';
 interface AddToWatchlistButtonProps {
   contentType: WatchlistContentType;
   contentId: string;
-  variant?: 'button' | 'icon';
+  variant?: 'button' | 'icon' | 'detail';
 }
 
 export function AddToWatchlistButton({
@@ -45,6 +46,37 @@ export function AddToWatchlistButton({
 
     setVisible(true);
   };
+
+  const modal = (
+    <WatchlistPickerModal
+      visible={visible}
+      contentType={contentType}
+      contentId={contentId}
+      onClose={() => setVisible(false)}
+    />
+  );
+
+  if (variant === 'detail') {
+    return (
+      <View>
+        <FeedbackMessage message={feedback} tone="info" onDismiss={() => setFeedback(null)} />
+        <DetailCircularAction
+          label="Watchlist"
+          accessibilityLabel={label}
+          active={active}
+          busy={isBusy}
+          onPress={handlePress}
+        >
+          <Ionicons
+            name={active ? 'bookmark' : 'bookmark-outline'}
+            size={22}
+            color={active ? colors.accent : colors.textPrimary}
+          />
+        </DetailCircularAction>
+        {modal}
+      </View>
+    );
+  }
 
   return (
     <View style={variant === 'icon' ? styles.iconWrapper : styles.wrapper}>
@@ -83,12 +115,7 @@ export function AddToWatchlistButton({
           style={[styles.button, active && styles.buttonActive]}
         />
       )}
-      <WatchlistPickerModal
-        visible={visible}
-        contentType={contentType}
-        contentId={contentId}
-        onClose={() => setVisible(false)}
-      />
+      {modal}
     </View>
   );
 }

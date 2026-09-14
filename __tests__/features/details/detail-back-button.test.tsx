@@ -6,7 +6,9 @@ import { interaction } from '@/theme/interaction';
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     back: jest.fn(),
+    navigate: jest.fn(),
   }),
+  useSegments: jest.fn(() => ['(tabs)', 'movie', '[id]']),
 }));
 
 describe('DetailBackButton', () => {

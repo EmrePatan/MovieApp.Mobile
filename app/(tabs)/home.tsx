@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
 import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
@@ -24,12 +25,23 @@ export default function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [typeFilter, setTypeFilter] = useState<HomeTypeFilter>('all');
+  const [isHomeFocused, setIsHomeFocused] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsHomeFocused(true);
+
+      return () => {
+        setIsHomeFocused(false);
+      };
+    }, []),
+  );
   const { data, error, isLoading, isFetching, refetch, isError } = useHome(
     typeFilter,
     DEFAULT_HOME_SECTION_SIZE,
   );
 
-  const { sections, featuredItem } = useMemo(() => {
+  const { sections, heroItems } = useMemo(() => {
     const nonEmptySections = (data?.sections ?? []).filter(
       (section) => section.items.length > 0,
     );
@@ -49,14 +61,15 @@ export default function HomeScreen() {
 
   const handleItemPress = useCallback(
     (item: HomeItem) => {
-      if (item.contentType === 'movie') {
-        router.push(`/movie/${item.id}`);
-        return;
-      }
-
-      router.push(`/tv/${item.id}`);
+      openCatalogDetailFromTab(
+        router,
+        item.id,
+        item.contentType === 'movie' ? 'movie' : 'tv',
+        'home',
+        { queryClient },
+      );
     },
-    [router],
+    [queryClient, router],
   );
 
   const renderSection = useCallback(
@@ -67,8 +80,15 @@ export default function HomeScreen() {
   );
 
   const listHeader = useMemo(
-    () => <HomeListHeader featuredItem={featuredItem} onItemPress={handleItemPress} />,
-    [featuredItem, handleItemPress],
+    () => (
+      <HomeListHeader
+        heroItems={heroItems}
+        filterKey={typeFilter}
+        onItemPress={handleItemPress}
+        isScreenFocused={isHomeFocused}
+      />
+    ),
+    [heroItems, typeFilter, handleItemPress, isHomeFocused],
   );
 
   const topChrome = useMemo(

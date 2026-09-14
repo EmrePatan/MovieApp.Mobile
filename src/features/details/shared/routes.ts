@@ -53,6 +53,58 @@ export function isValidGuid(value: string | undefined): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+export function normalizeRouteIdParam(
+  value: string | string[] | undefined,
+): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+
+  return value;
+}
+
+export function parseCatalogIdFromPathname(
+  pathname: string,
+  contentType: 'movie' | 'tv',
+): string | undefined {
+  const pattern = contentType === 'movie' ? /\/movie\/([^/]+)/ : /\/tv\/([^/]+)/;
+  const match = pathname.match(pattern);
+  if (!match?.[1]) {
+    return undefined;
+  }
+
+  const id = decodeURIComponent(match[1]);
+  return isValidGuid(id) ? id : undefined;
+}
+
+export function resolveCatalogRouteId(
+  rawId: string | string[] | undefined,
+  segments: readonly string[],
+  pathname?: string,
+  contentType?: 'movie' | 'tv',
+): string | undefined {
+  const paramId = normalizeRouteIdParam(rawId);
+  if (isValidGuid(paramId)) {
+    return paramId;
+  }
+
+  if (pathname && contentType) {
+    const pathnameId = parseCatalogIdFromPathname(pathname, contentType);
+    if (pathnameId) {
+      return pathnameId;
+    }
+  }
+
+  for (let index = segments.length - 1; index >= 0; index -= 1) {
+    const segment = segments[index];
+    if (isValidGuid(segment)) {
+      return segment;
+    }
+  }
+
+  return undefined;
+}
+
 export function parsePositiveInt(value: string | undefined): number | null {
   if (!value) {
     return null;

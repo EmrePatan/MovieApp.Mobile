@@ -90,7 +90,7 @@ export const ReviewCard = memo(function ReviewCard({
                 {isDeleting ? (
                   <ActivityIndicator color={colors.textMuted} size="small" />
                 ) : (
-                  <Ionicons name="trash-outline" size={15} color={colors.textMuted} />
+                  <Ionicons name="trash-outline" size={15} color={colors.danger} />
                 )}
               </Pressable>
             ) : null}

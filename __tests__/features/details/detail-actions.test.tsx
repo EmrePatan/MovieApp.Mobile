@@ -6,7 +6,13 @@ import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
 jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
-  DetailActionBar: ({ contentType, showWatched }: { contentType: string; showWatched?: boolean }) =>
+  DetailActionBar: ({
+    contentType,
+    showWatched,
+  }: {
+    contentType: string;
+    showWatched?: boolean;
+  }) =>
     mockReact.createElement(
       'Text',
       null,
@@ -45,6 +51,14 @@ jest.mock('@/features/reviews/components/ReviewsSection', () => ({
 
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
   SimilarContentSection: () => null,
+}));
+
+jest.mock('@/features/details/credits/components/CastRail', () => ({
+  CastRail: () => null,
+}));
+
+jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () => ({
+  WhereToWatchRail: () => null,
 }));
 
 const movie: MovieDetailsResponse = {
@@ -92,9 +106,9 @@ describe('detail actions integration', () => {
     expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
   });
 
-  it('renders tv detail action set without watched and inline rating', () => {
+  it('renders tv detail action set with watched and inline rating', () => {
     render(<TvShowDetailContent show={show} />);
-    expect(screen.getByText('Actions:tv')).toBeTruthy();
+    expect(screen.getByText('Actions:tv:watched')).toBeTruthy();
     expect(screen.getByText('Rating:tv')).toBeTruthy();
     expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();
     expect(screen.queryByText('TMDB Rating')).toBeNull();

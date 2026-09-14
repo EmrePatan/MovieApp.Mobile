@@ -5,7 +5,8 @@ import { useDeleteAccountMutation } from '@/features/profile/hooks/useProfileMut
 const mockMutate = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: jest.fn(), push: jest.fn() }),
+  useRouter: () => ({ back: jest.fn(), push: jest.fn(), navigate: jest.fn() }),
+  useSegments: jest.fn(() => []),
 }));
 
 jest.mock('@/features/profile/hooks/useProfileMutations', () => ({

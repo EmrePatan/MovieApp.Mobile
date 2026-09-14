@@ -19,6 +19,7 @@ interface CreateRatingPanResponderOptions {
   onCommit: (rating: number) => void;
   onClear: () => void;
   onInteractionActiveChange?: (active: boolean) => void;
+  retainPreviewOnCommit?: boolean;
 }
 
 export function createRatingPanResponder({
@@ -31,6 +32,7 @@ export function createRatingPanResponder({
   onCommit,
   onClear,
   onInteractionActiveChange,
+  retainPreviewOnCommit = false,
 }: CreateRatingPanResponderOptions) {
   const previewRef = { current: null as RatingPreview };
   const gestureModeRef = { current: 'pending' as RatingGestureMode };
@@ -83,11 +85,17 @@ export function createRatingPanResponder({
     const finalRating = previewRef.current;
     const mode = gestureModeRef.current;
     setInteractionActive(false);
-    resetGesture();
 
     if (shouldCommit && shouldCommitRatingGesture(mode) && finalRating != null) {
       commitResolvedPosition(finalRating);
+
+      if (retainPreviewOnCommit && finalRating !== 'clear') {
+        gestureModeRef.current = 'pending';
+        return;
+      }
     }
+
+    resetGesture();
   };
 
   const handleGrant = (event: GestureResponderEvent) => {

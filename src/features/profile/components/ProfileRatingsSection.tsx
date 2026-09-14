@@ -49,7 +49,7 @@ export function ProfileRatingsSection({ ratings, ratingsCount }: ProfileRatingsS
             valueLabel={String(item.count)}
             progress={item.count / maxCount}
             accessibilityLabel={`${item.stars} stars: ${item.count} ratings.`}
-            accentColor={colors.progressCompleted}
+            accentColor={colors.accent}
           />
         ))}
 

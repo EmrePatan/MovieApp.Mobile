@@ -196,7 +196,7 @@ export function WatchlistPickerModal({
                 <Ionicons
                   name={isInWatchlist ? 'checkmark-circle' : 'add-circle-outline'}
                   size={22}
-                  color={isInWatchlist ? colors.success : colors.textMuted}
+                  color={isInWatchlist ? colors.accent : colors.textMuted}
                 />
               )}
             </Pressable>

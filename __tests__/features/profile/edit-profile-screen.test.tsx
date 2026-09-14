@@ -7,7 +7,8 @@ const mockBack = jest.fn();
 const mockMutate = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: mockBack, push: jest.fn() }),
+  useRouter: () => ({ back: mockBack, push: jest.fn(), navigate: jest.fn() }),
+  useSegments: jest.fn(() => []),
 }));
 
 jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({

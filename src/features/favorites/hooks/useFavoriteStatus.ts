@@ -4,8 +4,17 @@ import { getMovieFavoriteStatus, getTvFavoriteStatus } from '../api/favorites-ap
 import { favoriteStatusQueryKey } from './favorite-query-keys';
 import type { FavoriteContentType } from '../types';
 
-export function useFavoriteStatus(contentType: FavoriteContentType, contentId: string) {
+interface UseFavoriteStatusOptions {
+  enabled?: boolean;
+}
+
+export function useFavoriteStatus(
+  contentType: FavoriteContentType,
+  contentId: string,
+  options: UseFavoriteStatusOptions = {},
+) {
   const { isAuthenticated } = useAuth();
+  const enabled = options.enabled ?? true;
 
   return useQuery({
     queryKey: favoriteStatusQueryKey(contentType, contentId),
@@ -17,7 +26,7 @@ export function useFavoriteStatus(contentType: FavoriteContentType, contentId: s
 
       return response.isFavorited;
     },
-    enabled: isAuthenticated && contentId.length > 0,
+    enabled: enabled && isAuthenticated && contentId.length > 0,
     staleTime: 30_000,
   });
 }

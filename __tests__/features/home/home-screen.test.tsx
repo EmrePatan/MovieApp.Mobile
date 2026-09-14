@@ -21,10 +21,32 @@ jest.mock('@/features/home/hooks/useHome', () => ({
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
+}));
+
+jest.mock('@/features/home/components/HomeHeroCarousel', () => ({
+  HomeHeroCarousel: ({ items, onItemPress }: { items: Array<{ id: string; title: string }>; onItemPress: (item: { id: string; title: string }) => void }) => {
+    const React = require('react');
+    const { View, Pressable, Text } = require('react-native');
+    const item = items[0];
+    if (!item) {
+      return null;
+    }
+
+    return React.createElement(
+      View,
+      null,
+      React.createElement(
+        Pressable,
+        { accessibilityLabel: `More info about ${item.title}`, onPress: () => onItemPress(item) },
+        React.createElement(Text, null, item.title),
+      ),
+    );
+  },
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -56,8 +78,8 @@ describe('HomeScreen', () => {
       data: {
         sections: [
           {
-            type: 'Popular',
-            title: 'Popular',
+            type: 'NewReleases',
+            title: 'New Releases',
             displayOrder: 1,
             items: [
               {
@@ -95,10 +117,9 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    expect(screen.getByText('Popular')).toBeTruthy();
+    expect(screen.getByText('New Releases')).toBeTruthy();
     expect(screen.getAllByText('Breaking Bad')).toHaveLength(1);
     expect(screen.getByText('Better Call Saul')).toBeTruthy();
-    expect(screen.getByLabelText('More info about Breaking Bad')).toBeTruthy();
   });
 
   it('renders error state with retry', () => {
@@ -116,7 +137,7 @@ describe('HomeScreen', () => {
     expect(mockRefetch).toHaveBeenCalled();
   });
 
-  it('renders the featured hero from the highest-priority section', () => {
+  it('renders the hero from discovery sections and not Continue Watching', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
@@ -146,7 +167,7 @@ describe('HomeScreen', () => {
               {
                 id: 'continue-id',
                 contentType: 'tv',
-                title: 'Featured Show',
+                title: 'Continue Show',
                 originalTitle: null,
                 posterUrl: null,
                 backdropUrl: null,
@@ -167,60 +188,65 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    expect(screen.getByLabelText('More info about Featured Show')).toBeTruthy();
-    expect(screen.getAllByText('Featured Show')).toHaveLength(1);
-    expect(screen.getByText('Trending Movie')).toBeTruthy();
+    expect(screen.getByLabelText('More info about Trending Movie')).toBeTruthy();
+    expect(screen.getAllByText('Trending Movie')).toHaveLength(1);
+    expect(screen.getByText('Continue Show')).toBeTruthy();
+    expect(screen.getByText('Continue Watching')).toBeTruthy();
   });
 
-  it('deduplicates the featured item from its source rail', () => {
+  it('deduplicates hero items from their source rails', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
           {
-            type: 'Trending',
-            title: 'Trending',
-            displayOrder: 2,
+            type: 'RecommendedForYou',
+            title: 'Recommended For You',
+            displayOrder: 1,
             items: [
               {
-                id: 'trending-id',
+                id: 'hero-id',
                 contentType: 'movie',
-                title: 'Trending Movie',
+                title: 'Hero Movie',
                 originalTitle: null,
                 posterUrl: null,
                 backdropUrl: null,
                 releaseDate: '2020-01-01',
-                voteAverage: 7.0,
-                voteCount: 50,
-              },
-            ],
-          },
-          {
-            type: 'ContinueWatching',
-            title: 'Continue Watching',
-            displayOrder: 1,
-            items: [
-              {
-                id: 'continue-id',
-                contentType: 'tv',
-                title: 'Featured Show',
-                originalTitle: null,
-                posterUrl: null,
-                backdropUrl: null,
-                releaseDate: '2010-01-01',
-                voteAverage: 9.0,
-                voteCount: 200,
-              },
-              {
-                id: 'second-show',
-                contentType: 'tv',
-                title: 'Second Show',
-                originalTitle: null,
-                posterUrl: null,
-                backdropUrl: null,
-                releaseDate: '2011-01-01',
                 voteAverage: 8.0,
                 voteCount: 100,
               },
+              {
+                id: 'second-recommended',
+                contentType: 'movie',
+                title: 'Second Recommended',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2021-01-01',
+                voteAverage: 7.5,
+                voteCount: 80,
+              },
+              {
+                id: 'third-recommended',
+                contentType: 'movie',
+                title: 'Third Recommended',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2021-06-01',
+                voteAverage: 7.4,
+                voteCount: 70,
+              },
+              {
+                id: 'fourth-recommended',
+                contentType: 'movie',
+                title: 'Fourth Recommended',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2022-01-01',
+                voteAverage: 7.3,
+                voteCount: 60,
+              },
             ],
           },
         ],
@@ -235,9 +261,8 @@ describe('HomeScreen', () => {
 
     render(<HomeScreen />);
 
-    expect(screen.getAllByText('Featured Show')).toHaveLength(1);
-    expect(screen.getByText('Second Show')).toBeTruthy();
-    expect(screen.getByText('Continue Watching')).toBeTruthy();
+    expect(screen.getAllByText('Hero Movie')).toHaveLength(1);
+    expect(screen.getByText('Fourth Recommended')).toBeTruthy();
   });
 
   it('requests a new type when filter changes', () => {

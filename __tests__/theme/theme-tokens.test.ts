@@ -14,11 +14,13 @@ describe('theme tokens', () => {
 
   it('defines interaction and semantic color tokens', () => {
     expect(interaction.touchTarget).toBeGreaterThanOrEqual(44);
-    expect(colors.accentTint12).toContain('229');
+    expect(colors.accent).toBe('#C4A35A');
+    expect(colors.accentStrong).toBe('#D4B36A');
+    expect(colors.accentTint12).toContain('196');
+    expect(colors.danger).toBe('#E50914');
+    expect(colors.success).toBe(colors.progressCompleted);
+    expect(colors.progressInProgress).toBe(colors.accent);
     expect(colors.progressTrack).toBeTruthy();
-    expect(colors.progressInProgress).toBeTruthy();
-    expect(colors.progressCompleted).toBeTruthy();
-    expect(colors.danger).toBe(colors.error);
     expect(spacing.md).toBe(16);
   });
 });

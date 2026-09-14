@@ -33,14 +33,13 @@ export function DetailInlineRatingSection({
   const aggregateQuery = useRatingAggregate(contentType, contentId);
   const rateContent = useRateContent(contentType, contentId);
   const deleteRating = useDeleteRating(contentType, contentId);
-  const [optimisticScore, setOptimisticScore] = useState<number | null | undefined>(undefined);
+  const [previewRating, setPreviewRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const serverScore = myRatingQuery.data?.score ?? null;
-  const displayScore =
-    optimisticScore !== undefined ? optimisticScore : serverScore;
-  const displayStarRating =
-    displayScore != null ? backendScoreToStarRating(displayScore) : null;
+  const serverStarRating =
+    serverScore != null ? backendScoreToStarRating(serverScore) : null;
+  const displayStarRating = previewRating ?? serverStarRating;
   const isPending = rateContent.isPending || deleteRating.isPending;
 
   const communityMeta = useMemo(() => {
@@ -65,18 +64,16 @@ export function DetailInlineRatingSection({
     }
 
     const backendScore = starRatingToBackendScore(starRating);
-    const previousScore = serverScore;
-
-    setOptimisticScore(backendScore);
+    setPreviewRating(starRating);
     setFeedback(null);
 
     rateContent.mutate(backendScore, {
       onError: () => {
-        setOptimisticScore(previousScore);
+        setPreviewRating(null);
         setFeedback('Unable to save rating. Please try again.');
       },
-      onSettled: () => {
-        setOptimisticScore(undefined);
+      onSuccess: () => {
+        setPreviewRating(null);
       },
     });
   };
@@ -86,18 +83,12 @@ export function DetailInlineRatingSection({
       return;
     }
 
-    const previousScore = serverScore;
-
-    setOptimisticScore(null);
+    setPreviewRating(null);
     setFeedback(null);
 
     deleteRating.mutate(undefined, {
       onError: () => {
-        setOptimisticScore(previousScore);
         setFeedback('Unable to remove rating. Please try again.');
-      },
-      onSettled: () => {
-        setOptimisticScore(undefined);
       },
     });
   };
@@ -114,6 +105,7 @@ export function DetailInlineRatingSection({
           disabled={isPending}
           onGestureStart={() => requireAuth()}
           onInteractionActiveChange={(active) => scrollLock?.setScrollLocked(active)}
+          onPreviewChange={setPreviewRating}
           onCommit={handleRate}
           onClear={handleClear}
         />
