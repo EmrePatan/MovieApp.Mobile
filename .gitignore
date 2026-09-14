@@ -18,6 +18,9 @@ expo-env.d.ts
 # Metro
 .metro-health-check*
 
+# EAS local credentials
+credentials.json
+
 # Environment
 .env
 .env.local
