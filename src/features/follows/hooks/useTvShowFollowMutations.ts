@@ -1,0 +1,52 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { removeTvShowFollow, upsertTvShowFollow } from '../api/follow-api';
+import type { TvShowFollowStatusResponse, UpsertTvShowFollowRequest } from '../types';
+import { tvShowFollowStatusQueryKey } from './follow-query-keys';
+
+export function useCreateTvShowFollow(tvShowId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const request: UpsertTvShowFollowRequest = {
+        notifyNewSeasons: true,
+        notifyNewEpisodes: true,
+      };
+      return upsertTvShowFollow(tvShowId, request);
+    },
+    onSuccess: (status) => {
+      queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
+    },
+  });
+}
+
+export function useUpdateTvShowFollow(tvShowId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: UpsertTvShowFollowRequest) => upsertTvShowFollow(tvShowId, request),
+    onSuccess: (status) => {
+      queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
+    },
+  });
+}
+
+export function useRemoveTvShowFollow(tvShowId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      await removeTvShowFollow(tvShowId);
+      const status: TvShowFollowStatusResponse = {
+        isFollowing: false,
+        notifyNewSeasons: true,
+        notifyNewEpisodes: true,
+        baselineEstablished: false,
+      };
+      return status;
+    },
+    onSuccess: (status) => {
+      queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
+    },
+  });
+}

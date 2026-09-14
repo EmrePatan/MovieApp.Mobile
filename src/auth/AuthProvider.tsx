@@ -15,6 +15,10 @@ import type { AuthContextValue } from './auth-types';
 import type { UserProfile } from '@/models/api/auth';
 import { queryClient } from '@/api/query-client';
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
+import {
+  resetPushPermissionRequestState,
+  unregisterKnownPushDeviceAsync,
+} from '@/features/follows/services/push-device-service';
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -123,7 +127,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const logout = useCallback(async () => {
+    try {
+      await unregisterKnownPushDeviceAsync();
+    } catch {
+      // Logout should continue even if push unregister fails.
+    }
+
     clearUserQueryCache(queryClient);
+    resetPushPermissionRequestState();
     await clearSession();
   }, [clearSession]);
 

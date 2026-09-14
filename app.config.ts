@@ -36,9 +36,12 @@ const config: ExpoConfig = {
     favicon: './assets/favicon.png',
     bundler: 'metro',
   },
-  plugins: ['expo-router', 'expo-secure-store'],
+  plugins: ['expo-router', 'expo-secure-store', 'expo-notifications'],
   extra: {
     appEnv: process.env.EXPO_PUBLIC_APP_ENV ?? 'development',
+    eas: {
+      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
+    },
     router: {
       origin: false,
     },

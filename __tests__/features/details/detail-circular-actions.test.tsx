@@ -56,6 +56,10 @@ jest.mock('@/features/watchlists/components/WatchlistPickerModal', () => ({
   WatchlistPickerModal: () => null,
 }));
 
+jest.mock('@/features/follows/components/FollowButton', () => ({
+  FollowButton: () => null,
+}));
+
 describe('DetailActionBar premium circular actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();

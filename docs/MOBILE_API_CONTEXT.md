@@ -1116,6 +1116,104 @@ Pagination applies to the combined favorites list (movies and TV shows merged, o
 
 ---
 
+## 11.5 TV Follow (Phase 1)
+
+TV Follow is independent from Favorite, Watchlist, and Watched. Following a show does not favorite it; unfollowing does not remove favorites.
+
+**Phase 1 note:** Baseline catalog hydration, release detection, and push notifications are **not active yet**. `baselineEstablished` is always `false` until a later phase.
+
+All endpoints require Bearer JWT.
+
+### `GET /api/tvshows/{tvShowId}/follow`
+
+**Response `200 OK`** (`TvShowFollowStatusResponse`):
+
+```json
+{
+  "isFollowing": true,
+  "notifyNewSeasons": true,
+  "notifyNewEpisodes": true,
+  "baselineEstablished": false
+}
+```
+
+When the user is not following the show, `isFollowing` is `false` and preference fields reflect defaults (`true` / `true`).
+
+**Status codes:** `200`, `401`
+
+---
+
+### `PUT /api/tvshows/{tvShowId}/follow`
+
+Creates or updates follow preferences for the current user.
+
+**Request body** (`UpsertTvShowFollowRequest`):
+
+```json
+{
+  "notifyNewSeasons": true,
+  "notifyNewEpisodes": true
+}
+```
+
+**Create semantics:** If no follow exists, a row is created. Omitted preference fields default to `true`. Returns `201 Created`.
+
+**Update semantics:** If a follow already exists, only provided preference fields are updated; omitted fields are preserved. At least one preference field must be provided on update. Returns `200 OK`.
+
+Both preferences may be set to `false` (muted follow without unfollowing).
+
+**Response `200 OK` / `201 Created`:** Same shape as `TvShowFollowStatusResponse`.
+
+**Status codes:** `200`, `201`, `400`, `401`, `404`, `409`, `429`
+
+---
+
+### `DELETE /api/tvshows/{tvShowId}/follow`
+
+Idempotent unfollow (same semantics as favorite delete).
+
+**Response:** `204 No Content`
+
+**Status codes:** `204`, `401`, `429`
+
+---
+
+### `GET /api/follows/tvshows`
+
+Paginated list of TV shows the current user follows.
+
+**Query parameters:** `page` (default `1`), `pageSize` (default `20`)
+
+**Response `200 OK`** (`TvShowFollowsResponse`):
+
+```json
+{
+  "tvShows": [
+    {
+      "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "title": "Breaking Bad",
+      "posterUrl": "/path.jpg",
+      "firstAirDate": "2008-01-20",
+      "voteAverage": 8.9,
+      "notifyNewSeasons": true,
+      "notifyNewEpisodes": true,
+      "baselineEstablished": false,
+      "followedAt": "2026-09-14T18:30:00Z"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 1,
+  "totalPages": 1,
+  "hasNextPage": false,
+  "hasPreviousPage": false
+}
+```
+
+**Status codes:** `200`, `400`, `401`
+
+---
+
 ## 12. Watchlists
 
 All endpoints require Bearer JWT.

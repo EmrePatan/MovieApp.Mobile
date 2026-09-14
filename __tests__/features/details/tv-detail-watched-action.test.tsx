@@ -47,6 +47,10 @@ jest.mock('@/features/watchlists/hooks/useWatchlists', () => ({
   useWatchlistMembership: jest.fn(),
 }));
 
+jest.mock('@/features/follows/components/FollowButton', () => ({
+  FollowButton: () => null,
+}));
+
 jest.mock('@/features/watchlists/components/WatchlistPickerModal', () => ({
   WatchlistPickerModal: () => null,
 }));
