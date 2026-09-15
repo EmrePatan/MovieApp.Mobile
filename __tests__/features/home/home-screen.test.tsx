@@ -7,6 +7,7 @@ import HomeScreen from '../../../app/(tabs)/home';
 
 const mockRefetch = jest.fn();
 const mockInvalidateQueries = jest.fn();
+const mockPush = jest.fn();
 const mockUseHome = useHome as jest.Mock;
 
 jest.mock('@tanstack/react-query', () => ({
@@ -21,7 +22,7 @@ jest.mock('@/features/home/hooks/useHome', () => ({
 }));
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
   useFocusEffect: jest.fn(),
 }));
 
@@ -513,5 +514,44 @@ describe('HomeScreen', () => {
     fireEvent.press(screen.getByLabelText('Show TV Shows'));
 
     expect(mockUseHome).toHaveBeenLastCalledWith('tv', 10);
+  });
+
+  it('navigates to Discover from Trending See All even when hero dedup empties the rail', () => {
+    mockUseHome.mockReturnValue({
+      data: {
+        sections: [
+          {
+            type: 'Trending',
+            title: 'Trending',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'trending-only',
+                contentType: 'movie',
+                title: 'Trending Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.0,
+                voteCount: 50,
+              },
+            ],
+          },
+        ],
+        isPersonalized: false,
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+    });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getByLabelText('See all Trending'));
+
+    expect(mockPush).toHaveBeenCalledWith('/discover');
   });
 });

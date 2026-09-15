@@ -62,6 +62,21 @@ describe('Home UI components', () => {
     expect(toJSON()).toBeNull();
   });
 
+  it('renders a header-only Trending section when See All is available', () => {
+    const section: HomeSectionModel = {
+      type: 'Trending',
+      title: 'Trending',
+      displayOrder: 1,
+      items: [],
+    };
+
+    render(<HomeSection section={section} onSeeAllPress={jest.fn()} />);
+
+    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('See All')).toBeTruthy();
+    expect(screen.queryByText('Interstellar')).toBeNull();
+  });
+
   it('renders continue watching without playback progress UI', () => {
     render(
       <HomeContentCard

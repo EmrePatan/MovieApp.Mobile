@@ -47,26 +47,28 @@ export const HomeSection = memo(function HomeSection({
     [variant],
   );
 
-  if (section.items.length === 0) {
+  if (section.items.length === 0 && !onSeeAllPress) {
     return null;
   }
 
   return (
     <View style={styles.container}>
       <HomeSectionHeader title={section.title} onSeeAllPress={onSeeAllPress} />
-      <FlatList
-        horizontal
-        data={section.items}
-        keyExtractor={homeItemKeyExtractor}
-        renderItem={renderItem}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={listContentStyle}
-        initialNumToRender={layout.horizontalList.initialNumToRender}
-        maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
-        windowSize={layout.horizontalList.windowSize}
-        getItemLayout={getHomeRailItemLayout}
-        nestedScrollEnabled
-      />
+      {section.items.length > 0 ? (
+        <FlatList
+          horizontal
+          data={section.items}
+          keyExtractor={homeItemKeyExtractor}
+          renderItem={renderItem}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={listContentStyle}
+          initialNumToRender={layout.horizontalList.initialNumToRender}
+          maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
+          windowSize={layout.horizontalList.windowSize}
+          getItemLayout={getHomeRailItemLayout}
+          nestedScrollEnabled
+        />
+      ) : null}
     </View>
   );
 }, areHomeSectionPropsEqual);

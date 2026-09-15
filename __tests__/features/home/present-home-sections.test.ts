@@ -47,7 +47,9 @@ describe('presentHomeSections', () => {
       'other-id',
       'trending-id',
     ]);
-    expect(presented.sections).toHaveLength(0);
+    expect(presented.sections).toHaveLength(1);
+    expect(presented.sections[0].type).toBe('Trending');
+    expect(presented.sections[0].items).toHaveLength(0);
   });
 
   it('excludes Continue Watching from visible sections', () => {
