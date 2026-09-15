@@ -33,6 +33,7 @@ module.exports = {
       displayName: 'ui',
       preset: '@react-native/jest-preset',
       testMatch: [
+        '<rootDir>/__tests__/auth/**/*.test.tsx',
         '<rootDir>/__tests__/features/**/*.test.tsx',
         '<rootDir>/__tests__/components/**/*.test.tsx',
       ],

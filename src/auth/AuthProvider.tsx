@@ -26,6 +26,29 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+async function hydrateCurrentUser(
+  clearSession: () => Promise<void>,
+  setUser: (profile: UserProfile | null) => void,
+  isMounted: () => boolean,
+) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (isMounted()) {
+      setUser(currentUser);
+    }
+  } catch (error) {
+    if (isApiError(error) && error.kind === 'unauthorized') {
+      await clearSession();
+      return;
+    }
+
+    // Backend unavailable: keep token, proceed without blocking startup.
+    if (isMounted()) {
+      setUser(null);
+    }
+  }
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -67,8 +90,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true;
 
     async function bootstrapAuth() {
+      let storedToken: string | null = null;
+
       try {
-        const storedToken = await getAccessToken();
+        storedToken = await getAccessToken();
 
         if (!storedToken) {
           if (isMounted) {
@@ -79,28 +104,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         syncToken(storedToken);
-
-        try {
-          const currentUser = await getCurrentUser();
-          if (isMounted) {
-            setUser(currentUser);
-          }
-        } catch (error) {
-          if (isApiError(error) && error.kind === 'unauthorized') {
-            await clearSession();
-            return;
-          }
-
-          // Backend unavailable: keep token, proceed without blocking startup.
-          if (isMounted) {
-            setUser(null);
-          }
-        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
         }
       }
+
+      if (!storedToken) {
+        return;
+      }
+
+      await hydrateCurrentUser(
+        clearSession,
+        (profile) => {
+          if (isMounted) {
+            setUser(profile);
+          }
+        },
+        () => isMounted,
+      );
     }
 
     void bootstrapAuth();
