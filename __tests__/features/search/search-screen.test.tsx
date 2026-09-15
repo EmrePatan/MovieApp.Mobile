@@ -43,11 +43,12 @@ jest.mock('@/hooks/useDebouncedValue', () => ({
   useDebouncedValue: (value: string) => value,
 }));
 
-jest.mock('@/features/details/shared/navigation/prefetch-catalog-detail', () => ({
-  prefetchCatalogDetail: jest.fn(),
-}));
-
+const mockOpenCatalogDetailFromTab = jest.fn();
 const mockOpenPersonDetail = jest.fn();
+
+jest.mock('@/features/details/shared/navigation/open-catalog-detail-from-tab', () => ({
+  openCatalogDetailFromTab: (...args: unknown[]) => mockOpenCatalogDetailFromTab(...args),
+}));
 
 jest.mock('@/features/details/shared/navigation/person-detail-navigation', () => ({
   openPersonDetail: (...args: unknown[]) => mockOpenPersonDetail(...args),
@@ -252,6 +253,27 @@ describe('SearchScreen', () => {
     expect(useSearchResults).toHaveBeenLastCalledWith('Interstellar', 'all');
   });
 
+  it('keeps the search input mounted while submitted search is loading', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      isFetching: true,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'dune');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
+
+    expect(screen.getByDisplayValue('dune')).toBeTruthy();
+    expect(screen.getByLabelText('Loading search results')).toBeTruthy();
+  });
+
   it('shows loading state for submitted search', () => {
     (useSearchResults as jest.Mock).mockReturnValue({
       data: undefined,
@@ -359,7 +381,14 @@ describe('SearchScreen', () => {
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
-    expect(mockPush).toHaveBeenCalledWith('/movie/movie-id');
+    expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
+      expect.objectContaining({ push: mockPush }),
+      'movie-id',
+      'movie',
+      'search',
+      expect.objectContaining({ queryClient: expect.any(Object) }),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('renders person autocomplete suggestions with department', () => {
@@ -426,7 +455,14 @@ describe('SearchScreen', () => {
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     fireEvent.press(screen.getByLabelText('Breaking Bad, TV · 2008 · ★ 8.9'));
-    expect(mockPush).toHaveBeenCalledWith('/tv/tv-id');
+    expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
+      expect.objectContaining({ push: mockPush }),
+      'tv-id',
+      'tv',
+      'search',
+      expect.objectContaining({ queryClient: expect.any(Object) }),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('navigates to person detail from result card', () => {

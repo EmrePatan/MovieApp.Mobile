@@ -100,11 +100,11 @@ export default function UpcomingScreen() {
 
   const listHeader = (
     <LibraryStackHeader
-      title="Upcoming"
+      title="Coming Up"
       subtitle={
         isAuthenticated
-          ? 'From TV shows you follow and movies with release alerts on'
-          : 'Future movie and TV premieres'
+          ? 'Movies and TV you follow with upcoming releases or episodes'
+          : 'Sign in to see your followed upcoming releases and episodes'
       }
     >
       {!isAuthenticated ? (

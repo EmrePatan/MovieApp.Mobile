@@ -12,7 +12,8 @@ import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
-const PREVIEW_SIZE = 112;
+const PREVIEW_WIDTH = 112;
+const PREVIEW_HEIGHT = Math.round(PREVIEW_WIDTH * 0.67);
 
 interface GalleryPreviewSectionProps {
   title: string;
@@ -64,8 +65,8 @@ export function GalleryPreviewSection({
           {Array.from({ length: 4 }, (_, index) => (
             <SkeletonBlock
               key={`gallery-preview-skeleton-${index}`}
-              width={PREVIEW_SIZE}
-              height={PREVIEW_SIZE * 0.67}
+              width={PREVIEW_WIDTH}
+              height={PREVIEW_HEIGHT}
               style={styles.previewItem}
             />
           ))}
@@ -91,8 +92,6 @@ export function GalleryPreviewSection({
       >
         {previewImages.map((item, index) => {
           const uri = resolveThumbnailImageUri(item.filePath);
-          const aspectRatio = item.aspectRatio && item.aspectRatio > 0 ? item.aspectRatio : 0.67;
-          const height = PREVIEW_SIZE / aspectRatio;
 
           return (
             <Pressable
@@ -100,7 +99,7 @@ export function GalleryPreviewSection({
               accessibilityRole="button"
               accessibilityLabel={`Gallery preview image ${index + 1}`}
               onPress={() => handleImagePress(index)}
-              style={[styles.previewItem, { width: PREVIEW_SIZE, height }]}
+              style={[styles.previewItem, styles.previewFrame]}
               testID={`gallery-preview-item-${index}`}
             >
               {uri ? (
@@ -137,6 +136,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: colors.surface,
+  },
+  previewFrame: {
+    width: PREVIEW_WIDTH,
+    height: PREVIEW_HEIGHT,
   },
   image: {
     width: '100%',

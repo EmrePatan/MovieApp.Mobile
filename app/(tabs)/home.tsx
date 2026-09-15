@@ -11,7 +11,6 @@ import { HomeListHeader } from '@/features/home/components/HomeListHeader';
 import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeComingUpSection } from '@/features/home/components/HomeComingUpSection';
 import { HomeSection } from '@/features/home/components/HomeSection';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { useHome } from '@/features/home/hooks/useHome';
@@ -75,9 +74,15 @@ export default function HomeScreen() {
 
   const handleComingUpItemPress = useCallback(
     (item: HomeItem) => {
-      router.push(buildCatalogDetailRoute(item.id, item.contentType === 'movie' ? 'movie' : 'tv'));
+      openCatalogDetailFromTab(
+        router,
+        item.id,
+        item.contentType === 'movie' ? 'movie' : 'tv',
+        'home',
+        { queryClient },
+      );
     },
-    [router],
+    [queryClient, router],
   );
 
   const handleExplorePress = useCallback(() => {

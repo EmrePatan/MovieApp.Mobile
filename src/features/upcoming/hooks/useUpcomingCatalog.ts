@@ -6,9 +6,9 @@ import { DEFAULT_UPCOMING_PAGE_SIZE } from '../types';
 
 export function useUpcomingCatalog(pageSize = DEFAULT_UPCOMING_PAGE_SIZE) {
   return useInfiniteQuery({
-    queryKey: upcomingCatalogInfiniteQueryKey(pageSize),
+    queryKey: upcomingCatalogInfiniteQueryKey(pageSize, 'followed'),
     queryFn: ({ pageParam, signal }) =>
-      getUpcomingCatalog({ page: pageParam, pageSize }, signal),
+      getUpcomingCatalog({ page: pageParam, pageSize, scope: 'followed' }, signal),
     initialPageParam: 1,
     getNextPageParam: getCatalogNextPageParam,
     staleTime: 60_000,

@@ -42,6 +42,11 @@ export function ProfileLibrarySection({
         subtitle={formatFollowingSubtitle(followingCount)}
         onPress={() => openLibraryStackScreen(router, '/following', '/(tabs)/profile')}
       />
+      <ProfileMenuRow
+        label="Coming Up"
+        subtitle="Followed releases and upcoming episodes"
+        onPress={() => openLibraryStackScreen(router, '/upcoming', '/(tabs)/profile')}
+      />
     </ProfileSection>
   );
 }

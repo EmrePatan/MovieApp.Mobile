@@ -38,9 +38,12 @@ export interface UpcomingCatalogItemResponse {
 
 export type UpcomingCatalogResponse = PaginatedResponse<UpcomingCatalogItemResponse>;
 
+export type UpcomingCatalogScope = 'catalog' | 'followed';
+
 export interface UpcomingCatalogRequest {
   page?: number;
   pageSize?: number;
+  scope?: UpcomingCatalogScope;
 }
 
 export const DEFAULT_UPCOMING_PAGE_SIZE = 20;

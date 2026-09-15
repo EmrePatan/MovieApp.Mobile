@@ -14,9 +14,8 @@ import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { SearchExploreLanding } from '@/features/discovery/components/SearchExploreLanding';
+import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
-import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchHistorySection } from '@/features/search/components/SearchHistorySection';
@@ -140,8 +139,7 @@ export default function SearchScreen() {
         return;
       }
 
-      prefetchCatalogDetail(queryClient, item.id, item.type);
-      router.push(buildCatalogDetailRoute(item.id, item.type));
+      openCatalogDetailFromTab(router, item.id, item.type, 'search', { queryClient });
     },
     [queryClient, router],
   );
@@ -150,8 +148,7 @@ export default function SearchScreen() {
     (item: HomeItem) => {
       Keyboard.dismiss();
       const itemType = item.contentType === 'movie' ? 'movie' : 'tv';
-      prefetchCatalogDetail(queryClient, item.id, itemType);
-      router.push(buildCatalogDetailRoute(item.id, itemType));
+      openCatalogDetailFromTab(router, item.id, itemType, 'search', { queryClient });
     },
     [queryClient, router],
   );
@@ -219,133 +216,139 @@ export default function SearchScreen() {
     [handleRefresh, isFetchingNextPage, isRefetching],
   );
 
+  const searchErrorMessage = searchQuery.isError
+    ? isApiError(searchQuery.error)
+      ? searchQuery.error.userMessage
+      : 'Unable to search right now. Please try again.'
+    : null;
+
   const listHeader = useMemo(
     () => (
-      <SearchScreenHeader
-        value={inputText}
-        onChangeText={setInputText}
-        onSubmit={handleSubmit}
-        onClear={handleClear}
-      >
-        {showAutocomplete ? (
-          <SearchSuggestionList
-            suggestions={autocompleteQuery.data?.items ?? []}
-            isLoading={autocompleteQuery.isLoading}
-            onSelect={handleSuggestionSelect}
+      <>
+        <SearchScreenHeader
+          value={inputText}
+          onChangeText={setInputText}
+          onSubmit={handleSubmit}
+          onClear={handleClear}
+        >
+          {showAutocomplete ? (
+            <SearchSuggestionList
+              suggestions={autocompleteQuery.data?.items ?? []}
+              isLoading={autocompleteQuery.isLoading}
+              onSelect={handleSuggestionSelect}
+            />
+          ) : null}
+          {hasActiveSearch ? (
+            <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+          ) : null}
+        </SearchScreenHeader>
+        {!hasActiveSearch && isAuthenticated && showExplore ? (
+          <SearchHistorySection
+            items={historyItems}
+            isLoading={historyQuery.isLoading}
+            isError={historyQuery.isError}
+            isClearing={clearHistory.isPending}
+            deletingId={deletingHistoryId}
+            onSelect={handleHistorySelect}
+            onDelete={handleDeleteHistoryItem}
+            onClearAll={handleClearHistory}
+            onRetry={() => void historyQuery.refetch()}
           />
         ) : null}
-        {hasActiveSearch ? (
-          <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+        {!hasActiveSearch && showExplore ? (
+          <SearchExploreLanding onItemPress={handleExploreItemPress} />
         ) : null}
-      </SearchScreenHeader>
+      </>
     ),
     [
       autocompleteQuery.data?.items,
       autocompleteQuery.isLoading,
+      clearHistory.isPending,
+      deletingHistoryId,
       handleClear,
+      handleClearHistory,
+      handleDeleteHistoryItem,
+      handleExploreItemPress,
+      handleHistorySelect,
       handleSubmit,
       handleSuggestionSelect,
       hasActiveSearch,
+      historyItems,
+      historyQuery,
       inputText,
+      isAuthenticated,
       showAutocomplete,
+      showExplore,
       typeFilter,
     ],
   );
 
-  const noResultsState = useMemo(
-    () => (
-      <SearchEmptyState
-        title={`No results for “${normalizedSubmittedQuery}”`}
-        message="Try a different spelling or a broader search term."
-      />
-    ),
-    [normalizedSubmittedQuery],
-  );
+  const listEmptyComponent = useMemo(() => {
+    if (!hasActiveSearch) {
+      return null;
+    }
 
-  if (hasActiveSearch) {
     if (searchQuery.isLoading && results.length === 0) {
-      return (
-        <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-          {listHeader}
-          <SearchLoadingState />
-        </SafeAreaView>
-      );
+      return <SearchLoadingState />;
     }
 
     if (searchQuery.isError && results.length === 0) {
-      const message = isApiError(searchQuery.error)
-        ? searchQuery.error.userMessage
-        : 'Unable to search right now. Please try again.';
-
       return (
-        <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-          {listHeader}
-          <View style={styles.errorContainer}>
-            <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
-          </View>
-        </SafeAreaView>
+        <View style={styles.errorContainer}>
+          <ErrorView
+            message={searchErrorMessage ?? 'Unable to search right now. Please try again.'}
+            onRetry={handleRefresh}
+            retryLabel="Try Again"
+          />
+        </View>
       );
     }
 
-    return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        <FlatList
-          data={results}
-          keyExtractor={searchResultKeyExtractor}
-          renderItem={renderResult}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={noResultsState}
-          ListFooterComponent={
-            searchQuery.isFetchingNextPage ? (
-              <View style={styles.footerLoading}>
-                <ActivityIndicator color={colors.accent} />
-              </View>
-            ) : null
-          }
-          refreshControl={refreshControl}
-          contentContainerStyle={styles.listContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.4}
-          initialNumToRender={layout.verticalList.initialNumToRender}
-          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-          windowSize={layout.verticalList.windowSize}
-          removeClippedSubviews
+    if (results.length === 0) {
+      return (
+        <SearchEmptyState
+          title={`No results for “${normalizedSubmittedQuery}”`}
+          message="Try a different spelling or a broader search term."
         />
-      </SafeAreaView>
-    );
-  }
+      );
+    }
+
+    return null;
+  }, [
+    handleRefresh,
+    hasActiveSearch,
+    normalizedSubmittedQuery,
+    results.length,
+    searchErrorMessage,
+    searchQuery.isError,
+    searchQuery.isLoading,
+  ]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
-        data={[]}
-        renderItem={() => null}
-        ListHeaderComponent={
-          <>
-            {listHeader}
-            {isAuthenticated && showExplore ? (
-              <SearchHistorySection
-                items={historyItems}
-                isLoading={historyQuery.isLoading}
-                isError={historyQuery.isError}
-                isClearing={clearHistory.isPending}
-                deletingId={deletingHistoryId}
-                onSelect={handleHistorySelect}
-                onDelete={handleDeleteHistoryItem}
-                onClearAll={handleClearHistory}
-                onRetry={() => void historyQuery.refetch()}
-              />
-            ) : null}
-            {showExplore ? (
-              <SearchExploreLanding onItemPress={handleExploreItemPress} />
-            ) : null}
-          </>
+        data={hasActiveSearch ? results : []}
+        keyExtractor={searchResultKeyExtractor}
+        renderItem={renderResult}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmptyComponent}
+        ListFooterComponent={
+          hasActiveSearch && searchQuery.isFetchingNextPage ? (
+            <View style={styles.footerLoading}>
+              <ActivityIndicator color={colors.accent} />
+            </View>
+          ) : null
         }
+        refreshControl={hasActiveSearch ? refreshControl : undefined}
         contentContainerStyle={styles.listContent}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        onEndReached={hasActiveSearch ? handleLoadMore : undefined}
+        onEndReachedThreshold={0.4}
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
+        removeClippedSubviews={hasActiveSearch}
       />
     </SafeAreaView>
   );

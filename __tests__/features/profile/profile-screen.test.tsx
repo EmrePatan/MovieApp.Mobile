@@ -115,8 +115,8 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('3 followed titles')).toBeTruthy();
     expect(screen.queryByText('8 ratings')).toBeNull();
     expect(screen.queryByText('2 reviews')).toBeNull();
-    expect(screen.queryByText('Upcoming')).toBeNull();
-    expect(screen.queryByText('Releases and followed TV episodes')).toBeNull();
+    expect(screen.getByText('Coming Up')).toBeTruthy();
+    expect(screen.getByText('Followed releases and upcoming episodes')).toBeTruthy();
   });
 
   it('shows month detail when a bar is pressed', () => {
@@ -136,12 +136,14 @@ describe('ProfileScreen', () => {
     fireEvent.press(screen.getByLabelText('Watchlist'));
     fireEvent.press(screen.getByLabelText('Watch History'));
     fireEvent.press(screen.getByLabelText('Following'));
+    fireEvent.press(screen.getByLabelText('Coming Up'));
 
     expect(mockPush).toHaveBeenCalledWith('/profile/edit');
     expect(mockPush).toHaveBeenCalledWith('/favorites');
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/watchlist');
     expect(mockPush).toHaveBeenCalledWith('/watch-history');
     expect(mockPush).toHaveBeenCalledWith('/following');
+    expect(mockPush).toHaveBeenCalledWith('/upcoming');
   });
 
   it('renders new-user empty analytics states', () => {

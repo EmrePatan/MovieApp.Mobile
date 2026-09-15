@@ -7,5 +7,9 @@ export function buildUpcomingCatalogPath(criteria: UpcomingCatalogRequest = {}):
     pageSize: String(criteria.pageSize ?? DEFAULT_UPCOMING_PAGE_SIZE),
   });
 
+  if (criteria.scope) {
+    params.set('scope', criteria.scope);
+  }
+
   return `/api/catalog/upcoming?${params.toString()}`;
 }
