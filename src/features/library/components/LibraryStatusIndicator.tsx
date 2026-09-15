@@ -20,6 +20,8 @@ function resolveAccentColor(status: LibraryCollectionStatus): string {
       return colors.libraryWatching;
     case 'saved':
       return colors.textSecondary;
+    case 'liked':
+      return colors.accent;
     case 'watched':
       return colors.libraryCompleted;
     default:
@@ -35,6 +37,8 @@ function resolveIcon(status: LibraryCollectionStatus): keyof typeof Ionicons.gly
       return 'play-circle-outline';
     case 'saved':
       return 'bookmark-outline';
+    case 'liked':
+      return 'heart-outline';
     case 'watched':
       return 'eye-outline';
     default:

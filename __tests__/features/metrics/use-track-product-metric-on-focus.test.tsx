@@ -32,4 +32,11 @@ describe('useTrackProductMetricOnFocus', () => {
 
     expect(trackProductMetricOnFocus).not.toHaveBeenCalled();
   });
+
+  it('tracks library_opened once per focus when enabled', () => {
+    renderHook(() => useTrackProductMetricOnFocus(PRODUCT_METRICS.libraryOpened, true));
+
+    expect(trackProductMetricOnFocus).toHaveBeenCalledTimes(1);
+    expect(trackProductMetricOnFocus).toHaveBeenCalledWith(PRODUCT_METRICS.libraryOpened);
+  });
 });

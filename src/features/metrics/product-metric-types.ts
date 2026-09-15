@@ -7,6 +7,8 @@ export const PRODUCT_METRICS = {
   worldCinemaOpened: 'world_cinema_opened',
   contentDetailOpened: 'content_detail_opened',
   pickSomethingUsed: 'pick_something_used',
+  libraryOpened: 'library_opened',
+  libraryFilterSelected: 'library_filter_selected',
 } as const;
 
 export type ProductMetricName = (typeof PRODUCT_METRICS)[keyof typeof PRODUCT_METRICS];

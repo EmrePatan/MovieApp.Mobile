@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { LibraryHubContent } from '@/features/library/components/LibraryHubContent';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 
 const mockPush = jest.fn();
-const mockOpenLibraryStackScreen = jest.fn();
+const mockOpenCatalogDetailFromTab = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
@@ -16,117 +17,181 @@ jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(() => ({ isAuthenticated: true })),
 }));
 
-jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
-  useCurrentProfile: jest.fn(() => ({
-    data: { displayName: 'Emre' },
-    refetch: jest.fn(),
-  })),
+jest.mock('@/features/details/shared/navigation/open-catalog-detail-from-tab', () => ({
+  openCatalogDetailFromTab: (...args: unknown[]) => mockOpenCatalogDetailFromTab(...args),
 }));
 
-jest.mock('@/features/profile/hooks/useProfileStatistics', () => ({
-  useProfileStatistics: jest.fn(() => ({
+jest.mock('@/features/metrics/track-product-metric', () => ({
+  trackProductMetric: jest.fn(),
+}));
+
+const mockRefetch = jest.fn();
+const mockFetchNextPage = jest.fn();
+
+jest.mock('@/features/library/hooks/useLibrary', () => ({
+  useLibrary: jest.fn(() => ({
     data: {
-      summary: {
-        moviesWatched: 12,
-        episodesWatched: 48,
-        showsStarted: 4,
-        showsCompleted: 1,
-        ratingsCount: 8,
-        reviewsCount: 2,
-        favoritesCount: 6,
-        watchlistCount: 2,
-        averageStarRating: 4.1,
-      },
-      activity: { last12Months: [] },
-      genres: [],
-      insights: [],
-      milestones: [],
-    },
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-    isRefetching: false,
-  })),
-}));
-
-jest.mock('@/features/following/hooks/useFollowingCount', () => ({
-  useFollowingCount: jest.fn(() => ({
-    totalCount: 3,
-    refetch: jest.fn(),
-    isRefetching: false,
-  })),
-}));
-
-jest.mock('@/features/home/hooks/useHome', () => ({
-  useHome: jest.fn(() => ({
-    data: {
-      sections: [
+      pages: [
         {
-          type: 'ContinueWatching',
-          title: 'Continue Watching',
-          displayOrder: 1,
           items: [
             {
               id: 'tv-1',
-              contentType: 'tv',
+              type: 'tv',
               title: 'In Progress Show',
               originalTitle: null,
-              posterUrl: null,
+              posterUrl: '/poster.jpg',
               backdropUrl: null,
-              releaseDate: null,
-              voteAverage: 8,
-              voteCount: 10,
-              seasonNumber: 2,
-              episodeNumber: 4,
-              episodeName: 'Episode Four',
+              year: 2020,
+              voteAverage: 8.2,
+              addedAt: null,
+              watchedAt: null,
+              lastActivityAt: '2026-01-01T00:00:00Z',
+              progressPercentage: 40,
+              nextEpisode: {
+                episodeId: 'ep-2',
+                seasonNumber: 2,
+                episodeNumber: 4,
+                title: 'Episode Four',
+              },
+              collectionStatus: 'watching',
             },
           ],
+          page: 1,
+          pageSize: 24,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
         },
       ],
-      isPersonalized: true,
     },
-    refetch: jest.fn(),
+    isLoading: false,
+    isError: false,
     isRefetching: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    isFetchNextPageError: false,
+    hasNextPage: false,
+    refetch: mockRefetch,
+    fetchNextPage: mockFetchNextPage,
   })),
 }));
 
-jest.mock('@/features/library/navigation/library-stack-navigation', () => ({
-  openLibraryStackScreen: (...args: unknown[]) => mockOpenLibraryStackScreen(...args),
-}));
+const { useLibrary } = jest.requireMock('@/features/library/hooks/useLibrary') as {
+  useLibrary: jest.Mock;
+};
 
 describe('LibraryHubContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useLibrary.mockImplementation(() => ({
+      data: {
+        pages: [
+          {
+            items: [
+              {
+                id: 'tv-1',
+                type: 'tv',
+                title: 'In Progress Show',
+                originalTitle: null,
+                posterUrl: '/poster.jpg',
+                backdropUrl: null,
+                year: 2020,
+                voteAverage: 8.2,
+                addedAt: null,
+                watchedAt: null,
+                lastActivityAt: '2026-01-01T00:00:00Z',
+                progressPercentage: 40,
+                nextEpisode: {
+                  episodeId: 'ep-2',
+                  seasonNumber: 2,
+                  episodeNumber: 4,
+                  title: 'Episode Four',
+                },
+                collectionStatus: 'watching',
+              },
+            ],
+            page: 1,
+            pageSize: 24,
+            totalCount: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isRefetching: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isFetchNextPageError: false,
+      hasNextPage: false,
+      refetch: mockRefetch,
+      fetchNextPage: mockFetchNextPage,
+    }));
   });
 
-  it('renders library summary and collection destinations', () => {
+  it('defaults to Watching category and renders the grid item', () => {
     render(<LibraryHubContent />);
 
     expect(screen.getByText('My Library')).toBeTruthy();
-    expect(screen.getAllByText('Watching').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Completed')).toBeTruthy();
-    expect(screen.getByText('Saved')).toBeTruthy();
-    expect(screen.getByLabelText('Favorites')).toBeTruthy();
-    expect(screen.getByLabelText('Watch History')).toBeTruthy();
-  });
-
-  it('renders continue watching with episode detail and watching status', () => {
-    render(<LibraryHubContent />);
-
-    expect(screen.getByText('Continue Watching')).toBeTruthy();
-    expect(screen.getByText('In Progress Show')).toBeTruthy();
+    expect(screen.getByLabelText('Watching category')).toBeTruthy();
+    expect(screen.getByLabelText('In Progress Show, Watching')).toBeTruthy();
     expect(screen.getByText('S2 · E4 · Episode Four')).toBeTruthy();
+    expect(useLibrary).toHaveBeenCalledWith('watching', 'all');
   });
 
-  it('navigates to library destinations', () => {
+  it('tracks filter metric when category changes', () => {
     render(<LibraryHubContent />);
 
-    fireEvent.press(screen.getByLabelText('Favorites'));
+    fireEvent.press(screen.getByLabelText('Liked category'));
 
-    expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
+    expect(trackProductMetric).toHaveBeenCalledWith('library_filter_selected');
+    expect(useLibrary).toHaveBeenLastCalledWith('liked', 'all');
+  });
+
+  it('tracks filter metric when media type changes', () => {
+    render(<LibraryHubContent />);
+
+    fireEvent.press(screen.getByLabelText('Filter Movies'));
+
+    expect(trackProductMetric).toHaveBeenCalledWith('library_filter_selected');
+    expect(useLibrary).toHaveBeenLastCalledWith('watching', 'movie');
+  });
+
+  it('navigates to catalog detail from grid item', () => {
+    render(<LibraryHubContent />);
+
+    fireEvent.press(screen.getByLabelText('In Progress Show, Watching'));
+
+    expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
       expect.anything(),
-      '/favorites',
-      '/(tabs)/library',
+      'tv-1',
+      'tv',
+      'library',
+      expect.objectContaining({ queryClient: expect.anything() }),
     );
+  });
+
+  it('shows category empty state with Browse Discover CTA', () => {
+    useLibrary.mockImplementation(() => ({
+      data: { pages: [{ items: [], page: 1, pageSize: 24, totalCount: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false }] },
+      isLoading: false,
+      isError: false,
+      isRefetching: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isFetchNextPageError: false,
+      hasNextPage: false,
+      refetch: mockRefetch,
+      fetchNextPage: mockFetchNextPage,
+    }));
+
+    render(<LibraryHubContent />);
+
+    expect(screen.getByText('Nothing in progress')).toBeTruthy();
+    fireEvent.press(screen.getByText('Browse Discover'));
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/discover');
   });
 });

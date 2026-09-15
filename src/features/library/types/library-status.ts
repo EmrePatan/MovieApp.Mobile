@@ -1,4 +1,9 @@
-export type LibraryCollectionStatus = 'watching' | 'completed' | 'saved' | 'watched';
+export type LibraryCollectionStatus =
+  | 'watching'
+  | 'completed'
+  | 'saved'
+  | 'watched'
+  | 'liked';
 
 export interface LibraryStatusPresentation {
   status: LibraryCollectionStatus;
