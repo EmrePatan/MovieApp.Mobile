@@ -33,6 +33,8 @@ import {
 } from '@/features/navigation/discovery-route-params';
 import { reconcileWatchProviderSelection } from '@/features/discovery/watch-provider-types';
 import type { StreamingDiscoverState } from '@/features/discovery/streaming-discover-types';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
@@ -48,6 +50,7 @@ export default function StreamingDiscoverScreen() {
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
   const { region: userRegion, isHydrated } = useRegionalPreference();
+  useTrackProductMetricOnFocus(PRODUCT_METRICS.streamingServicesOpened, isHydrated);
 
   const discoverState = useMemo(
     () => parseStreamingDiscoverParams(rawParams, userRegion),

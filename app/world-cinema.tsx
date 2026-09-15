@@ -16,6 +16,8 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { OriginCountrySelector } from '@/features/regions/components/OriginCountrySelector';
 import { useWorldCinema } from '@/features/discovery/hooks/useWorldCinema';
 import {
@@ -44,6 +46,7 @@ export default function WorldCinemaScreen() {
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
   const [countryExpanded, setCountryExpanded] = useState(false);
+  useTrackProductMetricOnFocus(PRODUCT_METRICS.worldCinemaOpened);
 
   const discoverState = useMemo(
     () => parseWorldCinemaParams(rawParams),

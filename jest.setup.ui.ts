@@ -73,3 +73,8 @@ jest.mock('expo-linear-gradient', () => ({
     children?: mockReact.ReactNode;
   }) => mockReact.createElement('LinearGradient', props, children),
 }));
+
+jest.mock('@/features/metrics/use-track-product-metric-on-focus', () => ({
+  useTrackProductMetricOnFocus: jest.fn(),
+}));
+

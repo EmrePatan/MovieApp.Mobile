@@ -16,6 +16,12 @@ jest.mock('@/features/details/tv/api/tv-api', () => ({
   getTvShowDetails: jest.fn(),
 }));
 
+jest.mock('@/features/metrics/track-product-metric', () => ({
+  trackProductMetric: jest.fn(),
+  trackProductMetricOnFocus: jest.fn(),
+  resetProductMetricTrackingForTests: jest.fn(),
+}));
+
 describe('catalog detail navigation', () => {
   const movieId = '65de321a-597a-46ec-a499-67ad9e20795e';
 

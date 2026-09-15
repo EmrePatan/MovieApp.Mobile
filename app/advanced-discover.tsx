@@ -42,6 +42,8 @@ import {
   ADVANCED_DISCOVER_PARAM_KEYS,
   setDiscoveryRouteParams,
 } from '@/features/navigation/discovery-route-params';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
@@ -63,6 +65,7 @@ export default function AdvancedDiscoverScreen() {
   const rawParams = useLocalSearchParams();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const { region: userRegion } = useRegionalPreference();
+  useTrackProductMetricOnFocus(PRODUCT_METRICS.advancedDiscoverOpened);
 
   const discoverState = useMemo(() => parseAdvancedDiscoverParams(rawParams), [rawParams]);
   const { mediaType, filters } = discoverState;

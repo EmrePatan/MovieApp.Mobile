@@ -13,6 +13,8 @@ import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { useOnTvThisWeek } from '@/features/discovery/hooks/useOnTvThisWeek';
@@ -27,6 +29,7 @@ import { spacing } from '@/theme/spacing';
 const RETURN_ROUTE = '/on-tv-this-week';
 
 export default function OnTvThisWeekScreen() {
+  useTrackProductMetricOnFocus(PRODUCT_METRICS.onTvThisWeekOpened);
   const router = useRouter();
   const queryClient = useQueryClient();
   const resultsQuery = useOnTvThisWeek();

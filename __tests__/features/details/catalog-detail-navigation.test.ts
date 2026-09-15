@@ -1,3 +1,9 @@
+jest.mock('@/features/metrics/track-product-metric', () => ({
+  trackProductMetric: jest.fn(),
+  trackProductMetricOnFocus: jest.fn(),
+  resetProductMetricTrackingForTests: jest.fn(),
+}));
+
 import {
   getCatalogDetailWatchRegion,
   openCatalogDetailFromLibraryStack,

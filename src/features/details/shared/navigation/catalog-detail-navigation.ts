@@ -1,5 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { ImperativeRouter } from 'expo-router';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import { getMovieDetailsByTmdbId } from '../../movie/api/movie-api';
 import { getTvShowDetailsByTmdbId } from '../../tv/api/tv-api';
 import type { PersonFilmographyEntry } from '../../person/types';
@@ -93,6 +95,10 @@ export function openCatalogDetailFromTab(
   origin: CatalogDetailTabOrigin,
   options?: OpenCatalogDetailOptions,
 ): void {
+  if (origin === 'discover') {
+    trackProductMetric(PRODUCT_METRICS.contentDetailOpened);
+  }
+
   lastCatalogDetailLibraryReturnHref = null;
   lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
   lastCatalogDetailOrigin = origin;
@@ -117,6 +123,10 @@ export function openCatalogDetailFromLibraryStack(
   origin: CatalogDetailLibraryOrigin,
   options?: OpenCatalogDetailOptions,
 ): void {
+  if (origin === 'discover') {
+    trackProductMetric(PRODUCT_METRICS.contentDetailOpened);
+  }
+
   lastCatalogDetailOrigin = null;
   lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
   lastCatalogDetailLibraryReturnHref =
