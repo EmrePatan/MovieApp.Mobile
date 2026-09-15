@@ -31,6 +31,7 @@ function RootNavigator() {
         <Stack.Screen name="upcoming" />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="discover" />
+        <Stack.Screen name="advanced-discover" />
         <Stack.Screen name="profile" />
       </Stack>
     </>

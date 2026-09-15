@@ -1,7 +1,23 @@
 import { api } from '@/api/client';
 import type { SearchResponse } from '@/features/search/types';
-import { buildBrowsePath, buildExplorePreviewPath, buildGenresPath } from './routes';
+import {
+  buildAdvancedDiscoverPath,
+  buildBrowsePath,
+  buildExplorePreviewPath,
+  buildGenresPath,
+} from './routes';
+import type { AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
+
+export async function getAdvancedDiscover(
+  criteria: AdvancedDiscoverRequest,
+  signal?: AbortSignal,
+): Promise<SearchResponse> {
+  return api.get<SearchResponse>(buildAdvancedDiscoverPath(criteria), {
+    authenticated: false,
+    signal,
+  });
+}
 
 export async function getBrowseDiscovery(
   criteria: DiscoveryBrowseRequest,

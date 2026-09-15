@@ -1,4 +1,9 @@
 import type {
+  AdvancedDiscoverFilters,
+  AdvancedDiscoverMediaType,
+} from '../advanced-discover-types';
+import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
+import type {
   DiscoveryBrowseFilters,
   DiscoveryBrowseMode,
   DiscoveryTypeFilter,
@@ -27,4 +32,27 @@ export function discoveryBrowseInfiniteQueryKey(
 
 export function genresQueryKey() {
   return ['genres'] as const;
+}
+
+export function advancedDiscoverInfiniteQueryKey(
+  mediaType: AdvancedDiscoverMediaType,
+  filters: AdvancedDiscoverFilters,
+  pageSize = DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
+) {
+  return [
+    'discovery',
+    'advanced',
+    mediaType,
+    filters.genreIds,
+    filters.year,
+    filters.yearFrom,
+    filters.yearTo,
+    filters.minRating,
+    filters.minRuntimeMinutes,
+    filters.maxRuntimeMinutes,
+    filters.originalLanguage,
+    filters.originCountry,
+    filters.sort,
+    pageSize,
+  ] as const;
 }

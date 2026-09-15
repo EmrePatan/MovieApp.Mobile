@@ -1,4 +1,6 @@
+import type { AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest } from '../types';
+import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import { DEFAULT_DISCOVERY_PAGE_SIZE } from '../types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 
@@ -43,4 +45,54 @@ export function buildBrowsePath(criteria: DiscoveryBrowseRequest): string {
   }
 
   return `/api/discovery/browse?${params.toString()}`;
+}
+
+export function buildAdvancedDiscoverPath(criteria: AdvancedDiscoverRequest): string {
+  const params = new URLSearchParams({
+    mediaType: criteria.mediaType,
+    page: String(criteria.page ?? 1),
+    pageSize: String(criteria.pageSize ?? DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE),
+  });
+
+  for (const genreId of criteria.genreIds) {
+    params.append('genreId', genreId);
+  }
+
+  if (criteria.year != null) {
+    params.set('year', String(criteria.year));
+  }
+
+  if (criteria.yearFrom != null) {
+    params.set('yearFrom', String(criteria.yearFrom));
+  }
+
+  if (criteria.yearTo != null) {
+    params.set('yearTo', String(criteria.yearTo));
+  }
+
+  if (criteria.minRating != null) {
+    params.set('minRating', String(criteria.minRating));
+  }
+
+  if (criteria.minRuntimeMinutes != null) {
+    params.set('minRuntimeMinutes', String(criteria.minRuntimeMinutes));
+  }
+
+  if (criteria.maxRuntimeMinutes != null) {
+    params.set('maxRuntimeMinutes', String(criteria.maxRuntimeMinutes));
+  }
+
+  if (criteria.originalLanguage) {
+    params.set('originalLanguage', criteria.originalLanguage);
+  }
+
+  if (criteria.originCountry) {
+    params.set('originCountry', criteria.originCountry);
+  }
+
+  if (criteria.sort) {
+    params.set('sort', criteria.sort);
+  }
+
+  return `/api/discovery/advanced?${params.toString()}`;
 }
