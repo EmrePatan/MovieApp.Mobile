@@ -9,7 +9,10 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { Screen } from '@/components/common/Screen';
 import { ProfileAnalyticsDashboard } from '@/features/profile/components/ProfileAnalyticsDashboard';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
+import { ProfileHeroStats } from '@/features/profile/components/ProfileHeroStats';
+import { ProfileLibrarySection } from '@/features/profile/components/ProfileLibrarySection';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
+import { useFollowingCount } from '@/features/following/hooks/useFollowingCount';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileStatistics } from '@/features/profile/hooks/useProfileStatistics';
 import { colors } from '@/theme/colors';
@@ -20,16 +23,19 @@ export default function ProfileScreen() {
   const { logout } = useAuth();
   const profileQuery = useCurrentProfile();
   const statisticsQuery = useProfileStatistics();
+  const followingCountQuery = useFollowingCount();
 
   const profile = profileQuery.data;
   const isRefreshing =
     (profileQuery.isRefetching && !profileQuery.isLoading) ||
-    (statisticsQuery.isRefetching && !statisticsQuery.isLoading);
+    (statisticsQuery.isRefetching && !statisticsQuery.isLoading) ||
+    (followingCountQuery.isRefetching && !followingCountQuery.isLoading);
 
   const handleRefresh = useCallback(() => {
     void profileQuery.refetch();
     void statisticsQuery.refetch();
-  }, [profileQuery, statisticsQuery]);
+    void followingCountQuery.refetch();
+  }, [followingCountQuery, profileQuery, statisticsQuery]);
 
   const handleLogout = useCallback(() => {
     void logout();
@@ -90,7 +96,14 @@ export default function ProfileScreen() {
             retryLabel="Retry"
           />
         ) : statisticsQuery.data ? (
-          <ProfileAnalyticsDashboard statistics={statisticsQuery.data} />
+          <>
+            <ProfileHeroStats summary={statisticsQuery.data.summary} />
+            <ProfileLibrarySection
+              summary={statisticsQuery.data.summary}
+              followingCount={followingCountQuery.totalCount}
+            />
+            <ProfileAnalyticsDashboard statistics={statisticsQuery.data} />
+          </>
         ) : null}
 
         <ProfileSection title="Account">

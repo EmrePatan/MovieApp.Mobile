@@ -25,6 +25,7 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="watch-history" />
         <Stack.Screen name="favorites" />
+        <Stack.Screen name="following" />
         <Stack.Screen name="discover" />
         <Stack.Screen name="profile" />
       </Stack>

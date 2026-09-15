@@ -1,39 +1,45 @@
-import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { UserStatisticsSummaryResponse } from '../types';
+import {
+  formatFavoritesSubtitle,
+  formatFollowingSubtitle,
+  formatWatchHistorySubtitle,
+  formatWatchlistSubtitle,
+} from '../utils/library-copy';
 import { ProfileMenuRow, ProfileSection } from './ProfileSection';
 
 interface ProfileLibrarySectionProps {
   summary: UserStatisticsSummaryResponse;
+  followingCount: number;
 }
 
-export function ProfileLibrarySection({ summary }: ProfileLibrarySectionProps) {
+export function ProfileLibrarySection({
+  summary,
+  followingCount,
+}: ProfileLibrarySectionProps) {
   const router = useRouter();
 
   return (
-    <ProfileSection title="Your Library">
+    <ProfileSection title="My Library">
       <ProfileMenuRow
         label="Favorites"
-        subtitle={`${summary.favoritesCount} saved titles`}
+        subtitle={formatFavoritesSubtitle(summary.favoritesCount)}
         onPress={() => router.push('/favorites')}
       />
       <ProfileMenuRow
         label="Watchlist"
-        subtitle={`${summary.watchlistCount} lists`}
+        subtitle={formatWatchlistSubtitle(summary.watchlistCount)}
         onPress={() => router.push('/(tabs)/watchlist')}
       />
       <ProfileMenuRow
         label="Watch History"
-        subtitle={`${summary.moviesWatched + summary.episodesWatched} watched items`}
+        subtitle={formatWatchHistorySubtitle(summary.moviesWatched, summary.episodesWatched)}
         onPress={() => router.push('/watch-history')}
       />
       <ProfileMenuRow
-        label="Your Ratings"
-        subtitle={`${summary.ratingsCount} ratings`}
-      />
-      <ProfileMenuRow
-        label="Your Reviews"
-        subtitle={`${summary.reviewsCount} reviews`}
+        label="Following"
+        subtitle={formatFollowingSubtitle(followingCount)}
+        onPress={() => router.push('/following')}
       />
     </ProfileSection>
   );

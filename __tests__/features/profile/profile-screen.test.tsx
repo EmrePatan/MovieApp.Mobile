@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import ProfileScreen from '../../../app/(tabs)/profile';
 import { useAuth } from '@/auth/useAuth';
+import { useFollowingCount } from '@/features/following/hooks/useFollowingCount';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileStatistics } from '@/features/profile/hooks/useProfileStatistics';
 import { createProfileStatisticsFixture } from '@/features/profile/utils/profile-statistics-fixtures';
@@ -22,6 +23,10 @@ jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
 
 jest.mock('@/features/profile/hooks/useProfileStatistics', () => ({
   useProfileStatistics: jest.fn(),
+}));
+
+jest.mock('@/features/following/hooks/useFollowingCount', () => ({
+  useFollowingCount: jest.fn(),
 }));
 
 describe('ProfileScreen', () => {
@@ -50,6 +55,13 @@ describe('ProfileScreen', () => {
       refetch: jest.fn(),
       isRefetching: false,
     });
+    (useFollowingCount as jest.Mock).mockReturnValue({
+      totalCount: 3,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+      isRefetching: false,
+    });
   });
 
   it('renders premium profile header and hero stats', () => {
@@ -62,6 +74,47 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('Your Year')).toBeTruthy();
     expect(screen.getByText('Your Taste')).toBeTruthy();
     expect(screen.getByText('Movies vs Series')).toBeTruthy();
+  });
+
+  it('shows My Library before analytics sections', () => {
+    render(<ProfileScreen />);
+
+    function collectText(node: unknown): string[] {
+      if (!node || typeof node !== 'object') {
+        return [];
+      }
+
+      if ('children' in node && Array.isArray((node as { children?: unknown }).children)) {
+        return (node as { children: unknown[] }).children.flatMap((child) => {
+          if (typeof child === 'string') {
+            return [child];
+          }
+
+          return collectText(child);
+        });
+      }
+
+      return [];
+    }
+
+    const texts = collectText(screen.toJSON());
+    const libraryIndex = texts.findIndex((text) => text === 'My Library');
+    const insightIndex = texts.findIndex((text) => text === 'Comedy is your top genre.');
+
+    expect(libraryIndex).toBeGreaterThan(-1);
+    expect(insightIndex).toBeGreaterThan(-1);
+    expect(libraryIndex).toBeLessThan(insightIndex);
+  });
+
+  it('renders My Library subtitles and removes ratings/reviews rows', () => {
+    render(<ProfileScreen />);
+
+    expect(screen.getByText('6 saved titles')).toBeTruthy();
+    expect(screen.getByText('2 lists')).toBeTruthy();
+    expect(screen.getByText('12 movies · 48 episodes')).toBeTruthy();
+    expect(screen.getByText('3 followed titles')).toBeTruthy();
+    expect(screen.queryByText('8 ratings')).toBeNull();
+    expect(screen.queryByText('2 reviews')).toBeNull();
   });
 
   it('shows month detail when a bar is pressed', () => {
@@ -78,11 +131,15 @@ describe('ProfileScreen', () => {
 
     fireEvent.press(screen.getByLabelText('Edit profile'));
     fireEvent.press(screen.getByLabelText('Favorites'));
+    fireEvent.press(screen.getByLabelText('Watchlist'));
     fireEvent.press(screen.getByLabelText('Watch History'));
+    fireEvent.press(screen.getByLabelText('Following'));
 
     expect(mockPush).toHaveBeenCalledWith('/profile/edit');
     expect(mockPush).toHaveBeenCalledWith('/favorites');
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/watchlist');
     expect(mockPush).toHaveBeenCalledWith('/watch-history');
+    expect(mockPush).toHaveBeenCalledWith('/following');
   });
 
   it('renders new-user empty analytics states', () => {
@@ -115,9 +172,20 @@ describe('ProfileScreen', () => {
       refetch: jest.fn(),
       isRefetching: false,
     });
+    (useFollowingCount as jest.Mock).mockReturnValue({
+      totalCount: 0,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+      isRefetching: false,
+    });
 
     render(<ProfileScreen />);
 
+    expect(screen.getByText('0 saved titles')).toBeTruthy();
+    expect(screen.getByText('0 lists')).toBeTruthy();
+    expect(screen.getByText('0 movies · 0 episodes')).toBeTruthy();
+    expect(screen.getByText('0 followed titles')).toBeTruthy();
     expect(screen.getByText('Start watching to build your activity timeline.')).toBeTruthy();
     expect(screen.getByText('Your favorite genres will appear here as you watch.')).toBeTruthy();
     expect(screen.getByText('Rate a few titles to reveal your rating style.')).toBeTruthy();
