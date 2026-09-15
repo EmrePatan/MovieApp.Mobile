@@ -41,7 +41,12 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
           <PlayTrailerButton contentType="tv" contentId={show.id} />
         }
       />
-      <DetailActionBar contentType="tv" contentId={show.id} showWatched />
+      <DetailActionBar
+        contentType="tv"
+        contentId={show.id}
+        showWatched
+        showFollow={show.canFollow}
+      />
       <DetailOverview overview={show.overview} />
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />

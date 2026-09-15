@@ -44,7 +44,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         contentType="movie"
         contentId={movie.id}
         showWatched={movie.isReleased}
-        releaseDate={movie.releaseDate}
+        showReleaseAlert={movie.canSetReleaseAlert}
       />
       <CollectionLinkRow collection={movie.collection} />
       <DetailOverview overview={movie.overview} />

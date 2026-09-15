@@ -65,6 +65,8 @@ const baseMovie: MovieDetailsResponse = {
   genres: ['Action'],
   collection: null,
   isReleased: true,
+  canFollowForRelease: false,
+  canSetReleaseAlert: false,
 };
 
 describe('movie detail collection row', () => {

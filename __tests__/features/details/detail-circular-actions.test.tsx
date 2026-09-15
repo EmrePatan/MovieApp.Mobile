@@ -117,11 +117,46 @@ describe('DetailActionBar premium circular actions', () => {
   });
 
   it('keeps movie follow visible when watched is hidden for upcoming releases', () => {
-    render(<DetailActionBar contentType="movie" contentId="movie-id" showWatched={false} />);
+    render(
+      <DetailActionBar
+        contentType="movie"
+        contentId="movie-id"
+        showWatched={false}
+        showReleaseAlert
+      />,
+    );
 
     expect(screen.queryByText('Watched')).toBeNull();
     expect(screen.getByText('MovieFollow')).toBeTruthy();
     expect(screen.getByText('Favorite')).toBeTruthy();
     expect(screen.getByText('Watchlist')).toBeTruthy();
+  });
+
+  it('25. reflows action bar without follow slot when hidden', () => {
+    render(
+      <DetailActionBar
+        contentType="tv"
+        contentId="tv-id"
+        showWatched
+        showFollow={false}
+      />,
+    );
+
+    expect(screen.queryByText('Follow')).toBeNull();
+    expect(screen.getByText('Watched')).toBeTruthy();
+  });
+
+  it('hides movie release alert when showReleaseAlert is false', () => {
+    render(
+      <DetailActionBar
+        contentType="movie"
+        contentId="movie-id"
+        showWatched
+        showReleaseAlert={false}
+      />,
+    );
+
+    expect(screen.queryByText('MovieFollow')).toBeNull();
+    expect(screen.getByText('Watched')).toBeTruthy();
   });
 });

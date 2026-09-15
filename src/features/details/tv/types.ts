@@ -25,4 +25,5 @@ export interface TvShowDetailsResponse {
   status: string;
   genres: string[];
   seasons: SeasonSummaryResponse[];
+  canFollow: boolean;
 }

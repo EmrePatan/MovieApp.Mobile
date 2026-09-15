@@ -81,6 +81,8 @@ const movie: MovieDetailsResponse = {
   genres: ['Sci-Fi'],
   collection: null,
   isReleased: true,
+  canFollowForRelease: false,
+  canSetReleaseAlert: false,
 };
 
 const show: TvShowDetailsResponse = {
@@ -99,6 +101,7 @@ const show: TvShowDetailsResponse = {
   status: 'Ended',
   genres: ['Drama'],
   seasons: [],
+  canFollow: false,
 };
 
 describe('detail actions integration', () => {

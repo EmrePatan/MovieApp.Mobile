@@ -102,7 +102,9 @@ describe('TV Detail watched action', () => {
 
   it('renders Follow on TV detail action row', () => {
     setupProgress();
-    render(<DetailActionBar contentType="tv" contentId={tvShowId} showWatched />);
+    render(
+      <DetailActionBar contentType="tv" contentId={tvShowId} showWatched showFollow />,
+    );
 
     expect(screen.getByText('Follow')).toBeTruthy();
     expect(screen.getByText('Watched')).toBeTruthy();

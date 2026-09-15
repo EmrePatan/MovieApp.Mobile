@@ -114,6 +114,8 @@ const movie: MovieDetailsResponse = {
   genres: [],
   collection: null,
   isReleased: true,
+  canFollowForRelease: false,
+  canSetReleaseAlert: false,
 };
 
 describe('detail UI', () => {
@@ -147,6 +149,7 @@ describe('detail UI', () => {
       status: 'Ended',
       genres: ['Drama'],
       seasons: [],
+      canFollow: false,
     };
 
     render(<TvShowDetailContent show={show} />);

@@ -9,6 +9,11 @@ jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
   PlayTrailerButton: () => null,
 }));
 
+jest.mock('@/features/gallery/hooks/useGallery', () => ({
+  useMovieGallery: () => ({ data: undefined, isLoading: false }),
+  useTvShowGallery: () => ({ data: undefined, isLoading: false }),
+}));
+
 jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
   DetailActionBar: ({
     contentType,
@@ -80,6 +85,8 @@ const baseMovie: Omit<MovieDetailsResponse, 'isReleased'> = {
   voteCount: 0,
   genres: ['Action'],
   collection: null,
+  canFollowForRelease: true,
+  canSetReleaseAlert: true,
 };
 
 const show: TvShowDetailsResponse = {
@@ -98,6 +105,7 @@ const show: TvShowDetailsResponse = {
   status: 'Ended',
   genres: ['Drama'],
   seasons: [],
+  canFollow: false,
 };
 
 describe('movie release guardrail', () => {
