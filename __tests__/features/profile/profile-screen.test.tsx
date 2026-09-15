@@ -80,7 +80,8 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('Emre')).toBeTruthy();
     expect(screen.getByText('Your movie and TV identity')).toBeTruthy();
     expect(screen.getByText('60')).toBeTruthy();
-    expect(screen.getByText('Watched')).toBeTruthy();
+    expect(screen.getByText('Watch Activity')).toBeTruthy();
+    expect(screen.getByText('movies & episodes')).toBeTruthy();
     expect(screen.getByText('Your Year')).toBeTruthy();
     expect(screen.getByText('Your Taste')).toBeTruthy();
     expect(screen.getByText('Movies vs Series')).toBeTruthy();

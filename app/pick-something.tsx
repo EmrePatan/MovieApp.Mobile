@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -21,11 +30,69 @@ import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { formatCatalogYear, formatRating } from '@/utils/format';
+import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 
 const RETURN_ROUTE = '/pick-something';
+
+interface PickSomethingHeroPick {
+  title: string;
+  posterUrl: string | null | undefined;
+  backdropUrl: string | null | undefined;
+}
+
+function PickSomethingHeroMedia({
+  pick,
+  height,
+}: {
+  pick: PickSomethingHeroPick;
+  height: number;
+}) {
+  const [posterFailed, setPosterFailed] = useState(false);
+  const posterUri = resolveImageUri(pick.posterUrl);
+
+  if (pick.backdropUrl) {
+    return (
+      <View style={styles.heroWrap} testID="pick-something-hero-backdrop">
+        <BackdropImage path={pick.backdropUrl} height={height} />
+        <View style={styles.heroOverlay}>
+          <PosterImage
+            uri={pick.posterUrl}
+            width={layout.posterCarousel.width + 24}
+            height={layout.posterCarousel.height + 36}
+            accessibilityLabel={`${pick.title} poster`}
+            elevated
+          />
+        </View>
+      </View>
+    );
+  }
+
+  if (posterUri && !posterFailed) {
+    return (
+      <View style={styles.heroWrap} testID="pick-something-hero-poster-cover">
+        <Image
+          source={{ uri: posterUri }}
+          style={[styles.heroCoverMedia, { height }]}
+          resizeMode="cover"
+          accessibilityRole="image"
+          accessibilityLabel={`${pick.title} poster`}
+          onError={() => setPosterFailed(true)}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.heroWrap} testID="pick-something-hero-placeholder">
+      <View style={[styles.heroMediaPlaceholder, { height }]} accessibilityRole="image">
+        <Ionicons name="film-outline" size={40} color={colors.textMuted} />
+      </View>
+    </View>
+  );
+}
 
 export default function PickSomethingScreen() {
   const router = useRouter();
@@ -112,22 +179,7 @@ export default function PickSomethingScreen() {
 
     return (
       <View style={styles.resultCard}>
-        <View style={styles.heroWrap}>
-          {pick.backdropUrl ? (
-            <BackdropImage path={pick.backdropUrl} height={heroHeight} />
-          ) : (
-            <View style={[styles.heroFallback, { height: heroHeight }]} />
-          )}
-          <View style={styles.heroOverlay}>
-            <PosterImage
-              uri={pick.posterUrl}
-              width={layout.posterCarousel.width + 24}
-              height={layout.posterCarousel.height + 36}
-              accessibilityLabel={`${pick.title} poster`}
-              elevated
-            />
-          </View>
-        </View>
+        <PickSomethingHeroMedia pick={pick} height={heroHeight} />
 
         <View style={styles.resultCopy}>
           <AppText variant="title" accessibilityRole="header">
@@ -283,7 +335,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.surface,
   },
-  heroFallback: {
+  heroCoverMedia: {
+    width: '100%',
+  },
+  heroMediaPlaceholder: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.surfaceElevated,
   },
   heroOverlay: {

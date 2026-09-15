@@ -14,7 +14,11 @@ export function ProfileHeroStats({ summary }: ProfileHeroStatsProps) {
 
   return (
     <View style={styles.container} accessibilityRole="summary">
-      <StatItem label="Watched" value={String(watchedTotal)} />
+      <StatItem
+        label="Watch Activity"
+        value={String(watchedTotal)}
+        caption="movies & episodes"
+      />
       <View style={styles.divider} />
       <StatItem label="Ratings" value={String(summary.ratingsCount)} />
       <View style={styles.divider} />
@@ -26,7 +30,15 @@ export function ProfileHeroStats({ summary }: ProfileHeroStatsProps) {
   );
 }
 
-function StatItem({ label, value }: { label: string; value: string }) {
+function StatItem({
+  label,
+  value,
+  caption,
+}: {
+  label: string;
+  value: string;
+  caption?: string;
+}) {
   return (
     <View style={styles.item} accessibilityRole="text">
       <AppText variant="title" style={styles.value}>
@@ -35,6 +47,11 @@ function StatItem({ label, value }: { label: string; value: string }) {
       <AppText variant="caption" muted style={styles.label}>
         {label}
       </AppText>
+      {caption ? (
+        <AppText variant="caption" muted style={styles.caption}>
+          {caption}
+        </AppText>
+      ) : null}
     </View>
   );
 }
@@ -62,6 +79,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.4,
     fontWeight: '600',
+  },
+  caption: {
+    fontSize: 10,
+    lineHeight: 12,
+    textTransform: 'lowercase',
+    letterSpacing: 0.2,
   },
   divider: {
     width: StyleSheet.hairlineWidth,

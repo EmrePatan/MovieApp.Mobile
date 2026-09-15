@@ -117,14 +117,15 @@ describe('DiscoverHubContent', () => {
 
     expect(screen.getByText('Discover')).toBeTruthy();
     expect(screen.getByLabelText('Global search from discover')).toBeTruthy();
-    expect(screen.getByLabelText('Explore with Filters')).toBeTruthy();
+    expect(screen.getByLabelText('Advanced Discover')).toBeTruthy();
+    expect(screen.getByText('Advanced Discover')).toBeTruthy();
     expect(screen.getByText('Genre · Year · Rating · Runtime · Country')).toBeTruthy();
   });
 
-  it('opens advanced discover from Explore with Filters', () => {
+  it('opens advanced discover from Advanced Discover entry', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('Explore with Filters'));
+    fireEvent.press(screen.getByLabelText('Advanced Discover'));
 
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/advanced-discover'));
   });

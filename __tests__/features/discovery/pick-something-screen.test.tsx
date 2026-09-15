@@ -57,13 +57,63 @@ describe('PickSomethingScreen', () => {
     });
   });
 
-  it('renders the first successful pick', () => {
+  it('renders the first successful pick with backdrop hero composition', () => {
     render(<PickSomethingScreen />);
 
+    expect(screen.getByTestId('pick-something-hero-backdrop')).toBeTruthy();
+    expect(screen.queryByTestId('pick-something-hero-poster-cover')).toBeNull();
+    expect(screen.queryByTestId('pick-something-hero-placeholder')).toBeNull();
+    expect(screen.getByLabelText('Inception poster')).toBeTruthy();
     expect(screen.getByText('Inception')).toBeTruthy();
     expect(screen.getByText('Trending right now')).toBeTruthy();
     expect(screen.getByText('Try Another')).toBeTruthy();
     expect(screen.getByText('View Details')).toBeTruthy();
+  });
+
+  it('uses full-bleed poster cover when backdrop is missing', () => {
+    (usePickSomething as jest.Mock).mockReturnValue({
+      data: {
+        item: {
+          ...pickItem,
+          backdropUrl: null,
+          posterUrl: 'https://example.com/poster.jpg',
+        },
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    render(<PickSomethingScreen />);
+
+    expect(screen.getByTestId('pick-something-hero-poster-cover')).toBeTruthy();
+    expect(screen.queryByTestId('pick-something-hero-backdrop')).toBeNull();
+    expect(screen.queryByTestId('pick-something-hero-placeholder')).toBeNull();
+    expect(screen.getByLabelText('Inception poster')).toBeTruthy();
+  });
+
+  it('uses themed placeholder when backdrop and poster are missing', () => {
+    (usePickSomething as jest.Mock).mockReturnValue({
+      data: {
+        item: {
+          ...pickItem,
+          backdropUrl: null,
+          posterUrl: null,
+        },
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    render(<PickSomethingScreen />);
+
+    expect(screen.getByTestId('pick-something-hero-placeholder')).toBeTruthy();
+    expect(screen.queryByTestId('pick-something-hero-backdrop')).toBeNull();
+    expect(screen.queryByTestId('pick-something-hero-poster-cover')).toBeNull();
+    expect(screen.queryByLabelText('Inception poster')).toBeNull();
   });
 
   it('tracks pick_something_used exactly once per screen visit', async () => {

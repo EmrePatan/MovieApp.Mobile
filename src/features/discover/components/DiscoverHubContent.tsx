@@ -113,11 +113,11 @@ export function DiscoverHubContent() {
           Find something new
         </AppText>
         <DiscoverFeatureEntry
-          title="Explore with Filters"
+          title="Advanced Discover"
           subtitle="Genre · Year · Rating · Runtime · Country"
           icon="options-outline"
           onPress={openAdvancedDiscover}
-          accessibilityLabel="Explore with Filters"
+          accessibilityLabel="Advanced Discover"
         />
         <DiscoverFeatureEntry
           title="Streaming Services"

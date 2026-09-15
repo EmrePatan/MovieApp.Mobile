@@ -39,7 +39,7 @@ export function SearchExploreLanding(_props: SearchExploreLandingProps) {
     <View style={styles.container}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Advanced Discover Filters"
+        accessibilityLabel="Advanced Discover"
         onPress={openAdvancedDiscover}
         style={({ pressed }) => [styles.advancedEntry, pressed && styles.pressed]}
       >
