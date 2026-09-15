@@ -86,6 +86,10 @@ export function DiscoverHubContent() {
     router.push('/on-tv-this-week');
   }, [router]);
 
+  const openPickSomething = useCallback(() => {
+    router.push('/pick-something');
+  }, [router]);
+
   const trendingItems = previewQuery.data?.trending.items ?? [];
   const topRatedItems = previewQuery.data?.topRated.items ?? [];
   const nowInTheatersItems = (nowInTheatersPreviewQuery.data?.items ?? []).filter(
@@ -126,7 +130,8 @@ export function DiscoverHubContent() {
           title="Pick Something For Me"
           subtitle="Let MovieApp choose your next title"
           icon="shuffle-outline"
-          comingSoon
+          onPress={openPickSomething}
+          accessibilityLabel="Pick Something For Me"
         />
       </View>
 

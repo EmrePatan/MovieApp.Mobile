@@ -37,6 +37,7 @@ function RootNavigator() {
         <Stack.Screen name="now-in-theaters" />
         <Stack.Screen name="on-tv-this-week" />
         <Stack.Screen name="world-cinema" />
+        <Stack.Screen name="pick-something" />
         <Stack.Screen name="profile" />
       </Stack>
     </>

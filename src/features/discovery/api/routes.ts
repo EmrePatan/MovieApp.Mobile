@@ -159,3 +159,18 @@ export function buildAdvancedDiscoverPath(criteria: AdvancedDiscoverRequest): st
 
   return `/api/discovery/advanced?${params.toString()}`;
 }
+
+export function buildPickSomethingPath(
+  mediaType: string = 'all',
+  excludeIds: readonly string[] = [],
+): string {
+  const params = new URLSearchParams({
+    mediaType,
+  });
+
+  for (const excludeId of excludeIds) {
+    params.append('excludeIds', excludeId);
+  }
+
+  return `/api/discovery/pick-something?${params.toString()}`;
+}

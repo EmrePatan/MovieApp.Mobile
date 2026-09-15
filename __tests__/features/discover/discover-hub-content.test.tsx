@@ -129,12 +129,13 @@ describe('DiscoverHubContent', () => {
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/advanced-discover'));
   });
 
-  it('activates Streaming Services and keeps D6 as coming soon', () => {
+  it('activates Pick Something For Me from the discover hub', () => {
     render(<DiscoverHubContent />);
 
-    expect(screen.getByLabelText('Streaming Services')).toBeTruthy();
-    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Pick Something For Me')).toBeTruthy();
+    expect(screen.getByLabelText('Pick Something For Me')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Pick Something For Me'));
+
+    expect(mockPush).toHaveBeenCalledWith('/pick-something');
   });
 
   it('renders World Cinema hub with default collection preview', () => {

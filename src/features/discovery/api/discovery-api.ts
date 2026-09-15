@@ -9,7 +9,9 @@ import {
   buildNowInTheatersPath,
   buildOnTvThisWeekPath,
   buildWorldCinemaPath,
+  buildPickSomethingPath,
 } from './routes';
+import type { PickSomethingRequest, PickSomethingResponse } from '../pick-something-types';
 import type { NowInTheatersRequest } from '../now-in-theaters-types';
 import type { OnTvThisWeekRequest } from '../on-tv-this-week-types';
 import type { WorldCinemaRequest } from '../world-cinema-types';
@@ -88,6 +90,16 @@ export async function getOnTvThisWeek(
       authenticated: false,
       signal,
     },
+  );
+}
+
+export async function getPickSomething(
+  criteria: PickSomethingRequest = {},
+  signal?: AbortSignal,
+): Promise<PickSomethingResponse> {
+  return api.get<PickSomethingResponse>(
+    buildPickSomethingPath(criteria.mediaType ?? 'all', criteria.excludeIds ?? []),
+    { signal },
   );
 }
 
