@@ -1,5 +1,5 @@
 import {
-  discoveryInfiniteQueryKey,
+  discoveryBrowseInfiniteQueryKey,
 } from '@/features/discovery/hooks/discovery-query-keys';
 import {
   recommendationHomeQueryKey,
@@ -25,17 +25,30 @@ describe('recommendation query keys', () => {
 });
 
 describe('discovery query keys', () => {
-  it('uses discovery keys', () => {
-    expect(discoveryInfiniteQueryKey('popular', 'movie', 20)).toEqual([
+  it('uses discovery browse keys', () => {
+    expect(
+      discoveryBrowseInfiniteQueryKey(
+        'top_rated',
+        'movie',
+        {
+          genreIds: [],
+          year: null,
+          minRating: null,
+          language: null,
+          sort: 'rating_desc',
+        },
+        20,
+      ),
+    ).toEqual([
       'discovery',
-      'popular',
+      'browse',
+      'top_rated',
       'movie',
-      20,
-    ]);
-    expect(discoveryInfiniteQueryKey('trending', 'all', 20)).toEqual([
-      'discovery',
-      'trending',
-      'all',
+      [],
+      null,
+      null,
+      null,
+      'rating_desc',
       20,
     ]);
   });

@@ -31,7 +31,7 @@ import {
   recommendationsInfiniteQueryKey,
   similarMoviesQueryKey,
 } from '@/features/recommendations/hooks/recommendation-query-keys';
-import { discoveryInfiniteQueryKey } from '@/features/discovery/hooks/discovery-query-keys';
+import { discoveryBrowseInfiniteQueryKey } from '@/features/discovery/hooks/discovery-query-keys';
 
 describe('action query keys', () => {
   const id = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
@@ -93,10 +93,29 @@ describe('action query keys', () => {
     ]);
     expect(recommendationHomeQueryKey()).toEqual(['recommendations', 'home']);
     expect(similarMoviesQueryKey(id, 20)).toEqual(['recommendations', 'similar', 'movie', id, 20]);
-    expect(discoveryInfiniteQueryKey('popular', 'all', 20)).toEqual([
+    expect(
+      discoveryBrowseInfiniteQueryKey(
+        'trending',
+        'all',
+        {
+          genreIds: [],
+          year: null,
+          minRating: null,
+          language: null,
+          sort: 'popularity_desc',
+        },
+        20,
+      ),
+    ).toEqual([
       'discovery',
-      'popular',
+      'browse',
+      'trending',
       'all',
+      [],
+      null,
+      null,
+      null,
+      'popularity_desc',
       20,
     ]);
   });

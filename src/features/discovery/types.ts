@@ -2,12 +2,129 @@ import type { SearchContentType } from '@/models/api/pagination';
 
 export type DiscoveryTypeFilter = SearchContentType;
 
-export interface DiscoveryRequest {
+export type DiscoveryBrowseMode = 'trending' | 'top_rated' | 'new_releases';
+
+export type DiscoverySort =
+  | 'popularity_desc'
+  | 'popularity_asc'
+  | 'rating_desc'
+  | 'rating_asc'
+  | 'release_desc'
+  | 'release_asc'
+  | 'title_asc'
+  | 'title_desc';
+
+export interface Genre {
+  id: string;
+  name: string;
+}
+
+export interface DiscoveryBrowseFilters {
+  genreIds: string[];
+  year: number | null;
+  minRating: number | null;
+  language: string | null;
+  sort: DiscoverySort | null;
+}
+
+export interface DiscoveryBrowseState {
+  mode: DiscoveryBrowseMode;
+  type: DiscoveryTypeFilter;
+  filters: DiscoveryBrowseFilters;
+}
+
+export interface DiscoveryBrowseRequest extends DiscoveryBrowseFilters {
+  mode: DiscoveryBrowseMode;
+  type?: DiscoveryTypeFilter;
   page?: number;
   pageSize?: number;
-  type?: DiscoveryTypeFilter;
 }
 
 export const DEFAULT_DISCOVERY_PAGE_SIZE = 20;
 
-export type DiscoveryKind = 'popular' | 'trending';
+export const DISCOVERY_BROWSE_MODES: { value: DiscoveryBrowseMode; label: string }[] = [
+  { value: 'trending', label: 'Trending' },
+  { value: 'top_rated', label: 'Top Rated' },
+  { value: 'new_releases', label: 'New Releases' },
+];
+
+export const DISCOVERY_SORT_OPTIONS: { value: DiscoverySort; label: string }[] = [
+  { value: 'popularity_desc', label: 'Most Popular' },
+  { value: 'popularity_asc', label: 'Least Popular' },
+  { value: 'rating_desc', label: 'Highest Rated' },
+  { value: 'rating_asc', label: 'Lowest Rated' },
+  { value: 'release_desc', label: 'Newest First' },
+  { value: 'release_asc', label: 'Oldest First' },
+  { value: 'title_asc', label: 'Title A–Z' },
+  { value: 'title_desc', label: 'Title Z–A' },
+];
+
+export const DISCOVERY_SORT_VALUES = DISCOVERY_SORT_OPTIONS.map((option) => option.value);
+
+export function getDefaultSortForMode(mode: DiscoveryBrowseMode): DiscoverySort {
+  switch (mode) {
+    case 'top_rated':
+      return 'rating_desc';
+    case 'new_releases':
+      return 'release_desc';
+    case 'trending':
+    default:
+      return 'popularity_desc';
+  }
+}
+
+export function createDefaultDiscoveryFilters(
+  mode: DiscoveryBrowseMode = 'trending',
+): DiscoveryBrowseFilters {
+  return {
+    genreIds: [],
+    year: null,
+    minRating: null,
+    language: null,
+    sort: getDefaultSortForMode(mode),
+  };
+}
+
+export function createDefaultDiscoveryState(): DiscoveryBrowseState {
+  return {
+    mode: 'trending',
+    type: 'all',
+    filters: createDefaultDiscoveryFilters('trending'),
+  };
+}
+
+export function countActiveDiscoveryFilters(
+  filters: DiscoveryBrowseFilters,
+  mode: DiscoveryBrowseMode,
+): number {
+  let count = 0;
+
+  if (filters.genreIds.length > 0) {
+    count += filters.genreIds.length;
+  }
+
+  if (filters.year != null) {
+    count += 1;
+  }
+
+  if (filters.minRating != null) {
+    count += 1;
+  }
+
+  if (filters.language) {
+    count += 1;
+  }
+
+  if (filters.sort && filters.sort !== getDefaultSortForMode(mode)) {
+    count += 1;
+  }
+
+  return count;
+}
+
+export function hasActiveDiscoveryFilters(
+  filters: DiscoveryBrowseFilters,
+  mode: DiscoveryBrowseMode,
+): boolean {
+  return countActiveDiscoveryFilters(filters, mode) > 0;
+}

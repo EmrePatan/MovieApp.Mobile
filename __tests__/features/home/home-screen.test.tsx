@@ -552,6 +552,6 @@ describe('HomeScreen', () => {
 
     fireEvent.press(screen.getByLabelText('See all Trending'));
 
-    expect(mockPush).toHaveBeenCalledWith('/discover');
+    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
   });
 });

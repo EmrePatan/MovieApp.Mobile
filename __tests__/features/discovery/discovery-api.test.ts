@@ -1,5 +1,5 @@
-import { buildPopularPath, buildTrendingPath } from '@/features/discovery/api/routes';
-import { getPopularDiscovery, getTrendingDiscovery } from '@/features/discovery/api/discovery-api';
+import { buildBrowsePath, buildGenresPath } from '@/features/discovery/api/routes';
+import { getBrowseDiscovery, getGenres } from '@/features/discovery/api/discovery-api';
 import { api } from '@/api/client';
 
 jest.mock('@/api/client', () => ({
@@ -9,12 +9,36 @@ jest.mock('@/api/client', () => ({
 }));
 
 describe('discovery api routes', () => {
-  it('builds popular and trending routes', () => {
-    expect(buildPopularPath({ page: 1, pageSize: 20, type: 'tv' })).toBe(
-      '/api/discovery/popular?page=1&pageSize=20&type=tv',
-    );
-    expect(buildTrendingPath({ page: 2, pageSize: 10, type: 'movie' })).toBe(
-      '/api/discovery/trending?page=2&pageSize=10&type=movie',
+  it('builds browse and genres routes', () => {
+    expect(buildGenresPath()).toBe('/api/genres');
+    expect(
+      buildBrowsePath({
+        mode: 'trending',
+        type: 'tv',
+        page: 1,
+        pageSize: 20,
+        genreIds: [],
+        year: null,
+        minRating: null,
+        language: null,
+        sort: 'popularity_desc',
+      }),
+    ).toBe('/api/discovery/browse?mode=trending&type=tv&page=1&pageSize=20&sort=popularity_desc');
+
+    expect(
+      buildBrowsePath({
+        mode: 'top_rated',
+        type: 'movie',
+        page: 2,
+        pageSize: 10,
+        genreIds: ['genre-1', 'genre-2'],
+        year: 2020,
+        minRating: 7.5,
+        language: 'en',
+        sort: 'rating_desc',
+      }),
+    ).toBe(
+      '/api/discovery/browse?mode=top_rated&type=movie&page=2&pageSize=10&genreId=genre-1&genreId=genre-2&year=2020&minRating=7.5&language=en&sort=rating_desc',
     );
   });
 });
@@ -24,19 +48,32 @@ describe('discovery api client', () => {
     jest.clearAllMocks();
   });
 
-  it('loads popular discovery without auth', async () => {
+  it('loads browse discovery without auth', async () => {
     (api.get as jest.Mock).mockResolvedValue({ items: [] });
-    await getPopularDiscovery({ page: 1, pageSize: 20, type: 'all' });
-    expect(api.get).toHaveBeenCalledWith('/api/discovery/popular?page=1&pageSize=20&type=all', {
-      authenticated: false,
-      signal: undefined,
+    await getBrowseDiscovery({
+      mode: 'new_releases',
+      type: 'all',
+      page: 1,
+      pageSize: 20,
+      genreIds: [],
+      year: null,
+      minRating: null,
+      language: null,
+      sort: 'release_desc',
     });
+    expect(api.get).toHaveBeenCalledWith(
+      '/api/discovery/browse?mode=new_releases&type=all&page=1&pageSize=20&sort=release_desc',
+      {
+        authenticated: false,
+        signal: undefined,
+      },
+    );
   });
 
-  it('loads trending discovery without auth', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ items: [] });
-    await getTrendingDiscovery({ page: 1, pageSize: 20, type: 'all' });
-    expect(api.get).toHaveBeenCalledWith('/api/discovery/trending?page=1&pageSize=20&type=all', {
+  it('loads genres without auth', async () => {
+    (api.get as jest.Mock).mockResolvedValue([]);
+    await getGenres();
+    expect(api.get).toHaveBeenCalledWith('/api/genres', {
       authenticated: false,
       signal: undefined,
     });

@@ -75,7 +75,7 @@ export default function HomeScreen() {
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
       if (sectionType === 'Trending') {
-        router.push('/discover');
+        router.push('/discover?mode=trending&type=all');
       }
     },
     [router],

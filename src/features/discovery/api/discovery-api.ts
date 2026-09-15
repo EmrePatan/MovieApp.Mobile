@@ -1,23 +1,20 @@
 import { api } from '@/api/client';
 import type { SearchResponse } from '@/features/search/types';
-import { buildPopularPath, buildTrendingPath } from './routes';
-import type { DiscoveryRequest } from '../types';
+import { buildBrowsePath, buildGenresPath } from './routes';
+import type { DiscoveryBrowseRequest, Genre } from '../types';
 
-export async function getPopularDiscovery(
-  criteria: DiscoveryRequest = {},
+export async function getBrowseDiscovery(
+  criteria: DiscoveryBrowseRequest,
   signal?: AbortSignal,
 ): Promise<SearchResponse> {
-  return api.get<SearchResponse>(buildPopularPath(criteria), {
+  return api.get<SearchResponse>(buildBrowsePath(criteria), {
     authenticated: false,
     signal,
   });
 }
 
-export async function getTrendingDiscovery(
-  criteria: DiscoveryRequest = {},
-  signal?: AbortSignal,
-): Promise<SearchResponse> {
-  return api.get<SearchResponse>(buildTrendingPath(criteria), {
+export async function getGenres(signal?: AbortSignal): Promise<Genre[]> {
+  return api.get<Genre[]>(buildGenresPath(), {
     authenticated: false,
     signal,
   });

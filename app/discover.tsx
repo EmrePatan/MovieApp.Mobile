@@ -3,14 +3,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
-import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
@@ -18,76 +19,109 @@ import { DetailBackButton } from '@/features/details/shared/components/DetailScr
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
-import { followingCatalogInfiniteQueryKey } from '@/features/following/hooks/following-query-keys';
-import { DiscoveryKindControl } from '@/features/discovery/components/DiscoveryKindControl';
-import { useDiscoveryResults } from '@/features/discovery/hooks/useDiscovery';
-import type { DiscoveryKind, DiscoveryTypeFilter } from '@/features/discovery/types';
-import { FollowingSection } from '@/features/following/components/FollowingSection';
-import type { FollowingCatalogItem } from '@/features/following/types';
-import { RecommendationSection } from '@/features/recommendations/components/RecommendationSection';
-import { useRecommendationHome } from '@/features/recommendations/hooks/useRecommendationHome';
-import type { RecommendationItem } from '@/features/recommendations/types';
-import { UpcomingSection } from '@/features/upcoming/components/UpcomingSection';
-import type { UpcomingCatalogItem } from '@/features/upcoming/types';
-import { upcomingCatalogInfiniteQueryKey } from '@/features/upcoming/hooks/upcoming-query-keys';
+import {
+  ActiveFilterChips,
+  buildActiveFilterChips,
+} from '@/features/discovery/components/ActiveFilterChips';
+import { DiscoverFilterSheet } from '@/features/discovery/components/DiscoverFilterSheet';
+import { DiscoveryModeControl } from '@/features/discovery/components/DiscoveryModeControl';
+import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
+import { useGenres } from '@/features/discovery/hooks/useGenres';
+import {
+  countActiveDiscoveryFilters,
+  createDefaultDiscoveryFilters,
+  DISCOVERY_SORT_OPTIONS,
+  getDefaultSortForMode,
+  hasActiveDiscoveryFilters,
+  type DiscoveryBrowseFilters,
+  type DiscoveryBrowseMode,
+  type DiscoveryBrowseState,
+  type DiscoveryTypeFilter,
+} from '@/features/discovery/types';
+import {
+  parseDiscoverParams,
+  serializeDiscoverRoute,
+} from '@/features/discovery/utils/discover-params';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 export default function DiscoverScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuth();
-  const [kind, setKind] = useState<DiscoveryKind>('trending');
-  const [typeFilter, setTypeFilter] = useState<DiscoveryTypeFilter>('all');
+  const rawParams = useLocalSearchParams();
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
 
-  const discoveryQuery = useDiscoveryResults(kind, typeFilter);
-  const recommendationHomeQuery = useRecommendationHome();
+  const browseState = useMemo(() => parseDiscoverParams(rawParams), [rawParams]);
+  const { mode, type: typeFilter, filters } = browseState;
+
+  const genresQuery = useGenres();
+  const browseQuery = useDiscoveryBrowse(mode, typeFilter, filters);
 
   const items = useMemo(
-    () => discoveryQuery.data?.pages.flatMap((page) => page.items) ?? [],
-    [discoveryQuery.data?.pages],
+    () => browseQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    [browseQuery.data?.pages],
   );
 
-  const recommendationSections = useMemo(
-    () =>
-      (recommendationHomeQuery.data?.sections ?? []).filter(
-        (section) => section.items.length > 0,
-      ),
-    [recommendationHomeQuery.data?.sections],
+  const activeFilterCount = useMemo(
+    () => countActiveDiscoveryFilters(filters, mode),
+    [filters, mode],
   );
+
+  const replaceBrowseState = useCallback(
+    (next: DiscoveryBrowseState) => {
+      router.replace(serializeDiscoverRoute(next));
+    },
+    [router],
+  );
+
+  const updateMode = useCallback(
+    (nextMode: DiscoveryBrowseMode) => {
+      const nextFilters: DiscoveryBrowseFilters = {
+        ...filters,
+        sort:
+          filters.sort === getDefaultSortForMode(mode)
+            ? getDefaultSortForMode(nextMode)
+            : filters.sort,
+      };
+
+      replaceBrowseState({ mode: nextMode, type: typeFilter, filters: nextFilters });
+    },
+    [filters, mode, replaceBrowseState, typeFilter],
+  );
+
+  const updateTypeFilter = useCallback(
+    (nextType: DiscoveryTypeFilter) => {
+      replaceBrowseState({ mode, type: nextType, filters });
+    },
+    [filters, mode, replaceBrowseState],
+  );
+
+  const updateFilters = useCallback(
+    (nextFilters: DiscoveryBrowseFilters) => {
+      replaceBrowseState({ mode, type: typeFilter, filters: nextFilters });
+    },
+    [mode, replaceBrowseState, typeFilter],
+  );
+
+  const clearFilters = useCallback(() => {
+    replaceBrowseState({
+      mode,
+      type: typeFilter,
+      filters: createDefaultDiscoveryFilters(mode),
+    });
+  }, [mode, replaceBrowseState, typeFilter]);
 
   const openCatalogDetail = useCallback(
-    (id: string, type: 'movie' | 'tv') => {
-      prefetchCatalogDetail(queryClient, id, type);
-      router.push(buildCatalogDetailRoute(id, type));
+    (id: string, itemType: 'movie' | 'tv') => {
+      prefetchCatalogDetail(queryClient, id, itemType);
+      router.push(buildCatalogDetailRoute(id, itemType));
     },
     [queryClient, router],
-  );
-
-  const handleRecommendationPress = useCallback(
-    (item: RecommendationItem) => {
-      openCatalogDetail(item.id, item.type);
-    },
-    [openCatalogDetail],
-  );
-
-  const handleFollowingPress = useCallback(
-    (item: FollowingCatalogItem) => {
-      openCatalogDetail(item.id, item.type);
-    },
-    [openCatalogDetail],
-  );
-
-  const handleUpcomingPress = useCallback(
-    (item: UpcomingCatalogItem) => {
-      openCatalogDetail(item.id, item.type);
-    },
-    [openCatalogDetail],
   );
 
   const handleResultPress = useCallback(
@@ -102,9 +136,9 @@ export default function DiscoverScreen() {
     isFetchingNextPage,
     isFetching,
     fetchNextPage,
-    refetch: refetchDiscovery,
+    refetch: refetchBrowse,
     isRefetching,
-  } = discoveryQuery;
+  } = browseQuery;
 
   const handleLoadMore = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage || isFetching) {
@@ -115,13 +149,43 @@ export default function DiscoverScreen() {
   }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
 
   const handleRefresh = useCallback(() => {
-    void refetchDiscovery();
-    void queryClient.invalidateQueries({ queryKey: upcomingCatalogInfiniteQueryKey() });
-    if (isAuthenticated) {
-      void recommendationHomeQuery.refetch();
-      void queryClient.invalidateQueries({ queryKey: followingCatalogInfiniteQueryKey() });
+    void refetchBrowse();
+  }, [refetchBrowse]);
+
+  const sortLabel = useMemo(() => {
+    if (!filters.sort || filters.sort === getDefaultSortForMode(mode)) {
+      return null;
     }
-  }, [isAuthenticated, queryClient, recommendationHomeQuery, refetchDiscovery]);
+
+    return DISCOVERY_SORT_OPTIONS.find((option) => option.value === filters.sort)?.label ?? null;
+  }, [filters.sort, mode]);
+
+  const activeFilterChips = useMemo(
+    () =>
+      buildActiveFilterChips(
+        {
+          genreIds: filters.genreIds,
+          year: filters.year,
+          minRating: filters.minRating,
+          language: filters.language,
+          sortLabel,
+        },
+        genresQuery.data ?? [],
+        {
+          onRemoveGenre: (genreId) =>
+            updateFilters({
+              ...filters,
+              genreIds: filters.genreIds.filter((id) => id !== genreId),
+            }),
+          onRemoveYear: () => updateFilters({ ...filters, year: null }),
+          onRemoveMinRating: () => updateFilters({ ...filters, minRating: null }),
+          onRemoveLanguage: () => updateFilters({ ...filters, language: null }),
+          onRemoveSort: () =>
+            updateFilters({ ...filters, sort: getDefaultSortForMode(mode) }),
+        },
+      ),
+    [filters, genresQuery.data, mode, sortLabel, updateFilters],
+  );
 
   const renderResult = useCallback(
     ({ item }: { item: SearchResultItem }) => (
@@ -136,81 +200,76 @@ export default function DiscoverScreen() {
         <DetailBackButton />
         <AppText variant="title">Discover</AppText>
         <AppText variant="bodySmall" muted>
-          Trending and popular titles across the catalog
+          Browse movies and shows
         </AppText>
-        <DiscoveryKindControl value={kind} onChange={setKind} />
-        <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
-        {isAuthenticated && recommendationHomeQuery.isLoading ? (
-          <View style={styles.sectionLoading}>
-            <ActivityIndicator color={colors.accent} />
-          </View>
-        ) : null}
-        {isAuthenticated && recommendationHomeQuery.isError ? (
-          <View style={styles.sectionError}>
-            <ErrorView
-              message={
-                isApiError(recommendationHomeQuery.error)
-                  ? recommendationHomeQuery.error.userMessage
-                  : 'Unable to load recommendations.'
-              }
-              onRetry={() => void recommendationHomeQuery.refetch()}
-              retryLabel="Try Again"
-            />
-          </View>
-        ) : null}
-        {isAuthenticated ? <FollowingSection onItemPress={handleFollowingPress} /> : null}
-        <UpcomingSection onItemPress={handleUpcomingPress} />
-        {isAuthenticated
-          ? recommendationSections.map((section) => (
-              <RecommendationSection
-                key={section.key}
-                section={section}
-                onItemPress={handleRecommendationPress}
-              />
-            ))
-          : null}
-        {!isAuthenticated ? (
-          <View style={styles.signInPrompt}>
-            <AppText variant="bodySmall" muted>
-              Sign in to see personalized recommendations.
+        <SearchFilterControl value={typeFilter} onChange={updateTypeFilter} />
+        <DiscoveryModeControl value={mode} onChange={updateMode} />
+        <View style={styles.filtersRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              activeFilterCount > 0
+                ? `Filters, ${activeFilterCount} active`
+                : 'Filters'
+            }
+            onPress={() => setFilterSheetVisible(true)}
+            style={({ pressed }) => [styles.filtersButton, pressed && styles.pressed]}
+          >
+            <Ionicons name="options-outline" size={18} color={colors.textPrimary} />
+            <AppText variant="bodySmall" style={styles.filtersButtonText}>
+              Filters
             </AppText>
-            <AppButton
-              title="Sign in"
-              variant="secondary"
-              onPress={() => router.push('/(auth)/login')}
-            />
-          </View>
-        ) : null}
-        <AppText variant="subtitle" style={styles.listTitle}>
-          {kind === 'trending' ? 'Trending Now' : 'Popular Titles'}
-        </AppText>
+            {activeFilterCount > 0 ? (
+              <View style={styles.filterBadge}>
+                <AppText variant="caption" style={styles.filterBadgeText}>
+                  {activeFilterCount}
+                </AppText>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
+        <ActiveFilterChips chips={activeFilterChips} />
       </View>
     ),
-    [
-      handleFollowingPress,
-      handleRecommendationPress,
-      handleUpcomingPress,
-      isAuthenticated,
-      kind,
-      recommendationHomeQuery,
-      recommendationSections,
-      router,
-      typeFilter,
-    ],
+    [activeFilterChips, activeFilterCount, mode, typeFilter, updateMode, updateTypeFilter],
   );
 
-  if (discoveryQuery.isLoading && items.length === 0) {
+  const emptyState = useMemo(() => {
+    if (hasActiveDiscoveryFilters(filters, mode)) {
+      return (
+        <View style={styles.emptyWithAction}>
+          <SearchEmptyState
+            title="No titles match your filters"
+            message="Try adjusting or clearing your filters."
+          />
+          <AppButton title="Clear filters" variant="secondary" onPress={clearFilters} />
+        </View>
+      );
+    }
+
+    return <SearchEmptyState title="No titles found for this browse mode." />;
+  }, [clearFilters, filters, mode]);
+
+  if (browseQuery.isLoading && items.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <SearchLoadingState />
+        <DiscoverFilterSheet
+          visible={filterSheetVisible}
+          mode={mode}
+          filters={filters}
+          onClose={() => setFilterSheetVisible(false)}
+          onApply={updateFilters}
+          onClear={clearFilters}
+        />
       </SafeAreaView>
     );
   }
 
-  if (discoveryQuery.isError && items.length === 0) {
-    const message = isApiError(discoveryQuery.error)
-      ? discoveryQuery.error.userMessage
+  if (browseQuery.isError && items.length === 0) {
+    const message = isApiError(browseQuery.error)
+      ? browseQuery.error.userMessage
       : 'Unable to load discovery content. Please try again.';
 
     return (
@@ -219,6 +278,14 @@ export default function DiscoverScreen() {
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
         </View>
+        <DiscoverFilterSheet
+          visible={filterSheetVisible}
+          mode={mode}
+          filters={filters}
+          onClose={() => setFilterSheetVisible(false)}
+          onApply={updateFilters}
+          onClear={clearFilters}
+        />
       </SafeAreaView>
     );
   }
@@ -230,11 +297,9 @@ export default function DiscoverScreen() {
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={
-          <SearchEmptyState title={`No ${kind} titles found for this filter.`} />
-        }
+        ListEmptyComponent={emptyState}
         ListFooterComponent={
-          discoveryQuery.isFetchingNextPage ? (
+          browseQuery.isFetchingNextPage ? (
             <View style={styles.footerLoading}>
               <ActivityIndicator color={colors.accent} />
             </View>
@@ -251,6 +316,14 @@ export default function DiscoverScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
       />
+      <DiscoverFilterSheet
+        visible={filterSheetVisible}
+        mode={mode}
+        filters={filters}
+        onClose={() => setFilterSheetVisible(false)}
+        onApply={updateFilters}
+        onClear={clearFilters}
+      />
     </SafeAreaView>
   );
 }
@@ -266,22 +339,48 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  listTitle: {
-    paddingTop: spacing.sm,
+  filtersRow: {
+    paddingHorizontal: 0,
+  },
+  filtersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    minHeight: 36,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  filtersButtonText: {
+    fontWeight: '600',
+  },
+  filterBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  filterBadgeText: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+  },
+  pressed: {
+    opacity: 0.85,
   },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,
   },
-  sectionLoading: {
-    paddingVertical: spacing.lg,
+  emptyWithAction: {
+    gap: spacing.md,
     alignItems: 'center',
-  },
-  sectionError: {
-    paddingHorizontal: 0,
-  },
-  signInPrompt: {
-    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   errorContainer: {
     flex: 1,
