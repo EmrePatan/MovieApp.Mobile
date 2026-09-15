@@ -115,6 +115,8 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('3 followed titles')).toBeTruthy();
     expect(screen.queryByText('8 ratings')).toBeNull();
     expect(screen.queryByText('2 reviews')).toBeNull();
+    expect(screen.queryByText('Upcoming')).toBeNull();
+    expect(screen.queryByText('Releases and followed TV episodes')).toBeNull();
   });
 
   it('shows month detail when a bar is pressed', () => {
