@@ -67,7 +67,10 @@ export function WhereToWatchRail({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       >
-        {providers.map((provider) => (
+        {providers.map((provider) => {
+          const logoUri = resolveImageUri(provider.logoPath);
+
+          return (
           <View
             key={provider.providerId}
             style={styles.providerItem}
@@ -76,9 +79,9 @@ export function WhereToWatchRail({
             testID={`watch-provider-${provider.providerId}`}
           >
             <View style={styles.logoCircle}>
-              {resolveImageUri(provider.logoPath) ? (
+              {logoUri ? (
                 <Image
-                  source={{ uri: resolveImageUri(provider.logoPath)! }}
+                  source={{ uri: logoUri }}
                   style={styles.logoImage}
                   resizeMode="contain"
                 />
@@ -94,7 +97,8 @@ export function WhereToWatchRail({
               {provider.name}
             </AppText>
           </View>
-        ))}
+          );
+        })}
       </ScrollView>
       <AppText variant="caption" style={styles.attribution} testID="where-to-watch-attribution">
         Data provided by JustWatch

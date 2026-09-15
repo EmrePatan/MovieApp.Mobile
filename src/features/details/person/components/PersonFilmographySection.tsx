@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
@@ -16,21 +17,24 @@ interface PersonFilmographySectionProps {
 
 export function PersonFilmographySection({ filmography }: PersonFilmographySectionProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const resolvingKeyRef = useRef<string | null>(null);
   const [resolvingKey, setResolvingKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handlePress = useCallback(
     async (entry: PersonFilmographyEntry) => {
       const entryKey = `${entry.mediaType}-${entry.tmdbId}`;
-      if (resolvingKey) {
+      if (resolvingKeyRef.current) {
         return;
       }
 
       setErrorMessage(null);
+      resolvingKeyRef.current = entryKey;
       setResolvingKey(entryKey);
 
       try {
-        await openCatalogDetailFromFilmography(router, entry);
+        await openCatalogDetailFromFilmography(router, entry, { queryClient });
       } catch (error) {
         setErrorMessage(
           isApiError(error)
@@ -38,10 +42,11 @@ export function PersonFilmographySection({ filmography }: PersonFilmographySecti
             : 'Could not open this title right now. Please try again.',
         );
       } finally {
+        resolvingKeyRef.current = null;
         setResolvingKey(null);
       }
     },
-    [resolvingKey, router],
+    [queryClient, router],
   );
 
   if (filmography.length === 0) {

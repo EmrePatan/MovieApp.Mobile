@@ -62,7 +62,6 @@ export const HomeSection = memo(function HomeSection({
         maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
         windowSize={layout.horizontalList.windowSize}
         getItemLayout={getHomeRailItemLayout}
-        removeClippedSubviews
         nestedScrollEnabled
       />
     </View>

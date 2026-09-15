@@ -1,4 +1,6 @@
+import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import type { FollowingCatalogItem } from '../types';
 import { FollowingCard } from './FollowingCard';
@@ -15,6 +17,13 @@ interface FollowingSectionProps {
 export function FollowingSection({ onItemPress }: FollowingSectionProps) {
   const followingQuery = useFollowingCatalog();
   const items = followingQuery.data?.pages[0]?.items ?? [];
+
+  const renderItem = useCallback(
+    ({ item }: { item: FollowingCatalogItem }) => (
+      <FollowingCard item={item} onPress={onItemPress} />
+    ),
+    [onItemPress],
+  );
 
   if (followingQuery.isLoading) {
     return (
@@ -46,8 +55,8 @@ export function FollowingSection({ onItemPress }: FollowingSectionProps) {
       <FlatList
         horizontal
         data={items}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
-        renderItem={({ item }) => <FollowingCard item={item} onPress={onItemPress} />}
+        keyExtractor={catalogItemKeyExtractor}
+        renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         initialNumToRender={layout.horizontalList.initialNumToRender}

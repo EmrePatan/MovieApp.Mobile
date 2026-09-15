@@ -16,13 +16,16 @@ interface MovieFollowButtonProps {
 
 export function MovieFollowButton({ movieId, releaseDate }: MovieFollowButtonProps) {
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { data: status, isLoading } = useMovieFollowStatus(movieId);
+  const isEligible = isFutureReleaseDate(releaseDate);
+  const { data: status, isLoading } = useMovieFollowStatus(movieId, {
+    enabled: isEligible,
+  });
   const createFollow = useCreateMovieFollow(movieId);
   const removeFollow = useRemoveMovieFollow(movieId);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [permissionHint, setPermissionHint] = useState<string | null>(null);
 
-  if (!isFutureReleaseDate(releaseDate)) {
+  if (!isEligible) {
     return null;
   }
 

@@ -8,14 +8,18 @@ import {
 import { searchHistoryQueryKey } from './search-query-keys';
 import { DEFAULT_SEARCH_HISTORY_PAGE_SIZE } from '../types';
 
-export function useSearchHistory() {
+interface UseSearchHistoryOptions {
+  enabled?: boolean;
+}
+
+export function useSearchHistory(options?: UseSearchHistoryOptions) {
   const { isAuthenticated } = useAuth();
 
   return useQuery({
     queryKey: searchHistoryQueryKey(1, DEFAULT_SEARCH_HISTORY_PAGE_SIZE),
     queryFn: ({ signal }) =>
       getSearchHistory(1, DEFAULT_SEARCH_HISTORY_PAGE_SIZE, signal),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && (options?.enabled ?? true),
     staleTime: 30_000,
   });
 }

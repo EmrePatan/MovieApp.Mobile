@@ -36,6 +36,22 @@ jest.mock('@/hooks/useDebouncedValue', () => ({
   useDebouncedValue: (value: string) => value,
 }));
 
+jest.mock('@/features/details/shared/navigation/prefetch-catalog-detail', () => ({
+  prefetchCatalogDetail: jest.fn(),
+}));
+
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      prefetchQuery: jest.fn(),
+      invalidateQueries: jest.fn(),
+    }),
+  };
+});
+
 const mockSearchResult = {
   id: 'movie-id',
   type: 'movie' as const,

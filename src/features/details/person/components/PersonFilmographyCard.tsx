@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
-import { resolveImageUri } from '@/utils/image-url';
 import type { PersonFilmographyEntry } from '../types';
 import { formatCatalogYear } from '@/utils/format';
 import { colors } from '@/theme/colors';
@@ -39,7 +38,7 @@ export const PersonFilmographyCard = memo(function PersonFilmographyCard({
       style={({ pressed }) => [styles.card, pressed && !busy && styles.pressed, busy && styles.busy]}
     >
       <PosterImage
-        uri={resolveImageUri(entry.posterPath)}
+        uri={entry.posterPath}
         width={POSTER_WIDTH}
         height={POSTER_HEIGHT}
         accessibilityLabel={`${entry.title} poster`}

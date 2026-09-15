@@ -1,4 +1,6 @@
+import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import type { UpcomingCatalogItem } from '../types';
 import { UpcomingCard } from './UpcomingCard';
@@ -14,6 +16,12 @@ interface UpcomingSectionProps {
 export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
   const upcomingQuery = useUpcomingCatalog();
   const items = upcomingQuery.data?.pages[0]?.items ?? [];
+  const renderItem = useCallback(
+    ({ item }: { item: UpcomingCatalogItem }) => (
+      <UpcomingCard item={item} onPress={onItemPress} />
+    ),
+    [onItemPress],
+  );
 
   if (upcomingQuery.isLoading) {
     return (
@@ -36,8 +44,8 @@ export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
       <FlatList
         horizontal
         data={items}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
-        renderItem={({ item }) => <UpcomingCard item={item} onPress={onItemPress} />}
+        keyExtractor={catalogItemKeyExtractor}
+        renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         initialNumToRender={layout.horizontalList.initialNumToRender}

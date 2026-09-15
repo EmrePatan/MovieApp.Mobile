@@ -42,7 +42,7 @@ export function FavoriteButton({
     { enabled: shouldQueryStatus },
   );
   const isFavorited = favoriteStatusResolved
-    ? (queriedIsFavorited ?? favoriteIsFavorited ?? false)
+    ? (favoriteIsFavorited ?? false)
     : queriedIsFavorited;
   const toggleFavorite = useToggleFavorite(contentType, contentId);
   const [feedback, setFeedback] = useState<string | null>(null);

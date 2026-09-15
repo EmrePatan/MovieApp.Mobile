@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { removeTvShowFollow, upsertTvShowFollow } from '../api/follow-api';
 import type { TvShowFollowStatusResponse, UpsertTvShowFollowRequest } from '../types';
+import { invalidateFollowCatalogQueries } from '../utils/invalidate-follow-catalog-queries';
 import { tvShowFollowStatusQueryKey } from './follow-query-keys';
 
 export function useCreateTvShowFollow(tvShowId: string) {
@@ -10,6 +11,7 @@ export function useCreateTvShowFollow(tvShowId: string) {
     mutationFn: (request: UpsertTvShowFollowRequest) => upsertTvShowFollow(tvShowId, request),
     onSuccess: (status) => {
       queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
+      invalidateFollowCatalogQueries(queryClient);
     },
   });
 }
@@ -21,6 +23,7 @@ export function useUpdateTvShowFollow(tvShowId: string) {
     mutationFn: (request: UpsertTvShowFollowRequest) => upsertTvShowFollow(tvShowId, request),
     onSuccess: (status) => {
       queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
+      invalidateFollowCatalogQueries(queryClient);
     },
   });
 }
@@ -41,6 +44,7 @@ export function useRemoveTvShowFollow(tvShowId: string) {
     },
     onSuccess: (status) => {
       queryClient.setQueryData(tvShowFollowStatusQueryKey(tvShowId), status);
+      invalidateFollowCatalogQueries(queryClient);
     },
   });
 }

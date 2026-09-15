@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +15,7 @@ import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
@@ -31,7 +33,6 @@ import {
 } from '@/features/search/hooks/useSearchHistory';
 import type { SearchAutocompleteItem, SearchResultItem, SearchTypeFilter } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
-import { getSearchResultItemLayout } from '@/features/search/utils/search-list-layout';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { useAuth } from '@/auth/useAuth';
@@ -41,6 +42,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SearchScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const [inputText, setInputText] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
@@ -55,8 +57,10 @@ export default function SearchScreen() {
     normalizedInput === normalizedSubmittedQuery;
 
   const searchQuery = useSearchResults(submittedQuery, typeFilter);
-  const autocompleteQuery = useAutocomplete(debouncedInput);
-  const historyQuery = useSearchHistory();
+  const showAutocomplete =
+    !hasActiveSearch && isValidSearchQuery(normalizeSearchQuery(debouncedInput));
+  const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
+  const historyQuery = useSearchHistory({ enabled: !hasActiveSearch });
   const deleteHistoryItem = useDeleteSearchHistoryItem();
   const clearHistory = useClearSearchHistory();
 
@@ -66,8 +70,6 @@ export default function SearchScreen() {
   );
 
   const historyItems = historyQuery.data?.items ?? [];
-  const showAutocomplete =
-    !hasActiveSearch && isValidSearchQuery(normalizeSearchQuery(debouncedInput));
 
   const submitSearch = useCallback((query: string) => {
     const normalized = normalizeSearchQuery(query);
@@ -106,9 +108,10 @@ export default function SearchScreen() {
   const handleResultPress = useCallback(
     (item: SearchResultItem) => {
       Keyboard.dismiss();
+      prefetchCatalogDetail(queryClient, item.id, item.type);
       router.push(buildCatalogDetailRoute(item.id, item.type));
     },
-    [router],
+    [queryClient, router],
   );
 
   const handleDeleteHistoryItem = useCallback(
@@ -135,21 +138,26 @@ export default function SearchScreen() {
     clearHistory.mutate();
   }, [clearHistory]);
 
+  const {
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    fetchNextPage,
+    refetch,
+    isRefetching,
+  } = searchQuery;
+
   const handleLoadMore = useCallback(() => {
-    if (
-      !searchQuery.hasNextPage ||
-      searchQuery.isFetchingNextPage ||
-      searchQuery.isFetching
-    ) {
+    if (!hasNextPage || isFetchingNextPage || isFetching) {
       return;
     }
 
-    void searchQuery.fetchNextPage();
-  }, [searchQuery]);
+    void fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
 
   const handleRefresh = useCallback(() => {
-    void searchQuery.refetch();
-  }, [searchQuery]);
+    void refetch();
+  }, [refetch]);
 
   const renderResult = useCallback(
     ({ item }: { item: SearchResultItem }) => (
@@ -161,12 +169,12 @@ export default function SearchScreen() {
   const refreshControl = useMemo(
     () => (
       <RefreshControl
-        refreshing={searchQuery.isRefetching && !searchQuery.isFetchingNextPage}
+        refreshing={isRefetching && !isFetchingNextPage}
         onRefresh={handleRefresh}
         tintColor={colors.accent}
       />
     ),
-    [handleRefresh, searchQuery.isFetchingNextPage, searchQuery.isRefetching],
+    [handleRefresh, isFetchingNextPage, isRefetching],
   );
 
   const listHeader = useMemo(
@@ -287,7 +295,6 @@ export default function SearchScreen() {
           initialNumToRender={layout.verticalList.initialNumToRender}
           maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
           windowSize={layout.verticalList.windowSize}
-          getItemLayout={getSearchResultItemLayout}
           removeClippedSubviews
         />
       </SafeAreaView>

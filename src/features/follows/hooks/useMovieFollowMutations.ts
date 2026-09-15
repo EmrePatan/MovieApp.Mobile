@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMovieFollow, removeMovieFollow } from '../api/movie-follow-api';
 import type { MovieFollowStatusResponse } from '../types';
+import { invalidateFollowCatalogQueries } from '../utils/invalidate-follow-catalog-queries';
 import { movieFollowStatusQueryKey } from './follow-query-keys';
 
 export function useCreateMovieFollow(movieId: string) {
@@ -10,6 +11,7 @@ export function useCreateMovieFollow(movieId: string) {
     mutationFn: () => createMovieFollow(movieId),
     onSuccess: (status) => {
       queryClient.setQueryData(movieFollowStatusQueryKey(movieId), status);
+      invalidateFollowCatalogQueries(queryClient);
     },
   });
 }
@@ -25,6 +27,7 @@ export function useRemoveMovieFollow(movieId: string) {
     },
     onSuccess: (status) => {
       queryClient.setQueryData(movieFollowStatusQueryKey(movieId), status);
+      invalidateFollowCatalogQueries(queryClient);
     },
   });
 }

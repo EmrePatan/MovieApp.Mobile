@@ -1,6 +1,17 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react-native';
 import { PersonDetailContent } from '@/features/details/person/components/PersonDetailContent';
+
+function renderWithQueryClient(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
@@ -12,7 +23,7 @@ jest.mock('expo-router', () => ({
 
 describe('PersonDetailContent', () => {
   it('renders biography and filmography', () => {
-    render(
+    renderWithQueryClient(
       <PersonDetailContent
         person={{
           id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -46,7 +57,7 @@ describe('PersonDetailContent', () => {
   });
 
   it('shows biography empty state', () => {
-    render(
+    renderWithQueryClient(
       <PersonDetailContent
         person={{
           id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',

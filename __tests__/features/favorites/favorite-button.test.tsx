@@ -72,6 +72,20 @@ describe('FavoriteButton', () => {
     expect(screen.getByLabelText('Add to favorites').props.accessibilityState.disabled).toBe(true);
   });
 
+  it('uses resolved favorite status without querying when provided', () => {
+    render(
+      <FavoriteButton
+        contentType="movie"
+        contentId="movie-id"
+        favoriteIsFavorited={true}
+        favoriteStatusResolved={true}
+      />,
+    );
+
+    expect(screen.getByLabelText('Remove from favorites')).toBeTruthy();
+    expect(useFavoriteStatus).toHaveBeenCalledWith('movie', 'movie-id', { enabled: false });
+  });
+
   it('prompts login when unauthenticated', () => {
     mockRequireAuth.mockReturnValue(false);
 
