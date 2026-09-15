@@ -15,6 +15,7 @@ import type { SearchResultItem } from '@/features/search/types';
 import { DEFAULT_RELEASE_REGION } from '@/features/regions/region-options';
 import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
 import { useOnTvThisWeekPreview } from '@/features/discovery/hooks/useOnTvThisWeekPreview';
+import { WorldCinemaHubSection } from './WorldCinemaHubSection';
 import { createNowInTheatersHref } from '@/features/discovery/utils/now-in-theaters-params';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
@@ -120,18 +121,14 @@ export function DiscoverHubContent() {
           accessibilityLabel="Streaming Services"
         />
         <DiscoverFeatureEntry
-          title="World Cinema"
-          subtitle="Curated collections from around the world"
-          icon="earth-outline"
-          comingSoon
-        />
-        <DiscoverFeatureEntry
           title="Pick Something For Me"
           subtitle="Let MovieApp choose your next title"
           icon="shuffle-outline"
           comingSoon
         />
       </View>
+
+      <WorldCinemaHubSection />
 
       <DiscoverPreviewSection
         title="Now in Theaters"

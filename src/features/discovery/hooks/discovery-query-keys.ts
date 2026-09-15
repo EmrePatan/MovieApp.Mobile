@@ -5,6 +5,8 @@ import type {
 import type { NowInTheatersState } from '../now-in-theaters-types';
 import { NOW_IN_THEATERS_PREVIEW_SIZE } from '../now-in-theaters-types';
 import { ON_TV_THIS_WEEK_PREVIEW_SIZE } from '../on-tv-this-week-types';
+import type { WorldCinemaState } from '../world-cinema-types';
+import { WORLD_CINEMA_PREVIEW_SIZE } from '../world-cinema-types';
 import type { StreamingDiscoverState } from '../streaming-discover-types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import type {
@@ -69,6 +71,27 @@ export function discoveryWatchProvidersQueryKey(
   watchRegion: string,
 ) {
   return ['discovery', 'watch-providers', mediaType, watchRegion] as const;
+}
+
+export function worldCinemaPreviewQueryKey(
+  mediaType: WorldCinemaState['mediaType'],
+  originCountry: string,
+) {
+  return ['discovery', 'world-cinema', 'preview', mediaType, originCountry, WORLD_CINEMA_PREVIEW_SIZE] as const;
+}
+
+export function worldCinemaInfiniteQueryKey(
+  state: WorldCinemaState,
+  pageSize: number,
+) {
+  return [
+    'discovery',
+    'world-cinema',
+    state.mediaType,
+    state.originCountry,
+    state.sort,
+    pageSize,
+  ] as const;
 }
 
 export function onTvThisWeekPreviewQueryKey() {

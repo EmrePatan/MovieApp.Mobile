@@ -1,4 +1,5 @@
 import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
+import type { WorldCinemaRequest } from '../world-cinema-types';
 import type { DiscoveryBrowseRequest } from '../types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import { DEFAULT_DISCOVERY_PAGE_SIZE } from '../types';
@@ -18,6 +19,21 @@ export function buildDiscoveryWatchProvidersPath(
   });
 
   return `/api/discovery/watch-providers?${params.toString()}`;
+}
+
+export function buildWorldCinemaPath(criteria: WorldCinemaRequest): string {
+  const params = new URLSearchParams({
+    mediaType: criteria.mediaType,
+    originCountry: criteria.originCountry,
+    page: String(criteria.page ?? 1),
+    pageSize: String(criteria.pageSize ?? 20),
+  });
+
+  if (criteria.sort) {
+    params.set('sort', criteria.sort);
+  }
+
+  return `/api/discovery/world-cinema?${params.toString()}`;
 }
 
 export function buildOnTvThisWeekPath(page = 1, pageSize = 20): string {

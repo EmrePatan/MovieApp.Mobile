@@ -63,6 +63,24 @@ jest.mock('@/features/discovery/hooks/useOnTvThisWeekPreview', () => ({
   })),
 }));
 
+jest.mock('@/features/discovery/hooks/useWorldCinemaPreview', () => ({
+  useWorldCinemaPreview: jest.fn(() => ({
+    data: {
+      items: [
+        {
+          id: 'movie-1',
+          type: 'movie',
+          title: 'Parasite',
+          posterUrl: '/poster.jpg',
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/library/navigation/library-stack-navigation', () => ({
   openLibraryStackScreen: (...args: unknown[]) => mockOpenLibraryStackScreen(...args),
 }));
@@ -101,12 +119,43 @@ describe('DiscoverHubContent', () => {
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/advanced-discover'));
   });
 
-  it('activates Streaming Services and keeps later phases as coming soon', () => {
+  it('activates Streaming Services and keeps D6 as coming soon', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByLabelText('Streaming Services')).toBeTruthy();
-    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText('World Cinema')).toBeTruthy();
+    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Pick Something For Me')).toBeTruthy();
+  });
+
+  it('renders World Cinema hub with default collection preview', () => {
+    render(<DiscoverHubContent />);
+
+    expect(screen.getByTestId('world-cinema-hub')).toBeTruthy();
+    expect(screen.getByTestId('world-cinema-preview')).toBeTruthy();
+    expect(screen.getByText('Parasite')).toBeTruthy();
+    expect(screen.getByLabelText('Explore World Cinema')).toBeTruthy();
+  });
+
+  it('opens world cinema with selected origin country from Explore', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByLabelText('Explore World Cinema'));
+
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.stringContaining('originCountry=KR'),
+    );
+  });
+
+  it('updates preview collection when a cinema chip is selected', () => {
+    const { useWorldCinemaPreview } = jest.requireMock(
+      '@/features/discovery/hooks/useWorldCinemaPreview',
+    );
+
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByTestId('world-cinema-chip-JP'));
+
+    expect(useWorldCinemaPreview).toHaveBeenLastCalledWith('JP', 'movie');
   });
 
   it('renders On TV This Week preview section with See All', () => {

@@ -8,9 +8,11 @@ import {
   buildGenresPath,
   buildNowInTheatersPath,
   buildOnTvThisWeekPath,
+  buildWorldCinemaPath,
 } from './routes';
 import type { NowInTheatersRequest } from '../now-in-theaters-types';
 import type { OnTvThisWeekRequest } from '../on-tv-this-week-types';
+import type { WorldCinemaRequest } from '../world-cinema-types';
 import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
 import type { DiscoveryWatchProvidersResponse } from '../watch-provider-types';
@@ -61,6 +63,16 @@ export async function getExplorePreview(
   signal?: AbortSignal,
 ): Promise<ExplorePreviewResponse> {
   return api.get<ExplorePreviewResponse>(buildExplorePreviewPath(sectionSize), {
+    authenticated: false,
+    signal,
+  });
+}
+
+export async function getWorldCinema(
+  criteria: WorldCinemaRequest,
+  signal?: AbortSignal,
+): Promise<SearchResponse> {
+  return api.get<SearchResponse>(buildWorldCinemaPath(criteria), {
     authenticated: false,
     signal,
   });
