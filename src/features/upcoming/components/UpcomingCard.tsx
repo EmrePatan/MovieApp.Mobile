@@ -4,6 +4,7 @@ import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { UpcomingCatalogItem } from '../types';
+import { formatRelativeAirDate } from '@/utils/date';
 import { formatCatalogYear, formatContentType, formatIsoDate, formatRating } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
@@ -15,10 +16,21 @@ interface UpcomingCardProps {
   onPress?: (item: UpcomingCatalogItem) => void;
 }
 
+function formatSeasonEpisode(seasonNumber?: number, episodeNumber?: number): string | null {
+  if (seasonNumber == null || episodeNumber == null) {
+    return null;
+  }
+
+  return `S${String(seasonNumber).padStart(2, '0')} E${String(episodeNumber).padStart(2, '0')}`;
+}
+
 export const UpcomingCard = memo(function UpcomingCard({ item, onPress }: UpcomingCardProps) {
+  const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const year = formatCatalogYear(item.releaseDate, item.year);
   const releaseDate = formatIsoDate(item.releaseDate);
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${releaseDate ? `, ${releaseDate}` : ''}${item.isFollowed ? ', notified' : ''}`;
+  const relativeAirDate = formatRelativeAirDate(item.releaseDate);
+  const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
+  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeAirDate ? `, ${relativeAirDate}` : releaseDate ? `, ${releaseDate}` : ''}${item.isFollowed ? ', notified' : ''}`;
 
   return (
     <Pressable
@@ -47,20 +59,28 @@ export const UpcomingCard = memo(function UpcomingCard({ item, onPress }: Upcomi
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
+        {isTvEpisode && seasonEpisode ? (
+          <AppText variant="caption" muted numberOfLines={1}>
+            {seasonEpisode}
+            {item.episodeName ? ` · ${item.episodeName}` : ''}
+          </AppText>
+        ) : null}
         <View style={styles.row}>
           <ContentTypeBadge type={item.type} />
-          {year ? (
+          {!isTvEpisode && year ? (
             <AppText variant="caption" muted>
               {year}
             </AppText>
           ) : null}
-          <AppText variant="caption" muted>
-            ★ {formatRating(item.voteAverage)}
-          </AppText>
+          {!isTvEpisode ? (
+            <AppText variant="caption" muted>
+              ★ {formatRating(item.voteAverage)}
+            </AppText>
+          ) : null}
         </View>
-        {releaseDate ? (
+        {relativeAirDate || releaseDate ? (
           <AppText variant="caption" muted numberOfLines={1}>
-            {releaseDate}
+            {relativeAirDate ?? releaseDate}
           </AppText>
         ) : null}
       </View>

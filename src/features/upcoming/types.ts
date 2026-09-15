@@ -1,11 +1,42 @@
-import type { CatalogItem } from '@/models/api/catalog';
-import type { PaginatedResponse } from '@/models/api/pagination';
+import type { ContentType, PaginatedResponse } from '@/models/api/pagination';
 
-export interface UpcomingCatalogItem extends CatalogItem {
+export type UpcomingKind = 'MovieRelease' | 'TvShowPremiere' | 'TvEpisode';
+
+export interface UpcomingCatalogItem {
+  id: string;
+  type: ContentType;
+  upcomingKind: UpcomingKind;
+  title: string;
+  originalTitle: string;
+  overview: string;
+  posterUrl: string | null;
+  backdropUrl: string | null;
+  releaseDate: string | null;
+  voteAverage: number;
+  voteCount: number;
+  year: number | null;
   isFollowed: boolean;
+  episodeId?: string;
+  seasonNumber?: number;
+  episodeNumber?: number;
+  episodeName?: string | null;
 }
 
-export type UpcomingCatalogResponse = PaginatedResponse<UpcomingCatalogItem>;
+export interface UpcomingCatalogItemResponse {
+  contentId: string;
+  contentType: 'Movie' | 'Tv';
+  upcomingKind: UpcomingKind;
+  title: string;
+  posterPath: string | null;
+  releaseDate: string;
+  isFollowed: boolean;
+  episodeId?: string | null;
+  seasonNumber?: number | null;
+  episodeNumber?: number | null;
+  episodeName?: string | null;
+}
+
+export type UpcomingCatalogResponse = PaginatedResponse<UpcomingCatalogItemResponse>;
 
 export interface UpcomingCatalogRequest {
   page?: number;

@@ -3,6 +3,7 @@ import type { UserStatisticsSummaryResponse } from '../types';
 import {
   formatFavoritesSubtitle,
   formatFollowingSubtitle,
+  formatUpcomingSubtitle,
   formatWatchHistorySubtitle,
   formatWatchlistSubtitle,
 } from '../utils/library-copy';
@@ -40,6 +41,11 @@ export function ProfileLibrarySection({
         label="Following"
         subtitle={formatFollowingSubtitle(followingCount)}
         onPress={() => router.push('/following')}
+      />
+      <ProfileMenuRow
+        label="Upcoming"
+        subtitle={formatUpcomingSubtitle()}
+        onPress={() => router.push('/upcoming')}
       />
     </ProfileSection>
   );

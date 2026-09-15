@@ -22,3 +22,7 @@ export function formatWatchHistorySubtitle(
 export function formatFollowingSubtitle(followingCount: number): string {
   return `${formatCountLabel(followingCount, 'followed title', 'followed titles')}`;
 }
+
+export function formatUpcomingSubtitle(): string {
+  return 'Releases and followed TV episodes';
+}

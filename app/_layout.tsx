@@ -27,6 +27,7 @@ function RootNavigator() {
         <Stack.Screen name="watch-history" />
         <Stack.Screen name="favorites" />
         <Stack.Screen name="following" />
+        <Stack.Screen name="upcoming" />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="discover" />
         <Stack.Screen name="profile" />
