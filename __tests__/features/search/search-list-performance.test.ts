@@ -25,6 +25,16 @@ function createItem(overrides: Partial<SearchResultItem> = {}): SearchResultItem
 describe('search list performance helpers', () => {
   it('builds stable result keys', () => {
     expect(searchResultKeyExtractor(createItem({ id: 'abc', type: 'tv' }))).toBe('tv-abc');
+    expect(
+      searchResultKeyExtractor({
+        id: 'person-id',
+        type: 'person',
+        title: 'Leonardo DiCaprio',
+        tmdbId: 6193,
+        knownForDepartment: 'Acting',
+        posterUrl: null,
+      }),
+    ).toBe('person-6193');
   });
 
   it('returns predictable result row offsets', () => {

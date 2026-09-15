@@ -14,6 +14,7 @@ import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { SearchExploreLanding } from '@/features/discovery/components/SearchExploreLanding';
+import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
@@ -30,7 +31,12 @@ import {
   useDeleteSearchHistoryItem,
   useSearchHistory,
 } from '@/features/search/hooks/useSearchHistory';
-import type { SearchAutocompleteItem, SearchResultItem, SearchTypeFilter } from '@/features/search/types';
+import {
+  isPersonSearchResult,
+  type SearchAutocompleteItem,
+  type SearchResultItem,
+  type SearchTypeFilter,
+} from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
 import type { HomeItem } from '@/features/home/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
@@ -128,6 +134,12 @@ export default function SearchScreen() {
   const handleResultPress = useCallback(
     (item: SearchResultItem) => {
       Keyboard.dismiss();
+
+      if (isPersonSearchResult(item)) {
+        openPersonDetail(router, item.tmdbId, '/(tabs)/search');
+        return;
+      }
+
       prefetchCatalogDetail(queryClient, item.id, item.type);
       router.push(buildCatalogDetailRoute(item.id, item.type));
     },

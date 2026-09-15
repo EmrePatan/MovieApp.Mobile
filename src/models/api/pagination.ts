@@ -13,4 +13,4 @@ export interface PaginatedResponse<TItem> extends PaginationMeta {
 
 export type ContentType = 'movie' | 'tv';
 
-export type SearchContentType = ContentType | 'all';
+export type SearchContentType = ContentType | 'person' | 'all';

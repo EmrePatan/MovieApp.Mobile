@@ -19,7 +19,7 @@ describe('search UI components', () => {
       />,
     );
 
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
     expect(onSubmit).toHaveBeenCalled();
 
     fireEvent.press(screen.getByLabelText('Clear search'));
@@ -31,6 +31,8 @@ describe('search UI components', () => {
     render(<SearchFilterControl value="all" onChange={onChange} />);
     fireEvent.press(screen.getByLabelText('Filter Movies'));
     expect(onChange).toHaveBeenCalledWith('movie');
+    fireEvent.press(screen.getByLabelText('Filter People'));
+    expect(onChange).toHaveBeenCalledWith('person');
   });
 
   it('renders empty state', () => {
@@ -66,6 +68,25 @@ describe('search UI components', () => {
     expect(screen.getByText('Interstellar')).toBeTruthy();
     expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
+    expect(onPress).toHaveBeenCalledWith(item);
+  });
+
+  it('renders person result card with department metadata', () => {
+    const item: SearchResultItem = {
+      id: 'person-id',
+      type: 'person',
+      title: 'Leonardo DiCaprio',
+      tmdbId: 6193,
+      knownForDepartment: 'Acting',
+      posterUrl: null,
+    };
+
+    const onPress = jest.fn();
+    render(<SearchResultCard item={item} onPress={onPress} />);
+
+    expect(screen.getByText('Leonardo DiCaprio')).toBeTruthy();
+    expect(screen.getByText('Person · Acting')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Acting'));
     expect(onPress).toHaveBeenCalledWith(item);
   });
 });

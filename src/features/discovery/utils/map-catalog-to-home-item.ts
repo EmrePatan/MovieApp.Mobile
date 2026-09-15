@@ -1,7 +1,7 @@
 import type { HomeItem } from '@/features/home/types';
-import type { SearchResultItem } from '@/features/search/types';
+import type { CatalogSearchResultItem } from '@/features/search/types';
 
-export function mapCatalogItemToHomeItem(item: SearchResultItem): HomeItem {
+export function mapCatalogItemToHomeItem(item: CatalogSearchResultItem): HomeItem {
   return {
     id: item.id,
     contentType: item.type,

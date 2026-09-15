@@ -4,15 +4,48 @@ import type { ComponentProps } from 'react';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchAutocompleteItem } from '../types';
-import { formatContentType } from '@/utils/format';
+import { formatContentType, formatKnownForDepartment } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
 const AUTOCOMPLETE_THUMB_WIDTH = 36;
 const AUTOCOMPLETE_THUMB_HEIGHT = 54;
+const AUTOCOMPLETE_PERSON_THUMB_SIZE = 36;
+
+function formatSuggestionTypeLabel(suggestion: SearchAutocompleteItem): string {
+  if (suggestion.type === 'person') {
+    const department = formatKnownForDepartment(suggestion.knownForDepartment);
+    const typeLabel = formatContentType('person');
+    return department ? `${typeLabel} · ${department}` : typeLabel;
+  }
+
+  return formatContentType(suggestion.type);
+}
 
 function SearchSuggestionLeadingVisual({ suggestion }: { suggestion: SearchAutocompleteItem }) {
+  if (suggestion.type === 'person') {
+    if (suggestion.posterUrl) {
+      return (
+        <PosterImage
+          uri={suggestion.posterUrl}
+          width={AUTOCOMPLETE_PERSON_THUMB_SIZE}
+          height={AUTOCOMPLETE_PERSON_THUMB_SIZE}
+          accessibilityLabel={`${suggestion.title} portrait`}
+        />
+      );
+    }
+
+    return (
+      <View
+        style={styles.personLeadingIcon}
+        accessibilityLabel="Person suggestion"
+      >
+        <Ionicons name="person-outline" size={20} color={colors.textSecondary} />
+      </View>
+    );
+  }
+
   if (suggestion.posterUrl) {
     return (
       <PosterImage
@@ -68,27 +101,31 @@ export function SearchSuggestionList({
 
   return (
     <View style={styles.container} accessibilityRole="list">
-      {suggestions.map((suggestion, index) => (
-        <Pressable
-          key={`${suggestion.type}-${suggestion.id}`}
-          accessibilityRole="button"
-          accessibilityLabel={`Search for ${suggestion.title}, ${formatContentType(suggestion.type)}`}
-          onPress={() => onSelect(suggestion)}
-          style={({ pressed }) => [
-            styles.row,
-            index < suggestions.length - 1 && styles.rowBorder,
-            pressed && styles.pressed,
-          ]}
-        >
-          <SearchSuggestionLeadingVisual suggestion={suggestion} />
-          <AppText variant="bodySmall" numberOfLines={1} style={styles.title}>
-            {suggestion.title}
-          </AppText>
-          <AppText variant="caption" muted style={styles.typeLabel}>
-            {formatContentType(suggestion.type)}
-          </AppText>
-        </Pressable>
-      ))}
+      {suggestions.map((suggestion, index) => {
+        const typeLabel = formatSuggestionTypeLabel(suggestion);
+
+        return (
+          <Pressable
+            key={`${suggestion.type}-${suggestion.id}`}
+            accessibilityRole="button"
+            accessibilityLabel={`Search for ${suggestion.title}, ${typeLabel}`}
+            onPress={() => onSelect(suggestion)}
+            style={({ pressed }) => [
+              styles.row,
+              index < suggestions.length - 1 && styles.rowBorder,
+              pressed && styles.pressed,
+            ]}
+          >
+            <SearchSuggestionLeadingVisual suggestion={suggestion} />
+            <AppText variant="bodySmall" numberOfLines={1} style={styles.title}>
+              {suggestion.title}
+            </AppText>
+            <AppText variant="caption" muted style={styles.typeLabel}>
+              {typeLabel}
+            </AppText>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -117,6 +154,16 @@ const styles = StyleSheet.create({
     width: AUTOCOMPLETE_THUMB_WIDTH,
     height: AUTOCOMPLETE_THUMB_HEIGHT,
     borderRadius: borderRadius.sm,
+    backgroundColor: colors.inputBackground,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  personLeadingIcon: {
+    width: AUTOCOMPLETE_PERSON_THUMB_SIZE,
+    height: AUTOCOMPLETE_PERSON_THUMB_SIZE,
+    borderRadius: AUTOCOMPLETE_PERSON_THUMB_SIZE / 2,
     backgroundColor: colors.inputBackground,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,

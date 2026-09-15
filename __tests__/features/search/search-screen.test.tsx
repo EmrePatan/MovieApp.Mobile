@@ -47,6 +47,12 @@ jest.mock('@/features/details/shared/navigation/prefetch-catalog-detail', () => 
   prefetchCatalogDetail: jest.fn(),
 }));
 
+const mockOpenPersonDetail = jest.fn();
+
+jest.mock('@/features/details/shared/navigation/person-detail-navigation', () => ({
+  openPersonDetail: (...args: unknown[]) => mockOpenPersonDetail(...args),
+}));
+
 jest.mock('@tanstack/react-query', () => {
   const actual = jest.requireActual('@tanstack/react-query');
 
@@ -136,8 +142,8 @@ describe('SearchScreen', () => {
 
   it('does not search for whitespace-only input', () => {
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), '   ');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), '   ');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
     expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
   });
 
@@ -150,7 +156,7 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'break');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'break');
 
     expect(screen.getByLabelText('Search for Breaking Bad, TV')).toBeTruthy();
     expect(screen.getByLabelText('TV show suggestion')).toBeTruthy();
@@ -165,7 +171,7 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
 
     expect(screen.getByLabelText('Search for Interstellar, Movie')).toBeTruthy();
     expect(screen.queryByText('Trending Now')).toBeNull();
@@ -196,7 +202,7 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
 
     expect(screen.queryByText('Recent Searches')).toBeNull();
     expect(screen.queryByText('inception')).toBeNull();
@@ -209,7 +215,7 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'zzzz');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'zzzz');
 
     expect(screen.getByLabelText('No suggestions')).toBeTruthy();
     expect(screen.queryByText('Trending Now')).toBeNull();
@@ -224,7 +230,7 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
     fireEvent.press(screen.getByLabelText('Clear search'));
 
     expect(screen.getByText('Explore by Genre')).toBeTruthy();
@@ -240,7 +246,7 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
     fireEvent.press(screen.getByLabelText('Search for Interstellar, Movie'));
 
     expect(useSearchResults).toHaveBeenLastCalledWith('Interstellar', 'all');
@@ -260,8 +266,8 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'interstellar');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     expect(screen.getByLabelText('Loading search results')).toBeTruthy();
   });
@@ -283,8 +289,8 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'interstellar');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     expect(screen.getByText('Try Again')).toBeTruthy();
   });
@@ -315,8 +321,8 @@ describe('SearchScreen', () => {
     });
 
     render(<SearchScreen />);
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'zzzz');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'zzzz');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     expect(screen.getByText('No results for “zzzz”')).toBeTruthy();
     expect(screen.queryByText('Try Again')).toBeNull();
@@ -349,11 +355,34 @@ describe('SearchScreen', () => {
 
     render(<SearchScreen />);
 
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'interstellar');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-id');
+  });
+
+  it('renders person autocomplete suggestions with department', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: '1',
+            type: 'person',
+            title: 'Leonardo DiCaprio',
+            posterUrl: null,
+            knownForDepartment: 'Acting',
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'leo');
+
+    expect(screen.getByLabelText('Search for Leonardo DiCaprio, Person · Acting')).toBeTruthy();
+    expect(screen.getByLabelText('Person suggestion')).toBeTruthy();
   });
 
   it('navigates to tv detail from result card', () => {
@@ -393,11 +422,59 @@ describe('SearchScreen', () => {
 
     render(<SearchScreen />);
 
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'breaking');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'breaking');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
     fireEvent.press(screen.getByLabelText('Breaking Bad, TV · 2008 · ★ 8.9'));
     expect(mockPush).toHaveBeenCalledWith('/tv/tv-id');
+  });
+
+  it('navigates to person detail from result card', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [
+              {
+                id: 'person-id',
+                type: 'person',
+                title: 'Leonardo DiCaprio',
+                tmdbId: 6193,
+                knownForDepartment: 'Acting',
+                posterUrl: null,
+              },
+            ],
+            page: 1,
+            pageSize: 20,
+            totalCount: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'leo');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
+
+    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Acting'));
+    expect(mockOpenPersonDetail).toHaveBeenCalledWith(
+      expect.objectContaining({ push: mockPush }),
+      6193,
+      '/(tabs)/search',
+    );
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('renders recent searches when history exists', () => {
@@ -426,7 +503,7 @@ describe('SearchScreen', () => {
   it('clears the query from the clear button', () => {
     render(<SearchScreen />);
 
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inter');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inter');
     fireEvent.press(screen.getByLabelText('Clear search'));
 
     expect(screen.getByDisplayValue('')).toBeTruthy();
@@ -436,11 +513,13 @@ describe('SearchScreen', () => {
   it('changes search type filter after submitting', () => {
     render(<SearchScreen />);
 
-    fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'star');
-    fireEvent(screen.getByLabelText('Search movies and TV shows'), 'submitEditing');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'star');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
     fireEvent.press(screen.getByLabelText('Filter TV Shows'));
 
     expect(useSearchResults).toHaveBeenLastCalledWith('star', 'tv');
+    fireEvent.press(screen.getByLabelText('Filter People'));
+    expect(useSearchResults).toHaveBeenLastCalledWith('star', 'person');
   });
 
   it('keeps search usable when genre loading fails', () => {
@@ -452,7 +531,7 @@ describe('SearchScreen', () => {
 
     render(<SearchScreen />);
 
-    expect(screen.getByLabelText('Search movies and TV shows')).toBeTruthy();
+    expect(screen.getByLabelText('Search movies, TV shows, and people')).toBeTruthy();
     expect(screen.getByText('Explore by Genre')).toBeTruthy();
   });
 

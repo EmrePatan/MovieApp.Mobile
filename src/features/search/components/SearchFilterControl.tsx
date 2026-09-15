@@ -8,6 +8,7 @@ const FILTERS: { label: string; value: SearchTypeFilter }[] = [
   { label: 'All', value: 'all' },
   { label: 'Movies', value: 'movie' },
   { label: 'TV Shows', value: 'tv' },
+  { label: 'People', value: 'person' },
 ];
 
 interface SearchFilterControlProps {

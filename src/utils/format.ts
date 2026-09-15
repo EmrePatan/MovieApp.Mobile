@@ -38,8 +38,26 @@ export function formatRating(value: number): string {
   return value > 0 ? value.toFixed(1) : '—';
 }
 
-export function formatContentType(type: 'movie' | 'tv'): string {
-  return type === 'movie' ? 'Movie' : 'TV';
+export function formatContentType(type: 'movie' | 'tv' | 'person'): string {
+  if (type === 'movie') {
+    return 'Movie';
+  }
+
+  if (type === 'tv') {
+    return 'TV';
+  }
+
+  return 'Person';
+}
+
+export function formatKnownForDepartment(
+  department: string | null | undefined,
+): string | null {
+  if (!department || department.trim().length === 0) {
+    return null;
+  }
+
+  return department.trim();
 }
 
 export function formatCatalogYear(

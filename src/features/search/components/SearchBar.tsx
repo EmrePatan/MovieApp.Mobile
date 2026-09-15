@@ -18,7 +18,7 @@ export function SearchBar({
   onChangeText,
   onSubmit,
   onClear,
-  placeholder = 'Search movies and TV shows',
+  placeholder = 'Search movies, TV shows, and people',
 }: SearchBarProps) {
   const showClear = value.length > 0;
 
@@ -26,7 +26,7 @@ export function SearchBar({
     <View style={styles.container}>
       <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
       <TextInput
-        accessibilityLabel="Search movies and TV shows"
+        accessibilityLabel="Search movies, TV shows, and people"
         accessibilityRole="search"
         autoCapitalize="none"
         autoCorrect={false}

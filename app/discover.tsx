@@ -111,6 +111,10 @@ export default function DiscoverScreen() {
 
   const handleResultPress = useCallback(
     (item: SearchResultItem) => {
+      if (item.type === 'person') {
+        return;
+      }
+
       openCatalogDetail(item.id, item.type);
     },
     [openCatalogDetail],
