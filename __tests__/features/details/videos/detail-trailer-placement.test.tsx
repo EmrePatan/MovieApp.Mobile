@@ -69,6 +69,8 @@ const movie: MovieDetailsResponse = {
   genres: ['Drama'],
   collection: null,
   isReleased: true,
+  canFollowForRelease: false,
+  canSetReleaseAlert: false,
 };
 
 const show: TvShowDetailsResponse = {

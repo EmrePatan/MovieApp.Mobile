@@ -84,6 +84,8 @@ const baseMovie: MovieDetailsResponse = {
   genres: ['Adventure'],
   collection: null,
   isReleased: true,
+  canFollowForRelease: false,
+  canSetReleaseAlert: false,
 };
 
 const baseShow: TvShowDetailsResponse = {
@@ -102,6 +104,7 @@ const baseShow: TvShowDetailsResponse = {
   status: 'Ended',
   genres: ['Drama'],
   seasons: [],
+  canFollow: false,
 };
 
 const basePerson: PersonDetailResponse = {

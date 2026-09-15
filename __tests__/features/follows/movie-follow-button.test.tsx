@@ -7,11 +7,8 @@ import {
   useRemoveMovieFollow,
 } from '@/features/follows/hooks/useMovieFollowMutations';
 import { ensurePushDeviceRegisteredAsync } from '@/features/follows/services/push-device-service';
-import * as dateUtils from '@/utils/date';
 
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
-const futureReleaseDate = '2026-03-15';
-const pastReleaseDate = '2020-01-01';
 const mockRequireAuth = jest.fn(() => true);
 const mockCreateMutate = jest.fn();
 const mockRemoveMutate = jest.fn();
@@ -39,9 +36,6 @@ jest.mock('@/features/follows/services/push-device-service', () => ({
 describe('MovieFollowButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(dateUtils, 'isFutureReleaseDate').mockImplementation(
-      (releaseDate) => releaseDate === futureReleaseDate,
-    );
     (useCreateMovieFollow as jest.Mock).mockReturnValue({
       mutate: mockCreateMutate,
       isPending: false,
@@ -57,24 +51,9 @@ describe('MovieFollowButton', () => {
     });
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('renders for a future release date', () => {
-    render(<MovieFollowButton movieId={movieId} releaseDate={futureReleaseDate} />);
+  it('renders when mounted by parent eligibility gate', () => {
+    render(<MovieFollowButton movieId={movieId} />);
     expect(screen.getByLabelText('Notify me when released')).toBeTruthy();
-  });
-
-  it('does not render for a past release date', () => {
-    render(<MovieFollowButton movieId={movieId} releaseDate={pastReleaseDate} />);
-    expect(screen.queryByLabelText('Notify me when released')).toBeNull();
-    expect(screen.queryByLabelText('Release alert on')).toBeNull();
-  });
-
-  it('does not render when release date is null', () => {
-    render(<MovieFollowButton movieId={movieId} releaseDate={null} />);
-    expect(screen.queryByLabelText('Notify me when released')).toBeNull();
   });
 
   it('registers push device after successful new follow only', async () => {
@@ -82,7 +61,7 @@ describe('MovieFollowButton', () => {
       options?.onSuccess?.();
     });
 
-    render(<MovieFollowButton movieId={movieId} releaseDate={futureReleaseDate} />);
+    render(<MovieFollowButton movieId={movieId} />);
     fireEvent.press(screen.getByLabelText('Notify me when released'));
 
     await waitFor(() => {
@@ -97,7 +76,7 @@ describe('MovieFollowButton', () => {
       isLoading: false,
     });
 
-    render(<MovieFollowButton movieId={movieId} releaseDate={futureReleaseDate} />);
+    render(<MovieFollowButton movieId={movieId} />);
     fireEvent.press(screen.getByLabelText('Release alert on'));
 
     expect(mockRemoveMutate).toHaveBeenCalledTimes(1);
@@ -111,7 +90,7 @@ describe('MovieFollowButton', () => {
       isLoading: false,
     });
 
-    render(<MovieFollowButton movieId={movieId} releaseDate={futureReleaseDate} />);
+    render(<MovieFollowButton movieId={movieId} />);
     expect(screen.getByLabelText('Release alert on').props.accessibilityState?.selected).toBe(true);
   });
 });

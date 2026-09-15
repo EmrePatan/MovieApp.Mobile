@@ -11,14 +11,16 @@ interface DetailActionBarProps {
   contentType: FavoriteContentType;
   contentId: string;
   showWatched?: boolean;
-  releaseDate?: string | null;
+  showReleaseAlert?: boolean;
+  showFollow?: boolean;
 }
 
 export function DetailActionBar({
   contentType,
   contentId,
   showWatched = false,
-  releaseDate,
+  showReleaseAlert = false,
+  showFollow = false,
 }: DetailActionBarProps) {
   const watchedTarget =
     contentType === 'movie'
@@ -30,9 +32,9 @@ export function DetailActionBar({
       <FavoriteButton contentType={contentType} contentId={contentId} variant="detail" />
       <AddToWatchlistButton contentType={contentType} contentId={contentId} variant="detail" />
       {showWatched ? <WatchedButton target={watchedTarget} variant="detail" /> : null}
-      {contentType === 'tv' && showWatched ? <FollowButton tvShowId={contentId} /> : null}
-      {contentType === 'movie' ? (
-        <MovieFollowButton movieId={contentId} releaseDate={releaseDate} />
+      {contentType === 'tv' && showFollow ? <FollowButton tvShowId={contentId} /> : null}
+      {contentType === 'movie' && showReleaseAlert ? (
+        <MovieFollowButton movieId={contentId} />
       ) : null}
     </View>
   );

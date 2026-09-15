@@ -17,4 +17,6 @@ export interface MovieDetailsResponse {
   genres: string[];
   collection: CollectionSummary | null;
   isReleased: boolean;
+  canFollowForRelease: boolean;
+  canSetReleaseAlert: boolean;
 }
