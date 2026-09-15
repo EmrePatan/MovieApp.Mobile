@@ -45,7 +45,17 @@ export const UpcomingListCard = memo(function UpcomingListCard({
   const relativeDate = formatRelativeAirDate(item.releaseDate);
   const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
   const kindLabel = getKindLabel(item);
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeDate ? `, ${relativeDate}` : releaseDate ? `, ${releaseDate}` : ''}${item.isFollowed ? ', followed' : ''}`;
+  const trackedLabel = item.isFollowed
+    ? item.type === 'movie'
+      ? 'release alert on'
+      : 'followed'
+    : null;
+  const trackedBadge = item.isFollowed
+    ? item.type === 'movie'
+      ? 'Alert on'
+      : 'Following'
+    : null;
+  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeDate ? `, ${relativeDate}` : releaseDate ? `, ${releaseDate}` : ''}${trackedLabel ? `, ${trackedLabel}` : ''}`;
 
   return (
     <Pressable
@@ -61,10 +71,10 @@ export const UpcomingListCard = memo(function UpcomingListCard({
           height={layout.posterList.height}
           accessibilityLabel={`${item.title} poster`}
         />
-        {item.isFollowed ? (
+        {trackedBadge ? (
           <View style={styles.followedBadge}>
             <AppText variant="caption" style={styles.followedBadgeText}>
-              Following
+              {trackedBadge}
             </AppText>
           </View>
         ) : null}

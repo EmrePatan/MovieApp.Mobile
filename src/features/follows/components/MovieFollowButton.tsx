@@ -23,6 +23,7 @@ export function MovieFollowButton({ movieId, releaseDate }: MovieFollowButtonPro
   const createFollow = useCreateMovieFollow(movieId);
   const removeFollow = useRemoveMovieFollow(movieId);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [successHint, setSuccessHint] = useState<string | null>(null);
   const [permissionHint, setPermissionHint] = useState<string | null>(null);
 
   if (!isEligible) {
@@ -34,10 +35,11 @@ export function MovieFollowButton({ movieId, releaseDate }: MovieFollowButtonPro
     isAuthenticated && (isLoading || createFollow.isPending || removeFollow.isPending);
 
   const handleFollowSuccess = async () => {
+    setSuccessHint('Release alert on. This title will appear in Coming Up.');
     const registrationResult = await ensurePushDeviceRegisteredAsync();
     if (registrationResult === 'permission_denied') {
       setPermissionHint(
-        'Followed. Enable notifications in device settings to receive release alerts.',
+        'Enable notifications in device settings to receive release alerts.',
       );
     }
   };
@@ -49,6 +51,7 @@ export function MovieFollowButton({ movieId, releaseDate }: MovieFollowButtonPro
     }
 
     setFeedback(null);
+    setSuccessHint(null);
     setPermissionHint(null);
 
     if (isFollowing) {
@@ -69,6 +72,11 @@ export function MovieFollowButton({ movieId, releaseDate }: MovieFollowButtonPro
   return (
     <>
       <FeedbackMessage message={feedback} tone="error" onDismiss={() => setFeedback(null)} />
+      <FeedbackMessage
+        message={successHint}
+        tone="info"
+        onDismiss={() => setSuccessHint(null)}
+      />
       <FeedbackMessage
         message={permissionHint}
         tone="info"

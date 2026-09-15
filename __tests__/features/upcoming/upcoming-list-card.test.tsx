@@ -25,6 +25,6 @@ describe('UpcomingListCard', () => {
 
     expect(screen.getByText('Avatar 4')).toBeTruthy();
     expect(screen.getByText('Release')).toBeTruthy();
-    expect(screen.getByText('Following')).toBeTruthy();
+    expect(screen.getByText('Alert on')).toBeTruthy();
   });
 });

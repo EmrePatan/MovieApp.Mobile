@@ -14,7 +14,7 @@ export function FollowingEmptyState() {
         Nothing followed yet
       </AppText>
       <AppText variant="bodySmall" muted center>
-        Follow upcoming movies or TV shows to see them here and get release alerts.
+        Tap Notify on upcoming movies or Follow TV shows to track releases here.
       </AppText>
     </View>
   );

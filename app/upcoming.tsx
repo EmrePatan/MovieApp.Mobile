@@ -103,7 +103,7 @@ export default function UpcomingScreen() {
       title="Upcoming"
       subtitle={
         isAuthenticated
-          ? 'Releases and episodes from titles you follow'
+          ? 'From TV shows you follow and movies with release alerts on'
           : 'Future movie and TV premieres'
       }
     >
@@ -149,8 +149,8 @@ export default function UpcomingScreen() {
       </AppText>
       <AppText variant="bodySmall" muted center>
         {isAuthenticated
-          ? 'Follow movies and TV shows to see their upcoming releases here.'
-          : 'Sign in to include followed releases and episodes.'}
+          ? 'Turn on Notify for upcoming movies or Follow TV shows to track them here.'
+          : 'Sign in to include release alerts and followed episodes.'}
       </AppText>
       {!isAuthenticated ? (
         <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />

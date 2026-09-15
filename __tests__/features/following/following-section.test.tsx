@@ -62,7 +62,7 @@ describe('FollowingSection', () => {
 
     expect(screen.getByText('Nothing followed yet')).toBeTruthy();
     expect(
-      screen.getByText('Follow upcoming movies or TV shows to see them here and get release alerts.'),
+      screen.getByText('Tap Notify on upcoming movies or Follow TV shows to track releases here.'),
     ).toBeTruthy();
   });
 
