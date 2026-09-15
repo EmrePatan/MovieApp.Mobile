@@ -43,7 +43,6 @@ export function ProfileLibrarySection({
 
 const styles = StyleSheet.create({
   summary: {
-    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
 });
