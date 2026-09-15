@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { SearchBar } from './SearchBar';
+import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -10,6 +12,7 @@ interface SearchScreenHeaderProps {
   onChangeText: (value: string) => void;
   onSubmit: () => void;
   onClear: () => void;
+  onBack?: () => void;
   children?: ReactNode;
 }
 
@@ -18,13 +21,26 @@ export function SearchScreenHeader({
   onChangeText,
   onSubmit,
   onClear,
+  onBack,
   children,
 }: SearchScreenHeaderProps) {
   return (
     <View style={styles.container}>
-      <AppText variant="bodySmall" muted style={styles.eyebrow} accessibilityRole="header">
-        Search
-      </AppText>
+      <View style={styles.titleRow}>
+        {onBack ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={onBack}
+            style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
+          </Pressable>
+        ) : null}
+        <AppText variant="bodySmall" muted style={styles.eyebrow} accessibilityRole="header">
+          Search
+        </AppText>
+      </View>
       <SearchBar
         value={value}
         onChangeText={onChangeText}
@@ -42,9 +58,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     gap: spacing.sm,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  backButton: {
+    minWidth: layout.touchTarget,
+    minHeight: layout.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -spacing.sm,
+  },
   eyebrow: {
     letterSpacing: 0.3,
     textTransform: 'uppercase',
     fontWeight: '600',
+  },
+  pressed: {
+    opacity: 0.85,
   },
 });

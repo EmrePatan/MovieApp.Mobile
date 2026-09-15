@@ -21,12 +21,12 @@ describe('library stack navigation', () => {
     expect(dismissTo).toHaveBeenCalledWith('/(tabs)/home');
   });
 
-  it('falls back to home when no return href was stored', () => {
+  it('falls back to library when no return href was stored', () => {
     const dismissTo = jest.fn();
     const router = { dismissTo } as never;
 
     returnFromLibraryStackScreen(router);
 
-    expect(dismissTo).toHaveBeenCalledWith('/(tabs)/home');
+    expect(dismissTo).toHaveBeenCalledWith('/(tabs)/library');
   });
 });

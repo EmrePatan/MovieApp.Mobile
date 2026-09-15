@@ -11,10 +11,20 @@ import {
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockDismissTo = jest.fn();
+const mockBack = jest.fn();
+const mockCanGoBack = jest.fn(() => false);
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    dismissTo: mockDismissTo,
+    back: mockBack,
+    canGoBack: mockCanGoBack,
+  }),
   useLocalSearchParams: jest.fn(() => ({})),
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock('@/auth/useAuth', () => ({
@@ -83,6 +93,9 @@ const mockSearchResult = {
 describe('SearchScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({});
 
     (useGenres as jest.Mock).mockReturnValue({
       data: [{ id: 'genre-1', name: 'Action' }],
@@ -579,5 +592,15 @@ describe('SearchScreen', () => {
 
     expect(mockReplace).toHaveBeenCalledWith('/(tabs)/search');
     expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+  });
+
+  it('returns to Discover when back is pressed with a discover origin', () => {
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({ from: 'discover' });
+
+    render(<SearchScreen />);
+    fireEvent.press(screen.getByLabelText('Back'));
+
+    expect(mockDismissTo).toHaveBeenCalledWith('/(tabs)/discover');
   });
 });

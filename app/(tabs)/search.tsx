@@ -1,15 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  BackHandler,
   FlatList,
   Keyboard,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import {
+  parseSearchReturnOrigin,
+  returnFromSearch,
+} from '@/features/navigation/search-navigation';
 import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -48,7 +53,8 @@ import { spacing } from '@/theme/spacing';
 export default function SearchScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { explore } = useLocalSearchParams<{ explore?: string }>();
+  const { explore, from } = useLocalSearchParams<{ explore?: string; from?: string }>();
+  const searchReturnOrigin = parseSearchReturnOrigin(from);
   const { isAuthenticated } = useAuth();
   const [inputText, setInputText] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
@@ -115,6 +121,34 @@ export default function SearchScreen() {
     setInputText('');
     setSubmittedQuery('');
   }, []);
+
+  const handleBack = useCallback(() => {
+    if (searchReturnOrigin) {
+      returnFromSearch(router, searchReturnOrigin);
+      return;
+    }
+
+    if (router.canGoBack()) {
+      router.back();
+    }
+  }, [router, searchReturnOrigin]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!searchReturnOrigin) {
+        return undefined;
+      }
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        returnFromSearch(router, searchReturnOrigin);
+        return true;
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }, [router, searchReturnOrigin]),
+  );
 
   const handleSuggestionSelect = useCallback(
     (suggestion: SearchAutocompleteItem) => {
@@ -230,6 +264,7 @@ export default function SearchScreen() {
           onChangeText={setInputText}
           onSubmit={handleSubmit}
           onClear={handleClear}
+          onBack={searchReturnOrigin ? handleBack : undefined}
         >
           {showAutocomplete ? (
             <SearchSuggestionList
@@ -270,9 +305,11 @@ export default function SearchScreen() {
       handleDeleteHistoryItem,
       handleExploreItemPress,
       handleHistorySelect,
+      handleBack,
       handleSubmit,
       handleSuggestionSelect,
       hasActiveSearch,
+      searchReturnOrigin,
       historyItems,
       historyQuery,
       inputText,

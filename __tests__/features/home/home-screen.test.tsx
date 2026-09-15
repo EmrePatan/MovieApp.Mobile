@@ -680,7 +680,7 @@ describe('HomeScreen', () => {
     expect(screen.getByText('Fourth Recommended')).toBeTruthy();
   });
 
-  it('navigates to Search explore from cold home CTA', () => {
+  it('navigates to Discover from cold home CTA', () => {
     mockUseHome.mockReturnValue({
       data: { sections: [], isPersonalized: false },
       error: null,
@@ -693,7 +693,38 @@ describe('HomeScreen', () => {
     render(<HomeScreen />);
     fireEvent.press(screen.getByLabelText('Explore movies and shows'));
 
-    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search?explore=1');
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/discover');
+  });
+
+  it('renders global search entry near the top of Home', () => {
+    mockUseHome.mockReturnValue({
+      data: { sections: [], isPersonalized: false },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+    });
+
+    render(<HomeScreen />);
+
+    expect(screen.getByLabelText('Search movies, TV shows, and people')).toBeTruthy();
+  });
+
+  it('navigates to Search from the global search entry', () => {
+    mockUseHome.mockReturnValue({
+      data: { sections: [], isPersonalized: false },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+    });
+
+    render(<HomeScreen />);
+    fireEvent.press(screen.getByLabelText('Search movies, TV shows, and people'));
+
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search?from=home');
   });
 
   it('navigates to Discover from Top Rated See All', () => {

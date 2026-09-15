@@ -1,6 +1,4 @@
 import { useRouter } from 'expo-router';
-import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
-import { openComingUpScreen } from '@/features/upcoming/navigation/coming-up-navigation';
 import type { UserStatisticsSummaryResponse } from '../types';
 import {
   formatFavoritesSubtitle,
@@ -21,32 +19,19 @@ export function ProfileLibrarySection({
 }: ProfileLibrarySectionProps) {
   const router = useRouter();
 
+  const collectionSummary = [
+    formatFavoritesSubtitle(summary.favoritesCount),
+    formatWatchlistSubtitle(summary.watchlistCount),
+    formatFollowingSubtitle(followingCount),
+    formatWatchHistorySubtitle(summary.moviesWatched, summary.episodesWatched),
+  ].join(' · ');
+
   return (
     <ProfileSection title="My Library">
       <ProfileMenuRow
-        label="Favorites"
-        subtitle={formatFavoritesSubtitle(summary.favoritesCount)}
-        onPress={() => openLibraryStackScreen(router, '/favorites', '/(tabs)/profile')}
-      />
-      <ProfileMenuRow
-        label="Watchlist"
-        subtitle={formatWatchlistSubtitle(summary.watchlistCount)}
-        onPress={() => router.push('/(tabs)/watchlist')}
-      />
-      <ProfileMenuRow
-        label="Watch History"
-        subtitle={formatWatchHistorySubtitle(summary.moviesWatched, summary.episodesWatched)}
-        onPress={() => openLibraryStackScreen(router, '/watch-history', '/(tabs)/profile')}
-      />
-      <ProfileMenuRow
-        label="Following"
-        subtitle={formatFollowingSubtitle(followingCount)}
-        onPress={() => openLibraryStackScreen(router, '/following', '/(tabs)/profile')}
-      />
-      <ProfileMenuRow
-        label="Coming Up"
-        subtitle="Followed releases and upcoming episodes"
-        onPress={() => openComingUpScreen(router, 'for-you', '/(tabs)/profile')}
+        label="Open My Library"
+        subtitle={collectionSummary}
+        onPress={() => router.push('/(tabs)/library')}
       />
     </ProfileSection>
   );

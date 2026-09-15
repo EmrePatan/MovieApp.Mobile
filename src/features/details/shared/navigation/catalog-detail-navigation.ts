@@ -6,7 +6,7 @@ import type { PersonFilmographyEntry } from '../../person/types';
 import { buildCatalogDetailRoute } from '../routes';
 import { prefetchCatalogDetail } from './prefetch-catalog-detail';
 
-export type CatalogDetailTabOrigin = 'home' | 'search' | 'watchlist';
+export type CatalogDetailTabOrigin = 'home' | 'search' | 'watchlist' | 'discover' | 'library';
 
 export type CatalogDetailLibraryOrigin =
   | 'upcoming'
@@ -20,10 +20,12 @@ export interface OpenCatalogDetailOptions {
   libraryReturnHref?: string;
 }
 
-const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, `/(tabs)/${CatalogDetailTabOrigin}`> = {
+const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, `/(tabs)/${string}`> = {
   home: '/(tabs)/home',
   search: '/(tabs)/search',
   watchlist: '/(tabs)/watchlist',
+  discover: '/(tabs)/discover',
+  library: '/(tabs)/library',
 };
 
 const LIBRARY_ORIGIN_HREFS: Record<CatalogDetailLibraryOrigin, string> = {

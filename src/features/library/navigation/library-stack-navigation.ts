@@ -1,6 +1,6 @@
 import type { ImperativeRouter } from 'expo-router';
 
-const DEFAULT_LIBRARY_RETURN_HREF = '/(tabs)/home';
+const DEFAULT_LIBRARY_RETURN_HREF = '/(tabs)/library';
 
 let lastLibraryStackEntryReturnHref: string | null = null;
 

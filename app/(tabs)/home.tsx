@@ -87,23 +87,23 @@ export default function HomeScreen() {
   );
 
   const handleExplorePress = useCallback(() => {
-    router.push('/(tabs)/search?explore=1');
+    router.push('/(tabs)/discover');
   }, [router]);
 
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
       if (sectionType === 'Trending') {
-        openLibraryStackScreen(router, '/discover?mode=trending&type=all');
+        openLibraryStackScreen(router, '/discover?mode=trending&type=all', '/(tabs)/home');
         return;
       }
 
       if (sectionType === 'TopRated') {
-        openLibraryStackScreen(router, '/discover?mode=top_rated&type=all');
+        openLibraryStackScreen(router, '/discover?mode=top_rated&type=all', '/(tabs)/home');
         return;
       }
 
       if (sectionType === 'NewReleases') {
-        openLibraryStackScreen(router, '/discover?mode=new_releases&type=all');
+        openLibraryStackScreen(router, '/discover?mode=new_releases&type=all', '/(tabs)/home');
         return;
       }
 

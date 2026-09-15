@@ -46,4 +46,9 @@ export const colors = {
   progressInProgress: '#C4A35A',
   progressCompleted: '#4CAF82',
   progressCompletedTint12: 'rgba(76, 175, 130, 0.12)',
+
+  libraryCompleted: '#9B7BD4',
+  libraryCompletedTint12: 'rgba(155, 123, 212, 0.12)',
+  libraryWatching: '#F5A623',
+  libraryWatchingTint12: 'rgba(245, 166, 35, 0.12)',
 } as const;

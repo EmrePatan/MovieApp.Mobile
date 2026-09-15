@@ -76,7 +76,7 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('Movies vs Series')).toBeTruthy();
   });
 
-  it('shows My Library before analytics sections', () => {
+  it('shows a compact My Library shortcut before analytics sections', () => {
     render(<ProfileScreen />);
 
     function collectText(node: unknown): string[] {
@@ -104,19 +104,19 @@ describe('ProfileScreen', () => {
     expect(libraryIndex).toBeGreaterThan(-1);
     expect(insightIndex).toBeGreaterThan(-1);
     expect(libraryIndex).toBeLessThan(insightIndex);
+    expect(screen.getByLabelText('Open My Library')).toBeTruthy();
+    expect(screen.queryByLabelText('Favorites')).toBeNull();
+    expect(screen.queryByLabelText('Watchlist')).toBeNull();
   });
 
-  it('renders My Library subtitles and removes ratings/reviews rows', () => {
+  it('renders compact library summary and keeps account settings', () => {
     render(<ProfileScreen />);
 
-    expect(screen.getByText('6 saved titles')).toBeTruthy();
-    expect(screen.getByText('2 lists')).toBeTruthy();
-    expect(screen.getByText('12 movies · 48 episodes')).toBeTruthy();
-    expect(screen.getByText('3 followed titles')).toBeTruthy();
-    expect(screen.queryByText('8 ratings')).toBeNull();
-    expect(screen.queryByText('2 reviews')).toBeNull();
-    expect(screen.getByText('Coming Up')).toBeTruthy();
-    expect(screen.getByText('Followed releases and upcoming episodes')).toBeTruthy();
+    expect(screen.getByText('6 saved titles · 2 lists · 3 followed titles · 12 movies · 48 episodes')).toBeTruthy();
+    expect(screen.getByLabelText('Edit profile')).toBeTruthy();
+    expect(screen.getByLabelText('Change email')).toBeTruthy();
+    expect(screen.getByLabelText('Change password')).toBeTruthy();
+    expect(screen.getByLabelText('Delete account')).toBeTruthy();
   });
 
   it('shows month detail when a bar is pressed', () => {
@@ -128,22 +128,14 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('8 watched · 1 movies · 7 episodes')).toBeTruthy();
   });
 
-  it('navigates to account settings and library routes', () => {
+  it('navigates to account settings and the Library tab shortcut', () => {
     render(<ProfileScreen />);
 
     fireEvent.press(screen.getByLabelText('Edit profile'));
-    fireEvent.press(screen.getByLabelText('Favorites'));
-    fireEvent.press(screen.getByLabelText('Watchlist'));
-    fireEvent.press(screen.getByLabelText('Watch History'));
-    fireEvent.press(screen.getByLabelText('Following'));
-    fireEvent.press(screen.getByLabelText('Coming Up'));
+    fireEvent.press(screen.getByLabelText('Open My Library'));
 
     expect(mockPush).toHaveBeenCalledWith('/profile/edit');
-    expect(mockPush).toHaveBeenCalledWith('/favorites');
-    expect(mockPush).toHaveBeenCalledWith('/(tabs)/watchlist');
-    expect(mockPush).toHaveBeenCalledWith('/watch-history');
-    expect(mockPush).toHaveBeenCalledWith('/following');
-    expect(mockPush).toHaveBeenCalledWith('/upcoming?tab=for-you');
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/library');
   });
 
   it('renders new-user empty analytics states', () => {
@@ -186,10 +178,9 @@ describe('ProfileScreen', () => {
 
     render(<ProfileScreen />);
 
-    expect(screen.getByText('0 saved titles')).toBeTruthy();
-    expect(screen.getByText('0 lists')).toBeTruthy();
-    expect(screen.getByText('0 movies · 0 episodes')).toBeTruthy();
-    expect(screen.getByText('0 followed titles')).toBeTruthy();
+    expect(
+      screen.getByText('0 saved titles · 0 lists · 0 followed titles · 0 movies · 0 episodes'),
+    ).toBeTruthy();
     expect(screen.getByText('Start watching to build your activity timeline.')).toBeTruthy();
     expect(screen.getByText('Your favorite genres will appear here as you watch.')).toBeTruthy();
     expect(screen.getByText('Rate a few titles to reveal your rating style.')).toBeTruthy();

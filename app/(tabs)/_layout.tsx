@@ -33,18 +33,20 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="discover"
         options={{
-          title: 'Search',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" size={size} color={color} />,
+          title: 'Discover',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="compass-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="watchlist"
+        name="library"
         options={{
-          title: 'Watchlist',
+          title: 'Library',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bookmark-outline" size={size} color={color} />
+            <Ionicons name="albums-outline" size={size} color={color} />
           ),
         }}
       />
@@ -57,6 +59,8 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="search" options={{ href: null }} />
+      <Tabs.Screen name="watchlist" options={{ href: null }} />
       <Tabs.Screen name="movie" options={{ href: null }} />
       <Tabs.Screen name="tv/[id]" options={{ href: null }} />
       <Tabs.Screen name="person/[tmdbId]" options={{ href: null }} />

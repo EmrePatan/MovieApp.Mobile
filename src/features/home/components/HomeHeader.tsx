@@ -48,7 +48,7 @@ export function HomeHeader({ overlay = false }: HomeHeaderProps) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={notificationsAccessibilityLabel}
-          onPress={() => openLibraryStackScreen(router, '/notifications')}
+          onPress={() => openLibraryStackScreen(router, '/notifications', '/(tabs)/home')}
           style={({ pressed }) => [
             styles.iconButton,
             overlay && styles.iconButtonOverlay,
