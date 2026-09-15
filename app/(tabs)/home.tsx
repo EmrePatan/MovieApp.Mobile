@@ -12,8 +12,9 @@ import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeComingUpSection } from '@/features/home/components/HomeComingUpSection';
 import { HomeSection } from '@/features/home/components/HomeSection';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
-import { homeQueryKey, useHome } from '@/features/home/hooks/useHome';
+import { useHome } from '@/features/home/hooks/useHome';
 import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
@@ -52,10 +53,8 @@ export default function HomeScreen() {
   }, [data?.isPersonalized, data?.sections]);
 
   const handleRefresh = useCallback(() => {
-    void queryClient.invalidateQueries({
-      queryKey: homeQueryKey('all', DEFAULT_HOME_SECTION_SIZE),
-    });
-  }, [queryClient]);
+    void refetch();
+  }, [refetch]);
 
   const handleRetry = useCallback(() => {
     void refetch();
@@ -88,22 +87,22 @@ export default function HomeScreen() {
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
       if (sectionType === 'Trending') {
-        router.push('/discover?mode=trending&type=all');
+        openLibraryStackScreen(router, '/discover?mode=trending&type=all');
         return;
       }
 
       if (sectionType === 'TopRated') {
-        router.push('/discover?mode=top_rated&type=all');
+        openLibraryStackScreen(router, '/discover?mode=top_rated&type=all');
         return;
       }
 
       if (sectionType === 'NewReleases') {
-        router.push('/discover?mode=new_releases&type=all');
+        openLibraryStackScreen(router, '/discover?mode=new_releases&type=all');
         return;
       }
 
       if (sectionType === 'ComingUp') {
-        router.push('/upcoming');
+        openLibraryStackScreen(router, '/upcoming');
       }
     },
     [router],

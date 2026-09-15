@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMovieFollow, removeMovieFollow } from '../api/movie-follow-api';
 import type { MovieFollowStatusResponse } from '../types';
+import { removeFollowedCatalogFromHomeCaches } from '../utils/home-coming-up-cache';
 import { invalidateFollowCatalogQueries } from '../utils/invalidate-follow-catalog-queries';
 import { movieFollowStatusQueryKey } from './follow-query-keys';
 
@@ -27,6 +28,7 @@ export function useRemoveMovieFollow(movieId: string) {
     },
     onSuccess: (status) => {
       queryClient.setQueryData(movieFollowStatusQueryKey(movieId), status);
+      removeFollowedCatalogFromHomeCaches(queryClient, movieId);
       invalidateFollowCatalogQueries(queryClient);
     },
   });

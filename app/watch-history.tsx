@@ -18,6 +18,7 @@ import { WatchHistoryEmptyState } from '@/features/watch-history/components/Watc
 import { WatchHistoryLoadingState } from '@/features/watch-history/components/WatchHistoryLoadingState';
 import { useRecentWatchHistory } from '@/features/watch-history/hooks/useRecentWatchHistory';
 import type { RecentWatchHistoryItemResponse } from '@/features/watch-history/types';
+import { openDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { buildRecentHistoryRoute } from '@/features/watch-history/utils/history-navigation';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -40,7 +41,7 @@ export default function WatchHistoryScreen() {
     (item: RecentWatchHistoryItemResponse) => {
       const route = buildRecentHistoryRoute(item);
       if (route) {
-        router.push(route);
+        openDetailFromLibraryStack(router, route, 'watch-history');
       }
     },
     [router],

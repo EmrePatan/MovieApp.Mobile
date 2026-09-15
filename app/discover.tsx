@@ -17,7 +17,7 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import {
   ActiveFilterChips,
@@ -104,7 +104,7 @@ export default function DiscoverScreen() {
   const openCatalogDetail = useCallback(
     (id: string, itemType: 'movie' | 'tv') => {
       prefetchCatalogDetail(queryClient, id, itemType);
-      router.push(buildCatalogDetailRoute(id, itemType));
+      openCatalogDetailFromLibraryStack(router, id, itemType, 'discover');
     },
     [queryClient, router],
   );

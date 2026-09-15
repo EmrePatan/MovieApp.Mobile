@@ -14,7 +14,7 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { useFavoritesItems } from '@/features/favorites/hooks/useFavoritesItems';
 import { useRemoveFavoriteMutation } from '@/features/favorites/hooks/useFavoriteMutations';
 import { flattenFavoritesPages } from '@/features/favorites/utils/favorite-library-items';
@@ -66,7 +66,7 @@ export default function FavoritesScreen() {
 
   const handleItemPress = useCallback(
     (item: LibraryItem) => {
-      router.push(buildCatalogDetailRoute(item.id, item.type));
+      openCatalogDetailFromLibraryStack(router, item.id, item.type, 'favorites');
     },
     [router],
   );

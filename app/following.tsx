@@ -14,7 +14,8 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { FollowingEmptyState } from '@/features/following/components/FollowingEmptyState';
 import { FollowingListCard } from '@/features/following/components/FollowingListCard';
 import { useFollowingCatalog } from '@/features/following/hooks/useFollowingCatalog';
@@ -51,12 +52,12 @@ export default function FollowingScreen() {
   }, [router]);
 
   const handleBrowse = useCallback(() => {
-    router.push('/discover');
+    openLibraryStackScreen(router, '/discover', '/following');
   }, [router]);
 
   const handleItemPress = useCallback(
     (item: FollowingCatalogItem) => {
-      router.push(buildCatalogDetailRoute(item.id, item.type));
+      openCatalogDetailFromLibraryStack(router, item.id, item.type, 'following');
     },
     [router],
   );

@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { useUnreadNotificationCount } from '@/features/notifications/hooks/useUnreadNotificationCount';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -47,7 +48,7 @@ export function HomeHeader({ overlay = false }: HomeHeaderProps) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={notificationsAccessibilityLabel}
-          onPress={() => router.push('/notifications')}
+          onPress={() => openLibraryStackScreen(router, '/notifications')}
           style={({ pressed }) => [
             styles.iconButton,
             overlay && styles.iconButtonOverlay,

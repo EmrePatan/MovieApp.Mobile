@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { getMovieDetails } from '@/features/details/movie/api/movie-api';
 import { movieQueryKey } from '@/features/details/movie/hooks/useMovieDetails';
 import {
+  openCatalogDetailFromLibraryStack,
   openCatalogDetailFromTab,
   resetCatalogDetailOriginForTests,
   returnToCatalogDetailOrigin,
@@ -70,5 +71,29 @@ describe('catalog detail navigation', () => {
     returnToCatalogDetailOrigin(router);
 
     expect(navigate).toHaveBeenCalledWith('/(tabs)/home');
+  });
+
+  it('returns to the remembered library stack origin', () => {
+    const dismissTo = jest.fn();
+    const push = jest.fn();
+    const router = { dismissTo, navigate: jest.fn(), replace: jest.fn(), push } as never;
+
+    openCatalogDetailFromLibraryStack(router, 'movie-b', 'movie', 'upcoming');
+    returnToCatalogDetailOrigin(router);
+
+    expect(push).toHaveBeenCalledWith('/movie/movie-b');
+    expect(dismissTo).toHaveBeenCalledWith('/upcoming');
+  });
+
+  it('prefers library stack origin over tab origin when both were set', () => {
+    const dismissTo = jest.fn();
+    const router = { dismissTo, navigate: jest.fn(), replace: jest.fn(), push: jest.fn() } as never;
+
+    openCatalogDetailFromTab(router, 'movie-a', 'movie', 'home');
+    openCatalogDetailFromLibraryStack(router, 'movie-b', 'movie', 'upcoming');
+    returnToCatalogDetailOrigin(router);
+
+    expect(dismissTo).toHaveBeenCalledWith('/upcoming');
+    expect(dismissTo).not.toHaveBeenCalledWith('/(tabs)/home');
   });
 });

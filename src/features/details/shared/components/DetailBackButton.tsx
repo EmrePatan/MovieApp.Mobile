@@ -8,6 +8,10 @@ import {
   returnToCatalogDetailOrigin,
 } from '../navigation/catalog-detail-navigation';
 import {
+  isLibraryStackRoute,
+  returnFromLibraryStackScreen,
+} from '@/features/library/navigation/library-stack-navigation';
+import {
   isGalleryDetailRoute,
   returnFromGalleryDetail,
 } from '../navigation/gallery-detail-navigation';
@@ -36,6 +40,11 @@ export function DetailBackButton({
   const displayLabel = label ?? 'Back';
 
   const handleBack = useCallback(() => {
+    if (isLibraryStackRoute(segments)) {
+      returnFromLibraryStackScreen(router);
+      return;
+    }
+
     if (isRootCatalogDetailRoute(segments)) {
       returnToCatalogDetailOrigin(router);
       return;

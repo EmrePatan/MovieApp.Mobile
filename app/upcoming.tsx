@@ -12,7 +12,7 @@ import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
 import { LibraryStackHeader } from '@/features/library/components/LibraryStackHeader';
 import type { LibraryTypeFilter } from '@/features/library/types';
@@ -66,7 +66,7 @@ export default function UpcomingScreen() {
 
   const handleItemPress = useCallback(
     (item: UpcomingCatalogItem) => {
-      router.push(buildCatalogDetailRoute(item.id, item.type));
+      openCatalogDetailFromLibraryStack(router, item.id, item.type, 'upcoming');
     },
     [router],
   );

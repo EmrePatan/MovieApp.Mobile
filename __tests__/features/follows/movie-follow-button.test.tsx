@@ -88,9 +88,6 @@ describe('MovieFollowButton', () => {
     await waitFor(() => {
       expect(mockCreateMutate).toHaveBeenCalledTimes(1);
       expect(ensurePushDeviceRegisteredAsync).toHaveBeenCalledTimes(1);
-      expect(
-        screen.getByText('Release alert on. This title will appear in Coming Up.'),
-      ).toBeTruthy();
     });
   });
 

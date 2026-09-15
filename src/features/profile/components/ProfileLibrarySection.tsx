@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { UserStatisticsSummaryResponse } from '../types';
 import {
   formatFavoritesSubtitle,
@@ -24,7 +25,7 @@ export function ProfileLibrarySection({
       <ProfileMenuRow
         label="Favorites"
         subtitle={formatFavoritesSubtitle(summary.favoritesCount)}
-        onPress={() => router.push('/favorites')}
+        onPress={() => openLibraryStackScreen(router, '/favorites', '/(tabs)/profile')}
       />
       <ProfileMenuRow
         label="Watchlist"
@@ -34,12 +35,12 @@ export function ProfileLibrarySection({
       <ProfileMenuRow
         label="Watch History"
         subtitle={formatWatchHistorySubtitle(summary.moviesWatched, summary.episodesWatched)}
-        onPress={() => router.push('/watch-history')}
+        onPress={() => openLibraryStackScreen(router, '/watch-history', '/(tabs)/profile')}
       />
       <ProfileMenuRow
         label="Following"
         subtitle={formatFollowingSubtitle(followingCount)}
-        onPress={() => router.push('/following')}
+        onPress={() => openLibraryStackScreen(router, '/following', '/(tabs)/profile')}
       />
     </ProfileSection>
   );

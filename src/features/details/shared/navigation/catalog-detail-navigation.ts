@@ -6,59 +6,49 @@ import type { PersonFilmographyEntry } from '../../person/types';
 import { buildCatalogDetailRoute } from '../routes';
 import { prefetchCatalogDetail } from './prefetch-catalog-detail';
 
-
-
 export type CatalogDetailTabOrigin = 'home' | 'search' | 'watchlist';
+
+export type CatalogDetailLibraryOrigin =
+  | 'upcoming'
+  | 'following'
+  | 'favorites'
+  | 'discover'
+  | 'watch-history';
 
 export interface OpenCatalogDetailOptions {
   queryClient?: QueryClient;
 }
 
-
-
 const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, `/(tabs)/${CatalogDetailTabOrigin}`> = {
-
   home: '/(tabs)/home',
-
   search: '/(tabs)/search',
-
   watchlist: '/(tabs)/watchlist',
-
 };
 
-
+const LIBRARY_ORIGIN_HREFS: Record<CatalogDetailLibraryOrigin, string> = {
+  upcoming: '/upcoming',
+  following: '/following',
+  favorites: '/favorites',
+  discover: '/discover',
+  'watch-history': '/watch-history',
+};
 
 let lastCatalogDetailOrigin: CatalogDetailTabOrigin | null = null;
-
-
+let lastCatalogDetailLibraryReturnHref: string | null = null;
 
 export function isRootCatalogDetailRoute(segments: readonly string[]): boolean {
-
   const tabsIndex = segments.indexOf('(tabs)');
-
   if (tabsIndex === -1) {
-
     return false;
-
   }
-
-
 
   const section = segments[tabsIndex + 1];
-
   if (section === 'movie') {
-
     return true;
-
   }
 
-
-
   return section === 'tv' && !segments.includes('season');
-
 }
-
-
 
 export async function openCatalogDetailFromFilmography(
   router: ImperativeRouter,
@@ -94,6 +84,7 @@ export function openCatalogDetailFromTab(
   origin: CatalogDetailTabOrigin,
   options?: OpenCatalogDetailOptions,
 ): void {
+  lastCatalogDetailLibraryReturnHref = null;
   lastCatalogDetailOrigin = origin;
   const href = buildCatalogDetailRoute(id, type);
 
@@ -109,27 +100,50 @@ export function openCatalogDetailFromTab(
   router.push(href);
 }
 
+export function openCatalogDetailFromLibraryStack(
+  router: ImperativeRouter,
+  id: string,
+  type: 'movie' | 'tv',
+  origin: CatalogDetailLibraryOrigin,
+  options?: OpenCatalogDetailOptions,
+): void {
+  lastCatalogDetailOrigin = null;
+  lastCatalogDetailLibraryReturnHref = LIBRARY_ORIGIN_HREFS[origin];
+  const href = buildCatalogDetailRoute(id, type);
 
+  if (options?.queryClient) {
+    prefetchCatalogDetail(options.queryClient, id, type);
+  }
+
+  router.push(href);
+}
+
+export function openDetailFromLibraryStack(
+  router: ImperativeRouter,
+  detailRoute: string,
+  origin: CatalogDetailLibraryOrigin,
+): void {
+  lastCatalogDetailOrigin = null;
+  lastCatalogDetailLibraryReturnHref = LIBRARY_ORIGIN_HREFS[origin];
+  router.push(detailRoute);
+}
 
 export function returnToCatalogDetailOrigin(router: ImperativeRouter): void {
+  if (lastCatalogDetailLibraryReturnHref) {
+    const libraryHref = lastCatalogDetailLibraryReturnHref;
+    lastCatalogDetailLibraryReturnHref = null;
+    router.dismissTo(libraryHref);
+    return;
+  }
 
   const href = lastCatalogDetailOrigin
-
     ? TAB_ORIGIN_HREFS[lastCatalogDetailOrigin]
-
     : '/(tabs)/home';
 
-
-
   router.navigate(href);
-
 }
-
-
 
 export function resetCatalogDetailOriginForTests(): void {
-
   lastCatalogDetailOrigin = null;
-
+  lastCatalogDetailLibraryReturnHref = null;
 }
-
