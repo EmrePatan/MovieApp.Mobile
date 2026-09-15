@@ -1,5 +1,32 @@
 import mockReact from 'react';
 
+jest.mock('react-native-gesture-handler', () => {
+  const { View } = require('react-native');
+
+  const createMockPanGesture = () => {
+    const gesture = {
+      activeOffsetY: jest.fn(() => gesture),
+      failOffsetX: jest.fn(() => gesture),
+      onUpdate: jest.fn(() => gesture),
+      onEnd: jest.fn(() => gesture),
+    };
+
+    return gesture;
+  };
+
+  return {
+    GestureHandlerRootView: View,
+    GestureDetector: View,
+    Gesture: {
+      Pan: jest.fn(() => createMockPanGesture()),
+    },
+  };
+});
+
+jest.mock('react-native-reanimated', () => ({
+  runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
+}));
+
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({
     children,

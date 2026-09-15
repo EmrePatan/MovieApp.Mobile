@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -38,8 +39,7 @@ export function ImageViewerModal({
   const [activeIndex, setActiveIndex] = useState(initialIndex);
 
   const {
-    panHandlers,
-    pagerScrollEnabled,
+    dismissGesture,
     animatedStyle,
     closeViewer,
   } = useImageViewerDismissGesture({
@@ -75,73 +75,79 @@ export function ImageViewerModal({
       onRequestClose={closeViewer}
       testID="gallery-image-viewer"
     >
-      <Animated.View style={[styles.overlay, animatedStyle]}>
-        <FlatList
-          horizontal
-          pagingEnabled
-          scrollEnabled={pagerScrollEnabled}
-          data={images}
-          style={styles.list}
-          keyExtractor={(image, index) => galleryImageKey(image, index)}
-          initialScrollIndex={Math.min(initialIndex, images.length - 1)}
-          getItemLayout={(_, index) => ({
-            length: width,
-            offset: width * index,
-            index,
-          })}
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={(event) => handleMomentumEnd(event.nativeEvent.contentOffset.x)}
-          renderItem={({ item, index }) => {
-            const uri = imageUris[index];
+      <GestureHandlerRootView style={styles.root}>
+        <GestureDetector gesture={dismissGesture}>
+          <Animated.View style={[styles.overlay, animatedStyle]}>
+            <FlatList
+              horizontal
+              pagingEnabled
+              data={images}
+              style={styles.list}
+              keyExtractor={(image, index) => galleryImageKey(image, index)}
+              initialScrollIndex={Math.min(initialIndex, images.length - 1)}
+              getItemLayout={(_, index) => ({
+                length: width,
+                offset: width * index,
+                index,
+              })}
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(event) => handleMomentumEnd(event.nativeEvent.contentOffset.x)}
+              renderItem={({ item, index }) => {
+                const uri = imageUris[index];
 
-            return (
-              <View style={[styles.slide, { width, height }]} {...panHandlers}>
-                {uri ? (
-                  <Image
-                    source={{ uri }}
-                    style={styles.image}
-                    resizeMode="contain"
-                    accessibilityLabel={`Gallery image ${index + 1}`}
-                  />
-                ) : (
-                  <AppText variant="body" muted>
-                    Image unavailable
-                  </AppText>
-                )}
-              </View>
-            );
-          }}
-        />
+                return (
+                  <View style={[styles.slide, { width, height }]}>
+                    {uri ? (
+                      <Image
+                        source={{ uri }}
+                        style={styles.image}
+                        resizeMode="contain"
+                        accessibilityLabel={`Gallery image ${index + 1}`}
+                      />
+                    ) : (
+                      <AppText variant="body" muted>
+                        Image unavailable
+                      </AppText>
+                    )}
+                  </View>
+                );
+              }}
+            />
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close image viewer"
-          onPress={closeViewer}
-          hitSlop={12}
-          style={({ pressed }) => [
-            styles.closeButton,
-            { top: closeButtonTop, right: spacing.lg },
-            pressed && styles.pressed,
-          ]}
-          testID="gallery-image-viewer-close"
-        >
-          <Ionicons name="close" size={24} color={colors.textPrimary} />
-        </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close image viewer"
+              onPress={closeViewer}
+              hitSlop={12}
+              style={({ pressed }) => [
+                styles.closeButton,
+                { top: closeButtonTop, right: spacing.lg },
+                pressed && styles.pressed,
+              ]}
+              testID="gallery-image-viewer-close"
+            >
+              <Ionicons name="close" size={24} color={colors.textPrimary} />
+            </Pressable>
 
-        <View
-          pointerEvents="none"
-          style={[styles.counterContainer, { bottom: insets.bottom + spacing.lg }]}
-        >
-          <AppText variant="caption" style={styles.counter}>
-            {activeIndex + 1} / {images.length}
-          </AppText>
-        </View>
-      </Animated.View>
+            <View
+              pointerEvents="none"
+              style={[styles.counterContainer, { bottom: insets.bottom + spacing.lg }]}
+            >
+              <AppText variant="caption" style={styles.counter}>
+                {activeIndex + 1} / {images.length}
+              </AppText>
+            </View>
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.96)',

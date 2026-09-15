@@ -13,10 +13,10 @@ describe('image viewer dismiss gesture', () => {
   });
 
   it('dismisses after a long downward drag', () => {
-    expect(shouldDismissImageViewerOnRelease(120, 0)).toBe(true);
+    expect(shouldDismissImageViewerOnRelease(100, 0)).toBe(true);
   });
 
   it('dismisses after a fast downward flick', () => {
-    expect(shouldDismissImageViewerOnRelease(20, 1.2)).toBe(true);
+    expect(shouldDismissImageViewerOnRelease(20, 900)).toBe(true);
   });
 });

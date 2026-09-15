@@ -1,9 +1,8 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { Animated, type GestureResponderHandlers, PanResponder } from 'react-native';
-import {
-  shouldCaptureImageViewerDismissGesture,
-  shouldDismissImageViewerOnRelease,
-} from '../utils/image-viewer-dismiss-gesture';
+import { useCallback, useMemo, useRef } from 'react';
+import { Animated } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
+import { shouldDismissImageViewerOnRelease } from '../utils/image-viewer-dismiss-gesture';
 
 interface UseImageViewerDismissGestureOptions {
   height: number;
@@ -11,8 +10,7 @@ interface UseImageViewerDismissGestureOptions {
 }
 
 interface UseImageViewerDismissGestureResult {
-  panHandlers: GestureResponderHandlers;
-  pagerScrollEnabled: boolean;
+  dismissGesture: ReturnType<typeof Gesture.Pan>;
   animatedStyle: {
     opacity: Animated.Value;
     transform: [{ translateY: Animated.Value }];
@@ -26,8 +24,6 @@ export function useImageViewerDismissGesture({
 }: UseImageViewerDismissGestureOptions): UseImageViewerDismissGestureResult {
   const translateY = useRef(new Animated.Value(0)).current;
   const backdropOpacity = useRef(new Animated.Value(1)).current;
-  const [pagerScrollEnabled, setPagerScrollEnabled] = useState(true);
-  const isDismissDraggingRef = useRef(false);
 
   const resetDismissAnimation = useCallback(() => {
     translateY.setValue(0);
@@ -39,88 +35,78 @@ export function useImageViewerDismissGesture({
     onClose();
   }, [onClose, resetDismissAnimation]);
 
-  const endDismissDrag = useCallback(() => {
-    isDismissDraggingRef.current = false;
-    setPagerScrollEnabled(true);
-  }, []);
+  const updateDrag = useCallback(
+    (offsetY: number) => {
+      if (offsetY > 0) {
+        translateY.setValue(offsetY);
+        backdropOpacity.setValue(Math.max(0.35, 1 - offsetY / 280));
+      }
+    },
+    [backdropOpacity, translateY],
+  );
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponderCapture: (_, gestureState) =>
-          shouldCaptureImageViewerDismissGesture(gestureState.dx, gestureState.dy),
-        onMoveShouldSetPanResponder: (_, gestureState) =>
-          shouldCaptureImageViewerDismissGesture(gestureState.dx, gestureState.dy),
-        onPanResponderTerminationRequest: () => !isDismissDraggingRef.current,
-        onPanResponderGrant: () => {
-          isDismissDraggingRef.current = true;
-          setPagerScrollEnabled(false);
-        },
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dy > 0) {
-            translateY.setValue(gestureState.dy);
-            backdropOpacity.setValue(Math.max(0.35, 1 - gestureState.dy / 280));
-          }
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          endDismissDrag();
-
-          if (shouldDismissImageViewerOnRelease(gestureState.dy, gestureState.vy)) {
-            Animated.parallel([
-              Animated.timing(translateY, {
-                toValue: height * 0.35,
-                duration: 180,
-                useNativeDriver: true,
-              }),
-              Animated.timing(backdropOpacity, {
-                toValue: 0,
-                duration: 180,
-                useNativeDriver: true,
-              }),
-            ]).start(({ finished }) => {
-              if (finished) {
-                closeViewer();
-              }
-            });
-            return;
-          }
-
-          Animated.parallel([
-            Animated.spring(translateY, {
-              toValue: 0,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-            Animated.spring(backdropOpacity, {
-              toValue: 1,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-          ]).start();
-        },
-        onPanResponderTerminate: () => {
-          endDismissDrag();
-
-          Animated.parallel([
-            Animated.spring(translateY, {
-              toValue: 0,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-            Animated.spring(backdropOpacity, {
-              toValue: 1,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-          ]).start();
-        },
+  const snapBack = useCallback(() => {
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        bounciness: 0,
       }),
-    [backdropOpacity, closeViewer, endDismissDrag, height, translateY],
+      Animated.spring(backdropOpacity, {
+        toValue: 1,
+        useNativeDriver: true,
+        bounciness: 0,
+      }),
+    ]).start();
+  }, [backdropOpacity, translateY]);
+
+  const dismissWithAnimation = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: height * 0.35,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) {
+        closeViewer();
+      }
+    });
+  }, [backdropOpacity, closeViewer, height, translateY]);
+
+  const handleRelease = useCallback(
+    (offsetY: number, velocityY: number) => {
+      if (shouldDismissImageViewerOnRelease(offsetY, velocityY)) {
+        dismissWithAnimation();
+        return;
+      }
+
+      snapBack();
+    },
+    [dismissWithAnimation, snapBack],
+  );
+
+  const dismissGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetY(8)
+        .failOffsetX([-12, 12])
+        .onUpdate((event) => {
+          runOnJS(updateDrag)(event.translationY);
+        })
+        .onEnd((event) => {
+          runOnJS(handleRelease)(event.translationY, event.velocityY);
+        }),
+    [handleRelease, updateDrag],
   );
 
   return {
-    panHandlers: panResponder.panHandlers,
-    pagerScrollEnabled,
+    dismissGesture,
     animatedStyle: {
       opacity: backdropOpacity,
       transform: [{ translateY }],
