@@ -102,17 +102,17 @@ describe('detail trailer placement', () => {
     });
   });
 
-  it('places Play Trailer between the action bar and overview on movie detail', () => {
+  it('places Play Trailer between hero and action bar on movie detail', () => {
     render(<MovieDetailContent movie={movie} />);
 
     const texts = screen.getAllByText(/Action Bar|Play Trailer|Overview copy/).map((node) => node.props.children);
-    expect(texts).toEqual(['Action Bar', 'Play Trailer', 'Overview copy']);
+    expect(texts).toEqual(['Play Trailer', 'Action Bar', 'Overview copy']);
   });
 
-  it('places Play Trailer between the action bar and overview on tv detail', () => {
+  it('places Play Trailer between hero and action bar on tv detail', () => {
     render(<TvShowDetailContent show={show} />);
 
     const texts = screen.getAllByText(/Action Bar|Play Trailer|Overview copy/).map((node) => node.props.children);
-    expect(texts).toEqual(['Action Bar', 'Play Trailer', 'Overview copy']);
+    expect(texts).toEqual(['Play Trailer', 'Action Bar', 'Overview copy']);
   });
 });

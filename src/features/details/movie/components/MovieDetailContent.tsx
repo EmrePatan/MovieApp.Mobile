@@ -32,13 +32,13 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         genres={movie.genres}
         posterAccessibilityLabel={`${movie.title} poster`}
       />
+      <PlayTrailerButton contentType="movie" contentId={movie.id} />
       <DetailActionBar
         contentType="movie"
         contentId={movie.id}
         showWatched
         releaseDate={movie.releaseDate}
       />
-      <PlayTrailerButton contentType="movie" contentId={movie.id} />
       <DetailOverview overview={movie.overview} />
       <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />

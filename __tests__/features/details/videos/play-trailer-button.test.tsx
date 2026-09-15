@@ -43,6 +43,7 @@ describe('PlayTrailerButton', () => {
   it('renders for movie when primary trailer is available', () => {
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
+    expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
     expect(screen.getByText('Play Trailer')).toBeTruthy();
   });
 

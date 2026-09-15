@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xl,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
 });
 

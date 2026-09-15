@@ -34,8 +34,8 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         genres={show.genres}
         posterAccessibilityLabel={`${show.title} poster`}
       />
-      <DetailActionBar contentType="tv" contentId={show.id} showWatched />
       <PlayTrailerButton contentType="tv" contentId={show.id} />
+      <DetailActionBar contentType="tv" contentId={show.id} showWatched />
       <DetailOverview overview={show.overview} />
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
