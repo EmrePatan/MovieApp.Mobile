@@ -7,6 +7,7 @@ import type {
   MessageResponse,
   RegisterRequest,
   ResetPasswordRequest,
+  SocialAuthRequest,
 } from '@/models/api/auth';
 
 export async function loginRequest(payload: LoginRequest): Promise<AuthResponse> {
@@ -27,4 +28,8 @@ export async function resetPasswordRequest(payload: ResetPasswordRequest): Promi
 
 export async function getCurrentUser(): Promise<CurrentUserResponse> {
   return api.get<CurrentUserResponse>('/api/auth/me');
+}
+
+export async function socialAuthRequest(payload: SocialAuthRequest): Promise<AuthResponse> {
+  return api.post<AuthResponse>('/api/auth/social', payload, { authenticated: false });
 }

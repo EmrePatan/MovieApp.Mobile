@@ -38,4 +38,11 @@ export interface MessageResponse {
   message: string;
 }
 
+export type SocialAuthProvider = 'google' | 'apple';
+
+export interface SocialAuthRequest {
+  provider: SocialAuthProvider;
+  identityToken: string;
+}
+
 export type CurrentUserResponse = UserProfile;

@@ -12,6 +12,7 @@ import {
   validateLoginForm,
   type LoginFormErrors,
 } from '@/utils/validation';
+import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
 import { spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
 
@@ -99,6 +100,8 @@ export default function LoginScreen() {
           <Link href="/(auth)/register" asChild>
             <AppButton title="Create an account" variant="secondary" />
           </Link>
+
+          <SocialAuthSection onError={setFormError} />
         </View>
       </KeyboardAvoidingView>
     </Screen>

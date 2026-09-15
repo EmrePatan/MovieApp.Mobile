@@ -16,6 +16,11 @@ jest.mock('@/auth/auth-api', () => ({
   getCurrentUser: jest.fn(),
   loginRequest: jest.fn(),
   registerRequest: jest.fn(),
+  socialAuthRequest: jest.fn(),
+}));
+
+jest.mock('@/auth/social-auth-service', () => ({
+  requestSocialIdentityToken: jest.fn(),
 }));
 
 jest.mock('@/api/client', () => ({

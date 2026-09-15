@@ -12,6 +12,7 @@ import {
   validateRegisterForm,
   type RegisterFormErrors,
 } from '@/utils/validation';
+import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
 import { spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
 
@@ -109,6 +110,8 @@ export default function RegisterScreen() {
           <Link href="/(auth)/login" asChild>
             <AppButton title="Back to sign in" variant="secondary" />
           </Link>
+
+          <SocialAuthSection onError={setFormError} />
         </View>
       </KeyboardAvoidingView>
     </Screen>

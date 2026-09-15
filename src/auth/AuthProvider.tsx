@@ -9,7 +9,9 @@ import {
 } from 'react';
 import { api } from '@/api/client';
 import { isApiError } from '@/api/errors';
-import { getCurrentUser, loginRequest, registerRequest } from './auth-api';
+import { getCurrentUser, loginRequest, registerRequest, socialAuthRequest } from './auth-api';
+import { requestSocialIdentityToken } from './social-auth-service';
+import type { SocialAuthProvider } from '@/models/api/auth';
 import { getAccessToken, removeAccessToken, saveAccessToken } from './auth-storage';
 import type { AuthContextValue } from './auth-types';
 import type { UserProfile } from '@/models/api/auth';
@@ -148,6 +150,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [establishSession],
   );
 
+  const signInWithSocial = useCallback(
+    async (provider: SocialAuthProvider) => {
+      const identityToken = await requestSocialIdentityToken(provider);
+      const response = await socialAuthRequest({ provider, identityToken });
+      await establishSession(response.accessToken, response.user);
+    },
+    [establishSession],
+  );
+
   const logout = useCallback(async () => {
     try {
       await unregisterKnownPushDeviceAsync();
@@ -184,11 +195,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: Boolean(token),
       login,
       register,
+      signInWithSocial,
       logout,
       refreshUser,
       updateSession,
     }),
-    [user, token, isLoading, login, register, logout, refreshUser, updateSession],
+    [user, token, isLoading, login, register, signInWithSocial, logout, refreshUser, updateSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

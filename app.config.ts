@@ -17,13 +17,14 @@ const config: ExpoConfig = {
     backgroundColor: '#0A0A0F',
   },
   ios: {
-  supportsTablet: true,
-  bundleIdentifier: 'com.movieapp.mobile',
-  buildNumber: '1',
-  infoPlist: {
-    ITSAppUsesNonExemptEncryption: false,
+    supportsTablet: true,
+    bundleIdentifier: 'com.movieapp.mobile',
+    buildNumber: '1',
+    usesAppleSignIn: true,
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
   },
-},
   android: {
     adaptiveIcon: {
       backgroundColor: '#0A0A0F',
@@ -39,7 +40,13 @@ const config: ExpoConfig = {
     favicon: './assets/favicon.png',
     bundler: 'metro',
   },
-  plugins: ['expo-router', 'expo-secure-store', 'expo-notifications'],
+  plugins: [
+    'expo-router',
+    'expo-secure-store',
+    'expo-notifications',
+    '@react-native-google-signin/google-signin',
+    'expo-apple-authentication',
+  ],
   extra: {
     appEnv: process.env.EXPO_PUBLIC_APP_ENV ?? 'development',
     eas: {

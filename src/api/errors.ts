@@ -79,7 +79,7 @@ export function mapStatusToErrorKind(status: number): ApiErrorKind {
 
 export function getUserMessageForAuthError(
   kind: ApiErrorKind,
-  context: 'login' | 'register' | 'forgot-password' | 'reset-password',
+  context: 'login' | 'register' | 'forgot-password' | 'reset-password' | 'social',
 ): string {
   if (kind === 'unauthorized' && context === 'login') {
     return 'Invalid email or password.';
@@ -87,6 +87,14 @@ export function getUserMessageForAuthError(
 
   if (kind === 'conflict' && context === 'register') {
     return 'An account with this email already exists.';
+  }
+
+  if (kind === 'conflict' && context === 'social') {
+    return 'An account with this email already exists. Sign in with your password to continue.';
+  }
+
+  if (kind === 'unauthorized' && context === 'social') {
+    return 'Social sign-in failed. Please try again.';
   }
 
   if (kind === 'rate_limited') {
