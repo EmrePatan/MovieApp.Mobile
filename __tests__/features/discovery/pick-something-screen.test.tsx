@@ -63,7 +63,8 @@ describe('PickSomethingScreen', () => {
     expect(screen.getByTestId('pick-something-hero-backdrop')).toBeTruthy();
     expect(screen.queryByTestId('pick-something-hero-poster-cover')).toBeNull();
     expect(screen.queryByTestId('pick-something-hero-placeholder')).toBeNull();
-    expect(screen.getByLabelText('Inception poster')).toBeTruthy();
+    expect(screen.getByLabelText('Inception backdrop')).toBeTruthy();
+    expect(screen.queryByLabelText('Inception poster')).toBeNull();
     expect(screen.getByText('Inception')).toBeTruthy();
     expect(screen.getByText('Trending right now')).toBeTruthy();
     expect(screen.getByText('Try Another')).toBeTruthy();

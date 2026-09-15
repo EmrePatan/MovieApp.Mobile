@@ -17,7 +17,6 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
-import { PosterImage } from '@/components/common/PosterImage';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { BackdropImage } from '@/features/details/shared/components/CatalogImage';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
@@ -33,8 +32,6 @@ import { formatCatalogYear, formatRating } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
-import { layout } from '@/theme/layout';
-
 const RETURN_ROUTE = '/pick-something';
 
 interface PickSomethingHeroPick {
@@ -55,17 +52,13 @@ function PickSomethingHeroMedia({
 
   if (pick.backdropUrl) {
     return (
-      <View style={styles.heroWrap} testID="pick-something-hero-backdrop">
+      <View
+        style={styles.heroWrap}
+        testID="pick-something-hero-backdrop"
+        accessibilityRole="image"
+        accessibilityLabel={`${pick.title} backdrop`}
+      >
         <BackdropImage path={pick.backdropUrl} height={height} />
-        <View style={styles.heroOverlay}>
-          <PosterImage
-            uri={pick.posterUrl}
-            width={layout.posterCarousel.width + 24}
-            height={layout.posterCarousel.height + 36}
-            accessibilityLabel={`${pick.title} poster`}
-            elevated
-          />
-        </View>
       </View>
     );
   }
@@ -343,11 +336,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceElevated,
-  },
-  heroOverlay: {
-    position: 'absolute',
-    left: spacing.lg,
-    bottom: spacing.lg,
   },
   resultCopy: {
     gap: spacing.sm,

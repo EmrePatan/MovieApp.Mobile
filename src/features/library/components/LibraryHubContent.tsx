@@ -108,17 +108,26 @@ export function LibraryHubContent() {
     [queryClient, router],
   );
 
+  const isSingleItem = items.length === 1;
+  const isSparsePair = items.length === 2;
+  const gridColumns = isSingleItem ? 1 : GRID_COLUMNS;
+
   const renderItem = useCallback(
     ({ item }: { item: LibraryItem }) => (
-      <LibraryGridCard
-        item={item}
-        category={category}
-        width={itemWidth}
-        height={itemHeight}
-        onPress={handleItemPress}
-      />
+      <View
+        style={items.length === 1 ? styles.singleItemCell : undefined}
+        testID={items.length === 1 ? 'library-grid-single-item' : undefined}
+      >
+        <LibraryGridCard
+          item={item}
+          category={category}
+          width={itemWidth}
+          height={itemHeight}
+          onPress={handleItemPress}
+        />
+      </View>
     ),
-    [category, handleItemPress, itemHeight, itemWidth],
+    [category, handleItemPress, itemHeight, itemWidth, items.length],
   );
 
   const listHeader = (
@@ -187,10 +196,11 @@ export function LibraryHubContent() {
 
   return (
     <FlatList
+      testID={items.length === 1 ? 'library-grid-single-column' : 'library-grid-three-column'}
       data={items}
       keyExtractor={getLibraryGridItemKey}
-      numColumns={GRID_COLUMNS}
-      columnWrapperStyle={styles.row}
+      numColumns={gridColumns}
+      columnWrapperStyle={isSingleItem ? undefined : isSparsePair ? styles.sparseRow : styles.row}
       renderItem={renderItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={emptyComponent}
@@ -247,6 +257,13 @@ const styles = StyleSheet.create({
   },
   row: {
     gap: GRID_GAP,
+  },
+  sparseRow: {
+    gap: GRID_GAP,
+    justifyContent: 'center',
+  },
+  singleItemCell: {
+    alignItems: 'center',
   },
   centered: {
     flex: 1,

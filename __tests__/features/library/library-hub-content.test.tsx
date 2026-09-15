@@ -132,6 +132,13 @@ describe('LibraryHubContent', () => {
     }));
   });
 
+  it('centers a single library item in sparse grid mode', () => {
+    render(<LibraryHubContent />);
+
+    expect(screen.getByTestId('library-grid-single-column')).toBeTruthy();
+    expect(screen.getByTestId('library-grid-single-item')).toBeTruthy();
+  });
+
   it('defaults to Watching category and renders the grid item', () => {
     render(<LibraryHubContent />);
 
