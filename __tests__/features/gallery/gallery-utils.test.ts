@@ -1,6 +1,7 @@
 import {
   getGalleryPreviewImages,
   getMovieTvGalleryImages,
+  getMovieTvPreviewImages,
   getPersonGalleryImages,
   GALLERY_PREVIEW_COUNT,
 } from '@/features/gallery/utils/gallery-images';
@@ -56,6 +57,13 @@ describe('gallery utils', () => {
 
   it('returns profile images for person gallery', () => {
     expect(getPersonGalleryImages(sampleGallery)).toHaveLength(1);
+  });
+
+  it('prefers backdrops before posters in preview', () => {
+    const preview = getMovieTvPreviewImages(sampleGallery);
+
+    expect(preview[0]?.category).toBe('backdrop');
+    expect(preview[1]?.category).toBe('poster');
   });
 
   it('limits preview images', () => {

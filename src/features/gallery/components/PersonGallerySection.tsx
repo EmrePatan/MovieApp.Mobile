@@ -19,7 +19,7 @@ export function PersonGallerySection({ query, seeAllRoute }: PersonGallerySectio
     <GalleryPreviewSection
       title="Photos"
       images={images}
-      isLoading={query.isLoading}
+      isLoading={query.isPending && !query.isError}
       seeAllRoute={seeAllRoute}
     />
   );

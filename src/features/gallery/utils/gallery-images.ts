@@ -15,26 +15,43 @@ function toGalleryImage(dto: GalleryImageDto, category: GalleryImage['category']
   };
 }
 
+function getGalleryImageDtos(
+  gallery: GalleryResponse,
+  category: 'backdrops' | 'posters',
+): GalleryImageDto[] {
+  const images = gallery[category];
+  return Array.isArray(images) ? images : [];
+}
+
 export function getMovieTvGalleryImages(
   gallery: GalleryResponse,
   filter: GalleryFilter,
 ): GalleryImage[] {
   if (filter === 'backdrops') {
-    return gallery.backdrops.map((image) => toGalleryImage(image, 'backdrop'));
+    return getGalleryImageDtos(gallery, 'backdrops').map((image) => toGalleryImage(image, 'backdrop'));
   }
 
   if (filter === 'posters') {
-    return gallery.posters.map((image) => toGalleryImage(image, 'poster'));
+    return getGalleryImageDtos(gallery, 'posters').map((image) => toGalleryImage(image, 'poster'));
   }
 
   return [
-    ...gallery.backdrops.map((image) => toGalleryImage(image, 'backdrop')),
-    ...gallery.posters.map((image) => toGalleryImage(image, 'poster')),
+    ...getGalleryImageDtos(gallery, 'backdrops').map((image) => toGalleryImage(image, 'backdrop')),
+    ...getGalleryImageDtos(gallery, 'posters').map((image) => toGalleryImage(image, 'poster')),
   ];
 }
 
+export function getMovieTvPreviewImages(gallery: GalleryResponse): GalleryImage[] {
+  const backdrops = getMovieTvGalleryImages(gallery, 'backdrops');
+  const posters = getMovieTvGalleryImages(gallery, 'posters');
+
+  return getGalleryPreviewImages([...backdrops, ...posters]);
+}
+
 export function getPersonGalleryImages(gallery: GalleryResponse): GalleryImage[] {
-  return gallery.profiles.map((image) => toGalleryImage(image, 'profile'));
+  const profiles = Array.isArray(gallery.profiles) ? gallery.profiles : [];
+
+  return profiles.map((image) => toGalleryImage(image, 'profile'));
 }
 
 export function getGalleryPreviewImages(images: GalleryImage[]): GalleryImage[] {

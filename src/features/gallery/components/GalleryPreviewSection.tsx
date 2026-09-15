@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
@@ -38,16 +38,20 @@ export function GalleryPreviewSection({
     return (
       <View style={styles.container} testID="gallery-preview-loading">
         <HomeSectionHeader title={title} />
-        <FlatList
+        <ScrollView
           horizontal
-          data={Array.from({ length: 4 })}
-          keyExtractor={(_, index) => `gallery-preview-skeleton-${index}`}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
-          renderItem={() => (
-            <SkeletonBlock width={PREVIEW_SIZE} height={PREVIEW_SIZE * 0.67} style={styles.previewItem} />
-          )}
-        />
+        >
+          {Array.from({ length: 4 }, (_, index) => (
+            <SkeletonBlock
+              key={`gallery-preview-skeleton-${index}`}
+              width={PREVIEW_SIZE}
+              height={PREVIEW_SIZE * 0.67}
+              style={styles.previewItem}
+            />
+          ))}
+        </ScrollView>
       </View>
     );
   }
@@ -62,22 +66,19 @@ export function GalleryPreviewSection({
         title={title}
         onSeeAllPress={seeAllRoute ? handleSeeAllPress : undefined}
       />
-      <FlatList
+      <ScrollView
         horizontal
-        data={previewImages}
-        keyExtractor={(image, index) => galleryImageKey(image, index)}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        initialNumToRender={layout.horizontalList.initialNumToRender}
-        maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
-        windowSize={layout.horizontalList.windowSize}
-        renderItem={({ item, index }) => {
+      >
+        {previewImages.map((item, index) => {
           const uri = resolveThumbnailImageUri(item.filePath);
           const aspectRatio = item.aspectRatio && item.aspectRatio > 0 ? item.aspectRatio : 0.67;
           const height = PREVIEW_SIZE / aspectRatio;
 
           return (
             <Pressable
+              key={galleryImageKey(item, index)}
               accessibilityRole="button"
               accessibilityLabel={`Gallery preview image ${index + 1}`}
               onPress={seeAllRoute ? handleSeeAllPress : undefined}
@@ -91,8 +92,8 @@ export function GalleryPreviewSection({
               )}
             </Pressable>
           );
-        }}
-      />
+        })}
+      </ScrollView>
     </View>
   );
 }

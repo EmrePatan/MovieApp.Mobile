@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { isValidGuid } from '@/features/details/shared/routes';
 import { getMovieGallery, getPersonGallery, getTvShowGallery } from '../api/gallery-api';
 import { galleryQueryKeys } from './gallery-query-keys';
 
@@ -8,8 +9,9 @@ export function useMovieGallery(movieId: string) {
   return useQuery({
     queryKey: galleryQueryKeys.movie(movieId),
     queryFn: ({ signal }) => getMovieGallery(movieId, signal),
-    enabled: movieId.length > 0,
+    enabled: isValidGuid(movieId),
     staleTime: galleryStaleTime,
+    retry: 1,
   });
 }
 
@@ -17,8 +19,9 @@ export function useTvShowGallery(tvShowId: string) {
   return useQuery({
     queryKey: galleryQueryKeys.tv(tvShowId),
     queryFn: ({ signal }) => getTvShowGallery(tvShowId, signal),
-    enabled: tvShowId.length > 0,
+    enabled: isValidGuid(tvShowId),
     staleTime: galleryStaleTime,
+    retry: 1,
   });
 }
 
