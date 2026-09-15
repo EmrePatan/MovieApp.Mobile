@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
@@ -42,12 +42,36 @@ export function WatchlistPickerModal({
   contentId,
   onClose,
 }: WatchlistPickerModalProps) {
-  const { data: watchlists = [], isLoading, isError, refetch } = useWatchlists(visible);
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      {visible ? (
+        <WatchlistPickerBody
+          key={`${contentType}-${contentId}`}
+          contentType={contentType}
+          contentId={contentId}
+          onClose={onClose}
+        />
+      ) : null}
+    </Modal>
+  );
+}
+
+function WatchlistPickerBody({
+  contentType,
+  contentId,
+  onClose,
+}: Omit<WatchlistPickerModalProps, 'visible'>) {
+  const { data: watchlists = [], isLoading, isError, refetch } = useWatchlists(true);
   const {
     data: membership = {},
     isLoading: isMembershipLoading,
     refetch: refetchMembership,
-  } = useWatchlistMembership(contentType, contentId, visible);
+  } = useWatchlistMembership(contentType, contentId, true);
   const watchlistItemMutation = useWatchlistItemMutation(contentType, contentId);
   const createWatchlistMutation = useCreateWatchlist(contentType, contentId);
   const [newWatchlistName, setNewWatchlistName] = useState('');
@@ -57,15 +81,6 @@ export function WatchlistPickerModal({
   const [listsExpanded, setListsExpanded] = useState(false);
   const listScrollRef = useRef<ScrollView>(null);
   const createInputRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    if (!visible) {
-      setListsExpanded(false);
-      setNewWatchlistName('');
-      setErrorMessage(null);
-      setIsCreateFocused(false);
-    }
-  }, [visible]);
 
   const isBusy =
     watchlistItemMutation.isPending || createWatchlistMutation.isPending || isMembershipLoading;
@@ -244,7 +259,6 @@ export function WatchlistPickerModal({
   );
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={styles.overlay}>
         <Pressable
           accessibilityRole="button"
@@ -382,7 +396,6 @@ export function WatchlistPickerModal({
           </SafeAreaView>
         </KeyboardAvoidingView>
       </View>
-    </Modal>
   );
 }
 

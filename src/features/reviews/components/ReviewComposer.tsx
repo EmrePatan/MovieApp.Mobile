@@ -28,7 +28,7 @@ interface ReviewComposerProps {
 
 const NEAR_LIMIT_RATIO = 0.9;
 
-export function ReviewComposer({
+function ReviewComposerInner({
   initialContent = '',
   submitLabel,
   isSubmitting = false,
@@ -41,12 +41,6 @@ export function ReviewComposer({
   const [content, setContent] = useState(initialContent);
   const [fieldErrors, setFieldErrors] = useState<ReviewFormErrors>({});
   const [isFocused, setIsFocused] = useState(false);
-
-  useEffect(() => {
-    if (initialContent !== content && initialContent.length > 0 && content === '') {
-      setContent(initialContent);
-    }
-  }, [content, initialContent]);
 
   useEffect(() => {
     if (!autoFocus) {
@@ -188,6 +182,10 @@ export function ReviewComposer({
       </View>
     </View>
   );
+}
+
+export function ReviewComposer(props: ReviewComposerProps) {
+  return <ReviewComposerInner key={props.initialContent ?? 'new'} {...props} />;
 }
 
 const styles = StyleSheet.create({

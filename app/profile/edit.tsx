@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
@@ -21,19 +21,13 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const profileQuery = useCurrentProfile();
   const updateProfile = useUpdateProfileMutation();
-  const [displayName, setDisplayName] = useState('');
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const profileDisplayName = profileQuery.data?.displayName ?? '';
+  const [displayNameDraft, setDisplayNameDraft] = useState<string | null>(null);
+  const displayName = displayNameDraft ?? profileDisplayName;
   const [fieldErrors, setFieldErrors] = useState<UpdateProfileFormErrors>({});
   const [feedback, setFeedback] = useState<{ message: string; tone: 'success' | 'error' } | null>(
     null,
   );
-
-  useEffect(() => {
-    if (!hasInitialized && profileQuery.data?.displayName) {
-      setDisplayName(profileQuery.data.displayName);
-      setHasInitialized(true);
-    }
-  }, [hasInitialized, profileQuery.data?.displayName]);
 
   const handleSubmit = () => {
     const errors = validateUpdateProfile(displayName);
@@ -84,7 +78,7 @@ export default function EditProfileScreen() {
           <AppInput
             label="Display name"
             value={displayName}
-            onChangeText={setDisplayName}
+            onChangeText={setDisplayNameDraft}
             error={fieldErrors.displayName}
             maxLength={100}
             autoCapitalize="words"

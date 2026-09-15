@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Animated, Dimensions, Easing, Modal, StyleSheet, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
@@ -53,7 +53,7 @@ function ConfettiParticle({
   particle: ParticleConfig;
   screenHeight: number;
 }) {
-  const progress = useRef(new Animated.Value(0)).current;
+  const progress = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     progress.setValue(0);

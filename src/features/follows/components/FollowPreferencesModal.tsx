@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,29 +33,41 @@ export function FollowPreferencesModal({
   onClose,
   onFollowSuccess,
 }: FollowPreferencesModalProps) {
+  const sheetKey = `${tvShowId}:${isFollowing}:${status?.notifyNewSeasons ?? 'n'}:${status?.notifyNewEpisodes ?? 'n'}`;
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      {visible ? (
+        <FollowPreferencesSheet
+          key={sheetKey}
+          tvShowId={tvShowId}
+          isFollowing={isFollowing}
+          status={status}
+          onClose={onClose}
+          onFollowSuccess={onFollowSuccess}
+        />
+      ) : null}
+    </Modal>
+  );
+}
+
+function FollowPreferencesSheet({
+  tvShowId,
+  isFollowing,
+  status,
+  onClose,
+  onFollowSuccess,
+}: Omit<FollowPreferencesModalProps, 'visible'>) {
   const createFollow = useCreateTvShowFollow(tvShowId);
   const updateFollow = useUpdateTvShowFollow(tvShowId);
   const removeFollow = useRemoveTvShowFollow(tvShowId);
-  const [notifyNewSeasons, setNotifyNewSeasons] = useState(true);
-  const [notifyNewEpisodes, setNotifyNewEpisodes] = useState(true);
+  const [notifyNewSeasons, setNotifyNewSeasons] = useState(
+    isFollowing && status ? status.notifyNewSeasons : true,
+  );
+  const [notifyNewEpisodes, setNotifyNewEpisodes] = useState(
+    isFollowing && status ? status.notifyNewEpisodes : true,
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const wasVisibleRef = useRef(false);
-
-  useEffect(() => {
-    if (visible && !wasVisibleRef.current) {
-      if (isFollowing && status) {
-        setNotifyNewSeasons(status.notifyNewSeasons);
-        setNotifyNewEpisodes(status.notifyNewEpisodes);
-      } else {
-        setNotifyNewSeasons(true);
-        setNotifyNewEpisodes(true);
-      }
-
-      setErrorMessage(null);
-    }
-
-    wasVisibleRef.current = visible;
-  }, [visible, isFollowing, status?.notifyNewEpisodes, status?.notifyNewSeasons]);
 
   const bothPreferencesOff = !notifyNewSeasons && !notifyNewEpisodes;
   const isBusy = createFollow.isPending || updateFollow.isPending || removeFollow.isPending;
@@ -120,7 +132,6 @@ export function FollowPreferencesModal({
   const confirmLabel = isFollowing ? 'Save preferences' : 'Follow show';
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <SafeAreaView style={styles.sheetContainer}>
           <View style={styles.sheet}>
@@ -183,7 +194,6 @@ export function FollowPreferencesModal({
           </View>
         </SafeAreaView>
       </View>
-    </Modal>
   );
 }
 

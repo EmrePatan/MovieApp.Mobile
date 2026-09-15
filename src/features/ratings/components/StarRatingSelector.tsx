@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   AccessibilityActionEvent,
   LayoutChangeEvent,
@@ -70,67 +70,62 @@ export function StarRatingSelector({
   onCommit,
   onClear,
 }: StarRatingSelectorProps) {
-  const trackWidthRef = useRef(0);
-  const disabledRef = useRef(disabled);
-  const valueRef = useRef(value);
-  const onCommitRef = useRef(onCommit);
-  const onClearRef = useRef(onClear);
-  const onGestureStartRef = useRef(onGestureStart);
-  const onInteractionActiveChangeRef = useRef(onInteractionActiveChange);
-  const onPreviewChangeRef = useRef(onPreviewChange);
+  const [trackWidth, setTrackWidth] = useState(0);
   const [localPreviewRating, setLocalPreviewRating] = useState<number | 'clear' | null>(null);
 
-  disabledRef.current = disabled;
-  valueRef.current = value;
-  onCommitRef.current = onCommit;
-  onClearRef.current = onClear;
-  onGestureStartRef.current = onGestureStart;
-  onInteractionActiveChangeRef.current = onInteractionActiveChange;
-  onPreviewChangeRef.current = onPreviewChange;
+  const handlePreviewChange = useCallback(
+    (rating: number | 'clear' | null) => {
+      setLocalPreviewRating(rating);
+      if (rating === 'clear' || rating == null) {
+        onPreviewChange?.(null);
+        return;
+      }
 
-  const handlePreviewChange = (rating: number | 'clear' | null) => {
-    setLocalPreviewRating(rating);
-    if (rating === 'clear' || rating == null) {
-      onPreviewChangeRef.current?.(null);
-      return;
+      onPreviewChange?.(rating);
+    },
+    [onPreviewChange],
+  );
+
+  const displayRating = useMemo(() => {
+    if (localPreviewRating === 'clear') {
+      return null;
     }
 
-    onPreviewChangeRef.current?.(rating);
-  };
-
-  const displayRating =
-    localPreviewRating === 'clear' ? null : localPreviewRating ?? value;
-
-  useEffect(() => {
-    if (localPreviewRating != null && localPreviewRating !== 'clear' && value === localPreviewRating) {
-      setLocalPreviewRating(null);
+    if (localPreviewRating != null) {
+      return localPreviewRating;
     }
 
-    if (localPreviewRating === 'clear' && value == null) {
-      setLocalPreviewRating(null);
-    }
+    return value;
   }, [localPreviewRating, value]);
 
   const { panHandlers, touchHandlers } = useMemo(
     () =>
       createRatingPanResponder({
-        getDisabled: () => disabledRef.current,
-        getHasRating: () => valueRef.current != null,
-        getTrackWidth: () => trackWidthRef.current,
+        getDisabled: () => disabled,
+        getHasRating: () => value != null,
+        getTrackWidth: () => trackWidth,
         getStarClusterWidth: () => STAR_CLUSTER_WIDTH,
-        onGestureStart: () => onGestureStartRef.current?.() ?? true,
+        onGestureStart: () => onGestureStart?.() ?? true,
         onPreviewChange: handlePreviewChange,
-        onCommit: (rating) => onCommitRef.current(rating),
-        onClear: () => onClearRef.current(),
-        onInteractionActiveChange: (active) =>
-          onInteractionActiveChangeRef.current?.(active),
+        onCommit,
+        onClear,
+        onInteractionActiveChange,
         retainPreviewOnCommit: true,
       }),
-    [],
+    [
+      disabled,
+      value,
+      trackWidth,
+      handlePreviewChange,
+      onCommit,
+      onClear,
+      onGestureStart,
+      onInteractionActiveChange,
+    ],
   );
 
   const handleLayout = (event: LayoutChangeEvent) => {
-    trackWidthRef.current = event.nativeEvent.layout.width;
+    setTrackWidth(event.nativeEvent.layout.width);
   };
 
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {

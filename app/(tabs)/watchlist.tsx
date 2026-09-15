@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -42,21 +42,38 @@ const DEFAULT_WATCHLIST_SORT: LibrarySortOption = 'recentlyAdded';
 export default function WatchlistScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string | null>(null);
+  const [userSelectedWatchlistId, setUserSelectedWatchlistId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
 
   const watchlistsQuery = useWatchlists(isAuthenticated);
-  const itemsQuery = useWatchlistItems(selectedWatchlistId);
-  const deleteWatchlist = useDeleteWatchlistMutation();
-  const removeItem = useRemoveWatchlistItemMutation(selectedWatchlistId);
 
   const watchlists = useMemo(
     () => watchlistsQuery.data ?? [],
     [watchlistsQuery.data],
   );
+
+  const selectedWatchlistId = useMemo(() => {
+    if (!isAuthenticated || watchlists.length === 0) {
+      return null;
+    }
+
+    if (
+      userSelectedWatchlistId &&
+      watchlists.some((watchlist) => watchlist.id === userSelectedWatchlistId)
+    ) {
+      return userSelectedWatchlistId;
+    }
+
+    return watchlists[0]?.id ?? null;
+  }, [isAuthenticated, userSelectedWatchlistId, watchlists]);
+
+  const itemsQuery = useWatchlistItems(selectedWatchlistId);
+  const deleteWatchlist = useDeleteWatchlistMutation();
+  const removeItem = useRemoveWatchlistItemMutation(selectedWatchlistId);
+
   const selectedWatchlist = useMemo(
     () => watchlists.find((watchlist) => watchlist.id === selectedWatchlistId) ?? null,
     [selectedWatchlistId, watchlists],
@@ -73,23 +90,6 @@ export default function WatchlistScreen() {
     sort,
   });
 
-  useEffect(() => {
-    if (!isAuthenticated || watchlists.length === 0) {
-      if (selectedWatchlistId !== null) {
-        setSelectedWatchlistId(null);
-      }
-      return;
-    }
-
-    const selectedExists = watchlists.some((watchlist) => watchlist.id === selectedWatchlistId);
-    if (!selectedWatchlistId || !selectedExists) {
-      const nextWatchlistId = watchlists[0]?.id ?? null;
-      if (nextWatchlistId !== selectedWatchlistId) {
-        setSelectedWatchlistId(nextWatchlistId);
-      }
-    }
-  }, [isAuthenticated, selectedWatchlistId, watchlists]);
-
   const handleSignIn = useCallback(() => {
     router.push('/(auth)/login');
   }, [router]);
@@ -99,13 +99,13 @@ export default function WatchlistScreen() {
   }, [router]);
 
   const handleSelectWatchlist = useCallback((watchlistId: string) => {
-    setSelectedWatchlistId(watchlistId);
+    setUserSelectedWatchlistId(watchlistId);
     setTypeFilter('all');
     setSort(DEFAULT_WATCHLIST_SORT);
   }, []);
 
   const handleCreatedWatchlist = useCallback((watchlistId: string) => {
-    setSelectedWatchlistId(watchlistId);
+    setUserSelectedWatchlistId(watchlistId);
     void watchlistsQuery.refetch();
   }, [watchlistsQuery]);
 
@@ -128,7 +128,7 @@ export default function WatchlistScreen() {
                 const remaining = watchlists.filter(
                   (watchlist) => watchlist.id !== selectedWatchlist.id,
                 );
-                setSelectedWatchlistId(remaining[0]?.id ?? null);
+                setUserSelectedWatchlistId(remaining[0]?.id ?? null);
               },
             });
           },
