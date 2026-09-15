@@ -33,8 +33,10 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         metadataLine={metadataLine}
         genres={show.genres}
         posterAccessibilityLabel={`${show.title} poster`}
+        identityAccessory={
+          <PlayTrailerButton contentType="tv" contentId={show.id} />
+        }
       />
-      <PlayTrailerButton contentType="tv" contentId={show.id} />
       <DetailActionBar contentType="tv" contentId={show.id} showWatched />
       <DetailOverview overview={show.overview} />
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />

@@ -31,8 +31,10 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         metadataLine={metadataLine}
         genres={movie.genres}
         posterAccessibilityLabel={`${movie.title} poster`}
+        identityAccessory={
+          <PlayTrailerButton contentType="movie" contentId={movie.id} />
+        }
       />
-      <PlayTrailerButton contentType="movie" contentId={movie.id} />
       <DetailActionBar
         contentType="movie"
         contentId={movie.id}

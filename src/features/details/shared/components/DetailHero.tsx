@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
@@ -9,7 +9,7 @@ import { DetailScrim } from './DetailScrim';
 import { shouldShowOriginalTitle } from '@/utils/format';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 export interface DetailHeroProps {
   title: string;
@@ -22,6 +22,7 @@ export interface DetailHeroProps {
   breadcrumb?: string | null;
   posterAccessibilityLabel?: string;
   useStillAsHero?: boolean;
+  identityAccessory?: ReactNode;
 }
 
 export const DetailHero = memo(function DetailHero({
@@ -35,6 +36,7 @@ export const DetailHero = memo(function DetailHero({
   breadcrumb,
   posterAccessibilityLabel,
   useStillAsHero = false,
+  identityAccessory,
 }: DetailHeroProps) {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -86,6 +88,7 @@ export const DetailHero = memo(function DetailHero({
                 {genres.join(' · ')}
               </AppText>
             ) : null}
+            {identityAccessory}
           </View>
         </View>
       </View>

@@ -102,17 +102,33 @@ describe('detail trailer placement', () => {
     });
   });
 
-  it('places Play Trailer between hero and action bar on movie detail', () => {
+  it('integrates compact Trailer CTA in hero before action bar on movie detail', () => {
     render(<MovieDetailContent movie={movie} />);
 
-    const texts = screen.getAllByText(/Action Bar|Play Trailer|Overview copy/).map((node) => node.props.children);
-    expect(texts).toEqual(['Play Trailer', 'Action Bar', 'Overview copy']);
+    const texts = screen.getAllByText(/Action Bar|Trailer|Overview copy/).map((node) => node.props.children);
+    expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
+    expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
   });
 
-  it('places Play Trailer between hero and action bar on tv detail', () => {
+  it('integrates compact Trailer CTA in hero before action bar on tv detail', () => {
     render(<TvShowDetailContent show={show} />);
 
-    const texts = screen.getAllByText(/Action Bar|Play Trailer|Overview copy/).map((node) => node.props.children);
-    expect(texts).toEqual(['Play Trailer', 'Action Bar', 'Overview copy']);
+    const texts = screen.getAllByText(/Action Bar|Trailer|Overview copy/).map((node) => node.props.children);
+    expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
+    expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
+  });
+
+  it('omits trailer CTA without leaving layout gap when primary is unavailable', () => {
+    mockUseMovieVideos.mockReturnValue({
+      data: { primary: null },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<MovieDetailContent movie={movie} />);
+
+    expect(screen.queryByText('Trailer')).toBeNull();
+    const texts = screen.getAllByText(/Action Bar|Overview copy/).map((node) => node.props.children);
+    expect(texts).toEqual(['Action Bar', 'Overview copy']);
   });
 });

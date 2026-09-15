@@ -44,7 +44,7 @@ describe('PlayTrailerButton', () => {
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
     expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
-    expect(screen.getByText('Play Trailer')).toBeTruthy();
+    expect(screen.getByText('Trailer')).toBeTruthy();
   });
 
   it('renders for tv when primary trailer is available', () => {
@@ -61,7 +61,7 @@ describe('PlayTrailerButton', () => {
 
     render(<PlayTrailerButton contentType="tv" contentId="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" />);
 
-    expect(screen.getByText('Play Trailer')).toBeTruthy();
+    expect(screen.getByText('Trailer')).toBeTruthy();
   });
 
   it('hides when primary is null', () => {
@@ -73,7 +73,7 @@ describe('PlayTrailerButton', () => {
 
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
-    expect(screen.queryByText('Play Trailer')).toBeNull();
+    expect(screen.queryByText('Trailer')).toBeNull();
   });
 
   it('hides while loading', () => {
@@ -85,7 +85,7 @@ describe('PlayTrailerButton', () => {
 
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
-    expect(screen.queryByText('Play Trailer')).toBeNull();
+    expect(screen.queryByText('Trailer')).toBeNull();
   });
 
   it('hides on query error', () => {
@@ -97,13 +97,13 @@ describe('PlayTrailerButton', () => {
 
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
-    expect(screen.queryByText('Play Trailer')).toBeNull();
+    expect(screen.queryByText('Trailer')).toBeNull();
   });
 
   it('opens valid canonical YouTube URLs through Linking', async () => {
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
-    fireEvent.press(screen.getByText('Play Trailer'));
+    fireEvent.press(screen.getByLabelText('Play Trailer'));
 
     await waitFor(() => {
       expect(mockCanOpenURL).toHaveBeenCalledWith(validWatchUrl);
@@ -120,7 +120,7 @@ describe('PlayTrailerButton', () => {
 
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
-    expect(screen.queryByText('Play Trailer')).toBeNull();
+    expect(screen.queryByText('Trailer')).toBeNull();
     expect(mockOpenURL).not.toHaveBeenCalled();
   });
 
@@ -128,7 +128,7 @@ describe('PlayTrailerButton', () => {
     mockOpenURL.mockRejectedValueOnce(new Error('failed'));
 
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
-    fireEvent.press(screen.getByText('Play Trailer'));
+    fireEvent.press(screen.getByLabelText('Play Trailer'));
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith('Unable to open trailer', 'Please try again later.');
