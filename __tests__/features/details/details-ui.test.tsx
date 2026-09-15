@@ -112,6 +112,7 @@ const movie: MovieDetailsResponse = {
   voteAverage: 8.4,
   voteCount: 1000,
   genres: [],
+  collection: null,
 };
 
 describe('detail UI', () => {

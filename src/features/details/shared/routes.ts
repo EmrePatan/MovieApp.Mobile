@@ -57,6 +57,10 @@ export function buildPersonDetailRoute(tmdbId: number): string {
   return `/person/${encodePathSegment(tmdbId)}`;
 }
 
+export function buildCollectionDetailRoute(tmdbCollectionId: number): string {
+  return `/collection/${encodePathSegment(tmdbCollectionId)}`;
+}
+
 export function isValidGuid(value: string | undefined): boolean {
   if (!value) {
     return false;

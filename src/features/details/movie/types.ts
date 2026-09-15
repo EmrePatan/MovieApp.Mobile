@@ -1,3 +1,4 @@
+import type { CollectionSummary } from '../collection/types';
 import type { ExternalIdsResponse } from '../shared/types';
 
 export interface MovieDetailsResponse {
@@ -14,4 +15,5 @@ export interface MovieDetailsResponse {
   voteAverage: number;
   voteCount: number;
   genres: string[];
+  collection: CollectionSummary | null;
 }

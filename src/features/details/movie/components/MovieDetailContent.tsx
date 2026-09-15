@@ -8,6 +8,7 @@ import { WhereToWatchRail } from '@/features/details/watch-providers/components/
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
 import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
+import { CollectionLinkRow } from '@/features/details/collection/components/CollectionLinkRow';
 import { formatMovieDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { MovieDetailsResponse } from '../types';
 interface MovieDetailContentProps {
@@ -41,6 +42,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         showWatched
         releaseDate={movie.releaseDate}
       />
+      <CollectionLinkRow collection={movie.collection} />
       <DetailOverview overview={movie.overview} />
       <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
