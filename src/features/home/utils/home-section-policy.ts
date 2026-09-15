@@ -11,12 +11,14 @@ export const EXCLUDED_HOME_SECTION_TYPES = new Set<HomeSectionType>([
 
 export const PERSONALIZED_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
   'RecommendedForYou',
+  'ComingUp',
   'Trending',
   'TopRated',
   'NewReleases',
 ];
 
 export const COLD_START_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
+  'ComingUp',
   'Trending',
   'TopRated',
   'NewReleases',

@@ -10,6 +10,7 @@ export interface HomeRequest {
 export type HomeSectionType =
   | 'HotThisWeek'
   | 'RecommendedForYou'
+  | 'ComingUp'
   | 'BecauseYouWatched'
   | 'BasedOnFavorites'
   | 'ContinueWatching'
@@ -19,6 +20,8 @@ export type HomeSectionType =
   | 'TopRated'
   | 'Genre'
   | (string & {});
+
+export type HomeUpcomingKind = 'MovieRelease' | 'TvShowPremiere' | 'TvEpisode';
 
 export interface HomeItem {
   id: string;
@@ -30,6 +33,11 @@ export interface HomeItem {
   releaseDate: string | null;
   voteAverage: number;
   voteCount: number;
+  upcomingKind?: HomeUpcomingKind | null;
+  episodeId?: string | null;
+  seasonNumber?: number | null;
+  episodeNumber?: number | null;
+  episodeName?: string | null;
 }
 
 export interface HomeSection {

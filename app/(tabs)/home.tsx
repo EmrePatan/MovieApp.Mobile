@@ -9,7 +9,9 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { HomeEmptyState } from '@/features/home/components/HomeEmptyState';
 import { HomeListHeader } from '@/features/home/components/HomeListHeader';
 import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
+import { HomeComingUpSection } from '@/features/home/components/HomeComingUpSection';
 import { HomeSection } from '@/features/home/components/HomeSection';
+import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { homeQueryKey, useHome } from '@/features/home/hooks/useHome';
 import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
@@ -72,6 +74,13 @@ export default function HomeScreen() {
     [queryClient, router],
   );
 
+  const handleComingUpItemPress = useCallback(
+    (item: HomeItem) => {
+      router.push(buildCatalogDetailRoute(item.id, 'tv'));
+    },
+    [router],
+  );
+
   const handleExplorePress = useCallback(() => {
     router.push('/(tabs)/search?explore=1');
   }, [router]);
@@ -90,24 +99,41 @@ export default function HomeScreen() {
 
       if (sectionType === 'NewReleases') {
         router.push('/discover?mode=new_releases&type=all');
+        return;
+      }
+
+      if (sectionType === 'ComingUp') {
+        router.push('/upcoming');
       }
     },
     [router],
   );
 
   const renderSection = useCallback(
-    ({ item }: { item: HomeSectionModel }) => (
-      <HomeSection
-        section={item}
-        onItemPress={handleItemPress}
-        onSeeAllPress={
-          item.type === 'Trending' || item.type === 'TopRated' || item.type === 'NewReleases'
-            ? () => handleSeeAllPress(item.type)
-            : undefined
-        }
-      />
-    ),
-    [handleItemPress, handleSeeAllPress],
+    ({ item }: { item: HomeSectionModel }) => {
+      if (item.type === 'ComingUp') {
+        return (
+          <HomeComingUpSection
+            section={item}
+            onItemPress={handleComingUpItemPress}
+            onSeeAllPress={() => handleSeeAllPress(item.type)}
+          />
+        );
+      }
+
+      return (
+        <HomeSection
+          section={item}
+          onItemPress={handleItemPress}
+          onSeeAllPress={
+            item.type === 'Trending' || item.type === 'TopRated' || item.type === 'NewReleases'
+              ? () => handleSeeAllPress(item.type)
+              : undefined
+          }
+        />
+      );
+    },
+    [handleComingUpItemPress, handleItemPress, handleSeeAllPress],
   );
 
   const listHeader = useMemo(

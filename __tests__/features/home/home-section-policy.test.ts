@@ -48,6 +48,22 @@ describe('applyHomeSectionPolicy', () => {
     ]);
   });
 
+  it('orders cold-start sections with Coming Up before Trending when present', () => {
+    const sections = [
+      createSection('ComingUp', 'Coming Up', [createItem({ id: 'coming' })]),
+      createSection('TopRated', 'Top Rated', [createItem({ id: 'top' })]),
+      createSection('Trending', 'Trending Now', [createItem({ id: 'trending' })]),
+    ];
+
+    const presented = applyHomeSectionPolicy(sections, false);
+
+    expect(presented.map((section) => section.type)).toEqual([
+      'ComingUp',
+      'Trending',
+      'TopRated',
+    ]);
+  });
+
   it('orders personalized sections with recommendation, trending, and browse rails', () => {
     const sections = [
       createSection('TopRated', 'Top Rated', [createItem({ id: 'top' })]),
@@ -65,6 +81,24 @@ describe('applyHomeSectionPolicy', () => {
       'Trending',
       'TopRated',
       'NewReleases',
+    ]);
+  });
+
+  it('orders personalized sections with Coming Up after Recommended For You', () => {
+    const sections = [
+      createSection('ComingUp', 'Coming Up', [createItem({ id: 'coming' })]),
+      createSection('RecommendedForYou', 'Recommended For You', [createItem({ id: 'rec' })]),
+      createSection('Trending', 'Trending Now', [createItem({ id: 'trending' })]),
+      createSection('TopRated', 'Top Rated', [createItem({ id: 'top' })]),
+    ];
+
+    const presented = applyHomeSectionPolicy(sections, true);
+
+    expect(presented.map((section) => section.type)).toEqual([
+      'RecommendedForYou',
+      'ComingUp',
+      'Trending',
+      'TopRated',
     ]);
   });
 

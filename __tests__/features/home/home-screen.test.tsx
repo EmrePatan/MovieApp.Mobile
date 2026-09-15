@@ -547,6 +547,50 @@ describe('HomeScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
   });
 
+  it('navigates to Upcoming from Coming Up See All', () => {
+    mockUseHome.mockReturnValue({
+      data: {
+        sections: [
+          {
+            type: 'ComingUp',
+            title: 'Coming Up',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'show-id',
+                contentType: 'tv',
+                title: 'Followed Show',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2026-09-20',
+                voteAverage: 0,
+                voteCount: 0,
+                upcomingKind: 'TvEpisode',
+                episodeId: 'episode-id',
+                seasonNumber: 1,
+                episodeNumber: 2,
+                episodeName: 'Next',
+              },
+            ],
+          },
+        ],
+        isPersonalized: true,
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+    });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getByLabelText('See all Coming Up'));
+
+    expect(mockPush).toHaveBeenCalledWith('/upcoming');
+  });
+
   it('keeps the full Recommended rail when hero comes from Hot This Week', () => {
     mockUseHome.mockReturnValue({
       data: {
