@@ -15,13 +15,14 @@ export function useAdvancedDiscover(
   mediaType: AdvancedDiscoverMediaType,
   filters: AdvancedDiscoverFilters,
   pageSize = DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
+  enabled = true,
 ) {
   const { region, isHydrated } = useRegionalPreference();
   const effectiveWatchRegion = resolveAdvancedDiscoverWatchRegion(filters, region);
 
   return useInfiniteQuery({
     queryKey: advancedDiscoverInfiniteQueryKey(mediaType, filters, pageSize, region),
-    enabled: isHydrated,
+    enabled: enabled && isHydrated,
     queryFn: ({ pageParam, signal }) =>
       getAdvancedDiscover(
         {

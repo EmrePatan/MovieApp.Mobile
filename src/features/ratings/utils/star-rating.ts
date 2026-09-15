@@ -6,6 +6,8 @@ export const STAR_COUNT = 5;
 export const RATING_STAR_VISUAL_SIZE = 30;
 export const RATING_STAR_GAP = 4;
 export const RATING_TRACK_HORIZONTAL_PADDING = 28;
+/** Extra snap zone on the right edge so tapping the 5th star registers as a full rating. */
+export const RATING_FIVE_STAR_SNAP_INSET = 18;
 /** Narrow edge strip used to clear an existing rating by dragging to the far left. */
 export const RATING_CLEAR_ZONE_WIDTH = 4;
 
@@ -111,7 +113,7 @@ export function resolveRatingGesturePosition(
     return MIN_STAR_RATING;
   }
 
-  if (clampedX >= starEnd) {
+  if (clampedX >= starEnd - RATING_FIVE_STAR_SNAP_INSET) {
     return MAX_STAR_RATING;
   }
 

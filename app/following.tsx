@@ -52,7 +52,7 @@ export default function FollowingScreen() {
   }, [router]);
 
   const handleBrowse = useCallback(() => {
-    openLibraryStackScreen(router, '/discover', '/following');
+    openLibraryStackScreen(router, '/discover-browse', '/following');
   }, [router]);
 
   const handleItemPress = useCallback(

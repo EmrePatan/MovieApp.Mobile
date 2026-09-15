@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import SearchScreen from '../../../app/(tabs)/search';
-import { useGenres } from '@/features/discovery/hooks/useGenres';
+import { TextInput } from 'react-native';
+import SearchScreen from '../../../app/search';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
 import {
@@ -24,15 +24,14 @@ jest.mock('expo-router', () => ({
     canGoBack: mockCanGoBack,
   }),
   useLocalSearchParams: jest.fn(() => ({})),
-  useFocusEffect: jest.fn(),
+  useFocusEffect: (callback: () => void | (() => void)) => {
+    const cleanup = callback();
+    return cleanup;
+  },
 }));
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: true }),
-}));
-
-jest.mock('@/features/discovery/hooks/useGenres', () => ({
-  useGenres: jest.fn(),
 }));
 
 jest.mock('@/features/search/hooks/useSearch', () => ({
@@ -97,12 +96,6 @@ describe('SearchScreen', () => {
     const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
     useLocalSearchParams.mockReturnValue({});
 
-    (useGenres as jest.Mock).mockReturnValue({
-      data: [{ id: 'genre-1', name: 'Action' }],
-      isLoading: false,
-      isError: false,
-    });
-
     (useSearchResults as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -144,14 +137,9 @@ describe('SearchScreen', () => {
     expect(screen.queryByText('Trending Now')).toBeNull();
     expect(screen.queryByText('Top Rated')).toBeNull();
     expect(screen.queryByText('New Releases')).toBeNull();
-    expect(screen.getByText('Explore by Genre')).toBeTruthy();
+    expect(screen.queryByText('Explore by Genre')).toBeNull();
+    expect(screen.getByText('Advanced Discover')).toBeTruthy();
     expect(screen.queryByText('Discover trending & popular')).toBeNull();
-  });
-
-  it('navigates to discover from genre chip', () => {
-    render(<SearchScreen />);
-    fireEvent.press(screen.getByLabelText('Browse Action'));
-    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all&genres=genre-1');
   });
 
   it('does not search for whitespace-only input', () => {
@@ -247,7 +235,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
     fireEvent.press(screen.getByLabelText('Clear search'));
 
-    expect(screen.getByText('Explore by Genre')).toBeTruthy();
+    expect(screen.getByText('Advanced Discover')).toBeTruthy();
     expect(screen.queryByLabelText('Search for Interstellar, Movie')).toBeNull();
   });
 
@@ -521,7 +509,7 @@ describe('SearchScreen', () => {
     expect(mockOpenPersonDetail).toHaveBeenCalledWith(
       expect.objectContaining({ push: mockPush }),
       6193,
-      '/(tabs)/search',
+      '/search',
     );
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -571,17 +559,17 @@ describe('SearchScreen', () => {
     expect(useSearchResults).toHaveBeenLastCalledWith('star', 'person');
   });
 
-  it('keeps search usable when genre loading fails', () => {
-    (useGenres as jest.Mock).mockReturnValue({
-      data: [{ id: 'genre-1', name: 'Action' }],
-      isLoading: false,
-      isError: true,
-    });
+  it('focuses the search input when the screen opens', async () => {
+    const focusSpy = jest.spyOn(TextInput.prototype, 'focus').mockImplementation(() => {});
 
     render(<SearchScreen />);
 
-    expect(screen.getByLabelText('Search movies, TV shows, and people')).toBeTruthy();
-    expect(screen.getByText('Explore by Genre')).toBeTruthy();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 300);
+    });
+
+    expect(focusSpy).toHaveBeenCalled();
+    focusSpy.mockRestore();
   });
 
   it('clears search state when explore param is present', () => {
@@ -590,7 +578,7 @@ describe('SearchScreen', () => {
 
     render(<SearchScreen />);
 
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)/search');
+    expect(mockReplace).toHaveBeenCalledWith('/search');
     expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
   });
 

@@ -45,10 +45,15 @@ function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
   };
 }
 
-function advanceCarouselToIndex(list: FlatList<HomeItem>, index: number) {
+function getCarouselSlideWidth(list: FlatList<HomeItem>) {
+  return list.props.getItemLayout?.(null, 0).length ?? 400;
+}
+
+function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: number) {
+  const slideWidth = getCarouselSlideWidth(list);
   fireEvent(list, 'momentumScrollEnd', {
     nativeEvent: {
-      contentOffset: { x: index * 400, y: 0 },
+      contentOffset: { x: (activeIndex + 1) * slideWidth, y: 0 },
     },
   });
 }
@@ -100,7 +105,7 @@ describe('HomeHeroCarousel', () => {
     act(() => {
       jest.advanceTimersByTime(6000);
     });
-    advanceCarouselToIndex(list, 1);
+    advanceCarouselToActiveIndex(list, 1);
 
     await waitFor(() => {
       expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
@@ -109,7 +114,7 @@ describe('HomeHeroCarousel', () => {
     act(() => {
       jest.advanceTimersByTime(6000);
     });
-    advanceCarouselToIndex(list, 0);
+    advanceCarouselToActiveIndex(list, 0);
 
     await waitFor(() => {
       expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
@@ -130,7 +135,7 @@ describe('HomeHeroCarousel', () => {
     act(() => {
       jest.advanceTimersByTime(6000);
     });
-    advanceCarouselToIndex(list, 1);
+    advanceCarouselToActiveIndex(list, 1);
 
     await waitFor(() => {
       expect(getByLabelText('Slide 2 of 2')).toBeTruthy();

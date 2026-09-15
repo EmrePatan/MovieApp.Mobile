@@ -1,3 +1,4 @@
+import { useEffect, useRef, type RefObject } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
@@ -11,6 +12,8 @@ interface SearchBarProps {
   onSubmit: () => void;
   onClear: () => void;
   placeholder?: string;
+  inputRef?: RefObject<TextInput | null>;
+  autoFocus?: boolean;
 }
 
 export function SearchBar({
@@ -19,13 +22,32 @@ export function SearchBar({
   onSubmit,
   onClear,
   placeholder = 'Search movies, TV shows, and people',
+  inputRef,
+  autoFocus = false,
 }: SearchBarProps) {
+  const internalInputRef = useRef<TextInput>(null);
+  const resolvedInputRef = inputRef ?? internalInputRef;
   const showClear = value.length > 0;
+
+  useEffect(() => {
+    if (!autoFocus) {
+      return;
+    }
+
+    const focusTimer = setTimeout(() => {
+      resolvedInputRef.current?.focus();
+    }, 280);
+
+    return () => {
+      clearTimeout(focusTimer);
+    };
+  }, [autoFocus, resolvedInputRef]);
 
   return (
     <View style={styles.container}>
       <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
       <TextInput
+        ref={resolvedInputRef}
         accessibilityLabel="Search movies, TV shows, and people"
         accessibilityRole="search"
         autoCapitalize="none"

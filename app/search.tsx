@@ -6,6 +6,7 @@ import {
   Keyboard,
   RefreshControl,
   StyleSheet,
+  TextInput,
   View,
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
@@ -42,7 +43,6 @@ import {
   type SearchTypeFilter,
 } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
-import type { HomeItem } from '@/features/home/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { useAuth } from '@/auth/useAuth';
@@ -62,6 +62,7 @@ export default function SearchScreen() {
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
 
   const handledExploreRef = useRef(false);
+  const searchInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (explore !== '1') {
@@ -76,7 +77,7 @@ export default function SearchScreen() {
     handledExploreRef.current = true;
     setInputText('');
     setSubmittedQuery('');
-    router.replace('/(tabs)/search');
+    router.replace('/search');
   }, [explore, router]);
 
   const debouncedInput = useDebouncedValue(inputText, AUTOCOMPLETE_DEBOUNCE_MS);
@@ -122,6 +123,18 @@ export default function SearchScreen() {
     setSubmittedQuery('');
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const focusTimer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 280);
+
+      return () => {
+        clearTimeout(focusTimer);
+      };
+    }, []),
+  );
+
   const handleBack = useCallback(() => {
     if (searchReturnOrigin) {
       returnFromSearch(router, searchReturnOrigin);
@@ -133,21 +146,23 @@ export default function SearchScreen() {
     }
   }, [router, searchReturnOrigin]);
 
+  const canNavigateBack = Boolean(searchReturnOrigin || router.canGoBack());
+
   useFocusEffect(
     useCallback(() => {
-      if (!searchReturnOrigin) {
+      if (!canNavigateBack) {
         return undefined;
       }
 
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        returnFromSearch(router, searchReturnOrigin);
+        handleBack();
         return true;
       });
 
       return () => {
         subscription.remove();
       };
-    }, [router, searchReturnOrigin]),
+    }, [canNavigateBack, handleBack]),
   );
 
   const handleSuggestionSelect = useCallback(
@@ -169,20 +184,11 @@ export default function SearchScreen() {
       Keyboard.dismiss();
 
       if (isPersonSearchResult(item)) {
-        openPersonDetail(router, item.tmdbId, '/(tabs)/search');
+        openPersonDetail(router, item.tmdbId, '/search');
         return;
       }
 
       openCatalogDetailFromTab(router, item.id, item.type, 'search', { queryClient });
-    },
-    [queryClient, router],
-  );
-
-  const handleExploreItemPress = useCallback(
-    (item: HomeItem) => {
-      Keyboard.dismiss();
-      const itemType = item.contentType === 'movie' ? 'movie' : 'tv';
-      openCatalogDetailFromTab(router, item.id, itemType, 'search', { queryClient });
     },
     [queryClient, router],
   );
@@ -264,7 +270,9 @@ export default function SearchScreen() {
           onChangeText={setInputText}
           onSubmit={handleSubmit}
           onClear={handleClear}
-          onBack={searchReturnOrigin ? handleBack : undefined}
+          onBack={canNavigateBack ? handleBack : undefined}
+          inputRef={searchInputRef}
+          autoFocus
         >
           {showAutocomplete ? (
             <SearchSuggestionList
@@ -290,26 +298,23 @@ export default function SearchScreen() {
             onRetry={() => void historyQuery.refetch()}
           />
         ) : null}
-        {!hasActiveSearch && showExplore ? (
-          <SearchExploreLanding onItemPress={handleExploreItemPress} />
-        ) : null}
+        {!hasActiveSearch && showExplore ? <SearchExploreLanding /> : null}
       </>
     ),
     [
       autocompleteQuery.data?.items,
       autocompleteQuery.isLoading,
+      canNavigateBack,
       clearHistory.isPending,
       deletingHistoryId,
       handleClear,
       handleClearHistory,
       handleDeleteHistoryItem,
-      handleExploreItemPress,
       handleHistorySelect,
       handleBack,
       handleSubmit,
       handleSuggestionSelect,
       hasActiveSearch,
-      searchReturnOrigin,
       historyItems,
       historyQuery,
       inputText,

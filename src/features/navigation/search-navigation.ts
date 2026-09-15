@@ -21,7 +21,7 @@ export function parseSearchReturnOrigin(value: string | string[] | undefined): S
 
 export function openSearch(router: ImperativeRouter, origin: SearchReturnOrigin): void {
   lastSearchReturnOrigin = origin;
-  router.push(`/(tabs)/search?from=${origin}`);
+  router.push(`/search?from=${origin}`);
 }
 
 export function returnFromSearch(router: ImperativeRouter, origin?: SearchReturnOrigin | null): void {

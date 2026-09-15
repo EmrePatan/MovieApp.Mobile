@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import type { ReactNode, RefObject } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { SearchBar } from './SearchBar';
@@ -13,6 +13,8 @@ interface SearchScreenHeaderProps {
   onSubmit: () => void;
   onClear: () => void;
   onBack?: () => void;
+  inputRef?: RefObject<TextInput | null>;
+  autoFocus?: boolean;
   children?: ReactNode;
 }
 
@@ -22,6 +24,8 @@ export function SearchScreenHeader({
   onSubmit,
   onClear,
   onBack,
+  inputRef,
+  autoFocus = false,
   children,
 }: SearchScreenHeaderProps) {
   return (
@@ -46,6 +50,8 @@ export function SearchScreenHeader({
         onChangeText={onChangeText}
         onSubmit={onSubmit}
         onClear={onClear}
+        inputRef={inputRef}
+        autoFocus={autoFocus}
       />
       {children}
     </View>

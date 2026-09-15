@@ -248,7 +248,7 @@ describe('WatchlistScreen', () => {
     render(<WatchlistScreen />);
     expect(screen.getByText('Your watchlist is empty')).toBeTruthy();
     fireEvent.press(screen.getByText('Browse'));
-    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search');
+    expect(mockPush).toHaveBeenCalledWith('/search');
   });
 
   it('navigates to tv detail and removes tv item', () => {

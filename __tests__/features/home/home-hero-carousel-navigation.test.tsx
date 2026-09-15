@@ -74,10 +74,24 @@ function pressHeroSlide(list: FlatList<HomeItem>, item: HomeItem, index: number)
   slideRender.unmount();
 }
 
-function advanceCarouselToIndex(list: FlatList<HomeItem>, index: number) {
+function getCarouselSlideWidth(list: FlatList<HomeItem>) {
+  return list.props.getItemLayout?.(null, 0).length ?? 400;
+}
+
+function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: number) {
+  const slideWidth = getCarouselSlideWidth(list);
   fireEvent(list, 'momentumScrollEnd', {
     nativeEvent: {
-      contentOffset: { x: index * 400, y: 0 },
+      contentOffset: { x: (activeIndex + 1) * slideWidth, y: 0 },
+    },
+  });
+}
+
+function swipeCarouselToScrollIndex(list: FlatList<HomeItem>, scrollIndex: number) {
+  const slideWidth = getCarouselSlideWidth(list);
+  fireEvent(list, 'momentumScrollEnd', {
+    nativeEvent: {
+      contentOffset: { x: scrollIndex * slideWidth, y: 0 },
     },
   });
 }
@@ -125,7 +139,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     act(() => {
       jest.advanceTimersByTime(6000);
     });
-    advanceCarouselToIndex(list, 1);
+    advanceCarouselToActiveIndex(list, 1);
 
     await waitFor(() => {
       expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
@@ -156,7 +170,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     act(() => {
       jest.advanceTimersByTime(6000);
     });
-    advanceCarouselToIndex(list, 1);
+    advanceCarouselToActiveIndex(list, 1);
 
     await waitFor(() => {
       expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
@@ -236,11 +250,57 @@ describe('HomeHeroCarousel navigation and focus', () => {
     act(() => {
       jest.advanceTimersByTime(6000);
     });
-    advanceCarouselToIndex(list, 1);
+    advanceCarouselToActiveIndex(list, 1);
 
     await waitFor(() => {
       expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
     });
+  });
+
+  it('loops from the last hero to the first when swiping past the end', async () => {
+    const itemA = createItem({ id: 'hero-a', title: 'Hero A' });
+    const itemB = createItem({ id: 'hero-b', title: 'Hero B' });
+    const onItemPress = jest.fn();
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={[itemA, itemB]} filterKey="all" onItemPress={onItemPress} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+
+    advanceCarouselToActiveIndex(list, 1);
+
+    await waitFor(() => {
+      expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
+    });
+
+    swipeCarouselToScrollIndex(list, 3);
+
+    await waitFor(() => {
+      expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
+    });
+
+    expect(onItemPress).not.toHaveBeenCalled();
+  });
+
+  it('loops from the first hero to the last when swiping before the start', async () => {
+    const itemA = createItem({ id: 'hero-a', title: 'Hero A' });
+    const itemB = createItem({ id: 'hero-b', title: 'Hero B' });
+    const onItemPress = jest.fn();
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={[itemA, itemB]} filterKey="all" onItemPress={onItemPress} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+
+    expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
+
+    swipeCarouselToScrollIndex(list, 0);
+
+    await waitFor(() => {
+      expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
+    });
+
+    expect(onItemPress).not.toHaveBeenCalled();
   });
 
   it('uses stable mediaType:contentId keys for hero slides', () => {
@@ -254,8 +314,8 @@ describe('HomeHeroCarousel navigation and focus', () => {
     );
     const list = UNSAFE_getByType(FlatList);
 
-    expect(list.props.keyExtractor(items[0], 0)).toBe('movie:hero-1');
-    expect(list.props.keyExtractor(items[1], 1)).toBe('tv:hero-2');
+    expect(list.props.keyExtractor(items[0], 0)).toBe('0:movie:hero-1');
+    expect(list.props.keyExtractor(items[1], 1)).toBe('1:tv:hero-2');
     expect(createHomeContentKey(items[0])).toBe('movie:hero-1');
     expect(createHomeContentKey(items[1])).toBe('tv:hero-2');
   });

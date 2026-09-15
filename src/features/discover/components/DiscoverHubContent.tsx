@@ -5,9 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import { GlobalSearchEntry } from '@/features/navigation/components/GlobalSearchEntry';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
-import { ExploreGenreSection } from '@/features/discovery/components/ExploreGenreSection';
 import { useExplorePreview } from '@/features/discovery/hooks/useExplorePreview';
-import { useGenres } from '@/features/discovery/hooks/useGenres';
 import { createAdvancedDiscoverHref } from '@/features/discovery/utils/advanced-discover-params';
 import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
@@ -26,26 +24,10 @@ import { spacing } from '@/theme/spacing';
 export function DiscoverHubContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const genresQuery = useGenres();
   const { region: userRegion, isHydrated } = useRegionalPreference();
   const previewQuery = useExplorePreview(10);
   const nowInTheatersPreviewQuery = useNowInTheatersPreview(userRegion, isHydrated);
   const onTvThisWeekPreviewQuery = useOnTvThisWeekPreview();
-
-  const handleGenrePress = useCallback(
-    (genreId: string) => {
-      openLibraryStackScreen(
-        router,
-        createDiscoverHref({
-          mode: 'trending',
-          type: 'all',
-          filters: { genreIds: [genreId] },
-        }),
-        '/(tabs)/discover',
-      );
-    },
-    [router],
-  );
 
   const handlePreviewItemPress = useCallback(
     (item: SearchResultItem) => {
@@ -67,15 +49,27 @@ export function DiscoverHubContent() {
   }, [router, userRegion]);
 
   const openTrendingBrowse = useCallback(() => {
-    openLibraryStackScreen(router, '/discover?mode=trending&type=all', '/(tabs)/discover');
+    openLibraryStackScreen(
+      router,
+      createDiscoverHref({ mode: 'trending', type: 'all' }),
+      '/(tabs)/discover',
+    );
   }, [router]);
 
   const openTopRatedBrowse = useCallback(() => {
-    openLibraryStackScreen(router, '/discover?mode=top_rated&type=all', '/(tabs)/discover');
+    openLibraryStackScreen(
+      router,
+      createDiscoverHref({ mode: 'top_rated', type: 'all' }),
+      '/(tabs)/discover',
+    );
   }, [router]);
 
   const openNewReleasesBrowse = useCallback(() => {
-    openLibraryStackScreen(router, '/discover?mode=new_releases&type=all', '/(tabs)/discover');
+    openLibraryStackScreen(
+      router,
+      createDiscoverHref({ mode: 'new_releases', type: 'all' }),
+      '/(tabs)/discover',
+    );
   }, [router]);
 
   const openNowInTheaters = useCallback(() => {
@@ -92,6 +86,7 @@ export function DiscoverHubContent() {
 
   const trendingItems = previewQuery.data?.trending.items ?? [];
   const topRatedItems = previewQuery.data?.topRated.items ?? [];
+  const newReleasesItems = previewQuery.data?.newReleases.items ?? [];
   const nowInTheatersItems = (nowInTheatersPreviewQuery.data?.items ?? []).filter(
     (item) => item.type === 'movie',
   );
@@ -177,17 +172,12 @@ export function DiscoverHubContent() {
         onItemPress={handlePreviewItemPress}
         onSeeAll={openTopRatedBrowse}
       />
-
-      <ExploreGenreSection genres={genresQuery.data ?? []} onGenrePress={handleGenrePress} />
-
-      <View style={styles.footerBrowse}>
-        <DiscoverFeatureEntry
-          title="New Releases"
-          subtitle="Browse the latest movies and shows"
-          icon="sparkles-outline"
-          onPress={openNewReleasesBrowse}
-        />
-      </View>
+      <DiscoverPreviewCarousel
+        title="New Releases"
+        items={newReleasesItems}
+        onItemPress={handlePreviewItemPress}
+        onSeeAll={openNewReleasesBrowse}
+      />
     </ScrollView>
   );
 }
@@ -214,8 +204,5 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.4,
     fontWeight: '600',
-  },
-  footerBrowse: {
-    paddingHorizontal: spacing.lg,
   },
 });

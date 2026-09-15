@@ -12,6 +12,18 @@ jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
   useUnreadNotificationCount: jest.fn(),
 }));
 
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({
+    user: {
+      id: 'user-1',
+      email: 'emre@example.com',
+      userName: 'emre',
+      displayName: 'Emre User',
+      createdAt: '2026-01-01T00:00:00Z',
+    },
+  }),
+}));
+
 describe('HomeHeader notification bell', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,6 +49,13 @@ describe('HomeHeader notification bell', () => {
 
     expect(screen.getByLabelText('Open notifications, 3 unread')).toBeTruthy();
     expect(screen.getByText('3')).toBeTruthy();
+  });
+
+  it('renders profile avatar initials', () => {
+    render(<HomeHeader />);
+
+    expect(screen.getByLabelText('Open Emre User profile')).toBeTruthy();
+    expect(screen.getByText('EU')).toBeTruthy();
   });
 
   it('shows 9+ when unread count exceeds nine', () => {

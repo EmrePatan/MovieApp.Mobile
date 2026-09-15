@@ -63,19 +63,28 @@ export default function AdvancedDiscoverScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
-  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const { region: userRegion } = useRegionalPreference();
   useTrackProductMetricOnFocus(PRODUCT_METRICS.advancedDiscoverOpened);
 
   const discoverState = useMemo(() => parseAdvancedDiscoverParams(rawParams), [rawParams]);
   const { mediaType, filters } = discoverState;
-
-  const discoverQuery = useAdvancedDiscover(mediaType, filters);
-
-  const items = useMemo(
-    () => discoverQuery.data?.pages.flatMap((page) => page.items) ?? [],
-    [discoverQuery.data?.pages],
+  const hasRouteFilters = useMemo(
+    () => hasActiveAdvancedDiscoverFilters(filters, mediaType),
+    [filters, mediaType],
   );
+  const [hasAppliedFilters, setHasAppliedFilters] = useState(hasRouteFilters);
+  const [filterSheetVisible, setFilterSheetVisible] = useState(!hasRouteFilters);
+  const shouldFetchResults = hasAppliedFilters || hasRouteFilters;
+
+  const discoverQuery = useAdvancedDiscover(mediaType, filters, undefined, shouldFetchResults);
+
+  const items = useMemo(() => {
+    if (!shouldFetchResults) {
+      return [];
+    }
+
+    return discoverQuery.data?.pages.flatMap((page) => page.items) ?? [];
+  }, [discoverQuery.data?.pages, shouldFetchResults]);
 
   const activeFilterCount = useMemo(
     () => countActiveAdvancedDiscoverFilters(filters, mediaType),
@@ -100,6 +109,7 @@ export default function AdvancedDiscoverScreen() {
 
   const applyFilters = useCallback(
     (nextMediaType: AdvancedDiscoverMediaType, nextFilters: AdvancedDiscoverFilters) => {
+      setHasAppliedFilters(true);
       replaceDiscoverState({ mediaType: nextMediaType, filters: nextFilters });
     },
     [replaceDiscoverState],
@@ -221,6 +231,10 @@ export default function AdvancedDiscoverScreen() {
   );
 
   const emptyState = useMemo(() => {
+    if (!shouldFetchResults) {
+      return null;
+    }
+
     if (hasActiveAdvancedDiscoverFilters(filters, mediaType)) {
       return (
         <View style={styles.emptyWithAction}>
@@ -234,7 +248,7 @@ export default function AdvancedDiscoverScreen() {
     }
 
     return <SearchEmptyState title="No titles found." />;
-  }, [clearFilters, filters, mediaType]);
+  }, [clearFilters, filters, mediaType, shouldFetchResults]);
 
   const filterSheet = (
     <AdvancedDiscoverFilterSheet
@@ -247,7 +261,7 @@ export default function AdvancedDiscoverScreen() {
     />
   );
 
-  if (discoverQuery.isLoading && items.length === 0) {
+  if (shouldFetchResults && discoverQuery.isLoading && items.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {topBar}
@@ -260,7 +274,7 @@ export default function AdvancedDiscoverScreen() {
     );
   }
 
-  if (discoverQuery.isError && items.length === 0) {
+  if (shouldFetchResults && discoverQuery.isError && items.length === 0) {
     const message = isApiError(discoverQuery.error)
       ? discoverQuery.error.userMessage
       : 'Unable to load discovery results. Please try again.';

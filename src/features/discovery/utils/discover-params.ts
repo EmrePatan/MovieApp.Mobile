@@ -145,7 +145,7 @@ export function serializeDiscoverParams(state: DiscoveryBrowseState): Record<str
 export function serializeDiscoverRoute(state: DiscoveryBrowseState): string {
   const params = serializeDiscoverParams(state);
   const search = new URLSearchParams(params).toString();
-  return search.length > 0 ? `/discover?${search}` : '/discover';
+  return search.length > 0 ? `/discover-browse?${search}` : '/discover-browse';
 }
 
 export function createDiscoverHref(

@@ -59,7 +59,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen name="search" options={{ href: null }} />
       <Tabs.Screen name="watchlist" options={{ href: null }} />
       <Tabs.Screen name="movie" options={{ href: null }} />
       <Tabs.Screen name="tv/[id]" options={{ href: null }} />

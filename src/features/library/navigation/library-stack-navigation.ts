@@ -10,7 +10,7 @@ export function isLibraryStackRoute(segments: readonly string[]): boolean {
     root === 'upcoming'
     || root === 'following'
     || root === 'favorites'
-    || root === 'discover'
+    || root === 'discover-browse'
     || root === 'watch-history'
     || root === 'notifications'
   );

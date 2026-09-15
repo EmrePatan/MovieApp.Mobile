@@ -58,10 +58,10 @@ describe('discover params', () => {
           sort: 'popularity_desc',
         },
       }),
-    ).toBe('/discover?mode=trending&type=all&genres=genre-1&year=2019');
+    ).toBe('/discover-browse?mode=trending&type=all&genres=genre-1&year=2019');
   });
 
   it('creates default discover href', () => {
-    expect(createDiscoverHref()).toBe('/discover?mode=trending&type=all');
+    expect(createDiscoverHref()).toBe('/discover-browse?mode=trending&type=all');
   });
 });

@@ -93,17 +93,29 @@ export default function HomeScreen() {
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
       if (sectionType === 'Trending') {
-        openLibraryStackScreen(router, '/discover?mode=trending&type=all', '/(tabs)/home');
+        openLibraryStackScreen(
+          router,
+          '/discover-browse?mode=trending&type=all',
+          '/(tabs)/home',
+        );
         return;
       }
 
       if (sectionType === 'TopRated') {
-        openLibraryStackScreen(router, '/discover?mode=top_rated&type=all', '/(tabs)/home');
+        openLibraryStackScreen(
+          router,
+          '/discover-browse?mode=top_rated&type=all',
+          '/(tabs)/home',
+        );
         return;
       }
 
       if (sectionType === 'NewReleases') {
-        openLibraryStackScreen(router, '/discover?mode=new_releases&type=all', '/(tabs)/home');
+        openLibraryStackScreen(
+          router,
+          '/discover-browse?mode=new_releases&type=all',
+          '/(tabs)/home',
+        );
         return;
       }
 

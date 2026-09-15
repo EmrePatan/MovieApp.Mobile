@@ -122,6 +122,8 @@ function createDiscoverQueryMock(overrides: Record<string, unknown> = {}) {
 describe('AdvancedDiscoverScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({});
     (useGenres as jest.Mock).mockReturnValue({
       data: [{ id: 'genre-1', name: 'Action' }],
       isLoading: false,
@@ -129,16 +131,38 @@ describe('AdvancedDiscoverScreen', () => {
     (useAdvancedDiscover as jest.Mock).mockReturnValue(createDiscoverQueryMock());
   });
 
-  it('renders advanced discover title and results', () => {
+  it('opens the filter sheet on first visit without prefetching results', () => {
     render(<AdvancedDiscoverScreen />);
 
-    expect(screen.getByText('Advanced Discover')).toBeTruthy();
+    expect(screen.getAllByText('Advanced Discover').length).toBeGreaterThan(0);
+    expect(screen.getByText('Media Type')).toBeTruthy();
+    expect(screen.queryByText('Inception')).toBeNull();
+    expect(useAdvancedDiscover).toHaveBeenCalledWith(
+      'movie',
+      expect.any(Object),
+      undefined,
+      false,
+    );
+  });
+
+  it('renders results after filters are applied', () => {
+    render(<AdvancedDiscoverScreen />);
+
+    fireEvent.press(screen.getByText('Show Results'));
+
     expect(screen.getByText('Inception')).toBeTruthy();
+    expect(useAdvancedDiscover).toHaveBeenLastCalledWith(
+      'movie',
+      expect.any(Object),
+      undefined,
+      true,
+    );
   });
 
   it('opens filter sheet from filters button', () => {
     render(<AdvancedDiscoverScreen />);
 
+    fireEvent.press(screen.getByLabelText('Close'));
     fireEvent.press(screen.getByLabelText('Filters'));
 
     expect(screen.getByText('Media Type')).toBeTruthy();
@@ -150,7 +174,6 @@ describe('AdvancedDiscoverScreen', () => {
   it('applies movie to tv toggle through setParams without pushing history', () => {
     render(<AdvancedDiscoverScreen />);
 
-    fireEvent.press(screen.getByLabelText('Filters'));
     fireEvent.press(screen.getByLabelText('Media type TV Shows'));
     fireEvent.press(screen.getByText('Show Results'));
 
@@ -162,7 +185,6 @@ describe('AdvancedDiscoverScreen', () => {
   it('resets filters to defaults via setParams', () => {
     render(<AdvancedDiscoverScreen />);
 
-    fireEvent.press(screen.getByLabelText('Filters'));
     fireEvent.press(screen.getByText('Reset'));
 
     expect(mockSetParams).toHaveBeenCalledWith(
@@ -219,6 +241,9 @@ describe('AdvancedDiscoverScreen', () => {
       }),
     );
 
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({ minRating: '8' });
+
     render(<AdvancedDiscoverScreen />);
 
     expect(screen.getByText('Provider unavailable')).toBeTruthy();
@@ -228,6 +253,7 @@ describe('AdvancedDiscoverScreen', () => {
 
   it('navigates to movie detail on result press', () => {
     render(<AdvancedDiscoverScreen />);
+    fireEvent.press(screen.getByText('Show Results'));
     fireEvent.press(screen.getByText('Inception'));
 
     expect(mockOpenCatalogDetail).toHaveBeenCalledWith(
@@ -259,6 +285,7 @@ describe('AdvancedDiscoverScreen', () => {
     );
 
     render(<AdvancedDiscoverScreen />);
+    fireEvent.press(screen.getByText('Show Results'));
     fireEvent.press(screen.getByText('Breaking Bad'));
     expect(mockOpenCatalogDetail).toHaveBeenCalledWith(
       expect.anything(),

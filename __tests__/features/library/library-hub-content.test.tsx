@@ -147,11 +147,11 @@ describe('LibraryHubContent', () => {
     }));
   });
 
-  it('centers a single library item in sparse grid mode', () => {
+  it('left-aligns a single library item in the three-column grid', () => {
     render(<LibraryHubContent />);
 
-    expect(screen.getByTestId('library-grid-single-column')).toBeTruthy();
-    expect(screen.getByTestId('library-grid-single-item')).toBeTruthy();
+    expect(screen.getByTestId('library-grid-three-column')).toBeTruthy();
+    expect(screen.queryByTestId('library-grid-single-item')).toBeNull();
   });
 
   it('does not double-pad the My Library heading inside the grid list', () => {

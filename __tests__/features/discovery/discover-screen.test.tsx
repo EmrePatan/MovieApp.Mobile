@@ -3,7 +3,7 @@ import { FlatList, ScrollView } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
-import DiscoverScreen from '../../../app/discover';
+import DiscoverScreen from '../../../app/discover-browse';
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -137,6 +137,20 @@ describe('DiscoverScreen', () => {
     expect(screen.getByText('Top Rated')).toBeTruthy();
   });
 
+  it('renders new releases title from mode deep link', () => {
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({ mode: 'new_releases', type: 'all' });
+
+    render(<DiscoverScreen />);
+
+    expect(screen.getByText('New Releases')).toBeTruthy();
+    expect(useDiscoveryBrowse).toHaveBeenCalledWith(
+      'new_releases',
+      'all',
+      expect.objectContaining({ sort: 'release_desc' }),
+    );
+  });
+
   it('does not render following, upcoming, or recommendation sections', () => {
     render(<DiscoverScreen />);
 
@@ -165,7 +179,7 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByText('Show Results'));
 
     expect(mockReplace).toHaveBeenCalledWith(
-      '/discover?mode=trending&type=all&genres=genre-1',
+      '/discover-browse?mode=trending&type=all&genres=genre-1',
     );
   });
 
@@ -176,7 +190,7 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByLabelText('Content type Movies'));
     fireEvent.press(screen.getByText('Show Results'));
 
-    expect(mockReplace).toHaveBeenCalledWith('/discover?mode=trending&type=movie');
+    expect(mockReplace).toHaveBeenCalledWith('/discover-browse?mode=trending&type=movie');
   });
 
   it('loads more results when pagination is available', () => {
@@ -226,7 +240,7 @@ describe('DiscoverScreen', () => {
 
     expect(screen.getByText('No titles match your filters')).toBeTruthy();
     fireEvent.press(screen.getByText('Clear filters'));
-    expect(mockReplace).toHaveBeenCalledWith('/discover?mode=trending&type=all');
+    expect(mockReplace).toHaveBeenCalledWith('/discover-browse?mode=trending&type=all');
   });
 
   it('renders error state with retry', () => {

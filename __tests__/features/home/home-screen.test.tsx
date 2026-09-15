@@ -36,6 +36,18 @@ jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
   })),
 }));
 
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({
+    user: {
+      id: 'user-1',
+      email: 'emre@example.com',
+      userName: 'emre',
+      displayName: 'Emre User',
+      createdAt: '2026-01-01T00:00:00Z',
+    },
+  }),
+}));
+
 jest.mock('@/features/home/components/HomeHeroCarousel', () => ({
   HomeHeroCarousel: ({ items, onItemPress }: { items: Array<{ id: string; title: string }>; onItemPress: (item: { id: string; title: string }) => void }) => {
     const React = require('react');
@@ -544,7 +556,7 @@ describe('HomeScreen', () => {
 
     fireEvent.press(screen.getByLabelText('See all Trending Now'));
 
-    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
+    expect(mockPush).toHaveBeenCalledWith('/discover-browse?mode=trending&type=all');
   });
 
   it('navigates to Upcoming from Coming Up See All', () => {
@@ -696,7 +708,7 @@ describe('HomeScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/discover');
   });
 
-  it('renders global search entry near the top of Home', () => {
+  it('renders search icon in the Home header', () => {
     mockUseHome.mockReturnValue({
       data: { sections: [], isPersonalized: false },
       error: null,
@@ -724,7 +736,7 @@ describe('HomeScreen', () => {
     render(<HomeScreen />);
     fireEvent.press(screen.getByLabelText('Search movies, TV shows, and people'));
 
-    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search?from=home');
+    expect(mockPush).toHaveBeenCalledWith('/search?from=home');
   });
 
   it('navigates to Discover from Top Rated See All', () => {
@@ -763,6 +775,6 @@ describe('HomeScreen', () => {
 
     fireEvent.press(screen.getByLabelText('See all Top Rated'));
 
-    expect(mockPush).toHaveBeenCalledWith('/discover?mode=top_rated&type=all');
+    expect(mockPush).toHaveBeenCalledWith('/discover-browse?mode=top_rated&type=all');
   });
 });

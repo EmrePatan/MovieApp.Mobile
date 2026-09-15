@@ -61,7 +61,7 @@ export default function FavoritesScreen() {
   }, [router]);
 
   const handleBrowse = useCallback(() => {
-    router.push('/(tabs)/search');
+    router.push('/search');
   }, [router]);
 
   const handleItemPress = useCallback(

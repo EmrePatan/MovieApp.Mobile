@@ -23,9 +23,9 @@ export interface OpenCatalogDetailOptions {
   watchRegion?: string;
 }
 
-const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, `/(tabs)/${string}`> = {
+const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, string> = {
   home: '/(tabs)/home',
-  search: '/(tabs)/search',
+  search: '/search',
   watchlist: '/(tabs)/watchlist',
   discover: '/(tabs)/discover',
   library: '/(tabs)/library',
@@ -35,7 +35,7 @@ const LIBRARY_ORIGIN_HREFS: Record<CatalogDetailLibraryOrigin, string> = {
   upcoming: '/upcoming',
   following: '/following',
   favorites: '/favorites',
-  discover: '/discover',
+  discover: '/discover-browse',
   'watch-history': '/watch-history',
 };
 

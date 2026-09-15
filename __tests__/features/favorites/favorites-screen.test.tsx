@@ -365,7 +365,7 @@ describe('FavoritesScreen', () => {
     render(<FavoritesScreen />);
     expect(screen.getByText("You haven't added any favorites yet")).toBeTruthy();
     fireEvent.press(screen.getByText('Browse'));
-    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search');
+    expect(mockPush).toHaveBeenCalledWith('/search');
   });
 
   it('renders initial error with retry', () => {

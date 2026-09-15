@@ -31,7 +31,8 @@ function RootNavigator() {
         <Stack.Screen name="following" />
         <Stack.Screen name="upcoming" />
         <Stack.Screen name="notifications" />
-        <Stack.Screen name="discover" />
+        <Stack.Screen name="search" options={{ gestureEnabled: true }} />
+        <Stack.Screen name="discover-browse" />
         <Stack.Screen name="advanced-discover" />
         <Stack.Screen name="streaming-discover" />
         <Stack.Screen name="now-in-theaters" />

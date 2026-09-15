@@ -124,4 +124,9 @@ describe('positionToStarRating', () => {
     expect(positionToStarRating(TOUCH_TRACK_WIDTH, TOUCH_TRACK_WIDTH, STAR_CLUSTER_WIDTH)).toBe(5);
     expect(positionToStarRating(225, TOUCH_TRACK_WIDTH, STAR_CLUSTER_WIDTH)).toBe(5);
   });
+
+  it('snaps the right side of the fifth star to a full rating', () => {
+    expect(resolveRatingGesturePosition(176, TOUCH_TRACK_WIDTH, STAR_CLUSTER_WIDTH)).toBe(5);
+    expect(resolveRatingGesturePosition(188, TOUCH_TRACK_WIDTH, STAR_CLUSTER_WIDTH)).toBe(5);
+  });
 });

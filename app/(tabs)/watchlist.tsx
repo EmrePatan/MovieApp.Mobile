@@ -95,7 +95,7 @@ export default function WatchlistScreen() {
   }, [router]);
 
   const handleBrowse = useCallback(() => {
-    router.push('/(tabs)/search');
+    router.push('/search');
   }, [router]);
 
   const handleSelectWatchlist = useCallback((watchlistId: string) => {

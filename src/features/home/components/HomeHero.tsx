@@ -24,6 +24,7 @@ interface HomeHeroProps {
   favoriteStatusPending?: boolean;
 }
 
+const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
 const HERO_MORE_INFO_MIN_WIDTH = 140;
 const HERO_MORE_INFO_MAX_WIDTH = 160;
 const HERO_FAVORITE_SIZE = 48;
@@ -148,6 +149,7 @@ export const HomeHero = memo(function HomeHero({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Open ${item.title}`}
+            delayPressIn={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
             onPress={handleHeroPress}
             style={[styles.mediaPressable, { height: heroHeight }]}
           >

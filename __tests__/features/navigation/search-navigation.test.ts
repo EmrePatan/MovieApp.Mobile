@@ -22,7 +22,7 @@ describe('search navigation', () => {
 
     openSearch(router, 'home');
 
-    expect(push).toHaveBeenCalledWith('/(tabs)/search?from=home');
+    expect(push).toHaveBeenCalledWith('/search?from=home');
   });
 
   it('returns to the remembered origin', () => {

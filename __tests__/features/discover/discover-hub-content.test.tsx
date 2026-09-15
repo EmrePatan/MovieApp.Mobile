@@ -17,13 +17,17 @@ jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({
     data: {
       trending: { items: [] },
       topRated: { items: [] },
+      newReleases: {
+        items: [
+          {
+            id: 'movie-2',
+            type: 'movie',
+            title: 'Fresh Release',
+            posterUrl: '/poster.jpg',
+          },
+        ],
+      },
     },
-  })),
-}));
-
-jest.mock('@/features/discovery/hooks/useGenres', () => ({
-  useGenres: jest.fn(() => ({
-    data: [{ id: 'genre-1', name: 'Action' }],
   })),
 }));
 
@@ -209,4 +213,25 @@ describe('DiscoverHubContent', () => {
       expect.stringContaining('/streaming-discover?mediaType=movie&watchRegion=TR'),
     );
   });
+
+  it('renders New Releases preview and does not show Explore by Genre', () => {
+    render(<DiscoverHubContent />);
+
+    expect(screen.getByText('Fresh Release')).toBeTruthy();
+    expect(screen.getByLabelText('See All New Releases')).toBeTruthy();
+    expect(screen.queryByText('Explore by Genre')).toBeNull();
+  });
+
+  it('opens new releases browse from See All', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByLabelText('See All New Releases'));
+
+    expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
+      expect.anything(),
+      '/discover-browse?mode=new_releases&type=all',
+      '/(tabs)/discover',
+    );
+  });
+
 });

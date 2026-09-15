@@ -3,33 +3,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { useGenres } from '../hooks/useGenres';
 import { createAdvancedDiscoverHref } from '../utils/advanced-discover-params';
-import { createDiscoverHref } from '../utils/discover-params';
-import { ExploreGenreSection } from './ExploreGenreSection';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-interface SearchExploreLandingProps {
-  onItemPress: (item: import('@/features/home/types').HomeItem) => void;
-}
-
-export function SearchExploreLanding(_props: SearchExploreLandingProps) {
+export function SearchExploreLanding() {
   const router = useRouter();
-  const genresQuery = useGenres();
-
-  const handleGenrePress = useCallback(
-    (genreId: string) => {
-      router.push(
-        createDiscoverHref({
-          mode: 'trending',
-          type: 'all',
-          filters: { genreIds: [genreId] },
-        }),
-      );
-    },
-    [router],
-  );
 
   const openAdvancedDiscover = useCallback(() => {
     router.push(createAdvancedDiscoverHref());
@@ -54,10 +33,6 @@ export function SearchExploreLanding(_props: SearchExploreLandingProps) {
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
       </Pressable>
-      <ExploreGenreSection
-        genres={genresQuery.data ?? []}
-        onGenrePress={handleGenrePress}
-      />
     </View>
   );
 }
