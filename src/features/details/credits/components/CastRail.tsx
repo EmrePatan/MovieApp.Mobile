@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
+import { openCreditsDetail } from '@/features/details/shared/navigation/credits-detail-navigation';
 import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
 import { buildCatalogDetailRoute, buildCreditsRoute } from '@/features/details/shared/routes';
 import { useMovieCredits, useTvShowCredits } from '../hooks/useCredits';
@@ -42,7 +43,11 @@ export function CastRail({ contentType, contentId, title }: CastRailProps) {
   );
 
   const handleSeeAllPress = useCallback(() => {
-    router.push(buildCreditsRoute(contentType, contentId, { title }));
+    openCreditsDetail(
+      router,
+      buildCreditsRoute(contentType, contentId, { title }),
+      buildCatalogDetailRoute(contentId, contentType),
+    );
   }, [contentId, contentType, router, title]);
 
   if (query.isLoading) {

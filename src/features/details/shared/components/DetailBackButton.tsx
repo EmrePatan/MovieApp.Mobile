@@ -16,6 +16,14 @@ import {
   returnFromGalleryDetail,
 } from '../navigation/gallery-detail-navigation';
 import {
+  isCreditsDetailRoute,
+  returnFromCreditsDetail,
+} from '../navigation/credits-detail-navigation';
+import {
+  isPersonFilmographyRoute,
+  returnFromPersonFilmography,
+} from '../navigation/person-filmography-navigation';
+import {
   isPersonDetailRoute,
   returnFromPersonDetail,
 } from '../navigation/person-detail-navigation';
@@ -49,6 +57,16 @@ export function DetailBackButton({
 
     if (isRootCatalogDetailRoute(segments)) {
       returnToCatalogDetailOrigin(router);
+      return;
+    }
+
+    if (isCreditsDetailRoute(segments)) {
+      returnFromCreditsDetail(router);
+      return;
+    }
+
+    if (isPersonFilmographyRoute(segments)) {
+      returnFromPersonFilmography(router);
       return;
     }
 
