@@ -115,4 +115,13 @@ describe('DetailActionBar premium circular actions', () => {
     expect(screen.queryByText('Follow')).toBeNull();
     expect(screen.getByText('Watched')).toBeTruthy();
   });
+
+  it('keeps movie follow visible when watched is hidden for upcoming releases', () => {
+    render(<DetailActionBar contentType="movie" contentId="movie-id" showWatched={false} />);
+
+    expect(screen.queryByText('Watched')).toBeNull();
+    expect(screen.getByText('MovieFollow')).toBeTruthy();
+    expect(screen.getByText('Favorite')).toBeTruthy();
+    expect(screen.getByText('Watchlist')).toBeTruthy();
+  });
 });

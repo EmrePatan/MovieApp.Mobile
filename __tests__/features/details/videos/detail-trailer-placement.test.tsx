@@ -68,6 +68,7 @@ const movie: MovieDetailsResponse = {
   voteCount: 10,
   genres: ['Drama'],
   collection: null,
+  isReleased: true,
 };
 
 const show: TvShowDetailsResponse = {

@@ -113,6 +113,7 @@ const movie: MovieDetailsResponse = {
   voteCount: 1000,
   genres: [],
   collection: null,
+  isReleased: true,
 };
 
 describe('detail UI', () => {

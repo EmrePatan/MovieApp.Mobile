@@ -64,6 +64,7 @@ const baseMovie: MovieDetailsResponse = {
   voteCount: 30000,
   genres: ['Action'],
   collection: null,
+  isReleased: true,
 };
 
 describe('movie detail collection row', () => {

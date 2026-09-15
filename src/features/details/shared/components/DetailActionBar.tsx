@@ -29,14 +29,10 @@ export function DetailActionBar({
     <View style={styles.container} testID="detail-action-bar">
       <FavoriteButton contentType={contentType} contentId={contentId} variant="detail" />
       <AddToWatchlistButton contentType={contentType} contentId={contentId} variant="detail" />
-      {showWatched ? (
-        <>
-          <WatchedButton target={watchedTarget} variant="detail" />
-          {contentType === 'tv' ? <FollowButton tvShowId={contentId} /> : null}
-          {contentType === 'movie' ? (
-            <MovieFollowButton movieId={contentId} releaseDate={releaseDate} />
-          ) : null}
-        </>
+      {showWatched ? <WatchedButton target={watchedTarget} variant="detail" /> : null}
+      {contentType === 'tv' && showWatched ? <FollowButton tvShowId={contentId} /> : null}
+      {contentType === 'movie' ? (
+        <MovieFollowButton movieId={contentId} releaseDate={releaseDate} />
       ) : null}
     </View>
   );

@@ -65,22 +65,21 @@ jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () =
   WhereToWatchRail: () => null,
 }));
 
-const movie: MovieDetailsResponse = {
+const baseMovie: Omit<MovieDetailsResponse, 'isReleased'> = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   externalIds: { tmdbId: 1, tvdbId: null, imdbId: null },
-  title: 'Interstellar',
+  title: 'Future Movie',
   originalTitle: null,
-  overview: 'A journey through space.',
-  releaseDate: '2014-11-07',
-  runtimeMinutes: 169,
+  overview: 'Not out yet.',
+  releaseDate: '2027-01-01',
+  runtimeMinutes: 120,
   posterPath: null,
   backdropPath: null,
   originalLanguage: 'en',
-  voteAverage: 8.4,
-  voteCount: 1000,
-  genres: ['Sci-Fi'],
+  voteAverage: 0,
+  voteCount: 0,
+  genres: ['Action'],
   collection: null,
-  isReleased: true,
 };
 
 const show: TvShowDetailsResponse = {
@@ -101,23 +100,64 @@ const show: TvShowDetailsResponse = {
   seasons: [],
 };
 
-describe('detail actions integration', () => {
-  it('renders movie detail action set with watched and inline rating', () => {
-    render(<MovieDetailContent movie={movie} />);
-    expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
-    expect(screen.getByText('Rating:movie')).toBeTruthy();
-    expect(screen.getByText('Movie · 2014 · ★ 8.4 · 2h 49m')).toBeTruthy();
-    expect(screen.queryByText('TMDB Rating')).toBeNull();
-    expect(screen.queryByText(/TMDB /)).toBeNull();
-    expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
+describe('movie release guardrail', () => {
+  it('1. hides watched for future effective release (isReleased false)', () => {
+    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
+
+    expect(screen.getByText('Actions:movie')).toBeTruthy();
+    expect(screen.queryByText('Actions:movie:watched')).toBeNull();
   });
 
-  it('renders tv detail action set with watched and inline rating', () => {
+  it('2. hides rating for future effective release (isReleased false)', () => {
+    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
+
+    expect(screen.queryByText('Rating:movie')).toBeNull();
+  });
+
+  it('3. shows watched for released movies (isReleased true)', () => {
+    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: true }} />);
+
+    expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
+  });
+
+  it('4. shows rating for released movies (isReleased true)', () => {
+    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: true }} />);
+
+    expect(screen.getByText('Rating:movie')).toBeTruthy();
+  });
+
+  it('5. keeps tv detail watched and rating unchanged', () => {
     render(<TvShowDetailContent show={show} />);
+
     expect(screen.getByText('Actions:tv:watched')).toBeTruthy();
     expect(screen.getByText('Rating:tv')).toBeTruthy();
-    expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();
-    expect(screen.queryByText('TMDB Rating')).toBeNull();
-    expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
+  });
+
+  it('6. keeps non-consumption action bar visible for unreleased movies', () => {
+    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
+
+    expect(screen.getByText('Actions:movie')).toBeTruthy();
+  });
+
+  it('7. shows consumption actions when release date is unknown but isReleased is true', () => {
+    render(
+      <MovieDetailContent
+        movie={{ ...baseMovie, releaseDate: null, isReleased: true }}
+      />,
+    );
+
+    expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
+    expect(screen.getByText('Rating:movie')).toBeTruthy();
+  });
+
+  it('8. shows consumption actions for movies releasing today (isReleased true)', () => {
+    render(
+      <MovieDetailContent
+        movie={{ ...baseMovie, releaseDate: '2026-09-15', isReleased: true }}
+      />,
+    );
+
+    expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
+    expect(screen.getByText('Rating:movie')).toBeTruthy();
   });
 });

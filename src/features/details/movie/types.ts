@@ -16,4 +16,5 @@ export interface MovieDetailsResponse {
   voteCount: number;
   genres: string[];
   collection: CollectionSummary | null;
+  isReleased: boolean;
 }

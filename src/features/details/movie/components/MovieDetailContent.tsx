@@ -39,12 +39,14 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       <DetailActionBar
         contentType="movie"
         contentId={movie.id}
-        showWatched
+        showWatched={movie.isReleased}
         releaseDate={movie.releaseDate}
       />
       <CollectionLinkRow collection={movie.collection} />
       <DetailOverview overview={movie.overview} />
-      <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
+      {movie.isReleased ? (
+        <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
+      ) : null}
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
       <CastRail contentType="movie" contentId={movie.id} title={movie.title} />
       <ReviewsSection contentType="movie" contentId={movie.id} />
