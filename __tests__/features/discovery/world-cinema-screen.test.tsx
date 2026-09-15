@@ -78,15 +78,15 @@ describe('WorldCinemaScreen', () => {
 
     expect(screen.getByText('World Cinema')).toBeTruthy();
     expect(screen.getByText('Parasite')).toBeTruthy();
-    expect(screen.getByLabelText('Origin country Korean')).toBeTruthy();
+    expect(screen.getByLabelText('Origin country South Korea')).toBeTruthy();
   });
 
   it('switches media type, origin country, and sort via setParams', () => {
     render(<WorldCinemaScreen />);
 
     fireEvent.press(screen.getByLabelText('TV Shows'));
-    fireEvent.press(screen.getByLabelText('Origin country Korean'));
-    fireEvent.press(screen.getByLabelText('Japanese'));
+    fireEvent.press(screen.getByLabelText('Origin country South Korea'));
+    fireEvent.press(screen.getByLabelText('Japan'));
     fireEvent.press(screen.getByLabelText('Sort by Top Rated'));
 
     expect(mockSetParams).toHaveBeenCalled();
