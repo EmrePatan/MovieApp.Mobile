@@ -79,6 +79,7 @@ describe('WorldCinemaScreen', () => {
     expect(screen.getByText('World Cinema')).toBeTruthy();
     expect(screen.getByText('Parasite')).toBeTruthy();
     expect(screen.getByLabelText('Origin country South Korea')).toBeTruthy();
+    expect(screen.queryByText('Korean Cinema')).toBeNull();
   });
 
   it('switches media type, origin country, and sort via setParams', () => {

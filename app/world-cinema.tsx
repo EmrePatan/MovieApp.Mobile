@@ -29,7 +29,6 @@ import {
   setDiscoveryRouteParams,
   WORLD_CINEMA_PARAM_KEYS,
 } from '@/features/navigation/discovery-route-params';
-import { getWorldCinemaCollectionLabel } from '@/features/discovery/world-cinema-collections';
 import { ADVANCED_DISCOVER_MEDIA_OPTIONS } from '@/features/discovery/advanced-discover-types';
 import { WORLD_CINEMA_SORT_OPTIONS } from '@/features/discovery/world-cinema-types';
 import type { WorldCinemaState } from '@/features/discovery/world-cinema-types';
@@ -164,10 +163,6 @@ export default function WorldCinemaScreen() {
             );
           })}
         </View>
-
-        <AppText variant="bodySmall" muted>
-          {getWorldCinemaCollectionLabel(discoverState.originCountry)}
-        </AppText>
       </View>
     ),
     [countryExpanded, discoverState, replaceState],
@@ -256,15 +251,17 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   toggleChip: {
+    minHeight: 44,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    justifyContent: 'center',
   },
   toggleChipSelected: {
     borderColor: colors.accent,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.accentTint12,
   },
   toggleLabelSelected: {
     color: colors.accent,
@@ -276,15 +273,17 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sortChip: {
+    minHeight: 44,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    justifyContent: 'center',
   },
   sortChipSelected: {
     borderColor: colors.accent,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.accentTint12,
   },
   sortLabelSelected: {
     color: colors.accent,

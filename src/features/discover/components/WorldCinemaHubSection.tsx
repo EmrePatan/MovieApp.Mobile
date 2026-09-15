@@ -67,12 +67,12 @@ export function WorldCinemaHubSection() {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Explore World Cinema"
+          accessibilityLabel="See All World Cinema"
           onPress={openWorldCinema}
           style={({ pressed }) => [styles.exploreButton, pressed && styles.pressed]}
         >
           <AppText variant="bodySmall" style={styles.exploreLabel}>
-            Explore
+            See All
           </AppText>
           <Ionicons name="chevron-forward" size={16} color={colors.accent} />
         </Pressable>
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   chipSelected: {
     borderColor: colors.accent,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.accentTint12,
   },
   chipLabelSelected: {
     color: colors.accent,

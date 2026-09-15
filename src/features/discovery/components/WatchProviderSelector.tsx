@@ -84,8 +84,8 @@ export function WatchProviderSelector({
 
 const styles = StyleSheet.create({
   listContent: {
-    gap: spacing.md,
-    paddingVertical: spacing.xs,
+    gap: spacing.sm,
+    paddingVertical: 0,
   },
   providerItem: {
     width: 72,

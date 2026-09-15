@@ -28,9 +28,9 @@ export function DiscoverPreviewCarousel({
       <View style={styles.header}>
         <AppText variant="subtitle">{title}</AppText>
         {onSeeAll ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={`See all ${title}`} onPress={onSeeAll}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`See All ${title}`} onPress={onSeeAll}>
             <AppText variant="bodySmall" style={styles.seeAll}>
-              See all
+              See All
             </AppText>
           </Pressable>
         ) : null}

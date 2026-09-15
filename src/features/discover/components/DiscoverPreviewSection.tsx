@@ -68,11 +68,11 @@ export function DiscoverPreviewSection({
         {onSeeAll && !isLoading && !isError && items.length > 0 ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`See all ${title}`}
+            accessibilityLabel={`See All ${title}`}
             onPress={onSeeAll}
           >
             <AppText variant="bodySmall" style={styles.seeAll}>
-              See all
+              See All
             </AppText>
           </Pressable>
         ) : null}

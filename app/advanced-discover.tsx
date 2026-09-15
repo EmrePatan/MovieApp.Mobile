@@ -175,11 +175,12 @@ export default function AdvancedDiscoverScreen() {
     [handleResultPress],
   );
 
-  const listHeader = useMemo(
+  const pageHeader = useMemo(
     () => (
       <View style={styles.header}>
-        <DetailBackButton />
-        <AppText variant="title">Advanced Discover</AppText>
+        <AppText variant="title" accessibilityRole="header">
+          Advanced Discover
+        </AppText>
         <AppText variant="bodySmall" muted>
           {getMediaTypeLabel(mediaType)}
           {sortLabel ? ` · ${sortLabel}` : ''}
@@ -213,6 +214,12 @@ export default function AdvancedDiscoverScreen() {
     [activeFilterCount, mediaType, sortLabel],
   );
 
+  const topBar = (
+    <View style={styles.topBar}>
+      <DetailBackButton />
+    </View>
+  );
+
   const emptyState = useMemo(() => {
     if (hasActiveAdvancedDiscoverFilters(filters, mediaType)) {
       return (
@@ -243,8 +250,11 @@ export default function AdvancedDiscoverScreen() {
   if (discoverQuery.isLoading && items.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
-        <SearchLoadingState />
+        {topBar}
+        <View style={styles.listContent}>
+          {pageHeader}
+          <SearchLoadingState />
+        </View>
         {filterSheet}
       </SafeAreaView>
     );
@@ -257,9 +267,12 @@ export default function AdvancedDiscoverScreen() {
 
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
-        <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
+        {topBar}
+        <View style={styles.listContent}>
+          {pageHeader}
+          <View style={styles.errorContainer}>
+            <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
+          </View>
         </View>
         {filterSheet}
       </SafeAreaView>
@@ -268,11 +281,12 @@ export default function AdvancedDiscoverScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      {topBar}
       <FlatList
         data={items}
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}
-        ListHeaderComponent={listHeader}
+        ListHeaderComponent={pageHeader}
         ListEmptyComponent={emptyState}
         ListFooterComponent={
           discoverQuery.isFetchingNextPage ? (
@@ -302,21 +316,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    gap: spacing.md,
+  topBar: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+  },
+  header: {
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
   },
   filtersRow: {
-    paddingHorizontal: 0,
+    paddingTop: spacing.xs,
   },
   filtersButton: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: spacing.xs,
-    minHeight: 36,
+    minHeight: 44,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
@@ -343,18 +358,17 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   listContent: {
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     flexGrow: 1,
   },
   emptyWithAction: {
     gap: spacing.md,
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
   },
   footerLoading: {
     paddingVertical: spacing.lg,

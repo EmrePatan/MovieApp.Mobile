@@ -159,7 +159,9 @@ export default function StreamingDiscoverScreen() {
         </AppText>
 
         <View style={styles.section}>
-          <AppText variant="subtitle">Where do you watch?</AppText>
+          <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+            Where do you watch?
+          </AppText>
           <WatchProviderSelector
             providers={providersQuery.data?.providers ?? []}
             selectedProviderIds={discoverState.watchProviderIds}
@@ -171,7 +173,7 @@ export default function StreamingDiscoverScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="bodySmall" muted>Content</AppText>
+          <AppText variant="bodySmall" muted style={styles.sectionLabel}>Content</AppText>
           <View style={styles.mediaRow}>
             {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((option) => {
               const selected = discoverState.mediaType === option.value;
@@ -201,7 +203,7 @@ export default function StreamingDiscoverScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="bodySmall" muted>Availability</AppText>
+          <AppText variant="bodySmall" muted style={styles.sectionLabel}>Availability</AppText>
           <WatchMonetizationSelector
             selectedTypes={discoverState.watchMonetizationTypes}
             onToggle={toggleMonetization}
@@ -313,7 +315,6 @@ const styles = StyleSheet.create({
   },
   topBar: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xs,
   },
   listContent: {
     paddingHorizontal: spacing.lg,
@@ -321,26 +322,31 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   headerContent: {
-    gap: spacing.lg,
-    paddingBottom: spacing.lg,
+    gap: spacing.md,
+    paddingBottom: spacing.md,
   },
   section: {
-    gap: spacing.sm,
+    gap: spacing.xs,
+  },
+  sectionLabel: {
+    fontWeight: '600',
   },
   mediaRow: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
   mediaChip: {
+    minHeight: 44,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    justifyContent: 'center',
   },
   mediaChipSelected: {
-    borderColor: colors.borderAccent,
+    borderColor: colors.accent,
     backgroundColor: colors.accentTint12,
   },
   mediaChipSelectedText: {

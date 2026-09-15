@@ -41,8 +41,8 @@ export function ExploreGenreSection({ genres, onGenrePress }: ExploreGenreSectio
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    gap: spacing.md,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
   },
   title: {
     color: colors.textPrimary,
@@ -54,12 +54,12 @@ const styles = StyleSheet.create({
   },
   chip: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    minHeight: 36,
+    minHeight: 40,
     justifyContent: 'center',
   },
   chipPressed: {

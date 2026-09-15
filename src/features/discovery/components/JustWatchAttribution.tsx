@@ -14,6 +14,6 @@ export function JustWatchAttribution({ testID = 'justwatch-attribution' }: { tes
 const styles = StyleSheet.create({
   attribution: {
     color: colors.textMuted,
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
   },
 });

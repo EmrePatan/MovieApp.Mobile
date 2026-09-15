@@ -48,15 +48,17 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   chip: {
+    minHeight: 44,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    justifyContent: 'center',
   },
   chipSelected: {
-    borderColor: colors.borderAccent,
+    borderColor: colors.accent,
     backgroundColor: colors.accentTint12,
   },
   chipLabel: {

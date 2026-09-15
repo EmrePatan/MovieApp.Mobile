@@ -196,14 +196,15 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
-    gap: spacing.xl,
+    gap: spacing.lg,
   },
   header: {
     gap: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   featureSection: {
     paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   futureSection: {
     paddingHorizontal: spacing.lg,

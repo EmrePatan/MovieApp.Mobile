@@ -145,13 +145,13 @@ describe('DiscoverHubContent', () => {
     expect(screen.getByTestId('world-cinema-hub')).toBeTruthy();
     expect(screen.getByTestId('world-cinema-preview')).toBeTruthy();
     expect(screen.getByText('Parasite')).toBeTruthy();
-    expect(screen.getByLabelText('Explore World Cinema')).toBeTruthy();
+    expect(screen.getByLabelText('See All World Cinema')).toBeTruthy();
   });
 
   it('opens world cinema with selected origin country from Explore', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('Explore World Cinema'));
+    fireEvent.press(screen.getByLabelText('See All World Cinema'));
 
     expect(mockPush).toHaveBeenCalledWith(
       expect.stringContaining('originCountry=KR'),
@@ -174,13 +174,13 @@ describe('DiscoverHubContent', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByTestId('on-tv-this-week-preview')).toBeTruthy();
-    expect(screen.getByLabelText('See all On TV This Week')).toBeTruthy();
+    expect(screen.getByLabelText('See All On TV This Week')).toBeTruthy();
   });
 
   it('opens on tv this week from See All', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('See all On TV This Week'));
+    fireEvent.press(screen.getByLabelText('See All On TV This Week'));
 
     expect(mockPush).toHaveBeenCalledWith('/on-tv-this-week');
   });
@@ -189,13 +189,13 @@ describe('DiscoverHubContent', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByTestId('now-in-theaters-preview')).toBeTruthy();
-    expect(screen.getByLabelText('See all Now in Theaters')).toBeTruthy();
+    expect(screen.getByLabelText('See All Now in Theaters')).toBeTruthy();
   });
 
   it('opens now in theaters from See All', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('See all Now in Theaters'));
+    fireEvent.press(screen.getByLabelText('See All Now in Theaters'));
 
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/now-in-theaters'));
   });

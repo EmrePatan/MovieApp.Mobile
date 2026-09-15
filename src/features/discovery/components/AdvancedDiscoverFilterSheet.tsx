@@ -241,18 +241,20 @@ export function AdvancedDiscoverFilterSheet({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
-          <View style={styles.header}>
-            <AppText variant="subtitle">Advanced Discover</AppText>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose}>
-              <Ionicons name="close" size={24} color={colors.textPrimary} />
-            </Pressable>
-          </View>
+          <View style={styles.sheetInner}>
+            <View style={styles.header}>
+              <AppText variant="subtitle">Advanced Discover</AppText>
+              <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose}>
+                <Ionicons name="close" size={24} color={colors.textPrimary} />
+              </Pressable>
+            </View>
 
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator
+            >
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>Media Type</AppText>
               <MediaTypeSelector
@@ -467,11 +469,12 @@ export function AdvancedDiscoverFilterSheet({
                 onChange={(sort) => setDraft((current) => ({ ...current, sort }))}
               />
             </View>
-          </ScrollView>
+            </ScrollView>
 
-          <View style={styles.actions}>
-            <AppButton title="Reset" variant="secondary" onPress={handleClear} />
-            <AppButton title="Show Results" onPress={handleApply} />
+            <View style={styles.footer}>
+              <AppButton title="Reset" variant="secondary" onPress={handleClear} />
+              <AppButton title="Show Results" onPress={handleApply} />
+            </View>
           </View>
         </SafeAreaView>
       </View>
@@ -490,25 +493,30 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
+  },
+  sheetInner: {
+    flexShrink: 1,
+    maxHeight: '100%',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  scroll: {
-    flexGrow: 0,
-  },
-  scrollContent: {
-    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  section: {
+  scroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+    paddingHorizontal: spacing.lg,
+  },
+  scrollContent: {
     gap: spacing.sm,
+    paddingBottom: spacing.md,
+  },
+  section: {
+    gap: spacing.xs,
   },
   sectionLabel: {
     color: colors.textSecondary,
@@ -533,12 +541,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surfaceElevated,
-    minHeight: 36,
+    minHeight: 44,
     justifyContent: 'center',
   },
   filterChipSelected: {
     borderColor: colors.accent,
-    backgroundColor: colors.accentMuted,
+    backgroundColor: colors.accentTint12,
   },
   filterChipLabel: {
     color: colors.textPrimary,
@@ -547,7 +555,12 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: '600',
   },
-  actions: {
+  footer: {
     gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
 });
