@@ -13,6 +13,8 @@ import { ProfileHeroStats } from '@/features/profile/components/ProfileHeroStats
 import { ProfileLibrarySection } from '@/features/profile/components/ProfileLibrarySection';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
 import { useFollowingCount } from '@/features/following/hooks/useFollowingCount';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
+import { getRegionLabel } from '@/features/regions/region-options';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileStatistics } from '@/features/profile/hooks/useProfileStatistics';
 import { colors } from '@/theme/colors';
@@ -24,6 +26,7 @@ export default function ProfileScreen() {
   const profileQuery = useCurrentProfile();
   const statisticsQuery = useProfileStatistics();
   const followingCountQuery = useFollowingCount();
+  const { region: userRegion } = useRegionalPreference();
 
   const profile = profileQuery.data;
   const isRefreshing =
@@ -105,6 +108,14 @@ export default function ProfileScreen() {
             <ProfileAnalyticsDashboard statistics={statisticsQuery.data} />
           </>
         ) : null}
+
+        <ProfileSection title="Preferences">
+          <ProfileMenuRow
+            label="Region"
+            subtitle={`Default for streaming and theaters (${getRegionLabel(userRegion)})`}
+            onPress={() => router.push('/profile/region')}
+          />
+        </ProfileSection>
 
         <ProfileSection title="Account">
           <ProfileMenuRow

@@ -63,6 +63,16 @@ jest.mock('@/features/discovery/hooks/useOnTvThisWeekPreview', () => ({
   })),
 }));
 
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: jest.fn(() => ({
+    region: 'TR',
+    source: 'fallback',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/discovery/hooks/useWorldCinemaPreview', () => ({
   useWorldCinemaPreview: jest.fn(() => ({
     data: {
@@ -193,6 +203,8 @@ describe('DiscoverHubContent', () => {
 
     fireEvent.press(screen.getByLabelText('Streaming Services'));
 
-    expect(mockPush).toHaveBeenCalledWith('/streaming-discover');
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.stringContaining('/streaming-discover?mediaType=movie&watchRegion=TR'),
+    );
   });
 });

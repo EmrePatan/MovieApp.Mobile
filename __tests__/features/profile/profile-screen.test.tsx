@@ -29,6 +29,16 @@ jest.mock('@/features/following/hooks/useFollowingCount', () => ({
   useFollowingCount: jest.fn(),
 }));
 
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: jest.fn(() => ({
+    region: 'TR',
+    source: 'fallback',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
+}));
+
 describe('ProfileScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();

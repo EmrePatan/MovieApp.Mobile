@@ -1,10 +1,14 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { getAdvancedDiscover } from '../api/discovery-api';
 import type {
   AdvancedDiscoverFilters,
   AdvancedDiscoverMediaType,
 } from '../advanced-discover-types';
-import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
+import {
+  DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
+  resolveAdvancedDiscoverWatchRegion,
+} from '../advanced-discover-types';
 import { advancedDiscoverInfiniteQueryKey } from './discovery-query-keys';
 
 export function useAdvancedDiscover(
@@ -12,8 +16,12 @@ export function useAdvancedDiscover(
   filters: AdvancedDiscoverFilters,
   pageSize = DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
 ) {
+  const { region, isHydrated } = useRegionalPreference();
+  const effectiveWatchRegion = resolveAdvancedDiscoverWatchRegion(filters, region);
+
   return useInfiniteQuery({
-    queryKey: advancedDiscoverInfiniteQueryKey(mediaType, filters, pageSize),
+    queryKey: advancedDiscoverInfiniteQueryKey(mediaType, filters, pageSize, region),
+    enabled: isHydrated,
     queryFn: ({ pageParam, signal }) =>
       getAdvancedDiscover(
         {
@@ -29,7 +37,7 @@ export function useAdvancedDiscover(
           maxRuntimeMinutes: filters.maxRuntimeMinutes,
           originalLanguage: filters.originalLanguage,
           originCountry: filters.originCountry,
-          watchRegion: filters.watchRegion,
+          watchRegion: effectiveWatchRegion,
           watchProviderIds: filters.watchProviderIds,
           watchMonetizationTypes: filters.watchMonetizationTypes,
           sort: filters.sort,

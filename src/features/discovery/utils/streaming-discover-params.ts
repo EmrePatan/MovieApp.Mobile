@@ -83,8 +83,9 @@ type StreamingDiscoverRouteParams = Record<string, string | string[] | undefined
 
 export function parseStreamingDiscoverParams(
   params: StreamingDiscoverRouteParams,
+  defaultWatchRegion?: string,
 ): StreamingDiscoverState {
-  const defaults = createDefaultStreamingDiscoverState();
+  const defaults = createDefaultStreamingDiscoverState(defaultWatchRegion);
 
   const monetizationTypes = parseMonetizationTypes(params.watchMonetizationType);
 
@@ -130,4 +131,16 @@ export function serializeStreamingDiscoverRoute(state: StreamingDiscoverState): 
   const params = serializeStreamingDiscoverParams(state);
   const search = new URLSearchParams(params).toString();
   return search.length > 0 ? `/streaming-discover?${search}` : '/streaming-discover';
+}
+
+export function createStreamingDiscoverHref(
+  overrides: Partial<StreamingDiscoverState> = {},
+  defaultWatchRegion?: string,
+): string {
+  const base = createDefaultStreamingDiscoverState(defaultWatchRegion);
+
+  return serializeStreamingDiscoverRoute({
+    ...base,
+    ...overrides,
+  });
 }

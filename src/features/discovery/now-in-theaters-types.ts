@@ -1,4 +1,4 @@
-import { DEFAULT_RELEASE_REGION } from '@/features/regions/region-options';
+import { FALLBACK_USER_REGION } from '@/features/regions/region-options';
 
 export const NOW_IN_THEATERS_PREVIEW_SIZE = 8;
 
@@ -14,8 +14,10 @@ export interface NowInTheatersState {
   releaseRegion: string;
 }
 
-export function createDefaultNowInTheatersState(): NowInTheatersState {
+export function createDefaultNowInTheatersState(
+  releaseRegion: string = FALLBACK_USER_REGION,
+): NowInTheatersState {
   return {
-    releaseRegion: DEFAULT_RELEASE_REGION,
+    releaseRegion,
   };
 }

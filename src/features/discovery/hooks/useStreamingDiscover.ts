@@ -7,9 +7,12 @@ import { streamingDiscoverInfiniteQueryKey } from './discovery-query-keys';
 export function useStreamingDiscover(
   state: StreamingDiscoverState,
   pageSize = DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
+  queryEnabled = true,
 ) {
   const enabled =
-    state.watchProviderIds.length > 0 && state.watchMonetizationTypes.length > 0;
+    queryEnabled &&
+    state.watchProviderIds.length > 0 &&
+    state.watchMonetizationTypes.length > 0;
 
   return useInfiniteQuery({
     queryKey: streamingDiscoverInfiniteQueryKey(state, pageSize),

@@ -9,9 +9,11 @@ import { nowInTheatersInfiniteQueryKey } from './discovery-query-keys';
 export function useNowInTheaters(
   state: NowInTheatersState,
   pageSize = DEFAULT_NOW_IN_THEATERS_PAGE_SIZE,
+  enabled = true,
 ) {
   return useInfiniteQuery({
     queryKey: nowInTheatersInfiniteQueryKey(state, pageSize),
+    enabled,
     queryFn: ({ pageParam, signal }) =>
       getNowInTheaters(
         {

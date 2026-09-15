@@ -14,8 +14,9 @@ function readParam(value: string | string[] | undefined): string | undefined {
 
 export function parseNowInTheatersParams(
   params: Record<string, string | string[] | undefined>,
+  defaultReleaseRegion?: string,
 ): NowInTheatersState {
-  const defaults = createDefaultNowInTheatersState();
+  const defaults = createDefaultNowInTheatersState(defaultReleaseRegion);
 
   return {
     releaseRegion: normalizeRegionCode(readParam(params.releaseRegion) ?? defaults.releaseRegion),
@@ -38,8 +39,9 @@ export function serializeNowInTheatersRoute(state: NowInTheatersState): string {
 
 export function createNowInTheatersHref(
   overrides: Partial<NowInTheatersState> = {},
+  defaultReleaseRegion?: string,
 ): string {
-  const base = createDefaultNowInTheatersState();
+  const base = createDefaultNowInTheatersState(defaultReleaseRegion);
 
   return serializeNowInTheatersRoute({
     ...base,

@@ -12,7 +12,8 @@ import { createAdvancedDiscoverHref } from '@/features/discovery/utils/advanced-
 import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { SearchResultItem } from '@/features/search/types';
-import { DEFAULT_RELEASE_REGION } from '@/features/regions/region-options';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
+import { createStreamingDiscoverHref } from '@/features/discovery/utils/streaming-discover-params';
 import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
 import { useOnTvThisWeekPreview } from '@/features/discovery/hooks/useOnTvThisWeekPreview';
 import { WorldCinemaHubSection } from './WorldCinemaHubSection';
@@ -26,8 +27,9 @@ export function DiscoverHubContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const genresQuery = useGenres();
+  const { region: userRegion, isHydrated } = useRegionalPreference();
   const previewQuery = useExplorePreview(10);
-  const nowInTheatersPreviewQuery = useNowInTheatersPreview(DEFAULT_RELEASE_REGION);
+  const nowInTheatersPreviewQuery = useNowInTheatersPreview(userRegion, isHydrated);
   const onTvThisWeekPreviewQuery = useOnTvThisWeekPreview();
 
   const handleGenrePress = useCallback(
@@ -61,8 +63,8 @@ export function DiscoverHubContent() {
   }, [router]);
 
   const openStreamingDiscover = useCallback(() => {
-    router.push('/streaming-discover');
-  }, [router]);
+    router.push(createStreamingDiscoverHref({}, userRegion));
+  }, [router, userRegion]);
 
   const openTrendingBrowse = useCallback(() => {
     openLibraryStackScreen(router, '/discover?mode=trending&type=all', '/(tabs)/discover');
@@ -77,8 +79,8 @@ export function DiscoverHubContent() {
   }, [router]);
 
   const openNowInTheaters = useCallback(() => {
-    router.push(createNowInTheatersHref({ releaseRegion: DEFAULT_RELEASE_REGION }));
-  }, [router]);
+    router.push(createNowInTheatersHref({}, userRegion));
+  }, [router, userRegion]);
 
   const openOnTvThisWeek = useCallback(() => {
     router.push('/on-tv-this-week');

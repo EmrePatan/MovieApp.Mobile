@@ -16,6 +16,7 @@ import { DetailBackButton } from '@/features/details/shared/components/DetailScr
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { ReleaseRegionSelector } from '@/features/regions/components/ReleaseRegionSelector';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 import {
   parseNowInTheatersParams,
@@ -35,13 +36,14 @@ export default function NowInTheatersScreen() {
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
   const [regionExpanded, setRegionExpanded] = useState(false);
+  const { region: userRegion, isHydrated } = useRegionalPreference();
 
   const discoverState = useMemo(
-    () => parseNowInTheatersParams(rawParams),
-    [rawParams],
+    () => parseNowInTheatersParams(rawParams, userRegion),
+    [rawParams, userRegion],
   );
 
-  const resultsQuery = useNowInTheaters(discoverState);
+  const resultsQuery = useNowInTheaters(discoverState, undefined, isHydrated);
 
   const items = useMemo(
     () => resultsQuery.data?.pages.flatMap((page) => page.items) ?? [],

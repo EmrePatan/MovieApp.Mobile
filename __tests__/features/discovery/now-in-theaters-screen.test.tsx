@@ -13,6 +13,16 @@ jest.mock('@/features/discovery/hooks/useNowInTheaters', () => ({
   useNowInTheaters: jest.fn(),
 }));
 
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: jest.fn(() => ({
+    region: 'TR',
+    source: 'fallback',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/details/shared/components/DetailScreenScaffold', () => ({
   DetailBackButton: () => null,
 }));
@@ -72,5 +82,26 @@ describe('NowInTheatersScreen', () => {
     fireEvent.press(screen.getByLabelText('United States'));
 
     expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('releaseRegion=US'));
+  });
+
+  it('does not mutate global user region when changing screen release region', () => {
+    const { useRegionalPreference } = jest.requireMock(
+      '@/features/regions/hooks/useRegionalPreference',
+    );
+    const setRegion = jest.fn();
+    (useRegionalPreference as jest.Mock).mockReturnValue({
+      region: 'TR',
+      source: 'saved',
+      isHydrated: true,
+      setRegion,
+      resetToDeviceDefault: jest.fn(),
+    });
+
+    render(<NowInTheatersScreen />);
+
+    fireEvent.press(screen.getByTestId('release-region-selector'));
+    fireEvent.press(screen.getByLabelText('United States'));
+
+    expect(setRegion).not.toHaveBeenCalled();
   });
 });

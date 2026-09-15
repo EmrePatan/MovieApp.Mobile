@@ -29,6 +29,7 @@ import {
 } from '@/features/discovery/utils/streaming-discover-params';
 import { reconcileWatchProviderSelection } from '@/features/discovery/watch-provider-types';
 import type { StreamingDiscoverState } from '@/features/discovery/streaming-discover-types';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
@@ -43,18 +44,20 @@ export default function StreamingDiscoverScreen() {
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
   const [regionExpanded, setRegionExpanded] = useState(false);
+  const { region: userRegion, isHydrated } = useRegionalPreference();
 
   const discoverState = useMemo(
-    () => parseStreamingDiscoverParams(rawParams),
-    [rawParams],
+    () => parseStreamingDiscoverParams(rawParams, userRegion),
+    [rawParams, userRegion],
   );
 
   const providersQuery = useDiscoveryWatchProviders(
     discoverState.mediaType,
     discoverState.watchRegion,
+    isHydrated,
   );
 
-  const resultsQuery = useStreamingDiscover(discoverState);
+  const resultsQuery = useStreamingDiscover(discoverState, undefined, isHydrated);
 
   const items = useMemo(
     () => resultsQuery.data?.pages.flatMap((page) => page.items) ?? [],

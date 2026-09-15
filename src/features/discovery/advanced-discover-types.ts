@@ -156,3 +156,18 @@ export function hasActiveAdvancedDiscoverFilters(
 ): boolean {
   return countActiveAdvancedDiscoverFilters(filters, mediaType) > 0;
 }
+
+export function hasStreamingAvailabilityFilters(filters: AdvancedDiscoverFilters): boolean {
+  return filters.watchProviderIds.length > 0 || filters.watchMonetizationTypes.length > 0;
+}
+
+export function resolveAdvancedDiscoverWatchRegion(
+  filters: AdvancedDiscoverFilters,
+  userRegion: string,
+): string | null {
+  if (!hasStreamingAvailabilityFilters(filters)) {
+    return filters.watchRegion;
+  }
+
+  return filters.watchRegion ?? userRegion;
+}

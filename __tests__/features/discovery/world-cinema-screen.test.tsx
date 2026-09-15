@@ -17,6 +17,16 @@ jest.mock('@/features/discovery/hooks/useWorldCinema', () => ({
   useWorldCinema: jest.fn(),
 }));
 
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: jest.fn(() => ({
+    region: 'TR',
+    source: 'fallback',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/details/shared/components/DetailScreenScaffold', () => ({
   DetailBackButton: () => null,
 }));

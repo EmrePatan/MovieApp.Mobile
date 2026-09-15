@@ -1,5 +1,5 @@
 import type { AdvancedDiscoverSort } from './advanced-discover-types';
-import { DEFAULT_WATCH_PROVIDER_REGION } from '@/features/details/watch-providers/api/watch-providers-api';
+import { FALLBACK_USER_REGION } from '@/features/regions/region-options';
 import type { WatchMonetizationType } from './watch-provider-types';
 
 export type StreamingDiscoverMediaType = 'movie' | 'tv';
@@ -13,10 +13,12 @@ export interface StreamingDiscoverState {
   sort: AdvancedDiscoverSort | null;
 }
 
-export function createDefaultStreamingDiscoverState(): StreamingDiscoverState {
+export function createDefaultStreamingDiscoverState(
+  watchRegion: string = FALLBACK_USER_REGION,
+): StreamingDiscoverState {
   return {
     mediaType: 'movie',
-    watchRegion: DEFAULT_WATCH_PROVIDER_REGION,
+    watchRegion,
     watchProviderIds: [],
     watchMonetizationTypes: ['stream'],
     minRating: null,

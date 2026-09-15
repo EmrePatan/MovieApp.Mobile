@@ -44,6 +44,7 @@ export function advancedDiscoverInfiniteQueryKey(
   mediaType: AdvancedDiscoverMediaType,
   filters: AdvancedDiscoverFilters,
   pageSize = DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
+  userRegion?: string,
 ) {
   return [
     'discovery',
@@ -62,6 +63,7 @@ export function advancedDiscoverInfiniteQueryKey(
     filters.watchProviderIds,
     filters.watchMonetizationTypes,
     filters.sort,
+    userRegion ?? 'pending',
     pageSize,
   ] as const;
 }

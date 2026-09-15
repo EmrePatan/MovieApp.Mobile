@@ -14,7 +14,7 @@ import { AppText } from '@/components/common/AppText';
 import { AppInput } from '@/components/inputs/AppInput';
 import { useDiscoveryWatchProviders } from '../hooks/useDiscoveryWatchProviders';
 import { useGenres } from '../hooks/useGenres';
-import { DEFAULT_WATCH_PROVIDER_REGION } from '@/features/details/watch-providers/api/watch-providers-api';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { WatchMonetizationSelector } from './WatchMonetizationSelector';
 import { WatchProviderSelector } from './WatchProviderSelector';
 import { WatchRegionSelector } from './WatchRegionSelector';
@@ -212,8 +212,9 @@ export function AdvancedDiscoverFilterSheet({
     filters.yearFrom != null || filters.yearTo != null,
   );
   const [regionExpanded, setRegionExpanded] = useState(false);
-  const watchRegion = draft.watchRegion ?? DEFAULT_WATCH_PROVIDER_REGION;
-  const providersQuery = useDiscoveryWatchProviders(draftMediaType, watchRegion);
+  const { region: userRegion, isHydrated } = useRegionalPreference();
+  const watchRegion = draft.watchRegion ?? userRegion;
+  const providersQuery = useDiscoveryWatchProviders(draftMediaType, watchRegion, isHydrated);
 
   useEffect(() => {
     if (visible && !wasVisibleRef.current) {

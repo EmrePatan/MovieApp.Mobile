@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
+import { RegionalPreferenceProvider } from '@/features/regions/RegionalPreferenceProvider';
 import { queryClient } from '@/api/query-client';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
@@ -45,11 +46,13 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <NotificationBootstrapProvider>
-          <RootNavigator />
-        </NotificationBootstrapProvider>
-      </AuthProvider>
+      <RegionalPreferenceProvider>
+        <AuthProvider>
+          <NotificationBootstrapProvider>
+            <RootNavigator />
+          </NotificationBootstrapProvider>
+        </AuthProvider>
+      </RegionalPreferenceProvider>
     </QueryClientProvider>
   );
 }

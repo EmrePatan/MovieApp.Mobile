@@ -6,9 +6,11 @@ import { discoveryWatchProvidersQueryKey } from './discovery-query-keys';
 export function useDiscoveryWatchProviders(
   mediaType: AdvancedDiscoverMediaType,
   watchRegion: string,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: discoveryWatchProvidersQueryKey(mediaType, watchRegion),
+    enabled,
     queryFn: ({ signal }) => getDiscoveryWatchProviders(mediaType, watchRegion, signal),
     staleTime: 300_000,
   });

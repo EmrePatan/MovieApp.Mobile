@@ -22,6 +22,16 @@ jest.mock('@/features/discovery/hooks/useGenres', () => ({
   useGenres: jest.fn(),
 }));
 
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: jest.fn(() => ({
+    region: 'TR',
+    source: 'fallback',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/discovery/hooks/useDiscoveryWatchProviders', () => ({
   useDiscoveryWatchProviders: jest.fn(() => ({
     data: { watchRegion: 'TR', mediaType: 'movie', providers: [] },

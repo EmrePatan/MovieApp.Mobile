@@ -1,4 +1,5 @@
 export const DEFAULT_RELEASE_REGION = 'TR';
+export const FALLBACK_USER_REGION = DEFAULT_RELEASE_REGION;
 
 export const REGION_OPTIONS: {
   code: string;
