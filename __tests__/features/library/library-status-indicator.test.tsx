@@ -24,9 +24,28 @@ describe('LibraryStatusIndicator', () => {
   });
 
   it('renders saved semantics without inventing progress', () => {
-    render(<LibraryStatusIndicator status="saved" label="Saved" />);
+    render(<LibraryStatusIndicator status="saved" label="Watchlist" />);
 
-    expect(screen.getByText('Saved')).toBeTruthy();
+    expect(screen.getByText('Watchlist')).toBeTruthy();
     expect(screen.queryByRole('progressbar')).toBeNull();
+  });
+
+  it('renders compact badge mode without visible status text', () => {
+    render(<LibraryStatusIndicator status="liked" display="badge" />);
+
+    expect(screen.queryByText('Liked')).toBeNull();
+  });
+
+  it('renders poster progress overlay without a status label row', () => {
+    render(
+      <LibraryStatusIndicator
+        status="watching"
+        progressPercentage={42}
+        display="poster-progress"
+      />,
+    );
+
+    expect(screen.queryByText('Watching')).toBeNull();
+    expect(JSON.stringify(screen.toJSON())).toContain('"accessibilityRole":"progressbar"');
   });
 });

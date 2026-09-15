@@ -112,12 +112,13 @@ export function LibraryHubContent() {
     ({ item }: { item: LibraryItem }) => (
       <LibraryGridCard
         item={item}
+        category={category}
         width={itemWidth}
         height={itemHeight}
         onPress={handleItemPress}
       />
     ),
-    [handleItemPress, itemHeight, itemWidth],
+    [category, handleItemPress, itemHeight, itemWidth],
   );
 
   const listHeader = (

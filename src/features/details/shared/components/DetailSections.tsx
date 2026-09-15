@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -30,10 +31,8 @@ export function DetailGenres({ genres }: DetailGenresProps) {
 
   return (
     <View style={styles.section}>
-      <AppText variant="subtitle" style={styles.sectionTitle}>
-        Genres
-      </AppText>
-      <View style={styles.genreRow}>
+      <HomeSectionHeader title="Genres" />
+      <View style={[styles.body, styles.genreRow]}>
         {genres.map((genre) => (
           <View key={genre} style={styles.genreChip}>
             <AppText variant="caption">{genre}</AppText>
@@ -55,10 +54,8 @@ export function DetailOverview({ overview }: DetailOverviewProps) {
 
   return (
     <View style={styles.section}>
-      <AppText variant="subtitle" style={styles.sectionTitle}>
-        Overview
-      </AppText>
-      <AppText variant="body" muted>
+      <HomeSectionHeader title="Overview" />
+      <AppText variant="body" muted style={styles.body}>
         {overview}
       </AppText>
     </View>
@@ -93,12 +90,11 @@ export function DetailExternalIds({ tmdbId, tvdbId, imdbId }: DetailExternalIdsP
 
 const styles = StyleSheet.create({
   section: {
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     gap: spacing.sm,
   },
-  sectionTitle: {
-    marginBottom: spacing.xs,
+  body: {
+    paddingHorizontal: spacing.lg,
   },
   item: {
     gap: 2,

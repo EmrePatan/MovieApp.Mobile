@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
-    padding: spacing.md,
+    padding: spacing.sm,
   },
   icon: {
     width: 28,

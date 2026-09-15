@@ -1,4 +1,4 @@
-import type { LibraryItem } from '../types/library';
+import type { LibraryCategory, LibraryItem } from '../types/library';
 import type { LibraryStatusPresentation } from '../types/library-status';
 
 function formatNextEpisodeDetail(item: LibraryItem): string | null {
@@ -32,12 +32,50 @@ export function resolveLibraryStatusPresentation(item: LibraryItem): LibraryStat
     case 'watchlist':
       return {
         status: 'saved',
-        label: 'Saved',
+        label: 'Watchlist',
       };
     default:
       return {
         status: 'saved',
-        label: 'Saved',
+        label: 'Watchlist',
       };
   }
+}
+
+export function buildLibraryGridAccessibilityLabel(
+  item: LibraryItem,
+  presentation: LibraryStatusPresentation,
+  category: LibraryCategory,
+): string {
+  const parts = [item.title];
+
+  if (category === 'watching') {
+    if (presentation.detail) {
+      parts.push(presentation.detail);
+    }
+
+    if (
+      presentation.progressPercentage != null &&
+      presentation.progressPercentage > 0 &&
+      presentation.progressPercentage < 100
+    ) {
+      parts.push(`${Math.round(presentation.progressPercentage)}% watched`);
+    } else {
+      parts.push('Watching');
+    }
+
+    return parts.join(', ');
+  }
+
+  if (category === 'watched') {
+    parts.push('Watched');
+  } else if (category === 'liked') {
+    parts.push('Liked');
+  } else if (category === 'watchlist') {
+    parts.push('Watchlist');
+  } else {
+    parts.push(presentation.label);
+  }
+
+  return parts.join(', ');
 }

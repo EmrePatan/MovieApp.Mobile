@@ -87,7 +87,7 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('Movies vs Series')).toBeTruthy();
   });
 
-  it('shows a compact My Library shortcut before analytics sections', () => {
+  it('shows compact library collection stats before analytics sections', () => {
     render(<ProfileScreen />);
 
     function collectText(node: unknown): string[] {
@@ -115,9 +115,12 @@ describe('ProfileScreen', () => {
     expect(libraryIndex).toBeGreaterThan(-1);
     expect(insightIndex).toBeGreaterThan(-1);
     expect(libraryIndex).toBeLessThan(insightIndex);
-    expect(screen.getByLabelText('Open My Library')).toBeTruthy();
-    expect(screen.queryByLabelText('Favorites')).toBeNull();
-    expect(screen.queryByLabelText('Watchlist')).toBeNull();
+    expect(screen.queryByLabelText('Open My Library')).toBeNull();
+    expect(
+      screen.getByLabelText(
+        'Library collections: 6 saved titles · 2 lists · 3 followed titles · 12 movies · 48 episodes',
+      ),
+    ).toBeTruthy();
   });
 
   it('renders compact library summary and keeps account settings', () => {
@@ -139,14 +142,13 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('8 watched · 1 movies · 7 episodes')).toBeTruthy();
   });
 
-  it('navigates to account settings and the Library tab shortcut', () => {
+  it('navigates to account settings without a redundant library shortcut', () => {
     render(<ProfileScreen />);
 
     fireEvent.press(screen.getByLabelText('Edit profile'));
-    fireEvent.press(screen.getByLabelText('Open My Library'));
 
     expect(mockPush).toHaveBeenCalledWith('/profile/edit');
-    expect(mockPush).toHaveBeenCalledWith('/(tabs)/library');
+    expect(mockPush).not.toHaveBeenCalledWith('/(tabs)/library');
   });
 
   it('renders new-user empty analytics states', () => {

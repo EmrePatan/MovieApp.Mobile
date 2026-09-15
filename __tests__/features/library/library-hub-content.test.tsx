@@ -137,8 +137,11 @@ describe('LibraryHubContent', () => {
 
     expect(screen.getByText('My Library')).toBeTruthy();
     expect(screen.getByLabelText('Watching category')).toBeTruthy();
-    expect(screen.getByLabelText('In Progress Show, Watching')).toBeTruthy();
+    expect(
+      screen.getByLabelText('In Progress Show, S2 · E4 · Episode Four, 40% watched'),
+    ).toBeTruthy();
     expect(screen.getByText('S2 · E4 · Episode Four')).toBeTruthy();
+    expect(screen.getAllByText('Watching')).toHaveLength(1);
     expect(useLibrary).toHaveBeenCalledWith('watching', 'all');
   });
 
@@ -163,7 +166,9 @@ describe('LibraryHubContent', () => {
   it('navigates to catalog detail from grid item', () => {
     render(<LibraryHubContent />);
 
-    fireEvent.press(screen.getByLabelText('In Progress Show, Watching'));
+    fireEvent.press(
+      screen.getByLabelText('In Progress Show, S2 · E4 · Episode Four, 40% watched'),
+    );
 
     expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
       expect.anything(),

@@ -1,5 +1,6 @@
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { getCatalogDetailWatchRegion } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
@@ -42,9 +43,7 @@ export function WhereToWatchRail({
   if (query.isLoading) {
     return (
       <View style={styles.container} testID="where-to-watch-loading">
-        <View style={styles.headerRow}>
-          <AppText variant="subtitle" style={styles.title}>Where to Watch</AppText>
-        </View>
+        <HomeSectionHeader title="Where to Watch" />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -69,9 +68,7 @@ export function WhereToWatchRail({
 
   return (
     <View style={styles.container} testID="where-to-watch-rail">
-      <View style={styles.headerRow}>
-        <AppText variant="subtitle" style={styles.title}>Where to Watch</AppText>
-      </View>
+      <HomeSectionHeader title="Where to Watch" />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -119,16 +116,8 @@ export function WhereToWatchRail({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  headerRow: {
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    marginBottom: spacing.md,
-  },
-  title: {
-    color: colors.textPrimary,
-    letterSpacing: 0.15,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   listContent: {
     paddingHorizontal: spacing.lg,

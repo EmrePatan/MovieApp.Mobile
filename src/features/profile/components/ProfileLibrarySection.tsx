@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { AppText } from '@/components/common/AppText';
 import type { UserStatisticsSummaryResponse } from '../types';
 import {
   formatFavoritesSubtitle,
@@ -6,7 +7,8 @@ import {
   formatWatchHistorySubtitle,
   formatWatchlistSubtitle,
 } from '../utils/library-copy';
-import { ProfileMenuRow, ProfileSection } from './ProfileSection';
+import { ProfileSection } from './ProfileSection';
+import { spacing } from '@/theme/spacing';
 
 interface ProfileLibrarySectionProps {
   summary: UserStatisticsSummaryResponse;
@@ -17,8 +19,6 @@ export function ProfileLibrarySection({
   summary,
   followingCount,
 }: ProfileLibrarySectionProps) {
-  const router = useRouter();
-
   const collectionSummary = [
     formatFavoritesSubtitle(summary.favoritesCount),
     formatWatchlistSubtitle(summary.watchlistCount),
@@ -28,11 +28,22 @@ export function ProfileLibrarySection({
 
   return (
     <ProfileSection title="My Library">
-      <ProfileMenuRow
-        label="Open My Library"
-        subtitle={collectionSummary}
-        onPress={() => router.push('/(tabs)/library')}
-      />
+      <View
+        style={styles.summary}
+        accessibilityRole="text"
+        accessibilityLabel={`Library collections: ${collectionSummary}`}
+      >
+        <AppText variant="bodySmall" muted>
+          {collectionSummary}
+        </AppText>
+      </View>
     </ProfileSection>
   );
 }
+
+const styles = StyleSheet.create({
+  summary: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+});

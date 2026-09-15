@@ -362,7 +362,7 @@ export function ReviewsSection({ contentType, contentId }: ReviewsSectionProps) 
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },

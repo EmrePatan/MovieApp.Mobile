@@ -28,10 +28,12 @@ import {
   getVisibleSeasons,
   shouldCollapseSeasonList,
 } from '../utils/season-list-collapse';
-import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+
+const SEASON_POSTER_WIDTH = 64;
+const SEASON_POSTER_HEIGHT = 96;
 
 export interface SeasonListItemProgressProps {
   label: string;
@@ -187,8 +189,8 @@ export function SeasonListItem({
       >
         <CatalogImage
           path={season.posterPath}
-          width={layout.posterList.width}
-          height={layout.posterList.height}
+          width={SEASON_POSTER_WIDTH}
+          height={SEASON_POSTER_HEIGHT}
           accessibilityLabel={`${label} poster`}
         />
         {showProgress ? (
@@ -258,8 +260,8 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
   const separatorInset =
     spacing.sm +
     (isAuthenticated ? watchedControlWidth + spacing.xs : 0) +
-    layout.posterList.width +
-    spacing.md;
+    SEASON_POSTER_WIDTH +
+    spacing.sm;
 
   if (seasons.length === 0) {
     return (
@@ -346,7 +348,7 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
 const styles = StyleSheet.create({
   section: {
     paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     gap: spacing.sm,
   },
   headerBlock: {
@@ -365,8 +367,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingLeft: spacing.sm,
     paddingRight: spacing.md,
-    paddingVertical: spacing.sm,
-    minHeight: layout.posterList.height + spacing.sm * 2,
+    paddingVertical: spacing.xs,
+    minHeight: SEASON_POSTER_HEIGHT + spacing.xs * 2,
     gap: spacing.xs,
   },
   rowWatched: {
@@ -382,7 +384,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
     minHeight: 44,
   },
   separator: {

@@ -30,6 +30,6 @@ export function ProfileAnalyticsDashboard({ statistics }: ProfileAnalyticsDashbo
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.xl,
+    gap: spacing.lg,
   },
 });

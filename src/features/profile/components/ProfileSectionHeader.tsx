@@ -25,7 +25,7 @@ export function ProfileSectionHeader({ title, subtitle }: ProfileSectionHeaderPr
 const styles = StyleSheet.create({
   container: {
     gap: 2,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   title: {
     letterSpacing: 0.2,

@@ -1,4 +1,7 @@
-import { resolveLibraryStatusPresentation } from '@/features/library/utils/library-status-presentation';
+import {
+  buildLibraryGridAccessibilityLabel,
+  resolveLibraryStatusPresentation,
+} from '@/features/library/utils/library-status-presentation';
 import type { LibraryItem } from '@/features/library/types/library';
 
 function createItem(collectionStatus: LibraryItem['collectionStatus']): LibraryItem {
@@ -53,6 +56,26 @@ describe('resolveLibraryStatusPresentation', () => {
     const presentation = resolveLibraryStatusPresentation(createItem('watchlist'));
 
     expect(presentation.status).toBe('saved');
-    expect(presentation.label).toBe('Saved');
+    expect(presentation.label).toBe('Watchlist');
+  });
+});
+
+describe('buildLibraryGridAccessibilityLabel', () => {
+  it('includes progress context for watching items without repeating category text in visible UI', () => {
+    const item = createItem('watching');
+    const presentation = resolveLibraryStatusPresentation(item);
+
+    expect(
+      buildLibraryGridAccessibilityLabel(item, presentation, 'watching'),
+    ).toBe('Sample Show, S1 · E2 · Next, 50% watched');
+  });
+
+  it('preserves semantic labels for compact category views', () => {
+    const item = createItem('liked');
+    const presentation = resolveLibraryStatusPresentation(item);
+
+    expect(buildLibraryGridAccessibilityLabel(item, presentation, 'liked')).toBe(
+      'Sample Show, Liked',
+    );
   });
 });

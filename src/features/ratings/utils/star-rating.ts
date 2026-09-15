@@ -3,7 +3,7 @@ export const MAX_BACKEND_SCORE = 10;
 export const MIN_STAR_RATING = 0.5;
 export const MAX_STAR_RATING = 5;
 export const STAR_COUNT = 5;
-export const RATING_STAR_VISUAL_SIZE = 34;
+export const RATING_STAR_VISUAL_SIZE = 30;
 export const RATING_STAR_GAP = 4;
 export const RATING_TRACK_HORIZONTAL_PADDING = 28;
 /** Narrow edge strip used to clear an existing rating by dragging to the far left. */

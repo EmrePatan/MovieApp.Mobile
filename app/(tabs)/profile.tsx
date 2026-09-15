@@ -145,7 +145,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    gap: spacing.xl,
+    gap: spacing.lg,
     paddingBottom: spacing.xxl,
   },
   loadingContainer: {
