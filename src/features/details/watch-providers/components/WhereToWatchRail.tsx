@@ -1,8 +1,9 @@
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
+import { getCatalogDetailWatchRegion } from '@/features/details/shared/navigation/catalog-detail-navigation';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { resolveImageUri } from '@/utils/image-url';
-import { DEFAULT_WATCH_PROVIDER_REGION } from '../api/watch-providers-api';
 import { useMovieWatchProviders, useTvShowWatchProviders } from '../hooks/useWatchProviders';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -19,10 +20,23 @@ interface WhereToWatchRailProps {
 export function WhereToWatchRail({
   contentType,
   contentId,
-  region = DEFAULT_WATCH_PROVIDER_REGION,
+  region,
 }: WhereToWatchRailProps) {
-  const movieQuery = useMovieWatchProviders(contentType === 'movie' ? contentId : '', region);
-  const tvQuery = useTvShowWatchProviders(contentType === 'tv' ? contentId : '', region);
+  const { region: userRegion, isHydrated } = useRegionalPreference();
+  const contextualRegion = getCatalogDetailWatchRegion();
+  const effectiveRegion = region ?? contextualRegion ?? userRegion;
+  const canFetchProviders = region != null || contextualRegion != null || isHydrated;
+
+  const movieQuery = useMovieWatchProviders(
+    contentType === 'movie' ? contentId : '',
+    effectiveRegion,
+    canFetchProviders,
+  );
+  const tvQuery = useTvShowWatchProviders(
+    contentType === 'tv' ? contentId : '',
+    effectiveRegion,
+    canFetchProviders,
+  );
   const query = contentType === 'movie' ? movieQuery : tvQuery;
 
   if (query.isLoading) {
@@ -30,7 +44,7 @@ export function WhereToWatchRail({
       <View style={styles.container} testID="where-to-watch-loading">
         <View style={styles.headerRow}>
           <AppText variant="subtitle" style={styles.title}>Where to Watch</AppText>
-          <AppText variant="caption" style={styles.region}>{region}</AppText>
+          <AppText variant="caption" style={styles.region}>{effectiveRegion}</AppText>
         </View>
         <ScrollView
           horizontal

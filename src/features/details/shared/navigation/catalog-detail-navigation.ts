@@ -18,6 +18,7 @@ export type CatalogDetailLibraryOrigin =
 export interface OpenCatalogDetailOptions {
   queryClient?: QueryClient;
   libraryReturnHref?: string;
+  watchRegion?: string;
 }
 
 const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, `/(tabs)/${string}`> = {
@@ -38,6 +39,7 @@ const LIBRARY_ORIGIN_HREFS: Record<CatalogDetailLibraryOrigin, string> = {
 
 let lastCatalogDetailOrigin: CatalogDetailTabOrigin | null = null;
 let lastCatalogDetailLibraryReturnHref: string | null = null;
+let lastCatalogDetailWatchRegion: string | null = null;
 
 export function isRootCatalogDetailRoute(segments: readonly string[]): boolean {
   const tabsIndex = segments.indexOf('(tabs)');
@@ -80,6 +82,10 @@ export async function openCatalogDetailFromFilmography(
   return details.id;
 }
 
+export function getCatalogDetailWatchRegion(): string | null {
+  return lastCatalogDetailWatchRegion;
+}
+
 export function openCatalogDetailFromTab(
   router: ImperativeRouter,
   id: string,
@@ -88,6 +94,7 @@ export function openCatalogDetailFromTab(
   options?: OpenCatalogDetailOptions,
 ): void {
   lastCatalogDetailLibraryReturnHref = null;
+  lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
   lastCatalogDetailOrigin = origin;
   const href = buildCatalogDetailRoute(id, type);
 
@@ -111,6 +118,7 @@ export function openCatalogDetailFromLibraryStack(
   options?: OpenCatalogDetailOptions,
 ): void {
   lastCatalogDetailOrigin = null;
+  lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
   lastCatalogDetailLibraryReturnHref =
     options?.libraryReturnHref ?? LIBRARY_ORIGIN_HREFS[origin];
   const href = buildCatalogDetailRoute(id, type);
@@ -127,8 +135,10 @@ export function openDetailFromLibraryStack(
   detailRoute: string,
   origin: CatalogDetailLibraryOrigin,
   libraryReturnHref?: string,
+  watchRegion?: string,
 ): void {
   lastCatalogDetailOrigin = null;
+  lastCatalogDetailWatchRegion = watchRegion ?? null;
   lastCatalogDetailLibraryReturnHref = libraryReturnHref ?? LIBRARY_ORIGIN_HREFS[origin];
   router.push(detailRoute);
 }
@@ -137,6 +147,7 @@ export function returnToCatalogDetailOrigin(router: ImperativeRouter): void {
   if (lastCatalogDetailLibraryReturnHref) {
     const libraryHref = lastCatalogDetailLibraryReturnHref;
     lastCatalogDetailLibraryReturnHref = null;
+    lastCatalogDetailWatchRegion = null;
     router.dismissTo(libraryHref);
     return;
   }
@@ -151,4 +162,5 @@ export function returnToCatalogDetailOrigin(router: ImperativeRouter): void {
 export function resetCatalogDetailOriginForTests(): void {
   lastCatalogDetailOrigin = null;
   lastCatalogDetailLibraryReturnHref = null;
+  lastCatalogDetailWatchRegion = null;
 }

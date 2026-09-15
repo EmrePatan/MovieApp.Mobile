@@ -25,8 +25,13 @@ import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscov
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
 import {
   parseStreamingDiscoverParams,
+  serializeStreamingDiscoverParams,
   serializeStreamingDiscoverRoute,
 } from '@/features/discovery/utils/streaming-discover-params';
+import {
+  setDiscoveryRouteParams,
+  STREAMING_DISCOVER_PARAM_KEYS,
+} from '@/features/navigation/discovery-route-params';
 import { reconcileWatchProviderSelection } from '@/features/discovery/watch-provider-types';
 import type { StreamingDiscoverState } from '@/features/discovery/streaming-discover-types';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
@@ -80,18 +85,24 @@ export default function StreamingDiscoverScreen() {
     );
 
     if (reconciled.length !== discoverState.watchProviderIds.length) {
-      router.replace(
-        serializeStreamingDiscoverRoute({
+      setDiscoveryRouteParams(
+        router,
+        serializeStreamingDiscoverParams({
           ...discoverState,
           watchProviderIds: reconciled,
         }),
+        STREAMING_DISCOVER_PARAM_KEYS,
       );
     }
   }, [discoverState, providersQuery.data?.providers, router]);
 
   const replaceState = useCallback(
     (next: StreamingDiscoverState) => {
-      router.replace(serializeStreamingDiscoverRoute(next));
+      setDiscoveryRouteParams(
+        router,
+        serializeStreamingDiscoverParams(next),
+        STREAMING_DISCOVER_PARAM_KEYS,
+      );
     },
     [router],
   );
@@ -133,9 +144,10 @@ export default function StreamingDiscoverScreen() {
       prefetchCatalogDetail(queryClient, item.id, item.type);
       openCatalogDetailFromLibraryStack(router, item.id, item.type, 'discover', {
         libraryReturnHref: currentRoute,
+        watchRegion: discoverState.watchRegion,
       });
     },
-    [currentRoute, queryClient, router],
+    [currentRoute, discoverState.watchRegion, queryClient, router],
   );
 
   const listHeader = useMemo(

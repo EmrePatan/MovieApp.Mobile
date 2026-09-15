@@ -2,11 +2,14 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import StreamingDiscoverScreen from '../../../app/streaming-discover';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
+import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 
+const mockSetParams = jest.fn();
+const mockPush = jest.fn();
 const mockReplace = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace, back: jest.fn() }),
+  useRouter: () => ({ setParams: mockSetParams, push: mockPush, replace: mockReplace, back: jest.fn() }),
   useLocalSearchParams: jest.fn(() => ({})),
 }));
 
@@ -30,6 +33,10 @@ jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
 
 jest.mock('@/features/details/shared/components/DetailScreenScaffold', () => ({
   DetailBackButton: () => null,
+}));
+
+jest.mock('@/features/details/shared/navigation/catalog-detail-navigation', () => ({
+  openCatalogDetailFromLibraryStack: jest.fn(),
 }));
 
 jest.mock('@tanstack/react-query', () => {
@@ -61,7 +68,20 @@ describe('StreamingDiscoverScreen', () => {
       refetch: jest.fn(),
     });
     (useStreamingDiscover as jest.Mock).mockReturnValue({
-      data: { pages: [{ items: [] }] },
+      data: {
+        pages: [
+          {
+            items: [
+              {
+                id: 'movie-1',
+                type: 'movie',
+                title: 'Inception',
+                posterUrl: null,
+              },
+            ],
+          },
+        ],
+      },
       isLoading: false,
       isError: false,
       isFetchingNextPage: false,
@@ -88,11 +108,51 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByText('Choose a streaming service')).toBeTruthy();
   });
 
-  it('selects a provider via replace navigation', () => {
+  it('selects providers via setParams without pushing navigation history', () => {
     render(<StreamingDiscoverScreen />);
 
     fireEvent.press(screen.getByLabelText('Netflix'));
+    fireEvent.press(screen.getByLabelText('Disney Plus'));
 
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('watchProviderId=8'));
+    expect(mockSetParams).toHaveBeenCalled();
+    expect(mockSetParams.mock.calls.some(([params]) => params.watchProviderId === '8')).toBe(true);
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('updates watchRegion and mediaType via setParams', () => {
+    render(<StreamingDiscoverScreen />);
+
+    fireEvent.press(screen.getByLabelText('Watch region Turkey'));
+    fireEvent.press(screen.getByLabelText('United States'));
+    fireEvent.press(screen.getByLabelText('TV Shows'));
+
+    expect(mockSetParams).toHaveBeenCalled();
+    expect(mockSetParams.mock.calls.some(([params]) => params.watchRegion === 'US')).toBe(true);
+    expect(mockSetParams.mock.calls.some(([params]) => params.mediaType === 'tv')).toBe(true);
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('opens detail with contextual watchRegion while preserving return href', () => {
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({
+      watchRegion: 'US',
+      watchProviderId: '8',
+      watchMonetizationType: 'stream',
+    });
+
+    render(<StreamingDiscoverScreen />);
+    fireEvent.press(screen.getByText('Inception'));
+
+    expect(openCatalogDetailFromLibraryStack).toHaveBeenCalledWith(
+      expect.anything(),
+      'movie-1',
+      'movie',
+      'discover',
+      expect.objectContaining({
+        watchRegion: 'US',
+        libraryReturnHref: expect.stringContaining('watchRegion=US'),
+      }),
+    );
   });
 });

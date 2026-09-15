@@ -26,6 +26,8 @@ import {
   countActiveAdvancedDiscoverFilters,
   createDefaultAdvancedDiscoverFilters,
   hasActiveAdvancedDiscoverFilters,
+  hasStreamingAvailabilityFilters,
+  resolveAdvancedDiscoverWatchRegion,
   type AdvancedDiscoverFilters,
   type AdvancedDiscoverMediaType,
   type AdvancedDiscoverState,
@@ -33,8 +35,14 @@ import {
 import { useAdvancedDiscover } from '@/features/discovery/hooks/useAdvancedDiscover';
 import {
   parseAdvancedDiscoverParams,
+  serializeAdvancedDiscoverParams,
   serializeAdvancedDiscoverRoute,
 } from '@/features/discovery/utils/advanced-discover-params';
+import {
+  ADVANCED_DISCOVER_PARAM_KEYS,
+  setDiscoveryRouteParams,
+} from '@/features/navigation/discovery-route-params';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
@@ -54,6 +62,7 @@ export default function AdvancedDiscoverScreen() {
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const { region: userRegion } = useRegionalPreference();
 
   const discoverState = useMemo(() => parseAdvancedDiscoverParams(rawParams), [rawParams]);
   const { mediaType, filters } = discoverState;
@@ -77,7 +86,11 @@ export default function AdvancedDiscoverScreen() {
 
   const replaceDiscoverState = useCallback(
     (next: AdvancedDiscoverState) => {
-      router.replace(serializeAdvancedDiscoverRoute(next));
+      setDiscoveryRouteParams(
+        router,
+        serializeAdvancedDiscoverParams(next),
+        ADVANCED_DISCOVER_PARAM_KEYS,
+      );
     },
     [router],
   );
@@ -99,11 +112,16 @@ export default function AdvancedDiscoverScreen() {
   const openCatalogDetail = useCallback(
     (id: string, itemType: 'movie' | 'tv') => {
       prefetchCatalogDetail(queryClient, id, itemType);
+      const contextualWatchRegion = hasStreamingAvailabilityFilters(filters)
+        ? resolveAdvancedDiscoverWatchRegion(filters, userRegion)
+        : undefined;
+
       openCatalogDetailFromLibraryStack(router, id, itemType, 'discover', {
         libraryReturnHref: currentRoute,
+        watchRegion: contextualWatchRegion ?? undefined,
       });
     },
-    [currentRoute, queryClient, router],
+    [currentRoute, filters, queryClient, router, userRegion],
   );
 
   const handleResultPress = useCallback(

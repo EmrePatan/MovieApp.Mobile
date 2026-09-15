@@ -20,8 +20,13 @@ import { OriginCountrySelector } from '@/features/regions/components/OriginCount
 import { useWorldCinema } from '@/features/discovery/hooks/useWorldCinema';
 import {
   parseWorldCinemaParams,
+  serializeWorldCinemaParams,
   serializeWorldCinemaRoute,
 } from '@/features/discovery/utils/world-cinema-params';
+import {
+  setDiscoveryRouteParams,
+  WORLD_CINEMA_PARAM_KEYS,
+} from '@/features/navigation/discovery-route-params';
 import { getWorldCinemaCollectionLabel } from '@/features/discovery/world-cinema-collections';
 import { ADVANCED_DISCOVER_MEDIA_OPTIONS } from '@/features/discovery/advanced-discover-types';
 import { WORLD_CINEMA_SORT_OPTIONS } from '@/features/discovery/world-cinema-types';
@@ -59,7 +64,11 @@ export default function WorldCinemaScreen() {
 
   const replaceState = useCallback(
     (next: WorldCinemaState) => {
-      router.replace(serializeWorldCinemaRoute(next));
+      setDiscoveryRouteParams(
+        router,
+        serializeWorldCinemaParams(next),
+        WORLD_CINEMA_PARAM_KEYS,
+      );
     },
     [router],
   );

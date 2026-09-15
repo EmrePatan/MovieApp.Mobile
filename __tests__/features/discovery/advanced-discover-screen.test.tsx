@@ -7,9 +7,10 @@ import AdvancedDiscoverScreen from '../../../app/advanced-discover';
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSetParams = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace, setParams: mockSetParams }),
   useLocalSearchParams: jest.fn(() => ({})),
   useSegments: jest.fn(() => []),
 }));
@@ -144,23 +145,32 @@ describe('AdvancedDiscoverScreen', () => {
     expect(screen.getByLabelText('Media type TV Shows')).toBeTruthy();
   });
 
-  it('applies movie to tv toggle through route replace', () => {
+  it('applies movie to tv toggle through setParams without pushing history', () => {
     render(<AdvancedDiscoverScreen />);
 
     fireEvent.press(screen.getByLabelText('Filters'));
     fireEvent.press(screen.getByLabelText('Media type TV Shows'));
     fireEvent.press(screen.getByText('Show Results'));
 
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('mediaType=tv'));
+    expect(mockSetParams).toHaveBeenCalledWith(expect.objectContaining({ mediaType: 'tv' }));
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it('resets filters to defaults', () => {
+  it('resets filters to defaults via setParams', () => {
     render(<AdvancedDiscoverScreen />);
 
     fireEvent.press(screen.getByLabelText('Filters'));
     fireEvent.press(screen.getByText('Reset'));
 
-    expect(mockReplace).toHaveBeenCalledWith('/advanced-discover?mediaType=movie');
+    expect(mockSetParams).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaType: 'movie',
+        genres: undefined,
+        minRating: undefined,
+      }),
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it('shows empty state with clear action when filtered results are empty', () => {
@@ -192,7 +202,8 @@ describe('AdvancedDiscoverScreen', () => {
 
     expect(screen.getByText('No titles match your filters')).toBeTruthy();
     fireEvent.press(screen.getByText('Clear filters'));
-    expect(mockReplace).toHaveBeenCalled();
+    expect(mockSetParams).toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it('shows error retry state', () => {

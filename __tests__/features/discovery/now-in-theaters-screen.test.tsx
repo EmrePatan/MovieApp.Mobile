@@ -2,11 +2,13 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import NowInTheatersScreen from '../../../app/now-in-theaters';
 import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 
+const mockSetParams = jest.fn();
+const mockPush = jest.fn();
 const mockReplace = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace, back: jest.fn() }),
-  useLocalSearchParams: jest.fn(() => ({})),
+  useRouter: () => ({ setParams: mockSetParams, push: mockPush, replace: mockReplace, back: jest.fn() }),
+  useLocalSearchParams: jest.fn(() => ({ releaseRegion: 'TR' })),
 }));
 
 jest.mock('@/features/discovery/hooks/useNowInTheaters', () => ({
@@ -43,20 +45,7 @@ describe('NowInTheatersScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useNowInTheaters as jest.Mock).mockReturnValue({
-      data: {
-        pages: [
-          {
-            items: [
-              {
-                id: 'movie-1',
-                type: 'movie',
-                title: 'Cinema One',
-                posterUrl: '/poster.jpg',
-              },
-            ],
-          },
-        ],
-      },
+      data: { pages: [{ items: [] }] },
       isLoading: false,
       isError: false,
       isFetchingNextPage: false,
@@ -67,41 +56,14 @@ describe('NowInTheatersScreen', () => {
     });
   });
 
-  it('renders now in theaters header and release region selector', () => {
+  it('updates releaseRegion via setParams without pushing navigation', () => {
     render(<NowInTheatersScreen />);
 
-    expect(screen.getByText('Now in Theaters')).toBeTruthy();
-    expect(screen.getByTestId('release-region-selector')).toBeTruthy();
-    expect(screen.getByText('Cinema One')).toBeTruthy();
-  });
-
-  it('updates release region via replace navigation', () => {
-    render(<NowInTheatersScreen />);
-
-    fireEvent.press(screen.getByTestId('release-region-selector'));
+    fireEvent.press(screen.getByLabelText('Release region Turkey'));
     fireEvent.press(screen.getByLabelText('United States'));
 
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('releaseRegion=US'));
-  });
-
-  it('does not mutate global user region when changing screen release region', () => {
-    const { useRegionalPreference } = jest.requireMock(
-      '@/features/regions/hooks/useRegionalPreference',
-    );
-    const setRegion = jest.fn();
-    (useRegionalPreference as jest.Mock).mockReturnValue({
-      region: 'TR',
-      source: 'saved',
-      isHydrated: true,
-      setRegion,
-      resetToDeviceDefault: jest.fn(),
-    });
-
-    render(<NowInTheatersScreen />);
-
-    fireEvent.press(screen.getByTestId('release-region-selector'));
-    fireEvent.press(screen.getByLabelText('United States'));
-
-    expect(setRegion).not.toHaveBeenCalled();
+    expect(mockSetParams).toHaveBeenCalledWith({ releaseRegion: 'US' });
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });

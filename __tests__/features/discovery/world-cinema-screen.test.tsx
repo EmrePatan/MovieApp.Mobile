@@ -2,10 +2,12 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import WorldCinemaScreen from '../../../app/world-cinema';
 import { useWorldCinema } from '@/features/discovery/hooks/useWorldCinema';
 
+const mockSetParams = jest.fn();
+const mockPush = jest.fn();
 const mockReplace = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace, back: jest.fn() }),
+  useRouter: () => ({ setParams: mockSetParams, push: mockPush, replace: mockReplace, back: jest.fn() }),
   useLocalSearchParams: () => ({
     mediaType: 'movie',
     originCountry: 'KR',
@@ -79,13 +81,19 @@ describe('WorldCinemaScreen', () => {
     expect(screen.getByLabelText('Origin country Korean')).toBeTruthy();
   });
 
-  it('switches media type in url state', () => {
+  it('switches media type, origin country, and sort via setParams', () => {
     render(<WorldCinemaScreen />);
 
     fireEvent.press(screen.getByLabelText('TV Shows'));
+    fireEvent.press(screen.getByLabelText('Origin country Korean'));
+    fireEvent.press(screen.getByLabelText('Japanese'));
+    fireEvent.press(screen.getByLabelText('Sort by Top Rated'));
 
-    expect(mockReplace).toHaveBeenCalledWith(
-      expect.stringContaining('mediaType=tv'),
-    );
+    expect(mockSetParams).toHaveBeenCalled();
+    expect(mockSetParams.mock.calls.some(([params]) => params.mediaType === 'tv')).toBe(true);
+    expect(mockSetParams.mock.calls.some(([params]) => params.originCountry === 'JP')).toBe(true);
+    expect(mockSetParams.mock.calls.some(([params]) => params.sort === 'rating_desc')).toBe(true);
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });

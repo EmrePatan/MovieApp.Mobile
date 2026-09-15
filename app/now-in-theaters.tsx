@@ -20,8 +20,13 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 import {
   parseNowInTheatersParams,
+  serializeNowInTheatersParams,
   serializeNowInTheatersRoute,
 } from '@/features/discovery/utils/now-in-theaters-params';
+import {
+  NOW_IN_THEATERS_PARAM_KEYS,
+  setDiscoveryRouteParams,
+} from '@/features/navigation/discovery-route-params';
 import type { NowInTheatersState } from '@/features/discovery/now-in-theaters-types';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
@@ -57,7 +62,11 @@ export default function NowInTheatersScreen() {
 
   const replaceState = useCallback(
     (next: NowInTheatersState) => {
-      router.replace(serializeNowInTheatersRoute(next));
+      setDiscoveryRouteParams(
+        router,
+        serializeNowInTheatersParams(next),
+        NOW_IN_THEATERS_PARAM_KEYS,
+      );
     },
     [router],
   );
