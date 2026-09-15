@@ -76,7 +76,7 @@ export default function HomeScreen() {
 
   const handleComingUpItemPress = useCallback(
     (item: HomeItem) => {
-      router.push(buildCatalogDetailRoute(item.id, 'tv'));
+      router.push(buildCatalogDetailRoute(item.id, item.contentType === 'movie' ? 'movie' : 'tv'));
     },
     [router],
   );

@@ -28,4 +28,25 @@ describe('HomeComingUpCard', () => {
     expect(screen.getByText('S01 E02 · Next Episode')).toBeTruthy();
     expect(screen.getByLabelText(/Followed Show, S01 E02, Next Episode/)).toBeTruthy();
   });
+
+  it('renders followed movie release metadata', () => {
+    render(
+      <HomeComingUpCard
+        item={{
+          ...item,
+          id: 'movie-id',
+          contentType: 'movie',
+          title: 'Future Movie',
+          upcomingKind: 'MovieRelease',
+          episodeId: null,
+          seasonNumber: null,
+          episodeNumber: null,
+          episodeName: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Future Movie')).toBeTruthy();
+    expect(screen.getByText('Release')).toBeTruthy();
+  });
 });

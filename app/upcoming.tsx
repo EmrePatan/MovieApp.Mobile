@@ -12,12 +12,12 @@ import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
-import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
+import { LibraryStackHeader } from '@/features/library/components/LibraryStackHeader';
 import type { LibraryTypeFilter } from '@/features/library/types';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
-import { UpcomingCard } from '@/features/upcoming/components/UpcomingCard';
+import { UpcomingListCard } from '@/features/upcoming/components/UpcomingListCard';
 import { useUpcomingCatalog } from '@/features/upcoming/hooks/useUpcomingCatalog';
 import type { UpcomingCatalogItem } from '@/features/upcoming/types';
 import { flattenUpcomingPages } from '@/features/upcoming/utils/upcoming-catalog-items';
@@ -93,31 +93,29 @@ export default function UpcomingScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: UpcomingCatalogItem }) => (
-      <View style={styles.listCard}>
-        <UpcomingCard item={item} onPress={handleItemPress} />
-      </View>
+      <UpcomingListCard item={item} onPress={handleItemPress} />
     ),
     [handleItemPress],
   );
 
   const listHeader = (
-    <View style={styles.header}>
-      <DetailBackButton />
-      <AppText variant="title">Upcoming</AppText>
-      <AppText variant="bodySmall" muted>
-        {isAuthenticated
-          ? 'Future releases and followed TV episodes'
-          : 'Future movie and TV premieres'}
-      </AppText>
+    <LibraryStackHeader
+      title="Upcoming"
+      subtitle={
+        isAuthenticated
+          ? 'Releases and episodes from titles you follow'
+          : 'Future movie and TV premieres'
+      }
+    >
       {!isAuthenticated ? (
-        <AppButton title="Sign In for Followed Episodes" variant="secondary" onPress={handleSignIn} />
+        <AppButton title="Sign In for Followed Updates" variant="secondary" onPress={handleSignIn} />
       ) : null}
       {items.length > 0 ? (
         <View style={styles.controls}>
           <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
         </View>
       ) : null}
-    </View>
+    </LibraryStackHeader>
   );
 
   if (upcomingQuery.isLoading && items.length === 0) {
@@ -151,8 +149,8 @@ export default function UpcomingScreen() {
       </AppText>
       <AppText variant="bodySmall" muted center>
         {isAuthenticated
-          ? 'Follow TV shows or browse future releases to build your schedule.'
-          : 'Sign in to include followed TV episodes, or browse future releases.'}
+          ? 'Follow movies and TV shows to see their upcoming releases here.'
+          : 'Sign in to include followed releases and episodes.'}
       </AppText>
       {!isAuthenticated ? (
         <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />
@@ -168,6 +166,7 @@ export default function UpcomingScreen() {
         renderItem={renderItem}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={emptyComponent}
+        ItemSeparatorComponent={ListSeparator}
         ListFooterComponent={
           upcomingQuery.isFetchingNextPage ? (
             <View style={styles.footerLoading}>
@@ -200,16 +199,14 @@ export default function UpcomingScreen() {
   );
 }
 
+function ListSeparator() {
+  return <View style={styles.separator} />;
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    paddingTop: spacing.md,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    gap: spacing.sm,
-    paddingBottom: spacing.sm,
   },
   controls: {
     gap: spacing.sm,
@@ -218,10 +215,11 @@ const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
     paddingBottom: spacing.xxl,
-    paddingHorizontal: layout.screenPaddingHorizontal,
   },
-  listCard: {
-    marginBottom: spacing.lg,
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginHorizontal: layout.screenPaddingHorizontal,
   },
   errorContainer: {
     flex: 1,

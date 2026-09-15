@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { HomeItem } from '../types';
@@ -27,6 +28,7 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
   item,
   onPress,
 }: HomeComingUpCardProps) {
+  const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const releaseDate = formatIsoDate(item.releaseDate);
   const relativeAirDate = formatRelativeAirDate(item.releaseDate);
   const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
@@ -50,14 +52,22 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
-        {seasonEpisode ? (
+        {isTvEpisode && seasonEpisode ? (
           <AppText variant="caption" muted numberOfLines={1}>
             {seasonEpisode}
             {item.episodeName ? ` · ${item.episodeName}` : ''}
           </AppText>
         ) : null}
+        {!isTvEpisode ? (
+          <View style={styles.row}>
+            <ContentTypeBadge type={item.contentType} />
+            <AppText variant="caption" muted>
+              {item.upcomingKind === 'TvShowPremiere' ? 'Premiere' : 'Release'}
+            </AppText>
+          </View>
+        ) : null}
         {relativeAirDate || releaseDate ? (
-          <AppText variant="caption" muted numberOfLines={1}>
+          <AppText variant="caption" style={styles.date} numberOfLines={1}>
             {relativeAirDate ?? releaseDate}
           </AppText>
         ) : null}
@@ -81,5 +91,15 @@ const styles = StyleSheet.create({
   title: {
     minHeight: 40,
     color: colors.textPrimary,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  date: {
+    color: colors.accent,
+    fontWeight: '600',
   },
 });
