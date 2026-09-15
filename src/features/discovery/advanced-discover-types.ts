@@ -1,3 +1,5 @@
+import type { WatchMonetizationType } from './watch-provider-types';
+
 export type AdvancedDiscoverMediaType = 'movie' | 'tv';
 
 export type AdvancedDiscoverSort =
@@ -16,6 +18,9 @@ export interface AdvancedDiscoverFilters {
   maxRuntimeMinutes: number | null;
   originalLanguage: string | null;
   originCountry: string | null;
+  watchRegion: string | null;
+  watchProviderIds: number[];
+  watchMonetizationTypes: WatchMonetizationType[];
   sort: AdvancedDiscoverSort | null;
 }
 
@@ -29,6 +34,8 @@ export interface AdvancedDiscoverRequest extends AdvancedDiscoverFilters {
   page?: number;
   pageSize?: number;
 }
+
+export type { WatchMonetizationType };
 
 export const DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE = 20;
 
@@ -72,6 +79,9 @@ export function createDefaultAdvancedDiscoverFilters(): AdvancedDiscoverFilters 
     maxRuntimeMinutes: null,
     originalLanguage: null,
     originCountry: null,
+    watchRegion: null,
+    watchProviderIds: [],
+    watchMonetizationTypes: [],
     sort: 'popularity_desc',
   };
 }
@@ -119,6 +129,18 @@ export function countActiveAdvancedDiscoverFilters(
 
   if (filters.originCountry) {
     count += 1;
+  }
+
+  if (filters.watchRegion) {
+    count += 1;
+  }
+
+  if (filters.watchProviderIds.length > 0) {
+    count += filters.watchProviderIds.length;
+  }
+
+  if (filters.watchMonetizationTypes.length > 0) {
+    count += filters.watchMonetizationTypes.length;
   }
 
   if (filters.sort && filters.sort !== 'popularity_desc') {

@@ -22,6 +22,15 @@ jest.mock('@/features/discovery/hooks/useGenres', () => ({
   useGenres: jest.fn(),
 }));
 
+jest.mock('@/features/discovery/hooks/useDiscoveryWatchProviders', () => ({
+  useDiscoveryWatchProviders: jest.fn(() => ({
+    data: { watchRegion: 'TR', mediaType: 'movie', providers: [] },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/details/shared/navigation/prefetch-catalog-detail', () => ({
   prefetchCatalogDetail: jest.fn(),
 }));

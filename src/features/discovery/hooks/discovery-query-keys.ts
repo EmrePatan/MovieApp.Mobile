@@ -2,6 +2,7 @@ import type {
   AdvancedDiscoverFilters,
   AdvancedDiscoverMediaType,
 } from '../advanced-discover-types';
+import type { StreamingDiscoverState } from '../streaming-discover-types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import type {
   DiscoveryBrowseFilters,
@@ -52,7 +53,34 @@ export function advancedDiscoverInfiniteQueryKey(
     filters.maxRuntimeMinutes,
     filters.originalLanguage,
     filters.originCountry,
+    filters.watchRegion,
+    filters.watchProviderIds,
+    filters.watchMonetizationTypes,
     filters.sort,
+    pageSize,
+  ] as const;
+}
+
+export function discoveryWatchProvidersQueryKey(
+  mediaType: AdvancedDiscoverMediaType,
+  watchRegion: string,
+) {
+  return ['discovery', 'watch-providers', mediaType, watchRegion] as const;
+}
+
+export function streamingDiscoverInfiniteQueryKey(
+  state: StreamingDiscoverState,
+  pageSize = DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE,
+) {
+  return [
+    'discovery',
+    'streaming',
+    state.mediaType,
+    state.watchRegion,
+    state.watchProviderIds,
+    state.watchMonetizationTypes,
+    state.minRating,
+    state.sort,
     pageSize,
   ] as const;
 }

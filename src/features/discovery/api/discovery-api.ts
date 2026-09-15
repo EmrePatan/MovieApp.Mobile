@@ -3,11 +3,27 @@ import type { SearchResponse } from '@/features/search/types';
 import {
   buildAdvancedDiscoverPath,
   buildBrowsePath,
+  buildDiscoveryWatchProvidersPath,
   buildExplorePreviewPath,
   buildGenresPath,
 } from './routes';
-import type { AdvancedDiscoverRequest } from '../advanced-discover-types';
+import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
+import type { DiscoveryWatchProvidersResponse } from '../watch-provider-types';
+
+export async function getDiscoveryWatchProviders(
+  mediaType: AdvancedDiscoverMediaType,
+  watchRegion: string,
+  signal?: AbortSignal,
+): Promise<DiscoveryWatchProvidersResponse> {
+  return api.get<DiscoveryWatchProvidersResponse>(
+    buildDiscoveryWatchProvidersPath(mediaType, watchRegion),
+    {
+      authenticated: false,
+      signal,
+    },
+  );
+}
 
 export async function getAdvancedDiscover(
   criteria: AdvancedDiscoverRequest,

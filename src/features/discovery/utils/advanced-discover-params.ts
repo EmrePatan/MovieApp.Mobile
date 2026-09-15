@@ -7,11 +7,13 @@ import {
   type AdvancedDiscoverSort,
   type AdvancedDiscoverState,
 } from '../advanced-discover-types';
+import type { WatchMonetizationType } from '../watch-provider-types';
 
 const MEDIA_TYPES = new Set<AdvancedDiscoverMediaType>(['movie', 'tv']);
 const SORT_VALUES = new Set<AdvancedDiscoverSort>(
   ADVANCED_DISCOVER_SORT_OPTIONS.map((option) => option.value),
 );
+const MONETIZATION_TYPES = new Set<WatchMonetizationType>(['stream', 'free', 'ads', 'rent', 'buy']);
 
 function readParam(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) {
@@ -95,6 +97,37 @@ function parseLanguage(value: string | undefined): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function parseWatchRegion(value: string | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(trimmed) ? trimmed : null;
+}
+
+function parseWatchProviderIds(value: string | string[] | undefined): number[] {
+  const rawValues = Array.isArray(value) ? value : value ? [value] : [];
+  const ids = rawValues
+    .flatMap((entry) => entry.split(','))
+    .map((entry) => Number.parseInt(entry.trim(), 10))
+    .filter((id) => Number.isFinite(id) && id > 0);
+
+  return Array.from(new Set(ids));
+}
+
+function parseWatchMonetizationTypes(value: string | string[] | undefined): WatchMonetizationType[] {
+  const rawValues = Array.isArray(value) ? value : value ? [value] : [];
+  const types = rawValues
+    .flatMap((entry) => entry.split(','))
+    .map((entry) => entry.trim().toLowerCase())
+    .filter((entry): entry is WatchMonetizationType =>
+      MONETIZATION_TYPES.has(entry as WatchMonetizationType),
+    );
+
+  return Array.from(new Set(types));
+}
+
 function parseOriginCountry(value: string | undefined): string | null {
   if (!value) {
     return null;
@@ -122,6 +155,9 @@ export function parseAdvancedDiscoverParams(
     maxRuntimeMinutes: parseRuntime(readParam(params.maxRuntime)),
     originalLanguage: parseLanguage(readParam(params.language)),
     originCountry: parseOriginCountry(readParam(params.originCountry)),
+    watchRegion: parseWatchRegion(readParam(params.watchRegion)),
+    watchProviderIds: parseWatchProviderIds(params.watchProviderId),
+    watchMonetizationTypes: parseWatchMonetizationTypes(params.watchMonetizationType),
     sort: parseSort(readParam(params.sort)),
   };
 
@@ -131,48 +167,64 @@ export function parseAdvancedDiscoverParams(
 export function serializeAdvancedDiscoverParams(
   state: AdvancedDiscoverState,
 ): Record<string, string> {
+  const filters: AdvancedDiscoverFilters = {
+    ...createDefaultAdvancedDiscoverFilters(),
+    ...state.filters,
+  };
   const params: Record<string, string> = {
     mediaType: state.mediaType,
   };
 
-  if (state.filters.genreIds.length > 0) {
-    params.genres = state.filters.genreIds.join(',');
+  if (filters.genreIds.length > 0) {
+    params.genres = filters.genreIds.join(',');
   }
 
-  if (state.filters.year != null) {
-    params.year = String(state.filters.year);
+  if (filters.year != null) {
+    params.year = String(filters.year);
   }
 
-  if (state.filters.yearFrom != null) {
-    params.yearFrom = String(state.filters.yearFrom);
+  if (filters.yearFrom != null) {
+    params.yearFrom = String(filters.yearFrom);
   }
 
-  if (state.filters.yearTo != null) {
-    params.yearTo = String(state.filters.yearTo);
+  if (filters.yearTo != null) {
+    params.yearTo = String(filters.yearTo);
   }
 
-  if (state.filters.minRating != null) {
-    params.minRating = String(state.filters.minRating);
+  if (filters.minRating != null) {
+    params.minRating = String(filters.minRating);
   }
 
-  if (state.filters.minRuntimeMinutes != null) {
-    params.minRuntime = String(state.filters.minRuntimeMinutes);
+  if (filters.minRuntimeMinutes != null) {
+    params.minRuntime = String(filters.minRuntimeMinutes);
   }
 
-  if (state.filters.maxRuntimeMinutes != null) {
-    params.maxRuntime = String(state.filters.maxRuntimeMinutes);
+  if (filters.maxRuntimeMinutes != null) {
+    params.maxRuntime = String(filters.maxRuntimeMinutes);
   }
 
-  if (state.filters.originalLanguage) {
-    params.language = state.filters.originalLanguage;
+  if (filters.originalLanguage) {
+    params.language = filters.originalLanguage;
   }
 
-  if (state.filters.originCountry) {
-    params.originCountry = state.filters.originCountry;
+  if (filters.originCountry) {
+    params.originCountry = filters.originCountry;
   }
 
-  if (state.filters.sort && state.filters.sort !== 'popularity_desc') {
-    params.sort = state.filters.sort;
+  if (filters.watchRegion) {
+    params.watchRegion = filters.watchRegion;
+  }
+
+  if (filters.watchProviderIds.length > 0) {
+    params.watchProviderId = filters.watchProviderIds.join(',');
+  }
+
+  if (filters.watchMonetizationTypes.length > 0) {
+    params.watchMonetizationType = filters.watchMonetizationTypes.join(',');
+  }
+
+  if (filters.sort && filters.sort !== 'popularity_desc') {
+    params.sort = filters.sort;
   }
 
   return params;

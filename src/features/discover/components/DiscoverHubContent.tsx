@@ -52,6 +52,10 @@ export function DiscoverHubContent() {
     router.push(createAdvancedDiscoverHref());
   }, [router]);
 
+  const openStreamingDiscover = useCallback(() => {
+    router.push('/streaming-discover');
+  }, [router]);
+
   const openTrendingBrowse = useCallback(() => {
     openLibraryStackScreen(router, '/discover?mode=trending&type=all', '/(tabs)/discover');
   }, [router]);
@@ -91,7 +95,8 @@ export function DiscoverHubContent() {
           title="Streaming Services"
           subtitle="Find where to watch across providers"
           icon="tv-outline"
-          comingSoon
+          onPress={openStreamingDiscover}
+          accessibilityLabel="Streaming Services"
         />
         <DiscoverFeatureEntry
           title="World Cinema"

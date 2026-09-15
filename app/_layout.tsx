@@ -32,6 +32,7 @@ function RootNavigator() {
         <Stack.Screen name="notifications" />
         <Stack.Screen name="discover" />
         <Stack.Screen name="advanced-discover" />
+        <Stack.Screen name="streaming-discover" />
         <Stack.Screen name="profile" />
       </Stack>
     </>

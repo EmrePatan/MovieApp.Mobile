@@ -12,7 +12,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { AppInput } from '@/components/inputs/AppInput';
+import { useDiscoveryWatchProviders } from '../hooks/useDiscoveryWatchProviders';
 import { useGenres } from '../hooks/useGenres';
+import { DEFAULT_WATCH_PROVIDER_REGION } from '@/features/details/watch-providers/api/watch-providers-api';
+import { WatchMonetizationSelector } from './WatchMonetizationSelector';
+import { WatchProviderSelector } from './WatchProviderSelector';
+import { WatchRegionSelector } from './WatchRegionSelector';
 import {
   ADVANCED_DISCOVER_MEDIA_OPTIONS,
   ADVANCED_DISCOVER_RUNTIME_PRESETS,
@@ -206,6 +211,9 @@ export function AdvancedDiscoverFilterSheet({
   const [useYearRange, setUseYearRange] = useState(
     filters.yearFrom != null || filters.yearTo != null,
   );
+  const [regionExpanded, setRegionExpanded] = useState(false);
+  const watchRegion = draft.watchRegion ?? DEFAULT_WATCH_PROVIDER_REGION;
+  const providersQuery = useDiscoveryWatchProviders(draftMediaType, watchRegion);
 
   useEffect(() => {
     if (visible && !wasVisibleRef.current) {
@@ -252,7 +260,11 @@ export function AdvancedDiscoverFilterSheet({
                 value={draftMediaType}
                 onChange={(nextType) => {
                   setDraftMediaType(nextType);
-                  setDraft((current) => ({ ...current, genreIds: [] }));
+                  setDraft((current) => ({
+                    ...current,
+                    genreIds: [],
+                    watchProviderIds: [],
+                  }));
                 }}
               />
             </View>
@@ -418,6 +430,54 @@ export function AdvancedDiscoverFilterSheet({
               autoCorrect={false}
               maxLength={2}
             />
+
+            <View style={styles.section}>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>Streaming</AppText>
+              <WatchRegionSelector
+                value={watchRegion}
+                expanded={regionExpanded}
+                onToggleExpanded={() => setRegionExpanded((current) => !current)}
+                onSelect={(regionCode) => {
+                  setRegionExpanded(false);
+                  setDraft((current) => ({
+                    ...current,
+                    watchRegion: regionCode,
+                    watchProviderIds: [],
+                  }));
+                }}
+              />
+              <AppText variant="bodySmall" muted>
+                Where to watch (availability region)
+              </AppText>
+              <WatchProviderSelector
+                providers={providersQuery.data?.providers ?? []}
+                selectedProviderIds={draft.watchProviderIds}
+                isLoading={providersQuery.isLoading}
+                isError={providersQuery.isError}
+                onRetry={() => void providersQuery.refetch()}
+                onToggle={(providerId) =>
+                  setDraft((current) => ({
+                    ...current,
+                    watchRegion: watchRegion,
+                    watchProviderIds: current.watchProviderIds.includes(providerId)
+                      ? current.watchProviderIds.filter((id) => id !== providerId)
+                      : [...current.watchProviderIds, providerId],
+                  }))
+                }
+              />
+              <WatchMonetizationSelector
+                selectedTypes={draft.watchMonetizationTypes}
+                onToggle={(type) =>
+                  setDraft((current) => ({
+                    ...current,
+                    watchRegion: watchRegion,
+                    watchMonetizationTypes: current.watchMonetizationTypes.includes(type)
+                      ? current.watchMonetizationTypes.filter((entry) => entry !== type)
+                      : [...current.watchMonetizationTypes, type],
+                  }))
+                }
+              />
+            </View>
 
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>Sort by</AppText>

@@ -1,4 +1,4 @@
-import type { AdvancedDiscoverRequest } from '../advanced-discover-types';
+import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest } from '../types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import { DEFAULT_DISCOVERY_PAGE_SIZE } from '../types';
@@ -6,6 +6,18 @@ import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 
 export function buildGenresPath(): string {
   return '/api/genres';
+}
+
+export function buildDiscoveryWatchProvidersPath(
+  mediaType: AdvancedDiscoverMediaType,
+  watchRegion: string,
+): string {
+  const params = new URLSearchParams({
+    mediaType,
+    watchRegion,
+  });
+
+  return `/api/discovery/watch-providers?${params.toString()}`;
 }
 
 export function buildExplorePreviewPath(sectionSize = DEFAULT_HOME_SECTION_SIZE): string {
@@ -92,6 +104,18 @@ export function buildAdvancedDiscoverPath(criteria: AdvancedDiscoverRequest): st
 
   if (criteria.sort) {
     params.set('sort', criteria.sort);
+  }
+
+  if (criteria.watchRegion) {
+    params.set('watchRegion', criteria.watchRegion);
+  }
+
+  for (const providerId of criteria.watchProviderIds ?? []) {
+    params.append('watchProviderId', String(providerId));
+  }
+
+  for (const monetizationType of criteria.watchMonetizationTypes ?? []) {
+    params.append('watchMonetizationType', monetizationType);
   }
 
   return `/api/discovery/advanced?${params.toString()}`;

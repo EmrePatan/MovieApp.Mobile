@@ -65,11 +65,19 @@ describe('DiscoverHubContent', () => {
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/advanced-discover'));
   });
 
-  it('marks future discovery features as coming soon', () => {
+  it('activates Streaming Services and keeps later phases as coming soon', () => {
     render(<DiscoverHubContent />);
 
-    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(4);
-    expect(screen.getByText('Streaming Services')).toBeTruthy();
+    expect(screen.getByLabelText('Streaming Services')).toBeTruthy();
+    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(3);
     expect(screen.getByText('Now in Theaters')).toBeTruthy();
+  });
+
+  it('opens streaming discover from Streaming Services', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByLabelText('Streaming Services'));
+
+    expect(mockPush).toHaveBeenCalledWith('/streaming-discover');
   });
 });
