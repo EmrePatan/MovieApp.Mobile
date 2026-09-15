@@ -6,6 +6,7 @@ import { DetailInlineRatingSection } from '@/features/ratings/components/DetailI
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
+import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { SeasonList } from './SeasonList';
 import { formatTvDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
@@ -34,6 +35,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         posterAccessibilityLabel={`${show.title} poster`}
       />
       <DetailActionBar contentType="tv" contentId={show.id} showWatched />
+      <PlayTrailerButton contentType="tv" contentId={show.id} />
       <DetailOverview overview={show.overview} />
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />

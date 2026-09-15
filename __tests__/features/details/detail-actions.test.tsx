@@ -5,6 +5,10 @@ import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDeta
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
+jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
+  PlayTrailerButton: () => null,
+}));
+
 jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
   DetailActionBar: ({
     contentType,

@@ -6,6 +6,7 @@ import { DetailInlineRatingSection } from '@/features/ratings/components/DetailI
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
+import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { formatMovieDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { MovieDetailsResponse } from '../types';
@@ -37,6 +38,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         showWatched
         releaseDate={movie.releaseDate}
       />
+      <PlayTrailerButton contentType="movie" contentId={movie.id} />
       <DetailOverview overview={movie.overview} />
       <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
