@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../../utils/render-with-providers';
 
 jest.mock('expo-linking', () => ({
   canOpenURL: jest.fn().mockResolvedValue(true),
@@ -107,7 +108,7 @@ describe('detail trailer placement', () => {
   });
 
   it('integrates compact Trailer CTA in hero before action bar on movie detail', () => {
-    render(<MovieDetailContent movie={movie} />);
+    renderWithProviders(<MovieDetailContent movie={movie} />);
 
     const texts = screen.getAllByText(/Action Bar|Trailer|Overview copy/).map((node) => node.props.children);
     expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
@@ -115,7 +116,7 @@ describe('detail trailer placement', () => {
   });
 
   it('integrates compact Trailer CTA in hero before action bar on tv detail', () => {
-    render(<TvShowDetailContent show={show} />);
+    renderWithProviders(<TvShowDetailContent show={show} />);
 
     const texts = screen.getAllByText(/Action Bar|Trailer|Overview copy/).map((node) => node.props.children);
     expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
@@ -129,7 +130,7 @@ describe('detail trailer placement', () => {
       isError: false,
     });
 
-    render(<MovieDetailContent movie={movie} />);
+    renderWithProviders(<MovieDetailContent movie={movie} />);
 
     expect(screen.queryByText('Trailer')).toBeNull();
     const texts = screen.getAllByText(/Action Bar|Overview copy/).map((node) => node.props.children);

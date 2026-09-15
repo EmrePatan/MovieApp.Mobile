@@ -23,8 +23,31 @@ jest.mock('react-native-gesture-handler', () => {
   };
 });
 
-jest.mock('react-native-reanimated', () => ({
-  runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
+jest.mock('react-native-reanimated', () => {
+  const { View } = require('react-native');
+
+  return {
+    __esModule: true,
+    default: {
+      View,
+      createAnimatedComponent: (component: unknown) => component,
+    },
+    useSharedValue: (initialValue: unknown) => ({ value: initialValue }),
+    useAnimatedStyle: (updater: () => object) => updater(),
+    withSpring: (value: unknown) => value,
+    withTiming: (value: unknown) => value,
+    runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
+    Easing: {
+      out: () => ({}),
+      cubic: {},
+    },
+  };
+});
+
+jest.mock('@/features/gallery/api/gallery-api', () => ({
+  getMovieGallery: jest.fn().mockResolvedValue({ backdrops: [], posters: [] }),
+  getTvShowGallery: jest.fn().mockResolvedValue({ backdrops: [], posters: [] }),
+  getPersonGallery: jest.fn().mockResolvedValue({ profiles: [] }),
 }));
 
 jest.mock('react-native-safe-area-context', () => ({

@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { ApiError } from '@/api/errors';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
@@ -124,7 +125,7 @@ describe('detail UI', () => {
   });
 
   it('renders movie detail with nullable fields', () => {
-    render(<MovieDetailContent movie={movie} />);
+    renderWithProviders(<MovieDetailContent movie={movie} />);
     expect(screen.getByText('Interstellar')).toBeTruthy();
     expect(screen.queryByText('Genres')).toBeNull();
     expect(screen.queryByText('Overview')).toBeNull();
@@ -152,7 +153,7 @@ describe('detail UI', () => {
       canFollow: false,
     };
 
-    render(<TvShowDetailContent show={show} />);
+    renderWithProviders(<TvShowDetailContent show={show} />);
     expect(screen.getByText('Breaking Bad')).toBeTruthy();
     expect(screen.getByText('No seasons available.')).toBeTruthy();
     expect(screen.queryByText('Watch Progress')).toBeNull();

@@ -1,5 +1,6 @@
 import mockReact from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
@@ -106,7 +107,7 @@ const show: TvShowDetailsResponse = {
 
 describe('detail actions integration', () => {
   it('renders movie detail action set with watched and inline rating', () => {
-    render(<MovieDetailContent movie={movie} />);
+    renderWithProviders(<MovieDetailContent movie={movie} />);
     expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
     expect(screen.getByText('Rating:movie')).toBeTruthy();
     expect(screen.getByText('Movie · 2014 · ★ 8.4 · 2h 49m')).toBeTruthy();
@@ -116,7 +117,7 @@ describe('detail actions integration', () => {
   });
 
   it('renders tv detail action set with watched and inline rating', () => {
-    render(<TvShowDetailContent show={show} />);
+    renderWithProviders(<TvShowDetailContent show={show} />);
     expect(screen.getByText('Actions:tv:watched')).toBeTruthy();
     expect(screen.getByText('Rating:tv')).toBeTruthy();
     expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();

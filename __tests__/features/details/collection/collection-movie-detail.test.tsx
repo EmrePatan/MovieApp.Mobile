@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../../utils/render-with-providers';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { getCollectionDetails } from '@/features/details/collection/api/collection-api';
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
@@ -75,7 +76,7 @@ describe('movie detail collection row', () => {
   });
 
   it('renders collection row between action bar and overview', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
@@ -98,7 +99,7 @@ describe('movie detail collection row', () => {
   });
 
   it('omits collection row without leaving layout gap when collection is null', () => {
-    render(<MovieDetailContent movie={baseMovie} />);
+    renderWithProviders(<MovieDetailContent movie={baseMovie} />);
 
     expect(screen.queryByTestId('collection-link-row')).toBeNull();
     const texts = screen
@@ -108,7 +109,7 @@ describe('movie detail collection row', () => {
   });
 
   it('does not fetch collection details from movie detail', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
