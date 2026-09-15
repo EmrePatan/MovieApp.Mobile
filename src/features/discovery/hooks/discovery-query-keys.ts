@@ -4,6 +4,7 @@ import type {
 } from '../advanced-discover-types';
 import type { NowInTheatersState } from '../now-in-theaters-types';
 import { NOW_IN_THEATERS_PREVIEW_SIZE } from '../now-in-theaters-types';
+import { ON_TV_THIS_WEEK_PREVIEW_SIZE } from '../on-tv-this-week-types';
 import type { StreamingDiscoverState } from '../streaming-discover-types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import type {
@@ -68,6 +69,14 @@ export function discoveryWatchProvidersQueryKey(
   watchRegion: string,
 ) {
   return ['discovery', 'watch-providers', mediaType, watchRegion] as const;
+}
+
+export function onTvThisWeekPreviewQueryKey() {
+  return ['discovery', 'on-tv-this-week', 'preview', ON_TV_THIS_WEEK_PREVIEW_SIZE] as const;
+}
+
+export function onTvThisWeekInfiniteQueryKey(pageSize: number) {
+  return ['discovery', 'on-tv-this-week', pageSize] as const;
 }
 
 export function nowInTheatersPreviewQueryKey(releaseRegion: string) {

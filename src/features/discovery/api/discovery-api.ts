@@ -7,8 +7,10 @@ import {
   buildExplorePreviewPath,
   buildGenresPath,
   buildNowInTheatersPath,
+  buildOnTvThisWeekPath,
 } from './routes';
 import type { NowInTheatersRequest } from '../now-in-theaters-types';
+import type { OnTvThisWeekRequest } from '../on-tv-this-week-types';
 import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
 import type { DiscoveryWatchProvidersResponse } from '../watch-provider-types';
@@ -62,6 +64,19 @@ export async function getExplorePreview(
     authenticated: false,
     signal,
   });
+}
+
+export async function getOnTvThisWeek(
+  criteria: OnTvThisWeekRequest,
+  signal?: AbortSignal,
+): Promise<SearchResponse> {
+  return api.get<SearchResponse>(
+    buildOnTvThisWeekPath(criteria.page ?? 1, criteria.pageSize ?? 20),
+    {
+      authenticated: false,
+      signal,
+    },
+  );
 }
 
 export async function getNowInTheaters(

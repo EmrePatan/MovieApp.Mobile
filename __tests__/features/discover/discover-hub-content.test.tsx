@@ -45,6 +45,24 @@ jest.mock('@/features/discovery/hooks/useNowInTheatersPreview', () => ({
   })),
 }));
 
+jest.mock('@/features/discovery/hooks/useOnTvThisWeekPreview', () => ({
+  useOnTvThisWeekPreview: jest.fn(() => ({
+    data: {
+      items: [
+        {
+          id: 'tv-1',
+          type: 'tv',
+          title: 'Airing Drama',
+          posterUrl: '/poster.jpg',
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/library/navigation/library-stack-navigation', () => ({
   openLibraryStackScreen: (...args: unknown[]) => mockOpenLibraryStackScreen(...args),
 }));
@@ -88,7 +106,22 @@ describe('DiscoverHubContent', () => {
 
     expect(screen.getByLabelText('Streaming Services')).toBeTruthy();
     expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText('On TV This Week')).toBeTruthy();
+    expect(screen.getByText('World Cinema')).toBeTruthy();
+  });
+
+  it('renders On TV This Week preview section with See All', () => {
+    render(<DiscoverHubContent />);
+
+    expect(screen.getByTestId('on-tv-this-week-preview')).toBeTruthy();
+    expect(screen.getByLabelText('See all On TV This Week')).toBeTruthy();
+  });
+
+  it('opens on tv this week from See All', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByLabelText('See all On TV This Week'));
+
+    expect(mockPush).toHaveBeenCalledWith('/on-tv-this-week');
   });
 
   it('renders Now in Theaters preview section with See All', () => {

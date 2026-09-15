@@ -20,6 +20,15 @@ export function buildDiscoveryWatchProvidersPath(
   return `/api/discovery/watch-providers?${params.toString()}`;
 }
 
+export function buildOnTvThisWeekPath(page = 1, pageSize = 20): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  return `/api/discovery/on-tv-this-week?${params.toString()}`;
+}
+
 export function buildNowInTheatersPath(
   releaseRegion: string,
   page = 1,

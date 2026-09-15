@@ -14,6 +14,7 @@ import { openLibraryStackScreen } from '@/features/library/navigation/library-st
 import type { SearchResultItem } from '@/features/search/types';
 import { DEFAULT_RELEASE_REGION } from '@/features/regions/region-options';
 import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
+import { useOnTvThisWeekPreview } from '@/features/discovery/hooks/useOnTvThisWeekPreview';
 import { createNowInTheatersHref } from '@/features/discovery/utils/now-in-theaters-params';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
@@ -26,6 +27,7 @@ export function DiscoverHubContent() {
   const genresQuery = useGenres();
   const previewQuery = useExplorePreview(10);
   const nowInTheatersPreviewQuery = useNowInTheatersPreview(DEFAULT_RELEASE_REGION);
+  const onTvThisWeekPreviewQuery = useOnTvThisWeekPreview();
 
   const handleGenrePress = useCallback(
     (genreId: string) => {
@@ -77,10 +79,17 @@ export function DiscoverHubContent() {
     router.push(createNowInTheatersHref({ releaseRegion: DEFAULT_RELEASE_REGION }));
   }, [router]);
 
+  const openOnTvThisWeek = useCallback(() => {
+    router.push('/on-tv-this-week');
+  }, [router]);
+
   const trendingItems = previewQuery.data?.trending.items ?? [];
   const topRatedItems = previewQuery.data?.topRated.items ?? [];
   const nowInTheatersItems = (nowInTheatersPreviewQuery.data?.items ?? []).filter(
     (item) => item.type === 'movie',
+  );
+  const onTvThisWeekItems = (onTvThisWeekPreviewQuery.data?.items ?? []).filter(
+    (item) => item.type === 'tv',
   );
 
   return (
@@ -138,14 +147,19 @@ export function DiscoverHubContent() {
         testID="now-in-theaters-preview"
       />
 
-      <View style={styles.futureSection}>
-        <DiscoverFeatureEntry
-          title="On TV This Week"
-          subtitle="New and returning episodes"
-          icon="calendar-outline"
-          comingSoon
-        />
-      </View>
+      <DiscoverPreviewSection
+        title="On TV This Week"
+        subtitle="Episodes airing in the next 7 days"
+        icon="calendar-outline"
+        items={onTvThisWeekItems}
+        isLoading={onTvThisWeekPreviewQuery.isLoading}
+        isError={onTvThisWeekPreviewQuery.isError}
+        onRetry={() => void onTvThisWeekPreviewQuery.refetch()}
+        onItemPress={handlePreviewItemPress}
+        onSeeAll={openOnTvThisWeek}
+        emptyMessage="No TV shows are airing this week right now."
+        testID="on-tv-this-week-preview"
+      />
 
       <DiscoverPreviewCarousel
         title="Trending"
