@@ -20,6 +20,20 @@ export function buildDiscoveryWatchProvidersPath(
   return `/api/discovery/watch-providers?${params.toString()}`;
 }
 
+export function buildNowInTheatersPath(
+  releaseRegion: string,
+  page = 1,
+  pageSize = 20,
+): string {
+  const params = new URLSearchParams({
+    releaseRegion,
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  return `/api/discovery/now-in-theaters?${params.toString()}`;
+}
+
 export function buildExplorePreviewPath(sectionSize = DEFAULT_HOME_SECTION_SIZE): string {
   const params = new URLSearchParams({
     sectionSize: String(sectionSize),

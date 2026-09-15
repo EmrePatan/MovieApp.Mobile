@@ -27,6 +27,24 @@ jest.mock('@/features/discovery/hooks/useGenres', () => ({
   })),
 }));
 
+jest.mock('@/features/discovery/hooks/useNowInTheatersPreview', () => ({
+  useNowInTheatersPreview: jest.fn(() => ({
+    data: {
+      items: [
+        {
+          id: 'movie-1',
+          type: 'movie',
+          title: 'Cinema One',
+          posterUrl: '/poster.jpg',
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/library/navigation/library-stack-navigation', () => ({
   openLibraryStackScreen: (...args: unknown[]) => mockOpenLibraryStackScreen(...args),
 }));
@@ -69,8 +87,23 @@ describe('DiscoverHubContent', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByLabelText('Streaming Services')).toBeTruthy();
-    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(3);
-    expect(screen.getByText('Now in Theaters')).toBeTruthy();
+    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('On TV This Week')).toBeTruthy();
+  });
+
+  it('renders Now in Theaters preview section with See All', () => {
+    render(<DiscoverHubContent />);
+
+    expect(screen.getByTestId('now-in-theaters-preview')).toBeTruthy();
+    expect(screen.getByLabelText('See all Now in Theaters')).toBeTruthy();
+  });
+
+  it('opens now in theaters from See All', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByLabelText('See all Now in Theaters'));
+
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/now-in-theaters'));
   });
 
   it('opens streaming discover from Streaming Services', () => {

@@ -12,8 +12,12 @@ import { createAdvancedDiscoverHref } from '@/features/discovery/utils/advanced-
 import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { SearchResultItem } from '@/features/search/types';
+import { DEFAULT_RELEASE_REGION } from '@/features/regions/region-options';
+import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
+import { createNowInTheatersHref } from '@/features/discovery/utils/now-in-theaters-params';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
+import { DiscoverPreviewSection } from './DiscoverPreviewSection';
 import { spacing } from '@/theme/spacing';
 
 export function DiscoverHubContent() {
@@ -21,6 +25,7 @@ export function DiscoverHubContent() {
   const queryClient = useQueryClient();
   const genresQuery = useGenres();
   const previewQuery = useExplorePreview(10);
+  const nowInTheatersPreviewQuery = useNowInTheatersPreview(DEFAULT_RELEASE_REGION);
 
   const handleGenrePress = useCallback(
     (genreId: string) => {
@@ -68,8 +73,15 @@ export function DiscoverHubContent() {
     openLibraryStackScreen(router, '/discover?mode=new_releases&type=all', '/(tabs)/discover');
   }, [router]);
 
+  const openNowInTheaters = useCallback(() => {
+    router.push(createNowInTheatersHref({ releaseRegion: DEFAULT_RELEASE_REGION }));
+  }, [router]);
+
   const trendingItems = previewQuery.data?.trending.items ?? [];
   const topRatedItems = previewQuery.data?.topRated.items ?? [];
+  const nowInTheatersItems = (nowInTheatersPreviewQuery.data?.items ?? []).filter(
+    (item) => item.type === 'movie',
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -112,13 +124,21 @@ export function DiscoverHubContent() {
         />
       </View>
 
+      <DiscoverPreviewSection
+        title="Now in Theaters"
+        subtitle="Currently playing in theaters"
+        icon="film-outline"
+        items={nowInTheatersItems}
+        isLoading={nowInTheatersPreviewQuery.isLoading}
+        isError={nowInTheatersPreviewQuery.isError}
+        onRetry={() => void nowInTheatersPreviewQuery.refetch()}
+        onItemPress={handlePreviewItemPress}
+        onSeeAll={openNowInTheaters}
+        emptyMessage="No movies are currently playing in theaters for this region."
+        testID="now-in-theaters-preview"
+      />
+
       <View style={styles.futureSection}>
-        <DiscoverFeatureEntry
-          title="Now in Theaters"
-          subtitle="Fresh releases playing now"
-          icon="film-outline"
-          comingSoon
-        />
         <DiscoverFeatureEntry
           title="On TV This Week"
           subtitle="New and returning episodes"

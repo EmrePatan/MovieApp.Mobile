@@ -1,0 +1,37 @@
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import { RegionSelector } from '@/features/regions/components/RegionSelector';
+
+describe('RegionSelector', () => {
+  it('renders semantic label and selected region', () => {
+    render(
+      <RegionSelector
+        label="Watch region"
+        value="TR"
+        expanded={false}
+        onToggleExpanded={jest.fn()}
+        onSelect={jest.fn()}
+        testID="watch-region-selector"
+      />,
+    );
+
+    expect(screen.getByText('Watch region')).toBeTruthy();
+    expect(screen.getByLabelText('Watch region Turkey')).toBeTruthy();
+  });
+
+  it('calls onSelect when a region is chosen', () => {
+    const onSelect = jest.fn();
+
+    render(
+      <RegionSelector
+        label="Release region"
+        value="TR"
+        expanded={true}
+        onToggleExpanded={jest.fn()}
+        onSelect={onSelect}
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText('United States'));
+    expect(onSelect).toHaveBeenCalledWith('US');
+  });
+});

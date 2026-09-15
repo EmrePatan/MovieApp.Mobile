@@ -6,7 +6,9 @@ import {
   buildDiscoveryWatchProvidersPath,
   buildExplorePreviewPath,
   buildGenresPath,
+  buildNowInTheatersPath,
 } from './routes';
+import type { NowInTheatersRequest } from '../now-in-theaters-types';
 import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
 import type { DiscoveryWatchProvidersResponse } from '../watch-provider-types';
@@ -60,4 +62,21 @@ export async function getExplorePreview(
     authenticated: false,
     signal,
   });
+}
+
+export async function getNowInTheaters(
+  criteria: NowInTheatersRequest,
+  signal?: AbortSignal,
+): Promise<SearchResponse> {
+  return api.get<SearchResponse>(
+    buildNowInTheatersPath(
+      criteria.releaseRegion,
+      criteria.page ?? 1,
+      criteria.pageSize ?? 20,
+    ),
+    {
+      authenticated: false,
+      signal,
+    },
+  );
 }

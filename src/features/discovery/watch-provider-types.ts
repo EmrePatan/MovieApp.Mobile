@@ -24,24 +24,18 @@ export const WATCH_MONETIZATION_OPTIONS: {
   { value: 'buy', label: 'Buy' },
 ];
 
-export const WATCH_REGION_OPTIONS: {
-  code: string;
-  label: string;
-}[] = [
-  { code: 'TR', label: 'Turkey' },
-  { code: 'US', label: 'United States' },
-  { code: 'GB', label: 'United Kingdom' },
-  { code: 'DE', label: 'Germany' },
-  { code: 'FR', label: 'France' },
-  { code: 'ES', label: 'Spain' },
-  { code: 'IT', label: 'Italy' },
-  { code: 'NL', label: 'Netherlands' },
-  { code: 'CA', label: 'Canada' },
-  { code: 'AU', label: 'Australia' },
-];
+import {
+  DEFAULT_RELEASE_REGION,
+  getRegionLabel,
+  REGION_OPTIONS,
+} from '@/features/regions/region-options';
+
+export const WATCH_REGION_OPTIONS = REGION_OPTIONS;
+
+export const DEFAULT_WATCH_PROVIDER_REGION = DEFAULT_RELEASE_REGION;
 
 export function getWatchRegionLabel(code: string): string {
-  return WATCH_REGION_OPTIONS.find((option) => option.code === code)?.label ?? code;
+  return getRegionLabel(code);
 }
 
 export function reconcileWatchProviderSelection(

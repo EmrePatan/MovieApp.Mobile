@@ -1,0 +1,193 @@
+import { useCallback, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { isApiError } from '@/api/errors';
+import { AppText } from '@/components/common/AppText';
+import { ErrorView } from '@/components/common/ErrorView';
+import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
+import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
+import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
+import { ReleaseRegionSelector } from '@/features/regions/components/ReleaseRegionSelector';
+import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
+import {
+  parseNowInTheatersParams,
+  serializeNowInTheatersRoute,
+} from '@/features/discovery/utils/now-in-theaters-params';
+import type { NowInTheatersState } from '@/features/discovery/now-in-theaters-types';
+import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
+import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
+import { SearchResultCard } from '@/features/search/components/SearchResultCard';
+import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import type { SearchResultItem } from '@/features/search/types';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+
+export default function NowInTheatersScreen() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const rawParams = useLocalSearchParams();
+  const [regionExpanded, setRegionExpanded] = useState(false);
+
+  const discoverState = useMemo(
+    () => parseNowInTheatersParams(rawParams),
+    [rawParams],
+  );
+
+  const resultsQuery = useNowInTheaters(discoverState);
+
+  const items = useMemo(
+    () => resultsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    [resultsQuery.data?.pages],
+  );
+
+  const currentRoute = useMemo(
+    () => serializeNowInTheatersRoute(discoverState),
+    [discoverState],
+  );
+
+  const replaceState = useCallback(
+    (next: NowInTheatersState) => {
+      router.replace(serializeNowInTheatersRoute(next));
+    },
+    [router],
+  );
+
+  const handleResultPress = useCallback(
+    (item: SearchResultItem) => {
+      if (item.type !== 'movie') {
+        return;
+      }
+
+      prefetchCatalogDetail(queryClient, item.id, item.type);
+      openCatalogDetailFromLibraryStack(
+        router,
+        item.id,
+        item.type,
+        'discover',
+        { libraryReturnHref: currentRoute },
+      );
+    },
+    [currentRoute, queryClient, router],
+  );
+
+  const listHeader = useMemo(
+    () => (
+      <View style={styles.header}>
+        <AppText variant="title" accessibilityRole="header">
+          Now in Theaters
+        </AppText>
+        <AppText variant="bodySmall" muted>
+          Movies currently playing in theaters
+        </AppText>
+        <ReleaseRegionSelector
+          value={discoverState.releaseRegion}
+          expanded={regionExpanded}
+          onToggleExpanded={() => setRegionExpanded((current) => !current)}
+          onSelect={(releaseRegion) => {
+            setRegionExpanded(false);
+            replaceState({ releaseRegion });
+          }}
+        />
+      </View>
+    ),
+    [discoverState.releaseRegion, regionExpanded, replaceState],
+  );
+
+  const listEmpty = useMemo(() => {
+    if (resultsQuery.isLoading) {
+      return <SearchLoadingState />;
+    }
+
+    if (resultsQuery.isError) {
+      const message = isApiError(resultsQuery.error)
+        ? resultsQuery.error.userMessage
+        : 'Unable to load theatrical listings right now.';
+
+      return (
+        <View style={styles.errorContainer}>
+          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel="Try Again" />
+        </View>
+      );
+    }
+
+    if (items.length === 0) {
+      return (
+        <SearchEmptyState
+          title="No theatrical releases"
+          message="There are no movies currently playing in this release region."
+        />
+      );
+    }
+
+    return null;
+  }, [items.length, resultsQuery]);
+
+  return (
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <View style={styles.topBar}>
+        <DetailBackButton />
+      </View>
+      <FlatList
+        data={items}
+        keyExtractor={searchResultKeyExtractor}
+        renderItem={({ item }) => (
+          <SearchResultCard item={item} onPress={handleResultPress} />
+        )}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmpty}
+        ListFooterComponent={
+          resultsQuery.isFetchingNextPage ? (
+            <ActivityIndicator color={colors.accent} style={styles.footerLoader} />
+          ) : null
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
+            onRefresh={() => void resultsQuery.refetch()}
+            tintColor={colors.accent}
+          />
+        }
+        onEndReached={() => {
+          if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {
+            void resultsQuery.fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.4}
+        contentContainerStyle={styles.listContent}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  topBar: {
+    paddingHorizontal: spacing.lg,
+  },
+  header: {
+    gap: spacing.md,
+    paddingBottom: spacing.lg,
+  },
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+    flexGrow: 1,
+  },
+  errorContainer: {
+    paddingVertical: spacing.lg,
+  },
+  footerLoader: {
+    paddingVertical: spacing.lg,
+  },
+});
