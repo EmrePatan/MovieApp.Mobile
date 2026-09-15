@@ -62,7 +62,7 @@ jest.mock('@/features/home/components/HomeHeroCarousel', () => ({
       null,
       React.createElement(
         Pressable,
-        { accessibilityLabel: `More info about ${item.title}`, onPress: () => onItemPress(item) },
+        { accessibilityLabel: `Open ${item.title}`, onPress: () => onItemPress(item) },
         React.createElement(Text, null, item.title),
       ),
     );
@@ -355,7 +355,7 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    expect(screen.getByLabelText('More info about Hero Movie')).toBeTruthy();
+    expect(screen.getByLabelText('Open Hero Movie')).toBeTruthy();
     expect(screen.getByText('Recommended Movie')).toBeTruthy();
     expect(screen.queryByText('Continue Show')).toBeNull();
     expect(screen.queryByText('Continue Watching')).toBeNull();

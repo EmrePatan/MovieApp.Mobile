@@ -62,7 +62,7 @@ function manualSwipeToActiveIndex(list: FlatList<HomeItem>, activeIndex: number)
   });
 }
 
-describe('HomeHeroCarousel real More Info press', () => {
+describe('HomeHeroCarousel real hero press', () => {
   it('opens B after A detail return when manually swiping to slide B', async () => {
     const itemA = createItem({ id: 'hero-a', title: 'Hero A' });
     const itemB = createItem({ id: 'hero-b', title: 'Hero B' });
@@ -79,7 +79,7 @@ describe('HomeHeroCarousel real More Info press', () => {
     );
     const list = UNSAFE_getByType(FlatList);
 
-    fireEvent.press(screen.getByLabelText('More info about Hero A'));
+    fireEvent.press(screen.getByLabelText('Open Hero A'));
     expect(onItemPress).toHaveBeenCalledWith(itemA);
     onItemPress.mockClear();
 
@@ -104,10 +104,10 @@ describe('HomeHeroCarousel real More Info press', () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText('Slide 2 of 3')).toBeTruthy();
-      expect(screen.getByLabelText('More info about Hero B')).toBeTruthy();
+      expect(screen.getByLabelText('Open Hero B')).toBeTruthy();
     });
 
-    fireEvent.press(screen.getByLabelText('More info about Hero B'));
+    fireEvent.press(screen.getByLabelText('Open Hero B'));
 
     expect(onItemPress).toHaveBeenCalledTimes(1);
     expect(onItemPress).toHaveBeenCalledWith(itemB);
@@ -127,7 +127,7 @@ describe('HomeHeroCarousel real More Info press', () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText('Slide 2 of 2')).toBeTruthy();
-      expect(screen.getByLabelText('More info about Hero B')).toBeTruthy();
+      expect(screen.getByLabelText('Open Hero B')).toBeTruthy();
     });
   });
 });

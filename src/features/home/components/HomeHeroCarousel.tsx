@@ -13,9 +13,13 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { HomeHero } from './HomeHero';
-import { useHeroFavoriteStatuses } from '../hooks/useHeroFavoriteStatuses';
 import type { HomeItem, HomeTypeFilter } from '../types';
-import { getHomeHeroHeight } from '../utils/home-hero-layout';
+import {
+  getHomeHeroCardWidth,
+  getHomeHeroHeight,
+  getHomeHeroSnapInterval,
+  HERO_CAROUSEL_SIDE_INSET,
+} from '../utils/home-hero-layout';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
@@ -87,13 +91,14 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const heroHeight = useMemo(() => getHomeHeroHeight(width), [width]);
+  const cardWidth = useMemo(() => getHomeHeroCardWidth(width), [width]);
+  const snapInterval = useMemo(() => getHomeHeroSnapInterval(width), [width]);
   const listRef = useRef<FlatList<HomeItem>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isInteracting, setIsInteracting] = useState(false);
   const [isAppActive, setIsAppActive] = useState(AppState.currentState === 'active');
   const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousCarouselKeyRef = useRef<string | null>(null);
-  const favoriteStatuses = useHeroFavoriteStatuses(items);
   const loopedItems = useMemo(() => buildLoopedHeroItems(items), [items]);
   const heroItemsKey = useMemo(
     () => items.map((item) => createHomeContentKey(item)).join('|'),
@@ -117,10 +122,10 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     setActiveIndex(0);
     setIsInteracting(false);
     listRef.current?.scrollToOffset({
-      offset: items.length > 1 ? width * LOOP_HEAD_INDEX : 0,
+      offset: items.length > 1 ? snapInterval * LOOP_HEAD_INDEX : 0,
       animated: false,
     });
-  }, [filterKey, heroItemsKey, items.length, width]);
+  }, [filterKey, heroItemsKey, items.length, snapInterval]);
 
   useEffect(() => {
     clearAutoAdvanceTimer();
@@ -133,7 +138,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
       const nextIndex = (activeIndex + 1) % items.length;
       setActiveIndex(nextIndex);
       listRef.current?.scrollToOffset({
-        offset: getScrollIndexForActiveIndex(nextIndex) * width,
+        offset: getScrollIndexForActiveIndex(nextIndex) * snapInterval,
         animated: true,
       });
     }, AUTO_ADVANCE_MS);
@@ -146,7 +151,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     isInteracting,
     isScreenFocused,
     items.length,
-    width,
+    snapInterval,
   ]);
 
   useEffect(() => {
@@ -199,25 +204,25 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         return;
       }
 
-      const scrollIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+      const scrollIndex = Math.round(event.nativeEvent.contentOffset.x / snapInterval);
       const nextActiveIndex = getActiveIndexFromScrollIndex(scrollIndex, items.length);
       setActiveIndex(nextActiveIndex);
 
       if (scrollIndex === 0) {
         listRef.current?.scrollToOffset({
-          offset: items.length * width,
+          offset: items.length * snapInterval,
           animated: false,
         });
       } else if (scrollIndex === items.length + 1) {
         listRef.current?.scrollToOffset({
-          offset: LOOP_HEAD_INDEX * width,
+          offset: LOOP_HEAD_INDEX * snapInterval,
           animated: false,
         });
       }
 
       setIsInteracting(false);
     },
-    [items.length, width],
+    [items.length, snapInterval],
   );
 
   const handleScrollBeginDrag = useCallback(() => {
@@ -237,11 +242,11 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
 
   const getItemLayout = useCallback(
     (_: ArrayLike<HomeItem> | null | undefined, index: number) => ({
-      length: width,
-      offset: width * index,
+      length: snapInterval,
+      offset: snapInterval * index,
       index,
     }),
-    [width],
+    [snapInterval],
   );
 
   const keyExtractor = useCallback(
@@ -250,25 +255,18 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   );
 
   const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<HomeItem>) => {
-      const contentKey = createHomeContentKey(item);
-      const favoriteStatus = favoriteStatuses.statuses[contentKey];
-
-      return (
-        <View style={[styles.slide, { width }]}>
-          <HomeHero
-            item={item}
-            heroHeight={heroHeight}
-            embedded
-            onPress={onItemPress}
-            favoriteIsFavorited={favoriteStatus?.isFavorited}
-            favoriteStatusResolved={favoriteStatus?.resolved ?? false}
-            favoriteStatusPending={favoriteStatuses.isLoading}
-          />
-        </View>
-      );
-    },
-    [favoriteStatuses.isLoading, favoriteStatuses.statuses, heroHeight, onItemPress, width],
+    ({ item }: ListRenderItemInfo<HomeItem>) => (
+      <View style={[styles.slide, { width: snapInterval }]}>
+        <HomeHero
+          item={item}
+          heroHeight={heroHeight}
+          cardWidth={cardWidth}
+          embedded
+          onPress={onItemPress}
+        />
+      </View>
+    ),
+    [cardWidth, heroHeight, onItemPress, snapInterval],
   );
 
   if (items.length === 0) {
@@ -276,18 +274,15 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   }
 
   if (items.length === 1) {
-    const contentKey = createHomeContentKey(items[0]);
-    const favoriteStatus = favoriteStatuses.statuses[contentKey];
-
     return (
-      <HomeHero
-        item={items[0]}
-        heroHeight={heroHeight}
-        onPress={() => onItemPress(items[0])}
-        favoriteIsFavorited={favoriteStatus?.isFavorited}
-        favoriteStatusResolved={favoriteStatus?.resolved ?? false}
-        favoriteStatusPending={favoriteStatuses.isLoading}
-      />
+      <View style={styles.singleItemShell}>
+        <HomeHero
+          item={items[0]}
+          heroHeight={heroHeight}
+          cardWidth={cardWidth}
+          onPress={() => onItemPress(items[0])}
+        />
+      </View>
     );
   }
 
@@ -297,12 +292,15 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         ref={listRef}
         data={loopedItems}
         horizontal
-        pagingEnabled
         bounces={false}
         decelerationRate="fast"
         directionalLockEnabled
         nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
+        snapToInterval={snapInterval}
+        snapToAlignment="start"
+        disableIntervalMomentum
+        contentContainerStyle={styles.listContent}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         getItemLayout={getItemLayout}
@@ -339,10 +337,17 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  singleItemShell: {
+    paddingHorizontal: HERO_CAROUSEL_SIDE_INSET,
+  },
+  listContent: {
+    paddingHorizontal: HERO_CAROUSEL_SIDE_INSET,
   },
   slide: {
-    overflow: 'hidden',
+    overflow: 'visible',
+    alignItems: 'flex-start',
   },
   indicatorRow: {
     flexDirection: 'row',
@@ -350,17 +355,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     marginTop: spacing.sm,
-    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    alignSelf: 'center',
+    borderRadius: 999,
+    backgroundColor: 'rgba(10, 10, 15, 0.62)',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
   },
   indicatorDot: {
-    width: 18,
-    height: 3,
+    height: 4,
     borderRadius: 2,
   },
   indicatorDotActive: {
+    width: 22,
     backgroundColor: colors.accent,
   },
   indicatorDotInactive: {
-    backgroundColor: colors.borderSubtle,
+    width: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
   },
 });

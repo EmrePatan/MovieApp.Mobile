@@ -9,19 +9,6 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
-jest.mock('@/features/favorites/components/FavoriteButton', () => {
-  const React = require('react');
-  const { Pressable, Text } = require('react-native');
-
-  return {
-    FavoriteButton: () => (
-      <Pressable accessibilityRole="button" accessibilityLabel="Add to favorites">
-        <Text>Favorite</Text>
-      </Pressable>
-    ),
-  };
-});
-
 function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
   return {
     id: 'hero-id',
@@ -52,19 +39,11 @@ describe('HomeHero', () => {
     renderHero();
 
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByText('Movie  •  2014  •  ★ 8.4')).toBeTruthy();
+    expect(screen.getByText('Movie  •  2014')).toBeTruthy();
+    expect(screen.getByLabelText('Rating 8.4')).toBeTruthy();
   });
 
-  it('navigates through the primary CTA', () => {
-    const item = createItem();
-
-    renderHero(item);
-    fireEvent.press(screen.getByLabelText('More info about Interstellar'));
-
-    expect(mockOnPress).toHaveBeenCalledWith(item);
-  });
-
-  it('navigates when pressing the hero artwork', () => {
+  it('navigates when pressing the hero card', () => {
     const item = createItem();
 
     renderHero(item);
@@ -85,8 +64,9 @@ describe('HomeHero', () => {
     );
 
     expect(screen.getByLabelText('Featured, Breaking Bad, TV, 2008, rating 8.9')).toBeTruthy();
-    expect(screen.getByText('TV  •  2008  •  ★ 8.9')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('More info about Breaking Bad'));
+    expect(screen.getByText('TV  •  2008')).toBeTruthy();
+    expect(screen.getByLabelText('Rating 8.9')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Open Breaking Bad'));
     expect(mockOnPress).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'tv-id', contentType: 'tv' }),
     );
@@ -126,11 +106,5 @@ describe('HomeHero', () => {
         'Featured, An Extraordinarily Long Movie Title That Should Be Clamped To Multiple Lines Without Breaking Layout, Movie',
       ),
     ).toBeTruthy();
-  });
-
-  it('exposes the favorite action', () => {
-    renderHero();
-
-    expect(screen.getByLabelText('Add to favorites')).toBeTruthy();
   });
 });

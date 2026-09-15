@@ -5,21 +5,12 @@ import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
 import { colors } from '@/theme/colors';
 
-const mockUseHeroFavoriteStatuses = jest.fn();
 const mockPrefetchQuery = jest.fn();
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
     prefetchQuery: mockPrefetchQuery,
   }),
-}));
-
-jest.mock('@/features/home/hooks/useHeroFavoriteStatuses', () => ({
-  useHeroFavoriteStatuses: (...args: unknown[]) => mockUseHeroFavoriteStatuses(...args),
-}));
-
-jest.mock('@/features/favorites/components/FavoriteButton', () => ({
-  FavoriteButton: () => null,
 }));
 
 jest.mock('@/features/home/components/HomeHero', () => ({
@@ -58,16 +49,10 @@ function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: num
   });
 }
 
-const favoriteStatusesResult = {
-  statuses: {},
-  isLoading: false,
-};
-
 describe('HomeHeroCarousel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-    mockUseHeroFavoriteStatuses.mockReturnValue(favoriteStatusesResult);
   });
 
   afterEach(() => {
@@ -86,7 +71,6 @@ describe('HomeHeroCarousel', () => {
     });
 
     expect(queryByLabelText('Slide 1 of 1')).toBeNull();
-    expect(mockUseHeroFavoriteStatuses).toHaveBeenCalledWith(items);
   });
 
   it('auto-advances across multiple heroes and wraps to the first slide', async () => {
@@ -146,20 +130,6 @@ describe('HomeHeroCarousel', () => {
     );
 
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
-  });
-
-  it('requests favorite statuses once for all hero items', () => {
-    const items = [
-      createItem({ id: 'hero-1' }),
-      createItem({ id: 'hero-2' }),
-      createItem({ id: 'hero-3' }),
-    ];
-
-    render(
-      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
-    );
-
-    expect(mockUseHeroFavoriteStatuses).toHaveBeenCalledWith(items);
   });
 
   it('uses the semantic accent color for the active indicator', () => {
