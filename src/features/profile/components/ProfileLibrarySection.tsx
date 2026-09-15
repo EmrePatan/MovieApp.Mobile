@@ -7,8 +7,9 @@ import {
   formatWatchHistorySubtitle,
   formatWatchlistSubtitle,
 } from '../utils/library-copy';
-import { ProfileSection } from './ProfileSection';
-import { spacing } from '@/theme/spacing';
+import { ProfileSectionHeader } from './ProfileSectionHeader';
+import { colors } from '@/theme/colors';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ProfileLibrarySectionProps {
   summary: UserStatisticsSummaryResponse;
@@ -27,9 +28,10 @@ export function ProfileLibrarySection({
   ].join(' · ');
 
   return (
-    <ProfileSection title="My Library">
+    <View style={styles.section}>
+      <ProfileSectionHeader title="My Library" />
       <View
-        style={styles.summary}
+        style={styles.card}
         accessibilityRole="text"
         accessibilityLabel={`Library collections: ${collectionSummary}`}
       >
@@ -37,12 +39,21 @@ export function ProfileLibrarySection({
           {collectionSummary}
         </AppText>
       </View>
-    </ProfileSection>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  summary: {
+  section: {
+    gap: spacing.sm,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
 });

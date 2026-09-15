@@ -81,6 +81,21 @@ const { useLibrary } = jest.requireMock('@/features/library/hooks/useLibrary') a
   useLibrary: jest.Mock;
 };
 
+function flattenStyle(style: unknown): Record<string, unknown> {
+  if (!style) {
+    return {};
+  }
+
+  if (Array.isArray(style)) {
+    return style.reduce<Record<string, unknown>>(
+      (acc, item) => ({ ...acc, ...flattenStyle(item) }),
+      {},
+    );
+  }
+
+  return style as Record<string, unknown>;
+}
+
 describe('LibraryHubContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -137,6 +152,15 @@ describe('LibraryHubContent', () => {
 
     expect(screen.getByTestId('library-grid-single-column')).toBeTruthy();
     expect(screen.getByTestId('library-grid-single-item')).toBeTruthy();
+  });
+
+  it('does not double-pad the My Library heading inside the grid list', () => {
+    render(<LibraryHubContent />);
+
+    const header = screen.getByTestId('library-hub-header');
+
+    expect(flattenStyle(header.props.style).paddingHorizontal).toBeUndefined();
+    expect(screen.getByText('My Library')).toBeTruthy();
   });
 
   it('defaults to Watching category and renders the grid item', () => {

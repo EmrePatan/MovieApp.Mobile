@@ -131,7 +131,7 @@ export function LibraryHubContent() {
   );
 
   const listHeader = (
-    <View style={styles.header}>
+    <View style={styles.header} testID="library-hub-header">
       <AppText variant="title" accessibilityRole="header">
         My Library
       </AppText>
@@ -157,7 +157,7 @@ export function LibraryHubContent() {
 
   if (libraryQuery.isLoading && items.length === 0) {
     return (
-      <View style={styles.screen}>
+      <View style={[styles.screen, styles.screenPadding]}>
         {listHeader}
         <View style={styles.centered}>
           <ActivityIndicator color={colors.accent} />
@@ -173,7 +173,7 @@ export function LibraryHubContent() {
       : 'Unable to load your library.';
 
     return (
-      <View style={styles.screen}>
+      <View style={[styles.screen, styles.screenPadding]}>
         {listHeader}
         <View style={styles.centered}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
@@ -245,9 +245,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: spacing.md,
-    paddingHorizontal: spacing.lg,
     gap: spacing.sm,
     paddingBottom: spacing.md,
+  },
+  screenPadding: {
+    paddingHorizontal: spacing.lg,
   },
   listContent: {
     flexGrow: 1,
