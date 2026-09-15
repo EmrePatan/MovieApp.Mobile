@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { useHome } from '@/features/home/hooks/useHome';
+import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import HomeScreen from '../../../app/(tabs)/home';
 
 const mockRefetch = jest.fn();
@@ -78,9 +79,82 @@ describe('HomeScreen', () => {
       data: {
         sections: [
           {
+            type: 'Trending',
+            title: 'Trending',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'trending-1',
+                contentType: 'tv',
+                title: 'Trending Show',
+                originalTitle: 'Trending Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2008-01-20',
+                voteAverage: 8.0,
+                voteCount: 100,
+              },
+              {
+                id: 'trending-2',
+                contentType: 'tv',
+                title: 'Another Trending Show',
+                originalTitle: 'Another Trending Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2010-01-20',
+                voteAverage: 7.8,
+                voteCount: 90,
+              },
+              {
+                id: 'trending-3',
+                contentType: 'tv',
+                title: 'Third Trending Show',
+                originalTitle: 'Third Trending Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2011-01-20',
+                voteAverage: 7.7,
+                voteCount: 85,
+              },
+              {
+                id: 'trending-4',
+                contentType: 'tv',
+                title: 'Fourth Trending Show',
+                originalTitle: 'Fourth Trending Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2012-01-20',
+                voteAverage: 7.6,
+                voteCount: 80,
+              },
+              {
+                id: 'trending-5',
+                contentType: 'tv',
+                title: 'Fifth Trending Show',
+                originalTitle: 'Fifth Trending Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2013-01-20',
+                voteAverage: 7.5,
+                voteCount: 75,
+              },
+              {
+                id: 'trending-6',
+                contentType: 'tv',
+                title: 'Sixth Trending Show',
+                originalTitle: 'Sixth Trending Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2014-01-20',
+                voteAverage: 7.4,
+                voteCount: 70,
+              },
+            ],
+          },
+          {
             type: 'NewReleases',
             title: 'New Releases',
-            displayOrder: 1,
+            displayOrder: 2,
             items: [
               {
                 id: 'abc',
@@ -117,6 +191,7 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
+    expect(screen.getByText('Trending')).toBeTruthy();
     expect(screen.getByText('New Releases')).toBeTruthy();
     expect(screen.getAllByText('Breaking Bad')).toHaveLength(1);
     expect(screen.getByText('Better Call Saul')).toBeTruthy();
@@ -137,7 +212,7 @@ describe('HomeScreen', () => {
     expect(mockRefetch).toHaveBeenCalled();
   });
 
-  it('renders the hero from discovery sections and not Continue Watching', () => {
+  it('renders the hero from allowed sections and hides Continue Watching', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
@@ -189,9 +264,168 @@ describe('HomeScreen', () => {
 
     render(<HomeScreen />);
     expect(screen.getByLabelText('More info about Trending Movie')).toBeTruthy();
-    expect(screen.getAllByText('Trending Movie')).toHaveLength(1);
-    expect(screen.getByText('Continue Show')).toBeTruthy();
-    expect(screen.getByText('Continue Watching')).toBeTruthy();
+    expect(screen.queryByText('Continue Show')).toBeNull();
+    expect(screen.queryByText('Continue Watching')).toBeNull();
+  });
+
+  it('renders personalized sections in Home 2.0 order and excludes Popular', () => {
+    const sections = [
+          {
+            type: 'Popular',
+            title: 'Popular',
+            displayOrder: 99,
+            items: [
+              {
+                id: 'popular-id',
+                contentType: 'movie',
+                title: 'Popular Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 7.0,
+                voteCount: 50,
+              },
+            ],
+          },
+          {
+            type: 'TopRated',
+            title: 'Top Rated',
+            displayOrder: 5,
+            items: [
+              {
+                id: 'top-id',
+                contentType: 'movie',
+                title: 'Top Rated Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 9.0,
+                voteCount: 50,
+              },
+              {
+                id: 'top-id-2',
+                contentType: 'movie',
+                title: 'Second Top Rated Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.9,
+                voteCount: 50,
+              },
+              {
+                id: 'top-id-3',
+                contentType: 'movie',
+                title: 'Third Top Rated Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.8,
+                voteCount: 50,
+              },
+            ],
+          },
+          {
+            type: 'BecauseYouWatched',
+            title: 'Because You Watched',
+            displayOrder: 2,
+            items: [
+              {
+                id: 'because-id',
+                contentType: 'movie',
+                title: 'Because Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.0,
+                voteCount: 50,
+              },
+            ],
+          },
+          {
+            type: 'RecommendedForYou',
+            title: 'Recommended For You',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'recommended-id',
+                contentType: 'movie',
+                title: 'Recommended Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.5,
+                voteCount: 50,
+              },
+              {
+                id: 'recommended-id-2',
+                contentType: 'movie',
+                title: 'Second Recommended Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.4,
+                voteCount: 50,
+              },
+              {
+                id: 'recommended-id-3',
+                contentType: 'movie',
+                title: 'Third Recommended Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.3,
+                voteCount: 50,
+              },
+              {
+                id: 'recommended-id-4',
+                contentType: 'movie',
+                title: 'Fourth Recommended Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.2,
+                voteCount: 50,
+              },
+            ],
+          },
+        ];
+
+    mockUseHome.mockReturnValue({
+      data: {
+        sections,
+        isPersonalized: true,
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+    });
+
+    const presented = presentHomeSections(sections, true);
+
+    expect(presented.sections.map((section) => section.type)).toEqual([
+      'RecommendedForYou',
+      'BecauseYouWatched',
+      'TopRated',
+    ]);
+
+    render(<HomeScreen />);
+
+    expect(screen.getByText('Recommended For You')).toBeTruthy();
+    expect(screen.getByText('Because You Watched')).toBeTruthy();
+    expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.queryByText('Popular')).toBeNull();
+    expect(screen.queryByText('Popular Movie')).toBeNull();
   });
 
   it('deduplicates hero items from their source rails', () => {

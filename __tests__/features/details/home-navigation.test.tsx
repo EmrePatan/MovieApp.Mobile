@@ -82,14 +82,34 @@ const homeSectionItems = [
   },
 ];
 
+function createTrendingFillers(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `trending-filler-${index}`,
+    contentType: 'movie' as const,
+    title: `Trending Filler ${index}`,
+    originalTitle: `Trending Filler ${index}`,
+    posterUrl: null,
+    backdropUrl: null,
+    releaseDate: '2020-01-01',
+    voteAverage: 7.0,
+    voteCount: 10,
+  }));
+}
+
 function mockHomeData() {
   (useHome as jest.Mock).mockReturnValue({
     data: {
       sections: [
         {
+          type: 'Trending',
+          title: 'Trending',
+          displayOrder: 1,
+          items: createTrendingFillers(5),
+        },
+        {
           type: 'NewReleases',
           title: 'New Releases',
-          displayOrder: 1,
+          displayOrder: 2,
           items: homeSectionItems,
         },
       ],
@@ -124,9 +144,15 @@ describe('Home detail navigation', () => {
       data: {
         sections: [
           {
+            type: 'Trending',
+            title: 'Trending',
+            displayOrder: 1,
+            items: createTrendingFillers(5),
+          },
+          {
             type: 'NewReleases',
             title: 'New Releases',
-            displayOrder: 1,
+            displayOrder: 2,
             items: [
               {
                 id: 'tv-a',

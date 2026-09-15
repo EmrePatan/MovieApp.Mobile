@@ -1,19 +1,33 @@
+import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
-import { StyleSheet, View } from 'react-native';
 
 interface HomeSectionHeaderProps {
   title: string;
+  onSeeAllPress?: () => void;
 }
 
-export function HomeSectionHeader({ title }: HomeSectionHeaderProps) {
+export function HomeSectionHeader({ title, onSeeAllPress }: HomeSectionHeaderProps) {
   return (
     <View style={styles.container} accessibilityRole="header">
       <View style={styles.titleRow}>
         <AppText variant="subtitle" style={styles.title}>{title}</AppText>
-        <View style={styles.actionPlaceholder} accessibilityElementsHidden />
+        {onSeeAllPress ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`See all ${title}`}
+            onPress={onSeeAllPress}
+            hitSlop={8}
+          >
+            <AppText variant="caption" style={styles.seeAll}>
+              See All
+            </AppText>
+          </Pressable>
+        ) : (
+          <View style={styles.actionPlaceholder} accessibilityElementsHidden />
+        )}
       </View>
     </View>
   );
@@ -34,6 +48,10 @@ const styles = StyleSheet.create({
     flex: 1,
     color: colors.textPrimary,
     letterSpacing: 0.15,
+  },
+  seeAll: {
+    color: colors.accent,
+    fontWeight: '600',
   },
   actionPlaceholder: {
     width: spacing.xl,

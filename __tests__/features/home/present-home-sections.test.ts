@@ -40,7 +40,7 @@ describe('presentHomeSections', () => {
       createSection('Trending', [createItem({ id: 'trending-id', title: 'Trending Title' })]),
     ];
 
-    const presented = presentHomeSections(sections);
+    const presented = presentHomeSections(sections, true);
 
     expect(presented.heroItems.map((item) => item.id)).toEqual([
       'featured-id',
@@ -50,33 +50,39 @@ describe('presentHomeSections', () => {
     expect(presented.sections).toHaveLength(0);
   });
 
-  it('does not promote Continue Watching into the hero', () => {
+  it('excludes Continue Watching from visible sections', () => {
     const continueItem = createItem({ id: 'continue-id', contentType: 'tv' });
     const recommended = createItem({ id: 'recommended-id' });
     const sections = [
       createSection('ContinueWatching', [continueItem]),
       createSection('RecommendedForYou', [recommended]),
+      createSection('Trending', [createItem({ id: 'trending-id' })]),
     ];
 
-    const presented = presentHomeSections(sections);
+    const presented = presentHomeSections(sections, true);
 
-    expect(presented.heroItems.map((item) => item.id)).toEqual(['recommended-id']);
-    expect(presented.sections.find((section) => section.type === 'ContinueWatching')?.items).toEqual([
-      continueItem,
-    ]);
+    expect(presented.heroItems.map((item) => item.id)).toEqual(['recommended-id', 'trending-id']);
+    expect(presented.sections.some((section) => section.type === 'ContinueWatching')).toBe(false);
   });
 
-  it('omits a rail that only contained hero candidates', () => {
-    const featured = createItem({ id: 'featured-id', title: 'Featured Title' });
+  it('excludes Popular and Genre sections from visible rails', () => {
     const sections = [
-      createSection('RecommendedForYou', [featured]),
-      createSection('Trending', [createItem({ id: 'trending-id', title: 'Trending Title' })]),
+      createSection('Popular', [createItem({ id: 'popular-id' })]),
+      createSection('Genre', [createItem({ id: 'genre-id' })]),
+      createSection('Trending', [
+        createItem({ id: 'trending-id-1' }),
+        createItem({ id: 'trending-id-2' }),
+        createItem({ id: 'trending-id-3' }),
+        createItem({ id: 'trending-id-4' }),
+        createItem({ id: 'trending-id-5' }),
+        createItem({ id: 'trending-id-6' }),
+      ]),
     ];
 
-    const presented = presentHomeSections(sections);
+    const presented = presentHomeSections(sections, false);
 
-    expect(presented.sections).toHaveLength(0);
-    expect(presented.heroItems.map((item) => item.id)).toEqual(['featured-id', 'trending-id']);
+    expect(presented.sections.map((section) => section.type)).toEqual(['Trending']);
+    expect(presented.sections[0].items).toHaveLength(1);
   });
 
   it('does not remove hero items from non-source rails', () => {
@@ -90,7 +96,7 @@ describe('presentHomeSections', () => {
       createSection('Trending', [shared, createItem({ id: 'unique-id', title: 'Unique' })]),
     ];
 
-    const presented = presentHomeSections(sections);
+    const presented = presentHomeSections(sections, true);
 
     expect(presented.heroItems.map((item) => item.id)).toEqual([
       'shared-id',

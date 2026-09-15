@@ -1,4 +1,5 @@
 import type { HomeItem, HomeSection, HomeSectionType } from '../types';
+import { applyHomeSectionPolicy } from './home-section-policy';
 import { selectHeroCandidates } from './selectHeroCandidates';
 
 export interface PresentedHomeFeed {
@@ -6,8 +7,12 @@ export interface PresentedHomeFeed {
   sections: HomeSection[];
 }
 
-export function presentHomeSections(sections: HomeSection[]): PresentedHomeFeed {
-  const heroCandidates = selectHeroCandidates(sections);
+export function presentHomeSections(
+  sections: HomeSection[],
+  isPersonalized: boolean,
+): PresentedHomeFeed {
+  const visibleSections = applyHomeSectionPolicy(sections, isPersonalized);
+  const heroCandidates = selectHeroCandidates(visibleSections, isPersonalized);
 
   const removalsBySection = new Map<HomeSectionType, Set<string>>();
   for (const candidate of heroCandidates) {
@@ -16,7 +21,7 @@ export function presentHomeSections(sections: HomeSection[]): PresentedHomeFeed 
     removalsBySection.set(candidate.sourceType, existing);
   }
 
-  const presentedSections = sections
+  const presentedSections = visibleSections
     .map((section) => {
       const idsToRemove = removalsBySection.get(section.type);
       if (!idsToRemove) {

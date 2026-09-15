@@ -39,22 +39,37 @@ describe('selectHeroCandidates', () => {
       createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, true);
 
     expect(candidates.map((candidate) => candidate.item.id)).toEqual(['recommended']);
   });
 
-  it('prioritizes recommended items first', () => {
+  it('prioritizes recommended items for personalized users', () => {
     const sections = [
       createSection('Trending', [createItem({ id: 'trending' })]),
-      createSection('RecommendedForYou', [createItem({ id: 'recommended-1' }), createItem({ id: 'recommended-2' })]),
+      createSection('RecommendedForYou', [
+        createItem({ id: 'recommended-1' }),
+        createItem({ id: 'recommended-2' }),
+      ]),
       createSection('Popular', [createItem({ id: 'popular' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, true);
 
     expect(candidates[0].item.id).toBe('recommended-1');
     expect(candidates[1].item.id).toBe('recommended-2');
+  });
+
+  it('does not use excluded Popular items for personalized hero selection', () => {
+    const sections = [
+      createSection('RecommendedForYou', [createItem({ id: 'rec-1' })]),
+      createSection('Trending', [createItem({ id: 'trending-1' })]),
+      createSection('Popular', [createItem({ id: 'popular-1' })]),
+    ];
+
+    const candidates = selectHeroCandidates(sections, true);
+
+    expect(candidates.map((candidate) => candidate.item.id)).toEqual(['rec-1', 'trending-1']);
   });
 
   it('caps recommended items for diversity when other sources exist', () => {
@@ -68,32 +83,52 @@ describe('selectHeroCandidates', () => {
           createItem({ id: 'rec-4' }),
         ],
       ),
-      createSection('Trending', [createItem({ id: 'trending-1' }), createItem({ id: 'trending-2' })]),
-      createSection('Popular', [createItem({ id: 'popular-1' }), createItem({ id: 'popular-2' })]),
+      createSection('Trending', [createItem({ id: 'trending-1' })]),
+      createSection('NewReleases', [createItem({ id: 'new-1' })]),
+      createSection('TopRated', [createItem({ id: 'top-1' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, true);
 
     expect(candidates).toHaveLength(HERO_MAX_CANDIDATES);
     expect(candidates.filter((candidate) => candidate.sourceType === 'RecommendedForYou')).toHaveLength(3);
-    expect(candidates.some((candidate) => candidate.sourceType === 'Trending')).toBe(true);
-    expect(candidates.some((candidate) => candidate.sourceType === 'Popular')).toBe(true);
+    expect(candidates.map((candidate) => candidate.sourceType)).toEqual([
+      'RecommendedForYou',
+      'RecommendedForYou',
+      'RecommendedForYou',
+      'Trending',
+      'NewReleases',
+    ]);
   });
 
-  it('includes trending and popular when recommended is sparse', () => {
+  it('prefers Trending for cold-start hero selection', () => {
     const sections = [
-      createSection('RecommendedForYou', [createItem({ id: 'rec-1' })]),
+      createSection('TopRated', [createItem({ id: 'top-1' })]),
       createSection('Trending', [createItem({ id: 'trending-1' })]),
+      createSection('NewReleases', [createItem({ id: 'new-1' })]),
       createSection('Popular', [createItem({ id: 'popular-1' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, false);
 
+    expect(candidates[0].item.id).toBe('trending-1');
     expect(candidates.map((candidate) => candidate.item.id)).toEqual([
-      'rec-1',
       'trending-1',
-      'popular-1',
+      'new-1',
+      'top-1',
     ]);
+  });
+
+  it('falls back to New Releases and Top Rated for cold-start users', () => {
+    const sections = [
+      createSection('Trending', []),
+      createSection('NewReleases', [createItem({ id: 'new-1' })]),
+      createSection('TopRated', [createItem({ id: 'top-1' })]),
+    ];
+
+    const candidates = selectHeroCandidates(sections, false);
+
+    expect(candidates.map((candidate) => candidate.item.id)).toEqual(['new-1', 'top-1']);
   });
 
   it('removes cross-source duplicates using mediaType and contentId', () => {
@@ -101,23 +136,14 @@ describe('selectHeroCandidates', () => {
     const sections = [
       createSection('RecommendedForYou', [shared]),
       createSection('Trending', [shared, createItem({ id: 'trending-only' })]),
-      createSection('Popular', [createItem({ id: 'popular-only' })]),
+      createSection('TopRated', [createItem({ id: 'top-only' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, true);
     const keys = candidates.map((candidate) => `${candidate.item.contentType}:${candidate.item.id}`);
 
     expect(new Set(keys).size).toBe(keys.length);
     expect(keys).toContain('movie:shared-id');
-  });
-
-  it('allows fewer than five candidates', () => {
-    const sections = [
-      createSection('RecommendedForYou', [createItem({ id: 'rec-1' })]),
-      createSection('Trending', [createItem({ id: 'trending-1' })]),
-    ];
-
-    expect(selectHeroCandidates(sections)).toHaveLength(2);
   });
 
   it('respects movie-only sections for movie filter results', () => {
@@ -126,7 +152,7 @@ describe('selectHeroCandidates', () => {
       createSection('Trending', [createItem({ id: 'movie-2', contentType: 'movie' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, true);
 
     expect(candidates.every((candidate) => candidate.item.contentType === 'movie')).toBe(true);
   });
@@ -137,19 +163,8 @@ describe('selectHeroCandidates', () => {
       createSection('Trending', [createItem({ id: 'tv-2', contentType: 'tv' })]),
     ];
 
-    const candidates = selectHeroCandidates(sections);
+    const candidates = selectHeroCandidates(sections, true);
 
     expect(candidates.every((candidate) => candidate.item.contentType === 'tv')).toBe(true);
-  });
-
-  it('allows both movie and tv candidates for all filter results', () => {
-    const sections = [
-      createSection('RecommendedForYou', [createItem({ id: 'movie-1', contentType: 'movie' })]),
-      createSection('Trending', [createItem({ id: 'tv-1', contentType: 'tv' })]),
-    ];
-
-    const candidates = selectHeroCandidates(sections);
-
-    expect(candidates.map((candidate) => candidate.item.contentType)).toEqual(['movie', 'tv']);
   });
 });

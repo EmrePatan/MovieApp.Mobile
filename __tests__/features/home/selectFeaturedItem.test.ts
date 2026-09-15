@@ -46,31 +46,18 @@ describe('selectFeaturedItem', () => {
       ),
     ];
 
-    expect(selectFeaturedItem(sections)?.id).toBe('recommended');
+    expect(selectFeaturedItem(sections, true)?.id).toBe('recommended');
   });
 
-  it('falls back to RecommendedForYou when ContinueWatching is empty', () => {
+  it('falls back to Trending for cold-start users', () => {
     const sections = [
-      createSection('ContinueWatching', []),
-      createSection(
-        'RecommendedForYou',
-        [createItem({ id: 'recommended', title: 'Recommended Title' })],
-      ),
-      createSection('Trending', [createItem({ id: 'trending', title: 'Trending Title' })]),
-    ];
-
-    expect(selectFeaturedItem(sections)?.id).toBe('recommended');
-  });
-
-  it('falls back to Trending when recommended is empty', () => {
-    const sections = [
-      createSection('ContinueWatching', []),
-      createSection('RecommendedForYou', []),
+      createSection('ContinueWatching', [createItem({ id: 'continue' })]),
+      createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),
       createSection('Trending', [createItem({ id: 'trending', title: 'Trending Title' })]),
       createSection('Popular', [createItem({ id: 'popular', title: 'Popular Title' })]),
     ];
 
-    expect(selectFeaturedItem(sections)?.id).toBe('trending');
+    expect(selectFeaturedItem(sections, false)?.id).toBe('trending');
   });
 
   it('returns null for empty sections', () => {
@@ -83,6 +70,6 @@ describe('selectFeaturedItem', () => {
       createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),
     ];
 
-    expect(selectFeaturedSourceSectionType(sections)).toBe('RecommendedForYou');
+    expect(selectFeaturedSourceSectionType(sections, true)).toBe('RecommendedForYou');
   });
 });

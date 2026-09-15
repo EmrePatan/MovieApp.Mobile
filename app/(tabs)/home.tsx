@@ -46,8 +46,8 @@ export default function HomeScreen() {
       (section) => section.items.length > 0,
     );
 
-    return presentHomeSections(nonEmptySections);
-  }, [data?.sections]);
+    return presentHomeSections(nonEmptySections, data?.isPersonalized ?? false);
+  }, [data?.isPersonalized, data?.sections]);
 
   const handleRefresh = useCallback(() => {
     void queryClient.invalidateQueries({
@@ -72,11 +72,24 @@ export default function HomeScreen() {
     [queryClient, router],
   );
 
+  const handleSeeAllPress = useCallback(
+    (sectionType: HomeSectionModel['type']) => {
+      if (sectionType === 'Trending') {
+        router.push('/discover');
+      }
+    },
+    [router],
+  );
+
   const renderSection = useCallback(
     ({ item }: { item: HomeSectionModel }) => (
-      <HomeSection section={item} onItemPress={handleItemPress} />
+      <HomeSection
+        section={item}
+        onItemPress={handleItemPress}
+        onSeeAllPress={item.type === 'Trending' ? () => handleSeeAllPress(item.type) : undefined}
+      />
     ),
-    [handleItemPress],
+    [handleItemPress, handleSeeAllPress],
   );
 
   const listHeader = useMemo(

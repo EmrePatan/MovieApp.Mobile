@@ -1,9 +1,18 @@
 import type { HomeItem, HomeSection, HomeSectionType } from '../types';
+import {
+  COLD_START_HERO_SOURCE_ORDER,
+  PERSONALIZED_HERO_SOURCE_ORDER,
+} from './home-section-policy';
 
 export const HERO_MAX_CANDIDATES = 5;
 export const HERO_RECOMMENDED_CAP = 3;
 
-const HERO_SOURCE_TYPES: HomeSectionType[] = ['RecommendedForYou', 'Trending', 'Popular'];
+const HERO_ELIGIBLE_SECTION_TYPES: HomeSectionType[] = [
+  'RecommendedForYou',
+  'Trending',
+  'NewReleases',
+  'TopRated',
+];
 
 export interface HeroCandidate {
   item: HomeItem;
@@ -18,9 +27,17 @@ function getSectionItems(sections: HomeSection[], type: HomeSectionType): HomeIt
   return sections.find((section) => section.type === type && section.items.length > 0)?.items ?? [];
 }
 
-export function selectHeroCandidates(sections: HomeSection[]): HeroCandidate[] {
+function getHeroSourceOrder(isPersonalized: boolean): readonly HomeSectionType[] {
+  return isPersonalized ? PERSONALIZED_HERO_SOURCE_ORDER : COLD_START_HERO_SOURCE_ORDER;
+}
+
+export function selectHeroCandidates(
+  sections: HomeSection[],
+  isPersonalized: boolean,
+): HeroCandidate[] {
   const usedKeys = new Set<string>();
   const candidates: HeroCandidate[] = [];
+  const sourceOrder = getHeroSourceOrder(isPersonalized);
 
   const tryAdd = (item: HomeItem, sourceType: HomeSectionType): boolean => {
     if (candidates.length >= HERO_MAX_CANDIDATES) {
@@ -37,51 +54,35 @@ export function selectHeroCandidates(sections: HomeSection[]): HeroCandidate[] {
     return true;
   };
 
-  const recommendedItems = getSectionItems(sections, 'RecommendedForYou');
-  for (const item of recommendedItems) {
-    const recommendedCount = candidates.filter(
-      (candidate) => candidate.sourceType === 'RecommendedForYou',
-    ).length;
+  const addFromSection = (sourceType: HomeSectionType, limit?: number) => {
+    let added = 0;
 
-    if (recommendedCount >= HERO_RECOMMENDED_CAP) {
-      break;
-    }
-
-    tryAdd(item, 'RecommendedForYou');
-  }
-
-  if (!candidates.some((candidate) => candidate.sourceType === 'Trending')) {
-    for (const item of getSectionItems(sections, 'Trending')) {
-      if (tryAdd(item, 'Trending')) {
-        break;
-      }
-    }
-  }
-
-  if (
-    candidates.length < HERO_MAX_CANDIDATES &&
-    !candidates.some((candidate) => candidate.sourceType === 'Popular')
-  ) {
-    for (const item of getSectionItems(sections, 'Popular')) {
-      if (tryAdd(item, 'Popular')) {
-        break;
-      }
-    }
-  }
-
-  for (const sourceType of ['Trending', 'Popular'] as const) {
     for (const item of getSectionItems(sections, sourceType)) {
-      if (candidates.length >= HERO_MAX_CANDIDATES) {
+      if (limit !== undefined && added >= limit) {
         break;
       }
 
-      tryAdd(item, sourceType);
+      if (tryAdd(item, sourceType)) {
+        added += 1;
+      }
     }
+  };
+
+  if (isPersonalized) {
+    addFromSection('RecommendedForYou', HERO_RECOMMENDED_CAP);
+  }
+
+  for (const sourceType of sourceOrder) {
+    if (sourceType === 'RecommendedForYou') {
+      continue;
+    }
+
+    addFromSection(sourceType);
   }
 
   return candidates;
 }
 
 export function isHeroEligibleSectionType(type: HomeSectionType): boolean {
-  return HERO_SOURCE_TYPES.includes(type);
+  return HERO_ELIGIBLE_SECTION_TYPES.includes(type);
 }

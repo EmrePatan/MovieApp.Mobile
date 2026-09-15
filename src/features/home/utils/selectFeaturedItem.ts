@@ -1,14 +1,25 @@
 import type { HomeItem, HomeSection, HomeSectionType } from '../types';
+import { applyHomeSectionPolicy } from './home-section-policy';
 import { selectHeroCandidates } from './selectHeroCandidates';
 
 export function selectFeaturedSourceSectionType(
   sections: HomeSection[],
+  isPersonalized = false,
 ): HomeSectionType | null {
-  const candidates = selectHeroCandidates(sections);
+  const candidates = selectHeroCandidates(
+    applyHomeSectionPolicy(sections, isPersonalized),
+    isPersonalized,
+  );
   return candidates[0]?.sourceType ?? null;
 }
 
-export function selectFeaturedItem(sections: HomeSection[]): HomeItem | null {
-  const candidates = selectHeroCandidates(sections);
+export function selectFeaturedItem(
+  sections: HomeSection[],
+  isPersonalized = false,
+): HomeItem | null {
+  const candidates = selectHeroCandidates(
+    applyHomeSectionPolicy(sections, isPersonalized),
+    isPersonalized,
+  );
   return candidates[0]?.item ?? null;
 }

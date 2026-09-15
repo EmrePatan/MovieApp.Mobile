@@ -42,9 +42,10 @@ describe('Home UI components', () => {
       ],
     };
 
-    render(<HomeSection section={section} />);
+    render(<HomeSection section={section} onSeeAllPress={jest.fn()} />);
 
     expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('See All')).toBeTruthy();
     expect(screen.getByText('Interstellar')).toBeTruthy();
     expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
   });

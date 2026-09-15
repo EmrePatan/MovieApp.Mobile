@@ -11,6 +11,7 @@ import { layout } from '@/theme/layout';
 interface HomeSectionProps {
   section: HomeSectionModel;
   onItemPress?: (item: HomeItem) => void;
+  onSeeAllPress?: () => void;
 }
 
 function areHomeSectionPropsEqual(
@@ -19,6 +20,7 @@ function areHomeSectionPropsEqual(
 ): boolean {
   return (
     previous.onItemPress === next.onItemPress &&
+    previous.onSeeAllPress === next.onSeeAllPress &&
     previous.section.type === next.section.type &&
     previous.section.displayOrder === next.section.displayOrder &&
     previous.section.title === next.section.title &&
@@ -29,6 +31,7 @@ function areHomeSectionPropsEqual(
 export const HomeSection = memo(function HomeSection({
   section,
   onItemPress,
+  onSeeAllPress,
 }: HomeSectionProps) {
   const variant = getHomeSectionVariant(section.type);
 
@@ -50,7 +53,7 @@ export const HomeSection = memo(function HomeSection({
 
   return (
     <View style={styles.container}>
-      <HomeSectionHeader title={section.title} />
+      <HomeSectionHeader title={section.title} onSeeAllPress={onSeeAllPress} />
       <FlatList
         horizontal
         data={section.items}
