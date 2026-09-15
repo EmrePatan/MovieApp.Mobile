@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
-import { buildPersonDetailRoute } from '@/features/details/shared/routes';
+import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
+import { buildCreditsRoute } from '@/features/details/shared/routes';
 import type { CastMember, CrewMember, CreditsResponse } from '../types';
 import { groupCrewByDepartment } from '../utils/group-crew-by-department';
 import { CreditCastRow } from './CreditCastRow';
@@ -15,12 +16,14 @@ import { spacing } from '@/theme/spacing';
 
 interface CreditsDetailContentProps {
   contentType: 'movie' | 'tv';
+  contentId: string;
   credits: CreditsResponse;
   title?: string;
 }
 
 export function CreditsDetailContent({
   contentType,
+  contentId,
   credits,
   title,
 }: CreditsDetailContentProps) {
@@ -40,9 +43,13 @@ export function CreditsDetailContent({
         return;
       }
 
-      router.push(buildPersonDetailRoute(member.providerPersonId));
+      openPersonDetail(
+        router,
+        member.providerPersonId,
+        buildCreditsRoute(contentType, contentId, { title }),
+      );
     },
-    [router],
+    [contentId, contentType, router, title],
   );
 
   const handleCrewPress = useCallback(
@@ -51,9 +58,13 @@ export function CreditsDetailContent({
         return;
       }
 
-      router.push(buildPersonDetailRoute(member.providerPersonId));
+      openPersonDetail(
+        router,
+        member.providerPersonId,
+        buildCreditsRoute(contentType, contentId, { title }),
+      );
     },
-    [router],
+    [contentId, contentType, router, title],
   );
 
   const listHeader = (

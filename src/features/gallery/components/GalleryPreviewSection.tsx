@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
@@ -6,6 +6,7 @@ import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader'
 import { resolveThumbnailImageUri } from '@/utils/image-url';
 import type { GalleryImage } from '../types';
 import { galleryImageKey, getGalleryPreviewImages } from '../utils/gallery-images';
+import { ImageViewerModal } from './ImageViewerModal';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -26,6 +27,7 @@ export function GalleryPreviewSection({
   seeAllRoute,
 }: GalleryPreviewSectionProps) {
   const router = useRouter();
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const previewImages = useMemo(() => getGalleryPreviewImages(images), [images]);
 
   const handleSeeAllPress = useCallback(() => {
@@ -33,6 +35,14 @@ export function GalleryPreviewSection({
       router.push(seeAllRoute);
     }
   }, [router, seeAllRoute]);
+
+  const handleImagePress = useCallback((index: number) => {
+    setViewerIndex(index);
+  }, []);
+
+  const handleCloseViewer = useCallback(() => {
+    setViewerIndex(null);
+  }, []);
 
   if (isLoading) {
     return (
@@ -81,7 +91,7 @@ export function GalleryPreviewSection({
               key={galleryImageKey(item, index)}
               accessibilityRole="button"
               accessibilityLabel={`Gallery preview image ${index + 1}`}
-              onPress={seeAllRoute ? handleSeeAllPress : undefined}
+              onPress={() => handleImagePress(index)}
               style={[styles.previewItem, { width: PREVIEW_SIZE, height }]}
               testID={`gallery-preview-item-${index}`}
             >
@@ -94,6 +104,15 @@ export function GalleryPreviewSection({
           );
         })}
       </ScrollView>
+
+      {viewerIndex !== null ? (
+        <ImageViewerModal
+          visible
+          images={images}
+          initialIndex={viewerIndex}
+          onClose={handleCloseViewer}
+        />
+      ) : null}
     </View>
   );
 }

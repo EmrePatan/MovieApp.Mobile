@@ -20,7 +20,12 @@ export default function TvCreditsScreen() {
       notFoundMessage="Cast and crew could not be found for this title."
     >
       {(credits) => (
-        <CreditsDetailContent contentType="tv" credits={credits} title={title} />
+        <CreditsDetailContent
+          contentType="tv"
+          contentId={resolvedId ?? ''}
+          credits={credits}
+          title={title}
+        />
       )}
     </DetailQueryState>
   );

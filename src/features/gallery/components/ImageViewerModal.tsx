@@ -8,14 +8,15 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { resolveOriginalImageUri } from '@/utils/image-url';
 import type { GalleryImage } from '../types';
 import { galleryImageKey } from '../utils/gallery-images';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 
 interface ImageViewerModalProps {
   visible: boolean;
@@ -30,7 +31,8 @@ export function ImageViewerModal({
   initialIndex,
   onClose,
 }: ImageViewerModalProps) {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
 
   const imageUris = useMemo(
@@ -50,36 +52,23 @@ export function ImageViewerModal({
     return null;
   }
 
+  const closeButtonTop = Math.max(insets.top, spacing.sm) + spacing.sm;
+
   return (
     <Modal
       visible={visible}
       animationType="fade"
       transparent
+      statusBarTranslucent
       onRequestClose={onClose}
       testID="gallery-image-viewer"
     >
       <View style={styles.overlay}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.toolbar}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Close image viewer"
-              onPress={onClose}
-              hitSlop={8}
-              testID="gallery-image-viewer-close"
-            >
-              <Ionicons name="close" size={28} color={colors.textPrimary} />
-            </Pressable>
-            <AppText variant="caption" style={styles.counter}>
-              {activeIndex + 1} / {images.length}
-            </AppText>
-          </View>
-        </SafeAreaView>
-
         <FlatList
           horizontal
           pagingEnabled
           data={images}
+          style={styles.list}
           keyExtractor={(image, index) => galleryImageKey(image, index)}
           initialScrollIndex={Math.min(initialIndex, images.length - 1)}
           getItemLayout={(_, index) => ({
@@ -93,7 +82,7 @@ export function ImageViewerModal({
             const uri = imageUris[index];
 
             return (
-              <View style={[styles.slide, { width }]}>
+              <View style={[styles.slide, { width, height }]}>
                 {uri ? (
                   <Image
                     source={{ uri }}
@@ -110,6 +99,30 @@ export function ImageViewerModal({
             );
           }}
         />
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close image viewer"
+          onPress={onClose}
+          hitSlop={12}
+          style={({ pressed }) => [
+            styles.closeButton,
+            { top: closeButtonTop, right: spacing.lg },
+            pressed && styles.pressed,
+          ]}
+          testID="gallery-image-viewer-close"
+        >
+          <Ionicons name="close" size={24} color={colors.textPrimary} />
+        </Pressable>
+
+        <View
+          pointerEvents="none"
+          style={[styles.counterContainer, { bottom: insets.bottom + spacing.lg }]}
+        >
+          <AppText variant="caption" style={styles.counter}>
+            {activeIndex + 1} / {images.length}
+          </AppText>
+        </View>
       </View>
     </Modal>
   );
@@ -120,25 +133,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.96)',
   },
-  safeArea: {
+  list: {
+    flex: 1,
+  },
+  closeButton: {
     position: 'absolute',
-    top: 0,
+    zIndex: 100,
+    elevation: 100,
+    width: interaction.touchTarget,
+    height: interaction.touchTarget,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(10, 10, 15, 0.85)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  pressed: {
+    opacity: interaction.pressedOpacity,
+  },
+  counterContainer: {
+    position: 'absolute',
     left: 0,
     right: 0,
-    zIndex: 2,
-  },
-  toolbar: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    zIndex: 50,
   },
   counter: {
     color: colors.textPrimary,
+    backgroundColor: 'rgba(10, 10, 15, 0.6)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
   slide: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.md,

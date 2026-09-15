@@ -8,9 +8,13 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: mockPush,
     back: jest.fn(),
+    navigate: jest.fn(),
+    canGoBack: jest.fn(() => false),
   }),
   useSegments: () => ['credits', 'movie', '3fa85f64-5717-4562-b3fc-2c963f66afa6'],
 }));
+
+const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 
 describe('CreditsDetailContent', () => {
   beforeEach(() => {
@@ -21,6 +25,7 @@ describe('CreditsDetailContent', () => {
     render(
       <CreditsDetailContent
         contentType="movie"
+        contentId={movieId}
         title="Interstellar"
         credits={{
           cast: [
@@ -70,6 +75,7 @@ describe('CreditsDetailContent', () => {
     render(
       <CreditsDetailContent
         contentType="movie"
+        contentId={movieId}
         credits={{
           cast: [
             {

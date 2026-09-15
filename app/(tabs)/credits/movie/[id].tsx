@@ -20,7 +20,12 @@ export default function MovieCreditsScreen() {
       notFoundMessage="Cast and crew could not be found for this title."
     >
       {(credits) => (
-        <CreditsDetailContent contentType="movie" credits={credits} title={title} />
+        <CreditsDetailContent
+          contentType="movie"
+          contentId={resolvedId ?? ''}
+          credits={credits}
+          title={title}
+        />
       )}
     </DetailQueryState>
   );

@@ -7,6 +7,10 @@ import {
   isRootCatalogDetailRoute,
   returnToCatalogDetailOrigin,
 } from '../navigation/catalog-detail-navigation';
+import {
+  isPersonDetailRoute,
+  returnFromPersonDetail,
+} from '../navigation/person-detail-navigation';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -30,6 +34,11 @@ export function DetailBackButton({
   const handleBack = useCallback(() => {
     if (isRootCatalogDetailRoute(segments)) {
       returnToCatalogDetailOrigin(router);
+      return;
+    }
+
+    if (isPersonDetailRoute(segments)) {
+      returnFromPersonDetail(router);
       return;
     }
 

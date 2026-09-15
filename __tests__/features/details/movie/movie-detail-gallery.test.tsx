@@ -214,6 +214,25 @@ describe('detail gallery integration', () => {
     expect(screen.queryByText('Photos')).toBeNull();
   });
 
+  it('opens the image viewer when a preview photo is tapped', async () => {
+    (getMovieGallery as jest.Mock).mockResolvedValue(
+      createGallery({
+        backdrops: [{ filePath: '/backdrop-1.jpg' }],
+      }),
+    );
+
+    renderWithQueryClient(<MovieDetailContent movie={baseMovie} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('gallery-preview-item-0')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('gallery-preview-item-0'));
+
+    expect(screen.getByTestId('gallery-image-viewer')).toBeTruthy();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
   it('navigates to movie gallery route from see all', async () => {
     (getMovieGallery as jest.Mock).mockResolvedValue(
       createGallery({
