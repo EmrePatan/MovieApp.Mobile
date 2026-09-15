@@ -123,7 +123,7 @@ describe('HomeScreen', () => {
           },
           {
             type: 'Trending',
-            title: 'Trending',
+            title: 'Trending Now',
             displayOrder: 1,
             items: [
               {
@@ -236,8 +236,8 @@ describe('HomeScreen', () => {
     render(<HomeScreen />);
     expect(screen.getByText('Find your next favorite')).toBeTruthy();
     expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.getByText('New Releases')).toBeTruthy();
-    expect(screen.queryByText('Trending')).toBeNull();
     expect(screen.queryByLabelText('Show TV Shows')).toBeNull();
   });
 
@@ -280,7 +280,7 @@ describe('HomeScreen', () => {
           },
           {
             type: 'Trending',
-            title: 'Trending',
+            title: 'Trending Now',
             displayOrder: 2,
             items: [
               {
@@ -345,7 +345,6 @@ describe('HomeScreen', () => {
     render(<HomeScreen />);
     expect(screen.getByLabelText('More info about Hero Movie')).toBeTruthy();
     expect(screen.getByText('Recommended Movie')).toBeTruthy();
-    expect(screen.queryByText('Trending Movie')).toBeNull();
     expect(screen.queryByText('Continue Show')).toBeNull();
     expect(screen.queryByText('Continue Watching')).toBeNull();
   });
@@ -507,7 +506,45 @@ describe('HomeScreen', () => {
     expect(screen.queryByText('Because You Watched')).toBeNull();
     expect(screen.queryByText('Popular')).toBeNull();
     expect(screen.queryByText('Popular Movie')).toBeNull();
-    expect(screen.queryByText('Trending')).toBeNull();
+  });
+
+  it('navigates to Discover from Trending See All', () => {
+    mockUseHome.mockReturnValue({
+      data: {
+        sections: [
+          {
+            type: 'Trending',
+            title: 'Trending Now',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'trending-only',
+                contentType: 'movie',
+                title: 'Trending Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.0,
+                voteCount: 50,
+              },
+            ],
+          },
+        ],
+        isPersonalized: false,
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+    });
+
+    render(<HomeScreen />);
+
+    fireEvent.press(screen.getByLabelText('See all Trending Now'));
+
+    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
   });
 
   it('keeps the full Recommended rail when hero comes from Hot This Week', () => {

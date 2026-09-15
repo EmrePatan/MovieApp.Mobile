@@ -78,6 +78,11 @@ export default function HomeScreen() {
 
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
+      if (sectionType === 'Trending') {
+        router.push('/discover?mode=trending&type=all');
+        return;
+      }
+
       if (sectionType === 'TopRated') {
         router.push('/discover?mode=top_rated&type=all');
         return;
@@ -96,7 +101,7 @@ export default function HomeScreen() {
         section={item}
         onItemPress={handleItemPress}
         onSeeAllPress={
-          item.type === 'TopRated' || item.type === 'NewReleases'
+          item.type === 'Trending' || item.type === 'TopRated' || item.type === 'NewReleases'
             ? () => handleSeeAllPress(item.type)
             : undefined
         }

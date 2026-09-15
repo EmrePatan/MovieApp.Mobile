@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import SearchScreen from '../../../app/(tabs)/search';
-import { useExplorePreview } from '@/features/discovery/hooks/useExplorePreview';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
@@ -20,10 +19,6 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: true }),
-}));
-
-jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({
-  useExplorePreview: jest.fn(),
 }));
 
 jest.mock('@/features/discovery/hooks/useGenres', () => ({
@@ -64,20 +59,6 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
-const previewItem = {
-  id: 'preview-1',
-  type: 'movie' as const,
-  title: 'Preview Movie',
-  originalTitle: 'Preview Movie',
-  overview: 'Overview',
-  posterUrl: null,
-  backdropUrl: null,
-  releaseDate: '2020-01-01',
-  voteAverage: 8.0,
-  voteCount: 100,
-  year: 2020,
-};
-
 const mockSearchResult = {
   id: 'movie-id',
   type: 'movie' as const,
@@ -95,17 +76,6 @@ const mockSearchResult = {
 describe('SearchScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useExplorePreview as jest.Mock).mockReturnValue({
-      data: {
-        trending: { items: [previewItem], page: 1, pageSize: 10, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
-        topRated: { items: [previewItem], page: 1, pageSize: 10, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
-        newReleases: { items: [previewItem], page: 1, pageSize: 10, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
-      },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-    });
 
     (useGenres as jest.Mock).mockReturnValue({
       data: [{ id: 'genre-1', name: 'Action' }],
@@ -151,17 +121,11 @@ describe('SearchScreen', () => {
   it('renders explore landing in idle state', () => {
     render(<SearchScreen />);
 
-    expect(screen.getByText('Trending Now')).toBeTruthy();
+    expect(screen.queryByText('Trending Now')).toBeNull();
     expect(screen.queryByText('Top Rated')).toBeNull();
     expect(screen.queryByText('New Releases')).toBeNull();
     expect(screen.getByText('Explore by Genre')).toBeTruthy();
     expect(screen.queryByText('Discover trending & popular')).toBeNull();
-  });
-
-  it('navigates to discover from trending see all', () => {
-    render(<SearchScreen />);
-    fireEvent.press(screen.getByLabelText('See all Trending Now'));
-    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
   });
 
   it('navigates to discover from genre chip', () => {
@@ -263,7 +227,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
     fireEvent.press(screen.getByLabelText('Clear search'));
 
-    expect(screen.getByText('Trending Now')).toBeTruthy();
+    expect(screen.getByText('Explore by Genre')).toBeTruthy();
     expect(screen.queryByLabelText('Search for Interstellar, Movie')).toBeNull();
   });
 
@@ -456,7 +420,7 @@ describe('SearchScreen', () => {
 
     expect(screen.getByText('Recent Searches')).toBeTruthy();
     expect(screen.getByText('inception')).toBeTruthy();
-    expect(screen.getByText('Trending Now')).toBeTruthy();
+    expect(screen.queryByText('Trending Now')).toBeNull();
   });
 
   it('clears the query from the clear button', () => {
@@ -479,18 +443,16 @@ describe('SearchScreen', () => {
     expect(useSearchResults).toHaveBeenLastCalledWith('star', 'tv');
   });
 
-  it('keeps search usable when explore preview fails', () => {
-    (useExplorePreview as jest.Mock).mockReturnValue({
-      data: undefined,
+  it('keeps search usable when genre loading fails', () => {
+    (useGenres as jest.Mock).mockReturnValue({
+      data: [{ id: 'genre-1', name: 'Action' }],
       isLoading: false,
       isError: true,
-      refetch: jest.fn(),
     });
 
     render(<SearchScreen />);
 
     expect(screen.getByLabelText('Search movies and TV shows')).toBeTruthy();
-    expect(screen.getByText('Unable to load discovery previews right now.')).toBeTruthy();
     expect(screen.getByText('Explore by Genre')).toBeTruthy();
   });
 

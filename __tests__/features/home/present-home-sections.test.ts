@@ -52,6 +52,44 @@ describe('presentHomeSections', () => {
     expect(presented.sections[0].items).toHaveLength(10);
   });
 
+  it('orders cold-start rails as Trending, Top Rated, then New Releases', () => {
+    const sections = [
+      createSection('HotThisWeek', [createItem({ id: 'hot-id' })]),
+      createSection('NewReleases', [createItem({ id: 'new-id' })]),
+      createSection('TopRated', [createItem({ id: 'top-id' })]),
+      createSection('Trending', [createItem({ id: 'trending-id' })]),
+    ];
+
+    const presented = presentHomeSections(sections, false);
+
+    expect(presented.showColdWelcome).toBe(true);
+    expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
+    expect(presented.sections.map((section) => section.type)).toEqual([
+      'Trending',
+      'TopRated',
+      'NewReleases',
+    ]);
+  });
+
+  it('orders personalized rails with Trending after Recommended For You', () => {
+    const sections = [
+      createSection('HotThisWeek', [createItem({ id: 'hot-id' })]),
+      createSection('RecommendedForYou', [createItem({ id: 'rec-id' })]),
+      createSection('Trending', [createItem({ id: 'trending-id' })]),
+      createSection('TopRated', [createItem({ id: 'top-id' })]),
+      createSection('NewReleases', [createItem({ id: 'new-id' })]),
+    ];
+
+    const presented = presentHomeSections(sections, true);
+
+    expect(presented.sections.map((section) => section.type)).toEqual([
+      'RecommendedForYou',
+      'Trending',
+      'TopRated',
+      'NewReleases',
+    ]);
+  });
+
   it('excludes Continue Watching and Because You Watched from visible sections', () => {
     const sections = [
       createSection('ContinueWatching', [createItem({ id: 'continue-id', contentType: 'tv' })]),
@@ -65,19 +103,5 @@ describe('presentHomeSections', () => {
     expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
     expect(presented.sections.some((section) => section.type === 'ContinueWatching')).toBe(false);
     expect(presented.sections.some((section) => section.type === 'BecauseYouWatched')).toBe(false);
-  });
-
-  it('orders cold-start rails as Top Rated then New Releases', () => {
-    const sections = [
-      createSection('HotThisWeek', [createItem({ id: 'hot-id' })]),
-      createSection('NewReleases', [createItem({ id: 'new-id' })]),
-      createSection('TopRated', [createItem({ id: 'top-id' })]),
-    ];
-
-    const presented = presentHomeSections(sections, false);
-
-    expect(presented.showColdWelcome).toBe(true);
-    expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
-    expect(presented.sections.map((section) => section.type)).toEqual(['TopRated', 'NewReleases']);
   });
 });
