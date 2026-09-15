@@ -24,8 +24,8 @@ interface HomeHeroProps {
   favoriteStatusPending?: boolean;
 }
 
-const HERO_MORE_INFO_MIN_WIDTH = 160;
-const HERO_MORE_INFO_MAX_WIDTH = 180;
+const HERO_MORE_INFO_MIN_WIDTH = 140;
+const HERO_MORE_INFO_MAX_WIDTH = 160;
 const HERO_FAVORITE_SIZE = 48;
 const HERO_SCRIM_COLORS = [
   'rgba(10, 10, 15, 0)',
@@ -107,7 +107,7 @@ export const HomeHero = memo(function HomeHero({
     () =>
       Math.min(
         HERO_MORE_INFO_MAX_WIDTH,
-        Math.max(HERO_MORE_INFO_MIN_WIDTH, Math.round(width * 0.44)),
+        Math.max(HERO_MORE_INFO_MIN_WIDTH, Math.round(width * 0.38)),
       ),
     [width],
   );
