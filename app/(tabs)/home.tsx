@@ -78,8 +78,13 @@ export default function HomeScreen() {
 
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
-      if (sectionType === 'Trending') {
-        router.push('/discover?mode=trending&type=all');
+      if (sectionType === 'TopRated') {
+        router.push('/discover?mode=top_rated&type=all');
+        return;
+      }
+
+      if (sectionType === 'NewReleases') {
+        router.push('/discover?mode=new_releases&type=all');
       }
     },
     [router],
@@ -90,7 +95,11 @@ export default function HomeScreen() {
       <HomeSection
         section={item}
         onItemPress={handleItemPress}
-        onSeeAllPress={item.type === 'Trending' ? () => handleSeeAllPress(item.type) : undefined}
+        onSeeAllPress={
+          item.type === 'TopRated' || item.type === 'NewReleases'
+            ? () => handleSeeAllPress(item.type)
+            : undefined
+        }
       />
     ),
     [handleItemPress, handleSeeAllPress],

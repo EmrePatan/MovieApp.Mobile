@@ -152,8 +152,8 @@ describe('SearchScreen', () => {
     render(<SearchScreen />);
 
     expect(screen.getByText('Trending Now')).toBeTruthy();
-    expect(screen.getByText('Top Rated')).toBeTruthy();
-    expect(screen.getByText('New Releases')).toBeTruthy();
+    expect(screen.queryByText('Top Rated')).toBeNull();
+    expect(screen.queryByText('New Releases')).toBeNull();
     expect(screen.getByText('Explore by Genre')).toBeTruthy();
     expect(screen.queryByText('Discover trending & popular')).toBeNull();
   });

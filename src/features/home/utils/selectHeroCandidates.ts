@@ -5,9 +5,8 @@ import {
 } from './home-section-policy';
 
 export const HERO_MAX_CANDIDATES = 5;
-export const HERO_RECOMMENDED_CAP = 3;
 
-const HERO_ELIGIBLE_SECTION_TYPES: HomeSectionType[] = ['RecommendedForYou'];
+const HERO_ELIGIBLE_SECTION_TYPES: HomeSectionType[] = ['HotThisWeek'];
 
 export interface HeroCandidate {
   item: HomeItem;
@@ -30,10 +29,6 @@ export function selectHeroCandidates(
   sections: HomeSection[],
   isPersonalized: boolean,
 ): HeroCandidate[] {
-  if (!isPersonalized) {
-    return [];
-  }
-
   const usedKeys = new Set<string>();
   const candidates: HeroCandidate[] = [];
   const sourceOrder = getHeroSourceOrder(isPersonalized);
@@ -53,27 +48,15 @@ export function selectHeroCandidates(
     return true;
   };
 
-  const addFromSection = (sourceType: HomeSectionType, limit?: number) => {
-    let added = 0;
-
+  const addFromSection = (sourceType: HomeSectionType) => {
     for (const item of getSectionItems(sections, sourceType)) {
-      if (limit !== undefined && added >= limit) {
+      if (!tryAdd(item, sourceType)) {
         break;
-      }
-
-      if (tryAdd(item, sourceType)) {
-        added += 1;
       }
     }
   };
 
-  addFromSection('RecommendedForYou', HERO_RECOMMENDED_CAP);
-
   for (const sourceType of sourceOrder) {
-    if (sourceType === 'RecommendedForYou') {
-      continue;
-    }
-
     addFromSection(sourceType);
   }
 

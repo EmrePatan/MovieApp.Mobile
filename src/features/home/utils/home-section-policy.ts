@@ -5,34 +5,31 @@ export const EXCLUDED_HOME_SECTION_TYPES = new Set<HomeSectionType>([
   'Popular',
   'Genre',
   'BasedOnFavorites',
-  'NewReleases',
-  'TopRated',
+  'BecauseYouWatched',
+  'Trending',
+  'HotThisWeek',
 ]);
 
 export const PERSONALIZED_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
   'RecommendedForYou',
-  'BecauseYouWatched',
+  'TopRated',
+  'NewReleases',
 ];
 
-export const COLD_START_HOME_SECTION_ORDER: readonly HomeSectionType[] = ['Trending'];
+export const COLD_START_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
+  'TopRated',
+  'NewReleases',
+];
 
-export const PERSONALIZED_HERO_SOURCE_ORDER: readonly HomeSectionType[] = ['RecommendedForYou'];
+export const PERSONALIZED_HERO_SOURCE_ORDER: readonly HomeSectionType[] = ['HotThisWeek'];
 
-export const COLD_START_HERO_SOURCE_ORDER: readonly HomeSectionType[] = [];
+export const COLD_START_HERO_SOURCE_ORDER: readonly HomeSectionType[] = ['HotThisWeek'];
 
 export function isAllowedHomeSectionType(
   type: HomeSectionType,
-  isPersonalized: boolean,
+  _isPersonalized: boolean,
 ): boolean {
-  if (EXCLUDED_HOME_SECTION_TYPES.has(type)) {
-    return false;
-  }
-
-  if (isPersonalized && type === 'Trending') {
-    return false;
-  }
-
-  return true;
+  return !EXCLUDED_HOME_SECTION_TYPES.has(type);
 }
 
 export function applyHomeSectionPolicy(

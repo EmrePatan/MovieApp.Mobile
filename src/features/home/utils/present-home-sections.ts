@@ -1,4 +1,4 @@
-import type { HomeItem, HomeSection, HomeSectionType } from '../types';
+import type { HomeItem, HomeSection } from '../types';
 import { applyHomeSectionPolicy } from './home-section-policy';
 import { selectHeroCandidates } from './selectHeroCandidates';
 
@@ -12,27 +12,22 @@ export function presentHomeSections(
   sections: HomeSection[],
   isPersonalized: boolean,
 ): PresentedHomeFeed {
+  const heroCandidates = selectHeroCandidates(sections, isPersonalized);
   const visibleSections = applyHomeSectionPolicy(sections, isPersonalized);
-  const heroCandidates = selectHeroCandidates(visibleSections, isPersonalized);
   const showColdWelcome = !isPersonalized;
-
-  const removalsBySection = new Map<HomeSectionType, Set<string>>();
-  for (const candidate of heroCandidates) {
-    const existing = removalsBySection.get(candidate.sourceType) ?? new Set<string>();
-    existing.add(candidate.item.id);
-    removalsBySection.set(candidate.sourceType, existing);
-  }
+  const heroIds = new Set(heroCandidates.map((candidate) => candidate.item.id));
 
   const presentedSections = visibleSections
     .map((section) => {
-      const idsToRemove = removalsBySection.get(section.type);
-      if (!idsToRemove) {
+      if (section.type !== 'RecommendedForYou' || heroIds.size === 0) {
         return section;
       }
 
+      const withoutHero = section.items.filter((item) => !heroIds.has(item.id));
+
       return {
         ...section,
-        items: section.items.filter((item) => !idsToRemove.has(item.id)),
+        items: withoutHero.length >= 10 ? withoutHero.slice(0, 10) : section.items,
       };
     })
     .filter((section) => section.items.length > 0);

@@ -31,12 +31,9 @@ export function SearchExploreLanding({ onItemPress }: SearchExploreLandingProps)
   const previewQuery = useExplorePreview(DEFAULT_HOME_SECTION_SIZE);
   const genresQuery = useGenres();
 
-  const handleSeeAll = useCallback(
-    (mode: 'trending' | 'top_rated' | 'new_releases') => {
-      router.push(createDiscoverHref({ mode, type: 'all' }));
-    },
-    [router],
-  );
+  const handleSeeAll = useCallback(() => {
+    router.push(createDiscoverHref({ mode: 'trending', type: 'all' }));
+  }, [router]);
 
   const handleGenrePress = useCallback(
     (genreId: string) => {
@@ -60,18 +57,6 @@ export function SearchExploreLanding({ onItemPress }: SearchExploreLandingProps)
         'Trending Now',
         previewQuery.data.trending.items.map(mapCatalogItemToHomeItem),
         1,
-      ),
-      createPreviewSection(
-        'TopRated',
-        'Top Rated',
-        previewQuery.data.topRated.items.map(mapCatalogItemToHomeItem),
-        2,
-      ),
-      createPreviewSection(
-        'NewReleases',
-        'New Releases',
-        previewQuery.data.newReleases.items.map(mapCatalogItemToHomeItem),
-        3,
       ),
     );
   }
@@ -108,15 +93,7 @@ export function SearchExploreLanding({ onItemPress }: SearchExploreLandingProps)
           key={section.type}
           section={section}
           onItemPress={onItemPress}
-          onSeeAllPress={() => {
-            if (section.type === 'Trending') {
-              handleSeeAll('trending');
-            } else if (section.type === 'TopRated') {
-              handleSeeAll('top_rated');
-            } else if (section.type === 'NewReleases') {
-              handleSeeAll('new_releases');
-            }
-          }}
+          onSeeAllPress={section.type === 'Trending' ? handleSeeAll : undefined}
         />
       ))}
 

@@ -86,6 +86,42 @@ describe('HomeScreen', () => {
       data: {
         sections: [
           {
+            type: 'HotThisWeek',
+            title: 'Hot This Week',
+            displayOrder: 0,
+            items: [
+              {
+                id: 'hot-1',
+                contentType: 'tv',
+                title: 'Hot Show',
+                originalTitle: 'Hot Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2008-01-20',
+                voteAverage: 8.0,
+                voteCount: 100,
+              },
+            ],
+          },
+          {
+            type: 'TopRated',
+            title: 'Top Rated',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'top-1',
+                contentType: 'tv',
+                title: 'Top Show',
+                originalTitle: 'Top Show',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2008-01-20',
+                voteAverage: 9.0,
+                voteCount: 100,
+              },
+            ],
+          },
+          {
             type: 'Trending',
             title: 'Trending',
             displayOrder: 1,
@@ -199,8 +235,9 @@ describe('HomeScreen', () => {
 
     render(<HomeScreen />);
     expect(screen.getByText('Find your next favorite')).toBeTruthy();
-    expect(screen.getByText('Trending')).toBeTruthy();
-    expect(screen.queryByText('New Releases')).toBeNull();
+    expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.getByText('New Releases')).toBeTruthy();
+    expect(screen.queryByText('Trending')).toBeNull();
     expect(screen.queryByLabelText('Show TV Shows')).toBeNull();
   });
 
@@ -219,10 +256,28 @@ describe('HomeScreen', () => {
     expect(mockRefetch).toHaveBeenCalled();
   });
 
-  it('renders the hero from Recommended For You and hides Continue Watching', () => {
+  it('renders the hero from Hot This Week and hides Continue Watching', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
+          {
+            type: 'HotThisWeek',
+            title: 'Hot This Week',
+            displayOrder: 0,
+            items: [
+              {
+                id: 'hero-id',
+                contentType: 'movie',
+                title: 'Hero Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 9.0,
+                voteCount: 100,
+              },
+            ],
+          },
           {
             type: 'Trending',
             title: 'Trending',
@@ -288,7 +343,8 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    expect(screen.getByLabelText('More info about Recommended Movie')).toBeTruthy();
+    expect(screen.getByLabelText('More info about Hero Movie')).toBeTruthy();
+    expect(screen.getByText('Recommended Movie')).toBeTruthy();
     expect(screen.queryByText('Trending Movie')).toBeNull();
     expect(screen.queryByText('Continue Show')).toBeNull();
     expect(screen.queryByText('Continue Watching')).toBeNull();
@@ -441,23 +497,41 @@ describe('HomeScreen', () => {
 
     expect(presented.sections.map((section) => section.type)).toEqual([
       'RecommendedForYou',
-      'BecauseYouWatched',
+      'TopRated',
     ]);
 
     render(<HomeScreen />);
 
     expect(screen.getByText('Recommended For You')).toBeTruthy();
-    expect(screen.getByText('Because You Watched')).toBeTruthy();
-    expect(screen.queryByText('Top Rated')).toBeNull();
+    expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.queryByText('Because You Watched')).toBeNull();
     expect(screen.queryByText('Popular')).toBeNull();
     expect(screen.queryByText('Popular Movie')).toBeNull();
     expect(screen.queryByText('Trending')).toBeNull();
   });
 
-  it('deduplicates hero items from their source rails', () => {
+  it('keeps the full Recommended rail when hero comes from Hot This Week', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
+          {
+            type: 'HotThisWeek',
+            title: 'Hot This Week',
+            displayOrder: 0,
+            items: [
+              {
+                id: 'hero-id',
+                contentType: 'movie',
+                title: 'Hero Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.0,
+                voteCount: 100,
+              },
+            ],
+          },
           {
             type: 'RecommendedForYou',
             title: 'Recommended For You',
@@ -521,7 +595,7 @@ describe('HomeScreen', () => {
 
     render(<HomeScreen />);
 
-    expect(screen.getAllByText('Hero Movie')).toHaveLength(1);
+    expect(screen.getAllByText('Hero Movie')).toHaveLength(2);
     expect(screen.getByText('Fourth Recommended')).toBeTruthy();
   });
 
@@ -541,19 +615,19 @@ describe('HomeScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/search?explore=1');
   });
 
-  it('navigates to Discover from Trending See All even when hero dedup empties the rail', () => {
+  it('navigates to Discover from Top Rated See All', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
           {
-            type: 'Trending',
-            title: 'Trending',
+            type: 'TopRated',
+            title: 'Top Rated',
             displayOrder: 1,
             items: [
               {
-                id: 'trending-only',
+                id: 'top-only',
                 contentType: 'movie',
-                title: 'Trending Movie',
+                title: 'Top Rated Movie',
                 originalTitle: null,
                 posterUrl: null,
                 backdropUrl: null,
@@ -575,8 +649,8 @@ describe('HomeScreen', () => {
 
     render(<HomeScreen />);
 
-    fireEvent.press(screen.getByLabelText('See all Trending'));
+    fireEvent.press(screen.getByLabelText('See all Top Rated'));
 
-    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
+    expect(mockPush).toHaveBeenCalledWith('/discover?mode=top_rated&type=all');
   });
 });

@@ -107,8 +107,14 @@ function mockHomeData() {
     data: {
       sections: [
         {
-          type: 'Trending',
-          title: 'Trending',
+          type: 'HotThisWeek',
+          title: 'Hot This Week',
+          displayOrder: 0,
+          items: homeSectionItems,
+        },
+        {
+          type: 'TopRated',
+          title: 'Top Rated',
           displayOrder: 1,
           items: homeSectionItems,
         },
@@ -144,8 +150,8 @@ describe('Home detail navigation', () => {
       data: {
         sections: [
           {
-            type: 'Trending',
-            title: 'Trending',
+            type: 'TopRated',
+            title: 'Top Rated',
             displayOrder: 1,
             items: [
               {

@@ -33,31 +33,22 @@ function createSection(
 }
 
 describe('selectFeaturedItem', () => {
-  it('ignores ContinueWatching for hero selection', () => {
+  it('uses Hot This Week for hero selection', () => {
     const sections = [
-      createSection('Trending', [createItem({ id: 'trending', title: 'Trending Title' })]),
-      createSection(
-        'ContinueWatching',
-        [createItem({ id: 'continue', title: 'Continue Title' })],
-      ),
-      createSection(
-        'RecommendedForYou',
-        [createItem({ id: 'recommended', title: 'Recommended Title' })],
-      ),
+      createSection('HotThisWeek', [createItem({ id: 'hot', title: 'Hot Title' })]),
+      createSection('RecommendedForYou', [createItem({ id: 'recommended', title: 'Recommended Title' })]),
     ];
 
-    expect(selectFeaturedItem(sections, true)?.id).toBe('recommended');
+    expect(selectFeaturedItem(sections, true)?.id).toBe('hot');
   });
 
-  it('returns null for cold-start users without a hero carousel', () => {
+  it('returns Hot This Week for cold-start hero carousel', () => {
     const sections = [
-      createSection('ContinueWatching', [createItem({ id: 'continue' })]),
-      createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),
-      createSection('Trending', [createItem({ id: 'trending', title: 'Trending Title' })]),
-      createSection('Popular', [createItem({ id: 'popular', title: 'Popular Title' })]),
+      createSection('HotThisWeek', [createItem({ id: 'hot', title: 'Hot Title' })]),
+      createSection('TopRated', [createItem({ id: 'top', title: 'Top Title' })]),
     ];
 
-    expect(selectFeaturedItem(sections, false)).toBeNull();
+    expect(selectFeaturedItem(sections, false)?.id).toBe('hot');
   });
 
   it('returns null for empty sections', () => {
@@ -66,10 +57,10 @@ describe('selectFeaturedItem', () => {
 
   it('returns the source section type using hero candidate priority', () => {
     const sections = [
-      createSection('Trending', [createItem({ id: 'trending' })]),
+      createSection('HotThisWeek', [createItem({ id: 'hot' })]),
       createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),
     ];
 
-    expect(selectFeaturedSourceSectionType(sections, true)).toBe('RecommendedForYou');
+    expect(selectFeaturedSourceSectionType(sections, true)).toBe('HotThisWeek');
   });
 });

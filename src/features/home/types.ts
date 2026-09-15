@@ -8,6 +8,7 @@ export interface HomeRequest {
 }
 
 export type HomeSectionType =
+  | 'HotThisWeek'
   | 'RecommendedForYou'
   | 'BecauseYouWatched'
   | 'BasedOnFavorites'
