@@ -14,5 +14,6 @@ describe('clear user query cache', () => {
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['reviews'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['search-history'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['home'] });
+    expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['notifications'] });
   });
 });

@@ -12,6 +12,7 @@ const USER_QUERY_PREFIXES = [
   ['reviews'],
   ['search-history'],
   ['home'],
+  ['notifications'],
 ] as const;
 
 export function clearUserQueryCache(queryClient: QueryClient) {

@@ -30,6 +30,12 @@ jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
 }));
 
+jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
+  useUnreadNotificationCount: jest.fn(() => ({
+    data: { unreadCount: 0 },
+  })),
+}));
+
 jest.mock('@/features/home/components/HomeHeroCarousel', () => ({
   HomeHeroCarousel: ({ items, onItemPress }: { items: Array<{ id: string; title: string }>; onItemPress: (item: { id: string; title: string }) => void }) => {
     const React = require('react');

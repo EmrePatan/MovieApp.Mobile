@@ -1214,6 +1214,101 @@ Paginated list of TV shows the current user follows.
 
 ---
 
+## 11.6 Notifications
+
+In-app notification inbox for release alerts on followed movies and TV shows. All endpoints require Bearer JWT.
+
+### `GET /api/notifications`
+
+Paginated inbox for the current user.
+
+**Query parameters:** `page` (default `1`), `pageSize` (default `20`)
+
+**Response `200 OK`** (`NotificationsInboxResponse`):
+
+```json
+{
+  "items": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "type": "MovieReleased",
+      "title": "Dune: Part Three",
+      "body": "Dune: Part Three is now available.",
+      "createdAtUtc": "2026-09-14T18:30:00Z",
+      "readAtUtc": null,
+      "contentType": "movie",
+      "contentId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "posterPath": "/path.jpg"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 1,
+  "totalPages": 1,
+  "hasNextPage": false,
+  "hasPreviousPage": false
+}
+```
+
+**Notification `type` values:** `MovieReleased`, `NewSeason`, `NewEpisodes`
+
+**`contentType` values:** `movie`, `tv` (lowercase)
+
+**Status codes:** `200`, `400`, `401`
+
+---
+
+### `GET /api/notifications/unread-count`
+
+**Response `200 OK`:**
+
+```json
+{
+  "unreadCount": 3
+}
+```
+
+**Status codes:** `200`, `401`
+
+---
+
+### `PATCH /api/notifications/{id}/read`
+
+Marks a single notification as read for the current user (ownership validated server-side).
+
+**Response `200 OK`:**
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "readAtUtc": "2026-09-14T19:00:00Z",
+  "contentType": "movie",
+  "contentId": "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+}
+```
+
+Use the response `contentType` and `contentId` for secure navigation after a push tap. Do not trust `movieId` / `tvShowId` fields from push payloads.
+
+**Status codes:** `200`, `401`, `404`
+
+---
+
+### `PATCH /api/notifications/read-all`
+
+Marks all unread notifications as read for the current user.
+
+**Response `200 OK`:**
+
+```json
+{
+  "affectedCount": 5
+}
+```
+
+**Status codes:** `200`, `401`
+
+---
+
 ## 12. Watchlists
 
 All endpoints require Bearer JWT.
@@ -2093,7 +2188,11 @@ Kebab-case strings: `recommended-for-you`, `because-you-watched`, `similar-to-fa
 | GET | `/api/watch-history/recent` | JWT | Recent watch history |
 | GET | `/api/watch-history/tvshows/{tvShowId}` | JWT | TV show watch progress |
 | GET | `/api/watch-history/tvshows/{tvShowId}/seasons/{seasonNumber}` | JWT | Season watch progress |
+| GET | `/api/notifications` | JWT | Notification inbox |
+| GET | `/api/notifications/unread-count` | JWT | Unread notification count |
+| PATCH | `/api/notifications/{id}/read` | JWT | Mark notification read |
+| PATCH | `/api/notifications/read-all` | JWT | Mark all notifications read |
 | GET | `/health` | No | Basic health check |
 | GET | `/health/ready` | No | Readiness check (PostgreSQL + Redis) |
 
-**Total: 72 endpoints** (70 mobile-relevant + 2 health)
+**Total: 76 endpoints** (74 mobile-relevant + 2 health)

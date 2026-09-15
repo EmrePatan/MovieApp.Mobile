@@ -6,6 +6,7 @@ import { queryClient } from '@/api/query-client';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
+import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
 import { colors } from '@/theme/colors';
 
 function RootNavigator() {
@@ -26,6 +27,7 @@ function RootNavigator() {
         <Stack.Screen name="watch-history" />
         <Stack.Screen name="favorites" />
         <Stack.Screen name="following" />
+        <Stack.Screen name="notifications" />
         <Stack.Screen name="discover" />
         <Stack.Screen name="profile" />
       </Stack>
@@ -37,7 +39,9 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RootNavigator />
+        <NotificationBootstrapProvider>
+          <RootNavigator />
+        </NotificationBootstrapProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

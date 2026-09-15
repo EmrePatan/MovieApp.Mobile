@@ -37,6 +37,12 @@ jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
 }));
 
+jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
+  useUnreadNotificationCount: jest.fn(() => ({
+    data: { unreadCount: 0 },
+  })),
+}));
+
 jest.mock('@/features/home/components/HomeHeroCarousel', () => ({
   HomeHeroCarousel: () => null,
 }));
