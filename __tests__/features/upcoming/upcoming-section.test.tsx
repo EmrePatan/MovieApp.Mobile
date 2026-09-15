@@ -35,7 +35,7 @@ describe('UpcomingSection', () => {
     jest.clearAllMocks();
   });
 
-  it('renders upcoming items with notified badge when followed', () => {
+  it('requests followed scope for the home preview rail', () => {
     (useUpcomingCatalog as jest.Mock).mockReturnValue({
       data: { pages: [{ items: [upcomingItem, upcomingItemUnfollowed] }] },
       isLoading: false,
@@ -44,6 +44,7 @@ describe('UpcomingSection', () => {
 
     render(<UpcomingSection />);
 
+    expect(useUpcomingCatalog).toHaveBeenCalledWith('followed');
     expect(screen.getByText('Upcoming')).toBeTruthy();
     expect(screen.getByText('Avatar 4')).toBeTruthy();
     expect(screen.getByText('Mission: Impossible 9')).toBeTruthy();

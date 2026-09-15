@@ -17,6 +17,7 @@ export type CatalogDetailLibraryOrigin =
 
 export interface OpenCatalogDetailOptions {
   queryClient?: QueryClient;
+  libraryReturnHref?: string;
 }
 
 const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, `/(tabs)/${CatalogDetailTabOrigin}`> = {
@@ -108,7 +109,8 @@ export function openCatalogDetailFromLibraryStack(
   options?: OpenCatalogDetailOptions,
 ): void {
   lastCatalogDetailOrigin = null;
-  lastCatalogDetailLibraryReturnHref = LIBRARY_ORIGIN_HREFS[origin];
+  lastCatalogDetailLibraryReturnHref =
+    options?.libraryReturnHref ?? LIBRARY_ORIGIN_HREFS[origin];
   const href = buildCatalogDetailRoute(id, type);
 
   if (options?.queryClient) {
@@ -122,9 +124,10 @@ export function openDetailFromLibraryStack(
   router: ImperativeRouter,
   detailRoute: string,
   origin: CatalogDetailLibraryOrigin,
+  libraryReturnHref?: string,
 ): void {
   lastCatalogDetailOrigin = null;
-  lastCatalogDetailLibraryReturnHref = LIBRARY_ORIGIN_HREFS[origin];
+  lastCatalogDetailLibraryReturnHref = libraryReturnHref ?? LIBRARY_ORIGIN_HREFS[origin];
   router.push(detailRoute);
 }
 

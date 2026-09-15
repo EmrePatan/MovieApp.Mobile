@@ -7,18 +7,24 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
+import { LibraryMediaFilterControl } from '@/features/library/components/LibraryMediaFilterControl';
 import { LibraryStackHeader } from '@/features/library/components/LibraryStackHeader';
-import type { LibraryTypeFilter } from '@/features/library/types';
-import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
+import type { CatalogMediaFilter } from '@/features/library/types';
+import { ComingUpTabBar } from '@/features/upcoming/components/ComingUpTabBar';
 import { UpcomingListCard } from '@/features/upcoming/components/UpcomingListCard';
 import { useUpcomingCatalog } from '@/features/upcoming/hooks/useUpcomingCatalog';
+import {
+  buildComingUpHref,
+  parseComingUpTab,
+  type ComingUpTab,
+} from '@/features/upcoming/navigation/coming-up-navigation';
 import type { UpcomingCatalogItem } from '@/features/upcoming/types';
 import { flattenUpcomingPages } from '@/features/upcoming/utils/upcoming-catalog-items';
 import { colors } from '@/theme/colors';
@@ -27,7 +33,7 @@ import { spacing } from '@/theme/spacing';
 
 function filterUpcomingItems(
   items: UpcomingCatalogItem[],
-  filter: LibraryTypeFilter,
+  filter: CatalogMediaFilter,
 ): UpcomingCatalogItem[] {
   if (filter === 'all') {
     return items;
@@ -46,13 +52,22 @@ function upcomingItemKey(item: UpcomingCatalogItem): string {
 
 export default function UpcomingScreen() {
   const router = useRouter();
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
   const { isAuthenticated } = useAuth();
-  const upcomingQuery = useUpcomingCatalog();
-  const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>('all');
+  const activeTab = parseComingUpTab(tab);
+  const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
+
+  const followedQuery = useUpcomingCatalog('followed', undefined, {
+    enabled: activeTab === 'for-you' && isAuthenticated,
+  });
+  const catalogQuery = useUpcomingCatalog('catalog', undefined, {
+    enabled: activeTab === 'upcoming',
+  });
+  const activeQuery = activeTab === 'for-you' ? followedQuery : catalogQuery;
 
   const items = useMemo(
-    () => flattenUpcomingPages(upcomingQuery.data?.pages ?? []),
-    [upcomingQuery.data?.pages],
+    () => flattenUpcomingPages(activeQuery.data?.pages ?? []),
+    [activeQuery.data?.pages],
   );
 
   const displayItems = useMemo(
@@ -64,32 +79,42 @@ export default function UpcomingScreen() {
     router.push('/(auth)/login');
   }, [router]);
 
+  const handleTabChange = useCallback((nextTab: ComingUpTab) => {
+    router.setParams({ tab: nextTab });
+  }, [router]);
+
+  const handleExploreUpcoming = useCallback(() => {
+    handleTabChange('upcoming');
+  }, [handleTabChange]);
+
   const handleItemPress = useCallback(
     (item: UpcomingCatalogItem) => {
-      openCatalogDetailFromLibraryStack(router, item.id, item.type, 'upcoming');
+      openCatalogDetailFromLibraryStack(router, item.id, item.type, 'upcoming', {
+        libraryReturnHref: buildComingUpHref(activeTab),
+      });
     },
-    [router],
+    [activeTab, router],
   );
 
   const handleLoadMore = useCallback(() => {
     if (
-      !upcomingQuery.hasNextPage ||
-      upcomingQuery.isFetchingNextPage ||
-      upcomingQuery.isFetching
+      !activeQuery.hasNextPage ||
+      activeQuery.isFetchingNextPage ||
+      activeQuery.isFetching
     ) {
       return;
     }
 
-    void upcomingQuery.fetchNextPage();
-  }, [upcomingQuery]);
+    void activeQuery.fetchNextPage();
+  }, [activeQuery]);
 
   const handleRefresh = useCallback(() => {
-    void upcomingQuery.refetch();
-  }, [upcomingQuery]);
+    void activeQuery.refetch();
+  }, [activeQuery]);
 
   const handleRetryNextPage = useCallback(() => {
-    void upcomingQuery.fetchNextPage();
-  }, [upcomingQuery]);
+    void activeQuery.fetchNextPage();
+  }, [activeQuery]);
 
   const renderItem = useCallback(
     ({ item }: { item: UpcomingCatalogItem }) => (
@@ -98,27 +123,57 @@ export default function UpcomingScreen() {
     [handleItemPress],
   );
 
+  const subtitle = activeTab === 'for-you'
+    ? isAuthenticated
+      ? 'Movies and TV you follow with upcoming releases or episodes'
+      : 'Sign in to see your followed upcoming releases and episodes'
+    : 'Discover upcoming movies and TV premieres from the catalog';
+
   const listHeader = (
-    <LibraryStackHeader
-      title="Coming Up"
-      subtitle={
-        isAuthenticated
-          ? 'Movies and TV you follow with upcoming releases or episodes'
-          : 'Sign in to see your followed upcoming releases and episodes'
-      }
-    >
-      {!isAuthenticated ? (
-        <AppButton title="Sign In for Followed Updates" variant="secondary" onPress={handleSignIn} />
-      ) : null}
-      {items.length > 0 ? (
-        <View style={styles.controls}>
-          <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
-        </View>
-      ) : null}
-    </LibraryStackHeader>
+    <>
+      <LibraryStackHeader title="Coming Up" subtitle={subtitle}>
+        {activeTab === 'for-you' && !isAuthenticated ? (
+          <AppButton
+            title="Sign In for Followed Updates"
+            variant="secondary"
+            onPress={handleSignIn}
+          />
+        ) : null}
+        {items.length > 0 ? (
+          <View style={styles.controls}>
+            <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
+          </View>
+        ) : null}
+      </LibraryStackHeader>
+      <ComingUpTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+    </>
   );
 
-  if (upcomingQuery.isLoading && items.length === 0) {
+  if (activeTab === 'for-you' && !isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+        <FlatList
+          data={[]}
+          renderItem={() => null}
+          ListHeaderComponent={listHeader}
+          ListEmptyComponent={
+            <View style={styles.filteredEmpty}>
+              <AppText variant="subtitle" center>
+                Sign in to see your Coming Up list
+              </AppText>
+              <AppText variant="bodySmall" muted center>
+                Follow shows and set release alerts to track what is next for you.
+              </AppText>
+              <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />
+            </View>
+          }
+          contentContainerStyle={styles.listContent}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (activeQuery.isLoading && items.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
@@ -127,14 +182,14 @@ export default function UpcomingScreen() {
     );
   }
 
-  if (upcomingQuery.isError && items.length === 0) {
+  if (activeQuery.isError && items.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
             message="Unable to load upcoming titles. Please try again."
-            onRetry={() => void upcomingQuery.refetch()}
+            onRetry={() => void activeQuery.refetch()}
             retryLabel="Retry"
           />
         </View>
@@ -142,19 +197,24 @@ export default function UpcomingScreen() {
     );
   }
 
-  const emptyComponent = (
+  const emptyComponent = activeTab === 'for-you' ? (
+    <View style={styles.filteredEmpty}>
+      <AppText variant="subtitle" center>
+        Nothing coming up yet
+      </AppText>
+      <AppText variant="bodySmall" muted center>
+        Follow a show or set an alert for an upcoming movie and it will appear here.
+      </AppText>
+      <AppButton title="Explore Upcoming" variant="secondary" onPress={handleExploreUpcoming} />
+    </View>
+  ) : (
     <View style={styles.filteredEmpty}>
       <AppText variant="subtitle" center>
         Nothing upcoming yet
       </AppText>
       <AppText variant="bodySmall" muted center>
-        {isAuthenticated
-          ? 'Turn on Notify for upcoming movies or Follow TV shows to track them here.'
-          : 'Sign in to include release alerts and followed episodes.'}
+        New catalog releases will appear here as they are announced.
       </AppText>
-      {!isAuthenticated ? (
-        <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />
-      ) : null}
     </View>
   );
 
@@ -168,11 +228,11 @@ export default function UpcomingScreen() {
         ListEmptyComponent={emptyComponent}
         ItemSeparatorComponent={ListSeparator}
         ListFooterComponent={
-          upcomingQuery.isFetchingNextPage ? (
+          activeQuery.isFetchingNextPage ? (
             <View style={styles.footerLoading}>
               <ActivityIndicator color={colors.accent} />
             </View>
-          ) : upcomingQuery.isFetchNextPageError ? (
+          ) : activeQuery.isFetchNextPageError ? (
             <View style={styles.footerError}>
               <AppText variant="bodySmall" muted center>
                 Unable to load more upcoming titles. Please try again.
@@ -183,7 +243,7 @@ export default function UpcomingScreen() {
         }
         refreshControl={
           <RefreshControl
-            refreshing={upcomingQuery.isRefetching && !upcomingQuery.isFetchingNextPage}
+            refreshing={activeQuery.isRefetching && !activeQuery.isFetchingNextPage}
             onRefresh={handleRefresh}
             tintColor={colors.accent}
           />

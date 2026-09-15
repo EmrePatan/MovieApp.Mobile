@@ -85,6 +85,18 @@ describe('catalog detail navigation', () => {
     expect(dismissTo).toHaveBeenCalledWith('/upcoming');
   });
 
+  it('returns to a custom library return href when provided', () => {
+    const dismissTo = jest.fn();
+    const router = { dismissTo, navigate: jest.fn(), replace: jest.fn(), push: jest.fn() } as never;
+
+    openCatalogDetailFromLibraryStack(router, 'movie-b', 'movie', 'upcoming', {
+      libraryReturnHref: '/upcoming?tab=upcoming',
+    });
+    returnToCatalogDetailOrigin(router);
+
+    expect(dismissTo).toHaveBeenCalledWith('/upcoming?tab=upcoming');
+  });
+
   it('prefers library stack origin over tab origin when both were set', () => {
     const dismissTo = jest.fn();
     const router = { dismissTo, navigate: jest.fn(), replace: jest.fn(), push: jest.fn() } as never;

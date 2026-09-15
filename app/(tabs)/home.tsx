@@ -12,6 +12,7 @@ import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeComingUpSection } from '@/features/home/components/HomeComingUpSection';
 import { HomeSection } from '@/features/home/components/HomeSection';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
+import { openComingUpScreen } from '@/features/upcoming/navigation/coming-up-navigation';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { useHome } from '@/features/home/hooks/useHome';
 import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
@@ -107,7 +108,7 @@ export default function HomeScreen() {
       }
 
       if (sectionType === 'ComingUp') {
-        openLibraryStackScreen(router, '/upcoming');
+        openComingUpScreen(router, 'for-you');
       }
     },
     [router],

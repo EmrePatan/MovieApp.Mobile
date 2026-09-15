@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
+import { openComingUpScreen } from '@/features/upcoming/navigation/coming-up-navigation';
 import type { UserStatisticsSummaryResponse } from '../types';
 import {
   formatFavoritesSubtitle,
@@ -45,7 +46,7 @@ export function ProfileLibrarySection({
       <ProfileMenuRow
         label="Coming Up"
         subtitle="Followed releases and upcoming episodes"
-        onPress={() => openLibraryStackScreen(router, '/upcoming', '/(tabs)/profile')}
+        onPress={() => openComingUpScreen(router, 'for-you', '/(tabs)/profile')}
       />
     </ProfileSection>
   );

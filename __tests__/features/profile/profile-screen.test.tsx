@@ -143,7 +143,7 @@ describe('ProfileScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/watchlist');
     expect(mockPush).toHaveBeenCalledWith('/watch-history');
     expect(mockPush).toHaveBeenCalledWith('/following');
-    expect(mockPush).toHaveBeenCalledWith('/upcoming');
+    expect(mockPush).toHaveBeenCalledWith('/upcoming?tab=for-you');
   });
 
   it('renders new-user empty analytics states', () => {

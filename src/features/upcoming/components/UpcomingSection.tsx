@@ -14,7 +14,7 @@ interface UpcomingSectionProps {
 }
 
 export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
-  const upcomingQuery = useUpcomingCatalog();
+  const upcomingQuery = useUpcomingCatalog('followed');
   const items = upcomingQuery.data?.pages[0]?.items ?? [];
   const renderItem = useCallback(
     ({ item }: { item: UpcomingCatalogItem }) => (
