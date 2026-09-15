@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -15,19 +15,12 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
-import { ReleaseRegionSelector } from '@/features/regions/components/ReleaseRegionSelector';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 import {
   parseNowInTheatersParams,
-  serializeNowInTheatersParams,
   serializeNowInTheatersRoute,
 } from '@/features/discovery/utils/now-in-theaters-params';
-import {
-  NOW_IN_THEATERS_PARAM_KEYS,
-  setDiscoveryRouteParams,
-} from '@/features/navigation/discovery-route-params';
-import type { NowInTheatersState } from '@/features/discovery/now-in-theaters-types';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
@@ -40,7 +33,6 @@ export default function NowInTheatersScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
-  const [regionExpanded, setRegionExpanded] = useState(false);
   const { region: userRegion, isHydrated } = useRegionalPreference();
 
   const discoverState = useMemo(
@@ -58,17 +50,6 @@ export default function NowInTheatersScreen() {
   const currentRoute = useMemo(
     () => serializeNowInTheatersRoute(discoverState),
     [discoverState],
-  );
-
-  const replaceState = useCallback(
-    (next: NowInTheatersState) => {
-      setDiscoveryRouteParams(
-        router,
-        serializeNowInTheatersParams(next),
-        NOW_IN_THEATERS_PARAM_KEYS,
-      );
-    },
-    [router],
   );
 
   const handleResultPress = useCallback(
@@ -98,18 +79,9 @@ export default function NowInTheatersScreen() {
         <AppText variant="bodySmall" muted>
           Movies currently playing in theaters
         </AppText>
-        <ReleaseRegionSelector
-          value={discoverState.releaseRegion}
-          expanded={regionExpanded}
-          onToggleExpanded={() => setRegionExpanded((current) => !current)}
-          onSelect={(releaseRegion) => {
-            setRegionExpanded(false);
-            replaceState({ releaseRegion });
-          }}
-        />
       </View>
     ),
-    [discoverState.releaseRegion, regionExpanded, replaceState],
+    [],
   );
 
   const listEmpty = useMemo(() => {
@@ -133,7 +105,7 @@ export default function NowInTheatersScreen() {
       return (
         <SearchEmptyState
           title="No theatrical releases"
-          message="There are no movies currently playing in this release region."
+          message="There are no movies currently playing in theaters right now."
         />
       );
     }

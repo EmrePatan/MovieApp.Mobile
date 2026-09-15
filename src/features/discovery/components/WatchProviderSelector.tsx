@@ -51,7 +51,7 @@ export function WatchProviderSelector({
   if (providers.length === 0) {
     return (
       <AppText variant="bodySmall" muted>
-        No streaming providers are available for this region.
+        No streaming providers are available right now.
       </AppText>
     );
   }

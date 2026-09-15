@@ -30,7 +30,7 @@ describe('WhereToWatchRail', () => {
     (getCatalogDetailWatchRegion as jest.Mock).mockReturnValue(null);
   });
 
-  it('uses user region when hydrated', () => {
+  it('uses user region when hydrated without showing region copy', () => {
     (useRegionalPreference as jest.Mock).mockReturnValue({
       region: 'US',
       isHydrated: true,
@@ -57,7 +57,9 @@ describe('WhereToWatchRail', () => {
     render(<WhereToWatchRail contentType="movie" contentId={movieId} />);
 
     expect(useMovieWatchProviders).toHaveBeenCalledWith(movieId, 'US', true);
-    expect(screen.getByTestId('where-to-watch-region')).toHaveTextContent('US');
+    expect(screen.getByText('Where to Watch')).toBeTruthy();
+    expect(screen.queryByTestId('where-to-watch-region')).toBeNull();
+    expect(screen.queryByText('US')).toBeNull();
   });
 
   it('waits for hydration before fetching with user region', () => {
@@ -77,7 +79,7 @@ describe('WhereToWatchRail', () => {
     expect(screen.getByTestId('where-to-watch-loading')).toBeTruthy();
   });
 
-  it('prefers contextual watchRegion from discovery navigation', () => {
+  it('prefers contextual watchRegion from discovery navigation without showing region copy', () => {
     (useRegionalPreference as jest.Mock).mockReturnValue({
       region: 'TR',
       isHydrated: true,
@@ -104,7 +106,7 @@ describe('WhereToWatchRail', () => {
     render(<WhereToWatchRail contentType="movie" contentId={movieId} />);
 
     expect(useMovieWatchProviders).toHaveBeenCalledWith(movieId, 'US', true);
-    expect(screen.getByTestId('where-to-watch-region')).toHaveTextContent('US');
+    expect(screen.queryByTestId('where-to-watch-region')).toBeNull();
   });
 
   it('omits the section when no providers are available', () => {

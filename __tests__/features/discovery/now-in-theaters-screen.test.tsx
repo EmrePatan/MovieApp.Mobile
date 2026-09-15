@@ -1,14 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { render, screen } from '@testing-library/react-native';
 import NowInTheatersScreen from '../../../app/now-in-theaters';
 import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 
-const mockSetParams = jest.fn();
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
-
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ setParams: mockSetParams, push: mockPush, replace: mockReplace, back: jest.fn() }),
-  useLocalSearchParams: jest.fn(() => ({ releaseRegion: 'TR' })),
+  useRouter: () => ({ setParams: jest.fn(), push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  useLocalSearchParams: jest.fn(() => ({})),
 }));
 
 jest.mock('@/features/discovery/hooks/useNowInTheaters', () => ({
@@ -56,14 +52,26 @@ describe('NowInTheatersScreen', () => {
     });
   });
 
-  it('updates releaseRegion via setParams without pushing navigation', () => {
+  it('renders without a release region selector', () => {
     render(<NowInTheatersScreen />);
 
-    fireEvent.press(screen.getByLabelText('Release region Turkey'));
-    fireEvent.press(screen.getByLabelText('United States'));
+    expect(screen.getByText('Now in Theaters')).toBeTruthy();
+    expect(screen.queryByTestId('release-region-selector')).toBeNull();
+    expect(screen.queryByText('Release region')).toBeNull();
+  });
 
-    expect(mockSetParams).toHaveBeenCalledWith({ releaseRegion: 'US' });
-    expect(mockReplace).not.toHaveBeenCalled();
-    expect(mockPush).not.toHaveBeenCalled();
+  it('queries theatrical listings using the user region by default', () => {
+    render(<NowInTheatersScreen />);
+
+    expect(useNowInTheaters).toHaveBeenCalledWith({ releaseRegion: 'TR' }, undefined, true);
+  });
+
+  it('honors explicit releaseRegion deep links', () => {
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({ releaseRegion: 'US' });
+
+    render(<NowInTheatersScreen />);
+
+    expect(useNowInTheaters).toHaveBeenCalledWith({ releaseRegion: 'US' }, undefined, true);
   });
 });

@@ -44,7 +44,6 @@ export function WhereToWatchRail({
       <View style={styles.container} testID="where-to-watch-loading">
         <View style={styles.headerRow}>
           <AppText variant="subtitle" style={styles.title}>Where to Watch</AppText>
-          <AppText variant="caption" style={styles.region}>{effectiveRegion}</AppText>
         </View>
         <ScrollView
           horizontal
@@ -72,9 +71,6 @@ export function WhereToWatchRail({
     <View style={styles.container} testID="where-to-watch-rail">
       <View style={styles.headerRow}>
         <AppText variant="subtitle" style={styles.title}>Where to Watch</AppText>
-        <AppText variant="caption" style={styles.region} testID="where-to-watch-region">
-          {query.data.region}
-        </AppText>
       </View>
       <ScrollView
         horizontal
@@ -127,20 +123,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: layout.screenPaddingHorizontal,
     marginBottom: spacing.md,
   },
   title: {
     color: colors.textPrimary,
     letterSpacing: 0.15,
-  },
-  region: {
-    color: colors.textMuted,
-    fontSize: 11,
-    letterSpacing: 0.4,
   },
   listContent: {
     paddingHorizontal: spacing.lg,

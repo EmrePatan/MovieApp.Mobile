@@ -142,7 +142,7 @@ export function DiscoverHubContent() {
         onRetry={() => void nowInTheatersPreviewQuery.refetch()}
         onItemPress={handlePreviewItemPress}
         onSeeAll={openNowInTheaters}
-        emptyMessage="No movies are currently playing in theaters for this region."
+        emptyMessage="No movies are currently playing in theaters right now."
         testID="now-in-theaters-preview"
       />
 

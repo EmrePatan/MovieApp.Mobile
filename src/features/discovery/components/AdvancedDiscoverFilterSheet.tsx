@@ -17,7 +17,6 @@ import { useGenres } from '../hooks/useGenres';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { WatchMonetizationSelector } from './WatchMonetizationSelector';
 import { WatchProviderSelector } from './WatchProviderSelector';
-import { WatchRegionSelector } from './WatchRegionSelector';
 import {
   ADVANCED_DISCOVER_MEDIA_OPTIONS,
   ADVANCED_DISCOVER_RUNTIME_PRESETS,
@@ -211,7 +210,6 @@ export function AdvancedDiscoverFilterSheet({
   const [useYearRange, setUseYearRange] = useState(
     filters.yearFrom != null || filters.yearTo != null,
   );
-  const [regionExpanded, setRegionExpanded] = useState(false);
   const { region: userRegion, isHydrated } = useRegionalPreference();
   const watchRegion = draft.watchRegion ?? userRegion;
   const providersQuery = useDiscoveryWatchProviders(draftMediaType, watchRegion, isHydrated);
@@ -434,22 +432,6 @@ export function AdvancedDiscoverFilterSheet({
 
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>Streaming</AppText>
-              <WatchRegionSelector
-                value={watchRegion}
-                expanded={regionExpanded}
-                onToggleExpanded={() => setRegionExpanded((current) => !current)}
-                onSelect={(regionCode) => {
-                  setRegionExpanded(false);
-                  setDraft((current) => ({
-                    ...current,
-                    watchRegion: regionCode,
-                    watchProviderIds: [],
-                  }));
-                }}
-              />
-              <AppText variant="bodySmall" muted>
-                Where to watch (availability region)
-              </AppText>
               <WatchProviderSelector
                 providers={providersQuery.data?.providers ?? []}
                 selectedProviderIds={draft.watchProviderIds}
@@ -459,7 +441,6 @@ export function AdvancedDiscoverFilterSheet({
                 onToggle={(providerId) =>
                   setDraft((current) => ({
                     ...current,
-                    watchRegion: watchRegion,
                     watchProviderIds: current.watchProviderIds.includes(providerId)
                       ? current.watchProviderIds.filter((id) => id !== providerId)
                       : [...current.watchProviderIds, providerId],
@@ -471,7 +452,6 @@ export function AdvancedDiscoverFilterSheet({
                 onToggle={(type) =>
                   setDraft((current) => ({
                     ...current,
-                    watchRegion: watchRegion,
                     watchMonetizationTypes: current.watchMonetizationTypes.includes(type)
                       ? current.watchMonetizationTypes.filter((entry) => entry !== type)
                       : [...current.watchMonetizationTypes, type],

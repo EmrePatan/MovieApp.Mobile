@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -20,7 +20,6 @@ import { ADVANCED_DISCOVER_MEDIA_OPTIONS } from '@/features/discovery/advanced-d
 import { JustWatchAttribution } from '@/features/discovery/components/JustWatchAttribution';
 import { WatchMonetizationSelector } from '@/features/discovery/components/WatchMonetizationSelector';
 import { WatchProviderSelector } from '@/features/discovery/components/WatchProviderSelector';
-import { WatchRegionSelector } from '@/features/discovery/components/WatchRegionSelector';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
 import {
@@ -48,7 +47,6 @@ export default function StreamingDiscoverScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
-  const [regionExpanded, setRegionExpanded] = useState(false);
   const { region: userRegion, isHydrated } = useRegionalPreference();
 
   const discoverState = useMemo(
@@ -157,20 +155,6 @@ export default function StreamingDiscoverScreen() {
           Streaming Services
         </AppText>
 
-        <WatchRegionSelector
-          value={discoverState.watchRegion}
-          expanded={regionExpanded}
-          onToggleExpanded={() => setRegionExpanded((current) => !current)}
-          onSelect={(regionCode) => {
-            setRegionExpanded(false);
-            replaceState({
-              ...discoverState,
-              watchRegion: regionCode,
-              watchProviderIds: [],
-            });
-          }}
-        />
-
         <View style={styles.section}>
           <AppText variant="subtitle">Where do you watch?</AppText>
           <WatchProviderSelector
@@ -229,7 +213,6 @@ export default function StreamingDiscoverScreen() {
       providersQuery.data?.providers,
       providersQuery.isError,
       providersQuery.isLoading,
-      regionExpanded,
       replaceState,
       toggleMonetization,
       toggleProvider,
@@ -241,7 +224,7 @@ export default function StreamingDiscoverScreen() {
       return (
         <SearchEmptyState
           title="Choose a streaming service"
-          message="Select one or more providers to see what you can watch in this region."
+          message="Select one or more providers to see what you can watch."
         />
       );
     }
@@ -266,7 +249,7 @@ export default function StreamingDiscoverScreen() {
       return (
         <SearchEmptyState
           title="No matches found"
-          message="Try another provider, availability type, or region."
+          message="Try another provider or availability type."
         />
       );
     }

@@ -143,6 +143,8 @@ describe('AdvancedDiscoverScreen', () => {
 
     expect(screen.getByText('Media Type')).toBeTruthy();
     expect(screen.getByLabelText('Media type TV Shows')).toBeTruthy();
+    expect(screen.queryByTestId('watch-region-selector')).toBeNull();
+    expect(screen.queryByText('Where to watch (availability region)')).toBeNull();
   });
 
   it('applies movie to tv toggle through setParams without pushing history', () => {

@@ -92,20 +92,28 @@ describe('StreamingDiscoverScreen', () => {
     });
   });
 
-  it('renders streaming discover controls and attribution', () => {
+  it('renders streaming discover controls without a region selector', () => {
     render(<StreamingDiscoverScreen />);
 
     expect(screen.getByText('Streaming Services')).toBeTruthy();
     expect(screen.getByText('Where do you watch?')).toBeTruthy();
-    expect(screen.getByText('Availability')).toBeTruthy();
-    expect(screen.getByTestId('justwatch-attribution')).toBeTruthy();
-    expect(screen.getByLabelText('Netflix')).toBeTruthy();
+    expect(screen.queryByTestId('watch-region-selector')).toBeNull();
+    expect(screen.queryByText('Watch region')).toBeNull();
   });
 
-  it('prompts users to choose a provider before showing results', () => {
+  it('loads providers using the user region by default', () => {
     render(<StreamingDiscoverScreen />);
 
-    expect(screen.getByText('Choose a streaming service')).toBeTruthy();
+    expect(useDiscoveryWatchProviders).toHaveBeenCalledWith('movie', 'TR', true);
+  });
+
+  it('honors explicit watchRegion deep links', () => {
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({ watchRegion: 'US' });
+
+    render(<StreamingDiscoverScreen />);
+
+    expect(useDiscoveryWatchProviders).toHaveBeenCalledWith('movie', 'US', true);
   });
 
   it('selects providers via setParams without pushing navigation history', () => {
@@ -118,19 +126,6 @@ describe('StreamingDiscoverScreen', () => {
     expect(mockSetParams.mock.calls.some(([params]) => params.watchProviderId === '8')).toBe(true);
     expect(mockReplace).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
-  });
-
-  it('updates watchRegion and mediaType via setParams', () => {
-    render(<StreamingDiscoverScreen />);
-
-    fireEvent.press(screen.getByLabelText('Watch region Turkey'));
-    fireEvent.press(screen.getByLabelText('United States'));
-    fireEvent.press(screen.getByLabelText('TV Shows'));
-
-    expect(mockSetParams).toHaveBeenCalled();
-    expect(mockSetParams.mock.calls.some(([params]) => params.watchRegion === 'US')).toBe(true);
-    expect(mockSetParams.mock.calls.some(([params]) => params.mediaType === 'tv')).toBe(true);
-    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it('opens detail with contextual watchRegion while preserving return href', () => {
