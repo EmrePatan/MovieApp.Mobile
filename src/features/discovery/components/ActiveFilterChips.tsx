@@ -17,6 +17,7 @@ interface ActiveFilterChipsProps {
 
 export function buildActiveFilterChips(
   filters: {
+    typeLabel: string | null;
     genreIds: string[];
     year: number | null;
     minRating: number | null;
@@ -25,6 +26,7 @@ export function buildActiveFilterChips(
   },
   genres: Genre[],
   handlers: {
+    onRemoveType: () => void;
     onRemoveGenre: (genreId: string) => void;
     onRemoveYear: () => void;
     onRemoveMinRating: () => void;
@@ -33,6 +35,14 @@ export function buildActiveFilterChips(
   },
 ): ActiveFilterChip[] {
   const chips: ActiveFilterChip[] = [];
+
+  if (filters.typeLabel) {
+    chips.push({
+      key: 'type',
+      label: filters.typeLabel,
+      onRemove: handlers.onRemoveType,
+    });
+  }
 
   for (const genreId of filters.genreIds) {
     const genre = genres.find((entry) => entry.id === genreId);

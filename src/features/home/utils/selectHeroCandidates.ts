@@ -7,12 +7,7 @@ import {
 export const HERO_MAX_CANDIDATES = 5;
 export const HERO_RECOMMENDED_CAP = 3;
 
-const HERO_ELIGIBLE_SECTION_TYPES: HomeSectionType[] = [
-  'RecommendedForYou',
-  'Trending',
-  'NewReleases',
-  'TopRated',
-];
+const HERO_ELIGIBLE_SECTION_TYPES: HomeSectionType[] = ['RecommendedForYou'];
 
 export interface HeroCandidate {
   item: HomeItem;
@@ -35,6 +30,10 @@ export function selectHeroCandidates(
   sections: HomeSection[],
   isPersonalized: boolean,
 ): HeroCandidate[] {
+  if (!isPersonalized) {
+    return [];
+  }
+
   const usedKeys = new Set<string>();
   const candidates: HeroCandidate[] = [];
   const sourceOrder = getHeroSourceOrder(isPersonalized);
@@ -68,9 +67,7 @@ export function selectHeroCandidates(
     }
   };
 
-  if (isPersonalized) {
-    addFromSection('RecommendedForYou', HERO_RECOMMENDED_CAP);
-  }
+  addFromSection('RecommendedForYou', HERO_RECOMMENDED_CAP);
 
   for (const sourceType of sourceOrder) {
     if (sourceType === 'RecommendedForYou') {

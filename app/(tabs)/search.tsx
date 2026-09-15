@@ -1,20 +1,19 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
   FlatList,
   Keyboard,
-  Pressable,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
-import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { SearchExploreLanding } from '@/features/discovery/components/SearchExploreLanding';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
@@ -33,6 +32,7 @@ import {
 } from '@/features/search/hooks/useSearchHistory';
 import type { SearchAutocompleteItem, SearchResultItem, SearchTypeFilter } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
+import type { HomeItem } from '@/features/home/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { useAuth } from '@/auth/useAuth';
@@ -43,11 +43,30 @@ import { spacing } from '@/theme/spacing';
 export default function SearchScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { explore } = useLocalSearchParams<{ explore?: string }>();
   const { isAuthenticated } = useAuth();
   const [inputText, setInputText] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<SearchTypeFilter>('all');
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+
+  const handledExploreRef = useRef(false);
+
+  useEffect(() => {
+    if (explore !== '1') {
+      handledExploreRef.current = false;
+      return;
+    }
+
+    if (handledExploreRef.current) {
+      return;
+    }
+
+    handledExploreRef.current = true;
+    setInputText('');
+    setSubmittedQuery('');
+    router.replace('/(tabs)/search');
+  }, [explore, router]);
 
   const debouncedInput = useDebouncedValue(inputText, AUTOCOMPLETE_DEBOUNCE_MS);
   const normalizedInput = normalizeSearchQuery(inputText);
@@ -70,6 +89,7 @@ export default function SearchScreen() {
   );
 
   const historyItems = historyQuery.data?.items ?? [];
+  const showExplore = !hasActiveSearch && !showAutocomplete;
 
   const submitSearch = useCallback((query: string) => {
     const normalized = normalizeSearchQuery(query);
@@ -110,6 +130,16 @@ export default function SearchScreen() {
       Keyboard.dismiss();
       prefetchCatalogDetail(queryClient, item.id, item.type);
       router.push(buildCatalogDetailRoute(item.id, item.type));
+    },
+    [queryClient, router],
+  );
+
+  const handleExploreItemPress = useCallback(
+    (item: HomeItem) => {
+      Keyboard.dismiss();
+      const itemType = item.contentType === 'movie' ? 'movie' : 'tv';
+      prefetchCatalogDetail(queryClient, item.id, itemType);
+      router.push(buildCatalogDetailRoute(item.id, itemType));
     },
     [queryClient, router],
   );
@@ -210,17 +240,6 @@ export default function SearchScreen() {
     ],
   );
 
-  const initialEmptyState = useMemo(
-    () => (
-      <SearchEmptyState
-        variant="initial"
-        title="Search movies and TV shows"
-        message="Try a title like Inception or Breaking Bad"
-      />
-    ),
-    [],
-  );
-
   const noResultsState = useMemo(
     () => (
       <SearchEmptyState
@@ -230,21 +249,6 @@ export default function SearchScreen() {
     ),
     [normalizedSubmittedQuery],
   );
-
-  const isAutocompleteActive = showAutocomplete;
-
-  const discoverLink = !hasActiveSearch && !isAutocompleteActive ? (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Discover trending and popular titles"
-      onPress={() => router.push('/discover')}
-      style={styles.discoverLink}
-    >
-      <AppText variant="bodySmall" style={styles.discoverLinkText}>
-        Discover trending & popular
-      </AppText>
-    </Pressable>
-  ) : null;
 
   if (hasActiveSearch) {
     if (searchQuery.isLoading && results.length === 0) {
@@ -301,10 +305,6 @@ export default function SearchScreen() {
     );
   }
 
-  const showInitialEmpty =
-    !isAutocompleteActive &&
-    (!isAuthenticated || (!historyQuery.isLoading && historyItems.length === 0));
-
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
@@ -313,7 +313,7 @@ export default function SearchScreen() {
         ListHeaderComponent={
           <>
             {listHeader}
-            {isAuthenticated && !isAutocompleteActive ? (
+            {isAuthenticated && showExplore ? (
               <SearchHistorySection
                 items={historyItems}
                 isLoading={historyQuery.isLoading}
@@ -326,10 +326,11 @@ export default function SearchScreen() {
                 onRetry={() => void historyQuery.refetch()}
               />
             ) : null}
-            {discoverLink}
+            {showExplore ? (
+              <SearchExploreLanding onItemPress={handleExploreItemPress} />
+            ) : null}
           </>
         }
-        ListEmptyComponent={showInitialEmpty ? initialEmptyState : null}
         contentContainerStyle={styles.listContent}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
@@ -355,14 +356,5 @@ const styles = StyleSheet.create({
   footerLoading: {
     paddingVertical: spacing.lg,
     alignItems: 'center',
-  },
-  discoverLink: {
-    alignSelf: 'center',
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  discoverLinkText: {
-    color: colors.accent,
-    fontWeight: '600',
   },
 });

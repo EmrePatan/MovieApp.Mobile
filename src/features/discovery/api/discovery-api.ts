@@ -1,7 +1,7 @@
 import { api } from '@/api/client';
 import type { SearchResponse } from '@/features/search/types';
-import { buildBrowsePath, buildGenresPath } from './routes';
-import type { DiscoveryBrowseRequest, Genre } from '../types';
+import { buildBrowsePath, buildExplorePreviewPath, buildGenresPath } from './routes';
+import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
 
 export async function getBrowseDiscovery(
   criteria: DiscoveryBrowseRequest,
@@ -15,6 +15,16 @@ export async function getBrowseDiscovery(
 
 export async function getGenres(signal?: AbortSignal): Promise<Genre[]> {
   return api.get<Genre[]>(buildGenresPath(), {
+    authenticated: false,
+    signal,
+  });
+}
+
+export async function getExplorePreview(
+  sectionSize: number,
+  signal?: AbortSignal,
+): Promise<ExplorePreviewResponse> {
+  return api.get<ExplorePreviewResponse>(buildExplorePreviewPath(sectionSize), {
     authenticated: false,
     signal,
   });

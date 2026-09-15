@@ -1,8 +1,17 @@
 import type { DiscoveryBrowseRequest } from '../types';
 import { DEFAULT_DISCOVERY_PAGE_SIZE } from '../types';
+import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 
 export function buildGenresPath(): string {
   return '/api/genres';
+}
+
+export function buildExplorePreviewPath(sectionSize = DEFAULT_HOME_SECTION_SIZE): string {
+  const params = new URLSearchParams({
+    sectionSize: String(sectionSize),
+  });
+
+  return `/api/discovery/explore-preview?${params.toString()}`;
 }
 
 export function buildBrowsePath(criteria: DiscoveryBrowseRequest): string {

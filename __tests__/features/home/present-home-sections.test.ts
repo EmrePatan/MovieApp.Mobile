@@ -37,19 +37,14 @@ describe('presentHomeSections', () => {
         'RecommendedForYou',
         [featured, createItem({ id: 'other-id', title: 'Other Title' })],
       ),
-      createSection('Trending', [createItem({ id: 'trending-id', title: 'Trending Title' })]),
+      createSection('BecauseYouWatched', [createItem({ id: 'because-id', title: 'Because Title' })]),
     ];
 
     const presented = presentHomeSections(sections, true);
 
-    expect(presented.heroItems.map((item) => item.id)).toEqual([
-      'featured-id',
-      'other-id',
-      'trending-id',
-    ]);
+    expect(presented.heroItems.map((item) => item.id)).toEqual(['featured-id', 'other-id']);
     expect(presented.sections).toHaveLength(1);
-    expect(presented.sections[0].type).toBe('Trending');
-    expect(presented.sections[0].items).toHaveLength(0);
+    expect(presented.sections[0].type).toBe('BecauseYouWatched');
   });
 
   it('excludes Continue Watching from visible sections', () => {
@@ -63,8 +58,9 @@ describe('presentHomeSections', () => {
 
     const presented = presentHomeSections(sections, true);
 
-    expect(presented.heroItems.map((item) => item.id)).toEqual(['recommended-id', 'trending-id']);
+    expect(presented.heroItems.map((item) => item.id)).toEqual(['recommended-id']);
     expect(presented.sections.some((section) => section.type === 'ContinueWatching')).toBe(false);
+    expect(presented.sections.some((section) => section.type === 'Trending')).toBe(false);
   });
 
   it('excludes Popular and Genre sections from visible rails', () => {
@@ -83,31 +79,22 @@ describe('presentHomeSections', () => {
 
     const presented = presentHomeSections(sections, false);
 
+    expect(presented.showColdWelcome).toBe(true);
+    expect(presented.heroItems).toEqual([]);
     expect(presented.sections.map((section) => section.type)).toEqual(['Trending']);
-    expect(presented.sections[0].items).toHaveLength(1);
+    expect(presented.sections[0].items).toHaveLength(6);
   });
 
-  it('does not remove hero items from non-source rails', () => {
-    const shared = createItem({ id: 'shared-id', title: 'Shared Title' });
+  it('does not build a cold-start hero carousel', () => {
     const sections = [
-      createSection('RecommendedForYou', [
-        shared,
-        createItem({ id: 'rec-2' }),
-        createItem({ id: 'rec-3' }),
-      ]),
-      createSection('Trending', [shared, createItem({ id: 'unique-id', title: 'Unique' })]),
+      createSection('Trending', [createItem({ id: 'trending-id' })]),
+      createSection('NewReleases', [createItem({ id: 'new-id' })]),
     ];
 
-    const presented = presentHomeSections(sections, true);
+    const presented = presentHomeSections(sections, false);
 
-    expect(presented.heroItems.map((item) => item.id)).toEqual([
-      'shared-id',
-      'rec-2',
-      'rec-3',
-      'unique-id',
-    ]);
-    expect(presented.sections).toHaveLength(1);
-    expect(presented.sections[0].type).toBe('Trending');
-    expect(presented.sections[0].items.map((item) => item.id)).toEqual(['shared-id']);
+    expect(presented.heroItems).toEqual([]);
+    expect(presented.showColdWelcome).toBe(true);
+    expect(presented.sections.map((section) => section.type)).toEqual(['Trending']);
   });
 });

@@ -49,7 +49,7 @@ describe('selectFeaturedItem', () => {
     expect(selectFeaturedItem(sections, true)?.id).toBe('recommended');
   });
 
-  it('falls back to Trending for cold-start users', () => {
+  it('returns null for cold-start users without a hero carousel', () => {
     const sections = [
       createSection('ContinueWatching', [createItem({ id: 'continue' })]),
       createSection('RecommendedForYou', [createItem({ id: 'recommended' })]),
@@ -57,7 +57,7 @@ describe('selectFeaturedItem', () => {
       createSection('Popular', [createItem({ id: 'popular', title: 'Popular Title' })]),
     ];
 
-    expect(selectFeaturedItem(sections, false)?.id).toBe('trending');
+    expect(selectFeaturedItem(sections, false)).toBeNull();
   });
 
   it('returns null for empty sections', () => {

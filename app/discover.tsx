@@ -24,17 +24,17 @@ import {
   buildActiveFilterChips,
 } from '@/features/discovery/components/ActiveFilterChips';
 import { DiscoverFilterSheet } from '@/features/discovery/components/DiscoverFilterSheet';
-import { DiscoveryModeControl } from '@/features/discovery/components/DiscoveryModeControl';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
 import {
   countActiveDiscoveryFilters,
   createDefaultDiscoveryFilters,
   DISCOVERY_SORT_OPTIONS,
+  DISCOVERY_TYPE_OPTIONS,
   getDefaultSortForMode,
+  getDiscoverTitle,
   hasActiveDiscoveryFilters,
   type DiscoveryBrowseFilters,
-  type DiscoveryBrowseMode,
   type DiscoveryBrowseState,
   type DiscoveryTypeFilter,
 } from '@/features/discovery/types';
@@ -42,13 +42,20 @@ import {
   parseDiscoverParams,
   serializeDiscoverRoute,
 } from '@/features/discovery/utils/discover-params';
-import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+
+function getTypeLabel(type: DiscoveryTypeFilter): string | null {
+  if (type === 'all') {
+    return null;
+  }
+
+  return DISCOVERY_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? null;
+}
 
 export default function DiscoverScreen() {
   const router = useRouter();
@@ -68,8 +75,8 @@ export default function DiscoverScreen() {
   );
 
   const activeFilterCount = useMemo(
-    () => countActiveDiscoveryFilters(filters, mode),
-    [filters, mode],
+    () => countActiveDiscoveryFilters(filters, mode, typeFilter),
+    [filters, mode, typeFilter],
   );
 
   const replaceBrowseState = useCallback(
@@ -79,42 +86,20 @@ export default function DiscoverScreen() {
     [router],
   );
 
-  const updateMode = useCallback(
-    (nextMode: DiscoveryBrowseMode) => {
-      const nextFilters: DiscoveryBrowseFilters = {
-        ...filters,
-        sort:
-          filters.sort === getDefaultSortForMode(mode)
-            ? getDefaultSortForMode(nextMode)
-            : filters.sort,
-      };
-
-      replaceBrowseState({ mode: nextMode, type: typeFilter, filters: nextFilters });
+  const applyFilters = useCallback(
+    (nextType: DiscoveryTypeFilter, nextFilters: DiscoveryBrowseFilters) => {
+      replaceBrowseState({ mode, type: nextType, filters: nextFilters });
     },
-    [filters, mode, replaceBrowseState, typeFilter],
-  );
-
-  const updateTypeFilter = useCallback(
-    (nextType: DiscoveryTypeFilter) => {
-      replaceBrowseState({ mode, type: nextType, filters });
-    },
-    [filters, mode, replaceBrowseState],
-  );
-
-  const updateFilters = useCallback(
-    (nextFilters: DiscoveryBrowseFilters) => {
-      replaceBrowseState({ mode, type: typeFilter, filters: nextFilters });
-    },
-    [mode, replaceBrowseState, typeFilter],
+    [mode, replaceBrowseState],
   );
 
   const clearFilters = useCallback(() => {
     replaceBrowseState({
       mode,
-      type: typeFilter,
+      type: 'all',
       filters: createDefaultDiscoveryFilters(mode),
     });
-  }, [mode, replaceBrowseState, typeFilter]);
+  }, [mode, replaceBrowseState]);
 
   const openCatalogDetail = useCallback(
     (id: string, itemType: 'movie' | 'tv') => {
@@ -164,6 +149,7 @@ export default function DiscoverScreen() {
     () =>
       buildActiveFilterChips(
         {
+          typeLabel: getTypeLabel(typeFilter),
           genreIds: filters.genreIds,
           year: filters.year,
           minRating: filters.minRating,
@@ -172,19 +158,39 @@ export default function DiscoverScreen() {
         },
         genresQuery.data ?? [],
         {
+          onRemoveType: () => replaceBrowseState({ mode, type: 'all', filters }),
           onRemoveGenre: (genreId) =>
-            updateFilters({
-              ...filters,
-              genreIds: filters.genreIds.filter((id) => id !== genreId),
+            replaceBrowseState({
+              mode,
+              type: typeFilter,
+              filters: {
+                ...filters,
+                genreIds: filters.genreIds.filter((id) => id !== genreId),
+              },
             }),
-          onRemoveYear: () => updateFilters({ ...filters, year: null }),
-          onRemoveMinRating: () => updateFilters({ ...filters, minRating: null }),
-          onRemoveLanguage: () => updateFilters({ ...filters, language: null }),
+          onRemoveYear: () =>
+            replaceBrowseState({ mode, type: typeFilter, filters: { ...filters, year: null } }),
+          onRemoveMinRating: () =>
+            replaceBrowseState({
+              mode,
+              type: typeFilter,
+              filters: { ...filters, minRating: null },
+            }),
+          onRemoveLanguage: () =>
+            replaceBrowseState({
+              mode,
+              type: typeFilter,
+              filters: { ...filters, language: null },
+            }),
           onRemoveSort: () =>
-            updateFilters({ ...filters, sort: getDefaultSortForMode(mode) }),
+            replaceBrowseState({
+              mode,
+              type: typeFilter,
+              filters: { ...filters, sort: getDefaultSortForMode(mode) },
+            }),
         },
       ),
-    [filters, genresQuery.data, mode, sortLabel, updateFilters],
+    [filters, genresQuery.data, mode, replaceBrowseState, sortLabel, typeFilter],
   );
 
   const renderResult = useCallback(
@@ -198,12 +204,7 @@ export default function DiscoverScreen() {
     () => (
       <View style={styles.header}>
         <DetailBackButton />
-        <AppText variant="title">Discover</AppText>
-        <AppText variant="bodySmall" muted>
-          Browse movies and shows
-        </AppText>
-        <SearchFilterControl value={typeFilter} onChange={updateTypeFilter} />
-        <DiscoveryModeControl value={mode} onChange={updateMode} />
+        <AppText variant="title">{getDiscoverTitle(mode)}</AppText>
         <View style={styles.filtersRow}>
           <Pressable
             accessibilityRole="button"
@@ -231,11 +232,11 @@ export default function DiscoverScreen() {
         <ActiveFilterChips chips={activeFilterChips} />
       </View>
     ),
-    [activeFilterChips, activeFilterCount, mode, typeFilter, updateMode, updateTypeFilter],
+    [activeFilterChips, activeFilterCount, mode],
   );
 
   const emptyState = useMemo(() => {
-    if (hasActiveDiscoveryFilters(filters, mode)) {
+    if (hasActiveDiscoveryFilters(filters, mode, typeFilter)) {
       return (
         <View style={styles.emptyWithAction}>
           <SearchEmptyState
@@ -248,21 +249,26 @@ export default function DiscoverScreen() {
     }
 
     return <SearchEmptyState title="No titles found for this browse mode." />;
-  }, [clearFilters, filters, mode]);
+  }, [clearFilters, filters, mode, typeFilter]);
+
+  const filterSheet = (
+    <DiscoverFilterSheet
+      visible={filterSheetVisible}
+      mode={mode}
+      type={typeFilter}
+      filters={filters}
+      onClose={() => setFilterSheetVisible(false)}
+      onApply={applyFilters}
+      onClear={clearFilters}
+    />
+  );
 
   if (browseQuery.isLoading && items.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <SearchLoadingState />
-        <DiscoverFilterSheet
-          visible={filterSheetVisible}
-          mode={mode}
-          filters={filters}
-          onClose={() => setFilterSheetVisible(false)}
-          onApply={updateFilters}
-          onClear={clearFilters}
-        />
+        {filterSheet}
       </SafeAreaView>
     );
   }
@@ -278,14 +284,7 @@ export default function DiscoverScreen() {
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
         </View>
-        <DiscoverFilterSheet
-          visible={filterSheetVisible}
-          mode={mode}
-          filters={filters}
-          onClose={() => setFilterSheetVisible(false)}
-          onApply={updateFilters}
-          onClear={clearFilters}
-        />
+        {filterSheet}
       </SafeAreaView>
     );
   }
@@ -316,14 +315,7 @@ export default function DiscoverScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
       />
-      <DiscoverFilterSheet
-        visible={filterSheetVisible}
-        mode={mode}
-        filters={filters}
-        onClose={() => setFilterSheetVisible(false)}
-        onApply={updateFilters}
-        onClear={clearFilters}
-      />
+      {filterSheet}
     </SafeAreaView>
   );
 }

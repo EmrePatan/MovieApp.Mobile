@@ -1,11 +1,13 @@
 import { memo } from 'react';
 import { HomeHeroCarousel } from './HomeHeroCarousel';
-import type { HomeItem, HomeTypeFilter } from '../types';
+import { ColdHomeWelcome } from './ColdHomeWelcome';
+import type { HomeItem } from '../types';
 
 interface HomeListHeaderProps {
   heroItems: HomeItem[];
-  filterKey: HomeTypeFilter;
+  showColdWelcome: boolean;
   onItemPress: (item: HomeItem) => void;
+  onExplorePress: () => void;
   isScreenFocused?: boolean;
 }
 
@@ -14,8 +16,9 @@ function areHomeListHeaderPropsEqual(
   next: HomeListHeaderProps,
 ): boolean {
   if (
-    previous.filterKey !== next.filterKey ||
+    previous.showColdWelcome !== next.showColdWelcome ||
     previous.onItemPress !== next.onItemPress ||
+    previous.onExplorePress !== next.onExplorePress ||
     previous.isScreenFocused !== next.isScreenFocused ||
     previous.heroItems.length !== next.heroItems.length
   ) {
@@ -31,10 +34,15 @@ function areHomeListHeaderPropsEqual(
 
 export const HomeListHeader = memo(function HomeListHeader({
   heroItems,
-  filterKey,
+  showColdWelcome,
   onItemPress,
+  onExplorePress,
   isScreenFocused = true,
 }: HomeListHeaderProps) {
+  if (showColdWelcome) {
+    return <ColdHomeWelcome onExplorePress={onExplorePress} />;
+  }
+
   if (heroItems.length === 0) {
     return null;
   }
@@ -42,7 +50,7 @@ export const HomeListHeader = memo(function HomeListHeader({
   return (
     <HomeHeroCarousel
       items={heroItems}
-      filterKey={filterKey}
+      filterKey="all"
       onItemPress={onItemPress}
       isScreenFocused={isScreenFocused}
     />

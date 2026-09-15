@@ -198,10 +198,10 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
+    expect(screen.getByText('Find your next favorite')).toBeTruthy();
     expect(screen.getByText('Trending')).toBeTruthy();
-    expect(screen.getByText('New Releases')).toBeTruthy();
-    expect(screen.getAllByText('Breaking Bad')).toHaveLength(1);
-    expect(screen.getByText('Better Call Saul')).toBeTruthy();
+    expect(screen.queryByText('New Releases')).toBeNull();
+    expect(screen.queryByLabelText('Show TV Shows')).toBeNull();
   });
 
   it('renders error state with retry', () => {
@@ -219,7 +219,7 @@ describe('HomeScreen', () => {
     expect(mockRefetch).toHaveBeenCalled();
   });
 
-  it('renders the hero from allowed sections and hides Continue Watching', () => {
+  it('renders the hero from Recommended For You and hides Continue Watching', () => {
     mockUseHome.mockReturnValue({
       data: {
         sections: [
@@ -242,9 +242,27 @@ describe('HomeScreen', () => {
             ],
           },
           {
+            type: 'RecommendedForYou',
+            title: 'Recommended For You',
+            displayOrder: 1,
+            items: [
+              {
+                id: 'recommended-id',
+                contentType: 'movie',
+                title: 'Recommended Movie',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.5,
+                voteCount: 50,
+              },
+            ],
+          },
+          {
             type: 'ContinueWatching',
             title: 'Continue Watching',
-            displayOrder: 1,
+            displayOrder: 3,
             items: [
               {
                 id: 'continue-id',
@@ -270,7 +288,8 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    expect(screen.getByLabelText('More info about Trending Movie')).toBeTruthy();
+    expect(screen.getByLabelText('More info about Recommended Movie')).toBeTruthy();
+    expect(screen.queryByText('Trending Movie')).toBeNull();
     expect(screen.queryByText('Continue Show')).toBeNull();
     expect(screen.queryByText('Continue Watching')).toBeNull();
   });
@@ -423,16 +442,16 @@ describe('HomeScreen', () => {
     expect(presented.sections.map((section) => section.type)).toEqual([
       'RecommendedForYou',
       'BecauseYouWatched',
-      'TopRated',
     ]);
 
     render(<HomeScreen />);
 
     expect(screen.getByText('Recommended For You')).toBeTruthy();
     expect(screen.getByText('Because You Watched')).toBeTruthy();
-    expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.queryByText('Top Rated')).toBeNull();
     expect(screen.queryByText('Popular')).toBeNull();
     expect(screen.queryByText('Popular Movie')).toBeNull();
+    expect(screen.queryByText('Trending')).toBeNull();
   });
 
   it('deduplicates hero items from their source rails', () => {
@@ -506,7 +525,7 @@ describe('HomeScreen', () => {
     expect(screen.getByText('Fourth Recommended')).toBeTruthy();
   });
 
-  it('requests a new type when filter changes', () => {
+  it('navigates to Search explore from cold home CTA', () => {
     mockUseHome.mockReturnValue({
       data: { sections: [], isPersonalized: false },
       error: null,
@@ -517,9 +536,9 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    fireEvent.press(screen.getByLabelText('Show TV Shows'));
+    fireEvent.press(screen.getByLabelText('Explore movies and shows'));
 
-    expect(mockUseHome).toHaveBeenLastCalledWith('tv', 10);
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/search?explore=1');
   });
 
   it('navigates to Discover from Trending See All even when hero dedup empties the rail', () => {

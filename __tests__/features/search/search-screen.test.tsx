@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import SearchScreen from '../../../app/(tabs)/search';
+import { useExplorePreview } from '@/features/discovery/hooks/useExplorePreview';
+import { useGenres } from '@/features/discovery/hooks/useGenres';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
 import {
@@ -9,13 +11,23 @@ import {
 } from '@/features/search/hooks/useSearchHistory';
 
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useLocalSearchParams: jest.fn(() => ({})),
 }));
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: true }),
+}));
+
+jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({
+  useExplorePreview: jest.fn(),
+}));
+
+jest.mock('@/features/discovery/hooks/useGenres', () => ({
+  useGenres: jest.fn(),
 }));
 
 jest.mock('@/features/search/hooks/useSearch', () => ({
@@ -52,6 +64,20 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
+const previewItem = {
+  id: 'preview-1',
+  type: 'movie' as const,
+  title: 'Preview Movie',
+  originalTitle: 'Preview Movie',
+  overview: 'Overview',
+  posterUrl: null,
+  backdropUrl: null,
+  releaseDate: '2020-01-01',
+  voteAverage: 8.0,
+  voteCount: 100,
+  year: 2020,
+};
+
 const mockSearchResult = {
   id: 'movie-id',
   type: 'movie' as const,
@@ -69,6 +95,23 @@ const mockSearchResult = {
 describe('SearchScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useExplorePreview as jest.Mock).mockReturnValue({
+      data: {
+        trending: { items: [previewItem], page: 1, pageSize: 10, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+        topRated: { items: [previewItem], page: 1, pageSize: 10, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+        newReleases: { items: [previewItem], page: 1, pageSize: 10, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    (useGenres as jest.Mock).mockReturnValue({
+      data: [{ id: 'genre-1', name: 'Action' }],
+      isLoading: false,
+      isError: false,
+    });
 
     (useSearchResults as jest.Mock).mockReturnValue({
       data: undefined,
@@ -105,17 +148,26 @@ describe('SearchScreen', () => {
     });
   });
 
-  it('renders initial empty state', () => {
+  it('renders explore landing in idle state', () => {
     render(<SearchScreen />);
-    expect(screen.getByText('Search movies and TV shows')).toBeTruthy();
-    expect(screen.getByText('Try a title like Inception or Breaking Bad')).toBeTruthy();
-    expect(screen.getByText('Discover trending & popular')).toBeTruthy();
+
+    expect(screen.getByText('Trending Now')).toBeTruthy();
+    expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.getByText('New Releases')).toBeTruthy();
+    expect(screen.getByText('Explore by Genre')).toBeTruthy();
+    expect(screen.queryByText('Discover trending & popular')).toBeNull();
   });
 
-  it('navigates to discover screen', () => {
+  it('navigates to discover from trending see all', () => {
     render(<SearchScreen />);
-    fireEvent.press(screen.getByLabelText('Discover trending and popular titles'));
-    expect(mockPush).toHaveBeenCalledWith('/discover');
+    fireEvent.press(screen.getByLabelText('See all Trending Now'));
+    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all');
+  });
+
+  it('navigates to discover from genre chip', () => {
+    render(<SearchScreen />);
+    fireEvent.press(screen.getByLabelText('Browse Action'));
+    expect(mockPush).toHaveBeenCalledWith('/discover?mode=trending&type=all&genres=genre-1');
   });
 
   it('does not search for whitespace-only input', () => {
@@ -140,7 +192,7 @@ describe('SearchScreen', () => {
     expect(screen.getByLabelText('TV show suggestion')).toBeTruthy();
   });
 
-  it('hides initial and discovery content while autocomplete is active', () => {
+  it('hides explore content while autocomplete is active', () => {
     (useAutocomplete as jest.Mock).mockReturnValue({
       data: {
         items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
@@ -152,8 +204,8 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
 
     expect(screen.getByLabelText('Search for Interstellar, Movie')).toBeTruthy();
-    expect(screen.queryByText('Discover trending & popular')).toBeNull();
-    expect(screen.queryByText('Try a title like Inception or Breaking Bad')).toBeNull();
+    expect(screen.queryByText('Trending Now')).toBeNull();
+    expect(screen.queryByText('Explore by Genre')).toBeNull();
   });
 
   it('hides recent searches while autocomplete is active', () => {
@@ -186,7 +238,7 @@ describe('SearchScreen', () => {
     expect(screen.queryByText('inception')).toBeNull();
   });
 
-  it('shows minimal autocomplete empty state instead of initial content', () => {
+  it('shows minimal autocomplete empty state instead of explore content', () => {
     (useAutocomplete as jest.Mock).mockReturnValue({
       data: { items: [] },
       isLoading: false,
@@ -196,11 +248,10 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'zzzz');
 
     expect(screen.getByLabelText('No suggestions')).toBeTruthy();
-    expect(screen.queryByText('Try a title like Inception or Breaking Bad')).toBeNull();
-    expect(screen.queryByText('Discover trending & popular')).toBeNull();
+    expect(screen.queryByText('Trending Now')).toBeNull();
   });
 
-  it('restores initial content after clearing an autocomplete query', () => {
+  it('restores explore after clearing an autocomplete query', () => {
     (useAutocomplete as jest.Mock).mockReturnValue({
       data: {
         items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
@@ -212,9 +263,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies and TV shows'), 'inte');
     fireEvent.press(screen.getByLabelText('Clear search'));
 
-    expect(screen.getByText('Search movies and TV shows')).toBeTruthy();
-    expect(screen.getByText('Try a title like Inception or Breaking Bad')).toBeTruthy();
-    expect(screen.getByText('Discover trending & popular')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.queryByLabelText('Search for Interstellar, Movie')).toBeNull();
   });
 
@@ -407,7 +456,7 @@ describe('SearchScreen', () => {
 
     expect(screen.getByText('Recent Searches')).toBeTruthy();
     expect(screen.getByText('inception')).toBeTruthy();
-    expect(screen.queryByText('Try a title like Inception or Breaking Bad')).toBeNull();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
   });
 
   it('clears the query from the clear button', () => {
@@ -428,5 +477,30 @@ describe('SearchScreen', () => {
     fireEvent.press(screen.getByLabelText('Filter TV Shows'));
 
     expect(useSearchResults).toHaveBeenLastCalledWith('star', 'tv');
+  });
+
+  it('keeps search usable when explore preview fails', () => {
+    (useExplorePreview as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+
+    expect(screen.getByLabelText('Search movies and TV shows')).toBeTruthy();
+    expect(screen.getByText('Unable to load discovery previews right now.')).toBeTruthy();
+    expect(screen.getByText('Explore by Genre')).toBeTruthy();
+  });
+
+  it('clears search state when explore param is present', () => {
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({ explore: '1' });
+
+    render(<SearchScreen />);
+
+    expect(mockReplace).toHaveBeenCalledWith('/(tabs)/search');
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
   });
 });

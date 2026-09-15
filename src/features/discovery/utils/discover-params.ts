@@ -149,7 +149,9 @@ export function serializeDiscoverRoute(state: DiscoveryBrowseState): string {
 }
 
 export function createDiscoverHref(
-  overrides: Partial<DiscoveryBrowseState> & {
+  overrides: {
+    mode?: DiscoveryBrowseMode;
+    type?: DiscoveryTypeFilter;
     filters?: Partial<DiscoveryBrowseFilters>;
   } = {},
 ): string {

@@ -1,4 +1,5 @@
 import type { SearchContentType } from '@/models/api/pagination';
+import type { SearchResponse } from '@/features/search/types';
 
 export type DiscoveryTypeFilter = SearchContentType;
 
@@ -17,6 +18,12 @@ export type DiscoverySort =
 export interface Genre {
   id: string;
   name: string;
+}
+
+export interface ExplorePreviewResponse {
+  trending: SearchResponse;
+  topRated: SearchResponse;
+  newReleases: SearchResponse;
 }
 
 export interface DiscoveryBrowseFilters {
@@ -48,6 +55,12 @@ export const DISCOVERY_BROWSE_MODES: { value: DiscoveryBrowseMode; label: string
   { value: 'new_releases', label: 'New Releases' },
 ];
 
+export const DISCOVERY_TYPE_OPTIONS: { value: DiscoveryTypeFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'movie', label: 'Movies' },
+  { value: 'tv', label: 'TV Shows' },
+];
+
 export const DISCOVERY_SORT_OPTIONS: { value: DiscoverySort; label: string }[] = [
   { value: 'popularity_desc', label: 'Most Popular' },
   { value: 'popularity_asc', label: 'Least Popular' },
@@ -70,6 +83,18 @@ export function getDefaultSortForMode(mode: DiscoveryBrowseMode): DiscoverySort 
     case 'trending':
     default:
       return 'popularity_desc';
+  }
+}
+
+export function getDiscoverTitle(mode: DiscoveryBrowseMode): string {
+  switch (mode) {
+    case 'top_rated':
+      return 'Top Rated';
+    case 'new_releases':
+      return 'New Releases';
+    case 'trending':
+    default:
+      return 'Trending';
   }
 }
 
@@ -96,8 +121,13 @@ export function createDefaultDiscoveryState(): DiscoveryBrowseState {
 export function countActiveDiscoveryFilters(
   filters: DiscoveryBrowseFilters,
   mode: DiscoveryBrowseMode,
+  type: DiscoveryTypeFilter = 'all',
 ): number {
   let count = 0;
+
+  if (type !== 'all') {
+    count += 1;
+  }
 
   if (filters.genreIds.length > 0) {
     count += filters.genreIds.length;
@@ -125,6 +155,7 @@ export function countActiveDiscoveryFilters(
 export function hasActiveDiscoveryFilters(
   filters: DiscoveryBrowseFilters,
   mode: DiscoveryBrowseMode,
+  type: DiscoveryTypeFilter = 'all',
 ): boolean {
-  return countActiveDiscoveryFilters(filters, mode) > 0;
+  return countActiveDiscoveryFilters(filters, mode, type) > 0;
 }

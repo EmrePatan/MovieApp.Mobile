@@ -12,7 +12,7 @@ import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeSection } from '@/features/home/components/HomeSection';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { homeQueryKey, useHome } from '@/features/home/hooks/useHome';
-import type { HomeItem, HomeSection as HomeSectionModel, HomeTypeFilter } from '@/features/home/types';
+import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
@@ -24,7 +24,6 @@ import { spacing } from '@/theme/spacing';
 export default function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [typeFilter, setTypeFilter] = useState<HomeTypeFilter>('all');
   const [isHomeFocused, setIsHomeFocused] = useState(true);
 
   useFocusEffect(
@@ -36,12 +35,13 @@ export default function HomeScreen() {
       };
     }, []),
   );
+
   const { data, error, isLoading, isFetching, refetch, isError } = useHome(
-    typeFilter,
+    'all',
     DEFAULT_HOME_SECTION_SIZE,
   );
 
-  const { sections, heroItems } = useMemo(() => {
+  const { sections, heroItems, showColdWelcome } = useMemo(() => {
     const nonEmptySections = (data?.sections ?? []).filter(
       (section) => section.items.length > 0,
     );
@@ -51,9 +51,9 @@ export default function HomeScreen() {
 
   const handleRefresh = useCallback(() => {
     void queryClient.invalidateQueries({
-      queryKey: homeQueryKey(typeFilter, DEFAULT_HOME_SECTION_SIZE),
+      queryKey: homeQueryKey('all', DEFAULT_HOME_SECTION_SIZE),
     });
-  }, [queryClient, typeFilter]);
+  }, [queryClient]);
 
   const handleRetry = useCallback(() => {
     void refetch();
@@ -71,6 +71,10 @@ export default function HomeScreen() {
     },
     [queryClient, router],
   );
+
+  const handleExplorePress = useCallback(() => {
+    router.push('/(tabs)/search?explore=1');
+  }, [router]);
 
   const handleSeeAllPress = useCallback(
     (sectionType: HomeSectionModel['type']) => {
@@ -96,22 +100,20 @@ export default function HomeScreen() {
     () => (
       <HomeListHeader
         heroItems={heroItems}
-        filterKey={typeFilter}
+        showColdWelcome={showColdWelcome}
         onItemPress={handleItemPress}
+        onExplorePress={handleExplorePress}
         isScreenFocused={isHomeFocused}
       />
     ),
-    [heroItems, typeFilter, handleItemPress, isHomeFocused],
+    [heroItems, showColdWelcome, handleItemPress, handleExplorePress, isHomeFocused],
   );
 
-  const topChrome = useMemo(
-    () => <HomeTopChrome typeFilter={typeFilter} onTypeFilterChange={setTypeFilter} />,
-    [typeFilter],
-  );
+  const topChrome = useMemo(() => <HomeTopChrome />, []);
 
   const listContentStyle = useMemo(
-    () => (sections.length === 0 ? styles.emptyContent : styles.content),
-    [sections.length],
+    () => (sections.length === 0 && !showColdWelcome ? styles.emptyContent : styles.content),
+    [sections.length, showColdWelcome],
   );
 
   const refreshControl = useMemo(
@@ -168,7 +170,7 @@ export default function HomeScreen() {
         keyExtractor={homeSectionKeyExtractor}
         renderItem={renderSection}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={HomeEmptyState}
+        ListEmptyComponent={showColdWelcome ? null : HomeEmptyState}
         contentContainerStyle={listContentStyle}
         refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}

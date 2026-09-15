@@ -107,6 +107,8 @@ function createBrowseQueryMock(overrides: Record<string, unknown> = {}) {
 describe('DiscoverScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({});
     (useGenres as jest.Mock).mockReturnValue({
       data: [{ id: 'genre-1', name: 'Action' }],
       isLoading: false,
@@ -115,12 +117,24 @@ describe('DiscoverScreen', () => {
     (useDiscoveryBrowse as jest.Mock).mockReturnValue(createBrowseQueryMock());
   });
 
-  it('renders browse header and results', () => {
+  it('renders dynamic browse title and results without top-level mode/type controls', () => {
     render(<DiscoverScreen />);
 
-    expect(screen.getByText('Discover')).toBeTruthy();
-    expect(screen.getByText('Browse movies and shows')).toBeTruthy();
+    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.queryByText('Discover')).toBeNull();
+    expect(screen.queryByText('Browse movies and shows')).toBeNull();
+    expect(screen.queryByLabelText('Top Rated')).toBeNull();
+    expect(screen.queryByLabelText('Filter Movies')).toBeNull();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
+  });
+
+  it('renders top rated title from mode deep link', () => {
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({ mode: 'top_rated', type: 'all' });
+
+    render(<DiscoverScreen />);
+
+    expect(screen.getByText('Top Rated')).toBeTruthy();
   });
 
   it('does not render following, upcoming, or recommendation sections', () => {
@@ -140,34 +154,29 @@ describe('DiscoverScreen', () => {
     expect(UNSAFE_getAllByType(ScrollView).length).toBeGreaterThan(0);
   });
 
-  it('replaces route when browse mode changes', () => {
-    render(<DiscoverScreen />);
-
-    fireEvent.press(screen.getByLabelText('Top Rated'));
-
-    expect(mockReplace).toHaveBeenCalledWith('/discover?mode=top_rated&type=all');
-  });
-
-  it('replaces route when type filter changes', () => {
-    render(<DiscoverScreen />);
-
-    fireEvent.press(screen.getByLabelText('Filter Movies'));
-
-    expect(mockReplace).toHaveBeenCalledWith('/discover?mode=trending&type=movie');
-  });
-
-  it('opens filter sheet and applies filters', () => {
+  it('opens filter sheet with content type and applies filters', () => {
     render(<DiscoverScreen />);
 
     fireEvent.press(screen.getByLabelText('Filters'));
-    expect(screen.getByText('Apply filters')).toBeTruthy();
+    expect(screen.getByText('Content Type')).toBeTruthy();
+    expect(screen.getByText('Show Results')).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText('Genre Action'));
-    fireEvent.press(screen.getByText('Apply filters'));
+    fireEvent.press(screen.getByText('Show Results'));
 
     expect(mockReplace).toHaveBeenCalledWith(
       '/discover?mode=trending&type=all&genres=genre-1',
     );
+  });
+
+  it('applies movie content type from filter sheet', () => {
+    render(<DiscoverScreen />);
+
+    fireEvent.press(screen.getByLabelText('Filters'));
+    fireEvent.press(screen.getByLabelText('Content type Movies'));
+    fireEvent.press(screen.getByText('Show Results'));
+
+    expect(mockReplace).toHaveBeenCalledWith('/discover?mode=trending&type=movie');
   });
 
   it('loads more results when pagination is available', () => {

@@ -5,37 +5,34 @@ export const EXCLUDED_HOME_SECTION_TYPES = new Set<HomeSectionType>([
   'Popular',
   'Genre',
   'BasedOnFavorites',
+  'NewReleases',
+  'TopRated',
 ]);
 
 export const PERSONALIZED_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
   'RecommendedForYou',
   'BecauseYouWatched',
-  'Trending',
-  'NewReleases',
-  'TopRated',
 ];
 
-export const COLD_START_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
-  'Trending',
-  'NewReleases',
-  'TopRated',
-];
+export const COLD_START_HOME_SECTION_ORDER: readonly HomeSectionType[] = ['Trending'];
 
-export const PERSONALIZED_HERO_SOURCE_ORDER: readonly HomeSectionType[] = [
-  'RecommendedForYou',
-  'Trending',
-  'NewReleases',
-  'TopRated',
-];
+export const PERSONALIZED_HERO_SOURCE_ORDER: readonly HomeSectionType[] = ['RecommendedForYou'];
 
-export const COLD_START_HERO_SOURCE_ORDER: readonly HomeSectionType[] = [
-  'Trending',
-  'NewReleases',
-  'TopRated',
-];
+export const COLD_START_HERO_SOURCE_ORDER: readonly HomeSectionType[] = [];
 
-export function isAllowedHomeSectionType(type: HomeSectionType): boolean {
-  return !EXCLUDED_HOME_SECTION_TYPES.has(type);
+export function isAllowedHomeSectionType(
+  type: HomeSectionType,
+  isPersonalized: boolean,
+): boolean {
+  if (EXCLUDED_HOME_SECTION_TYPES.has(type)) {
+    return false;
+  }
+
+  if (isPersonalized && type === 'Trending') {
+    return false;
+  }
+
+  return true;
 }
 
 export function applyHomeSectionPolicy(
@@ -49,7 +46,7 @@ export function applyHomeSectionPolicy(
   const sectionsByType = new Map<HomeSectionType, HomeSection>();
 
   for (const section of sections) {
-    if (!isAllowedHomeSectionType(section.type) || section.items.length === 0) {
+    if (!isAllowedHomeSectionType(section.type, isPersonalized) || section.items.length === 0) {
       continue;
     }
 

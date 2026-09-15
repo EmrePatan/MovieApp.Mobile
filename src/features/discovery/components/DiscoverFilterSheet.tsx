@@ -15,10 +15,12 @@ import { AppInput } from '@/components/inputs/AppInput';
 import { useGenres } from '../hooks/useGenres';
 import {
   DISCOVERY_SORT_OPTIONS,
+  DISCOVERY_TYPE_OPTIONS,
   getDefaultSortForMode,
   type DiscoveryBrowseFilters,
   type DiscoveryBrowseMode,
   type DiscoverySort,
+  type DiscoveryTypeFilter,
   type Genre,
 } from '../types';
 import { colors } from '@/theme/colors';
@@ -27,9 +29,10 @@ import { borderRadius, spacing } from '@/theme/spacing';
 interface DiscoverFilterSheetProps {
   visible: boolean;
   mode: DiscoveryBrowseMode;
+  type: DiscoveryTypeFilter;
   filters: DiscoveryBrowseFilters;
   onClose: () => void;
-  onApply: (filters: DiscoveryBrowseFilters) => void;
+  onApply: (type: DiscoveryTypeFilter, filters: DiscoveryBrowseFilters) => void;
   onClear: () => void;
 }
 
@@ -83,6 +86,40 @@ function GenreSelector({
   );
 }
 
+function TypeSelector({
+  value,
+  onChange,
+}: {
+  value: DiscoveryTypeFilter;
+  onChange: (value: DiscoveryTypeFilter) => void;
+}) {
+  return (
+    <View style={styles.chipGrid}>
+      {DISCOVERY_TYPE_OPTIONS.map((option) => {
+        const selected = option.value === value;
+
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            accessibilityLabel={`Content type ${option.label}`}
+            onPress={() => onChange(option.value)}
+            style={[styles.filterChip, selected && styles.filterChipSelected]}
+          >
+            <AppText
+              variant="caption"
+              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+            >
+              {option.label}
+            </AppText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function SortSelector({
   value,
   onChange,
@@ -120,6 +157,7 @@ function SortSelector({
 export function DiscoverFilterSheet({
   visible,
   mode,
+  type,
   filters,
   onClose,
   onApply,
@@ -127,22 +165,24 @@ export function DiscoverFilterSheet({
 }: DiscoverFilterSheetProps) {
   const genresQuery = useGenres();
   const wasVisibleRef = useRef(false);
+  const [draftType, setDraftType] = useState<DiscoveryTypeFilter>(type);
   const [draft, setDraft] = useState<DiscoveryBrowseFilters>(filters);
 
   useEffect(() => {
     if (visible && !wasVisibleRef.current) {
+      setDraftType(type);
       setDraft(filters);
     }
 
     wasVisibleRef.current = visible;
-  }, [visible, filters]);
+  }, [visible, filters, type]);
 
   const handleClose = () => {
     onClose();
   };
 
   const handleApply = () => {
-    onApply(draft);
+    onApply(draftType, draft);
     onClose();
   };
 
@@ -155,6 +195,7 @@ export function DiscoverFilterSheet({
       sort: getDefaultSortForMode(mode),
     };
 
+    setDraftType('all');
     setDraft(cleared);
     onClear();
     onClose();
@@ -176,6 +217,11 @@ export function DiscoverFilterSheet({
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
           >
+            <View style={styles.section}>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>Content Type</AppText>
+              <TypeSelector value={draftType} onChange={setDraftType} />
+            </View>
+
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>Genres</AppText>
               {genresQuery.isLoading ? (
@@ -249,8 +295,8 @@ export function DiscoverFilterSheet({
           </ScrollView>
 
           <View style={styles.actions}>
-            <AppButton title="Clear filters" variant="secondary" onPress={handleClear} />
-            <AppButton title="Apply filters" onPress={handleApply} />
+            <AppButton title="Reset" variant="secondary" onPress={handleClear} />
+            <AppButton title="Show Results" onPress={handleApply} />
           </View>
         </SafeAreaView>
       </View>
@@ -290,6 +336,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sectionLabel: {
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   chipGrid: {
@@ -298,25 +345,24 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   filterChip: {
-    minHeight: 32,
-    paddingHorizontal: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surfaceElevated,
-    alignItems: 'center',
+    minHeight: 36,
     justifyContent: 'center',
   },
   filterChipSelected: {
-    backgroundColor: colors.accent,
     borderColor: colors.accent,
+    backgroundColor: colors.accentMuted,
   },
   filterChipLabel: {
-    color: colors.textSecondary,
-    fontWeight: '500',
+    color: colors.textPrimary,
   },
   filterChipLabelSelected: {
-    color: colors.textPrimary,
+    color: colors.accent,
     fontWeight: '600',
   },
   actions: {

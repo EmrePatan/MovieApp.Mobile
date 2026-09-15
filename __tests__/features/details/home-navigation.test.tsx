@@ -110,12 +110,6 @@ function mockHomeData() {
           type: 'Trending',
           title: 'Trending',
           displayOrder: 1,
-          items: createTrendingFillers(5),
-        },
-        {
-          type: 'NewReleases',
-          title: 'New Releases',
-          displayOrder: 2,
           items: homeSectionItems,
         },
       ],
@@ -153,12 +147,6 @@ describe('Home detail navigation', () => {
             type: 'Trending',
             title: 'Trending',
             displayOrder: 1,
-            items: createTrendingFillers(5),
-          },
-          {
-            type: 'NewReleases',
-            title: 'New Releases',
-            displayOrder: 2,
             items: [
               {
                 id: 'tv-a',
