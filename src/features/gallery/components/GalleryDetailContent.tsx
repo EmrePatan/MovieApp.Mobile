@@ -30,7 +30,7 @@ export function GalleryDetailContent({ gallery, mode, subtitle }: GalleryDetailC
   return (
     <View style={styles.container} testID="gallery-detail-content">
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <DetailBackButton />
+        <DetailBackButton contentInset={false} />
         <View style={styles.header}>
           <AppText variant="title" style={styles.headerTitle}>
             {mode === 'person' ? 'Photos' : 'Gallery'}

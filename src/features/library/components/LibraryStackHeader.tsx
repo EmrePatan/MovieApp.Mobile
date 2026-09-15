@@ -14,9 +14,7 @@ interface LibraryStackHeaderProps {
 export function LibraryStackHeader({ title, subtitle, children }: LibraryStackHeaderProps) {
   return (
     <View style={styles.header}>
-      <View style={styles.backRow}>
-        <DetailBackButton />
-      </View>
+      <DetailBackButton contentInset />
       <AppText variant="title">{title}</AppText>
       {subtitle ? (
         <AppText variant="bodySmall" muted style={styles.subtitle}>
@@ -34,10 +32,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     gap: spacing.sm,
     paddingBottom: spacing.md,
-  },
-  backRow: {
-    alignSelf: 'flex-start',
-    marginLeft: -spacing.lg,
   },
   subtitle: {
     lineHeight: 20,

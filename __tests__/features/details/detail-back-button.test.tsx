@@ -22,4 +22,24 @@ describe('DetailBackButton', () => {
       top: 12,
     });
   });
+
+  it('uses zero left inset when rendered inside padded headers', () => {
+    render(<DetailBackButton contentInset />);
+
+    const button = screen.getByLabelText('Back');
+    expect(button).toHaveStyle({
+      paddingLeft: 0,
+      minHeight: interaction.touchTarget,
+      minWidth: interaction.touchTarget,
+    });
+  });
+
+  it('keeps standalone horizontal padding when not inset', () => {
+    render(<DetailBackButton contentInset={false} />);
+
+    const button = screen.getByLabelText('Back');
+    expect(button).toHaveStyle({
+      paddingHorizontal: 24,
+    });
+  });
 });

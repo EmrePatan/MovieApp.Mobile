@@ -27,12 +27,14 @@ interface DetailBackButtonProps {
   label?: string;
   topOffset?: number;
   variant?: 'inline' | 'overlay';
+  contentInset?: boolean;
 }
 
 export function DetailBackButton({
   label,
   topOffset = 0,
   variant = 'inline',
+  contentInset = true,
 }: DetailBackButtonProps) {
   const router = useRouter();
   const segments = useSegments();
@@ -85,7 +87,11 @@ export function DetailBackButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={handleBack}
-      style={({ pressed }) => [styles.inlineButton, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.inlineButton,
+        contentInset ? styles.inlineButtonContentInset : styles.inlineButtonStandalone,
+        pressed && styles.pressed,
+      ]}
     >
       <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
       <AppText variant="body">{displayLabel}</AppText>
@@ -97,10 +103,18 @@ const styles = StyleSheet.create({
   inlineButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 44,
+    alignSelf: 'flex-start',
+    minHeight: interaction.touchTarget,
+    minWidth: interaction.touchTarget,
     gap: spacing.xs,
-    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
+  },
+  inlineButtonContentInset: {
+    paddingLeft: 0,
+    paddingRight: spacing.md,
+  },
+  inlineButtonStandalone: {
+    paddingHorizontal: spacing.lg,
   },
   overlayButton: {
     position: 'absolute',

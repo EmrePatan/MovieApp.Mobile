@@ -70,7 +70,7 @@ export function CreditsDetailContent({
   const listHeader = (
     <View>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <DetailBackButton />
+        <DetailBackButton contentInset={false} />
         <View style={styles.header}>
           <AppText variant="title" style={styles.headerTitle}>
             Cast & Crew
