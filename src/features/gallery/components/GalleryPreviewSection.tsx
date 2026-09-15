@@ -1,0 +1,121 @@
+import { useCallback, useMemo } from 'react';
+import { FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
+import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
+import { resolveThumbnailImageUri } from '@/utils/image-url';
+import type { GalleryImage } from '../types';
+import { galleryImageKey, getGalleryPreviewImages } from '../utils/gallery-images';
+import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
+import { spacing } from '@/theme/spacing';
+
+const PREVIEW_SIZE = 112;
+
+interface GalleryPreviewSectionProps {
+  title: string;
+  images: GalleryImage[];
+  isLoading?: boolean;
+  seeAllRoute?: string;
+}
+
+export function GalleryPreviewSection({
+  title,
+  images,
+  isLoading = false,
+  seeAllRoute,
+}: GalleryPreviewSectionProps) {
+  const router = useRouter();
+  const previewImages = useMemo(() => getGalleryPreviewImages(images), [images]);
+
+  const handleSeeAllPress = useCallback(() => {
+    if (seeAllRoute) {
+      router.push(seeAllRoute);
+    }
+  }, [router, seeAllRoute]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.container} testID="gallery-preview-loading">
+        <HomeSectionHeader title={title} />
+        <FlatList
+          horizontal
+          data={Array.from({ length: 4 })}
+          keyExtractor={(_, index) => `gallery-preview-skeleton-${index}`}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          renderItem={() => (
+            <SkeletonBlock width={PREVIEW_SIZE} height={PREVIEW_SIZE * 0.67} style={styles.previewItem} />
+          )}
+        />
+      </View>
+    );
+  }
+
+  if (previewImages.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container} testID="gallery-preview">
+      <HomeSectionHeader
+        title={title}
+        onSeeAllPress={seeAllRoute ? handleSeeAllPress : undefined}
+      />
+      <FlatList
+        horizontal
+        data={previewImages}
+        keyExtractor={(image, index) => galleryImageKey(image, index)}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        initialNumToRender={layout.horizontalList.initialNumToRender}
+        maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
+        windowSize={layout.horizontalList.windowSize}
+        renderItem={({ item, index }) => {
+          const uri = resolveThumbnailImageUri(item.filePath);
+          const aspectRatio = item.aspectRatio && item.aspectRatio > 0 ? item.aspectRatio : 0.67;
+          const height = PREVIEW_SIZE / aspectRatio;
+
+          return (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Gallery preview image ${index + 1}`}
+              onPress={seeAllRoute ? handleSeeAllPress : undefined}
+              style={[styles.previewItem, { width: PREVIEW_SIZE, height }]}
+              testID={`gallery-preview-item-${index}`}
+            >
+              {uri ? (
+                <Image source={{ uri }} style={styles.image} resizeMode="cover" />
+              ) : (
+                <View style={styles.placeholder} />
+              )}
+            </Pressable>
+          );
+        }}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: spacing.lg,
+  },
+  listContent: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    gap: spacing.sm,
+  },
+  previewItem: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholder: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+});

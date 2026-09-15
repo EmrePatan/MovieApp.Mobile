@@ -1,8 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
+import { PersonGallerySection } from '@/features/gallery/components/PersonGallerySection';
+import { usePersonGallery } from '@/features/gallery/hooks/useGallery';
+import { buildPersonGalleryRoute } from '@/features/details/shared/routes';
 import type { PersonDetailResponse } from '../types';
-import { PersonFilmographySection } from './PersonFilmographySection';
+import { CollapsibleBiography } from './CollapsibleBiography';
+import { PersonFilmographyPreviewSection } from './PersonFilmographyPreviewSection';
 import { PersonHero } from './PersonHero';
 import { spacing } from '@/theme/spacing';
 
@@ -12,6 +16,7 @@ interface PersonDetailContentProps {
 
 export function PersonDetailContent({ person }: PersonDetailContentProps) {
   const biography = person.biography?.trim();
+  const galleryQuery = usePersonGallery(person.tmdbId);
 
   return (
     <View>
@@ -27,9 +32,7 @@ export function PersonDetailContent({ person }: PersonDetailContentProps) {
       <View style={styles.section}>
         <HomeSectionHeader title="Biography" />
         {biography ? (
-          <AppText variant="body" style={styles.biography}>
-            {biography}
-          </AppText>
+          <CollapsibleBiography biography={biography} />
         ) : (
           <AppText variant="bodySmall" muted style={styles.emptyBiography} testID="person-biography-empty">
             Biography is not available for this person yet.
@@ -37,7 +40,14 @@ export function PersonDetailContent({ person }: PersonDetailContentProps) {
         )}
       </View>
 
-      <PersonFilmographySection filmography={person.filmography} />
+      <PersonGallerySection
+        query={galleryQuery}
+        seeAllRoute={buildPersonGalleryRoute(person.tmdbId)}
+      />
+      <PersonFilmographyPreviewSection
+        tmdbPersonId={person.tmdbId}
+        filmography={person.filmography}
+      />
     </View>
   );
 }
@@ -45,10 +55,6 @@ export function PersonDetailContent({ person }: PersonDetailContentProps) {
 const styles = StyleSheet.create({
   section: {
     marginTop: spacing.md,
-  },
-  biography: {
-    paddingHorizontal: spacing.lg,
-    lineHeight: 24,
   },
   emptyBiography: {
     paddingHorizontal: spacing.lg,

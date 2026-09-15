@@ -57,6 +57,22 @@ export function buildPersonDetailRoute(tmdbId: number): string {
   return `/person/${encodePathSegment(tmdbId)}`;
 }
 
+export function buildMovieGalleryRoute(movieId: string): string {
+  return `/gallery/movie/${encodePathSegment(movieId)}`;
+}
+
+export function buildTvGalleryRoute(tvShowId: string): string {
+  return `/gallery/tv/${encodePathSegment(tvShowId)}`;
+}
+
+export function buildPersonGalleryRoute(tmdbPersonId: number): string {
+  return `/gallery/person/${encodePathSegment(tmdbPersonId)}`;
+}
+
+export function buildPersonFilmographyRoute(tmdbPersonId: number): string {
+  return `/person/${encodePathSegment(tmdbPersonId)}/filmography`;
+}
+
 export function buildCollectionDetailRoute(tmdbCollectionId: number): string {
   return `/collection/${encodePathSegment(tmdbCollectionId)}`;
 }

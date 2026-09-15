@@ -8,6 +8,9 @@ import { WhereToWatchRail } from '@/features/details/watch-providers/components/
 import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
 import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
+import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
+import { useTvShowGallery } from '@/features/gallery/hooks/useGallery';
+import { buildTvGalleryRoute } from '@/features/details/shared/routes';
 import { SeasonList } from './SeasonList';
 import { formatTvDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { TvShowDetailsResponse } from '../types';
@@ -17,6 +20,7 @@ interface TvShowDetailContentProps {
 }
 
 export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
+  const galleryQuery = useTvShowGallery(show.id);
   const metadataLine = formatTvDetailMetadataLine({
     firstAirDate: show.firstAirDate,
     voteAverage: show.voteAverage,
@@ -42,6 +46,10 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <WhereToWatchRail contentType="tv" contentId={show.id} />
+      <CatalogGallerySection
+        query={galleryQuery}
+        seeAllRoute={buildTvGalleryRoute(show.id)}
+      />
       <CastRail contentType="tv" contentId={show.id} title={show.title} />
       <ReviewsSection contentType="tv" contentId={show.id} />
       <SimilarContentSection contentType="tv" contentId={show.id} />

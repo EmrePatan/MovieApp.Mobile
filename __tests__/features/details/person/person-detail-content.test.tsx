@@ -21,6 +21,13 @@ jest.mock('expo-router', () => ({
   useSegments: jest.fn(() => ['(tabs)', 'person', '[tmdbId]']),
 }));
 
+jest.mock('@/features/gallery/hooks/useGallery', () => ({
+  usePersonGallery: () => ({
+    data: { backdrops: [], posters: [], logos: [], profiles: [] },
+    isLoading: false,
+  }),
+}));
+
 describe('PersonDetailContent', () => {
   it('renders biography and filmography', () => {
     renderWithQueryClient(
@@ -53,7 +60,7 @@ describe('PersonDetailContent', () => {
     expect(screen.getByText('Matthew McConaughey')).toBeTruthy();
     expect(screen.getByText('Award-winning actor.')).toBeTruthy();
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByTestId('person-filmography')).toBeTruthy();
+    expect(screen.getByTestId('person-filmography-preview')).toBeTruthy();
   });
 
   it('shows biography empty state', () => {

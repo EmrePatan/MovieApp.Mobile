@@ -9,6 +9,9 @@ import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
 import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { CollectionLinkRow } from '@/features/details/collection/components/CollectionLinkRow';
+import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
+import { useMovieGallery } from '@/features/gallery/hooks/useGallery';
+import { buildMovieGalleryRoute } from '@/features/details/shared/routes';
 import { formatMovieDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { MovieDetailsResponse } from '../types';
 interface MovieDetailContentProps {
@@ -16,6 +19,7 @@ interface MovieDetailContentProps {
 }
 
 export function MovieDetailContent({ movie }: MovieDetailContentProps) {
+  const galleryQuery = useMovieGallery(movie.id);
   const metadataLine = formatMovieDetailMetadataLine({
     releaseDate: movie.releaseDate,
     runtimeMinutes: movie.runtimeMinutes,
@@ -48,6 +52,10 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
       ) : null}
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
+      <CatalogGallerySection
+        query={galleryQuery}
+        seeAllRoute={buildMovieGalleryRoute(movie.id)}
+      />
       <CastRail contentType="movie" contentId={movie.id} title={movie.title} />
       <ReviewsSection contentType="movie" contentId={movie.id} />
       <SimilarContentSection contentType="movie" contentId={movie.id} />

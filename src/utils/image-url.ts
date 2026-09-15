@@ -11,12 +11,25 @@ export function getImageBaseUrl(): string | null {
   return base.replace(/\/+$/, '');
 }
 
+export type ImageSize = 'w300' | 'w500' | 'original';
+
+function applyImageSize(baseUri: string, size: ImageSize): string {
+  if (size === 'original') {
+    return baseUri.replace(/\/w\d+\//, '/original/');
+  }
+
+  return baseUri.replace(/\/w\d+\//, `/${size}/`);
+}
+
 /**
  * Resolves catalog image paths from the backend into a loadable URI.
  * Absolute URLs are returned unchanged.
  * Relative paths require EXPO_PUBLIC_IMAGE_BASE_URL to be configured.
  */
-export function resolveImageUri(path: string | null | undefined): string | null {
+export function resolveImageUri(
+  path: string | null | undefined,
+  size: ImageSize = 'w500',
+): string | null {
   if (!path || path.trim().length === 0) {
     return null;
   }
@@ -33,5 +46,14 @@ export function resolveImageUri(path: string | null | undefined): string | null 
   }
 
   const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-  return `${base}${normalizedPath}`;
+  const uri = `${base}${normalizedPath}`;
+  return applyImageSize(uri, size);
+}
+
+export function resolveThumbnailImageUri(path: string | null | undefined): string | null {
+  return resolveImageUri(path, 'w300');
+}
+
+export function resolveOriginalImageUri(path: string | null | undefined): string | null {
+  return resolveImageUri(path, 'original');
 }
