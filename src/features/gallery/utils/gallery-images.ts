@@ -61,3 +61,19 @@ export function getGalleryPreviewImages(images: GalleryImage[]): GalleryImage[] 
 export function galleryImageKey(image: GalleryImage, index: number): string {
   return `${image.category}-${image.filePath}-${index}`;
 }
+
+export function createGalleryImageFromPath(
+  filePath: string,
+  category: GalleryImage['category'],
+): GalleryImage {
+  return {
+    filePath,
+    width: null,
+    height: null,
+    aspectRatio: null,
+    category,
+    language: null,
+    voteAverage: 0,
+    voteCount: 0,
+  };
+}

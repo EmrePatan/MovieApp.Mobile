@@ -1,14 +1,17 @@
-import { memo } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
+import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
+import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
 import { DetailScrim } from '@/features/details/shared/components/DetailScrim';
 import { formatIsoDate } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 
 interface PersonHeroProps {
   name: string;
@@ -34,6 +37,24 @@ export const PersonHero = memo(function PersonHero({
 
   const birthLine = formatLifeDates(birthday, deathday);
   const metaParts = [knownForDepartment, birthLine, placeOfBirth].filter(Boolean);
+  const [isPortraitViewerOpen, setIsPortraitViewerOpen] = useState(false);
+
+  const portraitImages = useMemo(
+    () => (profileImagePath ? [createGalleryImageFromPath(profileImagePath, 'profile')] : []),
+    [profileImagePath],
+  );
+
+  const openPortraitViewer = useCallback(() => {
+    if (profileImagePath) {
+      setIsPortraitViewerOpen(true);
+    }
+  }, [profileImagePath]);
+
+  const closePortraitViewer = useCallback(() => {
+    setIsPortraitViewerOpen(false);
+  }, []);
+
+  const portraitLabel = `${name} portrait`;
 
   return (
     <View style={styles.container}>
@@ -55,13 +76,22 @@ export const PersonHero = memo(function PersonHero({
       <View style={styles.content}>
         <View style={[styles.portraitFrame, { width: portraitSize, height: portraitSize }]}>
           {profileImagePath ? (
-            <CatalogImage
-              path={profileImagePath}
-              width={portraitSize}
-              height={portraitSize}
-              rounded
-              accessibilityLabel={`${name} portrait`}
-            />
+            <Pressable
+              onPress={openPortraitViewer}
+              accessibilityRole="button"
+              accessibilityLabel={portraitLabel}
+              accessibilityHint="Opens full screen portrait"
+              style={({ pressed }) => [pressed && styles.portraitPressed]}
+              testID="person-hero-portrait"
+            >
+              <CatalogImage
+                path={profileImagePath}
+                width={portraitSize}
+                height={portraitSize}
+                rounded
+                accessibilityLabel={portraitLabel}
+              />
+            </Pressable>
           ) : (
             <View style={[styles.portraitFallback, { width: portraitSize, height: portraitSize }]}>
               <Ionicons name="person-outline" size={48} color={colors.textMuted} />
@@ -84,6 +114,15 @@ export const PersonHero = memo(function PersonHero({
           ) : null}
         </View>
       </View>
+
+      {isPortraitViewerOpen ? (
+        <ImageViewerModal
+          visible
+          images={portraitImages}
+          initialIndex={0}
+          onClose={closePortraitViewer}
+        />
+      ) : null}
     </View>
   );
 });
@@ -137,5 +176,8 @@ const styles = StyleSheet.create({
   },
   metaList: {
     gap: 2,
+  },
+  portraitPressed: {
+    opacity: interaction.pressedOpacity,
   },
 });

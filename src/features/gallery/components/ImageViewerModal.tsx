@@ -69,7 +69,7 @@ export function ImageViewerModal({
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType="none"
       transparent
       statusBarTranslucent
       onRequestClose={closeViewer}

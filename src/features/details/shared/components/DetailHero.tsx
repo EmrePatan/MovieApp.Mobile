@@ -1,7 +1,9 @@
-import { memo, useMemo, type ReactNode } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { memo, useCallback, useMemo, useState, type ReactNode } from 'react';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
+import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
+import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { BackdropImage, CatalogImage } from './CatalogImage';
 import { DetailBackButton } from './DetailBackButton';
 import { DetailMetadataRow } from './DetailMetadataRow';
@@ -10,6 +12,7 @@ import { shouldShowOriginalTitle } from '@/utils/format';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 
 export interface DetailHeroProps {
   title: string;
@@ -48,6 +51,24 @@ export const DetailHero = memo(function DetailHero({
 
   const heroImagePath = useStillAsHero ? stillPath : backdropPath;
   const showPoster = !useStillAsHero;
+  const [isPosterViewerOpen, setIsPosterViewerOpen] = useState(false);
+
+  const posterImages = useMemo(
+    () => (posterPath ? [createGalleryImageFromPath(posterPath, 'poster')] : []),
+    [posterPath],
+  );
+
+  const openPosterViewer = useCallback(() => {
+    if (posterPath) {
+      setIsPosterViewerOpen(true);
+    }
+  }, [posterPath]);
+
+  const closePosterViewer = useCallback(() => {
+    setIsPosterViewerOpen(false);
+  }, []);
+
+  const posterLabel = posterAccessibilityLabel ?? `${title} poster`;
 
   return (
     <View style={styles.container}>
@@ -65,12 +86,28 @@ export const DetailHero = memo(function DetailHero({
         ) : null}
 
         <View style={styles.titleRow}>
-          {showPoster ? (
+          {showPoster && posterPath ? (
+            <Pressable
+              onPress={openPosterViewer}
+              accessibilityRole="button"
+              accessibilityLabel={posterLabel}
+              accessibilityHint="Opens full screen poster"
+              style={({ pressed }) => [pressed && styles.posterPressed]}
+              testID="detail-hero-poster"
+            >
+              <CatalogImage
+                path={posterPath}
+                width={layout.posterCarousel.width}
+                height={layout.posterCarousel.height}
+                accessibilityLabel={posterLabel}
+              />
+            </Pressable>
+          ) : showPoster ? (
             <CatalogImage
               path={posterPath}
               width={layout.posterCarousel.width}
               height={layout.posterCarousel.height}
-              accessibilityLabel={posterAccessibilityLabel ?? `${title} poster`}
+              accessibilityLabel={posterLabel}
             />
           ) : null}
           <View style={styles.titleBlock}>
@@ -92,6 +129,15 @@ export const DetailHero = memo(function DetailHero({
           </View>
         </View>
       </View>
+
+      {isPosterViewerOpen ? (
+        <ImageViewerModal
+          visible
+          images={posterImages}
+          initialIndex={0}
+          onClose={closePosterViewer}
+        />
+      ) : null}
     </View>
   );
 });
@@ -119,5 +165,8 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
     paddingBottom: spacing.xs,
+  },
+  posterPressed: {
+    opacity: interaction.pressedOpacity,
   },
 });
