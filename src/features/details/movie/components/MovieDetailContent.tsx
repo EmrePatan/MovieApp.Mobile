@@ -46,7 +46,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       <DetailOverview overview={movie.overview} />
       <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
-      <CastRail contentType="movie" contentId={movie.id} />
+      <CastRail contentType="movie" contentId={movie.id} title={movie.title} />
       <ReviewsSection contentType="movie" contentId={movie.id} />
       <SimilarContentSection contentType="movie" contentId={movie.id} />
     </View>

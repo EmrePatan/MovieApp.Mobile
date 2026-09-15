@@ -61,6 +61,39 @@ export function buildCollectionDetailRoute(tmdbCollectionId: number): string {
   return `/collection/${encodePathSegment(tmdbCollectionId)}`;
 }
 
+export function buildCreditsRoute(
+  type: 'movie' | 'tv',
+  catalogId: string,
+  options?: { title?: string },
+): string {
+  const base =
+    type === 'movie'
+      ? `/credits/movie/${encodePathSegment(catalogId)}`
+      : `/credits/tv/${encodePathSegment(catalogId)}`;
+
+  if (!options?.title) {
+    return base;
+  }
+
+  const params = new URLSearchParams({ title: options.title });
+  return `${base}?${params.toString()}`;
+}
+
+export function parseCreditsCatalogIdFromPathname(
+  pathname: string,
+  contentType: 'movie' | 'tv',
+): string | undefined {
+  const pattern =
+    contentType === 'movie' ? /\/credits\/movie\/([^/]+)/ : /\/credits\/tv\/([^/]+)/;
+  const match = pathname.match(pattern);
+  if (!match?.[1]) {
+    return undefined;
+  }
+
+  const id = decodeURIComponent(match[1]);
+  return isValidGuid(id) ? id : undefined;
+}
+
 export function isValidGuid(value: string | undefined): boolean {
   if (!value) {
     return false;

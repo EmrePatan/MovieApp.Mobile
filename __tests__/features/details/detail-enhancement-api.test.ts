@@ -64,7 +64,7 @@ describe('detail enhancement api', () => {
   });
 
   it('calls credits endpoints without auth', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ cast: [] });
+    (api.get as jest.Mock).mockResolvedValue({ cast: [], crew: [] });
     await getMovieCredits(movieId);
     await getTvShowCredits(tvShowId);
 

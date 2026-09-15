@@ -42,7 +42,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <WhereToWatchRail contentType="tv" contentId={show.id} />
-      <CastRail contentType="tv" contentId={show.id} />
+      <CastRail contentType="tv" contentId={show.id} title={show.title} />
       <ReviewsSection contentType="tv" contentId={show.id} />
       <SimilarContentSection contentType="tv" contentId={show.id} />
     </View>
