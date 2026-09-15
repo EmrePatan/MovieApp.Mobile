@@ -5,7 +5,7 @@ import {
 
 describe('image viewer dismiss gesture', () => {
   it('captures downward vertical swipes', () => {
-    expect(shouldCaptureImageViewerDismissGesture(4, 24)).toBe(true);
+    expect(shouldCaptureImageViewerDismissGesture(2, 12)).toBe(true);
   });
 
   it('ignores horizontal swipes so gallery paging still works', () => {

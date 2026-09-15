@@ -8,6 +8,10 @@ import {
   returnToCatalogDetailOrigin,
 } from '../navigation/catalog-detail-navigation';
 import {
+  isGalleryDetailRoute,
+  returnFromGalleryDetail,
+} from '../navigation/gallery-detail-navigation';
+import {
   isPersonDetailRoute,
   returnFromPersonDetail,
 } from '../navigation/person-detail-navigation';
@@ -39,6 +43,11 @@ export function DetailBackButton({
 
     if (isPersonDetailRoute(segments)) {
       returnFromPersonDetail(router);
+      return;
+    }
+
+    if (isGalleryDetailRoute(segments)) {
+      returnFromGalleryDetail(router);
       return;
     }
 

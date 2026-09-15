@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { openGalleryDetail } from '@/features/details/shared/navigation/gallery-detail-navigation';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { resolveThumbnailImageUri } from '@/utils/image-url';
@@ -18,6 +19,7 @@ interface GalleryPreviewSectionProps {
   images: GalleryImage[];
   isLoading?: boolean;
   seeAllRoute?: string;
+  returnHref?: string;
 }
 
 export function GalleryPreviewSection({
@@ -25,16 +27,22 @@ export function GalleryPreviewSection({
   images,
   isLoading = false,
   seeAllRoute,
+  returnHref,
 }: GalleryPreviewSectionProps) {
   const router = useRouter();
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const previewImages = useMemo(() => getGalleryPreviewImages(images), [images]);
 
   const handleSeeAllPress = useCallback(() => {
+    if (seeAllRoute && returnHref) {
+      openGalleryDetail(router, seeAllRoute, returnHref);
+      return;
+    }
+
     if (seeAllRoute) {
       router.push(seeAllRoute);
     }
-  }, [router, seeAllRoute]);
+  }, [returnHref, router, seeAllRoute]);
 
   const handleImagePress = useCallback((index: number) => {
     setViewerIndex(index);

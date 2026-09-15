@@ -1,6 +1,6 @@
 export const IMAGE_VIEWER_DISMISS_DRAG_THRESHOLD = 100;
 export const IMAGE_VIEWER_DISMISS_VELOCITY_THRESHOLD = 1;
-export const IMAGE_VIEWER_VERTICAL_INTENT_THRESHOLD = 10;
+export const IMAGE_VIEWER_VERTICAL_INTENT_THRESHOLD = 6;
 
 export function shouldCaptureImageViewerDismissGesture(dx: number, dy: number): boolean {
   return (

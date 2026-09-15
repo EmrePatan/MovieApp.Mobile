@@ -1,10 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Animated,
   FlatList,
   Image,
   Modal,
-  PanResponder,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -14,12 +13,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { resolveOriginalImageUri } from '@/utils/image-url';
+import { useImageViewerDismissGesture } from '../hooks/useImageViewerDismissGesture';
 import type { GalleryImage } from '../types';
 import { galleryImageKey } from '../utils/gallery-images';
-import {
-  shouldCaptureImageViewerDismissGesture,
-  shouldDismissImageViewerOnRelease,
-} from '../utils/image-viewer-dismiss-gesture';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -40,85 +36,20 @@ export function ImageViewerModal({
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
-  const translateY = useRef(new Animated.Value(0)).current;
-  const backdropOpacity = useRef(new Animated.Value(1)).current;
+
+  const {
+    panHandlers,
+    pagerScrollEnabled,
+    animatedStyle,
+    closeViewer,
+  } = useImageViewerDismissGesture({
+    height,
+    onClose,
+  });
 
   const imageUris = useMemo(
     () => images.map((image) => resolveOriginalImageUri(image.filePath)),
     [images],
-  );
-
-  const resetDismissAnimation = useCallback(() => {
-    translateY.setValue(0);
-    backdropOpacity.setValue(1);
-  }, [backdropOpacity, translateY]);
-
-  const handleClose = useCallback(() => {
-    resetDismissAnimation();
-    onClose();
-  }, [onClose, resetDismissAnimation]);
-
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gestureState) =>
-          shouldCaptureImageViewerDismissGesture(gestureState.dx, gestureState.dy),
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dy > 0) {
-            translateY.setValue(gestureState.dy);
-            backdropOpacity.setValue(Math.max(0.35, 1 - gestureState.dy / 280));
-          }
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          if (shouldDismissImageViewerOnRelease(gestureState.dy, gestureState.vy)) {
-            Animated.parallel([
-              Animated.timing(translateY, {
-                toValue: height * 0.35,
-                duration: 180,
-                useNativeDriver: true,
-              }),
-              Animated.timing(backdropOpacity, {
-                toValue: 0,
-                duration: 180,
-                useNativeDriver: true,
-              }),
-            ]).start(({ finished }) => {
-              if (finished) {
-                handleClose();
-              }
-            });
-            return;
-          }
-
-          Animated.parallel([
-            Animated.spring(translateY, {
-              toValue: 0,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-            Animated.spring(backdropOpacity, {
-              toValue: 1,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-          ]).start();
-        },
-        onPanResponderTerminate: () => {
-          Animated.parallel([
-            Animated.spring(translateY, {
-              toValue: 0,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-            Animated.spring(backdropOpacity, {
-              toValue: 1,
-              useNativeDriver: true,
-              bounciness: 0,
-            }),
-          ]).start();
-        },
-      }),
-    [backdropOpacity, handleClose, height, translateY],
   );
 
   const handleMomentumEnd = useCallback(
@@ -141,22 +72,14 @@ export function ImageViewerModal({
       animationType="fade"
       transparent
       statusBarTranslucent
-      onRequestClose={handleClose}
+      onRequestClose={closeViewer}
       testID="gallery-image-viewer"
     >
-      <Animated.View
-        style={[
-          styles.overlay,
-          {
-            opacity: backdropOpacity,
-            transform: [{ translateY }],
-          },
-        ]}
-        {...panResponder.panHandlers}
-      >
+      <Animated.View style={[styles.overlay, animatedStyle]}>
         <FlatList
           horizontal
           pagingEnabled
+          scrollEnabled={pagerScrollEnabled}
           data={images}
           style={styles.list}
           keyExtractor={(image, index) => galleryImageKey(image, index)}
@@ -172,7 +95,7 @@ export function ImageViewerModal({
             const uri = imageUris[index];
 
             return (
-              <View style={[styles.slide, { width, height }]}>
+              <View style={[styles.slide, { width, height }]} {...panHandlers}>
                 {uri ? (
                   <Image
                     source={{ uri }}
@@ -193,7 +116,7 @@ export function ImageViewerModal({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close image viewer"
-          onPress={handleClose}
+          onPress={closeViewer}
           hitSlop={12}
           style={({ pressed }) => [
             styles.closeButton,
