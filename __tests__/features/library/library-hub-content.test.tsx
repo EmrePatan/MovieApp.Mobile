@@ -185,13 +185,22 @@ describe('LibraryHubContent', () => {
     expect(useLibrary).toHaveBeenLastCalledWith('liked', 'all');
   });
 
-  it('tracks filter metric when media type changes', () => {
+  it('hides media filter on Watching and always queries all media types', () => {
     render(<LibraryHubContent />);
 
+    expect(screen.queryByLabelText('Filter Movies')).toBeNull();
+    expect(screen.queryByLabelText('Filter All')).toBeNull();
+    expect(useLibrary).toHaveBeenCalledWith('watching', 'all');
+  });
+
+  it('shows media filter on other categories and tracks media type changes', () => {
+    render(<LibraryHubContent />);
+
+    fireEvent.press(screen.getByLabelText('Liked category'));
     fireEvent.press(screen.getByLabelText('Filter Movies'));
 
     expect(trackProductMetric).toHaveBeenCalledWith('library_filter_selected');
-    expect(useLibrary).toHaveBeenLastCalledWith('watching', 'movie');
+    expect(useLibrary).toHaveBeenLastCalledWith('liked', 'movie');
   });
 
   it('navigates to catalog detail from grid item', () => {

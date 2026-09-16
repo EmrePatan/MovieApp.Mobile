@@ -43,8 +43,9 @@ export function LibraryHubContent() {
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState<LibraryCategory>(DEFAULT_CATEGORY);
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>(DEFAULT_MEDIA_FILTER);
+  const effectiveMediaType = category === 'watching' ? 'all' : mediaType;
 
-  const libraryQuery = useLibrary(category, mediaType);
+  const libraryQuery = useLibrary(category, effectiveMediaType);
 
   const itemWidth = useMemo(
     () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
@@ -130,7 +131,9 @@ export function LibraryHubContent() {
         Your personal collection
       </AppText>
       <LibraryCategoryControl value={category} onChange={handleCategoryChange} />
-      <LibraryMediaFilterControl value={mediaType} onChange={handleMediaTypeChange} />
+      {category !== 'watching' ? (
+        <LibraryMediaFilterControl value={mediaType} onChange={handleMediaTypeChange} />
+      ) : null}
     </View>
   );
 
@@ -173,7 +176,7 @@ export function LibraryHubContent() {
     );
   }
 
-  const emptyCopy = resolveLibraryEmptyCopy(category, mediaType);
+  const emptyCopy = resolveLibraryEmptyCopy(category, effectiveMediaType);
 
   const emptyComponent = (
     <LibraryEmptyState

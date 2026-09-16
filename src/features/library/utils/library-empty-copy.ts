@@ -18,11 +18,8 @@ export function resolveLibraryEmptyCopy(
     case 'watching':
       return {
         icon: 'library',
-        title: mediaType === 'movie' ? 'No movies in progress' : 'Nothing in progress',
-        message:
-          mediaType === 'movie'
-            ? 'Movie progress is tracked when you mark a title as watched.'
-            : 'Start a TV show and your in-progress series will appear here.',
+        title: 'Nothing in progress',
+        message: 'Start a TV show and your in-progress series will appear here.',
       };
     case 'watched':
       return {
