@@ -40,14 +40,14 @@ describe('SocialAuthSection', () => {
   it('renders Google action when configured', () => {
     render(<SocialAuthSection />);
 
-    expect(screen.getByText('or continue with')).toBeTruthy();
-    expect(screen.getByText('Continue with Google')).toBeTruthy();
+    expect(screen.getByText('Continue in one tap')).toBeTruthy();
+    expect(screen.getByLabelText('Continue with Google')).toBeTruthy();
   });
 
   it('enters the existing session pipeline on Google success', async () => {
     render(<SocialAuthSection />);
 
-    fireEvent.press(screen.getByText('Continue with Google'));
+    fireEvent.press(screen.getByLabelText('Continue with Google'));
 
     await waitFor(() => {
       expect(mockSignInWithSocial).toHaveBeenCalledWith('google');
@@ -60,7 +60,7 @@ describe('SocialAuthSection', () => {
     const onError = jest.fn();
 
     render(<SocialAuthSection onError={onError} />);
-    fireEvent.press(screen.getByText('Continue with Google'));
+    fireEvent.press(screen.getByLabelText('Continue with Google'));
 
     await waitFor(() => {
       expect(mockSignInWithSocial).toHaveBeenCalled();
@@ -77,7 +77,7 @@ describe('SocialAuthSection', () => {
     const onError = jest.fn();
 
     render(<SocialAuthSection onError={onError} />);
-    fireEvent.press(screen.getByText('Continue with Google'));
+    fireEvent.press(screen.getByLabelText('Continue with Google'));
 
     await waitFor(() => {
       expect(onError).toHaveBeenCalledWith('Social sign-in failed. Please try again.');

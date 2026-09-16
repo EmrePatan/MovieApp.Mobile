@@ -1,31 +1,48 @@
 import { useCallback, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import * as AppleAuthentication from 'expo-apple-authentication';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
-  isAppleSocialAuthAvailable,
-  isGoogleSocialAuthAvailable,
   SocialAuthCancelledError,
   SocialAuthConfigurationError,
 } from '@/auth/social-auth-service';
-import { isGoogleSocialAuthConfigured } from '@/auth/social-auth-config';
+import {
+  shouldShowAppleSocialAuthButton,
+  shouldShowGoogleSocialAuthButton,
+} from '@/auth/social-auth-ui';
 import type { SocialAuthProvider } from '@/models/api/auth';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 
 interface SocialAuthSectionProps {
   onError?: (message: string | null) => void;
 }
 
+interface SocialProviderConfig {
+  provider: SocialAuthProvider;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}
+
+const SOCIAL_PROVIDERS: SocialProviderConfig[] = [
+  { provider: 'google', label: 'Google', icon: 'logo-google' },
+  { provider: 'apple', label: 'Apple', icon: 'logo-apple' },
+];
+
 export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
   const { signInWithSocial } = useAuth();
   const [activeProvider, setActiveProvider] = useState<SocialAuthProvider | null>(null);
 
-  const showGoogle = isGoogleSocialAuthAvailable() && isGoogleSocialAuthConfigured();
-  const showApple = isAppleSocialAuthAvailable();
+  const visibleProviders = SOCIAL_PROVIDERS.filter((entry) => {
+    if (entry.provider === 'google') {
+      return shouldShowGoogleSocialAuthButton();
+    }
+
+    return shouldShowAppleSocialAuthButton();
+  });
 
   const handleSocialSignIn = useCallback(
     async (provider: SocialAuthProvider) => {
@@ -61,46 +78,50 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
     [activeProvider, onError, signInWithSocial],
   );
 
-  if (!showGoogle && !showApple) {
+  if (visibleProviders.length === 0) {
     return null;
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.dividerRow}>
-        <View style={styles.dividerLine} />
-        <AppText variant="caption" muted style={styles.dividerLabel}>
-          or continue with
-        </AppText>
-        <View style={styles.dividerLine} />
-      </View>
+      <AppText variant="bodySmall" muted center style={styles.heading}>
+        Continue in one tap
+      </AppText>
 
-      <View style={styles.actions}>
-        {showGoogle ? (
-          <AppButton
-            title="Continue with Google"
-            variant="secondary"
-            onPress={() => void handleSocialSignIn('google')}
-            loading={activeProvider === 'google'}
-            disabled={activeProvider !== null && activeProvider !== 'google'}
-          />
-        ) : null}
+      <View style={styles.providerRow}>
+        {visibleProviders.map((entry) => {
+          const isLoading = activeProvider === entry.provider;
+          const isDisabled = activeProvider !== null && activeProvider !== entry.provider;
 
-        {showApple ? (
-          <AppleAuthentication.AppleAuthenticationButton
-            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
-            cornerRadius={12}
-            style={styles.appleButton}
-            onPress={() => {
-              if (activeProvider) {
-                return;
-              }
-
-              void handleSocialSignIn('apple');
-            }}
-          />
-        ) : null}
+          return (
+            <Pressable
+              key={entry.provider}
+              accessibilityRole="button"
+              accessibilityLabel={`Continue with ${entry.label}`}
+              accessibilityState={{ disabled: isDisabled, busy: isLoading }}
+              disabled={isDisabled}
+              onPress={() => void handleSocialSignIn(entry.provider)}
+              style={({ pressed }) => [
+                styles.providerChip,
+                pressed && !isDisabled && styles.providerChipPressed,
+                isDisabled && styles.providerChipDisabled,
+              ]}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={colors.accent} />
+              ) : (
+                <>
+                  <View style={styles.iconBadge}>
+                    <Ionicons name={entry.icon} size={16} color={colors.textPrimary} />
+                  </View>
+                  <AppText variant="bodySmall" style={styles.providerLabel}>
+                    {entry.label}
+                  </AppText>
+                </>
+              )}
+            </Pressable>
+          );
+        })}
       </View>
     </View>
   );
@@ -109,26 +130,44 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
 const styles = StyleSheet.create({
   container: {
     gap: spacing.md,
-    marginTop: spacing.sm,
   },
-  dividerRow: {
+  heading: {
+    letterSpacing: 0.3,
+  },
+  providerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.sm,
   },
-  dividerLine: {
+  providerChip: {
     flex: 1,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
+    minHeight: 56,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
   },
-  dividerLabel: {
-    textTransform: 'lowercase',
+  providerChipPressed: {
+    opacity: interaction.pressedOpacity,
+    borderColor: colors.borderAccent,
   },
-  actions: {
-    gap: spacing.sm,
+  providerChipDisabled: {
+    opacity: interaction.disabledOpacity,
   },
-  appleButton: {
-    width: '100%',
-    height: Platform.OS === 'ios' ? 48 : 0,
+  iconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentTint14,
+  },
+  providerLabel: {
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
 });

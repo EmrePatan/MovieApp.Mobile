@@ -1,13 +1,10 @@
-import { Platform } from 'react-native';
+import { requireOptionalNativeModule } from 'expo-modules-core';
+import { Platform, TurboModuleRegistry } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import {
-  GoogleSignin,
-  isCancelledResponse,
-  isErrorWithCode,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import { getGoogleSocialAuthConfig, isGoogleSocialAuthConfigured } from './social-auth-config';
 import type { SocialAuthProvider } from '@/models/api/auth';
+
+type GoogleSigninModule = typeof import('@react-native-google-signin/google-signin');
 
 export class SocialAuthCancelledError extends Error {
   constructor() {
@@ -24,10 +21,28 @@ export class SocialAuthConfigurationError extends Error {
 }
 
 let googleConfigured = false;
+let googleSigninModulePromise: Promise<GoogleSigninModule> | null = null;
 
-function ensureGoogleConfigured(): void {
+function isGoogleNativeModuleAvailable(): boolean {
+  return TurboModuleRegistry.get('RNGoogleSignin') != null;
+}
+
+async function loadGoogleSigninModule(): Promise<GoogleSigninModule> {
+  if (!isGoogleNativeModuleAvailable()) {
+    throw new SocialAuthConfigurationError(
+      'Google sign-in is not available in this build. Rebuild the dev client with `npx expo run:ios` or `npx expo run:android`.',
+    );
+  }
+
+  googleSigninModulePromise ??= import('@react-native-google-signin/google-signin');
+  return googleSigninModulePromise;
+}
+
+async function ensureGoogleConfigured(): Promise<GoogleSigninModule> {
+  const googleSignin = await loadGoogleSigninModule();
+
   if (googleConfigured) {
-    return;
+    return googleSignin;
   }
 
   const config = getGoogleSocialAuthConfig();
@@ -35,21 +50,26 @@ function ensureGoogleConfigured(): void {
     throw new SocialAuthConfigurationError('Google sign-in is not configured for this build.');
   }
 
-  GoogleSignin.configure({
+  googleSignin.GoogleSignin.configure({
     webClientId: config.webClientId ?? undefined,
     iosClientId: config.iosClientId ?? undefined,
     offlineAccess: false,
   });
 
   googleConfigured = true;
+  return googleSignin;
+}
+
+function isAppleNativeModuleAvailable(): boolean {
+  return Platform.OS === 'ios' && requireOptionalNativeModule('ExpoAppleAuthentication') != null;
 }
 
 export function isAppleSocialAuthAvailable(): boolean {
-  return Platform.OS === 'ios';
+  return isAppleNativeModuleAvailable();
 }
 
 export function isGoogleSocialAuthAvailable(): boolean {
-  return Platform.OS === 'ios' || Platform.OS === 'android';
+  return (Platform.OS === 'ios' || Platform.OS === 'android') && isGoogleNativeModuleAvailable();
 }
 
 export async function requestSocialIdentityToken(provider: SocialAuthProvider): Promise<string> {
@@ -65,7 +85,8 @@ async function requestGoogleIdentityToken(): Promise<string> {
     throw new SocialAuthConfigurationError('Google sign-in is not available on this platform.');
   }
 
-  ensureGoogleConfigured();
+  const { GoogleSignin, isCancelledResponse, isErrorWithCode, statusCodes } =
+    await ensureGoogleConfigured();
 
   if (Platform.OS === 'android') {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -98,8 +119,14 @@ async function requestGoogleIdentityToken(): Promise<string> {
 }
 
 async function requestAppleIdentityToken(): Promise<string> {
-  if (!isAppleSocialAuthAvailable()) {
+  if (Platform.OS !== 'ios') {
     throw new SocialAuthConfigurationError('Apple sign-in is only available on iOS.');
+  }
+
+  if (!isAppleNativeModuleAvailable()) {
+    throw new SocialAuthConfigurationError(
+      'Apple sign-in is not available in this build. Rebuild the dev client with `npx expo run:ios`.',
+    );
   }
 
   const isAvailable = await AppleAuthentication.isAvailableAsync();

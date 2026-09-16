@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import { Screen } from '@/components/common/Screen';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -12,11 +10,12 @@ import {
   validateForgotPasswordForm,
   type ForgotPasswordFormErrors,
 } from '@/utils/validation';
-import { spacing } from '@/theme/spacing';
+import { AuthLink } from '@/features/auth/components/AuthLink';
+import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 export default function ForgotPasswordScreen() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [fieldErrors, setFieldErrors] = useState<ForgotPasswordFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -50,71 +49,60 @@ export default function ForgotPasswordScreen() {
   }
 
   return (
-    <Screen scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
-      >
-        <View style={styles.header}>
-          <AppText variant="title">Forgot password</AppText>
-          <AppText variant="body" muted center>
-            Enter your email and we&apos;ll send reset instructions if an account exists.
+    <AuthScreenLayout
+      eyebrow="Need a reset"
+      title="Forgot password"
+      subtitle="Enter your email and we will send reset instructions if an account exists."
+      footer={
+        <View style={styles.footerRow}>
+          <AppText variant="bodySmall" muted>Remembered it?</AppText>
+          <AuthLink label="Back to sign in" href="/(auth)/login" />
+        </View>
+      }
+    >
+      <View style={styles.form}>
+        <AppInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          error={fieldErrors.email}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          returnKeyType="done"
+          onSubmitEditing={() => void handleSubmit()}
+        />
+
+        {successMessage ? (
+          <AppText variant="bodySmall" style={styles.successMessage} accessibilityRole="alert">
+            {successMessage}
           </AppText>
-        </View>
+        ) : null}
 
-        <View style={styles.form}>
-          <AppInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            error={fieldErrors.email}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            returnKeyType="done"
-            onSubmitEditing={() => void handleSubmit()}
-          />
+        {formError ? (
+          <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
+            {formError}
+          </AppText>
+        ) : null}
 
-          {successMessage ? (
-            <AppText variant="bodySmall" style={styles.successMessage} accessibilityRole="alert">
-              {successMessage}
-            </AppText>
-          ) : null}
+        <AppButton
+          title="Send reset instructions"
+          onPress={() => void handleSubmit()}
+          loading={isSubmitting}
+        />
 
-          {formError ? (
-            <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
-              {formError}
-            </AppText>
-          ) : null}
-
-          <AppButton
-            title="Send reset instructions"
-            onPress={() => void handleSubmit()}
-            loading={isSubmitting}
-          />
-
-          <AppButton title="Back to sign in" variant="secondary" onPress={() => router.replace('/(auth)/login')} />
-
-          <Link href="/(auth)/register" asChild>
-            <AppButton title="Create an account" variant="secondary" />
-          </Link>
-        </View>
-      </KeyboardAvoidingView>
-    </Screen>
+        <AuthLink
+          label="Create an account"
+          href="/(auth)/register"
+          accent={false}
+        />
+      </View>
+    </AuthScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: spacing.xl,
-  },
-  header: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   form: {
     gap: spacing.md,
   },
@@ -123,5 +111,10 @@ const styles = StyleSheet.create({
   },
   successMessage: {
     color: colors.success,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 });

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { Link } from 'expo-router';
-import { Screen } from '@/components/common/Screen';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -12,9 +10,12 @@ import {
   validateRegisterForm,
   type RegisterFormErrors,
 } from '@/utils/validation';
+import { AuthDivider } from '@/features/auth/components/AuthDivider';
+import { AuthLink } from '@/features/auth/components/AuthLink';
+import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
-import { spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
@@ -50,88 +51,80 @@ export default function RegisterScreen() {
   }
 
   return (
-    <Screen scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
-      >
-        <View style={styles.header}>
-          <AppText variant="title">Create account</AppText>
-          <AppText variant="body" muted center>
-            Join MovieApp to save favorites, watchlists, and more
+    <AuthScreenLayout
+      eyebrow="Opening night"
+      title="Create account"
+      subtitle="Join MovieApp to save favorites, watchlists, and more."
+      footer={
+        <View style={styles.footerRow}>
+          <AppText variant="bodySmall" muted>Already have an account?</AppText>
+          <AuthLink label="Sign in" href="/(auth)/login" />
+        </View>
+      }
+    >
+      <SocialAuthSection onError={setFormError} />
+
+      <AuthDivider label="or create with email" />
+
+      <View style={styles.form}>
+        <AppInput
+          label="Display name"
+          value={displayName}
+          onChangeText={setDisplayName}
+          error={fieldErrors.displayName}
+          autoComplete="name"
+          textContentType="name"
+          returnKeyType="next"
+        />
+        <AppInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          error={fieldErrors.email}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          returnKeyType="next"
+        />
+        <AppInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          error={fieldErrors.password}
+          secureTextEntry
+          autoComplete="new-password"
+          textContentType="newPassword"
+          returnKeyType="done"
+          onSubmitEditing={() => void handleRegister()}
+        />
+
+        {formError ? (
+          <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
+            {formError}
           </AppText>
-        </View>
+        ) : null}
 
-        <View style={styles.form}>
-          <AppInput
-            label="Display name"
-            value={displayName}
-            onChangeText={setDisplayName}
-            error={fieldErrors.displayName}
-            autoComplete="name"
-            textContentType="name"
-            returnKeyType="next"
-          />
-          <AppInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            error={fieldErrors.email}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            returnKeyType="next"
-          />
-          <AppInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            error={fieldErrors.password}
-            secureTextEntry
-            autoComplete="new-password"
-            textContentType="newPassword"
-            returnKeyType="done"
-            onSubmitEditing={() => void handleRegister()}
-          />
-
-          {formError ? (
-            <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
-              {formError}
-            </AppText>
-          ) : null}
-
-          <AppButton
-            title="Create account"
-            onPress={() => void handleRegister()}
-            loading={isSubmitting}
-          />
-
-          <Link href="/(auth)/login" asChild>
-            <AppButton title="Back to sign in" variant="secondary" />
-          </Link>
-
-          <SocialAuthSection onError={setFormError} />
-        </View>
-      </KeyboardAvoidingView>
-    </Screen>
+        <AppButton
+          title="Create account"
+          onPress={() => void handleRegister()}
+          loading={isSubmitting}
+        />
+      </View>
+    </AuthScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: spacing.xl,
-  },
-  header: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   form: {
     gap: spacing.md,
   },
   formError: {
     color: colors.error,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 });

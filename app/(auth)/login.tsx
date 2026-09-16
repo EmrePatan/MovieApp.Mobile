@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { Link } from 'expo-router';
-import { Screen } from '@/components/common/Screen';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -12,9 +10,12 @@ import {
   validateLoginForm,
   type LoginFormErrors,
 } from '@/utils/validation';
+import { AuthDivider } from '@/features/auth/components/AuthDivider';
+import { AuthLink } from '@/features/auth/components/AuthLink';
+import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
-import { spacing } from '@/theme/spacing';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -49,79 +50,75 @@ export default function LoginScreen() {
   }
 
   return (
-    <Screen scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
-      >
-        <View style={styles.header}>
-          <AppText variant="hero">MovieApp</AppText>
-          <AppText variant="body" muted center>
-            Sign in to continue watching
+    <AuthScreenLayout
+      eyebrow="Now showing"
+      title="MovieApp"
+      subtitle="Your seat is waiting. Sign in to pick up where you left off."
+      footer={
+        <View style={styles.footerRow}>
+          <AppText variant="bodySmall" muted>New here?</AppText>
+          <AuthLink label="Create an account" href="/(auth)/register" />
+        </View>
+      }
+    >
+      <SocialAuthSection onError={setFormError} />
+
+      <AuthDivider label="or with email" />
+
+      <View style={styles.form}>
+        <AppInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          error={fieldErrors.email}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          returnKeyType="next"
+        />
+        <AppInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          error={fieldErrors.password}
+          secureTextEntry
+          autoComplete="password"
+          textContentType="password"
+          returnKeyType="done"
+          onSubmitEditing={() => void handleLogin()}
+        />
+
+        <View style={styles.forgotRow}>
+          <AuthLink label="Forgot password?" href="/(auth)/forgot-password" accent={false} />
+        </View>
+
+        {formError ? (
+          <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
+            {formError}
           </AppText>
-        </View>
+        ) : null}
 
-        <View style={styles.form}>
-          <AppInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            error={fieldErrors.email}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            returnKeyType="next"
-          />
-          <AppInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            error={fieldErrors.password}
-            secureTextEntry
-            autoComplete="password"
-            textContentType="password"
-            returnKeyType="done"
-            onSubmitEditing={() => void handleLogin()}
-          />
-
-          {formError ? (
-            <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
-              {formError}
-            </AppText>
-          ) : null}
-
-          <AppButton title="Sign in" onPress={() => void handleLogin()} loading={isSubmitting} />
-
-          <Link href="/(auth)/forgot-password" asChild>
-            <AppButton title="Forgot password?" variant="secondary" />
-          </Link>
-
-          <Link href="/(auth)/register" asChild>
-            <AppButton title="Create an account" variant="secondary" />
-          </Link>
-
-          <SocialAuthSection onError={setFormError} />
-        </View>
-      </KeyboardAvoidingView>
-    </Screen>
+        <AppButton title="Sign in" onPress={() => void handleLogin()} loading={isSubmitting} />
+      </View>
+    </AuthScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: spacing.xl,
-  },
-  header: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   form: {
     gap: spacing.md,
   },
+  forgotRow: {
+    alignItems: 'flex-end',
+    marginTop: -spacing.xs,
+  },
   formError: {
     color: colors.error,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 });

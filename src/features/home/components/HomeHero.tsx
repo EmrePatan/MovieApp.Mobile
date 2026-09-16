@@ -115,7 +115,7 @@ export const HomeHero = memo(function HomeHero({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Open ${item.title}`}
-        delayPressIn={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
+        unstable_pressDelay={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
         onPress={handleHeroPress}
         style={[styles.card, { width: cardWidth, height: heroHeight }]}
       >

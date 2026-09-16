@@ -22,14 +22,8 @@ export const homeHeaderStyles = StyleSheet.create({
   },
   brandBlock: {
     flex: 1,
-    gap: 2,
-  },
-  tagline: {
-    color: colors.textMuted,
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    fontSize: 10,
-    fontWeight: '600',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   actionCluster: {
     flexDirection: 'row',

@@ -3,10 +3,7 @@ import ForgotPasswordScreen from '../../../app/(auth)/forgot-password';
 import { forgotPasswordRequest } from '@/auth/auth-api';
 import { ApiError } from '@/api/errors';
 
-const mockReplace = jest.fn();
-
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace }),
   Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -58,9 +55,8 @@ describe('ForgotPasswordScreen', () => {
     expect(await screen.findByText('Too many attempts. Please try again later.')).toBeTruthy();
   });
 
-  it('navigates back to login', () => {
+  it('shows a link back to login', () => {
     render(<ForgotPasswordScreen />);
-    fireEvent.press(screen.getByText('Back to sign in'));
-    expect(mockReplace).toHaveBeenCalledWith('/(auth)/login');
+    expect(screen.getByLabelText('Back to sign in')).toBeTruthy();
   });
 });
