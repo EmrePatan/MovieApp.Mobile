@@ -1,7 +1,8 @@
 import mockReact from 'react';
 
 jest.mock('react-native-gesture-handler', () => {
-  const { View } = require('react-native');
+  const mockReact = require('react');
+  const { View, Pressable } = require('react-native');
 
   const createMockPanGesture = () => {
     const gesture = {
@@ -14,12 +15,50 @@ jest.mock('react-native-gesture-handler', () => {
     return gesture;
   };
 
+  const Swipeable = ({
+    children,
+    renderRightActions,
+    containerStyle,
+    childrenContainerStyle,
+  }: {
+    children: mockReact.ReactNode;
+    renderRightActions?: () => mockReact.ReactNode;
+    containerStyle?: object;
+    childrenContainerStyle?: object;
+  }) => {
+    const [isOpen, setIsOpen] = mockReact.useState(false);
+
+    return mockReact.createElement(
+      View,
+      { style: containerStyle, testID: 'notification-swipeable' },
+      mockReact.createElement(
+        Pressable,
+        {
+          testID: 'swipeable-open-trigger',
+          accessibilityRole: 'button',
+          accessibilityLabel: 'Reveal delete action',
+          onPress: () => setIsOpen(true),
+        },
+        null,
+      ),
+      mockReact.createElement(View, { style: childrenContainerStyle }, children),
+      isOpen
+        ? mockReact.createElement(
+            View,
+            { testID: 'swipeable-right-actions' },
+            renderRightActions?.(),
+          )
+        : null,
+    );
+  };
+
   return {
     GestureHandlerRootView: View,
     GestureDetector: View,
     Gesture: {
       Pan: jest.fn(() => createMockPanGesture()),
     },
+    Swipeable,
   };
 });
 

@@ -1,16 +1,22 @@
-import { memo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { memo, useCallback, useRef } from 'react';
+import {
+  type AccessibilityActionEvent,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
 import type { NotificationItem } from '../types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 const POSTER_WIDTH = 48;
 const POSTER_HEIGHT = 72;
+const DELETE_ACTION_WIDTH = 88;
 
 interface NotificationRowProps {
   item: NotificationItem;
@@ -23,75 +29,118 @@ export const NotificationRow = memo(function NotificationRow({
   onPress,
   onDelete,
 }: NotificationRowProps) {
+  const swipeableRef = useRef<Swipeable>(null);
   const isUnread = item.readAtUtc == null;
   const relativeTime = formatNotificationRelativeTime(item.createdAtUtc);
   const accessibilityLabel = `${isUnread ? 'Unread, ' : ''}${item.title}. ${item.body}. ${relativeTime}`;
 
-  return (
-    <View style={styles.row}>
+  const handleDelete = useCallback(() => {
+    swipeableRef.current?.close();
+    onDelete?.(item);
+  }, [item, onDelete]);
+
+  const handleAccessibilityAction = useCallback(
+    (event: AccessibilityActionEvent) => {
+      if (event.nativeEvent.actionName === 'delete') {
+        handleDelete();
+      }
+    },
+    [handleDelete],
+  );
+
+  const renderRightActions = useCallback(() => {
+    if (!onDelete) {
+      return null;
+    }
+
+    return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        onPress={() => onPress?.(item)}
-        style={({ pressed }) => [styles.mainPressable, pressed && styles.pressed]}
+        accessibilityLabel="Delete notification"
+        onPress={handleDelete}
+        style={({ pressed }) => [styles.deleteAction, pressed && styles.pressed]}
       >
-        <View style={styles.posterWrap}>
-          <CatalogImage
-            path={item.posterPath}
-            width={POSTER_WIDTH}
-            height={POSTER_HEIGHT}
-            accessibilityLabel={`${item.title} poster`}
-          />
-          {isUnread ? <View style={styles.unreadDot} accessibilityLabel="Unread" /> : null}
-        </View>
-        <View style={styles.content}>
-          <View style={styles.titleRow}>
-            <AppText
-              variant="body"
-              numberOfLines={1}
-              style={[styles.title, isUnread && styles.titleUnread]}
-            >
-              {item.title}
-            </AppText>
-            {relativeTime ? (
-              <AppText variant="caption" muted numberOfLines={1}>
-                {relativeTime}
-              </AppText>
-            ) : null}
-          </View>
-          <AppText variant="bodySmall" muted numberOfLines={2}>
-            {item.body}
-          </AppText>
-        </View>
+        <AppText variant="bodySmall" style={styles.deleteActionLabel}>
+          Delete
+        </AppText>
       </Pressable>
-      {onDelete ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Delete notification"
-          hitSlop={8}
-          onPress={() => onDelete(item)}
-          style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
-        >
-          <Ionicons name="trash-outline" size={18} color={colors.danger} />
-        </Pressable>
-      ) : null}
-    </View>
+    );
+  }, [handleDelete, onDelete]);
+
+  const rowContent = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityActions={onDelete ? [{ name: 'delete', label: 'Delete notification' }] : undefined}
+      onAccessibilityAction={onDelete ? handleAccessibilityAction : undefined}
+      onPress={() => onPress?.(item)}
+      style={({ pressed }) => [styles.mainPressable, pressed && styles.pressed]}
+    >
+      <View style={styles.posterWrap}>
+        <CatalogImage
+          path={item.posterPath}
+          width={POSTER_WIDTH}
+          height={POSTER_HEIGHT}
+          accessibilityLabel={`${item.title} poster`}
+        />
+        {isUnread ? <View style={styles.unreadDot} accessibilityLabel="Unread" /> : null}
+      </View>
+      <View style={styles.content}>
+        <View style={styles.titleRow}>
+          <AppText
+            variant="body"
+            numberOfLines={1}
+            style={[styles.title, isUnread && styles.titleUnread]}
+          >
+            {item.title}
+          </AppText>
+          {relativeTime ? (
+            <AppText variant="caption" muted numberOfLines={1}>
+              {relativeTime}
+            </AppText>
+          ) : null}
+        </View>
+        <AppText variant="bodySmall" muted numberOfLines={2}>
+          {item.body}
+        </AppText>
+      </View>
+    </Pressable>
+  );
+
+  if (!onDelete) {
+    return <View style={styles.row}>{rowContent}</View>;
+  }
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      friction={2}
+      overshootRight={false}
+      rightThreshold={DELETE_ACTION_WIDTH / 2}
+      activeOffsetX={[-24, 24]}
+      failOffsetY={[-12, 12]}
+      renderRightActions={renderRightActions}
+      containerStyle={styles.row}
+      childrenContainerStyle={styles.swipeableContent}
+    >
+      {rowContent}
+    </Swipeable>
   );
 });
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingRight: layout.screenPaddingHorizontal,
     minHeight: POSTER_HEIGHT + spacing.sm * 2,
+  },
+  swipeableContent: {
+    backgroundColor: colors.background,
   },
   mainPressable: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    paddingLeft: layout.screenPaddingHorizontal,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: spacing.sm,
   },
   pressed: {
@@ -129,9 +178,17 @@ const styles = StyleSheet.create({
   titleUnread: {
     fontWeight: '600',
   },
-  deleteButton: {
-    alignSelf: 'center',
-    paddingVertical: spacing.sm,
-    paddingLeft: spacing.xs,
+  deleteAction: {
+    width: DELETE_ACTION_WIDTH,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.dangerMuted,
+    marginVertical: spacing.sm,
+    marginRight: layout.screenPaddingHorizontal,
+    borderRadius: borderRadius.md,
+  },
+  deleteActionLabel: {
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
 });

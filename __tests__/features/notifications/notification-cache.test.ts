@@ -96,10 +96,35 @@ describe('notification cache updates', () => {
     const queryKey = notificationsInboxInfiniteQueryKey(DEFAULT_NOTIFICATIONS_PAGE_SIZE);
     seedInbox(queryClient);
 
-    deleteNotificationFromCache(queryClient, notificationId);
+    const previous = deleteNotificationFromCache(queryClient, notificationId);
     const next = queryClient.getQueryData<ReturnType<typeof seedInbox>>(queryKey);
 
+    expect(previous?.pages[0]?.items).toHaveLength(1);
     expect(next?.pages[0]?.items).toHaveLength(0);
     expect(next?.pages[0]?.totalCount).toBe(0);
+  });
+
+  it('restores inbox cache on rollback after optimistic delete', () => {
+    const queryClient = new QueryClient();
+    const queryKey = notificationsInboxInfiniteQueryKey(DEFAULT_NOTIFICATIONS_PAGE_SIZE);
+    seedInbox(queryClient);
+
+    const previous = deleteNotificationFromCache(queryClient, notificationId);
+    queryClient.setQueryData(queryKey, previous);
+
+    const restored = queryClient.getQueryData<ReturnType<typeof seedInbox>>(queryKey);
+    expect(restored?.pages[0]?.items).toHaveLength(1);
+    expect(restored?.pages[0]?.items[0]?.id).toBe(notificationId);
+  });
+
+  it('only decrements unread count for unread deletions', () => {
+    const queryClient = new QueryClient();
+    const unreadQueryKey = unreadNotificationCountQueryKey();
+    queryClient.setQueryData(unreadQueryKey, { unreadCount: 2 });
+
+    decrementUnreadNotificationCountInCache(queryClient);
+    const next = queryClient.getQueryData<{ unreadCount: number }>(unreadQueryKey);
+
+    expect(next?.unreadCount).toBe(1);
   });
 });

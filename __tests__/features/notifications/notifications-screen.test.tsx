@@ -156,13 +156,24 @@ describe('NotificationsScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/tv/9c9e6679-7425-40de-944b-e07fc1f90ae8');
   });
 
-  it('deletes a notification with unread state preserved in mutation payload', () => {
+  it('does not show a permanently visible delete control in the inbox', () => {
+    render(<NotificationsScreen />);
+
+    expect(screen.queryByLabelText('Delete notification')).toBeNull();
+  });
+
+  it('deletes a notification via accessibility action with unread state preserved', () => {
     const deleteMutation = createDeleteMutationMock();
     (useDeleteNotification as jest.Mock).mockReturnValue(deleteMutation);
 
     render(<NotificationsScreen />);
 
-    fireEvent.press(screen.getAllByLabelText('Delete notification')[0]);
+    fireEvent(
+      screen.getByRole('button', { name: /Dune: Part Three/ }),
+      'accessibilityAction',
+      { nativeEvent: { actionName: 'delete' } },
+    );
+
     expect(deleteMutation.mutate).toHaveBeenCalledWith({
       notificationId: unreadNotification.id,
       wasUnread: true,
