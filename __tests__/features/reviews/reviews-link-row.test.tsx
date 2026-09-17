@@ -118,7 +118,7 @@ describe('ReviewsLinkRow', () => {
     expect(useMovieReviews).toHaveBeenCalledWith(movieId, REVIEW_COUNT_PAGE_SIZE);
   });
 
-  it('opens the movie reviews route when pressed', () => {
+  it('opens the movie reviews route with exactly one navigation action when pressed', () => {
     render(
       <ReviewsLinkRow
         contentType="movie"
@@ -130,6 +130,7 @@ describe('ReviewsLinkRow', () => {
 
     fireEvent.press(screen.getByTestId('reviews-link-row-button'));
 
+    expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith(
       `/reviews/movie/${movieId}?title=Interstellar`,
     );

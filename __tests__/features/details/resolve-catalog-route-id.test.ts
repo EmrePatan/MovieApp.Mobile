@@ -42,4 +42,16 @@ describe('parseCatalogIdFromPathname', () => {
     const tvId = 'a2ae92ef-3a02-4ac4-827b-c05ec45ba999';
     expect(parseCatalogIdFromPathname(`/tv/${tvId}`, 'tv')).toBe(tvId);
   });
+
+  it('does not treat child destination pathnames as catalog detail routes', () => {
+    const movieId = '65de321a-597a-46ec-a499-67ad9e20795e';
+    const tvId = 'a2ae92ef-3a02-4ac4-827b-c05ec45ba999';
+
+    expect(parseCatalogIdFromPathname(`/reviews/movie/${movieId}`, 'movie')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/credits/movie/${movieId}`, 'movie')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/gallery/movie/${movieId}`, 'movie')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/reviews/tv/${tvId}`, 'tv')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/credits/tv/${tvId}`, 'tv')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/gallery/tv/${tvId}`, 'tv')).toBeUndefined();
+  });
 });

@@ -14,6 +14,7 @@ export default function TvShowDetailScreen() {
   return (
     <DetailQueryState
       query={query}
+      enableRatingNavigationGestureLock
       invalidParamsMessage={isInvalid ? 'The TV show link is invalid.' : undefined}
       notFoundTitle="TV show not found"
       notFoundMessage="This TV show could not be found."

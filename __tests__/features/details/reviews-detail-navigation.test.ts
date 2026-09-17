@@ -31,11 +31,34 @@ describe('reviews detail navigation', () => {
     expect(isReviewsDetailRoute(['(tabs)', 'movie', 'id'])).toBe(false);
   });
 
-  it('returns to the screen that opened reviews', () => {
-    const navigate = jest.fn();
+  it('opens reviews with a single push action', () => {
+    const push = jest.fn();
+    const router = {
+      push,
+      dismissTo: jest.fn(),
+      navigate: jest.fn(),
+      back: jest.fn(),
+      canGoBack: jest.fn(() => false),
+    } as never;
+
+    openReviewsDetail(
+      router,
+      '/reviews/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    );
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith(
+      '/reviews/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    );
+  });
+
+  it('returns to the screen that opened reviews by dismissing to origin', () => {
+    const dismissTo = jest.fn();
     const router = {
       push: jest.fn(),
-      navigate,
+      dismissTo,
+      navigate: jest.fn(),
       back: jest.fn(),
       canGoBack: jest.fn(() => false),
     } as never;
@@ -47,6 +70,6 @@ describe('reviews detail navigation', () => {
     );
     returnFromReviewsDetail(router);
 
-    expect(navigate).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    expect(dismissTo).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
   });
 });

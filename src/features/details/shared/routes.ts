@@ -171,10 +171,27 @@ export function normalizeRouteIdParam(
   return value;
 }
 
+function isCatalogChildDestinationPathname(
+  pathname: string,
+  contentType: 'movie' | 'tv',
+): boolean {
+  const mediaSegment = contentType === 'movie' ? 'movie' : 'tv';
+
+  return (
+    pathname.includes(`/reviews/${mediaSegment}/`) ||
+    pathname.includes(`/credits/${mediaSegment}/`) ||
+    pathname.includes(`/gallery/${mediaSegment}/`)
+  );
+}
+
 export function parseCatalogIdFromPathname(
   pathname: string,
   contentType: 'movie' | 'tv',
 ): string | undefined {
+  if (isCatalogChildDestinationPathname(pathname, contentType)) {
+    return undefined;
+  }
+
   const pattern = contentType === 'movie' ? /\/movie\/([^/]+)/ : /\/tv\/([^/]+)/;
   const match = pathname.match(pattern);
   if (!match?.[1]) {

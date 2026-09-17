@@ -46,6 +46,10 @@ jest.mock('expo-secure-store', () => ({
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ replace: jest.fn() })),
   useNavigation: jest.fn(() => ({ setOptions: jest.fn() })),
+  useFocusEffect: jest.fn((callback: () => void | (() => void)) => {
+    callback();
+    return undefined;
+  }),
   useSegments: jest.fn(() => []),
   Redirect: 'Redirect',
   Stack: 'Stack',

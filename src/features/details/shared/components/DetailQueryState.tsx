@@ -42,6 +42,8 @@ interface DetailQueryStateProps<TData> {
 
   contentLayout?: 'scroll' | 'list';
 
+  enableRatingNavigationGestureLock?: boolean;
+
   children: (data: TData) => ReactNode;
 
 }
@@ -84,6 +86,8 @@ export function DetailQueryState<TData>({
 
   contentLayout = 'scroll',
 
+  enableRatingNavigationGestureLock = false,
+
   children,
 
 }: DetailQueryStateProps<TData>) {
@@ -93,7 +97,7 @@ export function DetailQueryState<TData>({
   const scrollRef = useRef<ScrollView>(null);
   const [interactionLocked, setInteractionLocked] = useState(false);
 
-  useDetailNavigationGestureLock(interactionLocked);
+  useDetailNavigationGestureLock(interactionLocked, enableRatingNavigationGestureLock);
 
   const handleInteractionLockChange = useCallback((locked: boolean) => {
     setInteractionLocked(locked);

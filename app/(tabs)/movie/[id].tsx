@@ -14,6 +14,7 @@ export default function MovieDetailScreen() {
   return (
     <DetailQueryState
       query={query}
+      enableRatingNavigationGestureLock
       invalidParamsMessage={isInvalid ? 'The movie link is invalid.' : undefined}
       notFoundTitle="Movie not found"
       notFoundMessage="This movie could not be found."

@@ -9,11 +9,12 @@ describe('gallery detail navigation', () => {
     resetGalleryDetailNavigationForTests();
   });
 
-  it('returns to the screen that opened the gallery', () => {
-    const navigate = jest.fn();
+  it('returns to the screen that opened the gallery by dismissing to origin', () => {
+    const dismissTo = jest.fn();
     const router = {
       push: jest.fn(),
-      navigate,
+      dismissTo,
+      navigate: jest.fn(),
       back: jest.fn(),
       canGoBack: jest.fn(() => false),
     } as never;
@@ -25,6 +26,6 @@ describe('gallery detail navigation', () => {
     );
     returnFromGalleryDetail(router);
 
-    expect(navigate).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    expect(dismissTo).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
   });
 });

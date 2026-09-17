@@ -9,11 +9,12 @@ describe('credits detail navigation', () => {
     resetCreditsDetailNavigationForTests();
   });
 
-  it('returns to the screen that opened credits', () => {
-    const navigate = jest.fn();
+  it('returns to the screen that opened credits by dismissing to origin', () => {
+    const dismissTo = jest.fn();
     const router = {
       push: jest.fn(),
-      navigate,
+      dismissTo,
+      navigate: jest.fn(),
       back: jest.fn(),
       canGoBack: jest.fn(() => false),
     } as never;
@@ -25,6 +26,6 @@ describe('credits detail navigation', () => {
     );
     returnFromCreditsDetail(router);
 
-    expect(navigate).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    expect(dismissTo).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
   });
 });

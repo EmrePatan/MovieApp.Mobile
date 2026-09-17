@@ -1,4 +1,5 @@
 import type { ImperativeRouter } from 'expo-router';
+import { returnToDetailChildOrigin } from './detail-child-destination-navigation';
 
 let lastGalleryReturnHref: string | null = null;
 
@@ -23,18 +24,7 @@ export function openGalleryDetail(
 export function returnFromGalleryDetail(router: ImperativeRouter): void {
   const returnHref = lastGalleryReturnHref;
   lastGalleryReturnHref = null;
-
-  if (returnHref) {
-    router.navigate(returnHref);
-    return;
-  }
-
-  if (router.canGoBack()) {
-    router.back();
-    return;
-  }
-
-  router.navigate('/(tabs)/home');
+  returnToDetailChildOrigin(router, returnHref);
 }
 
 export function resetGalleryDetailNavigationForTests(): void {

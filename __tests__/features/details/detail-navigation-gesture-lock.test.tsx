@@ -6,11 +6,16 @@ import { useDetailScrollLock } from '@/features/details/shared/context/DetailScr
 import { useDetailNavigationGestureLock } from '@/features/details/shared/navigation/useDetailNavigationGestureLock';
 
 const mockSetOptions = jest.fn();
+const mockFocusEffect = jest.fn((callback: () => void | (() => void)) => {
+  const cleanup = callback();
+  return cleanup;
+});
 
 jest.mock('expo-router', () => ({
   useNavigation: () => ({
     setOptions: mockSetOptions,
   }),
+  useFocusEffect: (callback: () => void | (() => void)) => mockFocusEffect(callback),
 }));
 
 describe('useDetailNavigationGestureLock', () => {
@@ -18,22 +23,29 @@ describe('useDetailNavigationGestureLock', () => {
     jest.clearAllMocks();
   });
 
-  it('disables back-swipe only while interaction is locked', () => {
-    function Probe({ locked }: { locked: boolean }) {
-      useDetailNavigationGestureLock(locked);
+  it('does nothing when disabled', () => {
+    function Probe() {
+      useDetailNavigationGestureLock(true, false);
       return null;
     }
 
-    const { rerender, unmount } = render(<Probe locked={false} />);
+    render(<Probe />);
+    expect(mockSetOptions).not.toHaveBeenCalled();
+  });
+
+  it('disables back-swipe only while interaction is locked on focused catalog detail', () => {
+    function Probe({ locked }: { locked: boolean }) {
+      useDetailNavigationGestureLock(locked, true);
+      return null;
+    }
+
+    const { rerender } = render(<Probe locked={false} />);
     expect(mockSetOptions).toHaveBeenCalledWith({ gestureEnabled: true });
 
     rerender(<Probe locked={true} />);
     expect(mockSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
 
     rerender(<Probe locked={false} />);
-    expect(mockSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
-
-    unmount();
     expect(mockSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
   });
 });
@@ -43,7 +55,7 @@ describe('DetailQueryState navigation gesture lock', () => {
     jest.clearAllMocks();
   });
 
-  it('wires rating interaction lock to navigation gesture options', () => {
+  it('wires rating interaction lock only when enabled for catalog detail', () => {
     function RatingLockTrigger() {
       const scrollLock = useDetailScrollLock();
 
@@ -60,6 +72,7 @@ describe('DetailQueryState navigation gesture lock', () => {
 
     render(
       <DetailQueryState
+        enableRatingNavigationGestureLock
         query={{
           data: { title: 'Example' },
           error: null,
@@ -76,5 +89,25 @@ describe('DetailQueryState navigation gesture lock', () => {
 
     fireEvent.press(screen.getByLabelText('Lock rating interaction'));
     expect(mockSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+  });
+
+  it('does not wire rating interaction lock for non-catalog detail screens', () => {
+    render(
+      <DetailQueryState
+        query={{
+          data: { title: 'Example' },
+          error: null,
+          isLoading: false,
+          isError: false,
+          refetch: jest.fn(),
+        }}
+        notFoundTitle="Not found"
+        notFoundMessage="Missing"
+      >
+        {() => <Text>child destination</Text>}
+      </DetailQueryState>,
+    );
+
+    expect(mockSetOptions).not.toHaveBeenCalled();
   });
 });

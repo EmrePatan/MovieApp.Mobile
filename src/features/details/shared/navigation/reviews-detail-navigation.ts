@@ -1,4 +1,5 @@
 import type { ImperativeRouter } from 'expo-router';
+import { returnToDetailChildOrigin } from './detail-child-destination-navigation';
 
 let lastReviewsReturnHref: string | null = null;
 
@@ -23,18 +24,7 @@ export function openReviewsDetail(
 export function returnFromReviewsDetail(router: ImperativeRouter): void {
   const returnHref = lastReviewsReturnHref;
   lastReviewsReturnHref = null;
-
-  if (returnHref) {
-    router.navigate(returnHref);
-    return;
-  }
-
-  if (router.canGoBack()) {
-    router.back();
-    return;
-  }
-
-  router.navigate('/(tabs)/home');
+  returnToDetailChildOrigin(router, returnHref);
 }
 
 export function resetReviewsDetailNavigationForTests(): void {
