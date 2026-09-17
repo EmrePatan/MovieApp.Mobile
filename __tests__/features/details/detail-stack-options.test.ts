@@ -1,9 +1,10 @@
 import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 
 describe('detail-stack-options', () => {
-  it('disables native swipe-back on rated detail routes', () => {
+  it('keeps edge back-swipe enabled while disabling full-screen back gestures', () => {
     expect(ratedDetailStackScreenOptions).toEqual({
-      gestureEnabled: false,
+      gestureEnabled: true,
+      fullScreenGestureEnabled: false,
     });
   });
 });

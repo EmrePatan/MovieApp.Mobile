@@ -2,9 +2,12 @@ import type { NativeStackNavigationOptions } from 'expo-router';
 
 /**
  * Movie and TV detail screens include a drag-based star rating control.
- * Native iOS interactive back swipe competes with that gesture, so it is
- * disabled here. Users can still navigate back via the overlay back button.
+ * Keep iOS edge back-swipe enabled, but restrict it to the screen edge so
+ * horizontal rating drags do not compete with full-screen back gestures.
+ * While the user is actively rating, DetailQueryState temporarily disables
+ * back-swipe via navigation.setOptions.
  */
 export const ratedDetailStackScreenOptions: NativeStackNavigationOptions = {
-  gestureEnabled: false,
+  gestureEnabled: true,
+  fullScreenGestureEnabled: false,
 };

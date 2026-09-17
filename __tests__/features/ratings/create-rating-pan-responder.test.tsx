@@ -134,6 +134,34 @@ describe('createRatingPanResponder', () => {
     expect(onInteractionActiveChange).toHaveBeenLastCalledWith(false);
   });
 
+  it('activates interaction lock on touch start before pan claims', () => {
+    const onInteractionActiveChange = jest.fn();
+    const { handlers, touchHandlers } = createResponder({ onInteractionActiveChange });
+
+    touchHandlers.onTouchStart?.({
+      nativeEvent: { pageX: 10, pageY: 10, locationX: 10, locationY: 0 },
+    });
+
+    expect(onInteractionActiveChange).toHaveBeenCalledWith(true);
+    expect(handlers.getGestureMode()).toBe('pending');
+  });
+
+  it('releases interaction lock after a tap commit', () => {
+    const onInteractionActiveChange = jest.fn();
+    const onCommit = jest.fn();
+    const { touchHandlers } = createResponder({ onInteractionActiveChange, onCommit });
+
+    touchHandlers.onTouchStart?.({
+      nativeEvent: { pageX: 10, pageY: 10, locationX: TRACK_WIDTH * 0.65, locationY: 0 },
+    });
+    touchHandlers.onTouchEnd?.({
+      nativeEvent: { pageX: 10, pageY: 10, locationX: TRACK_WIDTH * 0.65, locationY: 0 },
+    });
+
+    expect(onCommit).toHaveBeenCalledWith(3.5);
+    expect(onInteractionActiveChange).toHaveBeenLastCalledWith(false);
+  });
+
   it('releases scroll lock when vertical movement dominates', () => {
     const onInteractionActiveChange = jest.fn();
     const { handlers } = createResponder({ onInteractionActiveChange });

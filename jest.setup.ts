@@ -45,6 +45,7 @@ jest.mock('expo-secure-store', () => ({
 
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ replace: jest.fn() })),
+  useNavigation: jest.fn(() => ({ setOptions: jest.fn() })),
   useSegments: jest.fn(() => []),
   Redirect: 'Redirect',
   Stack: 'Stack',

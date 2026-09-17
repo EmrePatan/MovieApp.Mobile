@@ -120,6 +120,16 @@ export function createRatingPanResponder({
     touchRef.movedVertically = false;
     touchRef.panGranted = false;
     gestureModeRef.current = 'pending';
+
+    if (getDisabled()) {
+      return;
+    }
+
+    if (onGestureStart && !onGestureStart()) {
+      return;
+    }
+
+    setInteractionActive(true);
   };
 
   const handleTouchMove = (event: GestureResponderEvent) => {
@@ -132,15 +142,27 @@ export function createRatingPanResponder({
   };
 
   const handleTouchEnd = (event: GestureResponderEvent) => {
-    if (getDisabled() || touchRef.panGranted || touchRef.movedVertically) {
+    if (getDisabled()) {
+      setInteractionActive(false);
+      return;
+    }
+
+    if (touchRef.panGranted) {
+      return;
+    }
+
+    if (touchRef.movedVertically) {
+      setInteractionActive(false);
       return;
     }
 
     if (onGestureStart && !onGestureStart()) {
+      setInteractionActive(false);
       return;
     }
 
     commitResolvedPosition(resolvePosition(event.nativeEvent.locationX));
+    setInteractionActive(false);
   };
 
   const handleMove = (event: GestureResponderEvent, gestureState: PanResponderGestureState) => {

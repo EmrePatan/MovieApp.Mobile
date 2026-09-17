@@ -12,6 +12,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 
 import { DetailScrollProvider } from '../context/DetailScrollContext';
 import { DetailScrollLockProvider } from '../context/DetailScrollLockContext';
+import { useDetailNavigationGestureLock } from '../navigation/useDetailNavigationGestureLock';
 
 import { DetailBackButton } from './DetailBackButton';
 
@@ -90,12 +91,12 @@ export function DetailQueryState<TData>({
   const { data, error, isLoading, isError, refetch } = query;
 
   const scrollRef = useRef<ScrollView>(null);
-  const [scrollLocked, setScrollLocked] = useState(false);
+  const [interactionLocked, setInteractionLocked] = useState(false);
 
-  const handleScrollLockChange = useCallback((locked: boolean) => {
+  useDetailNavigationGestureLock(interactionLocked);
 
-    setScrollLocked(locked);
-
+  const handleInteractionLockChange = useCallback((locked: boolean) => {
+    setInteractionLocked(locked);
   }, []);
 
 
@@ -258,7 +259,7 @@ export function DetailQueryState<TData>({
     return (
       <DetailStateShell>
         <View style={styles.listContainer}>
-          <DetailScrollLockProvider onScrollLockChange={handleScrollLockChange}>
+          <DetailScrollLockProvider onScrollLockChange={handleInteractionLockChange}>
             {children(data)}
           </DetailScrollLockProvider>
         </View>
@@ -274,7 +275,7 @@ export function DetailQueryState<TData>({
 
         ref={scrollRef}
 
-        scrollEnabled={!scrollLocked}
+        scrollEnabled={!interactionLocked}
 
         showsVerticalScrollIndicator={false}
 
@@ -286,7 +287,7 @@ export function DetailQueryState<TData>({
 
         <DetailScrollProvider scrollRef={scrollRef}>
 
-          <DetailScrollLockProvider onScrollLockChange={handleScrollLockChange}>
+          <DetailScrollLockProvider onScrollLockChange={handleInteractionLockChange}>
 
             {children(data)}
 

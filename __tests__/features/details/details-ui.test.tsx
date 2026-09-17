@@ -18,6 +18,7 @@ const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: jest.fn(), push: mockPush, navigate: jest.fn() }),
+  useNavigation: () => ({ setOptions: jest.fn() }),
   useSegments: jest.fn(() => ['(tabs)', 'movie', '[id]']),
 }));
 

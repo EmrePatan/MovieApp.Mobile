@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import {
   MIN_STAR_RATING,
@@ -98,6 +99,8 @@ export function StarRatingSelector({
     return value;
   }, [localPreviewRating, value]);
 
+  const nativeGesture = useMemo(() => Gesture.Native(), []);
+
   const { panHandlers, touchHandlers } = useMemo(
     () =>
       createRatingPanResponder({
@@ -169,26 +172,28 @@ export function StarRatingSelector({
       style={styles.touchSurface}
       testID="star-rating-selector"
     >
-      <View
-        {...panHandlers}
-        {...touchHandlers}
-        onLayout={handleLayout}
-        style={[styles.track, { width: TOUCH_TRACK_WIDTH }]}
-        testID="star-rating-track"
-      >
-        <View pointerEvents="none" style={styles.starRow}>
-          {Array.from({ length: STAR_COUNT }, (_, index) => {
-            const starIndex = index + 1;
-            const fill = getStarFillState(starIndex, displayRating ?? 0);
+      <GestureDetector gesture={nativeGesture}>
+        <View
+          {...panHandlers}
+          {...touchHandlers}
+          onLayout={handleLayout}
+          style={[styles.track, { width: TOUCH_TRACK_WIDTH }]}
+          testID="star-rating-track"
+        >
+          <View pointerEvents="none" style={styles.starRow}>
+            {Array.from({ length: STAR_COUNT }, (_, index) => {
+              const starIndex = index + 1;
+              const fill = getStarFillState(starIndex, displayRating ?? 0);
 
-            return (
-              <View key={starIndex} testID={`star-${starIndex}-${fill}`}>
-                <StarGlyph fill={fill} size={STAR_VISUAL_SIZE} />
-              </View>
-            );
-          })}
+              return (
+                <View key={starIndex} testID={`star-${starIndex}-${fill}`}>
+                  <StarGlyph fill={fill} size={STAR_VISUAL_SIZE} />
+                </View>
+              );
+            })}
+          </View>
         </View>
-      </View>
+      </GestureDetector>
     </View>
   );
 }

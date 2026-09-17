@@ -57,6 +57,7 @@ jest.mock('react-native-gesture-handler', () => {
     GestureDetector: View,
     Gesture: {
       Pan: jest.fn(() => createMockPanGesture()),
+      Native: jest.fn(() => createMockPanGesture()),
     },
     Swipeable,
   };
