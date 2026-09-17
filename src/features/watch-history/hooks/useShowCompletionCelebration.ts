@@ -17,11 +17,19 @@ export function useShowCompletionCelebration({
 
   useEffect(() => {
     if (!enabled || totalEpisodes <= 0) {
-      previousWatchedRef.current = watchedEpisodes;
+      if (!enabled) {
+        previousWatchedRef.current = null;
+      }
+
       return;
     }
 
     const previousWatched = previousWatchedRef.current;
+
+    if (previousWatched === null) {
+      previousWatchedRef.current = watchedEpisodes;
+      return;
+    }
 
     if (
       shouldTriggerShowCompletionCelebration(previousWatched, watchedEpisodes, totalEpisodes)

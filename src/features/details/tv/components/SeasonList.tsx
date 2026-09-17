@@ -245,7 +245,7 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
   const { confettiVisible, dismissConfetti } = useShowCompletionCelebration({
     watchedEpisodes,
     totalEpisodes,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && progressReady,
   });
   const tvSummary =
     isAuthenticated && tvProgress

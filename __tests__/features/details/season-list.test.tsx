@@ -193,6 +193,49 @@ describe('SeasonList progress UI', () => {
     jest.useRealTimers();
   });
 
+  it('does not show confetti when progress loads in as already complete', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
+
+    const { rerender } = render(
+      <SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />,
+    );
+
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 35,
+        watchedEpisodes: 35,
+        progressPercentage: 100,
+        nextEpisode: null,
+        seasons: [
+          {
+            seasonNumber: 1,
+            totalEpisodes: 22,
+            watchedEpisodes: 22,
+            progressPercentage: 100,
+          },
+          {
+            seasonNumber: 2,
+            totalEpisodes: 13,
+            watchedEpisodes: 13,
+            progressPercentage: 100,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    rerender(<SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />);
+
+    expect(screen.getByTestId('show-completed-banner')).toBeTruthy();
+    expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
+  });
+
   it('keeps the completion banner visible for already finished shows', () => {
     (useTvShowProgress as jest.Mock).mockReturnValue({
       data: {
