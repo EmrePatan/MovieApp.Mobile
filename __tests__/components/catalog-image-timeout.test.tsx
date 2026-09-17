@@ -18,7 +18,7 @@ describe('CatalogImage bounded loading', () => {
   it('shows fallback after onLoadStart when no terminal callbacks arrive', () => {
     render(
       <CatalogImage
-        path="/w500/stuck.jpg"
+        path="/poster.jpg"
         width={120}
         height={180}
         accessibilityLabel="Stuck poster"
@@ -45,7 +45,7 @@ describe('CatalogImage bounded loading', () => {
   it('keeps loaded image visible after timeout when load succeeds', () => {
     render(
       <CatalogImage
-        path="/w500/good.jpg"
+        path="/poster.jpg"
         width={120}
         height={180}
         accessibilityLabel="Good poster"
