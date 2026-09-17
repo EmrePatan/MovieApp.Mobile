@@ -9,6 +9,7 @@ export const PRODUCT_METRICS = {
   pickSomethingUsed: 'pick_something_used',
   libraryOpened: 'library_opened',
   libraryFilterSelected: 'library_filter_selected',
+  insightsOpened: 'insights_opened',
 } as const;
 
 export type ProductMetricName = (typeof PRODUCT_METRICS)[keyof typeof PRODUCT_METRICS];

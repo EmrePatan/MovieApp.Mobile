@@ -7,9 +7,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { Screen } from '@/components/common/Screen';
-import { ProfileAnalyticsDashboard } from '@/features/profile/components/ProfileAnalyticsDashboard';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
-import { ProfileHeroStats } from '@/features/profile/components/ProfileHeroStats';
 import { ProfileLibrarySection } from '@/features/profile/components/ProfileLibrarySection';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
 import { useFollowingCount } from '@/features/following/hooks/useFollowingCount';
@@ -86,27 +84,23 @@ export default function ProfileScreen() {
 
         {statisticsQuery.isLoading && !statisticsQuery.data ? (
           <AppText variant="bodySmall" muted>
-            Loading your insights...
+            Loading library summary...
           </AppText>
         ) : statisticsQuery.isError ? (
           <ErrorView
             message={
               isApiError(statisticsQuery.error)
                 ? statisticsQuery.error.userMessage
-                : 'Unable to load your statistics.'
+                : 'Unable to load your library summary.'
             }
             onRetry={() => void statisticsQuery.refetch()}
             retryLabel="Retry"
           />
         ) : statisticsQuery.data ? (
-          <>
-            <ProfileHeroStats summary={statisticsQuery.data.summary} />
-            <ProfileLibrarySection
-              summary={statisticsQuery.data.summary}
-              followingCount={followingCountQuery.totalCount}
-            />
-            <ProfileAnalyticsDashboard statistics={statisticsQuery.data} />
-          </>
+          <ProfileLibrarySection
+            summary={statisticsQuery.data.summary}
+            followingCount={followingCountQuery.totalCount}
+          />
         ) : null}
 
         <ProfileSection title="Preferences">

@@ -74,48 +74,19 @@ describe('ProfileScreen', () => {
     });
   });
 
-  it('renders premium profile header and hero stats', () => {
+  it('renders profile identity and account sections', () => {
     render(<ProfileScreen />);
 
     expect(screen.getByText('Emre')).toBeTruthy();
     expect(screen.getByText('Your movie and TV identity')).toBeTruthy();
-    expect(screen.getByText('60')).toBeTruthy();
-    expect(screen.getByText('Watch Activity')).toBeTruthy();
-    expect(screen.getByText('movies & episodes')).toBeTruthy();
-    expect(screen.getByText('Your Year')).toBeTruthy();
-    expect(screen.getByText('Your Taste')).toBeTruthy();
-    expect(screen.getByText('Movies vs Series')).toBeTruthy();
+    expect(screen.getByText('My Library')).toBeTruthy();
+    expect(screen.queryByText('Your Year')).toBeNull();
+    expect(screen.queryByText('Your Taste')).toBeNull();
   });
 
-  it('shows compact library collection stats before analytics sections', () => {
+  it('shows compact library collection stats', () => {
     render(<ProfileScreen />);
 
-    function collectText(node: unknown): string[] {
-      if (!node || typeof node !== 'object') {
-        return [];
-      }
-
-      if ('children' in node && Array.isArray((node as { children?: unknown }).children)) {
-        return (node as { children: unknown[] }).children.flatMap((child) => {
-          if (typeof child === 'string') {
-            return [child];
-          }
-
-          return collectText(child);
-        });
-      }
-
-      return [];
-    }
-
-    const texts = collectText(screen.toJSON());
-    const libraryIndex = texts.findIndex((text) => text === 'My Library');
-    const insightIndex = texts.findIndex((text) => text === 'Comedy is your top genre.');
-
-    expect(libraryIndex).toBeGreaterThan(-1);
-    expect(insightIndex).toBeGreaterThan(-1);
-    expect(libraryIndex).toBeLessThan(insightIndex);
-    expect(screen.queryByLabelText('Open My Library')).toBeNull();
     expect(
       screen.getByLabelText(
         'Library collections: 6 saved titles · 2 lists · 3 followed titles · 12 movies · 48 episodes',
@@ -133,15 +104,6 @@ describe('ProfileScreen', () => {
     expect(screen.getByLabelText('Delete account')).toBeTruthy();
   });
 
-  it('shows month detail when a bar is pressed', () => {
-    render(<ProfileScreen />);
-
-    fireEvent.press(screen.getByLabelText('April 2026: 8 watched items, 1 movies and 7 episodes.'));
-
-    expect(screen.getByText('April 2026')).toBeTruthy();
-    expect(screen.getByText('8 watched · 1 movies · 7 episodes')).toBeTruthy();
-  });
-
   it('navigates to account settings without a redundant library shortcut', () => {
     render(<ProfileScreen />);
 
@@ -151,7 +113,7 @@ describe('ProfileScreen', () => {
     expect(mockPush).not.toHaveBeenCalledWith('/(tabs)/library');
   });
 
-  it('renders new-user empty analytics states', () => {
+  it('renders sparse library summary for new users', () => {
     (useProfileStatistics as jest.Mock).mockReturnValue({
       data: createProfileStatisticsFixture({
         summary: {
@@ -165,16 +127,6 @@ describe('ProfileScreen', () => {
           watchlistCount: 0,
           averageStarRating: null,
         },
-        activity: {
-          last12Months: [],
-          mostActiveMonth: null,
-          currentMonthTotal: 0,
-          previousMonthTotal: 0,
-          longestStreakDays: null,
-        },
-        genres: [],
-        insights: [],
-        milestones: [],
       }),
       isLoading: false,
       isError: false,
@@ -194,12 +146,10 @@ describe('ProfileScreen', () => {
     expect(
       screen.getByText('0 saved titles · 0 lists · 0 followed titles · 0 movies · 0 episodes'),
     ).toBeTruthy();
-    expect(screen.getByText('Start watching to build your activity timeline.')).toBeTruthy();
-    expect(screen.getByText('Your favorite genres will appear here as you watch.')).toBeTruthy();
-    expect(screen.getByText('Rate a few titles to reveal your rating style.')).toBeTruthy();
+    expect(screen.queryByText('Your Year')).toBeNull();
   });
 
-  it('shows statistics error state', () => {
+  it('shows library summary error state', () => {
     (useProfileStatistics as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -211,7 +161,7 @@ describe('ProfileScreen', () => {
 
     render(<ProfileScreen />);
 
-    expect(screen.getByText('Unable to load your statistics.')).toBeTruthy();
+    expect(screen.getByText('Unable to load your library summary.')).toBeTruthy();
   });
 
   it('logs out from profile screen', () => {

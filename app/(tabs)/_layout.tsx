@@ -51,14 +51,15 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="insights"
         options={{
-          title: 'Profile',
+          title: 'Insights',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+            <Ionicons name="sparkles-outline" size={size} color={color} />
           ),
         }}
       />
+      <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="watchlist" options={{ href: null }} />
       <Tabs.Screen name="movie" options={{ href: null }} />
       <Tabs.Screen name="tv/[id]" options={{ href: null }} />
