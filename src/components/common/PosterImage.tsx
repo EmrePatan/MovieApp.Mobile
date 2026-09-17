@@ -1,7 +1,6 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRemoteImageState } from '@/hooks/useRemoteImageState';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
@@ -22,9 +21,17 @@ export const PosterImage = memo(function PosterImage({
   accessibilityLabel,
   elevated = false,
 }: PosterImageProps) {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(uri));
+  const [trackedUri, setTrackedUri] = useState(uri);
   const resolvedUri = resolveImageUri(uri);
-  const { isLoading, showFallback, markLoading, markLoaded, markError } =
-    useRemoteImageState(resolvedUri);
+  const showFallback = !resolvedUri || hasError;
+
+  if (trackedUri !== uri) {
+    setTrackedUri(uri);
+    setHasError(false);
+    setIsLoading(Boolean(uri));
+  }
 
   return (
     <View
@@ -43,13 +50,15 @@ export const PosterImage = memo(function PosterImage({
       ) : (
         <>
           <Image
-            source={{ uri: resolvedUri! }}
+            source={{ uri: resolvedUri }}
             style={[styles.image, { width, height }]}
             resizeMode="cover"
-            onLoadStart={markLoading}
-            onLoad={markLoaded}
-            onLoadEnd={markLoaded}
-            onError={markError}
+            onLoadStart={() => setIsLoading(true)}
+            onLoadEnd={() => setIsLoading(false)}
+            onError={() => {
+              setHasError(true);
+              setIsLoading(false);
+            }}
           />
           {isLoading ? (
             <View style={styles.loadingOverlay}>

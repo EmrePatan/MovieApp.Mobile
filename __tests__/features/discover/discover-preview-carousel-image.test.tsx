@@ -1,50 +1,42 @@
 import { act, render, screen } from '@testing-library/react-native';
 import { Image } from 'react-native';
 import { DiscoverPreviewCarousel } from '@/features/discover/components/DiscoverPreviewCarousel';
-import { REMOTE_IMAGE_LOAD_TIMEOUT_MS } from '@/hooks/useRemoteImageState';
-
-jest.mock('react', () => jest.requireActual('react'));
 
 const items = [
   {
     id: 'movie-1',
     type: 'movie' as const,
-    title: 'Loaded Movie',
-    originalTitle: 'Loaded Movie',
+    title: 'Interstellar',
+    originalTitle: 'Interstellar',
     overview: '',
-    posterUrl: '/w500/loaded.jpg',
+    posterUrl: '/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg',
     backdropUrl: null,
     releaseDate: null,
     voteAverage: 8,
     voteCount: 100,
-    year: 2024,
+    year: 2014,
   },
   {
     id: 'movie-2',
     type: 'movie' as const,
-    title: 'Stuck Movie',
-    originalTitle: 'Stuck Movie',
+    title: 'Inception',
+    originalTitle: 'Inception',
     overview: '',
-    posterUrl: '/w500/stuck.jpg',
+    posterUrl: '/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg',
     backdropUrl: null,
     releaseDate: null,
     voteAverage: 7,
     voteCount: 50,
-    year: 2023,
+    year: 2010,
   },
 ];
 
 describe('DiscoverPreviewCarousel images', () => {
   beforeEach(() => {
-    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
-    jest.useFakeTimers();
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('uses CatalogImage and recovers from a hung image load', () => {
+  it('keeps CatalogImage mounted while loading and only falls back on error', () => {
     render(
       <DiscoverPreviewCarousel
         title="Top Rated"
@@ -55,19 +47,16 @@ describe('DiscoverPreviewCarousel images', () => {
 
     const images = screen.UNSAFE_queryAllByType(Image);
     expect(images.length).toBeGreaterThan(0);
-
-    const stuckImage = images[1];
-    expect(stuckImage).toBeTruthy();
-
-    act(() => {
-      stuckImage.props.onLoadStart?.();
-    });
+    expect(images[0].props.source.uri).toBe(
+      'https://image.tmdb.org/t/p/w500/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg',
+    );
 
     act(() => {
-      jest.advanceTimersByTime(REMOTE_IMAGE_LOAD_TIMEOUT_MS);
+      images[1].props.onError?.();
     });
 
-    expect(screen.getByLabelText('Stuck Movie poster')).toBeTruthy();
+    expect(screen.getByLabelText('Inception poster')).toBeTruthy();
     expect(screen.getAllByLabelText('film-outline').length).toBeGreaterThan(0);
+    expect(screen.UNSAFE_getAllByType(Image)).toHaveLength(1);
   });
 });
