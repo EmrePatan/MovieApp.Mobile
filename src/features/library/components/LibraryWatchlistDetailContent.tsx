@@ -169,7 +169,6 @@ export function LibraryWatchlistDetailContent({
     <View style={styles.controls}>
       <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
       <LibrarySortControl
-        variant="menu"
         value={sort}
         options={WATCHLIST_SORT_OPTIONS}
         onChange={setSort}

@@ -157,20 +157,15 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.queryByLabelText('Filter People')).toBeNull();
   });
 
-  it('keeps all sort options reachable through the compact sort control', () => {
+  it('shows sort options as chips matching the media filters', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
-    fireEvent.press(screen.getByLabelText('Sort by Recently Added'));
+    expect(screen.getByLabelText('Sort by Recently Added')).toBeTruthy();
+    expect(screen.getByLabelText('Sort by Title A–Z')).toBeTruthy();
+    expect(screen.getByLabelText('Sort by Rating')).toBeTruthy();
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      'Sort by',
-      undefined,
-      expect.arrayContaining([
-        expect.objectContaining({ text: 'Recently Added' }),
-        expect.objectContaining({ text: 'Title A–Z' }),
-        expect.objectContaining({ text: 'Rating' }),
-      ]),
-    );
+    fireEvent.press(screen.getByLabelText('Sort by Title A–Z'));
+    expect(screen.getByLabelText('Sort by Title A–Z')).toBeTruthy();
   });
 
   it('does not show a permanent remove control in the normal row state', () => {
