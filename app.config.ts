@@ -44,7 +44,13 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     'expo-notifications',
-    '@react-native-google-signin/google-signin',
+    [
+      '@react-native-google-signin/google-signin',
+      {
+        iosUrlScheme:
+          'com.googleusercontent.apps.673271760956-3j4poqn6jja3jabj19p6rv49h92iq0mt',
+      },
+    ],
     'expo-apple-authentication',
   ],
   extra: {
