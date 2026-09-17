@@ -71,7 +71,7 @@ describe('DetailInlineRatingSection', () => {
     expect(screen.queryByText(/\/10/)).toBeNull();
   });
 
-  it('keeps the section title left aligned and centers the star row', () => {
+  it('keeps the section title left aligned and centers the star row with compact spacing', () => {
     render(<DetailInlineRatingSection contentType="movie" contentId="movie-id" />);
 
     const section = screen.getByTestId('detail-inline-rating-section');
@@ -81,6 +81,7 @@ describe('DetailInlineRatingSection', () => {
     expect(section).toContainElement(title);
     expect(ratingRow).toHaveStyle({ alignItems: 'center', width: '100%' });
     expect(ratingRow).toContainElement(screen.getByTestId('star-rating-selector'));
+    expect(section).toHaveStyle({ marginTop: 8 });
   });
 
   it('renders backend score 7 as 3 full + 1 half + 1 empty', () => {

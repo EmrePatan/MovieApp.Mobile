@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useDeleteRating, useRateContent } from '../hooks/useRatingMutations';
@@ -17,6 +16,7 @@ import {
 } from '../utils/star-rating';
 import { useDetailScrollLock } from '@/features/details/shared/context/DetailScrollLockContext';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 interface DetailInlineRatingSectionProps {
@@ -96,7 +96,11 @@ export function DetailInlineRatingSection({
 
   return (
     <View style={styles.section} testID="detail-inline-rating-section">
-      <HomeSectionHeader title="Your Rating" />
+      <View style={styles.header} accessibilityRole="header">
+        <AppText variant="subtitle" style={styles.headerTitle}>
+          Your Rating
+        </AppText>
+      </View>
 
       <View style={styles.ratingRow} testID="star-rating-row">
         <StarRatingSelector
@@ -143,8 +147,15 @@ export function DetailInlineRatingSection({
 
 const styles = StyleSheet.create({
   section: {
-    marginTop: spacing.md,
-    gap: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  header: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    marginBottom: spacing.xs,
+  },
+  headerTitle: {
+    color: colors.textPrimary,
+    letterSpacing: 0.15,
   },
   ratingRow: {
     width: '100%',

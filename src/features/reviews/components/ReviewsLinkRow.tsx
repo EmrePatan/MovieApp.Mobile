@@ -12,7 +12,7 @@ import { useReviewsQuery } from '../hooks/useReviewsQuery';
 import type { ReviewContentType } from '../types';
 import { REVIEW_COUNT_PAGE_SIZE } from '../types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 
@@ -65,38 +65,32 @@ export function ReviewsLinkRow({
           {isCountLoading ? (
             <ActivityIndicator color={colors.accent} size="small" testID="reviews-count-loading" />
           ) : (
-            <AppText variant="bodySmall" muted style={styles.count}>
-              ({countLabel})
+            <AppText variant="bodySmall" muted style={styles.count} testID="reviews-count">
+              {countLabel}
             </AppText>
           )}
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </View>
       </Pressable>
+      <View style={styles.separator} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: colors.borderSubtle,
-    marginBottom: spacing.sm,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: layout.touchTarget,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    paddingVertical: spacing.xs,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
@@ -111,6 +105,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   count: {
-    fontWeight: '600',
+    minWidth: spacing.lg,
+    textAlign: 'right',
+    fontVariant: ['tabular-nums'],
   },
 });

@@ -3,6 +3,7 @@ import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';
 import { REVIEW_COUNT_PAGE_SIZE } from '@/features/reviews/types';
+import { colors } from '@/theme/colors';
 
 const mockPush = jest.fn();
 
@@ -61,7 +62,8 @@ describe('ReviewsLinkRow', () => {
     );
 
     expect(screen.getByText('Reviews')).toBeTruthy();
-    expect(screen.getByText('(121)')).toBeTruthy();
+    expect(screen.getByTestId('reviews-count')).toHaveTextContent('121');
+    expect(screen.queryByText('(121)')).toBeNull();
     expect(screen.getByLabelText('Reviews, 121 reviews')).toBeTruthy();
   });
 
@@ -77,8 +79,30 @@ describe('ReviewsLinkRow', () => {
       />,
     );
 
-    expect(screen.getByText('(0)')).toBeTruthy();
+    expect(screen.getByTestId('reviews-count')).toHaveTextContent('0');
+    expect(screen.queryByText('(0)')).toBeNull();
     expect(screen.getByLabelText('Reviews, 0 reviews')).toBeTruthy();
+  });
+
+  it('uses compact navigation row styling instead of an elevated card', () => {
+    render(
+      <ReviewsLinkRow
+        contentType="movie"
+        contentId={movieId}
+        contentTitle="Interstellar"
+        returnHref={`/movie/${movieId}`}
+      />,
+    );
+
+    const row = screen.getByTestId('reviews-link-row-button');
+    const flattened = Array.isArray(row.props.style)
+      ? Object.assign({}, ...row.props.style.filter(Boolean))
+      : row.props.style;
+
+    expect(flattened.backgroundColor).toBeUndefined();
+    expect(flattened.borderRadius).toBeUndefined();
+    expect(flattened.borderWidth).toBeUndefined();
+    expect(screen.getByTestId('reviews-count')).toHaveStyle({ color: colors.textSecondary });
   });
 
   it('uses a lightweight page size for count lookup', () => {

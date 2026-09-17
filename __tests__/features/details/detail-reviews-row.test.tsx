@@ -141,7 +141,7 @@ describe('detail reviews row', () => {
 
     expect(screen.getByTestId('detail-inline-rating-section')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
-    expect(screen.getByText('(121)')).toBeTruthy();
+    expect(screen.getByTestId('reviews-count')).toHaveTextContent('121');
     expect(screen.queryByTestId('reviews-section')).toBeNull();
     expect(screen.queryByTestId('reviews-detail-content')).toBeNull();
     expect(screen.queryByText('Load more reviews')).toBeNull();
@@ -152,7 +152,7 @@ describe('detail reviews row', () => {
 
     expect(screen.getByTestId('detail-inline-rating-section')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
-    expect(screen.getByText('(42)')).toBeTruthy();
+    expect(screen.getByTestId('reviews-count')).toHaveTextContent('42');
     expect(screen.queryByTestId('reviews-section')).toBeNull();
   });
 
