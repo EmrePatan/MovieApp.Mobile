@@ -52,4 +52,24 @@ describe('world-cinema-collections', () => {
     expect(WORLD_CINEMA_COUNTRY_LABELS.TR).toBe('Türkiye');
     expect(getOriginCountryLabel('TR')).toBe('Türkiye');
   });
+
+  it('uses concise demonym labels for curated World Cinema tabs', () => {
+    expect(WORLD_CINEMA_CURATED_COLLECTIONS.map((collection) => collection.label)).toEqual([
+      'Korean',
+      'Japanese',
+      'Iranian',
+      'French',
+      'Italian',
+      'Spanish',
+      'Indian',
+      'Turkish',
+      'Chinese',
+      'Hong Kong',
+      'Taiwanese',
+      'German',
+      'Mexican',
+      'Argentine',
+      'Brazilian',
+    ]);
+  });
 });

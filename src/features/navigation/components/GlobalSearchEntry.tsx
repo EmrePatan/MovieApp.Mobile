@@ -10,8 +10,11 @@ import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
 import { borderRadius, spacing } from '@/theme/spacing';
 
+type GlobalSearchEntryVariant = 'default' | 'discover';
+
 interface GlobalSearchEntryProps {
   origin: SearchReturnOrigin;
+  variant?: GlobalSearchEntryVariant;
 }
 
 interface GlobalSearchIconButtonProps {
@@ -48,19 +51,35 @@ export function GlobalSearchIconButton({
   );
 }
 
-export function GlobalSearchEntry({ origin }: GlobalSearchEntryProps) {
+const DISCOVER_SEARCH_PLACEHOLDER = 'Search movies, shows & people';
+
+export function GlobalSearchEntry({ origin, variant = 'default' }: GlobalSearchEntryProps) {
   const router = useRouter();
+  const isDiscover = variant === 'discover';
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Search movies, TV shows, and people"
       onPress={() => openSearch(router, origin)}
-      style={({ pressed }) => [styles.entry, pressed && styles.entryPressed]}
+      testID={isDiscover ? 'discover-search-entry' : 'global-search-entry'}
+      style={({ pressed }) => [
+        styles.entry,
+        isDiscover && styles.entryDiscover,
+        pressed && (isDiscover ? styles.entryDiscoverPressed : styles.entryPressed),
+      ]}
     >
-      <Ionicons name="search-outline" size={20} color={colors.textMuted} />
-      <AppText variant="body" muted style={styles.placeholder}>
-        Search movies, TV & people
+      <Ionicons
+        name="search-outline"
+        size={isDiscover ? 18 : 20}
+        color={isDiscover ? colors.accentMuted : colors.textMuted}
+      />
+      <AppText
+        variant={isDiscover ? 'bodySmall' : 'body'}
+        muted
+        style={[styles.placeholder, isDiscover && styles.placeholderDiscover]}
+      >
+        {isDiscover ? DISCOVER_SEARCH_PLACEHOLDER : 'Search movies, TV & people'}
       </AppText>
     </Pressable>
   );
@@ -96,10 +115,27 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
+  entryDiscover: {
+    marginHorizontal: 0,
+    minHeight: 50,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surfaceElevated,
+  },
   placeholder: {
     flex: 1,
   },
+  placeholderDiscover: {
+    color: colors.textSecondary,
+    letterSpacing: 0.1,
+  },
   entryPressed: {
     opacity: 0.85,
+  },
+  entryDiscoverPressed: {
+    opacity: interaction.pressedOpacity,
+    borderColor: colors.borderAccent,
+    backgroundColor: colors.accentTint12,
   },
 });

@@ -9,7 +9,10 @@ import {
   DEFAULT_WORLD_CINEMA_MEDIA_TYPE,
   DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY,
 } from '@/features/discovery/world-cinema-types';
-import { WORLD_CINEMA_CURATED_COLLECTIONS } from '@/features/discovery/world-cinema-collections';
+import {
+  getWorldCinemaTabFlag,
+  WORLD_CINEMA_CURATED_COLLECTIONS,
+} from '@/features/discovery/world-cinema-collections';
 import { createWorldCinemaHref } from '@/features/discovery/utils/world-cinema-params';
 import type { SearchResultItem } from '@/features/search/types';
 import { useQueryClient } from '@tanstack/react-query';
@@ -26,10 +29,6 @@ export function WorldCinemaHubSection() {
   const previewQuery = useWorldCinemaPreview(
     selectedOriginCountry,
     DEFAULT_WORLD_CINEMA_MEDIA_TYPE,
-  );
-
-  const selectedCollection = WORLD_CINEMA_CURATED_COLLECTIONS.find(
-    (collection) => collection.originCountry === selectedOriginCountry,
   );
 
   const previewItems = (previewQuery.data?.items ?? []).filter(
@@ -86,6 +85,7 @@ export function WorldCinemaHubSection() {
         contentContainerStyle={styles.chipList}
         renderItem={({ item }) => {
           const selected = item.originCountry === selectedOriginCountry;
+          const flag = getWorldCinemaTabFlag(item.originCountry);
 
           return (
             <Pressable
@@ -100,23 +100,28 @@ export function WorldCinemaHubSection() {
               ]}
               testID={`world-cinema-chip-${item.originCountry}`}
             >
-              <AppText variant="bodySmall" style={selected ? styles.chipLabelSelected : undefined}>
-                {item.label}
-              </AppText>
+              <View style={styles.chipContent}>
+                {flag ? (
+                  <AppText variant="bodySmall" style={styles.chipFlag}>
+                    {flag}
+                  </AppText>
+                ) : null}
+                <AppText variant="bodySmall" style={selected ? styles.chipLabelSelected : undefined}>
+                  {item.label}
+                </AppText>
+              </View>
             </Pressable>
           );
         }}
       />
 
       <DiscoverPreviewSection
-        title={selectedCollection?.label ?? 'World Cinema'}
-        subtitle="Movies and TV from this origin country"
+        hideTitle
         items={previewItems}
         isLoading={previewQuery.isLoading}
         isError={previewQuery.isError}
         onRetry={() => void previewQuery.refetch()}
         onItemPress={handlePreviewItemPress}
-        onSeeAll={openWorldCinema}
         emptyMessage="No titles found for this cinema collection right now."
         testID="world-cinema-preview"
       />
@@ -153,12 +158,22 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   chip: {
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     marginRight: spacing.sm,
+  },
+  chipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  chipFlag: {
+    fontSize: 14,
+    lineHeight: 18,
   },
   chipSelected: {
     borderColor: colors.accent,

@@ -9,9 +9,10 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 interface DiscoverPreviewSectionProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   icon?: keyof typeof Ionicons.glyphMap;
+  hideTitle?: boolean;
   items: SearchResultItem[];
   isLoading?: boolean;
   isError?: boolean;
@@ -34,16 +35,21 @@ export function DiscoverPreviewSection({
   onItemPress,
   onSeeAll,
   testID,
+  hideTitle = false,
 }: DiscoverPreviewSectionProps) {
+  const showHeader = !hideTitle && Boolean(title);
+
   if (!isLoading && !isError && items.length === 0) {
     return (
       <View style={styles.section} testID={testID}>
+        {showHeader ? (
         <View style={styles.header}>
           <View style={styles.titleRow}>
             {icon ? <Ionicons name={icon} size={18} color={colors.accent} /> : null}
             <AppText variant="subtitle">{title}</AppText>
           </View>
         </View>
+        ) : null}
         <AppText variant="bodySmall" muted style={styles.emptyMessage}>
           {emptyMessage}
         </AppText>
@@ -53,6 +59,7 @@ export function DiscoverPreviewSection({
 
   return (
     <View style={styles.section} testID={testID}>
+      {showHeader ? (
       <View style={styles.header}>
         <View style={styles.titleRow}>
           {icon ? <Ionicons name={icon} size={18} color={colors.accent} /> : null}
@@ -77,6 +84,7 @@ export function DiscoverPreviewSection({
           </Pressable>
         ) : null}
       </View>
+      ) : null}
 
       {isLoading ? (
         <FlatList

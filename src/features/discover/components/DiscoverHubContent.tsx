@@ -100,7 +100,7 @@ export function DiscoverHubContent() {
         <AppText variant="title" accessibilityRole="header">
           Discover
         </AppText>
-        <GlobalSearchEntry origin="discover" />
+        <GlobalSearchEntry origin="discover" variant="discover" />
       </View>
 
       <View style={styles.featureSection}>

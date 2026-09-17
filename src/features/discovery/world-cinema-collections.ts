@@ -1,22 +1,23 @@
 import { REGION_OPTIONS } from '@/features/regions/region-options';
+import { countryCodeToFlagEmoji } from './utils/country-flag';
 import type { WorldCinemaCollection } from './world-cinema-types';
 
 export const WORLD_CINEMA_CURATED_COLLECTIONS: WorldCinemaCollection[] = [
-  { originCountry: 'KR', label: 'Korean Cinema' },
-  { originCountry: 'JP', label: 'Japanese Cinema' },
-  { originCountry: 'IR', label: 'Iranian Cinema' },
-  { originCountry: 'FR', label: 'French Cinema' },
-  { originCountry: 'IT', label: 'Italian Cinema' },
-  { originCountry: 'ES', label: 'Spanish Cinema' },
-  { originCountry: 'IN', label: 'Indian Cinema' },
-  { originCountry: 'TR', label: 'Turkish Cinema' },
-  { originCountry: 'CN', label: 'Chinese Cinema' },
-  { originCountry: 'HK', label: 'Hong Kong Cinema' },
-  { originCountry: 'TW', label: 'Taiwanese Cinema' },
-  { originCountry: 'DE', label: 'German Cinema' },
-  { originCountry: 'MX', label: 'Mexican Cinema' },
-  { originCountry: 'AR', label: 'Argentine Cinema' },
-  { originCountry: 'BR', label: 'Brazilian Cinema' },
+  { originCountry: 'KR', label: 'Korean' },
+  { originCountry: 'JP', label: 'Japanese' },
+  { originCountry: 'IR', label: 'Iranian' },
+  { originCountry: 'FR', label: 'French' },
+  { originCountry: 'IT', label: 'Italian' },
+  { originCountry: 'ES', label: 'Spanish' },
+  { originCountry: 'IN', label: 'Indian' },
+  { originCountry: 'TR', label: 'Turkish' },
+  { originCountry: 'CN', label: 'Chinese' },
+  { originCountry: 'HK', label: 'Hong Kong' },
+  { originCountry: 'TW', label: 'Taiwanese' },
+  { originCountry: 'DE', label: 'German' },
+  { originCountry: 'MX', label: 'Mexican' },
+  { originCountry: 'AR', label: 'Argentine' },
+  { originCountry: 'BR', label: 'Brazilian' },
 ];
 
 export const WORLD_CINEMA_COUNTRY_LABELS: Record<string, string> = {
@@ -72,5 +73,9 @@ export function getWorldCinemaCollectionLabel(originCountry: string): string {
     (collection) => collection.originCountry === originCountry,
   );
 
-  return curated?.label ?? `${getOriginCountryLabel(originCountry)} Cinema`;
+  return curated?.label ?? getOriginCountryLabel(originCountry);
+}
+
+export function getWorldCinemaTabFlag(originCountry: string): string {
+  return countryCodeToFlagEmoji(originCountry);
 }

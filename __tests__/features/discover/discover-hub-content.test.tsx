@@ -106,7 +106,7 @@ jest.mock('@/features/navigation/components/GlobalSearchEntry', () => ({
     return React.createElement(
       Pressable,
       { accessibilityLabel: `Global search from ${origin}` },
-      React.createElement(Text, null, 'Search movies, TV & people'),
+      React.createElement(Text, null, 'Search movies, shows & people'),
     );
   },
 }));
