@@ -97,3 +97,27 @@ export function clearUnreadNotificationCountInCache(
 ): UnreadNotificationCountResponse | undefined {
   return setUnreadNotificationCountInCache(queryClient, 0);
 }
+
+export function deleteNotificationFromCache(
+  queryClient: QueryClient,
+  notificationId: string,
+  pageSize = DEFAULT_NOTIFICATIONS_PAGE_SIZE,
+): InfiniteData<NotificationsInboxResponse> | undefined {
+  const queryKey = getInboxQueryKey(pageSize);
+  const previous = queryClient.getQueryData<InfiniteData<NotificationsInboxResponse>>(queryKey);
+
+  if (!previous) {
+    return undefined;
+  }
+
+  queryClient.setQueryData<InfiniteData<NotificationsInboxResponse>>(queryKey, {
+    ...previous,
+    pages: previous.pages.map((page) => ({
+      ...page,
+      items: page.items.filter((item) => item.id !== notificationId),
+      totalCount: Math.max(0, page.totalCount - (page.items.some((item) => item.id === notificationId) ? 1 : 0)),
+    })),
+  });
+
+  return previous;
+}

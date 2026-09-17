@@ -6,6 +6,7 @@ import {
 import {
   clearUnreadNotificationCountInCache,
   decrementUnreadNotificationCountInCache,
+  deleteNotificationFromCache,
   markAllNotificationsReadInCache,
   markNotificationReadInCache,
 } from '@/features/notifications/utils/notification-cache-updates';
@@ -88,5 +89,17 @@ describe('notification cache updates', () => {
     const next = queryClient.getQueryData<{ unreadCount: number }>(queryKey);
 
     expect(next?.unreadCount).toBe(0);
+  });
+
+  it('removes a notification from the inbox cache', () => {
+    const queryClient = new QueryClient();
+    const queryKey = notificationsInboxInfiniteQueryKey(DEFAULT_NOTIFICATIONS_PAGE_SIZE);
+    seedInbox(queryClient);
+
+    deleteNotificationFromCache(queryClient, notificationId);
+    const next = queryClient.getQueryData<ReturnType<typeof seedInbox>>(queryKey);
+
+    expect(next?.pages[0]?.items).toHaveLength(0);
+    expect(next?.pages[0]?.totalCount).toBe(0);
   });
 });

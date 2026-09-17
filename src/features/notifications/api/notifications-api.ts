@@ -1,5 +1,6 @@
 import { api } from '@/api/client';
 import {
+  buildDeleteNotificationPath,
   buildMarkAllNotificationsReadPath,
   buildMarkNotificationReadPath,
   buildNotificationsInboxPath,
@@ -45,4 +46,11 @@ export async function markAllNotificationsRead(
     undefined,
     { signal },
   );
+}
+
+export async function deleteNotification(
+  notificationId: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  await api.delete(buildDeleteNotificationPath(notificationId), { signal });
 }

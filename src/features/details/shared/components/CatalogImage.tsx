@@ -1,6 +1,7 @@
-import { memo, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { memo } from 'react';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRemoteImageState } from '@/hooks/useRemoteImageState';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
@@ -14,21 +15,34 @@ export const BackdropImage = memo(function BackdropImage({
   path,
   height = 220,
 }: BackdropImageProps) {
-  const [hasError, setHasError] = useState(false);
   const uri = resolveImageUri(path);
+  const { isLoading, showFallback, markLoading, markLoaded, markError } =
+    useRemoteImageState(uri);
 
-  if (!uri || hasError) {
-    return <View style={[styles.fallback, { height }]} accessibilityRole="image" />;
+  if (showFallback) {
+    return (
+      <View style={[styles.fallback, { height }]} accessibilityRole="image">
+        <Ionicons name="film-outline" size={40} color={colors.textMuted} />
+      </View>
+    );
   }
 
   return (
-    <Image
-      source={{ uri }}
-      style={[styles.image, { height }]}
-      resizeMode="cover"
-      accessibilityRole="image"
-      onError={() => setHasError(true)}
-    />
+    <View style={{ height }} accessibilityRole="image">
+      <Image
+        source={{ uri: uri! }}
+        style={[styles.image, { height }]}
+        resizeMode="cover"
+        onLoadStart={markLoading}
+        onLoadEnd={markLoaded}
+        onError={markError}
+      />
+      {isLoading ? (
+        <View style={[styles.loadingOverlay, { height }]}>
+          <ActivityIndicator color={colors.textMuted} size="small" />
+        </View>
+      ) : null}
+    </View>
   );
 });
 
@@ -47,9 +61,9 @@ export const CatalogImage = memo(function CatalogImage({
   accessibilityLabel,
   rounded = true,
 }: CatalogImageProps) {
-  const [hasError, setHasError] = useState(false);
   const uri = resolveImageUri(path);
-  const showFallback = !uri || hasError;
+  const { isLoading, showFallback, markLoading, markLoaded, markError } =
+    useRemoteImageState(uri);
 
   return (
     <View
@@ -66,12 +80,21 @@ export const CatalogImage = memo(function CatalogImage({
           <Ionicons name="film-outline" size={28} color={colors.textMuted} />
         </View>
       ) : (
-        <Image
-          source={{ uri }}
-          style={[styles.image, rounded && styles.rounded, { width, height }]}
-          resizeMode="cover"
-          onError={() => setHasError(true)}
-        />
+        <>
+          <Image
+            source={{ uri: uri! }}
+            style={[styles.image, rounded && styles.rounded, { width, height }]}
+            resizeMode="cover"
+            onLoadStart={markLoading}
+            onLoadEnd={markLoaded}
+            onError={markError}
+          />
+          {isLoading ? (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator color={colors.textMuted} size="small" />
+            </View>
+          ) : null}
+        </>
       )}
     </View>
   );
@@ -82,6 +105,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   fallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.surfaceElevated,
   },
   imageContainer: {
@@ -93,6 +118,12 @@ const styles = StyleSheet.create({
   },
   fallbackInner: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceElevated,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceElevated,

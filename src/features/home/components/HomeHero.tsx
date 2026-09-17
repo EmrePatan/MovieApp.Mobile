@@ -75,6 +75,12 @@ export const HomeHero = memo(function HomeHero({
 }: HomeHeroProps) {
   const { width } = useWindowDimensions();
   const [posterFailed, setPosterFailed] = useState(false);
+  const [posterFailedItemId, setPosterFailedItemId] = useState(item.id);
+
+  if (posterFailedItemId !== item.id) {
+    setPosterFailedItemId(item.id);
+    setPosterFailed(false);
+  }
 
   const heroHeight = useMemo(
     () => heroHeightProp ?? getHomeHeroHeight(width),

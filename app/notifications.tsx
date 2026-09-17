@@ -16,6 +16,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { NotificationRow } from '@/features/notifications/components/NotificationRow';
 import { NotificationsEmptyState } from '@/features/notifications/components/NotificationsEmptyState';
+import { useDeleteNotification } from '@/features/notifications/hooks/useDeleteNotification';
 import { useMarkAllNotificationsRead } from '@/features/notifications/hooks/useMarkAllNotificationsRead';
 import { useMarkNotificationRead } from '@/features/notifications/hooks/useMarkNotificationRead';
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
@@ -33,6 +34,7 @@ export default function NotificationsScreen() {
   const notificationsQuery = useNotificationsInbox();
   const markNotificationRead = useMarkNotificationRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
+  const deleteNotification = useDeleteNotification();
 
   const items = useMemo(
     () => flattenNotificationPages(notificationsQuery.data?.pages ?? []),
@@ -67,6 +69,20 @@ export default function NotificationsScreen() {
     markAllNotificationsRead.mutate();
   }, [hasUnread, markAllNotificationsRead]);
 
+  const handleDelete = useCallback(
+    (item: NotificationItem) => {
+      if (deleteNotification.isPending) {
+        return;
+      }
+
+      deleteNotification.mutate({
+        notificationId: item.id,
+        wasUnread: item.readAtUtc == null,
+      });
+    },
+    [deleteNotification],
+  );
+
   const handleLoadMore = useCallback(() => {
     if (
       !notificationsQuery.hasNextPage ||
@@ -89,9 +105,13 @@ export default function NotificationsScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: NotificationItem }) => (
-      <NotificationRow item={item} onPress={handleItemPress} />
+      <NotificationRow
+        item={item}
+        onPress={handleItemPress}
+        onDelete={handleDelete}
+      />
     ),
-    [handleItemPress],
+    [handleDelete, handleItemPress],
   );
 
   const listHeader = (

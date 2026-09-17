@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
@@ -14,52 +15,67 @@ const POSTER_HEIGHT = 72;
 interface NotificationRowProps {
   item: NotificationItem;
   onPress?: (item: NotificationItem) => void;
+  onDelete?: (item: NotificationItem) => void;
 }
 
 export const NotificationRow = memo(function NotificationRow({
   item,
   onPress,
+  onDelete,
 }: NotificationRowProps) {
   const isUnread = item.readAtUtc == null;
   const relativeTime = formatNotificationRelativeTime(item.createdAtUtc);
   const accessibilityLabel = `${isUnread ? 'Unread, ' : ''}${item.title}. ${item.body}. ${relativeTime}`;
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-    >
-      <View style={styles.posterWrap}>
-        <CatalogImage
-          path={item.posterPath}
-          width={POSTER_WIDTH}
-          height={POSTER_HEIGHT}
-          accessibilityLabel={`${item.title} poster`}
-        />
-        {isUnread ? <View style={styles.unreadDot} accessibilityLabel="Unread" /> : null}
-      </View>
-      <View style={styles.content}>
-        <View style={styles.titleRow}>
-          <AppText
-            variant="body"
-            numberOfLines={1}
-            style={[styles.title, isUnread && styles.titleUnread]}
-          >
-            {item.title}
-          </AppText>
-          {relativeTime ? (
-            <AppText variant="caption" muted numberOfLines={1}>
-              {relativeTime}
-            </AppText>
-          ) : null}
+    <View style={styles.row}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={() => onPress?.(item)}
+        style={({ pressed }) => [styles.mainPressable, pressed && styles.pressed]}
+      >
+        <View style={styles.posterWrap}>
+          <CatalogImage
+            path={item.posterPath}
+            width={POSTER_WIDTH}
+            height={POSTER_HEIGHT}
+            accessibilityLabel={`${item.title} poster`}
+          />
+          {isUnread ? <View style={styles.unreadDot} accessibilityLabel="Unread" /> : null}
         </View>
-        <AppText variant="bodySmall" muted numberOfLines={2}>
-          {item.body}
-        </AppText>
-      </View>
-    </Pressable>
+        <View style={styles.content}>
+          <View style={styles.titleRow}>
+            <AppText
+              variant="body"
+              numberOfLines={1}
+              style={[styles.title, isUnread && styles.titleUnread]}
+            >
+              {item.title}
+            </AppText>
+            {relativeTime ? (
+              <AppText variant="caption" muted numberOfLines={1}>
+                {relativeTime}
+              </AppText>
+            ) : null}
+          </View>
+          <AppText variant="bodySmall" muted numberOfLines={2}>
+            {item.body}
+          </AppText>
+        </View>
+      </Pressable>
+      {onDelete ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Delete notification"
+          hitSlop={8}
+          onPress={() => onDelete(item)}
+          style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+        >
+          <Ionicons name="trash-outline" size={18} color={colors.danger} />
+        </Pressable>
+      ) : null}
+    </View>
   );
 });
 
@@ -67,10 +83,16 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.md,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.sm,
+    paddingRight: layout.screenPaddingHorizontal,
     minHeight: POSTER_HEIGHT + spacing.sm * 2,
+  },
+  mainPressable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+    paddingLeft: layout.screenPaddingHorizontal,
+    paddingVertical: spacing.sm,
   },
   pressed: {
     opacity: 0.85,
@@ -106,5 +128,10 @@ const styles = StyleSheet.create({
   },
   titleUnread: {
     fontWeight: '600',
+  },
+  deleteButton: {
+    alignSelf: 'center',
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.xs,
   },
 });

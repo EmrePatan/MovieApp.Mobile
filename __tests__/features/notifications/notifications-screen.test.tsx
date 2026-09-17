@@ -1,6 +1,7 @@
 import { FlatList } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useAuth } from '@/auth/useAuth';
+import { useDeleteNotification } from '@/features/notifications/hooks/useDeleteNotification';
 import { useMarkAllNotificationsRead } from '@/features/notifications/hooks/useMarkAllNotificationsRead';
 import { useMarkNotificationRead } from '@/features/notifications/hooks/useMarkNotificationRead';
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
@@ -27,6 +28,10 @@ jest.mock('@/features/notifications/hooks/useMarkNotificationRead', () => ({
 
 jest.mock('@/features/notifications/hooks/useMarkAllNotificationsRead', () => ({
   useMarkAllNotificationsRead: jest.fn(),
+}));
+
+jest.mock('@/features/notifications/hooks/useDeleteNotification', () => ({
+  useDeleteNotification: jest.fn(),
 }));
 
 const unreadNotification = {
@@ -86,6 +91,13 @@ function createMarkReadMutationMock() {
   };
 }
 
+function createDeleteMutationMock() {
+  return {
+    mutate: jest.fn(),
+    isPending: false,
+  };
+}
+
 describe('NotificationsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -96,6 +108,7 @@ describe('NotificationsScreen', () => {
       mutate: jest.fn(),
       isPending: false,
     });
+    (useDeleteNotification as jest.Mock).mockReturnValue(createDeleteMutationMock());
   });
 
   it('renders logged-out state', () => {
@@ -141,6 +154,19 @@ describe('NotificationsScreen', () => {
     fireEvent.press(screen.getByRole('button', { name: /Severance/ }));
     expect(markRead.mutate).not.toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith('/tv/9c9e6679-7425-40de-944b-e07fc1f90ae8');
+  });
+
+  it('deletes a notification with unread state preserved in mutation payload', () => {
+    const deleteMutation = createDeleteMutationMock();
+    (useDeleteNotification as jest.Mock).mockReturnValue(deleteMutation);
+
+    render(<NotificationsScreen />);
+
+    fireEvent.press(screen.getAllByLabelText('Delete notification')[0]);
+    expect(deleteMutation.mutate).toHaveBeenCalledWith({
+      notificationId: unreadNotification.id,
+      wasUnread: true,
+    });
   });
 
   it('marks all notifications read optimistically', () => {

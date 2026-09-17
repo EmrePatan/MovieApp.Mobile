@@ -23,3 +23,7 @@ export function buildMarkNotificationReadPath(notificationId: string): string {
 export function buildMarkAllNotificationsReadPath(): string {
   return '/api/notifications/read-all';
 }
+
+export function buildDeleteNotificationPath(notificationId: string): string {
+  return `/api/notifications/${encodeURIComponent(notificationId)}`;
+}
