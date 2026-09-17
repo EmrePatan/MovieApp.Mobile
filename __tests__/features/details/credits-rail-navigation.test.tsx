@@ -86,7 +86,7 @@ describe('CastRail navigation', () => {
     fireEvent.press(screen.getByLabelText('See all Cast & Crew'));
 
     expect(mockPush).toHaveBeenCalledWith(
-      `/credits/movie/${movieId}?title=Interstellar`,
+      `/movie/${movieId}/credits?title=Interstellar`,
     );
   });
 });

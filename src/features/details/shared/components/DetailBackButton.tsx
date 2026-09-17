@@ -12,18 +12,6 @@ import {
   returnFromLibraryStackScreen,
 } from '@/features/library/navigation/library-stack-navigation';
 import {
-  isGalleryDetailRoute,
-  returnFromGalleryDetail,
-} from '../navigation/gallery-detail-navigation';
-import {
-  isReviewsDetailRoute,
-  returnFromReviewsDetail,
-} from '../navigation/reviews-detail-navigation';
-import {
-  isCreditsDetailRoute,
-  returnFromCreditsDetail,
-} from '../navigation/credits-detail-navigation';
-import {
   isPersonFilmographyRoute,
   returnFromPersonFilmography,
 } from '../navigation/person-filmography-navigation';
@@ -64,11 +52,6 @@ export function DetailBackButton({
       return;
     }
 
-    if (isCreditsDetailRoute(segments)) {
-      returnFromCreditsDetail(router);
-      return;
-    }
-
     if (isPersonFilmographyRoute(segments)) {
       returnFromPersonFilmography(router);
       return;
@@ -76,16 +59,6 @@ export function DetailBackButton({
 
     if (isPersonDetailRoute(segments)) {
       returnFromPersonDetail(router);
-      return;
-    }
-
-    if (isGalleryDetailRoute(segments)) {
-      returnFromGalleryDetail(router);
-      return;
-    }
-
-    if (isReviewsDetailRoute(segments)) {
-      returnFromReviewsDetail(router);
       return;
     }
 

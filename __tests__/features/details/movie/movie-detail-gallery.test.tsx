@@ -250,7 +250,7 @@ describe('detail gallery integration', () => {
     });
 
     fireEvent.press(screen.getByLabelText('See all Photos'));
-    expect(mockPush).toHaveBeenCalledWith(`/gallery/movie/${movieId}`);
+    expect(mockPush).toHaveBeenCalledWith(`/movie/${movieId}/gallery`);
   });
 
   it('renders tv photos from gallery query', async () => {

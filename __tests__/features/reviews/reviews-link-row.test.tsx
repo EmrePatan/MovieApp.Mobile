@@ -57,7 +57,6 @@ describe('ReviewsLinkRow', () => {
         contentType="movie"
         contentId={movieId}
         contentTitle="Interstellar"
-        returnHref={`/movie/${movieId}`}
       />,
     );
 
@@ -75,7 +74,6 @@ describe('ReviewsLinkRow', () => {
         contentType="movie"
         contentId={movieId}
         contentTitle="Interstellar"
-        returnHref={`/movie/${movieId}`}
       />,
     );
 
@@ -90,7 +88,6 @@ describe('ReviewsLinkRow', () => {
         contentType="movie"
         contentId={movieId}
         contentTitle="Interstellar"
-        returnHref={`/movie/${movieId}`}
       />,
     );
 
@@ -111,7 +108,6 @@ describe('ReviewsLinkRow', () => {
         contentType="movie"
         contentId={movieId}
         contentTitle="Interstellar"
-        returnHref={`/movie/${movieId}`}
       />,
     );
 
@@ -124,7 +120,6 @@ describe('ReviewsLinkRow', () => {
         contentType="movie"
         contentId={movieId}
         contentTitle="Interstellar"
-        returnHref={`/movie/${movieId}`}
       />,
     );
 
@@ -132,7 +127,7 @@ describe('ReviewsLinkRow', () => {
 
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith(
-      `/reviews/movie/${movieId}?title=Interstellar`,
+      `/movie/${movieId}/reviews?title=Interstellar`,
     );
   });
 
@@ -142,14 +137,13 @@ describe('ReviewsLinkRow', () => {
         contentType="tv"
         contentId={movieId}
         contentTitle="Breaking Bad"
-        returnHref={`/tv/${movieId}`}
       />,
     );
 
     fireEvent.press(screen.getByTestId('reviews-link-row-button'));
 
     expect(mockPush).toHaveBeenCalledWith(
-      `/reviews/tv/${movieId}?title=Breaking+Bad`,
+      `/tv/${movieId}/reviews?title=Breaking+Bad`,
     );
     expect(useTvShowReviews).toHaveBeenCalledWith(movieId, REVIEW_COUNT_PAGE_SIZE);
   });

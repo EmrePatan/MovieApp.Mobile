@@ -1,31 +1,27 @@
 import {
+  isCreditsDetailRoute,
   openCreditsDetail,
-  resetCreditsDetailNavigationForTests,
-  returnFromCreditsDetail,
 } from '@/features/details/shared/navigation/credits-detail-navigation';
 
 describe('credits detail navigation', () => {
-  beforeEach(() => {
-    resetCreditsDetailNavigationForTests();
-  });
-
-  it('returns to the screen that opened credits by dismissing to origin', () => {
-    const dismissTo = jest.fn();
-    const router = {
-      push: jest.fn(),
-      dismissTo,
-      navigate: jest.fn(),
-      back: jest.fn(),
-      canGoBack: jest.fn(() => false),
-    } as never;
+  it('opens credits with a single push action in the catalog stack', () => {
+    const push = jest.fn();
+    const router = { push } as never;
 
     openCreditsDetail(
       router,
-      '/credits/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6?title=Interstellar',
-      '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/credits?title=Interstellar',
     );
-    returnFromCreditsDetail(router);
 
-    expect(dismissTo).toHaveBeenCalledWith('/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6');
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith(
+      '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/credits?title=Interstellar',
+    );
+  });
+
+  it('detects credits detail routes in the catalog stack', () => {
+    expect(isCreditsDetailRoute(['(tabs)', 'movie', 'id', 'credits'])).toBe(true);
+    expect(isCreditsDetailRoute(['(tabs)', 'tv', 'id', 'credits'])).toBe(true);
+    expect(isCreditsDetailRoute(['(tabs)', 'credits', 'movie', 'id'])).toBe(false);
   });
 });

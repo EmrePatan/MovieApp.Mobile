@@ -10,7 +10,7 @@ import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrai
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
 import { useTvShowGallery } from '@/features/gallery/hooks/useGallery';
-import { buildTvDetailRoute, buildTvGalleryRoute } from '@/features/details/shared/routes';
+import { buildTvGalleryRoute } from '@/features/details/shared/routes';
 import { SeasonList } from './SeasonList';
 import { formatTvDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { TvShowDetailsResponse } from '../types';
@@ -53,14 +53,12 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         contentType="tv"
         contentId={show.id}
         contentTitle={show.title}
-        returnHref={buildTvDetailRoute(show.id)}
       />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <WhereToWatchRail contentType="tv" contentId={show.id} />
       <CatalogGallerySection
         query={galleryQuery}
         seeAllRoute={buildTvGalleryRoute(show.id)}
-        returnHref={buildTvDetailRoute(show.id)}
       />
       <CastRail contentType="tv" contentId={show.id} title={show.title} />
       <SimilarContentSection contentType="tv" contentId={show.id} />

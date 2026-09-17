@@ -1,7 +1,5 @@
 import type { ImperativeRouter } from 'expo-router';
-import { returnToDetailChildOrigin } from './detail-child-destination-navigation';
-
-let lastCreditsReturnHref: string | null = null;
+import { isCatalogChildDestinationSegment } from '../routes';
 
 export function isCreditsDetailRoute(segments: readonly string[]): boolean {
   const tabsIndex = segments.indexOf('(tabs)');
@@ -9,24 +7,18 @@ export function isCreditsDetailRoute(segments: readonly string[]): boolean {
     return false;
   }
 
-  return segments[tabsIndex + 1] === 'credits';
+  const section = segments[tabsIndex + 1];
+  if (section !== 'movie' && section !== 'tv') {
+    return false;
+  }
+
+  return isCatalogChildDestinationSegment(segments[tabsIndex + 3]) &&
+    segments[tabsIndex + 3] === 'credits';
 }
 
 export function openCreditsDetail(
   router: ImperativeRouter,
   creditsRoute: string,
-  returnHref: string,
 ): void {
-  lastCreditsReturnHref = returnHref;
   router.push(creditsRoute);
-}
-
-export function returnFromCreditsDetail(router: ImperativeRouter): void {
-  const returnHref = lastCreditsReturnHref;
-  lastCreditsReturnHref = null;
-  returnToDetailChildOrigin(router, returnHref);
-}
-
-export function resetCreditsDetailNavigationForTests(): void {
-  lastCreditsReturnHref = null;
 }

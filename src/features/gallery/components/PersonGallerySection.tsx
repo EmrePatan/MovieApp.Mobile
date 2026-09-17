@@ -7,10 +7,9 @@ import { GalleryPreviewSection } from './GalleryPreviewSection';
 interface PersonGallerySectionProps {
   query: UseQueryResult<GalleryResponse>;
   seeAllRoute: string;
-  returnHref: string;
 }
 
-export function PersonGallerySection({ query, seeAllRoute, returnHref }: PersonGallerySectionProps) {
+export function PersonGallerySection({ query, seeAllRoute }: PersonGallerySectionProps) {
   const images = useMemo(
     () => (query.data ? getPersonGalleryImages(query.data) : []),
     [query.data],
@@ -22,7 +21,6 @@ export function PersonGallerySection({ query, seeAllRoute, returnHref }: PersonG
       images={images}
       isLoading={query.isPending && !query.isError}
       seeAllRoute={seeAllRoute}
-      returnHref={returnHref}
     />
   );
 }

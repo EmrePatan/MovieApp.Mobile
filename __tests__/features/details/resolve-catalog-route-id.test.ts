@@ -4,54 +4,37 @@ import {
 } from '@/features/details/shared/routes';
 
 describe('resolveCatalogRouteId', () => {
-  const movieId = '65de321a-597a-46ec-a499-67ad9e20795e';
+  const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+  const tvId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 
-  it('prefers a valid search param id', () => {
-    expect(resolveCatalogRouteId(movieId, ['(tabs)', 'movie', '[id]'])).toBe(movieId);
-  });
-
-  it('falls back to pathname when params are not ready yet', () => {
+  it('resolves a valid route param directly', () => {
     expect(
-      resolveCatalogRouteId(
-        undefined,
-        ['(tabs)', 'movie', '[id]'],
-        `/movie/${movieId}`,
-        'movie',
-      ),
+      resolveCatalogRouteId(movieId, ['(tabs)', 'movie', movieId], `/movie/${movieId}`, 'movie'),
     ).toBe(movieId);
   });
 
-  it('falls back to a guid segment when params are not ready yet', () => {
+  it('falls back to pathname parsing when the route param is invalid', () => {
+    expect(
+      resolveCatalogRouteId('invalid', ['(tabs)', 'movie', movieId], `/movie/${movieId}`, 'movie'),
+    ).toBe(movieId);
+  });
+
+  it('falls back to the last valid guid in segments', () => {
     expect(resolveCatalogRouteId(undefined, ['(tabs)', 'movie', movieId])).toBe(movieId);
   });
 
-  it('returns undefined while route params and segments are unresolved', () => {
-    expect(resolveCatalogRouteId(undefined, ['(tabs)', 'movie', '[id]'])).toBeUndefined();
+  it('returns undefined when no valid id can be resolved', () => {
+    expect(resolveCatalogRouteId('invalid', ['(tabs)', 'movie', 'bad-id'])).toBeUndefined();
   });
-});
 
-describe('parseCatalogIdFromPathname', () => {
-  const movieId = '65de321a-597a-46ec-a499-67ad9e20795e';
-
-  it('parses movie ids from pathname', () => {
+  it('does not treat nested child destination pathnames as active catalog detail routes', () => {
+    expect(parseCatalogIdFromPathname(`/movie/${movieId}/reviews`, 'movie')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/movie/${movieId}/credits`, 'movie')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/movie/${movieId}/gallery`, 'movie')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/tv/${tvId}/reviews`, 'tv')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/tv/${tvId}/credits`, 'tv')).toBeUndefined();
+    expect(parseCatalogIdFromPathname(`/tv/${tvId}/gallery`, 'tv')).toBeUndefined();
     expect(parseCatalogIdFromPathname(`/movie/${movieId}`, 'movie')).toBe(movieId);
-    expect(parseCatalogIdFromPathname(`/(tabs)/movie/${movieId}`, 'movie')).toBe(movieId);
-  });
-
-  it('parses tv ids from pathname', () => {
-    const tvId = 'a2ae92ef-3a02-4ac4-827b-c05ec45ba999';
     expect(parseCatalogIdFromPathname(`/tv/${tvId}`, 'tv')).toBe(tvId);
-  });
-
-  it('does not treat child destination pathnames as catalog detail routes', () => {
-    const movieId = '65de321a-597a-46ec-a499-67ad9e20795e';
-    const tvId = 'a2ae92ef-3a02-4ac4-827b-c05ec45ba999';
-
-    expect(parseCatalogIdFromPathname(`/reviews/movie/${movieId}`, 'movie')).toBeUndefined();
-    expect(parseCatalogIdFromPathname(`/credits/movie/${movieId}`, 'movie')).toBeUndefined();
-    expect(parseCatalogIdFromPathname(`/gallery/movie/${movieId}`, 'movie')).toBeUndefined();
-    expect(parseCatalogIdFromPathname(`/reviews/tv/${tvId}`, 'tv')).toBeUndefined();
-    expect(parseCatalogIdFromPathname(`/credits/tv/${tvId}`, 'tv')).toBeUndefined();
-    expect(parseCatalogIdFromPathname(`/gallery/tv/${tvId}`, 'tv')).toBeUndefined();
   });
 });

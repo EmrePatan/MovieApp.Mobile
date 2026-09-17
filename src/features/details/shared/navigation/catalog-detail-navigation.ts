@@ -51,10 +51,19 @@ export function isRootCatalogDetailRoute(segments: readonly string[]): boolean {
 
   const section = segments[tabsIndex + 1];
   if (section === 'movie') {
-    return true;
+    return Boolean(segments[tabsIndex + 2]) && segments[tabsIndex + 3] === undefined;
   }
 
-  return section === 'tv' && !segments.includes('season');
+  if (section === 'tv') {
+    if (segments.includes('season')) {
+      return false;
+    }
+
+    const childSegment = segments[tabsIndex + 3];
+    return Boolean(segments[tabsIndex + 2]) && childSegment === undefined;
+  }
+
+  return false;
 }
 
 export async function openCatalogDetailFromFilmography(

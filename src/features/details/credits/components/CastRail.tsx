@@ -43,11 +43,7 @@ export function CastRail({ contentType, contentId, title }: CastRailProps) {
   );
 
   const handleSeeAllPress = useCallback(() => {
-    openCreditsDetail(
-      router,
-      buildCreditsRoute(contentType, contentId, { title }),
-      buildCatalogDetailRoute(contentId, contentType),
-    );
+    openCreditsDetail(router, buildCreditsRoute(contentType, contentId, { title }));
   }, [contentId, contentType, router, title]);
 
   if (query.isLoading) {

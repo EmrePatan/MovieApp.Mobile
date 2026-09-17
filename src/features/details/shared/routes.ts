@@ -58,15 +58,15 @@ export function buildPersonDetailRoute(tmdbId: number): string {
 }
 
 export function buildMovieGalleryRoute(movieId: string): string {
-  return `/gallery/movie/${encodePathSegment(movieId)}`;
+  return `/movie/${encodePathSegment(movieId)}/gallery`;
 }
 
 export function buildTvGalleryRoute(tvShowId: string): string {
-  return `/gallery/tv/${encodePathSegment(tvShowId)}`;
+  return `/tv/${encodePathSegment(tvShowId)}/gallery`;
 }
 
 export function buildPersonGalleryRoute(tmdbPersonId: number): string {
-  return `/gallery/person/${encodePathSegment(tmdbPersonId)}`;
+  return `/person/${encodePathSegment(tmdbPersonId)}/gallery`;
 }
 
 export function buildPersonFilmographyRoute(tmdbPersonId: number): string {
@@ -81,7 +81,7 @@ export function buildMovieReviewsRoute(
   movieId: string,
   options?: { title?: string },
 ): string {
-  const base = `/reviews/movie/${encodePathSegment(movieId)}`;
+  const base = `/movie/${encodePathSegment(movieId)}/reviews`;
 
   if (!options?.title) {
     return base;
@@ -95,7 +95,7 @@ export function buildTvReviewsRoute(
   tvShowId: string,
   options?: { title?: string },
 ): string {
-  const base = `/reviews/tv/${encodePathSegment(tvShowId)}`;
+  const base = `/tv/${encodePathSegment(tvShowId)}/reviews`;
 
   if (!options?.title) {
     return base;
@@ -112,8 +112,8 @@ export function buildCreditsRoute(
 ): string {
   const base =
     type === 'movie'
-      ? `/credits/movie/${encodePathSegment(catalogId)}`
-      : `/credits/tv/${encodePathSegment(catalogId)}`;
+      ? `/movie/${encodePathSegment(catalogId)}/credits`
+      : `/tv/${encodePathSegment(catalogId)}/credits`;
 
   if (!options?.title) {
     return base;
@@ -123,12 +123,26 @@ export function buildCreditsRoute(
   return `${base}?${params.toString()}`;
 }
 
+const CATALOG_CHILD_DESTINATION_SEGMENTS = ['reviews', 'credits', 'gallery'] as const;
+
+export type CatalogChildDestinationSegment = (typeof CATALOG_CHILD_DESTINATION_SEGMENTS)[number];
+
+export function isCatalogChildDestinationSegment(
+  segment: string | undefined,
+): segment is CatalogChildDestinationSegment {
+  return CATALOG_CHILD_DESTINATION_SEGMENTS.includes(
+    segment as CatalogChildDestinationSegment,
+  );
+}
+
 export function parseReviewsCatalogIdFromPathname(
   pathname: string,
   contentType: 'movie' | 'tv',
 ): string | undefined {
   const pattern =
-    contentType === 'movie' ? /\/reviews\/movie\/([^/]+)/ : /\/reviews\/tv\/([^/]+)/;
+    contentType === 'movie'
+      ? /\/movie\/([^/]+)\/reviews(?:\/|$|\?)/
+      : /\/tv\/([^/]+)\/reviews(?:\/|$|\?)/;
   const match = pathname.match(pattern);
   if (!match?.[1]) {
     return undefined;
@@ -143,7 +157,9 @@ export function parseCreditsCatalogIdFromPathname(
   contentType: 'movie' | 'tv',
 ): string | undefined {
   const pattern =
-    contentType === 'movie' ? /\/credits\/movie\/([^/]+)/ : /\/credits\/tv\/([^/]+)/;
+    contentType === 'movie'
+      ? /\/movie\/([^/]+)\/credits(?:\/|$|\?)/
+      : /\/tv\/([^/]+)\/credits(?:\/|$|\?)/;
   const match = pathname.match(pattern);
   if (!match?.[1]) {
     return undefined;
@@ -177,10 +193,9 @@ function isCatalogChildDestinationPathname(
 ): boolean {
   const mediaSegment = contentType === 'movie' ? 'movie' : 'tv';
 
-  return (
-    pathname.includes(`/reviews/${mediaSegment}/`) ||
-    pathname.includes(`/credits/${mediaSegment}/`) ||
-    pathname.includes(`/gallery/${mediaSegment}/`)
+  return CATALOG_CHILD_DESTINATION_SEGMENTS.some((child) =>
+    pathname.includes(`/${mediaSegment}/`) &&
+    new RegExp(`/${mediaSegment}/[^/]+/${child}(?:/|$|\\?)`).test(pathname),
   );
 }
 

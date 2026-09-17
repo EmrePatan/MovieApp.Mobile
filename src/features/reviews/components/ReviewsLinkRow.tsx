@@ -20,14 +20,12 @@ interface ReviewsLinkRowProps {
   contentType: ReviewContentType;
   contentId: string;
   contentTitle: string;
-  returnHref: string;
 }
 
 export function ReviewsLinkRow({
   contentType,
   contentId,
   contentTitle,
-  returnHref,
 }: ReviewsLinkRowProps) {
   const router = useRouter();
   const reviewsQuery = useReviewsQuery(contentType, contentId, REVIEW_COUNT_PAGE_SIZE);
@@ -45,8 +43,8 @@ export function ReviewsLinkRow({
         ? buildMovieReviewsRoute(contentId, { title: contentTitle })
         : buildTvReviewsRoute(contentId, { title: contentTitle });
 
-    openReviewsDetail(router, reviewsRoute, returnHref);
-  }, [contentId, contentTitle, contentType, returnHref, router]);
+    openReviewsDetail(router, reviewsRoute);
+  }, [contentId, contentTitle, contentType, router]);
 
   return (
     <View style={styles.container} testID="reviews-link-row">

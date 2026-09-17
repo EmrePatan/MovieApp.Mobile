@@ -3,7 +3,7 @@ import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { PersonGallerySection } from '@/features/gallery/components/PersonGallerySection';
 import { usePersonGallery } from '@/features/gallery/hooks/useGallery';
-import { buildPersonDetailRoute, buildPersonGalleryRoute } from '@/features/details/shared/routes';
+import { buildPersonGalleryRoute } from '@/features/details/shared/routes';
 import type { PersonDetailResponse } from '../types';
 import { CollapsibleBiography } from './CollapsibleBiography';
 import { PersonFilmographyPreviewSection } from './PersonFilmographyPreviewSection';
@@ -43,7 +43,6 @@ export function PersonDetailContent({ person }: PersonDetailContentProps) {
       <PersonGallerySection
         query={galleryQuery}
         seeAllRoute={buildPersonGalleryRoute(person.tmdbId)}
-        returnHref={buildPersonDetailRoute(person.tmdbId)}
       />
       <PersonFilmographyPreviewSection
         tmdbPersonId={person.tmdbId}

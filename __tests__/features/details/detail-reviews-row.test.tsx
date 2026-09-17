@@ -162,7 +162,7 @@ describe('detail reviews row', () => {
     fireEvent.press(screen.getByTestId('reviews-link-row-button'));
 
     expect(mockPush).toHaveBeenCalledWith(
-      `/reviews/movie/${movieId}?title=Interstellar`,
+      `/movie/${movieId}/reviews?title=Interstellar`,
     );
   });
 
@@ -172,7 +172,7 @@ describe('detail reviews row', () => {
     fireEvent.press(screen.getByTestId('reviews-link-row-button'));
 
     expect(mockPush).toHaveBeenCalledWith(
-      `/reviews/tv/${tvShowId}?title=Breaking+Bad`,
+      `/tv/${tvShowId}/reviews?title=Breaking+Bad`,
     );
   });
 

@@ -7,14 +7,12 @@ import { GalleryPreviewSection } from './GalleryPreviewSection';
 interface CatalogGallerySectionProps {
   query: UseQueryResult<GalleryResponse>;
   seeAllRoute: string;
-  returnHref: string;
   title?: string;
 }
 
 export function CatalogGallerySection({
   query,
   seeAllRoute,
-  returnHref,
   title = 'Photos',
 }: CatalogGallerySectionProps) {
   const images = useMemo(
@@ -28,7 +26,6 @@ export function CatalogGallerySection({
       images={images}
       isLoading={query.isPending && !query.isError}
       seeAllRoute={seeAllRoute}
-      returnHref={returnHref}
     />
   );
 }

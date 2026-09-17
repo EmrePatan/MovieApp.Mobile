@@ -1,7 +1,5 @@
 import type { ImperativeRouter } from 'expo-router';
-import { returnToDetailChildOrigin } from './detail-child-destination-navigation';
-
-let lastReviewsReturnHref: string | null = null;
+import { isCatalogChildDestinationSegment } from '../routes';
 
 export function isReviewsDetailRoute(segments: readonly string[]): boolean {
   const tabsIndex = segments.indexOf('(tabs)');
@@ -9,24 +7,18 @@ export function isReviewsDetailRoute(segments: readonly string[]): boolean {
     return false;
   }
 
-  return segments[tabsIndex + 1] === 'reviews';
+  const section = segments[tabsIndex + 1];
+  if (section !== 'movie' && section !== 'tv') {
+    return false;
+  }
+
+  return isCatalogChildDestinationSegment(segments[tabsIndex + 3]) &&
+    segments[tabsIndex + 3] === 'reviews';
 }
 
 export function openReviewsDetail(
   router: ImperativeRouter,
   reviewsRoute: string,
-  returnHref: string,
 ): void {
-  lastReviewsReturnHref = returnHref;
   router.push(reviewsRoute);
-}
-
-export function returnFromReviewsDetail(router: ImperativeRouter): void {
-  const returnHref = lastReviewsReturnHref;
-  lastReviewsReturnHref = null;
-  returnToDetailChildOrigin(router, returnHref);
-}
-
-export function resetReviewsDetailNavigationForTests(): void {
-  lastReviewsReturnHref = null;
 }

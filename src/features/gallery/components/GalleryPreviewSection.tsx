@@ -20,7 +20,6 @@ interface GalleryPreviewSectionProps {
   images: GalleryImage[];
   isLoading?: boolean;
   seeAllRoute?: string;
-  returnHref?: string;
 }
 
 export function GalleryPreviewSection({
@@ -28,22 +27,18 @@ export function GalleryPreviewSection({
   images,
   isLoading = false,
   seeAllRoute,
-  returnHref,
 }: GalleryPreviewSectionProps) {
   const router = useRouter();
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const previewImages = useMemo(() => getGalleryPreviewImages(images), [images]);
 
   const handleSeeAllPress = useCallback(() => {
-    if (seeAllRoute && returnHref) {
-      openGalleryDetail(router, seeAllRoute, returnHref);
+    if (!seeAllRoute) {
       return;
     }
 
-    if (seeAllRoute) {
-      router.push(seeAllRoute);
-    }
-  }, [returnHref, router, seeAllRoute]);
+    openGalleryDetail(router, seeAllRoute);
+  }, [router, seeAllRoute]);
 
   const handleImagePress = useCallback((index: number) => {
     setViewerIndex(index);

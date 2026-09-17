@@ -11,10 +11,7 @@ import { SimilarContentSection } from '@/features/recommendations/components/Sim
 import { CollectionLinkRow } from '@/features/details/collection/components/CollectionLinkRow';
 import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
 import { useMovieGallery } from '@/features/gallery/hooks/useGallery';
-import {
-  buildMovieDetailRoute,
-  buildMovieGalleryRoute,
-} from '@/features/details/shared/routes';
+import { buildMovieGalleryRoute } from '@/features/details/shared/routes';
 import { formatMovieDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { MovieDetailsResponse } from '../types';
 interface MovieDetailContentProps {
@@ -58,13 +55,11 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         contentType="movie"
         contentId={movie.id}
         contentTitle={movie.title}
-        returnHref={buildMovieDetailRoute(movie.id)}
       />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
       <CatalogGallerySection
         query={galleryQuery}
         seeAllRoute={buildMovieGalleryRoute(movie.id)}
-        returnHref={buildMovieDetailRoute(movie.id)}
       />
       <CastRail contentType="movie" contentId={movie.id} title={movie.title} />
       <SimilarContentSection contentType="movie" contentId={movie.id} />
