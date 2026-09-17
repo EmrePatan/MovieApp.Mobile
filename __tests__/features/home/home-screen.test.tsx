@@ -1,14 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
-import { useHome } from '@/features/home/hooks/useHome';
+import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
+import { createHomeFeedMockReturnValue } from './home-feed-test-utils';
 import HomeScreen from '../../../app/(tabs)/home';
 
 const mockRefetch = jest.fn();
 const mockInvalidateQueries = jest.fn();
 const mockPush = jest.fn();
-const mockUseHome = useHome as jest.Mock;
+const mockUseHomeFeed = useHomeFeed as jest.Mock;
+
+function mockHomeFeed(options: Parameters<typeof createHomeFeedMockReturnValue>[0]) {
+  mockUseHomeFeed.mockReturnValue(createHomeFeedMockReturnValue(options));
+}
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
@@ -16,9 +21,8 @@ jest.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-jest.mock('@/features/home/hooks/useHome', () => ({
-  homeQueryKey: (type: string, sectionSize: number) => ['home', type, sectionSize],
-  useHome: jest.fn(),
+jest.mock('@/features/home/hooks/useHomeFeed', () => ({
+  useHomeFeed: jest.fn(),
 }));
 
 jest.mock('expo-router', () => ({
@@ -80,7 +84,7 @@ describe('HomeScreen', () => {
   });
 
   it('renders loading state', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: undefined,
       error: null,
       isLoading: true,
@@ -94,7 +98,7 @@ describe('HomeScreen', () => {
   });
 
   it('renders home sections on success', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections: [
           {
@@ -254,7 +258,7 @@ describe('HomeScreen', () => {
   });
 
   it('renders error state with retry', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: undefined,
       error: new ApiError({ kind: 'network' }),
       isLoading: false,
@@ -269,7 +273,7 @@ describe('HomeScreen', () => {
   });
 
   it('renders the hero from Hot This Week and hides Continue Watching', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections: [
           {
@@ -492,7 +496,7 @@ describe('HomeScreen', () => {
           },
         ];
 
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections,
         isPersonalized: true,
@@ -521,7 +525,7 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to Discover from Trending See All', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections: [
           {
@@ -560,7 +564,7 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to Upcoming from Coming Up See All', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections: [
           {
@@ -604,7 +608,7 @@ describe('HomeScreen', () => {
   });
 
   it('keeps the full Recommended rail when hero comes from Hot This Week', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections: [
           {
@@ -693,7 +697,7 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to Discover from cold home CTA', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: { sections: [], isPersonalized: false },
       error: null,
       isLoading: false,
@@ -709,7 +713,7 @@ describe('HomeScreen', () => {
   });
 
   it('renders search icon in the Home header', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: { sections: [], isPersonalized: false },
       error: null,
       isLoading: false,
@@ -724,7 +728,7 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to Search from the global search entry', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: { sections: [], isPersonalized: false },
       error: null,
       isLoading: false,
@@ -740,7 +744,7 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to Discover from Top Rated See All', () => {
-    mockUseHome.mockReturnValue({
+    mockHomeFeed({
       data: {
         sections: [
           {

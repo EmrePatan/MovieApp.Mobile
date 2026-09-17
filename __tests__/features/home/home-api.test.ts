@@ -1,4 +1,9 @@
-import { buildHomeQueryString, getHome } from '@/features/home/api/home-api';
+import {
+  buildHomeQueryString,
+  getHome,
+  getHomeBrowse,
+  getHomePersonalized,
+} from '@/features/home/api/home-api';
 import { api } from '@/api/client';
 
 jest.mock('@/api/client', () => ({
@@ -35,6 +40,41 @@ describe('home api', () => {
 
     expect(api.get).toHaveBeenCalledWith('/api/home?type=tv&sectionSize=10', {
       signal: controller.signal,
+    });
+    expect(result).toEqual(response);
+  });
+
+  it('requests browse data through the central API client', async () => {
+    const response = {
+      sections: [],
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    };
+
+    (api.get as jest.Mock).mockResolvedValue(response);
+
+    const result = await getHomeBrowse({ type: 'all', sectionSize: 10 });
+
+    expect(api.get).toHaveBeenCalledWith('/api/home/browse?type=all&sectionSize=10', {
+      signal: undefined,
+      headers: undefined,
+    });
+    expect(result).toEqual(response);
+  });
+
+  it('requests personalized data through the central API client', async () => {
+    const response = {
+      sections: [],
+      isPersonalized: false,
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    };
+
+    (api.get as jest.Mock).mockResolvedValue(response);
+
+    const result = await getHomePersonalized({ type: 'all', sectionSize: 10 });
+
+    expect(api.get).toHaveBeenCalledWith('/api/home/personalized?type=all&sectionSize=10', {
+      signal: undefined,
+      headers: undefined,
     });
     expect(result).toEqual(response);
   });

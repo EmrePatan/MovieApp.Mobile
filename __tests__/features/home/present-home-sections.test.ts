@@ -90,6 +90,18 @@ describe('presentHomeSections', () => {
     ]);
   });
 
+  it('does not show cold welcome while personalization is unknown', () => {
+    const sections = [
+      createSection('HotThisWeek', [createItem({ id: 'hot-id' })]),
+      createSection('Trending', [createItem({ id: 'trending-id' })]),
+    ];
+
+    const presented = presentHomeSections(sections, 'unknown');
+
+    expect(presented.showColdWelcome).toBe(false);
+    expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
+  });
+
   it('excludes Continue Watching and Because You Watched from visible sections', () => {
     const sections = [
       createSection('ContinueWatching', [createItem({ id: 'continue-id', contentType: 'tv' })]),

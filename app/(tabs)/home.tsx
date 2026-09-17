@@ -10,11 +10,12 @@ import { HomeEmptyState } from '@/features/home/components/HomeEmptyState';
 import { HomeListHeader } from '@/features/home/components/HomeListHeader';
 import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeComingUpSection } from '@/features/home/components/HomeComingUpSection';
+import { HomePersonalizedLoadingSlot } from '@/features/home/components/HomePersonalizedLoadingSlot';
 import { HomeSection } from '@/features/home/components/HomeSection';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { openComingUpScreen } from '@/features/upcoming/navigation/coming-up-navigation';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
-import { useHome } from '@/features/home/hooks/useHome';
+import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
@@ -30,6 +31,7 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
   const [isHomeFocused, setIsHomeFocused] = useState(true);
   const hasLoggedMeaningfulRender = useRef(false);
+  const hasLoggedPersonalizedRender = useRef(false);
 
   useEffect(() => {
     markHomePerfEvent('home_mount');
@@ -45,37 +47,60 @@ export default function HomeScreen() {
     }, []),
   );
 
-  const { data, error, isLoading, isFetching, refetch, isError } = useHome(
-    'all',
-    DEFAULT_HOME_SECTION_SIZE,
-  );
+  const {
+    browse,
+    personalized,
+    mergedSections,
+    personalization,
+    isInitialBrowseLoading,
+    isFetching,
+    refetch,
+  } = useHomeFeed('all', DEFAULT_HOME_SECTION_SIZE);
+
+  const { sections, heroItems, showColdWelcome } = useMemo(() => {
+    const nonEmptySections = mergedSections.filter((section) => section.items.length > 0);
+    return presentHomeSections(nonEmptySections, personalization);
+  }, [mergedSections, personalization]);
+
+  const showPersonalizedLoadingSlot = personalization === 'unknown' && !personalized.isError;
+
+  const hasVisibleBrowseContent = heroItems.length > 0 || sections.length > 0;
 
   useEffect(() => {
-    if (hasLoggedMeaningfulRender.current) {
+    if (hasLoggedMeaningfulRender.current || isInitialBrowseLoading || !hasVisibleBrowseContent) {
       return;
     }
 
-    if (!isLoading || data) {
-      hasLoggedMeaningfulRender.current = true;
-      markHomePerfEvent('first_meaningful_render');
+    hasLoggedMeaningfulRender.current = true;
+    markHomePerfEvent('first_meaningful_render');
+  }, [hasVisibleBrowseContent, isInitialBrowseLoading]);
+
+  useEffect(() => {
+    if (hasLoggedPersonalizedRender.current || personalization === 'unknown') {
+      return;
     }
-  }, [data, isLoading]);
 
-  const { sections, heroItems, showColdWelcome } = useMemo(() => {
-    const nonEmptySections = (data?.sections ?? []).filter(
-      (section) => section.items.length > 0,
-    );
+    const hasPersonalizedVisible =
+      showColdWelcome ||
+      sections.some(
+        (section) => section.type === 'RecommendedForYou' || section.type === 'ComingUp',
+      );
 
-    return presentHomeSections(nonEmptySections, data?.isPersonalized ?? false);
-  }, [data?.isPersonalized, data?.sections]);
+    if (!hasPersonalizedVisible) {
+      return;
+    }
+
+    hasLoggedPersonalizedRender.current = true;
+    markHomePerfEvent('home_personalized_render');
+  }, [personalization, sections, showColdWelcome]);
 
   const handleRefresh = useCallback(() => {
     void refetch();
   }, [refetch]);
 
-  const handleRetry = useCallback(() => {
-    void refetch();
-  }, [refetch]);
+  const handleRetryBrowse = useCallback(() => {
+    void browse.refetch();
+  }, [browse]);
 
   const handleItemPress = useCallback(
     (item: HomeItem) => {
@@ -193,15 +218,20 @@ export default function HomeScreen() {
   const refreshControl = useMemo(
     () => (
       <RefreshControl
-        refreshing={isFetching && !isLoading}
+        refreshing={isFetching && !isInitialBrowseLoading}
         onRefresh={handleRefresh}
         tintColor={colors.accent}
       />
     ),
-    [handleRefresh, isFetching, isLoading],
+    [handleRefresh, isFetching, isInitialBrowseLoading],
   );
 
-  if (isLoading && !data) {
+  const listFooter = useMemo(
+    () => (showPersonalizedLoadingSlot ? <HomePersonalizedLoadingSlot /> : null),
+    [showPersonalizedLoadingSlot],
+  );
+
+  if (isInitialBrowseLoading) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {topChrome}
@@ -210,7 +240,9 @@ export default function HomeScreen() {
     );
   }
 
-  if (isError && error && !data) {
+  if (browse.isError && !browse.data) {
+    const error = browse.error;
+
     if (isApiError(error) && error.kind === 'unauthorized') {
       return (
         <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -230,7 +262,7 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {topChrome}
         <View style={styles.centered}>
-          <ErrorView message={message} onRetry={handleRetry} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={handleRetryBrowse} retryLabel="Try Again" />
         </View>
       </SafeAreaView>
     );
@@ -244,6 +276,7 @@ export default function HomeScreen() {
         keyExtractor={homeSectionKeyExtractor}
         renderItem={renderSection}
         ListHeaderComponent={listHeader}
+        ListFooterComponent={listFooter}
         ListEmptyComponent={showColdWelcome ? null : HomeEmptyState}
         contentContainerStyle={listContentStyle}
         refreshControl={refreshControl}

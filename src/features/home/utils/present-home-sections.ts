@@ -1,5 +1,6 @@
 import type { HomeItem, HomeSection } from '../types';
 import { applyHomeSectionPolicy } from './home-section-policy';
+import type { PersonalizationState } from './personalization-state';
 import { selectHeroCandidates } from './selectHeroCandidates';
 
 export interface PresentedHomeFeed {
@@ -10,11 +11,18 @@ export interface PresentedHomeFeed {
 
 export function presentHomeSections(
   sections: HomeSection[],
-  isPersonalized: boolean,
+  personalization: PersonalizationState | boolean,
 ): PresentedHomeFeed {
+  const personalizationState: PersonalizationState =
+    typeof personalization === 'boolean'
+      ? personalization
+        ? 'personalized'
+        : 'not-personalized'
+      : personalization;
+  const isPersonalized = personalizationState === 'personalized';
   const heroCandidates = selectHeroCandidates(sections, isPersonalized);
   const visibleSections = applyHomeSectionPolicy(sections, isPersonalized);
-  const showColdWelcome = !isPersonalized;
+  const showColdWelcome = personalizationState === 'not-personalized';
   const heroIds = new Set(heroCandidates.map((candidate) => candidate.item.id));
 
   const presentedSections = visibleSections

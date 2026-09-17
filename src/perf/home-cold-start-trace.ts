@@ -7,7 +7,12 @@ type HomePerfEvent =
   | 'home_mount'
   | 'home_api_start'
   | 'home_api_end'
-  | 'first_meaningful_render';
+  | 'home_browse_api_start'
+  | 'home_browse_api_end'
+  | 'home_personalized_api_start'
+  | 'home_personalized_api_end'
+  | 'first_meaningful_render'
+  | 'home_personalized_render';
 
 let traceId: string | null = null;
 let originMs = 0;

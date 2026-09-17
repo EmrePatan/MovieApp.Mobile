@@ -31,4 +31,14 @@ describe('home-cold-start-trace', () => {
   it('does not throw when marking events without an active trace', () => {
     expect(() => markHomePerfEvent('home_mount')).not.toThrow();
   });
+
+  it('records progressive home events when tracing is enabled', () => {
+    beginHomeColdStartTrace();
+
+    expect(() => markHomePerfEvent('home_browse_api_start')).not.toThrow();
+    expect(() => markHomePerfEvent('home_browse_api_end')).not.toThrow();
+    expect(() => markHomePerfEvent('home_personalized_api_start')).not.toThrow();
+    expect(() => markHomePerfEvent('home_personalized_api_end')).not.toThrow();
+    expect(() => markHomePerfEvent('home_personalized_render')).not.toThrow();
+  });
 });

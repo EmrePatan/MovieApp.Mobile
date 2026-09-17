@@ -52,4 +52,15 @@ export interface HomeResponse {
   isPersonalized: boolean;
 }
 
+export interface HomeBrowseResponse {
+  sections: HomeSection[];
+  generatedAtUtc: string;
+}
+
+export interface HomePersonalizedResponse {
+  sections: HomeSection[];
+  isPersonalized: boolean;
+  generatedAtUtc: string;
+}
+
 export const DEFAULT_HOME_SECTION_SIZE = 10;
