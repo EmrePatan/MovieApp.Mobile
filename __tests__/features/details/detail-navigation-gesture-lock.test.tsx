@@ -5,7 +5,8 @@ import { DetailQueryState } from '@/features/details/shared/components/DetailQue
 import { useDetailScrollLock } from '@/features/details/shared/context/DetailScrollLockContext';
 import { useDetailNavigationGestureLock } from '@/features/details/shared/navigation/useDetailNavigationGestureLock';
 
-const mockSetOptions = jest.fn();
+const mockChildSetOptions = jest.fn();
+const mockParentSetOptions = jest.fn();
 const mockFocusEffect = jest.fn((callback: () => void | (() => void)) => {
   const cleanup = callback();
   return cleanup;
@@ -13,7 +14,10 @@ const mockFocusEffect = jest.fn((callback: () => void | (() => void)) => {
 
 jest.mock('expo-router', () => ({
   useNavigation: () => ({
-    setOptions: mockSetOptions,
+    setOptions: mockChildSetOptions,
+    getParent: () => ({
+      setOptions: mockParentSetOptions,
+    }),
   }),
   useFocusEffect: (callback: () => void | (() => void)) => mockFocusEffect(callback),
 }));
@@ -30,23 +34,42 @@ describe('useDetailNavigationGestureLock', () => {
     }
 
     render(<Probe />);
-    expect(mockSetOptions).not.toHaveBeenCalled();
+    expect(mockParentSetOptions).not.toHaveBeenCalled();
+    expect(mockChildSetOptions).not.toHaveBeenCalled();
   });
 
-  it('disables back-swipe only while interaction is locked on focused catalog detail', () => {
+  it('disables back-swipe on the parent root navigator while interaction is locked', () => {
     function Probe({ locked }: { locked: boolean }) {
       useDetailNavigationGestureLock(locked, true);
       return null;
     }
 
     const { rerender } = render(<Probe locked={false} />);
-    expect(mockSetOptions).toHaveBeenCalledWith({ gestureEnabled: true });
+    expect(mockParentSetOptions).toHaveBeenCalledWith({ gestureEnabled: true });
+    expect(mockChildSetOptions).not.toHaveBeenCalled();
 
     rerender(<Probe locked={true} />);
-    expect(mockSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(mockParentSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
 
     rerender(<Probe locked={false} />);
-    expect(mockSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
+    expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
+  });
+
+  it('restores parent gestures on blur cleanup', () => {
+    let cleanup: void | (() => void);
+    mockFocusEffect.mockImplementationOnce((callback: () => void | (() => void)) => {
+      cleanup = callback();
+    });
+
+    function Probe() {
+      useDetailNavigationGestureLock(false, true);
+      return null;
+    }
+
+    render(<Probe />);
+    cleanup?.();
+
+    expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
   });
 });
 
@@ -55,7 +78,7 @@ describe('DetailQueryState navigation gesture lock', () => {
     jest.clearAllMocks();
   });
 
-  it('wires rating interaction lock only when enabled for catalog detail', () => {
+  function renderRatingLockProbe() {
     function RatingLockTrigger() {
       const scrollLock = useDetailScrollLock();
 
@@ -70,7 +93,24 @@ describe('DetailQueryState navigation gesture lock', () => {
       );
     }
 
-    render(
+    function RatingUnlockTrigger() {
+      const scrollLock = useDetailScrollLock();
+
+      return (
+        <>
+          <RatingLockTrigger />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Unlock rating interaction"
+            onPress={() => scrollLock?.setScrollLocked(false)}
+          >
+            <Text>unlock</Text>
+          </Pressable>
+        </>
+      );
+    }
+
+    return render(
       <DetailQueryState
         enableRatingNavigationGestureLock
         query={{
@@ -83,12 +123,25 @@ describe('DetailQueryState navigation gesture lock', () => {
         notFoundTitle="Not found"
         notFoundMessage="Missing"
       >
-        {() => <RatingLockTrigger />}
+        {() => <RatingUnlockTrigger />}
       </DetailQueryState>,
     );
+  }
+
+  it('synchronously disables the parent root navigator when rating interaction starts', () => {
+    renderRatingLockProbe();
 
     fireEvent.press(screen.getByLabelText('Lock rating interaction'));
-    expect(mockSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(mockParentSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(mockChildSetOptions).not.toHaveBeenCalled();
+  });
+
+  it('restores the parent root navigator when rating interaction ends', () => {
+    renderRatingLockProbe();
+
+    fireEvent.press(screen.getByLabelText('Lock rating interaction'));
+    fireEvent.press(screen.getByLabelText('Unlock rating interaction'));
+    expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
   });
 
   it('does not wire rating interaction lock for non-catalog detail screens', () => {
@@ -108,6 +161,7 @@ describe('DetailQueryState navigation gesture lock', () => {
       </DetailQueryState>,
     );
 
-    expect(mockSetOptions).not.toHaveBeenCalled();
+    expect(mockParentSetOptions).not.toHaveBeenCalled();
+    expect(mockChildSetOptions).not.toHaveBeenCalled();
   });
 });

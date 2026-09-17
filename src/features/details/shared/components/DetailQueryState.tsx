@@ -4,6 +4,8 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useNavigation } from 'expo-router';
+
 import { UseQueryResult } from '@tanstack/react-query';
 
 import { isApiError } from '@/api/errors';
@@ -12,6 +14,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 
 import { DetailScrollProvider } from '../context/DetailScrollContext';
 import { DetailScrollLockProvider } from '../context/DetailScrollLockContext';
+import { setCatalogDetailGestureEnabled } from '../navigation/catalog-detail-gesture-navigation';
 import { useDetailNavigationGestureLock } from '../navigation/useDetailNavigationGestureLock';
 
 import { DetailBackButton } from './DetailBackButton';
@@ -93,15 +96,23 @@ export function DetailQueryState<TData>({
 }: DetailQueryStateProps<TData>) {
 
   const { data, error, isLoading, isError, refetch } = query;
+  const navigation = useNavigation();
 
   const scrollRef = useRef<ScrollView>(null);
   const [interactionLocked, setInteractionLocked] = useState(false);
 
   useDetailNavigationGestureLock(interactionLocked, enableRatingNavigationGestureLock);
 
-  const handleInteractionLockChange = useCallback((locked: boolean) => {
-    setInteractionLocked(locked);
-  }, []);
+  const handleInteractionLockChange = useCallback(
+    (locked: boolean) => {
+      setInteractionLocked(locked);
+
+      if (enableRatingNavigationGestureLock) {
+        setCatalogDetailGestureEnabled(navigation, !locked);
+      }
+    },
+    [enableRatingNavigationGestureLock, navigation],
+  );
 
 
 

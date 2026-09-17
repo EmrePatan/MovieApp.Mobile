@@ -5,7 +5,7 @@ import type { NativeStackNavigationOptions } from 'expo-router';
  * Keep iOS edge back-swipe enabled, but restrict it to the screen edge so
  * horizontal rating drags do not compete with full-screen back gestures.
  * While the user is actively rating, DetailQueryState temporarily disables
- * back-swipe via navigation.setOptions.
+ * the parent root-stack back-swipe via navigation.setOptions.
  */
 export const ratedDetailStackScreenOptions: NativeStackNavigationOptions = {
   gestureEnabled: true,
