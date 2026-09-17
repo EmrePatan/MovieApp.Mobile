@@ -6,7 +6,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -18,17 +17,17 @@ import { LibraryContentCard } from '@/features/library/components/LibraryContent
 import { LibraryEmptyState } from '@/features/library/components/LibraryEmptyState';
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
 import { LibrarySortControl } from '@/features/library/components/LibrarySortControl';
-import { useLibraryDisplayItems } from '@/features/library/hooks/useLibraryDisplayItems';
 import { getLibraryItemKey } from '@/features/library/utils/library-item-key';
 import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
-import type { LibrarySortOption, LibraryTypeFilter } from '@/features/library/types';
-import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
+import type { CatalogMediaFilter, LibrarySortOption } from '@/features/library/types';
+import { LibraryMediaFilterControl } from '@/features/library/components/LibraryMediaFilterControl';
 import { CreateWatchlistModal } from '@/features/watchlists/components/CreateWatchlistModal';
 import { WatchlistSelector } from '@/features/watchlists/components/WatchlistSelector';
 import {
   useDeleteWatchlistMutation,
   useRemoveWatchlistItemMutation,
 } from '@/features/watchlists/hooks/useWatchlistMutations';
+import { useStableFetchedItems } from '@/features/watchlists/hooks/useStableFetchedItems';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import { flattenWatchlistPages, type LibraryItem } from '@/features/watchlists/utils/library-items';
@@ -44,7 +43,7 @@ export default function WatchlistScreen() {
   const { isAuthenticated } = useAuth();
   const [userSelectedWatchlistId, setUserSelectedWatchlistId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>('all');
+  const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
 
@@ -70,7 +69,7 @@ export default function WatchlistScreen() {
     return watchlists[0]?.id ?? null;
   }, [isAuthenticated, userSelectedWatchlistId, watchlists]);
 
-  const itemsQuery = useWatchlistItems(selectedWatchlistId);
+  const itemsQuery = useWatchlistItems(selectedWatchlistId, { mediaType: typeFilter, sort });
   const deleteWatchlist = useDeleteWatchlistMutation();
   const removeItem = useRemoveWatchlistItemMutation(selectedWatchlistId);
 
@@ -83,12 +82,7 @@ export default function WatchlistScreen() {
     () => flattenWatchlistPages(itemsQuery.data?.pages ?? []),
     [itemsQuery.data?.pages],
   );
-
-  const displayItems = useLibraryDisplayItems({
-    items,
-    typeFilter,
-    sort,
-  });
+  const displayItems = useStableFetchedItems(items, itemsQuery.isFetching);
 
   const handleSignIn = useCallback(() => {
     router.push('/(auth)/login');
@@ -176,11 +170,6 @@ export default function WatchlistScreen() {
     void itemsQuery.fetchNextPage();
   }, [itemsQuery]);
 
-  const handleRefresh = useCallback(() => {
-    void watchlistsQuery.refetch();
-    void itemsQuery.refetch();
-  }, [itemsQuery, watchlistsQuery]);
-
   const renderItem = useCallback(
     ({ item }: { item: LibraryItem }) => (
       <LibraryContentCard
@@ -195,16 +184,16 @@ export default function WatchlistScreen() {
     [handleItemPress, handleRemoveItem, removingItemKey],
   );
 
-  const listControls = items.length > 0 ? (
+  const listControls = (
     <View style={styles.controls}>
-      <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+      <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
       <LibrarySortControl
         value={sort}
         options={WATCHLIST_SORT_OPTIONS}
         onChange={setSort}
       />
     </View>
-  ) : null;
+  );
 
   const listHeader = (
     <View style={styles.header}>
@@ -306,7 +295,7 @@ export default function WatchlistScreen() {
     );
   }
 
-  if (itemsQuery.isLoading && items.length === 0) {
+  if (itemsQuery.isLoading && displayItems.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
@@ -316,7 +305,7 @@ export default function WatchlistScreen() {
     );
   }
 
-  if (itemsQuery.isError && items.length === 0) {
+  if (itemsQuery.isError && displayItems.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
@@ -340,7 +329,7 @@ export default function WatchlistScreen() {
         : 'No items match this filter';
 
   const emptyComponent =
-    items.length === 0 ? (
+    displayItems.length === 0 ? (
       <LibraryEmptyState
         icon="bookmark"
         title="Your watchlist is empty"
@@ -370,15 +359,6 @@ export default function WatchlistScreen() {
               <ActivityIndicator color={colors.accent} />
             </View>
           ) : null
-        }
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={
-              (watchlistsQuery.isRefetching || itemsQuery.isRefetching) &&
-              !itemsQuery.isFetchingNextPage
-            }
-            onRefresh={handleRefresh}
-          />
         }
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}

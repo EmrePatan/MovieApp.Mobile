@@ -7,6 +7,16 @@ describe('watchlist infinite query keys', () => {
       'watchlist-id',
       'items',
       20,
+      'all',
+      'recentlyAdded',
+    ]);
+    expect(watchlistItemsInfiniteQueryKey('watchlist-id', 20, 'movie', 'titleAsc')).toEqual([
+      'watchlist',
+      'watchlist-id',
+      'items',
+      20,
+      'movie',
+      'titleAsc',
     ]);
   });
 });

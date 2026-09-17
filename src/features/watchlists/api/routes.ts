@@ -26,8 +26,12 @@ export function buildWatchlistItemsPath(
   watchlistId: string,
   page = 1,
   pageSize = 20,
+  mediaType: string = 'all',
+  sort: string = 'recentlyAdded',
 ): string {
   const params = new URLSearchParams({
+    mediaType,
+    sort,
     page: String(page),
     pageSize: String(pageSize),
   });

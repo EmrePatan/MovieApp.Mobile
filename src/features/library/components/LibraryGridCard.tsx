@@ -1,5 +1,11 @@
-import { memo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { memo, useCallback } from 'react';
+import {
+  type AccessibilityActionEvent,
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { LibraryCategory, LibraryItem } from '../types/library';
@@ -17,6 +23,9 @@ interface LibraryGridCardProps {
   width: number;
   height: number;
   onPress: (item: LibraryItem) => void;
+  onRemove?: (item: LibraryItem) => void;
+  removeAccessibilityLabel?: string;
+  isRemoving?: boolean;
 }
 
 export const LibraryGridCard = memo(function LibraryGridCard({
@@ -25,15 +34,40 @@ export const LibraryGridCard = memo(function LibraryGridCard({
   width,
   height,
   onPress,
+  onRemove,
+  removeAccessibilityLabel = 'this list',
+  isRemoving = false,
 }: LibraryGridCardProps) {
   const presentation = resolveLibraryStatusPresentation(item);
   const accessibilityLabel = buildLibraryGridAccessibilityLabel(item, presentation, category);
+  const removeActionLabel = `Remove ${item.title} from ${removeAccessibilityLabel}`;
+
+  const handleRemove = useCallback(() => {
+    if (isRemoving) {
+      return;
+    }
+
+    onRemove?.(item);
+  }, [isRemoving, item, onRemove]);
+
+  const handleAccessibilityAction = useCallback(
+    (event: AccessibilityActionEvent) => {
+      if (event.nativeEvent.actionName === 'remove') {
+        handleRemove();
+      }
+    },
+    [handleRemove],
+  );
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityActions={onRemove ? [{ name: 'remove', label: removeActionLabel }] : undefined}
+      onAccessibilityAction={onRemove ? handleAccessibilityAction : undefined}
       onPress={() => onPress(item)}
+      onLongPress={onRemove ? handleRemove : undefined}
+      delayLongPress={400}
       style={({ pressed }) => [styles.card, { width }, pressed && styles.pressed]}
     >
       <View style={[styles.posterWrap, { height }]}>
@@ -52,6 +86,11 @@ export const LibraryGridCard = memo(function LibraryGridCard({
         ) : (
           <LibraryStatusIndicator status={presentation.status} display="badge" />
         )}
+        {isRemoving ? (
+          <View style={styles.removingOverlay}>
+            <ActivityIndicator color={colors.accent} />
+          </View>
+        ) : null}
       </View>
       {category === 'watching' && presentation.detail ? (
         <AppText variant="caption" muted numberOfLines={1} style={styles.watchingDetail}>
@@ -79,5 +118,11 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.85,
+  },
+  removingOverlay: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.overlay,
   },
 });

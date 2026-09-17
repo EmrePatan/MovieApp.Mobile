@@ -23,7 +23,7 @@ export function LibraryWatchlistDetailHeader({
   children,
 }: LibraryWatchlistDetailHeaderProps) {
   return (
-    <View style={styles.header}>
+    <View style={styles.header} testID="library-watchlist-detail-header">
       <View style={styles.toolbar}>
         <View style={styles.leadingSlot}>
           <DetailBackButton contentInset />
@@ -62,7 +62,6 @@ export function LibraryWatchlistDetailHeader({
 const styles = StyleSheet.create({
   header: {
     paddingTop: spacing.sm,
-    paddingHorizontal: layout.screenPaddingHorizontal,
     gap: spacing.sm,
     paddingBottom: spacing.sm,
   },

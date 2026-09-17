@@ -9,6 +9,11 @@ import {
   buildWatchlistPath,
   buildWatchlistsPath,
 } from './routes';
+import type { WatchlistItemsQueryParams } from '../utils/watchlist-items-query';
+import {
+  toWatchlistItemsMediaTypeQuery,
+  toWatchlistItemsSortQuery,
+} from '../utils/watchlist-items-query';
 import type {
   CreateWatchlistRequest,
   UpdateWatchlistRequest,
@@ -90,10 +95,17 @@ export async function getWatchlistItems(
   watchlistId: string,
   page = 1,
   pageSize = 20,
+  query: WatchlistItemsQueryParams = { mediaType: 'all', sort: 'recentlyAdded' },
   signal?: AbortSignal,
 ): Promise<WatchlistItemsResponse> {
   return api.get<WatchlistItemsResponse>(
-    buildWatchlistItemsPath(watchlistId, page, pageSize),
+    buildWatchlistItemsPath(
+      watchlistId,
+      page,
+      pageSize,
+      toWatchlistItemsMediaTypeQuery(query.mediaType),
+      toWatchlistItemsSortQuery(query.sort),
+    ),
     { signal },
   );
 }

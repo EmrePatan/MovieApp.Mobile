@@ -1,4 +1,5 @@
 import type {
+  WatchlistCatalogItemResponse,
   WatchlistContentType,
   WatchlistItemsResponse,
   WatchlistMovieItemResponse,
@@ -39,15 +40,27 @@ function mapTvItem(item: WatchlistTvShowItemResponse): LibraryItem {
   };
 }
 
+function mapCatalogItem(item: WatchlistCatalogItemResponse): LibraryItem {
+  return {
+    id: item.id,
+    type: item.contentType,
+    title: item.title,
+    posterPath: item.posterPath,
+    airDate: item.contentType === 'movie' ? item.releaseDate : item.firstAirDate,
+    voteAverage: item.voteAverage,
+    createdAt: item.createdAt,
+  };
+}
+
 export function mapWatchlistPageToLibraryItems(page: WatchlistItemsResponse): LibraryItem[] {
-  const items = [
+  if (page.items?.length) {
+    return page.items.map(mapCatalogItem);
+  }
+
+  return [
     ...page.movies.map(mapMovieItem),
     ...page.tvShows.map(mapTvItem),
   ];
-
-  return items.sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-  );
 }
 
 export function flattenWatchlistPages(pages: WatchlistItemsResponse[]): LibraryItem[] {

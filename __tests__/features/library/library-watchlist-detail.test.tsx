@@ -1,5 +1,4 @@
-import { Alert } from 'react-native';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { LibraryWatchlistDetailContent } from '@/features/library/components/LibraryWatchlistDetailContent';
 const mockPush = jest.fn();
 const mockBack = jest.fn();
@@ -107,14 +106,24 @@ jest.mock('@/features/watchlists/hooks/useWatchlistMutations', () => ({
   })),
 }));
 
+function flattenStyle(style: unknown): Record<string, unknown> {
+  if (!style) {
+    return {};
+  }
+
+  if (Array.isArray(style)) {
+    return style.reduce<Record<string, unknown>>(
+      (acc, item) => ({ ...acc, ...flattenStyle(item) }),
+      {},
+    );
+  }
+
+  return style as Record<string, unknown>;
+}
+
 describe('LibraryWatchlistDetailContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   it('renders the selected watchlist contents', () => {
@@ -122,7 +131,7 @@ describe('LibraryWatchlistDetailContent', () => {
 
     expect(screen.getByTestId('library-watchlist-detail')).toBeTruthy();
     expect(screen.getByText('Weekend Movies')).toBeTruthy();
-    expect(screen.getByText('Interstellar')).toBeTruthy();
+    expect(screen.getByLabelText('Interstellar, Watchlist')).toBeTruthy();
   });
 
   it('does not show Delete List as a permanent primary action', () => {
@@ -136,28 +145,17 @@ describe('LibraryWatchlistDetailContent', () => {
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      'List options',
-      undefined,
-      expect.arrayContaining([
-        expect.objectContaining({ text: 'Rename List' }),
-        expect.objectContaining({ text: 'Delete List', style: 'destructive' }),
-      ]),
-    );
+    expect(screen.getByTestId('watchlist-list-options-sheet')).toBeTruthy();
+    expect(screen.getByText('List options')).toBeTruthy();
+    expect(screen.getByTestId('watchlist-rename-option')).toBeTruthy();
+    expect(screen.getByTestId('watchlist-delete-option')).toBeTruthy();
   });
 
   it('opens rename list modal from the overflow menu', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
-    const overflowAlert = (Alert.alert as jest.Mock).mock.calls[0];
-    const renameAction = overflowAlert[2].find(
-      (action: { text: string }) => action.text === 'Rename List',
-    );
-
-    act(() => {
-      renameAction.onPress();
-    });
+    fireEvent.press(screen.getByTestId('watchlist-rename-option'));
 
     expect(screen.getByTestId('rename-watchlist-modal')).toHaveTextContent('Weekend Movies');
   });
@@ -166,25 +164,12 @@ describe('LibraryWatchlistDetailContent', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
-    const overflowAlert = (Alert.alert as jest.Mock).mock.calls[0];
-    const deleteListAction = overflowAlert[2].find(
-      (action: { text: string }) => action.text === 'Delete List',
-    );
+    fireEvent.press(screen.getByTestId('watchlist-delete-option'));
 
-    deleteListAction.onPress();
+    expect(screen.getByText('Delete list')).toBeTruthy();
+    expect(screen.getByText('Delete "Weekend Movies"? This cannot be undone.')).toBeTruthy();
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      'Delete list',
-      'Delete "Weekend Movies"? This cannot be undone.',
-      expect.any(Array),
-    );
-
-    const confirmAlert = (Alert.alert as jest.Mock).mock.calls[1];
-    const confirmDeleteAction = confirmAlert[2].find(
-      (action: { text: string }) => action.text === 'Delete',
-    );
-
-    confirmDeleteAction.onPress();
+    fireEvent.press(screen.getByTestId('watchlist-delete-confirm-button'));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith('wl-1', expect.any(Object));
   });
@@ -217,11 +202,13 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.queryByLabelText('Remove Interstellar from this list')).toBeNull();
   });
 
-  it('keeps item removal reachable through swipe and working', () => {
+  it('keeps item removal reachable through long press', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
-    fireEvent.press(screen.getByLabelText('Reveal delete action'));
-    fireEvent.press(screen.getByLabelText('Remove Interstellar from this list'));
+    fireEvent(
+      screen.getByLabelText('Interstellar, Watchlist'),
+      'longPress',
+    );
 
     expect(mockRemoveMutate).toHaveBeenCalledWith(
       { contentType: 'movie', contentId: 'movie-1' },
@@ -233,7 +220,7 @@ describe('LibraryWatchlistDetailContent', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent(
-      screen.getByRole('button', { name: /Interstellar, Movie, 2014, rating/ }),
+      screen.getByRole('button', { name: 'Interstellar, Watchlist' }),
       'accessibilityAction',
       { nativeEvent: { actionName: 'remove' } },
     );
@@ -259,14 +246,18 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.queryByText(/title/)).toBeNull();
   });
 
+  it('does not double-pad the watchlist detail header inside the grid list', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    const header = screen.getByTestId('library-watchlist-detail-header');
+
+    expect(flattenStyle(header.props.style).paddingHorizontal).toBeUndefined();
+  });
+
   it('navigates to detail when a watchlist item is pressed', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
-    fireEvent.press(
-      screen.getByRole('button', {
-        name: /Interstellar, Movie, 2014, rating/,
-      }),
-    );
+    fireEvent.press(screen.getByLabelText('Interstellar, Watchlist'));
 
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-1');
   });

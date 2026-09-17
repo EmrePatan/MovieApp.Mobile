@@ -1,26 +1,28 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
 import { ErrorView } from '@/components/common/ErrorView';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { RenameWatchlistModal } from '@/features/watchlists/components/RenameWatchlistModal';
+import { WatchlistListOptionsSheet } from '@/features/watchlists/components/WatchlistListOptionsSheet';
 import { useDeleteWatchlistMutation, useRemoveWatchlistItemMutation } from '@/features/watchlists/hooks/useWatchlistMutations';
+import { useStableFetchedItems } from '@/features/watchlists/hooks/useStableFetchedItems';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
-import { flattenWatchlistPages, type LibraryItem } from '@/features/watchlists/utils/library-items';
+import { flattenWatchlistPages } from '@/features/watchlists/utils/library-items';
 import type { CatalogMediaFilter, LibrarySortOption } from '../types';
-import { useLibraryDisplayItems } from '../hooks/useLibraryDisplayItems';
-import { getLibraryItemKey } from '../utils/library-item-key';
+import type { LibraryItem as GridLibraryItem } from '../types/library';
+import { getLibraryGridItemKey } from '../utils/library-item-key';
+import { mapWatchlistItemToLibraryGridItem } from '../utils/map-watchlist-item-to-grid-item';
 import { getAvailableSortOptions } from '../utils/library-sort';
-import { LibraryContentCard } from './LibraryContentCard';
 import { LibraryEmptyState } from './LibraryEmptyState';
+import { LibraryGridCard } from './LibraryGridCard';
 import { LibraryLoadingState } from './LibraryLoadingState';
 import { LibraryWatchlistDetailHeader } from './LibraryWatchlistDetailHeader';
 import { LibraryWatchlistListControls } from './LibraryWatchlistListControls';
@@ -30,6 +32,8 @@ import { spacing } from '@/theme/spacing';
 
 const WATCHLIST_SORT_OPTIONS = getAvailableSortOptions(true);
 const DEFAULT_WATCHLIST_SORT: LibrarySortOption = 'recentlyAdded';
+const GRID_COLUMNS = 3;
+const GRID_GAP = spacing.sm;
 
 interface LibraryWatchlistDetailContentProps {
   watchlistId: string;
@@ -39,14 +43,16 @@ export function LibraryWatchlistDetailContent({
   watchlistId,
 }: LibraryWatchlistDetailContentProps) {
   const router = useRouter();
-  const watchlistsQuery = useWatchlists();
-  const itemsQuery = useWatchlistItems(watchlistId);
-  const deleteWatchlist = useDeleteWatchlistMutation();
-  const removeItem = useRemoveWatchlistItemMutation(watchlistId);
+  const { width } = useWindowDimensions();
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
+  const watchlistsQuery = useWatchlists();
+  const itemsQuery = useWatchlistItems(watchlistId, { mediaType: typeFilter, sort });
+  const deleteWatchlist = useDeleteWatchlistMutation();
+  const removeItem = useRemoveWatchlistItemMutation(watchlistId);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
+  const [optionsSheetVisible, setOptionsSheetVisible] = useState(false);
 
   const watchlist = useMemo(
     () => watchlistsQuery.data?.find((entry) => entry.id === watchlistId) ?? null,
@@ -57,36 +63,30 @@ export function LibraryWatchlistDetailContent({
     () => flattenWatchlistPages(itemsQuery.data?.pages ?? []),
     [itemsQuery.data?.pages],
   );
+  const stableItems = useStableFetchedItems(items, itemsQuery.isFetching);
 
-  const displayItems = useLibraryDisplayItems({
-    items,
-    typeFilter,
-    sort,
-  });
+  const gridItems = useMemo(
+    () => stableItems.map(mapWatchlistItemToLibraryGridItem),
+    [stableItems],
+  );
 
-  const confirmDeleteWatchlist = useCallback(() => {
+  const itemWidth = useMemo(
+    () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
+    [width],
+  );
+  const itemHeight = itemWidth / layout.posterAspectRatio;
+
+  const handleDeleteWatchlist = useCallback(() => {
     if (!watchlist) {
       return;
     }
 
-    Alert.alert(
-      'Delete list',
-      `Delete "${watchlist.name}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            deleteWatchlist.mutate(watchlist.id, {
-              onSuccess: () => {
-                router.back();
-              },
-            });
-          },
-        },
-      ],
-    );
+    deleteWatchlist.mutate(watchlist.id, {
+      onSuccess: () => {
+        setOptionsSheetVisible(false);
+        router.back();
+      },
+    });
   }, [deleteWatchlist, router, watchlist]);
 
   const handleOverflowPress = useCallback(() => {
@@ -94,38 +94,23 @@ export function LibraryWatchlistDetailContent({
       return;
     }
 
-    Alert.alert(
-      'List options',
-      undefined,
-      [
-        {
-          text: 'Rename List',
-          onPress: () => setRenameModalVisible(true),
-        },
-        {
-          text: 'Delete List',
-          style: 'destructive',
-          onPress: confirmDeleteWatchlist,
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
-  }, [confirmDeleteWatchlist, watchlist]);
+    setOptionsSheetVisible(true);
+  }, [watchlist]);
 
   const handleItemPress = useCallback(
-    (item: LibraryItem) => {
+    (item: GridLibraryItem) => {
       router.push(buildCatalogDetailRoute(item.id, item.type));
     },
     [router],
   );
 
   const handleRemoveItem = useCallback(
-    (item: LibraryItem) => {
+    (item: GridLibraryItem) => {
       if (removeItem.isPending) {
         return;
       }
 
-      const itemKey = getLibraryItemKey(item);
+      const itemKey = getLibraryGridItemKey(item);
       setRemovingItemKey(itemKey);
       removeItem.mutate(
         { contentType: item.type, contentId: item.id },
@@ -151,26 +136,23 @@ export function LibraryWatchlistDetailContent({
     void itemsQuery.fetchNextPage();
   }, [itemsQuery]);
 
-  const handleRefresh = useCallback(() => {
-    void watchlistsQuery.refetch();
-    void itemsQuery.refetch();
-  }, [itemsQuery, watchlistsQuery]);
-
   const renderItem = useCallback(
-    ({ item }: { item: LibraryItem }) => (
-      <LibraryContentCard
+    ({ item }: { item: GridLibraryItem }) => (
+      <LibraryGridCard
         item={item}
-        isRemoving={removingItemKey === getLibraryItemKey(item)}
+        category="watchlist"
+        width={itemWidth}
+        height={itemHeight}
+        isRemoving={removingItemKey === getLibraryGridItemKey(item)}
         removeAccessibilityLabel="this list"
-        removalMode="swipe"
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />
     ),
-    [handleItemPress, handleRemoveItem, removingItemKey],
+    [handleItemPress, handleRemoveItem, itemHeight, itemWidth, removingItemKey],
   );
 
-  const listControls = items.length > 0 ? (
+  const listControls = (
     <LibraryWatchlistListControls
       typeFilter={typeFilter}
       onTypeFilterChange={setTypeFilter}
@@ -178,7 +160,7 @@ export function LibraryWatchlistDetailContent({
       sortOptions={WATCHLIST_SORT_OPTIONS}
       onSortChange={setSort}
     />
-  ) : null;
+  );
 
   const listHeader = (
     <LibraryWatchlistDetailHeader
@@ -189,26 +171,36 @@ export function LibraryWatchlistDetailContent({
     </LibraryWatchlistDetailHeader>
   );
 
-  const renameModal = (
-    <RenameWatchlistModal
-      visible={renameModalVisible}
-      watchlistId={watchlist?.id ?? null}
-      initialName={watchlist?.name ?? ''}
-      onClose={() => setRenameModalVisible(false)}
-    />
+  const watchlistModals = (
+    <>
+      <WatchlistListOptionsSheet
+        visible={optionsSheetVisible}
+        listName={watchlist?.name ?? ''}
+        deleteLoading={deleteWatchlist.isPending}
+        onClose={() => setOptionsSheetVisible(false)}
+        onRename={() => setRenameModalVisible(true)}
+        onConfirmDelete={handleDeleteWatchlist}
+      />
+      <RenameWatchlistModal
+        visible={renameModalVisible}
+        watchlistId={watchlist?.id ?? null}
+        initialName={watchlist?.name ?? ''}
+        onClose={() => setRenameModalVisible(false)}
+      />
+    </>
   );
 
-  if (itemsQuery.isLoading && items.length === 0) {
+  if (itemsQuery.isLoading && stableItems.length === 0) {
     return (
       <View style={styles.screen}>
         {listHeader}
         <LibraryLoadingState accessibilityLabel="Loading watchlist items" />
-        {renameModal}
+        {watchlistModals}
       </View>
     );
   }
 
-  if (itemsQuery.isError && items.length === 0) {
+  if (itemsQuery.isError && stableItems.length === 0) {
     return (
       <View style={styles.screen}>
         {listHeader}
@@ -219,7 +211,7 @@ export function LibraryWatchlistDetailContent({
             retryLabel="Try Again"
           />
         </View>
-        {renameModal}
+        {watchlistModals}
       </View>
     );
   }
@@ -232,7 +224,7 @@ export function LibraryWatchlistDetailContent({
         : 'No items match this filter';
 
   const emptyComponent =
-    items.length === 0 ? (
+    stableItems.length === 0 ? (
       <LibraryEmptyState
         icon="bookmark"
         title="This watchlist is empty"
@@ -252,8 +244,10 @@ export function LibraryWatchlistDetailContent({
     <>
       <FlatList
       testID="library-watchlist-detail"
-      data={displayItems}
-      keyExtractor={getLibraryItemKey}
+      data={gridItems}
+      keyExtractor={getLibraryGridItemKey}
+      numColumns={GRID_COLUMNS}
+      columnWrapperStyle={styles.row}
       renderItem={renderItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={emptyComponent}
@@ -264,23 +258,14 @@ export function LibraryWatchlistDetailContent({
           </View>
         ) : null
       }
-      refreshControl={
-        <MovieAppRefreshControl
-          refreshing={
-            (watchlistsQuery.isRefetching || itemsQuery.isRefetching) &&
-            !itemsQuery.isFetchingNextPage
-          }
-          onRefresh={handleRefresh}
-        />
-      }
       contentContainerStyle={styles.listContent}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.4}
-      initialNumToRender={layout.verticalList.initialNumToRender}
-      maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+      initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
+      maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
       windowSize={layout.verticalList.windowSize}
       />
-      {renameModal}
+      {watchlistModals}
     </>
   );
 }
@@ -288,10 +273,16 @@ export function LibraryWatchlistDetailContent({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingHorizontal: spacing.lg,
   },
   listContent: {
-    paddingBottom: spacing.xxl,
     flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+    gap: GRID_GAP,
+  },
+  row: {
+    gap: GRID_GAP,
   },
   centered: {
     flex: 1,

@@ -161,7 +161,7 @@ describe('WatchlistScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-id');
   });
 
-  it('filters to tv only', () => {
+  it('requests tv-only items when the tv filter is selected', () => {
     (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
     mockWatchlists({
       data: [
@@ -174,42 +174,74 @@ describe('WatchlistScreen', () => {
         },
       ],
     });
-    mockItems({
-      data: {
-        pages: [
-          {
-            movies: [
-              {
-                id: 'movie-id',
-                title: 'Interstellar',
-                posterPath: null,
-                releaseDate: '2014-11-07',
-                voteAverage: 8.4,
-                createdAt: '2026-09-11T14:30:00Z',
-              },
-            ],
-            tvShows: [
-              {
-                id: 'tv-id',
-                title: 'Breaking Bad',
-                posterPath: null,
-                firstAirDate: '2008-01-20',
-                voteAverage: 8.9,
-                createdAt: '2026-09-12T14:30:00Z',
-              },
-            ],
-            page: 1,
-            pageSize: 20,
-            totalCount: 2,
-            totalPages: 1,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          },
-        ],
-      },
-    });
+
+    const mixedPage = {
+      movies: [
+        {
+          id: 'movie-id',
+          title: 'Interstellar',
+          posterPath: null,
+          releaseDate: '2014-11-07',
+          voteAverage: 8.4,
+          createdAt: '2026-09-11T14:30:00Z',
+        },
+      ],
+      tvShows: [
+        {
+          id: 'tv-id',
+          title: 'Breaking Bad',
+          posterPath: null,
+          firstAirDate: '2008-01-20',
+          voteAverage: 8.9,
+          createdAt: '2026-09-12T14:30:00Z',
+        },
+      ],
+      page: 1,
+      pageSize: 20,
+      totalCount: 2,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    };
+
+    const tvOnlyPage = {
+      movies: [],
+      tvShows: [
+        {
+          id: 'tv-id',
+          title: 'Breaking Bad',
+          posterPath: null,
+          firstAirDate: '2008-01-20',
+          voteAverage: 8.9,
+          createdAt: '2026-09-12T14:30:00Z',
+        },
+      ],
+      page: 1,
+      pageSize: 20,
+      totalCount: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    };
+
+    (useWatchlistItems as jest.Mock).mockImplementation(
+      (_watchlistId: string, query: { mediaType?: string }) => ({
+        data: {
+          pages: [query.mediaType === 'tv' ? tvOnlyPage : mixedPage],
+        },
+        isLoading: false,
+        isError: false,
+        refetch: jest.fn(),
+        isRefetching: false,
+        isFetchingNextPage: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+      }),
+    );
 
     render(<WatchlistScreen />);
+    expect(screen.getByLabelText('Interstellar, Movie, 2014, rating 8.4')).toBeTruthy();
+
     fireEvent.press(screen.getByLabelText('Filter TV Shows'));
     expect(screen.getByLabelText('Breaking Bad, TV, 2008, rating 8.9')).toBeTruthy();
     expect(screen.queryByLabelText('Interstellar, Movie, 2014, rating 8.4')).toBeNull();

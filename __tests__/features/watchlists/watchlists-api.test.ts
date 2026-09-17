@@ -39,7 +39,10 @@ describe('watchlists api routes', () => {
     expect(buildWatchlistsPath()).toBe('/api/watchlists');
     expect(buildWatchlistPath(watchlistId)).toBe(`/api/watchlists/${watchlistId}`);
     expect(buildWatchlistItemsPath(watchlistId, 1, 20)).toBe(
-      `/api/watchlists/${watchlistId}/items?page=1&pageSize=20`,
+      `/api/watchlists/${watchlistId}/items?mediaType=all&sort=recentlyAdded&page=1&pageSize=20`,
+    );
+    expect(buildWatchlistItemsPath(watchlistId, 2, 50, 'movie', 'titleAsc')).toBe(
+      `/api/watchlists/${watchlistId}/items?mediaType=movie&sort=titleAsc&page=2&pageSize=50`,
     );
   });
 
@@ -96,7 +99,7 @@ describe('watchlists api client', () => {
     await getWatchlistItems(watchlistId, 1, 20);
     expect(api.get).toHaveBeenCalledWith(`/api/watchlists/${watchlistId}`, { signal: undefined });
     expect(api.get).toHaveBeenCalledWith(
-      `/api/watchlists/${watchlistId}/items?page=1&pageSize=20`,
+      `/api/watchlists/${watchlistId}/items?mediaType=all&sort=recentlyAdded&page=1&pageSize=20`,
       { signal: undefined },
     );
   });

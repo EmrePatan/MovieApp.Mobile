@@ -34,6 +34,19 @@ export interface WatchlistTvShowItemResponse {
   createdAt: string;
 }
 
+export type WatchlistContentType = 'movie' | 'tv';
+
+export interface WatchlistCatalogItemResponse {
+  contentType: WatchlistContentType;
+  id: string;
+  title: string;
+  posterPath: string | null;
+  releaseDate: string | null;
+  firstAirDate: string | null;
+  voteAverage: number;
+  createdAt: string;
+}
+
 export interface WatchlistMembershipResponse {
   watchlistIds: string[];
   isInWatchlist: boolean;
@@ -49,10 +62,9 @@ export interface WatchlistDetailResponse {
 }
 
 export interface WatchlistItemsResponse extends PaginationMeta {
+  items: WatchlistCatalogItemResponse[];
   movies: WatchlistMovieItemResponse[];
   tvShows: WatchlistTvShowItemResponse[];
 }
-
-export type WatchlistContentType = 'movie' | 'tv';
 
 export const DEFAULT_WATCHLIST_PAGE_SIZE = 20;

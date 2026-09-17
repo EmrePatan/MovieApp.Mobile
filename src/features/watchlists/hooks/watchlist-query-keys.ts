@@ -13,8 +13,10 @@ export function watchlistItemsQueryKey(watchlistId: string, page = 1, pageSize =
 export function watchlistItemsInfiniteQueryKey(
   watchlistId: string,
   pageSize = 20,
+  mediaType: string = 'all',
+  sort: string = 'recentlyAdded',
 ) {
-  return ['watchlist', watchlistId, 'items', pageSize] as const;
+  return ['watchlist', watchlistId, 'items', pageSize, mediaType, sort] as const;
 }
 
 export function watchlistMembershipQueryKey(
