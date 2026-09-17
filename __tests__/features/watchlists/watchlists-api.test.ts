@@ -12,6 +12,7 @@ import {
   addTvToWatchlist,
   createWatchlist,
   deleteWatchlist,
+  updateWatchlist,
   getWatchlist,
   getWatchlistItems,
   getWatchlists,
@@ -24,6 +25,7 @@ jest.mock('@/api/client', () => ({
   api: {
     get: jest.fn(),
     post: jest.fn(),
+    patch: jest.fn(),
     delete: jest.fn(),
   },
 }));
@@ -72,6 +74,14 @@ describe('watchlists api client', () => {
     (api.post as jest.Mock).mockResolvedValue({ id: watchlistId, name: 'My List' });
     await createWatchlist('My List');
     expect(api.post).toHaveBeenCalledWith('/api/watchlists', { name: 'My List' });
+  });
+
+  it('updates a watchlist name', async () => {
+    (api.patch as jest.Mock).mockResolvedValue({ id: watchlistId, name: 'Renamed List' });
+    await updateWatchlist(watchlistId, 'Renamed List');
+    expect(api.patch).toHaveBeenCalledWith(`/api/watchlists/${watchlistId}`, {
+      name: 'Renamed List',
+    });
   });
 
   it('deletes a watchlist', async () => {

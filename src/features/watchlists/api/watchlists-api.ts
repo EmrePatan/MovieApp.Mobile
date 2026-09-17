@@ -11,6 +11,7 @@ import {
 } from './routes';
 import type {
   CreateWatchlistRequest,
+  UpdateWatchlistRequest,
   WatchlistDetailResponse,
   WatchlistItemsResponse,
   WatchlistMembershipResponse,
@@ -43,6 +44,14 @@ export async function getWatchlist(
   signal?: AbortSignal,
 ): Promise<WatchlistDetailResponse> {
   return api.get<WatchlistDetailResponse>(buildWatchlistPath(watchlistId), { signal });
+}
+
+export async function updateWatchlist(
+  watchlistId: string,
+  name: string,
+): Promise<WatchlistSummaryResponse> {
+  const body: UpdateWatchlistRequest = { name };
+  return api.patch<WatchlistSummaryResponse>(buildWatchlistPath(watchlistId), body);
 }
 
 export async function deleteWatchlist(watchlistId: string): Promise<void> {

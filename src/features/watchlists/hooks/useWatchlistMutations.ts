@@ -4,6 +4,7 @@ import {
   addTvToWatchlist,
   createWatchlist,
   deleteWatchlist,
+  updateWatchlist,
   removeMovieFromWatchlist,
   removeTvFromWatchlist,
 } from '../api/watchlists-api';
@@ -89,6 +90,20 @@ export function useDeleteWatchlistMutation() {
     mutationFn: (watchlistId: string) => deleteWatchlist(watchlistId),
     onSuccess: (_result, watchlistId) => {
       invalidateAllWatchlistItemQueries(queryClient, watchlistId);
+      invalidateLibraryQueries(queryClient);
+    },
+  });
+}
+
+export function useRenameWatchlistMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ watchlistId, name }: { watchlistId: string; name: string }) =>
+      updateWatchlist(watchlistId, name),
+    onSuccess: (_result, variables) => {
+      invalidateAllWatchlistItemQueries(queryClient, variables.watchlistId);
+      invalidateLibraryQueries(queryClient);
     },
   });
 }

@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import { ErrorView } from '@/components/common/ErrorView';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { RenameWatchlistModal } from '@/features/watchlists/components/RenameWatchlistModal';
 import { useDeleteWatchlistMutation, useRemoveWatchlistItemMutation } from '@/features/watchlists/hooks/useWatchlistMutations';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
@@ -45,6 +46,7 @@ export function LibraryWatchlistDetailContent({
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
+  const [renameModalVisible, setRenameModalVisible] = useState(false);
 
   const watchlist = useMemo(
     () => watchlistsQuery.data?.find((entry) => entry.id === watchlistId) ?? null,
@@ -68,7 +70,7 @@ export function LibraryWatchlistDetailContent({
     }
 
     Alert.alert(
-      'Delete watchlist',
+      'Delete list',
       `Delete "${watchlist.name}"? This cannot be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -93,15 +95,19 @@ export function LibraryWatchlistDetailContent({
     }
 
     Alert.alert(
-      watchlist.name,
+      'List options',
       undefined,
       [
-        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Rename List',
+          onPress: () => setRenameModalVisible(true),
+        },
         {
           text: 'Delete List',
           style: 'destructive',
           onPress: confirmDeleteWatchlist,
         },
+        { text: 'Cancel', style: 'cancel' },
       ],
     );
   }, [confirmDeleteWatchlist, watchlist]);
@@ -183,11 +189,21 @@ export function LibraryWatchlistDetailContent({
     </LibraryWatchlistDetailHeader>
   );
 
+  const renameModal = (
+    <RenameWatchlistModal
+      visible={renameModalVisible}
+      watchlistId={watchlist?.id ?? null}
+      initialName={watchlist?.name ?? ''}
+      onClose={() => setRenameModalVisible(false)}
+    />
+  );
+
   if (itemsQuery.isLoading && items.length === 0) {
     return (
       <View style={styles.screen}>
         {listHeader}
         <LibraryLoadingState accessibilityLabel="Loading watchlist items" />
+        {renameModal}
       </View>
     );
   }
@@ -203,6 +219,7 @@ export function LibraryWatchlistDetailContent({
             retryLabel="Try Again"
           />
         </View>
+        {renameModal}
       </View>
     );
   }
@@ -232,7 +249,8 @@ export function LibraryWatchlistDetailContent({
     );
 
   return (
-    <FlatList
+    <>
+      <FlatList
       testID="library-watchlist-detail"
       data={displayItems}
       keyExtractor={getLibraryItemKey}
@@ -262,7 +280,9 @@ export function LibraryWatchlistDetailContent({
       initialNumToRender={layout.verticalList.initialNumToRender}
       maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
       windowSize={layout.verticalList.windowSize}
-    />
+      />
+      {renameModal}
+    </>
   );
 }
 

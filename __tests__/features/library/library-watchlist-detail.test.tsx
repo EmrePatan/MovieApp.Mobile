@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { LibraryWatchlistDetailContent } from '@/features/library/components/LibraryWatchlistDetailContent';
 const mockPush = jest.fn();
 const mockBack = jest.fn();
@@ -72,9 +72,33 @@ jest.mock('@/features/watchlists/hooks/useWatchlistItems', () => ({
 const mockDeleteMutate = jest.fn();
 const mockRemoveMutate = jest.fn();
 
+jest.mock('@/features/watchlists/components/RenameWatchlistModal', () => {
+  const mockReact = require('react');
+  const { Text } = require('react-native');
+
+  return {
+    RenameWatchlistModal: ({
+      visible,
+      initialName,
+    }: {
+      visible: boolean;
+      initialName: string;
+    }) =>
+      visible
+        ? mockReact.createElement(Text, { testID: 'rename-watchlist-modal' }, initialName)
+        : null,
+  };
+});
+
+const mockRenameMutate = jest.fn();
+
 jest.mock('@/features/watchlists/hooks/useWatchlistMutations', () => ({
   useDeleteWatchlistMutation: jest.fn(() => ({
     mutate: mockDeleteMutate,
+    isPending: false,
+  })),
+  useRenameWatchlistMutation: jest.fn(() => ({
+    mutate: mockRenameMutate,
     isPending: false,
   })),
   useRemoveWatchlistItemMutation: jest.fn(() => ({
@@ -107,21 +131,38 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.queryByText('Delete List')).toBeNull();
   });
 
-  it('exposes Delete List through the overflow menu', () => {
+  it('exposes rename and delete actions through the overflow menu', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
 
     expect(Alert.alert).toHaveBeenCalledWith(
-      'Weekend Movies',
+      'List options',
       undefined,
       expect.arrayContaining([
+        expect.objectContaining({ text: 'Rename List' }),
         expect.objectContaining({ text: 'Delete List', style: 'destructive' }),
       ]),
     );
   });
 
-  it('still confirms and deletes the watchlist from the overflow action', () => {
+  it('opens rename list modal from the overflow menu', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(screen.getByLabelText('Watchlist options'));
+    const overflowAlert = (Alert.alert as jest.Mock).mock.calls[0];
+    const renameAction = overflowAlert[2].find(
+      (action: { text: string }) => action.text === 'Rename List',
+    );
+
+    act(() => {
+      renameAction.onPress();
+    });
+
+    expect(screen.getByTestId('rename-watchlist-modal')).toHaveTextContent('Weekend Movies');
+  });
+
+  it('still confirms and deletes the list from the overflow action', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
@@ -133,7 +174,7 @@ describe('LibraryWatchlistDetailContent', () => {
     deleteListAction.onPress();
 
     expect(Alert.alert).toHaveBeenCalledWith(
-      'Delete watchlist',
+      'Delete list',
       'Delete "Weekend Movies"? This cannot be undone.',
       expect.any(Array),
     );

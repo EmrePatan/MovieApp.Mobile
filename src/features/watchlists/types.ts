@@ -4,6 +4,10 @@ export interface CreateWatchlistRequest {
   name: string;
 }
 
+export interface UpdateWatchlistRequest {
+  name: string;
+}
+
 export interface WatchlistSummaryResponse {
   id: string;
   name: string;
