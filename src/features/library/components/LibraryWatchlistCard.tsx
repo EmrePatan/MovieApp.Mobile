@@ -28,7 +28,7 @@ export const LibraryWatchlistCard = memo(function LibraryWatchlistCard({
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View style={styles.iconWrap}>
-        <Ionicons name="bookmark" size={20} color={colors.accent} />
+        <Ionicons name="bookmark" size={20} color={colors.libraryWatchlist} />
       </View>
       <View style={styles.meta}>
         <AppText variant="body" numberOfLines={2} style={styles.title}>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.libraryWatchlistTint12,
   },
   meta: {
     flex: 1,

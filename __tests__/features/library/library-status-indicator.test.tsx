@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 import { LibraryStatusIndicator } from '@/features/library/components/LibraryStatusIndicator';
+import { colors } from '@/theme/colors';
 
 describe('LibraryStatusIndicator', () => {
   it('renders completed semantics with label text', () => {
@@ -34,6 +35,13 @@ describe('LibraryStatusIndicator', () => {
     render(<LibraryStatusIndicator status="liked" display="badge" />);
 
     expect(screen.queryByText('Liked')).toBeNull();
+  });
+
+  it('renders saved badge with accent bookmark styling', () => {
+    render(<LibraryStatusIndicator status="saved" display="badge" />);
+
+    expect(JSON.stringify(screen.toJSON())).toContain(colors.libraryWatchlist);
+    expect(JSON.stringify(screen.toJSON())).toContain('bookmark');
   });
 
   it('renders poster progress overlay without a status label row', () => {

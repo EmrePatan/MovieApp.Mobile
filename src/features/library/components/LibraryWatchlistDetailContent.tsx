@@ -12,7 +12,7 @@ import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { RenameWatchlistModal } from '@/features/watchlists/components/RenameWatchlistModal';
 import { WatchlistListOptionsSheet } from '@/features/watchlists/components/WatchlistListOptionsSheet';
 import { useDeleteWatchlistMutation, useRemoveWatchlistItemMutation } from '@/features/watchlists/hooks/useWatchlistMutations';
-import { useStableFetchedItems } from '@/features/watchlists/hooks/useStableFetchedItems';
+import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import { flattenWatchlistPages } from '@/features/watchlists/utils/library-items';
@@ -63,7 +63,7 @@ export function LibraryWatchlistDetailContent({
     () => flattenWatchlistPages(itemsQuery.data?.pages ?? []),
     [itemsQuery.data?.pages],
   );
-  const stableItems = useStableFetchedItems(items, itemsQuery.isFetching);
+  const stableItems = useStableFetchedItems(items, itemsQuery.isFetching, watchlistId);
 
   const gridItems = useMemo(
     () => stableItems.map(mapWatchlistItemToLibraryGridItem),

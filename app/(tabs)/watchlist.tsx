@@ -27,7 +27,7 @@ import {
   useDeleteWatchlistMutation,
   useRemoveWatchlistItemMutation,
 } from '@/features/watchlists/hooks/useWatchlistMutations';
-import { useStableFetchedItems } from '@/features/watchlists/hooks/useStableFetchedItems';
+import { useStableFetchedItems } from '@/features/library/hooks/useStableFetchedItems';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import { flattenWatchlistPages, type LibraryItem } from '@/features/watchlists/utils/library-items';
@@ -82,7 +82,11 @@ export default function WatchlistScreen() {
     () => flattenWatchlistPages(itemsQuery.data?.pages ?? []),
     [itemsQuery.data?.pages],
   );
-  const displayItems = useStableFetchedItems(items, itemsQuery.isFetching);
+  const displayItems = useStableFetchedItems(
+    items,
+    itemsQuery.isFetching,
+    selectedWatchlistId ?? 'none',
+  );
 
   const handleSignIn = useCallback(() => {
     router.push('/(auth)/login');

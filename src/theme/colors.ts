@@ -51,4 +51,6 @@ export const colors = {
   libraryCompletedTint12: 'rgba(155, 123, 212, 0.12)',
   libraryWatching: '#F5A623',
   libraryWatchingTint12: 'rgba(245, 166, 35, 0.12)',
+  libraryWatchlist: '#6B9FD4',
+  libraryWatchlistTint12: 'rgba(107, 159, 212, 0.12)',
 } as const;

@@ -22,7 +22,7 @@ function resolveAccentColor(status: LibraryCollectionStatus): string {
     case 'watching':
       return colors.libraryWatching;
     case 'saved':
-      return colors.textSecondary;
+      return colors.libraryWatchlist;
     case 'liked':
       return colors.accent;
     case 'watched':
@@ -64,7 +64,11 @@ export function LibraryStatusIndicator({
   if (display === 'badge') {
     return (
       <View style={styles.badge} importantForAccessibility="no-hide-descendants">
-        <Ionicons name={resolveIcon(status, status === 'liked')} size={12} color={accent} />
+        <Ionicons
+          name={resolveIcon(status, status === 'liked' || status === 'saved')}
+          size={12}
+          color={accent}
+        />
       </View>
     );
   }

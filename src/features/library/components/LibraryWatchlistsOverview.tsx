@@ -6,7 +6,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/common/AppText';
@@ -137,12 +136,6 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
         }
         ListFooterComponent={createListFooter}
         contentContainerStyle={styles.listContent}
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={watchlistsQuery.isRefetching}
-            onRefresh={() => void watchlistsQuery.refetch()}
-          />
-        }
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}

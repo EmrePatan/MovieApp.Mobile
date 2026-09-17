@@ -6,7 +6,6 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
@@ -20,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { CatalogMediaFilter } from '../types';
 import type { LibraryCategory, LibraryItem } from '../types/library';
 import { useLibrary } from '../hooks/useLibrary';
+import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { flattenLibraryPages } from '../utils/flatten-library-pages';
 import { getLibraryGridItemKey } from '../utils/library-item-key';
 import { resolveLibraryEmptyCopy } from '../utils/library-empty-copy';
@@ -61,6 +61,7 @@ export function LibraryHubContent() {
     () => flattenLibraryPages(libraryQuery.data?.pages ?? []),
     [libraryQuery.data?.pages],
   );
+  const displayItems = useStableFetchedItems(items, libraryQuery.isFetching, category);
 
   const handleCategoryChange = useCallback((nextCategory: LibraryCategory) => {
     if (nextCategory === category) {
@@ -157,7 +158,7 @@ export function LibraryHubContent() {
     return <LibraryWatchlistsOverview listHeader={listHeader} />;
   }
 
-  if (libraryQuery.isLoading && items.length === 0) {
+  if (libraryQuery.isLoading && displayItems.length === 0) {
     return (
       <View style={[styles.screen, styles.screenPadding]}>
         {listHeader}
@@ -169,7 +170,7 @@ export function LibraryHubContent() {
     );
   }
 
-  if (libraryQuery.isError && items.length === 0) {
+  if (libraryQuery.isError && displayItems.length === 0) {
     const message = isApiError(libraryQuery.error)
       ? libraryQuery.error.userMessage
       : 'Unable to load your library.';
@@ -199,7 +200,7 @@ export function LibraryHubContent() {
   return (
     <FlatList
       testID="library-grid-three-column"
-      data={items}
+      data={displayItems}
       keyExtractor={getLibraryGridItemKey}
       numColumns={GRID_COLUMNS}
       columnWrapperStyle={styles.row}
@@ -223,12 +224,6 @@ export function LibraryHubContent() {
             />
           </View>
         ) : null
-      }
-      refreshControl={
-        <MovieAppRefreshControl
-          refreshing={libraryQuery.isRefetching && !libraryQuery.isFetchingNextPage}
-          onRefresh={handleRefresh}
-        />
       }
       contentContainerStyle={styles.listContent}
       onEndReached={handleLoadMore}
