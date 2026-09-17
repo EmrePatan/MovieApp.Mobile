@@ -17,7 +17,7 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 
-const SWIPE_REMOVE_ACTION_WIDTH = 92;
+const SWIPE_REMOVE_ACTION_SIZE = 40;
 
 interface LibraryContentCardProps {
   item: LibraryItem;
@@ -101,9 +101,7 @@ export const LibraryContentCard = memo(function LibraryContentCard({
         {isRemoving ? (
           <ActivityIndicator color={colors.accent} size="small" />
         ) : (
-          <AppText variant="bodySmall" style={styles.swipeRemoveLabel}>
-            Remove
-          </AppText>
+          <Ionicons name="close" size={18} color={colors.accent} />
         )}
       </Pressable>
     );
@@ -181,7 +179,7 @@ export const LibraryContentCard = memo(function LibraryContentCard({
         ref={swipeableRef}
         friction={2}
         overshootRight={false}
-        rightThreshold={SWIPE_REMOVE_ACTION_WIDTH / 2}
+        rightThreshold={SWIPE_REMOVE_ACTION_SIZE / 2}
         activeOffsetX={[-24, 24]}
         failOffsetY={[-12, 12]}
         renderRightActions={renderSwipeRemoveAction}
@@ -260,18 +258,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceElevated,
   },
   swipeRemoveAction: {
-    width: SWIPE_REMOVE_ACTION_WIDTH,
+    width: SWIPE_REMOVE_ACTION_SIZE,
+    height: SWIPE_REMOVE_ACTION_SIZE,
+    alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.accentTint18,
+    backgroundColor: colors.accentTint12,
     borderWidth: 1,
     borderColor: colors.borderAccent,
-    marginVertical: spacing.sm,
-    marginRight: layout.screenPaddingHorizontal,
-    borderRadius: borderRadius.md,
-  },
-  swipeRemoveLabel: {
-    color: colors.accent,
-    fontWeight: '600',
+    marginRight: spacing.md,
+    borderRadius: borderRadius.full,
   },
 });

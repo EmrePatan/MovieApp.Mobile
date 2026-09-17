@@ -177,7 +177,6 @@ describe('LibraryWatchlistDetailContent', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.queryByLabelText('Remove Interstellar from this list')).toBeNull();
-    expect(screen.queryByText('Remove')).toBeNull();
   });
 
   it('keeps item removal reachable through swipe and working', () => {
