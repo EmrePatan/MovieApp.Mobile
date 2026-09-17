@@ -46,8 +46,8 @@ export function LibraryMediaFilterControl({ value, onChange }: LibraryMediaFilte
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.xs,
-    paddingTop: spacing.xs,
   },
   chip: {
     minHeight: 32,

@@ -21,9 +21,8 @@ import { getAvailableSortOptions } from '../utils/library-sort';
 import { LibraryContentCard } from './LibraryContentCard';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryLoadingState } from './LibraryLoadingState';
-import { LibraryMediaFilterControl } from './LibraryMediaFilterControl';
-import { LibrarySortControl } from './LibrarySortControl';
 import { LibraryWatchlistDetailHeader } from './LibraryWatchlistDetailHeader';
+import { LibraryWatchlistListControls } from './LibraryWatchlistListControls';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -166,14 +165,13 @@ export function LibraryWatchlistDetailContent({
   );
 
   const listControls = items.length > 0 ? (
-    <View style={styles.controls}>
-      <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
-      <LibrarySortControl
-        value={sort}
-        options={WATCHLIST_SORT_OPTIONS}
-        onChange={setSort}
-      />
-    </View>
+    <LibraryWatchlistListControls
+      typeFilter={typeFilter}
+      onTypeFilterChange={setTypeFilter}
+      sort={sort}
+      sortOptions={WATCHLIST_SORT_OPTIONS}
+      onSortChange={setSort}
+    />
   ) : null;
 
   const listHeader = (
@@ -276,10 +274,6 @@ export function LibraryWatchlistDetailContent({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-  },
-  controls: {
-    gap: spacing.xs,
-    paddingTop: spacing.xs,
   },
   listContent: {
     paddingBottom: spacing.xxl,

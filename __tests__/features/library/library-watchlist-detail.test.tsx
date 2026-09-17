@@ -157,9 +157,11 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.queryByLabelText('Filter People')).toBeNull();
   });
 
-  it('shows sort options as chips matching the media filters', () => {
+  it('shows filters and labeled sort chips in a controls panel', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
+    expect(screen.getByLabelText('Filter All')).toBeTruthy();
+    expect(screen.getByText('Sort')).toBeTruthy();
     expect(screen.getByLabelText('Sort by Recently Added')).toBeTruthy();
     expect(screen.getByLabelText('Sort by Title A–Z')).toBeTruthy();
     expect(screen.getByLabelText('Sort by Rating')).toBeTruthy();
