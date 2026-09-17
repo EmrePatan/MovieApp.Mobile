@@ -28,6 +28,18 @@ jest.mock('@/features/metrics/track-product-metric', () => ({
 const mockRefetch = jest.fn();
 const mockFetchNextPage = jest.fn();
 
+jest.mock('@/features/library/components/LibraryWatchlistsOverview', () => ({
+  LibraryWatchlistsOverview: ({ listHeader }: { listHeader: React.ReactNode }) => {
+    const { View, Text } = require('react-native');
+    return (
+      <View testID="library-watchlists-overview">
+        {listHeader}
+        <Text>Watchlists overview</Text>
+      </View>
+    );
+  },
+}));
+
 jest.mock('@/features/library/hooks/useLibrary', () => ({
   useLibrary: jest.fn(() => ({
     data: {
@@ -173,16 +185,16 @@ describe('LibraryHubContent', () => {
     ).toBeTruthy();
     expect(screen.getByText('S2 · E4 · Episode Four')).toBeTruthy();
     expect(screen.getAllByText('Watching')).toHaveLength(1);
-    expect(useLibrary).toHaveBeenCalledWith('watching', 'all');
+    expect(useLibrary).toHaveBeenCalledWith('watching', 'all', { enabled: true });
   });
 
   it('tracks filter metric when category changes', () => {
     render(<LibraryHubContent />);
 
-    fireEvent.press(screen.getByLabelText('Liked category'));
+    fireEvent.press(screen.getByLabelText('Favorites category'));
 
     expect(trackProductMetric).toHaveBeenCalledWith('library_filter_selected');
-    expect(useLibrary).toHaveBeenLastCalledWith('liked', 'all');
+    expect(useLibrary).toHaveBeenLastCalledWith('liked', 'all', { enabled: true });
   });
 
   it('hides media filter on Watching and always queries all media types', () => {
@@ -190,17 +202,17 @@ describe('LibraryHubContent', () => {
 
     expect(screen.queryByLabelText('Filter Movies')).toBeNull();
     expect(screen.queryByLabelText('Filter All')).toBeNull();
-    expect(useLibrary).toHaveBeenCalledWith('watching', 'all');
+    expect(useLibrary).toHaveBeenCalledWith('watching', 'all', { enabled: true });
   });
 
   it('shows media filter on other categories and tracks media type changes', () => {
     render(<LibraryHubContent />);
 
-    fireEvent.press(screen.getByLabelText('Liked category'));
+    fireEvent.press(screen.getByLabelText('Favorites category'));
     fireEvent.press(screen.getByLabelText('Filter Movies'));
 
     expect(trackProductMetric).toHaveBeenCalledWith('library_filter_selected');
-    expect(useLibrary).toHaveBeenLastCalledWith('liked', 'movie');
+    expect(useLibrary).toHaveBeenLastCalledWith('liked', 'movie', { enabled: true });
   });
 
   it('navigates to catalog detail from grid item', () => {
@@ -217,6 +229,17 @@ describe('LibraryHubContent', () => {
       'library',
       expect.objectContaining({ queryClient: expect.anything() }),
     );
+  });
+
+  it('renders watchlists overview instead of library grid', () => {
+    render(<LibraryHubContent />);
+
+    fireEvent.press(screen.getByLabelText('Watchlists category'));
+
+    expect(screen.getByTestId('library-watchlists-overview')).toBeTruthy();
+    expect(screen.getByText('Watchlists overview')).toBeTruthy();
+    expect(screen.queryByTestId('library-grid-three-column')).toBeNull();
+    expect(useLibrary).toHaveBeenLastCalledWith('watchlist', 'all', { enabled: false });
   });
 
   it('shows category empty state with Browse Discover CTA', () => {

@@ -12,6 +12,7 @@ import {
 } from './favorite-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { removeFavoriteFromCache } from '@/features/library/utils/optimistic-favorites-cache';
 import type { FavoriteContentType } from '../types';
 import { DEFAULT_FAVORITES_PAGE_SIZE } from '../types';
@@ -23,6 +24,7 @@ function invalidateFavoriteQueries(
 ) {
   void queryClient.invalidateQueries({ queryKey: favoriteStatusQueryKey(contentType, contentId) });
   void queryClient.invalidateQueries({ queryKey: ['favorites'] });
+  invalidateLibraryQueries(queryClient);
   invalidateRecommendationQueries(queryClient);
   invalidateProfileStatistics(queryClient);
 }

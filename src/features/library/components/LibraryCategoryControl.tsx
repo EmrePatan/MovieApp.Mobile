@@ -7,8 +7,8 @@ import { borderRadius, spacing } from '@/theme/spacing';
 const CATEGORIES: { label: string; value: LibraryCategory }[] = [
   { label: 'Watching', value: 'watching' },
   { label: 'Watched', value: 'watched' },
-  { label: 'Liked', value: 'liked' },
-  { label: 'Watchlist', value: 'watchlist' },
+  { label: 'Favorites', value: 'liked' },
+  { label: 'Watchlists', value: 'watchlist' },
 ];
 
 interface LibraryCategoryControlProps {

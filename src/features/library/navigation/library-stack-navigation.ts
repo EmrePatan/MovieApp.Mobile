@@ -13,6 +13,7 @@ export function isLibraryStackRoute(segments: readonly string[]): boolean {
     || root === 'discover-browse'
     || root === 'watch-history'
     || root === 'notifications'
+    || root === 'watchlist'
   );
 }
 

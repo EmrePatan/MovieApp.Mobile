@@ -28,6 +28,7 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="watch-history" />
         <Stack.Screen name="favorites" />
+        <Stack.Screen name="watchlist/[id]" />
         <Stack.Screen name="following" />
         <Stack.Screen name="upcoming" />
         <Stack.Screen name="notifications" />

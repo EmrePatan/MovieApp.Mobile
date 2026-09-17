@@ -49,7 +49,7 @@ describe('resolveLibraryStatusPresentation', () => {
     const presentation = resolveLibraryStatusPresentation(createItem('liked'));
 
     expect(presentation.status).toBe('liked');
-    expect(presentation.label).toBe('Liked');
+    expect(presentation.label).toBe('Favorite');
   });
 
   it('maps watchlist items to saved status', () => {
@@ -75,7 +75,7 @@ describe('buildLibraryGridAccessibilityLabel', () => {
     const presentation = resolveLibraryStatusPresentation(item);
 
     expect(buildLibraryGridAccessibilityLabel(item, presentation, 'liked')).toBe(
-      'Sample Show, Liked',
+      'Sample Show, Favorite',
     );
   });
 });

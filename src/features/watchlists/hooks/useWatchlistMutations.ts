@@ -15,6 +15,7 @@ import {
 } from './watchlist-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { removeWatchlistItemFromCache } from '@/features/library/utils/optimistic-watchlist-cache';
 import type { WatchlistContentType } from '../types';
 import { DEFAULT_WATCHLIST_PAGE_SIZE } from '../types';
@@ -49,6 +50,7 @@ function invalidateWatchlistQueries(
 ) {
   invalidateAllWatchlistItemQueries(queryClient, watchlistId);
   invalidateWatchlistMembership(queryClient, contentType, contentId);
+  invalidateLibraryQueries(queryClient);
   invalidateRecommendationQueries(queryClient);
   invalidateProfileStatistics(queryClient);
 }
@@ -74,6 +76,7 @@ export function useCreateWatchlistForLibrary() {
     mutationFn: (name: string) => createWatchlist(name),
     onSuccess: () => {
       invalidateAllWatchlistItemQueries(queryClient);
+      invalidateLibraryQueries(queryClient);
       invalidateProfileStatistics(queryClient);
     },
   });

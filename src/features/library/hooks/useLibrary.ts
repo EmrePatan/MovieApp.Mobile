@@ -6,8 +6,17 @@ import type { LibraryCategory } from '../types/library';
 import { DEFAULT_LIBRARY_PAGE_SIZE } from '../types/library';
 import { libraryInfiniteQueryKey } from './library-query-keys';
 
-export function useLibrary(category: LibraryCategory, mediaType: CatalogMediaFilter) {
+interface UseLibraryOptions {
+  enabled?: boolean;
+}
+
+export function useLibrary(
+  category: LibraryCategory,
+  mediaType: CatalogMediaFilter,
+  options: UseLibraryOptions = {},
+) {
   const { isAuthenticated } = useAuth();
+  const enabled = options.enabled ?? true;
 
   return useInfiniteQuery({
     queryKey: libraryInfiniteQueryKey(category, mediaType),
@@ -15,7 +24,7 @@ export function useLibrary(category: LibraryCategory, mediaType: CatalogMediaFil
       getLibrary(category, mediaType, pageParam, DEFAULT_LIBRARY_PAGE_SIZE, signal),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && enabled,
     staleTime: 30_000,
   });
 }

@@ -27,7 +27,7 @@ export function resolveLibraryStatusPresentation(item: LibraryItem): LibraryStat
     case 'liked':
       return {
         status: 'liked',
-        label: 'Liked',
+        label: 'Favorite',
       };
     case 'watchlist':
       return {
@@ -70,7 +70,7 @@ export function buildLibraryGridAccessibilityLabel(
   if (category === 'watched') {
     parts.push('Watched');
   } else if (category === 'liked') {
-    parts.push('Liked');
+    parts.push('Favorite');
   } else if (category === 'watchlist') {
     parts.push('Watchlist');
   } else {

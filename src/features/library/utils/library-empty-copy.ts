@@ -30,14 +30,14 @@ export function resolveLibraryEmptyCopy(
     case 'liked':
       return {
         icon: 'heart',
-        title: `No liked ${mediaLabel} yet`,
-        message: 'Save movies and shows you love to build your liked collection.',
+        title: `No favorite ${mediaLabel} yet`,
+        message: 'Save movies and shows you love to build your favorites collection.',
       };
     case 'watchlist':
       return {
         icon: 'bookmark',
-        title: `No saved ${mediaLabel} yet`,
-        message: 'Add titles to any watchlist and they will appear here.',
+        title: 'No watchlists yet',
+        message: 'Create a list to save movies and TV shows you want to watch.',
       };
     default:
       return {

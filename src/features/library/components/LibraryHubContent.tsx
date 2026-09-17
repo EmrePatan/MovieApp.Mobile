@@ -27,6 +27,7 @@ import { LibraryCategoryControl } from './LibraryCategoryControl';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryGridCard } from './LibraryGridCard';
 import { LibraryMediaFilterControl } from './LibraryMediaFilterControl';
+import { LibraryWatchlistsOverview } from './LibraryWatchlistsOverview';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -43,9 +44,12 @@ export function LibraryHubContent() {
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState<LibraryCategory>(DEFAULT_CATEGORY);
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>(DEFAULT_MEDIA_FILTER);
+  const isWatchlistsCategory = category === 'watchlist';
   const effectiveMediaType = category === 'watching' ? 'all' : mediaType;
 
-  const libraryQuery = useLibrary(category, effectiveMediaType);
+  const libraryQuery = useLibrary(category, effectiveMediaType, {
+    enabled: !isWatchlistsCategory,
+  });
 
   const itemWidth = useMemo(
     () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
@@ -131,7 +135,7 @@ export function LibraryHubContent() {
         Your personal collection
       </AppText>
       <LibraryCategoryControl value={category} onChange={handleCategoryChange} />
-      {category !== 'watching' ? (
+      {category !== 'watching' && !isWatchlistsCategory ? (
         <LibraryMediaFilterControl value={mediaType} onChange={handleMediaTypeChange} />
       ) : null}
     </View>
@@ -147,6 +151,10 @@ export function LibraryHubContent() {
         <AppButton title="Sign in" onPress={() => router.push('/(auth)/login')} />
       </View>
     );
+  }
+
+  if (isWatchlistsCategory) {
+    return <LibraryWatchlistsOverview listHeader={listHeader} />;
   }
 
   if (libraryQuery.isLoading && items.length === 0) {
