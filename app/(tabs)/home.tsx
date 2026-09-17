@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -20,6 +20,7 @@ import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
+import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -28,6 +29,11 @@ export default function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isHomeFocused, setIsHomeFocused] = useState(true);
+  const hasLoggedMeaningfulRender = useRef(false);
+
+  useEffect(() => {
+    markHomePerfEvent('home_mount');
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -43,6 +49,17 @@ export default function HomeScreen() {
     'all',
     DEFAULT_HOME_SECTION_SIZE,
   );
+
+  useEffect(() => {
+    if (hasLoggedMeaningfulRender.current) {
+      return;
+    }
+
+    if (!isLoading || data) {
+      hasLoggedMeaningfulRender.current = true;
+      markHomePerfEvent('first_meaningful_render');
+    }
+  }, [data, isLoading]);
 
   const { sections, heroItems, showColdWelcome } = useMemo(() => {
     const nonEmptySections = (data?.sections ?? []).filter(

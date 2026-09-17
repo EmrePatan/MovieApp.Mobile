@@ -21,6 +21,7 @@ import {
   resetPushPermissionRequestState,
   unregisterKnownPushDeviceAsync,
 } from '@/features/follows/services/push-device-service';
+import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await saveAccessToken(accessToken);
       syncToken(accessToken);
       setUser(profile);
+      markHomePerfEvent('session_established');
     },
     [syncToken],
   );
@@ -137,6 +139,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(
     async (email: string, password: string) => {
       const response = await loginRequest({ email, password });
+      markHomePerfEvent('login_response');
       await establishSession(response.accessToken, response.user);
     },
     [establishSession],

@@ -14,6 +14,7 @@ import { AuthDivider } from '@/features/auth/components/AuthDivider';
 import { AuthLink } from '@/features/auth/components/AuthLink';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
+import { beginHomeColdStartTrace } from '@/perf/home-cold-start-trace';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -35,6 +36,7 @@ export default function LoginScreen() {
 
     setFormError(null);
     setIsSubmitting(true);
+    beginHomeColdStartTrace();
 
     try {
       await login(email.trim(), password);

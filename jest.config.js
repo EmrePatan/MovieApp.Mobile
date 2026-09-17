@@ -11,6 +11,7 @@ module.exports = {
         '<rootDir>/__tests__/hooks/**/*.test.ts',
         '<rootDir>/__tests__/theme/**/*.test.ts',
         '<rootDir>/__tests__/features/**/*.test.ts',
+        '<rootDir>/__tests__/perf/**/*.test.ts',
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {
