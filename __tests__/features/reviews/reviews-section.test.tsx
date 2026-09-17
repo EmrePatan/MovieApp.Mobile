@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert } from 'react-native';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
-import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
+import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
 import { useMyReview } from '@/features/reviews/hooks/useMyReview';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
@@ -104,7 +104,7 @@ function mockReviewsQuery(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe('ReviewsSection', () => {
+describe('ReviewsDetailContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRequireAuth.mockReturnValue(true);
@@ -133,10 +133,10 @@ describe('ReviewsSection', () => {
   });
 
   it('renders review count and public reviews', () => {
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByText('Reviews')).toBeTruthy();
-    expect(screen.getByLabelText('1 review')).toBeTruthy();
+    expect(screen.getByText('1 review')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
@@ -160,7 +160,7 @@ describe('ReviewsSection', () => {
       }),
     );
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByText('No reviews yet')).toBeTruthy();
     expect(screen.getByText('Be the first to share your thoughts.')).toBeTruthy();
   });
@@ -174,7 +174,7 @@ describe('ReviewsSection', () => {
       }),
     );
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByText('Server error.')).toBeTruthy();
     fireEvent.press(screen.getByText('Try Again'));
     expect(mockRefetch).toHaveBeenCalled();
@@ -183,7 +183,7 @@ describe('ReviewsSection', () => {
   it('prompts login when writing a review while logged out', () => {
     mockRequireAuth.mockReturnValue(false);
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByText('Write a review'));
 
     expect(mockCreateMutate).not.toHaveBeenCalled();
@@ -191,7 +191,7 @@ describe('ReviewsSection', () => {
   });
 
   it('opens composer and submits a new review', async () => {
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByText('Write a review'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
@@ -213,7 +213,7 @@ describe('ReviewsSection', () => {
       isLoading: false,
     });
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByText('Your review')).toBeTruthy();
     expect(screen.getByText('Jane Doe')).toBeTruthy();
@@ -227,7 +227,7 @@ describe('ReviewsSection', () => {
       isLoading: false,
     });
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByLabelText('Edit review'));
     fireEvent.changeText(screen.getByLabelText('Review'), 'Updated take.');
@@ -249,7 +249,7 @@ describe('ReviewsSection', () => {
       isLoading: false,
     });
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByLabelText('Delete review'));
 
     expect(alertSpy).toHaveBeenCalled();
@@ -265,13 +265,13 @@ describe('ReviewsSection', () => {
       }),
     );
 
-    render(<ReviewsSection contentType="movie" contentId={movieId} />);
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByText('Load more reviews'));
     expect(mockFetchNextPage).toHaveBeenCalled();
   });
 
   it('uses tv review query for tv content', () => {
-    render(<ReviewsSection contentType="tv" contentId={movieId} />);
-    expect(useTvShowReviews).toHaveBeenCalledWith(movieId);
+    render(<ReviewsDetailContent contentType="tv" contentId={movieId} />);
+    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, undefined);
   });
 });

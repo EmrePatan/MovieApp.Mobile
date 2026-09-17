@@ -50,8 +50,8 @@ jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
   useToggleSeasonWatched: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
-jest.mock('@/features/reviews/components/ReviewsSection', () => ({
-  ReviewsSection: () => null,
+jest.mock('@/features/reviews/components/ReviewsLinkRow', () => ({
+  ReviewsLinkRow: () => null,
 }));
 
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({

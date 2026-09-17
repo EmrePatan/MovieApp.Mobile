@@ -5,7 +5,7 @@ import { DetailOverview } from '../../shared/components/DetailSections';
 import { DetailInlineRatingSection } from '@/features/ratings/components/DetailInlineRatingSection';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
-import { ReviewsSection } from '@/features/reviews/components/ReviewsSection';
+import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
 import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
@@ -49,6 +49,12 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       />
       <DetailOverview overview={show.overview} />
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
+      <ReviewsLinkRow
+        contentType="tv"
+        contentId={show.id}
+        contentTitle={show.title}
+        returnHref={buildTvDetailRoute(show.id)}
+      />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <WhereToWatchRail contentType="tv" contentId={show.id} />
       <CatalogGallerySection
@@ -57,7 +63,6 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         returnHref={buildTvDetailRoute(show.id)}
       />
       <CastRail contentType="tv" contentId={show.id} title={show.title} />
-      <ReviewsSection contentType="tv" contentId={show.id} />
       <SimilarContentSection contentType="tv" contentId={show.id} />
     </View>
   );

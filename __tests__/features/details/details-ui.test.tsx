@@ -65,8 +65,8 @@ jest.mock('@/features/watch-history/components/WatchedButton', () => ({
   WatchedButton: () => null,
 }));
 
-jest.mock('@/features/reviews/components/ReviewsSection', () => ({
-  ReviewsSection: () => null,
+jest.mock('@/features/reviews/components/ReviewsLinkRow', () => ({
+  ReviewsLinkRow: () => null,
 }));
 
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({

@@ -77,6 +77,34 @@ export function buildCollectionDetailRoute(tmdbCollectionId: number): string {
   return `/collection/${encodePathSegment(tmdbCollectionId)}`;
 }
 
+export function buildMovieReviewsRoute(
+  movieId: string,
+  options?: { title?: string },
+): string {
+  const base = `/reviews/movie/${encodePathSegment(movieId)}`;
+
+  if (!options?.title) {
+    return base;
+  }
+
+  const params = new URLSearchParams({ title: options.title });
+  return `${base}?${params.toString()}`;
+}
+
+export function buildTvReviewsRoute(
+  tvShowId: string,
+  options?: { title?: string },
+): string {
+  const base = `/reviews/tv/${encodePathSegment(tvShowId)}`;
+
+  if (!options?.title) {
+    return base;
+  }
+
+  const params = new URLSearchParams({ title: options.title });
+  return `${base}?${params.toString()}`;
+}
+
 export function buildCreditsRoute(
   type: 'movie' | 'tv',
   catalogId: string,
@@ -93,6 +121,21 @@ export function buildCreditsRoute(
 
   const params = new URLSearchParams({ title: options.title });
   return `${base}?${params.toString()}`;
+}
+
+export function parseReviewsCatalogIdFromPathname(
+  pathname: string,
+  contentType: 'movie' | 'tv',
+): string | undefined {
+  const pattern =
+    contentType === 'movie' ? /\/reviews\/movie\/([^/]+)/ : /\/reviews\/tv\/([^/]+)/;
+  const match = pathname.match(pattern);
+  if (!match?.[1]) {
+    return undefined;
+  }
+
+  const id = decodeURIComponent(match[1]);
+  return isValidGuid(id) ? id : undefined;
 }
 
 export function parseCreditsCatalogIdFromPathname(

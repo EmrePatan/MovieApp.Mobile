@@ -45,7 +45,7 @@ jest.mock('@/features/details/credits/components/CastRail', () => ({ CastRail: (
 jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () => ({
   WhereToWatchRail: () => null,
 }));
-jest.mock('@/features/reviews/components/ReviewsSection', () => ({ ReviewsSection: () => null }));
+jest.mock('@/features/reviews/components/ReviewsLinkRow', () => ({ ReviewsLinkRow: () => null }));
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
   SimilarContentSection: () => null,
 }));

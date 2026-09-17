@@ -1,4 +1,5 @@
 export const DEFAULT_REVIEW_PAGE_SIZE = 20;
+export const REVIEW_COUNT_PAGE_SIZE = 1;
 export const MAX_REVIEW_CONTENT_LENGTH = 5000;
 
 export type ReviewContentType = 'movie' | 'tv';

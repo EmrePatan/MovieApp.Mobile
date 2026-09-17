@@ -16,6 +16,10 @@ import {
   returnFromGalleryDetail,
 } from '../navigation/gallery-detail-navigation';
 import {
+  isReviewsDetailRoute,
+  returnFromReviewsDetail,
+} from '../navigation/reviews-detail-navigation';
+import {
   isCreditsDetailRoute,
   returnFromCreditsDetail,
 } from '../navigation/credits-detail-navigation';
@@ -77,6 +81,11 @@ export function DetailBackButton({
 
     if (isGalleryDetailRoute(segments)) {
       returnFromGalleryDetail(router);
+      return;
+    }
+
+    if (isReviewsDetailRoute(segments)) {
+      returnFromReviewsDetail(router);
       return;
     }
 
