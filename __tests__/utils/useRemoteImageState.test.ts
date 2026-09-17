@@ -1,4 +1,4 @@
-import { getInitialState } from '@/hooks/useRemoteImageState';
+import { getInitialState, REMOTE_IMAGE_LOAD_TIMEOUT_MS } from '@/hooks/useRemoteImageState';
 
 describe('useRemoteImageState', () => {
   it('starts loading for a valid URL', () => {
@@ -17,5 +17,9 @@ describe('useRemoteImageState', () => {
 
   it('resets to error when the source becomes missing', () => {
     expect(getInitialState(null)).toBe('error');
+  });
+
+  it('defines a bounded loading timeout', () => {
+    expect(REMOTE_IMAGE_LOAD_TIMEOUT_MS).toBeGreaterThan(0);
   });
 });

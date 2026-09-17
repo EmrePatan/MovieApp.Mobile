@@ -34,6 +34,7 @@ export const BackdropImage = memo(function BackdropImage({
         style={[styles.image, { height }]}
         resizeMode="cover"
         onLoadStart={markLoading}
+        onLoad={markLoaded}
         onLoadEnd={markLoaded}
         onError={markError}
       />
@@ -86,6 +87,7 @@ export const CatalogImage = memo(function CatalogImage({
             style={[styles.image, rounded && styles.rounded, { width, height }]}
             resizeMode="cover"
             onLoadStart={markLoading}
+            onLoad={markLoaded}
             onLoadEnd={markLoaded}
             onError={markError}
           />

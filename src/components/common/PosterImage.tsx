@@ -47,6 +47,7 @@ export const PosterImage = memo(function PosterImage({
             style={[styles.image, { width, height }]}
             resizeMode="cover"
             onLoadStart={markLoading}
+            onLoad={markLoaded}
             onLoadEnd={markLoaded}
             onError={markError}
           />
