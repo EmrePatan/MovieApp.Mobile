@@ -161,7 +161,7 @@ describe('LibraryWatchlistDetailContent', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.getByLabelText('Filter All')).toBeTruthy();
-    expect(screen.getByText('Sort')).toBeTruthy();
+    expect(screen.queryByText('Sort')).toBeNull();
     expect(screen.getByLabelText('Sort by Recently Added')).toBeTruthy();
     expect(screen.getByLabelText('Sort by Title A–Z')).toBeTruthy();
     expect(screen.getByLabelText('Sort by Rating')).toBeTruthy();

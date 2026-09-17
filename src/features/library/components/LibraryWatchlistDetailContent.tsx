@@ -177,11 +177,6 @@ export function LibraryWatchlistDetailContent({
   const listHeader = (
     <LibraryWatchlistDetailHeader
       title={watchlist?.name ?? 'Watchlist'}
-      subtitle={
-        watchlist
-          ? `${watchlist.itemCount} ${watchlist.itemCount === 1 ? 'title' : 'titles'}`
-          : undefined
-      }
       onOverflowPress={watchlist ? handleOverflowPress : undefined}
     >
       {listControls}

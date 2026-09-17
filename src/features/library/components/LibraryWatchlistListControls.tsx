@@ -24,7 +24,6 @@ export function LibraryWatchlistListControls({
       <LibraryMediaFilterControl value={typeFilter} onChange={onTypeFilterChange} />
       <LibrarySortControl
         appearance="outlined"
-        showLabel
         value={sort}
         options={sortOptions}
         onChange={onSortChange}
