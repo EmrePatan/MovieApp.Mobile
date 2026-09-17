@@ -24,31 +24,35 @@ export function LibraryWatchlistDetailHeader({
 }: LibraryWatchlistDetailHeaderProps) {
   return (
     <View style={styles.header}>
-      <View style={styles.navRow}>
-        <DetailBackButton contentInset />
-        {onOverflowPress ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={overflowAccessibilityLabel}
-            hitSlop={8}
-            onPress={onOverflowPress}
-            style={({ pressed }) => [styles.overflowButton, pressed && styles.pressed]}
-          >
-            <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
-          </Pressable>
-        ) : (
-          <View style={styles.overflowPlaceholder} />
-        )}
-      </View>
-      <View style={styles.titleBlock}>
-        <AppText variant="subtitle" numberOfLines={2} style={styles.title}>
-          {title}
-        </AppText>
-        {subtitle ? (
-          <AppText variant="caption" muted>
-            {subtitle}
+      <View style={styles.toolbar}>
+        <View style={styles.leadingSlot}>
+          <DetailBackButton contentInset />
+        </View>
+        <View style={styles.titleSlot}>
+          <AppText variant="subtitle" numberOfLines={1} center style={styles.title}>
+            {title}
           </AppText>
-        ) : null}
+          {subtitle ? (
+            <AppText variant="caption" muted center numberOfLines={1}>
+              {subtitle}
+            </AppText>
+          ) : null}
+        </View>
+        <View style={styles.trailingSlot}>
+          {onOverflowPress ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={overflowAccessibilityLabel}
+              hitSlop={8}
+              onPress={onOverflowPress}
+              style={({ pressed }) => [styles.overflowButton, pressed && styles.pressed]}
+            >
+              <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
+            </Pressable>
+          ) : (
+            <View style={styles.overflowPlaceholder} />
+          )}
+        </View>
       </View>
       {children}
     </View>
@@ -62,10 +66,29 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingBottom: spacing.sm,
   },
-  navRow: {
+  toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    minHeight: layout.touchTarget,
+  },
+  leadingSlot: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  titleSlot: {
+    flex: 2,
+    justifyContent: 'center',
+    gap: 2,
+    paddingHorizontal: spacing.xs,
+  },
+  trailingSlot: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  title: {
+    fontWeight: '600',
   },
   overflowButton: {
     width: layout.touchTarget,
@@ -76,12 +99,7 @@ const styles = StyleSheet.create({
   },
   overflowPlaceholder: {
     width: layout.touchTarget,
-  },
-  titleBlock: {
-    gap: 2,
-  },
-  title: {
-    fontWeight: '600',
+    height: layout.touchTarget,
   },
   pressed: {
     opacity: 0.85,

@@ -209,6 +209,15 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.getByLabelText('Back')).toBeTruthy();
   });
 
+  it('renders title inline with back and overflow in a single toolbar row', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    expect(screen.getByText('Weekend Movies')).toBeTruthy();
+    expect(screen.getByLabelText('Back')).toBeTruthy();
+    expect(screen.getByLabelText('Watchlist options')).toBeTruthy();
+    expect(screen.queryByText(/title/)).toBeNull();
+  });
+
   it('navigates to detail when a watchlist item is pressed', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
