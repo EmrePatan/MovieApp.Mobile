@@ -12,6 +12,7 @@ module.exports = {
         '<rootDir>/__tests__/theme/**/*.test.ts',
         '<rootDir>/__tests__/features/**/*.test.ts',
         '<rootDir>/__tests__/perf/**/*.test.ts',
+        '<rootDir>/__tests__/bootstrap/**/*.test.ts',
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {
@@ -37,6 +38,7 @@ module.exports = {
         '<rootDir>/__tests__/auth/**/*.test.tsx',
         '<rootDir>/__tests__/features/**/*.test.tsx',
         '<rootDir>/__tests__/components/**/*.test.tsx',
+        '<rootDir>/__tests__/bootstrap/**/*.test.tsx',
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts', '<rootDir>/jest.setup.ui.ts'],
       moduleNameMapper: {

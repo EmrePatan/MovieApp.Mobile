@@ -1,9 +1,10 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Stack } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
+import { AppStartupGate } from '@/bootstrap/AppStartupGate';
 import { RegionalPreferenceProvider } from '@/features/regions/RegionalPreferenceProvider';
 import { queryClient } from '@/api/query-client';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
@@ -11,6 +12,8 @@ import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
 import { colors } from '@/theme/colors';
+
+void SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const { isLoading } = useAuth();
@@ -57,9 +60,11 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <RegionalPreferenceProvider>
           <AuthProvider>
-            <NotificationBootstrapProvider>
-              <RootNavigator />
-            </NotificationBootstrapProvider>
+            <AppStartupGate>
+              <NotificationBootstrapProvider>
+                <RootNavigator />
+              </NotificationBootstrapProvider>
+            </AppStartupGate>
           </AuthProvider>
         </RegionalPreferenceProvider>
       </QueryClientProvider>
