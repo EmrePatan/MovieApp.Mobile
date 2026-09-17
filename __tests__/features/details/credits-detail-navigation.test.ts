@@ -20,8 +20,8 @@ describe('credits detail navigation', () => {
   });
 
   it('detects credits detail routes in the catalog stack', () => {
-    expect(isCreditsDetailRoute(['(tabs)', 'movie', 'id', 'credits'])).toBe(true);
-    expect(isCreditsDetailRoute(['(tabs)', 'tv', 'id', 'credits'])).toBe(true);
+    expect(isCreditsDetailRoute(['movie', 'id', 'credits'])).toBe(true);
+    expect(isCreditsDetailRoute(['tv', 'id', 'credits'])).toBe(true);
     expect(isCreditsDetailRoute(['(tabs)', 'credits', 'movie', 'id'])).toBe(false);
   });
 });

@@ -27,6 +27,10 @@ function RootNavigator() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="movie" />
+        <Stack.Screen name="tv" />
+        <Stack.Screen name="person" />
+        <Stack.Screen name="collection" />
         <Stack.Screen name="watch-history" />
         <Stack.Screen name="favorites" />
         <Stack.Screen name="watchlist/[id]" />

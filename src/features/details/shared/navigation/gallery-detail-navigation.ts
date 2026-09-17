@@ -1,20 +1,20 @@
 import type { ImperativeRouter } from 'expo-router';
-import { isCatalogChildDestinationSegment } from '../routes';
+import { getMovieSegmentIndex, getPersonSegmentIndex, getTvSegmentIndex } from './catalog-route-segments';
 
 export function isGalleryDetailRoute(segments: readonly string[]): boolean {
-  const tabsIndex = segments.indexOf('(tabs)');
-  if (tabsIndex === -1) {
-    return false;
+  const movieIndex = getMovieSegmentIndex(segments);
+  if (movieIndex !== -1) {
+    return segments[movieIndex + 2] === 'gallery';
   }
 
-  const section = segments[tabsIndex + 1];
-  if (section === 'movie' || section === 'tv') {
-    return isCatalogChildDestinationSegment(segments[tabsIndex + 3]) &&
-      segments[tabsIndex + 3] === 'gallery';
+  const tvIndex = getTvSegmentIndex(segments);
+  if (tvIndex !== -1) {
+    return segments[tvIndex + 2] === 'gallery';
   }
 
-  if (section === 'person') {
-    return segments[tabsIndex + 3] === 'gallery';
+  const personIndex = getPersonSegmentIndex(segments);
+  if (personIndex !== -1) {
+    return segments[personIndex + 2] === 'gallery';
   }
 
   return false;

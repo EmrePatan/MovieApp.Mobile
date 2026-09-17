@@ -5,7 +5,7 @@ import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { openCreditsDetail } from '@/features/details/shared/navigation/credits-detail-navigation';
 import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
-import { buildCatalogDetailRoute, buildCreditsRoute } from '@/features/details/shared/routes';
+import { buildCreditsRoute } from '@/features/details/shared/routes';
 import { useMovieCredits, useTvShowCredits } from '../hooks/useCredits';
 import type { CastMember } from '../types';
 import { CastRailItem } from './CastRailItem';
@@ -33,11 +33,7 @@ export function CastRail({ contentType, contentId, title }: CastRailProps) {
         return;
       }
 
-      openPersonDetail(
-        router,
-        member.providerPersonId,
-        buildCatalogDetailRoute(contentId, contentType),
-      );
+      openPersonDetail(router, member.providerPersonId);
     },
     [contentId, contentType, router],
   );

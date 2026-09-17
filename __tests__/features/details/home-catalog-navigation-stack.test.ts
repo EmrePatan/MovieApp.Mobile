@@ -5,114 +5,83 @@ type NavigationEvent =
   | { type: 'back' };
 
 /**
- * Models the hidden movie/tv tab stacks used by Expo Router tabs.
- * push from Home switches to the detail tab and pushes one screen.
- * back pops that screen and returns to Home when the detail stack is empty.
+ * Models the root stack above tabs. Each catalog detail push adds a screen on
+ * top of the current root history, and back pops to the previous root screen.
  */
-class TabCatalogNavigationSimulator {
+class RootCatalogNavigationSimulator {
   readonly events: NavigationEvent[] = [];
 
-  private activeTab: 'home' | 'movie' | 'tv' = 'home';
-
-  private readonly movieStack: string[] = [];
-
-  private readonly tvStack: string[] = [];
+  private readonly rootStack: string[] = ['/(tabs)'];
 
   push(href: string) {
     this.events.push({ type: 'push', href });
-
-    if (href.startsWith('/movie/')) {
-      this.activeTab = 'movie';
-      this.movieStack.push(href);
-      return;
-    }
-
-    if (href.startsWith('/tv/')) {
-      this.activeTab = 'tv';
-      this.tvStack.push(href);
-    }
+    this.rootStack.push(href);
   }
 
   back() {
     this.events.push({ type: 'back' });
-
-    if (this.activeTab === 'movie') {
-      this.movieStack.pop();
-      if (this.movieStack.length === 0) {
-        this.activeTab = 'home';
-      }
-      return;
-    }
-
-    if (this.activeTab === 'tv') {
-      this.tvStack.pop();
-      if (this.tvStack.length === 0) {
-        this.activeTab = 'home';
-      }
+    if (this.rootStack.length > 1) {
+      this.rootStack.pop();
     }
   }
 
   currentRoute(): string {
-    if (this.activeTab === 'home') {
-      return '/(tabs)/home';
-    }
-
-    const stack = this.activeTab === 'movie' ? this.movieStack : this.tvStack;
-    return stack[stack.length - 1] ?? '/(tabs)/home';
+    return this.rootStack[this.rootStack.length - 1] ?? '/(tabs)';
   }
 
-  movieStackDepth(): number {
-    return this.movieStack.length;
+  rootDepth(): number {
+    return this.rootStack.length;
   }
 }
 
-describe('Home catalog navigation stack semantics', () => {
-  it('opens A, returns Home, opens B, returns Home, opens C, returns Home', () => {
-    const navigation = new TabCatalogNavigationSimulator();
+describe('root catalog navigation stack semantics', () => {
+  it('opens A, returns to tabs, opens B, returns to tabs, opens C, returns to tabs', () => {
+    const navigation = new RootCatalogNavigationSimulator();
 
     navigation.push(buildCatalogDetailRoute('a', 'movie'));
     expect(navigation.currentRoute()).toBe('/movie/a');
-    expect(navigation.movieStackDepth()).toBe(1);
+    expect(navigation.rootDepth()).toBe(2);
 
     navigation.back();
-    expect(navigation.currentRoute()).toBe('/(tabs)/home');
-    expect(navigation.movieStackDepth()).toBe(0);
+    expect(navigation.currentRoute()).toBe('/(tabs)');
+    expect(navigation.rootDepth()).toBe(1);
 
     navigation.push(buildCatalogDetailRoute('b', 'movie'));
     expect(navigation.currentRoute()).toBe('/movie/b');
-    expect(navigation.movieStackDepth()).toBe(1);
 
     navigation.back();
-    expect(navigation.currentRoute()).toBe('/(tabs)/home');
-    expect(navigation.movieStackDepth()).toBe(0);
+    expect(navigation.currentRoute()).toBe('/(tabs)');
 
     navigation.push(buildCatalogDetailRoute('c', 'movie'));
-    expect(navigation.currentRoute()).toBe('/movie/c');
-
     navigation.back();
-    expect(navigation.currentRoute()).toBe('/(tabs)/home');
-    expect(navigation.events).toEqual([
-      { type: 'push', href: '/movie/a' },
-      { type: 'back' },
-      { type: 'push', href: '/movie/b' },
-      { type: 'back' },
-      { type: 'push', href: '/movie/c' },
-      { type: 'back' },
-    ]);
+    expect(navigation.currentRoute()).toBe('/(tabs)');
   });
 
-  it('does not keep A underneath B after returning to Home', () => {
-    const navigation = new TabCatalogNavigationSimulator();
+  it('does not keep A underneath B after returning to tabs', () => {
+    const navigation = new RootCatalogNavigationSimulator();
 
     navigation.push(buildCatalogDetailRoute('a', 'movie'));
     navigation.back();
     navigation.push(buildCatalogDetailRoute('b', 'movie'));
 
     expect(navigation.currentRoute()).toBe('/movie/b');
-    expect(navigation.movieStackDepth()).toBe(1);
+    expect(navigation.rootDepth()).toBe(2);
 
     navigation.back();
-    expect(navigation.currentRoute()).toBe('/(tabs)/home');
-    expect(navigation.movieStackDepth()).toBe(0);
+    expect(navigation.currentRoute()).toBe('/(tabs)');
+    expect(navigation.rootDepth()).toBe(1);
+  });
+
+  it('preserves an intermediate discover screen beneath detail', () => {
+    const navigation = new RootCatalogNavigationSimulator();
+
+    navigation.push('/world-cinema?region=KR');
+    navigation.push(buildCatalogDetailRoute('colony', 'movie'));
+
+    expect(navigation.currentRoute()).toBe('/movie/colony');
+    expect(navigation.rootDepth()).toBe(3);
+
+    navigation.back();
+    expect(navigation.currentRoute()).toBe('/world-cinema?region=KR');
   });
 });

@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
 import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
-import { buildCreditsRoute } from '@/features/details/shared/routes';
 import type { CastMember, CrewMember, CreditsResponse } from '../types';
 import { groupCrewByDepartment } from '../utils/group-crew-by-department';
 import { CreditCastRow } from './CreditCastRow';
@@ -43,11 +42,7 @@ export function CreditsDetailContent({
         return;
       }
 
-      openPersonDetail(
-        router,
-        member.providerPersonId,
-        buildCreditsRoute(contentType, contentId, { title }),
-      );
+      openPersonDetail(router, member.providerPersonId);
     },
     [contentId, contentType, router, title],
   );
@@ -58,11 +53,7 @@ export function CreditsDetailContent({
         return;
       }
 
-      openPersonDetail(
-        router,
-        member.providerPersonId,
-        buildCreditsRoute(contentType, contentId, { title }),
-      );
+      openPersonDetail(router, member.providerPersonId);
     },
     [contentId, contentType, router, title],
   );

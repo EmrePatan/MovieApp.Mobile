@@ -21,9 +21,9 @@ describe('reviews detail navigation', () => {
   });
 
   it('detects reviews detail routes in the catalog stack', () => {
-    expect(isReviewsDetailRoute(['(tabs)', 'movie', 'id', 'reviews'])).toBe(true);
-    expect(isReviewsDetailRoute(['(tabs)', 'tv', 'id', 'reviews'])).toBe(true);
-    expect(isReviewsDetailRoute(['(tabs)', 'movie', 'id'])).toBe(false);
+    expect(isReviewsDetailRoute(['movie', 'id', 'reviews'])).toBe(true);
+    expect(isReviewsDetailRoute(['tv', 'id', 'reviews'])).toBe(true);
+    expect(isReviewsDetailRoute(['movie', 'id'])).toBe(false);
     expect(isReviewsDetailRoute(['(tabs)', 'reviews', 'movie', 'id'])).toBe(false);
   });
 

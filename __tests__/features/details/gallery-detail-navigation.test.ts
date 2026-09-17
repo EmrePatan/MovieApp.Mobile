@@ -20,9 +20,9 @@ describe('gallery detail navigation', () => {
   });
 
   it('detects gallery detail routes in catalog and person stacks', () => {
-    expect(isGalleryDetailRoute(['(tabs)', 'movie', 'id', 'gallery'])).toBe(true);
-    expect(isGalleryDetailRoute(['(tabs)', 'tv', 'id', 'gallery'])).toBe(true);
-    expect(isGalleryDetailRoute(['(tabs)', 'person', '42', 'gallery'])).toBe(true);
+    expect(isGalleryDetailRoute(['movie', 'id', 'gallery'])).toBe(true);
+    expect(isGalleryDetailRoute(['tv', 'id', 'gallery'])).toBe(true);
+    expect(isGalleryDetailRoute(['person', '42', 'gallery'])).toBe(true);
     expect(isGalleryDetailRoute(['(tabs)', 'gallery', 'movie', 'id'])).toBe(false);
   });
 });

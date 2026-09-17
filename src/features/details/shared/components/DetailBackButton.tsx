@@ -4,21 +4,9 @@ import { useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import {
-  isRootCatalogDetailRoute,
-  returnToCatalogDetailOrigin,
-} from '../navigation/catalog-detail-navigation';
-import {
   isLibraryStackRoute,
   returnFromLibraryStackScreen,
 } from '@/features/library/navigation/library-stack-navigation';
-import {
-  isPersonFilmographyRoute,
-  returnFromPersonFilmography,
-} from '../navigation/person-filmography-navigation';
-import {
-  isPersonDetailRoute,
-  returnFromPersonDetail,
-} from '../navigation/person-detail-navigation';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -44,21 +32,6 @@ export function DetailBackButton({
   const handleBack = useCallback(() => {
     if (isLibraryStackRoute(segments)) {
       returnFromLibraryStackScreen(router);
-      return;
-    }
-
-    if (isRootCatalogDetailRoute(segments)) {
-      returnToCatalogDetailOrigin(router);
-      return;
-    }
-
-    if (isPersonFilmographyRoute(segments)) {
-      returnFromPersonFilmography(router);
-      return;
-    }
-
-    if (isPersonDetailRoute(segments)) {
-      returnFromPersonDetail(router);
       return;
     }
 

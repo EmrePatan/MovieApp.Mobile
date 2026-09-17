@@ -11,7 +11,7 @@ import { detailChildStackScreenOptions } from '@/features/details/shared/navigat
 describe('catalog child destination navigation', () => {
   const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 
-  it('uses nested catalog stack routes instead of hidden tabs', () => {
+  it('uses nested catalog stack routes', () => {
     expect(buildMovieReviewsRoute(movieId)).toBe(`/movie/${movieId}/reviews`);
     expect(buildCreditsRoute('movie', movieId)).toBe(`/movie/${movieId}/credits`);
     expect(buildMovieGalleryRoute(movieId)).toBe(`/movie/${movieId}/gallery`);
@@ -24,24 +24,13 @@ describe('catalog child destination navigation', () => {
     expect(parseCatalogIdFromPathname(`/movie/${movieId}`, 'movie')).toBe(movieId);
   });
 
-  it('does not register reviews, credits, or gallery as hidden tabs', () => {
-    const tabsLayout = readFileSync(
-      path.join(process.cwd(), 'app/(tabs)/_layout.tsx'),
-      'utf8',
-    );
-
-    expect(tabsLayout).not.toContain('name="reviews"');
-    expect(tabsLayout).not.toContain('name="credits"');
-    expect(tabsLayout).not.toContain('name="gallery"');
-  });
-
-  it('registers catalog child screens in the movie and tv stacks', () => {
+  it('registers catalog child screens in the root movie and tv stacks', () => {
     const movieLayout = readFileSync(
-      path.join(process.cwd(), 'app/(tabs)/movie/_layout.tsx'),
+      path.join(process.cwd(), 'app/movie/_layout.tsx'),
       'utf8',
     );
     const tvLayout = readFileSync(
-      path.join(process.cwd(), 'app/(tabs)/tv/[id]/_layout.tsx'),
+      path.join(process.cwd(), 'app/tv/[id]/_layout.tsx'),
       'utf8',
     );
 

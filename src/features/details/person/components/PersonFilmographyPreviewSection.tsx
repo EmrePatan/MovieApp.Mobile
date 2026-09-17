@@ -7,7 +7,7 @@ import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { openCatalogDetailFromFilmography } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { openPersonFilmography } from '@/features/details/shared/navigation/person-filmography-navigation';
-import { buildPersonDetailRoute, buildPersonFilmographyRoute } from '@/features/details/shared/routes';
+import { buildPersonFilmographyRoute } from '@/features/details/shared/routes';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -60,11 +60,7 @@ export function PersonFilmographyPreviewSection({
   );
 
   const handleSeeAllPress = useCallback(() => {
-    openPersonFilmography(
-      router,
-      buildPersonFilmographyRoute(tmdbPersonId),
-      buildPersonDetailRoute(tmdbPersonId),
-    );
+    openPersonFilmography(router, buildPersonFilmographyRoute(tmdbPersonId));
   }, [router, tmdbPersonId]);
 
   if (filmography.length === 0) {

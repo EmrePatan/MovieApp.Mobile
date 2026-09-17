@@ -19,52 +19,12 @@ export type CatalogDetailLibraryOrigin =
 
 export interface OpenCatalogDetailOptions {
   queryClient?: QueryClient;
-  libraryReturnHref?: string;
   watchRegion?: string;
+  /** Ignored: catalog detail return is handled by native root-stack history. */
+  libraryReturnHref?: string;
 }
 
-const TAB_ORIGIN_HREFS: Record<CatalogDetailTabOrigin, string> = {
-  home: '/(tabs)/home',
-  search: '/search',
-  watchlist: '/(tabs)/watchlist',
-  discover: '/(tabs)/discover',
-  library: '/(tabs)/library',
-};
-
-const LIBRARY_ORIGIN_HREFS: Record<CatalogDetailLibraryOrigin, string> = {
-  upcoming: '/upcoming',
-  following: '/following',
-  favorites: '/favorites',
-  discover: '/discover-browse',
-  'watch-history': '/watch-history',
-};
-
-let lastCatalogDetailOrigin: CatalogDetailTabOrigin | null = null;
-let lastCatalogDetailLibraryReturnHref: string | null = null;
 let lastCatalogDetailWatchRegion: string | null = null;
-
-export function isRootCatalogDetailRoute(segments: readonly string[]): boolean {
-  const tabsIndex = segments.indexOf('(tabs)');
-  if (tabsIndex === -1) {
-    return false;
-  }
-
-  const section = segments[tabsIndex + 1];
-  if (section === 'movie') {
-    return Boolean(segments[tabsIndex + 2]) && segments[tabsIndex + 3] === undefined;
-  }
-
-  if (section === 'tv') {
-    if (segments.includes('season')) {
-      return false;
-    }
-
-    const childSegment = segments[tabsIndex + 3];
-    return Boolean(segments[tabsIndex + 2]) && childSegment === undefined;
-  }
-
-  return false;
-}
 
 export async function openCatalogDetailFromFilmography(
   router: ImperativeRouter,
@@ -108,18 +68,11 @@ export function openCatalogDetailFromTab(
     trackProductMetric(PRODUCT_METRICS.contentDetailOpened);
   }
 
-  lastCatalogDetailLibraryReturnHref = null;
   lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
-  lastCatalogDetailOrigin = origin;
   const href = buildCatalogDetailRoute(id, type);
 
   if (options?.queryClient) {
     prefetchCatalogDetail(options.queryClient, id, type);
-  }
-
-  if (origin === 'home') {
-    router.replace(href);
-    return;
   }
 
   router.push(href);
@@ -136,10 +89,7 @@ export function openCatalogDetailFromLibraryStack(
     trackProductMetric(PRODUCT_METRICS.contentDetailOpened);
   }
 
-  lastCatalogDetailOrigin = null;
   lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
-  lastCatalogDetailLibraryReturnHref =
-    options?.libraryReturnHref ?? LIBRARY_ORIGIN_HREFS[origin];
   const href = buildCatalogDetailRoute(id, type);
 
   if (options?.queryClient) {
@@ -152,34 +102,14 @@ export function openCatalogDetailFromLibraryStack(
 export function openDetailFromLibraryStack(
   router: ImperativeRouter,
   detailRoute: string,
-  origin: CatalogDetailLibraryOrigin,
-  libraryReturnHref?: string,
+  _origin: CatalogDetailLibraryOrigin,
+  _libraryReturnHref?: string,
   watchRegion?: string,
 ): void {
-  lastCatalogDetailOrigin = null;
   lastCatalogDetailWatchRegion = watchRegion ?? null;
-  lastCatalogDetailLibraryReturnHref = libraryReturnHref ?? LIBRARY_ORIGIN_HREFS[origin];
   router.push(detailRoute);
 }
 
-export function returnToCatalogDetailOrigin(router: ImperativeRouter): void {
-  if (lastCatalogDetailLibraryReturnHref) {
-    const libraryHref = lastCatalogDetailLibraryReturnHref;
-    lastCatalogDetailLibraryReturnHref = null;
-    lastCatalogDetailWatchRegion = null;
-    router.dismissTo(libraryHref);
-    return;
-  }
-
-  const href = lastCatalogDetailOrigin
-    ? TAB_ORIGIN_HREFS[lastCatalogDetailOrigin]
-    : '/(tabs)/home';
-
-  router.navigate(href);
-}
-
 export function resetCatalogDetailOriginForTests(): void {
-  lastCatalogDetailOrigin = null;
-  lastCatalogDetailLibraryReturnHref = null;
   lastCatalogDetailWatchRegion = null;
 }

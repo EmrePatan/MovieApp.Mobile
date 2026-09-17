@@ -184,7 +184,7 @@ export default function SearchScreen() {
       Keyboard.dismiss();
 
       if (isPersonSearchResult(item)) {
-        openPersonDetail(router, item.tmdbId, '/search');
+        openPersonDetail(router, item.tmdbId);
         return;
       }
 

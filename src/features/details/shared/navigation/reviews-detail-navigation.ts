@@ -1,19 +1,19 @@
 import type { ImperativeRouter } from 'expo-router';
 import { isCatalogChildDestinationSegment } from '../routes';
+import { getMovieSegmentIndex, getTvSegmentIndex } from './catalog-route-segments';
 
 export function isReviewsDetailRoute(segments: readonly string[]): boolean {
-  const tabsIndex = segments.indexOf('(tabs)');
-  if (tabsIndex === -1) {
-    return false;
+  const movieIndex = getMovieSegmentIndex(segments);
+  if (movieIndex !== -1) {
+    return segments[movieIndex + 2] === 'reviews';
   }
 
-  const section = segments[tabsIndex + 1];
-  if (section !== 'movie' && section !== 'tv') {
-    return false;
+  const tvIndex = getTvSegmentIndex(segments);
+  if (tvIndex !== -1) {
+    return segments[tvIndex + 2] === 'reviews';
   }
 
-  return isCatalogChildDestinationSegment(segments[tabsIndex + 3]) &&
-    segments[tabsIndex + 3] === 'reviews';
+  return false;
 }
 
 export function openReviewsDetail(
