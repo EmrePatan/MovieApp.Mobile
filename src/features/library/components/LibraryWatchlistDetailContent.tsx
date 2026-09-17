@@ -8,23 +8,22 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AppButton } from '@/components/buttons/AppButton';
 import { ErrorView } from '@/components/common/ErrorView';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { useDeleteWatchlistMutation, useRemoveWatchlistItemMutation } from '@/features/watchlists/hooks/useWatchlistMutations';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import { flattenWatchlistPages, type LibraryItem } from '@/features/watchlists/utils/library-items';
-import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
-import type { LibrarySortOption, LibraryTypeFilter } from '../types';
+import type { CatalogMediaFilter, LibrarySortOption } from '../types';
 import { useLibraryDisplayItems } from '../hooks/useLibraryDisplayItems';
 import { getLibraryItemKey } from '../utils/library-item-key';
 import { getAvailableSortOptions } from '../utils/library-sort';
 import { LibraryContentCard } from './LibraryContentCard';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryLoadingState } from './LibraryLoadingState';
+import { LibraryMediaFilterControl } from './LibraryMediaFilterControl';
 import { LibrarySortControl } from './LibrarySortControl';
-import { LibraryStackHeader } from './LibraryStackHeader';
+import { LibraryWatchlistDetailHeader } from './LibraryWatchlistDetailHeader';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -44,7 +43,7 @@ export function LibraryWatchlistDetailContent({
   const itemsQuery = useWatchlistItems(watchlistId);
   const deleteWatchlist = useDeleteWatchlistMutation();
   const removeItem = useRemoveWatchlistItemMutation(watchlistId);
-  const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>('all');
+  const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
 
@@ -64,7 +63,7 @@ export function LibraryWatchlistDetailContent({
     sort,
   });
 
-  const handleDeleteWatchlist = useCallback(() => {
+  const confirmDeleteWatchlist = useCallback(() => {
     if (!watchlist) {
       return;
     }
@@ -88,6 +87,25 @@ export function LibraryWatchlistDetailContent({
       ],
     );
   }, [deleteWatchlist, router, watchlist]);
+
+  const handleOverflowPress = useCallback(() => {
+    if (!watchlist) {
+      return;
+    }
+
+    Alert.alert(
+      watchlist.name,
+      undefined,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete List',
+          style: 'destructive',
+          onPress: confirmDeleteWatchlist,
+        },
+      ],
+    );
+  }, [confirmDeleteWatchlist, watchlist]);
 
   const handleItemPress = useCallback(
     (item: LibraryItem) => {
@@ -138,8 +156,8 @@ export function LibraryWatchlistDetailContent({
       <LibraryContentCard
         item={item}
         isRemoving={removingItemKey === getLibraryItemKey(item)}
-        removeIcon="bookmark"
-        removeAccessibilityLabel="watchlist"
+        removeIcon="close"
+        removeAccessibilityLabel="this list"
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />
@@ -149,8 +167,9 @@ export function LibraryWatchlistDetailContent({
 
   const listControls = items.length > 0 ? (
     <View style={styles.controls}>
-      <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+      <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
       <LibrarySortControl
+        variant="menu"
         value={sort}
         options={WATCHLIST_SORT_OPTIONS}
         onChange={setSort}
@@ -159,25 +178,17 @@ export function LibraryWatchlistDetailContent({
   ) : null;
 
   const listHeader = (
-    <LibraryStackHeader
+    <LibraryWatchlistDetailHeader
       title={watchlist?.name ?? 'Watchlist'}
       subtitle={
         watchlist
           ? `${watchlist.itemCount} ${watchlist.itemCount === 1 ? 'title' : 'titles'}`
           : undefined
       }
+      onOverflowPress={watchlist ? handleOverflowPress : undefined}
     >
-      {watchlist ? (
-        <AppButton
-          title="Delete List"
-          variant="ghost"
-          loading={deleteWatchlist.isPending}
-          disabled={deleteWatchlist.isPending}
-          onPress={handleDeleteWatchlist}
-        />
-      ) : null}
       {listControls}
-    </LibraryStackHeader>
+    </LibraryWatchlistDetailHeader>
   );
 
   if (itemsQuery.isLoading && items.length === 0) {
@@ -268,7 +279,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   controls: {
-    gap: spacing.sm,
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   listContent: {
     paddingBottom: spacing.xxl,

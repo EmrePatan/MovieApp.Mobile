@@ -83,6 +83,7 @@ describe('LibraryWatchlistsOverview', () => {
       />,
     );
 
+    expect(screen.getByLabelText('Create new watchlist')).toBeTruthy();
     expect(screen.getByText('New List')).toBeTruthy();
   });
 

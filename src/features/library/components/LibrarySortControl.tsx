@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { getSortLabel } from '../utils/library-sort';
@@ -10,11 +10,51 @@ interface LibrarySortControlProps {
   value: LibrarySortOption;
   options: LibrarySortOption[];
   onChange: (value: LibrarySortOption) => void;
+  variant?: 'chips' | 'menu';
 }
 
-export function LibrarySortControl({ value, options, onChange }: LibrarySortControlProps) {
+export function LibrarySortControl({
+  value,
+  options,
+  onChange,
+  variant = 'chips',
+}: LibrarySortControlProps) {
   if (options.length <= 1) {
     return null;
+  }
+
+  if (variant === 'menu') {
+    const handlePress = () => {
+      Alert.alert(
+        'Sort by',
+        undefined,
+        [
+          ...options.map((option) => ({
+            text: getSortLabel(option),
+            onPress: () => onChange(option),
+          })),
+          { text: 'Cancel', style: 'cancel' },
+        ],
+      );
+    };
+
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Sort by ${getSortLabel(value)}`}
+        accessibilityHint="Opens sort options"
+        onPress={handlePress}
+        style={({ pressed }) => [styles.menuTrigger, pressed && styles.menuPressed]}
+      >
+        <AppText variant="caption" muted>
+          Sort:
+        </AppText>
+        <AppText variant="caption" style={styles.menuValue}>
+          {getSortLabel(value)}
+        </AppText>
+        <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
+      </Pressable>
+    );
   }
 
   return (
@@ -85,6 +125,25 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   chipLabelSelected: {
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  menuTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    minHeight: 32,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  menuPressed: {
+    opacity: 0.85,
+  },
+  menuValue: {
     color: colors.textSecondary,
     fontWeight: '600',
   },

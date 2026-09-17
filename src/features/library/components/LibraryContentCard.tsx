@@ -28,7 +28,15 @@ function formatYear(item: LibraryItem): string | null {
 }
 
 function resolveRemoveIconName(icon: LibraryRemoveIcon): keyof typeof Ionicons.glyphMap {
-  return icon === 'heart' ? 'heart' : 'bookmark';
+  if (icon === 'heart') {
+    return 'heart';
+  }
+
+  if (icon === 'close') {
+    return 'close';
+  }
+
+  return 'bookmark';
 }
 
 export const LibraryContentCard = memo(function LibraryContentCard({

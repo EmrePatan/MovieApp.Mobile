@@ -2,12 +2,14 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { AppButton } from '@/components/buttons/AppButton';
+import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { CreateWatchlistModal } from '@/features/watchlists/components/CreateWatchlistModal';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
@@ -17,7 +19,7 @@ import { LibraryLoadingState } from './LibraryLoadingState';
 import { LibraryWatchlistCard } from './LibraryWatchlistCard';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LibraryWatchlistsOverviewProps {
   listHeader: ReactNode;
@@ -56,12 +58,19 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
   );
 
   const createListFooter = (
-    <AppButton
-      title="New List"
-      variant="secondary"
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Create new watchlist"
       onPress={() => setCreateModalVisible(true)}
-      style={styles.newListButton}
-    />
+      style={({ pressed }) => [styles.newListAction, pressed && styles.newListPressed]}
+    >
+      <View style={styles.newListIconWrap}>
+        <Ionicons name="add" size={20} color={colors.accent} />
+      </View>
+      <AppText variant="body" style={styles.newListLabel}>
+        New List
+      </AppText>
+    </Pressable>
   );
 
   const createModal = (
@@ -163,7 +172,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
-  newListButton: {
-    marginTop: spacing.md,
+  newListAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: layout.touchTarget,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
+    borderStyle: 'dashed',
+    backgroundColor: colors.accentTint12,
+  },
+  newListPressed: {
+    opacity: 0.85,
+  },
+  newListIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentTint18,
+  },
+  newListLabel: {
+    color: colors.accent,
+    fontWeight: '600',
   },
 });

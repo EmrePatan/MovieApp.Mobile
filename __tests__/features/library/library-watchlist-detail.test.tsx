@@ -1,6 +1,6 @@
+import { Alert } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { LibraryWatchlistDetailContent } from '@/features/library/components/LibraryWatchlistDetailContent';
-
 const mockPush = jest.fn();
 const mockBack = jest.fn();
 
@@ -69,18 +69,30 @@ jest.mock('@/features/watchlists/hooks/useWatchlistItems', () => ({
   })),
 }));
 
+const mockDeleteMutate = jest.fn();
+const mockRemoveMutate = jest.fn();
+
 jest.mock('@/features/watchlists/hooks/useWatchlistMutations', () => ({
   useDeleteWatchlistMutation: jest.fn(() => ({
-    mutate: jest.fn(),
+    mutate: mockDeleteMutate,
     isPending: false,
   })),
   useRemoveWatchlistItemMutation: jest.fn(() => ({
-    mutate: jest.fn(),
+    mutate: mockRemoveMutate,
     isPending: false,
   })),
 }));
 
 describe('LibraryWatchlistDetailContent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders the selected watchlist contents', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
@@ -89,10 +101,104 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.getByText('Interstellar')).toBeTruthy();
   });
 
-  it('exposes list management actions', () => {
+  it('does not show Delete List as a permanent primary action', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
-    expect(screen.getByText('Delete List')).toBeTruthy();
-    expect(screen.getByLabelText('Remove Interstellar from watchlist')).toBeTruthy();
+    expect(screen.queryByText('Delete List')).toBeNull();
+  });
+
+  it('exposes Delete List through the overflow menu', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(screen.getByLabelText('Watchlist options'));
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Weekend Movies',
+      undefined,
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'Delete List', style: 'destructive' }),
+      ]),
+    );
+  });
+
+  it('still confirms and deletes the watchlist from the overflow action', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(screen.getByLabelText('Watchlist options'));
+    const overflowAlert = (Alert.alert as jest.Mock).mock.calls[0];
+    const deleteListAction = overflowAlert[2].find(
+      (action: { text: string }) => action.text === 'Delete List',
+    );
+
+    deleteListAction.onPress();
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Delete watchlist',
+      'Delete "Weekend Movies"? This cannot be undone.',
+      expect.any(Array),
+    );
+
+    const confirmAlert = (Alert.alert as jest.Mock).mock.calls[1];
+    const confirmDeleteAction = confirmAlert[2].find(
+      (action: { text: string }) => action.text === 'Delete',
+    );
+
+    confirmDeleteAction.onPress();
+
+    expect(mockDeleteMutate).toHaveBeenCalledWith('wl-1', expect.any(Object));
+  });
+
+  it('shows All, Movies, and TV Shows filters without People', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    expect(screen.getByLabelText('Filter All')).toBeTruthy();
+    expect(screen.getByLabelText('Filter Movies')).toBeTruthy();
+    expect(screen.getByLabelText('Filter TV Shows')).toBeTruthy();
+    expect(screen.queryByLabelText('Filter People')).toBeNull();
+  });
+
+  it('keeps all sort options reachable through the compact sort control', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(screen.getByLabelText('Sort by Recently Added'));
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Sort by',
+      undefined,
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'Recently Added' }),
+        expect.objectContaining({ text: 'Title A–Z' }),
+        expect.objectContaining({ text: 'Rating' }),
+      ]),
+    );
+  });
+
+  it('keeps item removal reachable and working', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(screen.getByLabelText('Remove Interstellar from this list'));
+
+    expect(mockRemoveMutate).toHaveBeenCalledWith(
+      { contentType: 'movie', contentId: 'movie-1' },
+      expect.any(Object),
+    );
+  });
+
+  it('keeps back navigation affordance intact', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    expect(screen.getByLabelText('Back')).toBeTruthy();
+  });
+
+  it('navigates to detail when a watchlist item is pressed', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(
+      screen.getByRole('button', {
+        name: /Interstellar, Movie, 2014, rating/,
+      }),
+    );
+
+    expect(mockPush).toHaveBeenCalledWith('/movie/movie-1');
   });
 });

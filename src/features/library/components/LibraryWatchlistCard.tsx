@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import type { WatchlistSummaryResponse } from '@/features/watchlists/types';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LibraryWatchlistCardProps {
@@ -27,7 +28,7 @@ export const LibraryWatchlistCard = memo(function LibraryWatchlistCard({
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View style={styles.iconWrap}>
-        <Ionicons name="bookmark" size={22} color={colors.accent} />
+        <Ionicons name="bookmark" size={20} color={colors.accent} />
       </View>
       <View style={styles.meta}>
         <AppText variant="body" numberOfLines={2} style={styles.title}>
@@ -46,8 +47,10 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.md,
+    gap: spacing.sm,
+    minHeight: layout.touchTarget,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
@@ -57,8 +60,8 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   iconWrap: {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',

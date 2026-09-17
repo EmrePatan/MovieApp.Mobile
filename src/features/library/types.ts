@@ -6,4 +6,4 @@ export type CatalogMediaFilter = 'all' | 'movie' | 'tv';
 
 export type LibrarySortOption = 'recentlyAdded' | 'titleAsc' | 'ratingDesc';
 
-export type LibraryRemoveIcon = 'heart' | 'bookmark';
+export type LibraryRemoveIcon = 'heart' | 'bookmark' | 'close';
