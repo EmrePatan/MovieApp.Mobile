@@ -156,8 +156,8 @@ export function LibraryWatchlistDetailContent({
       <LibraryContentCard
         item={item}
         isRemoving={removingItemKey === getLibraryItemKey(item)}
-        removeIcon="close"
         removeAccessibilityLabel="this list"
+        removalMode="swipe"
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />

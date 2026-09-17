@@ -63,6 +63,25 @@ describe('LibraryContentCard', () => {
     expect(screen.getByText('TV')).toBeTruthy();
   });
 
+  it('reveals swipe remove action without a permanent remove button', () => {
+    const onRemove = jest.fn();
+    render(
+      <LibraryContentCard
+        item={movieItem}
+        removeAccessibilityLabel="this list"
+        removalMode="swipe"
+        onRemove={onRemove}
+      />,
+    );
+
+    expect(screen.queryByLabelText('Remove Interstellar from this list')).toBeNull();
+
+    fireEvent.press(screen.getByLabelText('Reveal delete action'));
+    fireEvent.press(screen.getByLabelText('Remove Interstellar from this list'));
+
+    expect(onRemove).toHaveBeenCalledWith(movieItem);
+  });
+
   it('truncates long titles with numberOfLines', () => {
     const longTitleItem: LibraryItem = {
       ...movieItem,

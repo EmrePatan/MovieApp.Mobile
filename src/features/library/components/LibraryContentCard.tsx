@@ -1,5 +1,12 @@
-import { memo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { memo, useCallback, useRef } from 'react';
+import {
+  type AccessibilityActionEvent,
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
@@ -10,11 +17,14 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 
+const SWIPE_REMOVE_ACTION_WIDTH = 92;
+
 interface LibraryContentCardProps {
   item: LibraryItem;
   isRemoving?: boolean;
   removeIcon?: LibraryRemoveIcon;
   removeAccessibilityLabel?: string;
+  removalMode?: 'button' | 'swipe';
   onPress?: (item: LibraryItem) => void;
   onRemove?: (item: LibraryItem) => void;
 }
@@ -44,17 +54,72 @@ export const LibraryContentCard = memo(function LibraryContentCard({
   isRemoving = false,
   removeIcon = 'bookmark',
   removeAccessibilityLabel = 'watchlist',
+  removalMode = 'button',
   onPress,
   onRemove,
 }: LibraryContentCardProps) {
+  const swipeableRef = useRef<Swipeable>(null);
   const year = formatYear(item);
   const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}, rating ${formatRating(item.voteAverage)}`;
+  const removeActionLabel = `Remove ${item.title} from ${removeAccessibilityLabel}`;
+  const usesSwipeRemove = Boolean(onRemove) && removalMode === 'swipe';
 
-  return (
-    <View style={styles.card}>
+  const handleRemove = useCallback(() => {
+    if (isRemoving) {
+      return;
+    }
+
+    swipeableRef.current?.close();
+    onRemove?.(item);
+  }, [isRemoving, item, onRemove]);
+
+  const handleAccessibilityAction = useCallback(
+    (event: AccessibilityActionEvent) => {
+      if (event.nativeEvent.actionName === 'remove') {
+        handleRemove();
+      }
+    },
+    [handleRemove],
+  );
+
+  const renderSwipeRemoveAction = useCallback(() => {
+    if (!onRemove) {
+      return null;
+    }
+
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={removeActionLabel}
+        disabled={isRemoving}
+        onPress={handleRemove}
+        style={({ pressed }) => [
+          styles.swipeRemoveAction,
+          pressed && !isRemoving && styles.pressed,
+        ]}
+      >
+        {isRemoving ? (
+          <ActivityIndicator color={colors.accent} size="small" />
+        ) : (
+          <AppText variant="bodySmall" style={styles.swipeRemoveLabel}>
+            Remove
+          </AppText>
+        )}
+      </Pressable>
+    );
+  }, [handleRemove, isRemoving, onRemove, removeActionLabel]);
+
+  const cardContent = (
+    <>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
+        accessibilityActions={
+          usesSwipeRemove
+            ? [{ name: 'remove', label: removeActionLabel }]
+            : undefined
+        }
+        onAccessibilityAction={usesSwipeRemove ? handleAccessibilityAction : undefined}
         onPress={() => onPress?.(item)}
         style={({ pressed }) => [styles.content, pressed && styles.pressed]}
       >
@@ -85,12 +150,12 @@ export const LibraryContentCard = memo(function LibraryContentCard({
           </View>
         </View>
       </Pressable>
-      {onRemove ? (
+      {onRemove && removalMode === 'button' ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Remove ${item.title} from ${removeAccessibilityLabel}`}
+          accessibilityLabel={removeActionLabel}
           disabled={isRemoving}
-          onPress={() => onRemove(item)}
+          onPress={handleRemove}
           style={({ pressed }) => [
             styles.removeButton,
             pressed && !isRemoving && styles.removePressed,
@@ -107,11 +172,37 @@ export const LibraryContentCard = memo(function LibraryContentCard({
           )}
         </Pressable>
       ) : null}
-    </View>
+    </>
   );
+
+  if (usesSwipeRemove) {
+    return (
+      <Swipeable
+        ref={swipeableRef}
+        friction={2}
+        overshootRight={false}
+        rightThreshold={SWIPE_REMOVE_ACTION_WIDTH / 2}
+        activeOffsetX={[-24, 24]}
+        failOffsetY={[-12, 12]}
+        renderRightActions={renderSwipeRemoveAction}
+        containerStyle={styles.swipeRow}
+        childrenContainerStyle={styles.swipeContent}
+      >
+        <View style={styles.card}>{cardContent}</View>
+      </Swipeable>
+    );
+  }
+
+  return <View style={styles.card}>{cardContent}</View>;
 });
 
 const styles = StyleSheet.create({
+  swipeRow: {
+    minHeight: layout.posterList.height + spacing.sm * 2,
+  },
+  swipeContent: {
+    backgroundColor: colors.background,
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,5 +258,20 @@ const styles = StyleSheet.create({
   },
   removePressed: {
     backgroundColor: colors.surfaceElevated,
+  },
+  swipeRemoveAction: {
+    width: SWIPE_REMOVE_ACTION_WIDTH,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.accentTint18,
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
+    marginVertical: spacing.sm,
+    marginRight: layout.screenPaddingHorizontal,
+    borderRadius: borderRadius.md,
+  },
+  swipeRemoveLabel: {
+    color: colors.accent,
+    fontWeight: '600',
   },
 });

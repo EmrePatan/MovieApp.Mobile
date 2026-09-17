@@ -173,10 +173,33 @@ describe('LibraryWatchlistDetailContent', () => {
     );
   });
 
-  it('keeps item removal reachable and working', () => {
+  it('does not show a permanent remove control in the normal row state', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
+    expect(screen.queryByLabelText('Remove Interstellar from this list')).toBeNull();
+    expect(screen.queryByText('Remove')).toBeNull();
+  });
+
+  it('keeps item removal reachable through swipe and working', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent.press(screen.getByLabelText('Reveal delete action'));
     fireEvent.press(screen.getByLabelText('Remove Interstellar from this list'));
+
+    expect(mockRemoveMutate).toHaveBeenCalledWith(
+      { contentType: 'movie', contentId: 'movie-1' },
+      expect.any(Object),
+    );
+  });
+
+  it('keeps item removal reachable through accessibility action', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    fireEvent(
+      screen.getByRole('button', { name: /Interstellar, Movie, 2014, rating/ }),
+      'accessibilityAction',
+      { nativeEvent: { actionName: 'remove' } },
+    );
 
     expect(mockRemoveMutate).toHaveBeenCalledWith(
       { contentType: 'movie', contentId: 'movie-1' },
