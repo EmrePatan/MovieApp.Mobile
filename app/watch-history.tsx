@@ -2,10 +2,10 @@ import { useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
@@ -143,10 +143,9 @@ export default function WatchHistoryScreen() {
           ) : null
         }
         refreshControl={
-          <RefreshControl
+          <MovieAppRefreshControl
             refreshing={historyQuery.isRefetching && !historyQuery.isFetchingNextPage}
             onRefresh={handleRefresh}
-            tintColor={colors.accent}
           />
         }
         contentContainerStyle={styles.listContent}

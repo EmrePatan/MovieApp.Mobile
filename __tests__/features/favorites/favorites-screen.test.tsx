@@ -1,6 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { FlatList, RefreshControl } from 'react-native';
+import { FlatList } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { ApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
 import { useFavoritesItems } from '@/features/favorites/hooks/useFavoritesItems';
@@ -409,7 +410,7 @@ describe('FavoritesScreen', () => {
 
     const { UNSAFE_getByType } = render(<FavoritesScreen />);
     const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement<
-      React.ComponentProps<typeof RefreshControl>
+      React.ComponentProps<typeof MovieAppRefreshControl>
     >;
     refreshControl.props.onRefresh?.();
     expect(refetch).toHaveBeenCalled();

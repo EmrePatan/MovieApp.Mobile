@@ -2,11 +2,11 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  RefreshControl,
   StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
@@ -225,10 +225,9 @@ export function LibraryHubContent() {
         ) : null
       }
       refreshControl={
-        <RefreshControl
+        <MovieAppRefreshControl
           refreshing={libraryQuery.isRefetching && !libraryQuery.isFetchingNextPage}
           onRefresh={handleRefresh}
-          tintColor={colors.accent}
         />
       }
       contentContainerStyle={styles.listContent}

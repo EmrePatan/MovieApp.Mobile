@@ -4,11 +4,11 @@ import {
   BackHandler,
   FlatList,
   Keyboard,
-  RefreshControl,
   StyleSheet,
   TextInput,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -247,10 +247,9 @@ export default function SearchScreen() {
 
   const refreshControl = useMemo(
     () => (
-      <RefreshControl
+      <MovieAppRefreshControl
         refreshing={isRefetching && !isFetchingNextPage}
         onRefresh={handleRefresh}
-        tintColor={colors.accent}
       />
     ),
     [handleRefresh, isFetchingNextPage, isRefetching],

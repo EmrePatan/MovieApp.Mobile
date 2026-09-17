@@ -3,10 +3,10 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
 import { ErrorView } from '@/components/common/ErrorView';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
@@ -265,13 +265,12 @@ export function LibraryWatchlistDetailContent({
         ) : null
       }
       refreshControl={
-        <RefreshControl
+        <MovieAppRefreshControl
           refreshing={
             (watchlistsQuery.isRefetching || itemsQuery.isRefetching) &&
             !itemsQuery.isFetchingNextPage
           }
           onRefresh={handleRefresh}
-          tintColor={colors.accent}
         />
       }
       contentContainerStyle={styles.listContent}

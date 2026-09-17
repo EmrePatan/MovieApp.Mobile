@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
@@ -77,7 +78,7 @@ export default function ProfileScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
+          <MovieAppRefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
         }
       >
         {profile ? <ProfileHero profile={profile} /> : null}

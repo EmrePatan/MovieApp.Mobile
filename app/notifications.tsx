@@ -3,10 +3,10 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
@@ -211,12 +211,11 @@ export default function NotificationsScreen() {
           ) : null
         }
         refreshControl={
-          <RefreshControl
+          <MovieAppRefreshControl
             refreshing={
               notificationsQuery.isRefetching && !notificationsQuery.isFetchingNextPage
             }
             onRefresh={handleRefresh}
-            tintColor={colors.accent}
           />
         }
         contentContainerStyle={styles.listContent}

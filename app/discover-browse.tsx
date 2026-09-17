@@ -4,10 +4,10 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -309,10 +309,9 @@ export default function DiscoverScreen() {
           ) : null
         }
         refreshControl={
-          <RefreshControl
+          <MovieAppRefreshControl
             refreshing={isRefetching && !isFetchingNextPage}
             onRefresh={handleRefresh}
-            tintColor={colors.accent}
           />
         }
         contentContainerStyle={styles.listContent}

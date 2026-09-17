@@ -3,10 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
   FlatList,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
@@ -135,10 +135,9 @@ export default function NowInTheatersScreen() {
           ) : null
         }
         refreshControl={
-          <RefreshControl
+          <MovieAppRefreshControl
             refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
             onRefresh={() => void resultsQuery.refetch()}
-            tintColor={colors.accent}
           />
         }
         onEndReached={() => {

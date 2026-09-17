@@ -3,10 +3,10 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -372,13 +372,12 @@ export default function WatchlistScreen() {
           ) : null
         }
         refreshControl={
-          <RefreshControl
+          <MovieAppRefreshControl
             refreshing={
               (watchlistsQuery.isRefetching || itemsQuery.isRefetching) &&
               !itemsQuery.isFetchingNextPage
             }
             onRefresh={handleRefresh}
-            tintColor={colors.accent}
           />
         }
         contentContainerStyle={styles.listContent}

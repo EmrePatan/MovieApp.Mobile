@@ -2,10 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
@@ -242,10 +242,9 @@ export default function UpcomingScreen() {
           ) : null
         }
         refreshControl={
-          <RefreshControl
+          <MovieAppRefreshControl
             refreshing={activeQuery.isRefetching && !activeQuery.isFetchingNextPage}
             onRefresh={handleRefresh}
-            tintColor={colors.accent}
           />
         }
         contentContainerStyle={styles.listContent}

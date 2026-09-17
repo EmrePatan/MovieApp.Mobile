@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
@@ -217,10 +218,9 @@ export default function HomeScreen() {
 
   const refreshControl = useMemo(
     () => (
-      <RefreshControl
+      <MovieAppRefreshControl
         refreshing={isFetching && !isInitialBrowseLoading}
         onRefresh={handleRefresh}
-        tintColor={colors.accent}
       />
     ),
     [handleRefresh, isFetching, isInitialBrowseLoading],

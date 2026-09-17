@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -141,7 +142,7 @@ export function InsightsHubContent() {
     <ScrollView
       contentContainerStyle={styles.scrollContent}
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
+        <MovieAppRefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
       }
     >
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
