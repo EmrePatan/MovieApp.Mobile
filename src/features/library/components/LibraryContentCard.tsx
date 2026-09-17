@@ -101,7 +101,7 @@ export const LibraryContentCard = memo(function LibraryContentCard({
         {isRemoving ? (
           <ActivityIndicator color={colors.accent} size="small" />
         ) : (
-          <Ionicons name="close" size={18} color={colors.accent} />
+          <Ionicons name="trash-outline" size={18} color={colors.accent} />
         )}
       </Pressable>
     );
