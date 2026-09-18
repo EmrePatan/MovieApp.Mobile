@@ -1,6 +1,5 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { PosterImage } from '@/components/common/PosterImage';
 import type { InsightsV3Era } from '../types';
 import { formatDecadeLabel } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
@@ -60,21 +59,6 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
               );
             })}
           </View>
-
-          {era.oldestTitle ? (
-            <View style={styles.oldestCard} testID="insights-oldest-title">
-              <PosterImage uri={era.oldestTitle.posterPath} width={56} height={84} />
-              <View style={styles.oldestCopy}>
-                <AppText variant="caption" muted>Oldest watched</AppText>
-                <AppText variant="body" style={styles.oldestTitle}>
-                  {era.oldestTitle.title}
-                </AppText>
-                {era.oldestTitle.year ? (
-                  <AppText variant="caption" muted>{era.oldestTitle.year}</AppText>
-                ) : null}
-              </View>
-            </View>
-          ) : null}
 
           {era.unknownCount > 0 ? (
             <AppText variant="caption" muted>
@@ -138,24 +122,6 @@ const styles = StyleSheet.create({
   },
   decadeLabelFavorite: {
     color: colors.accentStrong,
-    fontWeight: '600',
-  },
-  oldestCard: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-  },
-  oldestCopy: {
-    flex: 1,
-    gap: 4,
-  },
-  oldestTitle: {
-    color: colors.textPrimary,
     fontWeight: '600',
   },
 });

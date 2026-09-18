@@ -105,10 +105,7 @@ export function InsightsHubContent() {
       }
     >
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-      <InsightsMovieDnaHero
-        movieDna={insights.movieDna}
-        backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
-      />
+      <InsightsMovieDnaHero movieDna={insights.movieDna} />
       <InsightsYourYearSection
         yourYear={insights.yourYear}
         year={activeYear}
@@ -119,7 +116,6 @@ export function InsightsHubContent() {
       <InsightsTimeInStoriesSection
         timeInStories={insights.timeInStories}
         year={activeYear}
-        backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
       />
       <InsightsRatingsSection ratings={insights.yourRatings} />
       <InsightsErasSection era={insights.yourEra} />

@@ -12,6 +12,7 @@ import {
   formatHoursFromMinutes,
   formatMovieDnaDisplayTitle,
   formatMovieDnaEditorialLine,
+  formatWatchTimeBreakdown,
   formatWatchingMixLine,
   formatWeekdayName,
 } from '@/features/insights/utils/insights-format';
@@ -94,6 +95,15 @@ describe('insights format helpers', () => {
     expect(line).not.toContain(insightsV3Fixture.movieDna.identityTitle);
     expect(line).not.toContain('gravitate');
     expect(formatMovieDnaEditorialLine(insightsV3Fixture.movieDna)).toBe(line);
+  });
+
+  it('formats watch time as year month day hour breakdown', () => {
+    expect(formatWatchTimeBreakdown(20 * 60)).toBe('20h');
+    expect(formatWatchTimeBreakdown(227 * 60)).toBe('9d 11h');
+    expect(formatWatchTimeBreakdown((365 * 24 * 60) + (2 * 30 * 24 * 60) + (5 * 24 * 60) + (8 * 60))).toBe(
+      '1y 2mo 5d 8h',
+    );
+    expect(formatWatchTimeBreakdown(45)).toBe('45m');
   });
 
   it('formats watching mix as a compact editorial line', () => {

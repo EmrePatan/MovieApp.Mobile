@@ -320,13 +320,51 @@ export function formatDecadeLabel(bucket: string): string {
   return bucket;
 }
 
-export function formatHoursShort(totalMinutes: number): string {
+const MINUTES_PER_HOUR = 60;
+const MINUTES_PER_DAY = MINUTES_PER_HOUR * 24;
+const MINUTES_PER_MONTH = MINUTES_PER_DAY * 30;
+const MINUTES_PER_YEAR = MINUTES_PER_DAY * 365;
+
+export function formatWatchTimeBreakdown(totalMinutes: number): string {
   if (totalMinutes <= 0) {
     return '0h';
   }
 
-  const hours = Math.round(totalMinutes / 60);
-  return `${hours}h`;
+  let remaining = Math.floor(totalMinutes);
+  const years = Math.floor(remaining / MINUTES_PER_YEAR);
+  remaining %= MINUTES_PER_YEAR;
+  const months = Math.floor(remaining / MINUTES_PER_MONTH);
+  remaining %= MINUTES_PER_MONTH;
+  const days = Math.floor(remaining / MINUTES_PER_DAY);
+  remaining %= MINUTES_PER_DAY;
+  const hours = Math.floor(remaining / MINUTES_PER_HOUR);
+  const minutes = remaining % MINUTES_PER_HOUR;
+
+  const parts: string[] = [];
+  if (years > 0) {
+    parts.push(`${years}y`);
+  }
+  if (months > 0) {
+    parts.push(`${months}mo`);
+  }
+  if (days > 0) {
+    parts.push(`${days}d`);
+  }
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (parts.length === 0 && minutes > 0) {
+    parts.push(`${minutes}m`);
+  }
+  if (parts.length === 0) {
+    parts.push('0h');
+  }
+
+  return parts.join(' ');
+}
+
+export function formatHoursShort(totalMinutes: number): string {
+  return formatWatchTimeBreakdown(totalMinutes);
 }
 
 export function formatAchievementBadgeNumber(value: number): string {

@@ -1,14 +1,8 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3TimeInStories } from '../types';
-import {
-  formatEquivalentDays,
-  formatHoursFromMinutes,
-  formatHoursShort,
-} from '../utils/insights-format';
-import { resolveImageUri } from '@/utils/image-url';
+import { formatWatchTimeBreakdown } from '../utils/insights-format';
 import { InsightsDonutRing } from './InsightsDonutRing';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
@@ -18,13 +12,11 @@ import { borderRadius, spacing } from '@/theme/spacing';
 interface InsightsTimeInStoriesSectionProps {
   timeInStories: InsightsV3TimeInStories;
   year: number;
-  backdropImagePath?: string | null;
 }
 
 export function InsightsTimeInStoriesSection({
   timeInStories,
   year,
-  backdropImagePath,
 }: InsightsTimeInStoriesSectionProps) {
   if (timeInStories.totalMinutes <= 0) {
     return (
@@ -41,7 +33,7 @@ export function InsightsTimeInStoriesSection({
   const movieSharePercent = Math.round(
     (timeInStories.movieMinutes / timeInStories.totalMinutes) * 100,
   );
-  const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
+  const totalBreakdown = formatWatchTimeBreakdown(timeInStories.totalMinutes);
 
   return (
     <View style={styles.section}>
@@ -51,24 +43,12 @@ export function InsightsTimeInStoriesSection({
       />
       <View style={styles.hero}>
         <View style={styles.donutWrap}>
-          {resolvedBackdrop ? (
-            <View style={styles.donutPhotoClip}>
-              <Image source={{ uri: resolvedBackdrop }} style={styles.donutPhoto} />
-              <LinearGradient
-                colors={['rgba(10, 10, 15, 0.35)', 'rgba(10, 10, 15, 0.88)']}
-                style={styles.donutPhotoScrim}
-              />
-            </View>
-          ) : null}
           <InsightsDonutRing size={176} strokeWidth={13} progressPercent={movieSharePercent} />
           <View style={styles.donutCenter}>
-            <AppText variant="hero" style={styles.hours}>
-              {formatHoursFromMinutes(timeInStories.totalMinutes)}
+            <AppText variant="hero" center style={styles.duration} numberOfLines={2}>
+              {totalBreakdown}
             </AppText>
-            <AppText variant="caption" style={styles.hoursLabel}>hours</AppText>
-            <AppText variant="bodySmall" style={styles.daysCopy}>
-              That&apos;s {formatEquivalentDays(timeInStories.totalMinutes)} in stories
-            </AppText>
+            <AppText variant="caption" style={styles.durationLabel}>watch time</AppText>
           </View>
         </View>
       </View>
@@ -77,12 +57,12 @@ export function InsightsTimeInStoriesSection({
         <BreakdownCard
           icon="film-outline"
           label="Movies"
-          value={formatHoursShort(timeInStories.movieMinutes)}
+          value={formatWatchTimeBreakdown(timeInStories.movieMinutes)}
         />
         <BreakdownCard
           icon="tv-outline"
           label="Series"
-          value={formatHoursShort(timeInStories.episodeMinutes)}
+          value={formatWatchTimeBreakdown(timeInStories.episodeMinutes)}
         />
       </View>
 
@@ -92,7 +72,7 @@ export function InsightsTimeInStoriesSection({
           <AppText variant="caption" muted>
             In {year}, you&apos;ve watched{' '}
             <AppText variant="caption" style={styles.yearHighlight}>
-              {formatHoursFromMinutes(timeInStories.yearMinutes)} hours
+              {formatWatchTimeBreakdown(timeInStories.yearMinutes)}
             </AppText>
           </AppText>
         </View>
@@ -113,7 +93,9 @@ function BreakdownCard({
   return (
     <View style={styles.breakdownCard}>
       <Ionicons name={icon} size={16} color={colors.accent} />
-      <AppText variant="body" style={styles.breakdownValue}>{value}</AppText>
+      <AppText variant="body" center style={styles.breakdownValue} numberOfLines={2}>
+        {value}
+      </AppText>
       <AppText variant="caption" style={styles.breakdownLabel}>{label}</AppText>
     </View>
   );
@@ -134,45 +116,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 196,
   },
-  donutPhotoClip: {
-    position: 'absolute',
-    width: 148,
-    height: 148,
-    borderRadius: 74,
-    overflow: 'hidden',
-  },
-  donutPhoto: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  donutPhotoScrim: {
-    ...StyleSheet.absoluteFill,
-  },
   donutCenter: {
     position: 'absolute',
     alignItems: 'center',
     gap: 2,
     paddingHorizontal: spacing.md,
+    maxWidth: 148,
   },
-  hours: {
+  duration: {
     color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
     fontWeight: '700',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 8,
+    fontSize: 28,
+    lineHeight: 32,
   },
-  hoursLabel: {
+  durationLabel: {
     color: colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     fontSize: 11,
-  },
-  daysCopy: {
-    textAlign: 'center',
-    marginTop: 2,
-    color: colors.textMuted,
   },
   breakdownRow: {
     flexDirection: 'row',
@@ -190,6 +152,8 @@ const styles = StyleSheet.create({
     color: colors.accentStrong,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
+    fontSize: 15,
+    lineHeight: 20,
   },
   breakdownLabel: {
     color: colors.textMuted,
