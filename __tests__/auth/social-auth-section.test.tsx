@@ -54,6 +54,15 @@ describe('SocialAuthSection', () => {
     expect(screen.queryByLabelText('Continue with Apple')).toBeNull();
   });
 
+  it('renders Google and Apple on iOS', () => {
+    Platform.OS = 'ios';
+
+    render(<SocialAuthSection />);
+
+    expect(screen.getByLabelText('Continue with Google')).toBeTruthy();
+    expect(screen.getByLabelText('Continue with Apple')).toBeTruthy();
+  });
+
   it('renders Google action when configured', () => {
     render(<SocialAuthSection />);
 
