@@ -10,8 +10,10 @@ import {
   formatEquivalentDays,
   formatGenreGravitation,
   formatHoursFromMinutes,
+  formatMovieDnaEditorialLine,
   formatWeekdayName,
 } from '@/features/insights/utils/insights-format';
+import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 describe('insights format helpers', () => {
   it('formats estimated duration in hours and days', () => {
@@ -34,6 +36,14 @@ describe('insights format helpers', () => {
 
   it('builds selectable years from member since through current year', () => {
     expect(buildSelectableYears('2024-06-01T00:00:00Z', 2026)).toEqual([2026, 2025, 2024]);
+  });
+
+  it('selects a deterministic Movie DNA editorial line from identity signals', () => {
+    const line = formatMovieDnaEditorialLine(insightsV3Fixture.movieDna);
+    expect(line).toBe('The long arc is where your story keeps returning.');
+    expect(line).not.toContain(insightsV3Fixture.movieDna.identityTitle);
+    expect(line).not.toContain('gravitate');
+    expect(formatMovieDnaEditorialLine(insightsV3Fixture.movieDna)).toBe(line);
   });
 
   it('formats genre copy and active day percent from real values', () => {

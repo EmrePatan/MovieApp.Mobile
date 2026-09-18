@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3MovieDna } from '../types';
-import { formatGenreGravitation } from '../utils/insights-format';
+import { formatGenreGravitation, formatMovieDnaEditorialLine } from '../utils/insights-format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -53,6 +53,7 @@ export function InsightsMovieDnaHero({
 }: InsightsMovieDnaHeroProps) {
   const visibleGenres = movieDna.topGenres.slice(0, 3);
   const gravitation = formatGenreGravitation(visibleGenres.map((genre) => genre.name));
+  const editorialLine = formatMovieDnaEditorialLine(movieDna);
   const hasMix =
     movieDna.watchingMix.movieTitleCount + movieDna.watchingMix.seriesTitleCount > 0;
   const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
@@ -111,6 +112,14 @@ export function InsightsMovieDnaHero({
             />
           </View>
         ) : null}
+
+        <View style={styles.quotePanel} accessibilityRole="text">
+          <AppText variant="caption" style={styles.quoteMark}>“</AppText>
+          <AppText variant="bodySmall" center style={styles.quoteText}>
+            {editorialLine}
+          </AppText>
+          <AppText variant="caption" style={styles.quoteMark}>”</AppText>
+        </View>
         </View>
       </View>
     </>
@@ -283,5 +292,28 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.accent,
     borderRadius: borderRadius.full,
+  },
+  quotePanel: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
+  },
+  quoteMark: {
+    color: colors.accentMuted,
+    fontSize: 26,
+    lineHeight: 26,
+    ...TEXT_LIFT,
+  },
+  quoteText: {
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    lineHeight: 22,
+    maxWidth: '88%',
+    fontSize: 13,
+    ...TEXT_LIFT,
   },
 });

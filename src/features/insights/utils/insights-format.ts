@@ -1,3 +1,5 @@
+import type { InsightsV3MovieDna } from '../types';
+
 const WEEKDAY_NAMES = [
   'Sunday',
   'Monday',
@@ -155,6 +157,57 @@ export function formatActiveYearDayPercent(
   }
 
   return Math.min(100, Math.round((activeDays / elapsedDays) * 100));
+}
+
+const MOVIE_DNA_EDITORIAL_BY_CODE: Record<string, string> = {
+  recent_releases: 'You keep one eye on what is still unfolding on screen.',
+  series_first: 'The long arc is where your story keeps returning.',
+  movie_first: 'You chase complete stories in a single sitting.',
+  top_genre: 'One current runs strong beneath everything you watch.',
+};
+
+const MOVIE_DNA_EDITORIAL_CODE_PRIORITY = [
+  'recent_releases',
+  'series_first',
+  'movie_first',
+  'top_genre',
+] as const;
+
+const MIN_TITLES_FOR_EDITORIAL = 5;
+
+export function formatMovieDnaEditorialLine(movieDna: InsightsV3MovieDna): string {
+  for (const code of MOVIE_DNA_EDITORIAL_CODE_PRIORITY) {
+    if (movieDna.identityCodes.includes(code)) {
+      return MOVIE_DNA_EDITORIAL_BY_CODE[code];
+    }
+  }
+
+  const { movieTitleCount, seriesTitleCount, movieSharePercent, seriesSharePercent } =
+    movieDna.watchingMix;
+  const totalTitles = movieTitleCount + seriesTitleCount;
+
+  if (totalTitles < MIN_TITLES_FOR_EDITORIAL) {
+    return 'Your reel is still finding its signature.';
+  }
+
+  if (movieSharePercent >= 35 && seriesSharePercent >= 35) {
+    return 'You move freely between the epic and the episode.';
+  }
+
+  if (seriesSharePercent >= 60) {
+    return 'You follow worlds that deepen with every chapter.';
+  }
+
+  if (movieSharePercent >= 60) {
+    return 'A single sitting still holds your full attention.';
+  }
+
+  const topShare = movieDna.topGenres[0]?.sharePercent ?? 0;
+  if (topShare >= 25) {
+    return 'Your instincts keep circling the same kind of magic.';
+  }
+
+  return 'Every watch leaves another clue on the reel.';
 }
 
 export function formatGenreGravitation(genreNames: string[]): string | null {

@@ -15,12 +15,14 @@ describe('insights sections', () => {
     expect(screen.getByText('Sci-Fi Storyteller')).toBeTruthy();
     expect(screen.getByText('Sci-Fi')).toBeTruthy();
     expect(screen.getByLabelText('Movies 28, series 9')).toBeTruthy();
+    expect(screen.getByText('The long arc is where your story keeps returning.')).toBeTruthy();
   });
 
   it('shows empty Movie DNA discovery state', () => {
     render(<InsightsMovieDnaHero movieDna={emptyInsightsV3Fixture.movieDna} />);
 
     expect(screen.getByText(/Keep watching and rating/)).toBeTruthy();
+    expect(screen.getByText('Your reel is still finding its signature.')).toBeTruthy();
   });
 
   it('renders monthly activity and year stats without heatmap cells', () => {
