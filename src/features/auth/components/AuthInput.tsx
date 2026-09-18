@@ -1,35 +1,79 @@
-import { forwardRef } from 'react';
-import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
+import { forwardRef, useState } from 'react';
+import { Pressable, StyleSheet, TextInput, TextInputProps, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
+export type AuthInputIcon = 'email' | 'lock' | 'person';
+
 interface AuthInputProps extends TextInputProps {
-  label: string;
+  placeholder: string;
   error?: string;
+  leadingIcon?: AuthInputIcon;
+  showPasswordToggle?: boolean;
 }
 
+const ICON_MAP: Record<AuthInputIcon, keyof typeof Ionicons.glyphMap> = {
+  email: 'mail-outline',
+  lock: 'lock-closed-outline',
+  person: 'person-outline',
+};
+
 export const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
-  { label, error, style, ...props },
+  {
+    placeholder,
+    error,
+    leadingIcon,
+    showPasswordToggle = false,
+    style,
+    secureTextEntry,
+    ...props
+  },
   ref,
 ) {
-  const inputId = props.nativeID ?? label.toLowerCase().replace(/\s+/g, '-');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const inputId = props.nativeID ?? placeholder.toLowerCase().replace(/\s+/g, '-');
+  const isSecure = showPasswordToggle ? !isPasswordVisible : secureTextEntry;
 
   return (
     <View style={styles.container}>
-      <AppText variant="bodySmall" style={styles.label}>
-        {label}
-      </AppText>
-      <TextInput
-        ref={ref}
-        accessibilityLabel={label}
-        nativeID={inputId}
-        placeholderTextColor="rgba(161, 161, 181, 0.72)"
-        style={[styles.input, error && styles.inputError, style]}
-        {...props}
-      />
+      <View style={[styles.field, error ? styles.fieldError : null]}>
+        {leadingIcon ? (
+          <Ionicons
+            name={ICON_MAP[leadingIcon]}
+            size={20}
+            color="rgba(245, 245, 247, 0.55)"
+            style={styles.leadingIcon}
+          />
+        ) : null}
+        <TextInput
+          ref={ref}
+          accessibilityLabel={placeholder}
+          nativeID={inputId}
+          placeholder={placeholder}
+          placeholderTextColor="rgba(161, 161, 181, 0.72)"
+          style={[styles.input, style]}
+          secureTextEntry={isSecure}
+          {...props}
+        />
+        {showPasswordToggle ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+            hitSlop={8}
+            onPress={() => setIsPasswordVisible((visible) => !visible)}
+            style={styles.trailingButton}
+          >
+            <Ionicons
+              name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color="rgba(245, 245, 247, 0.55)"
+            />
+          </Pressable>
+        ) : null}
+      </View>
       {error ? (
         <AppText variant="caption" style={styles.error} accessibilityRole="alert">
           {error}
@@ -43,24 +87,35 @@ const styles = StyleSheet.create({
   container: {
     gap: spacing.xs,
   },
-  label: {
-    color: 'rgba(245, 245, 247, 0.82)',
+  field: {
+    minHeight: 56,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.16)',
+    backgroundColor: 'rgba(12, 12, 18, 0.42)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+  },
+  fieldError: {
+    borderColor: 'rgba(255, 77, 79, 0.55)',
+  },
+  leadingIcon: {
+    marginRight: spacing.sm,
   },
   input: {
-    backgroundColor: 'rgba(12, 12, 18, 0.58)',
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.14)',
+    flex: 1,
     color: colors.textPrimary,
-    minHeight: layout.touchTarget,
-    paddingVertical: 9,
-    paddingHorizontal: spacing.md,
     fontSize: typography.body.fontSize,
+    paddingVertical: spacing.sm,
+    minHeight: 24,
   },
-  inputError: {
-    borderColor: colors.error,
+  trailingButton: {
+    marginLeft: spacing.sm,
+    padding: 2,
   },
   error: {
-    color: colors.error,
+    color: '#FFB4B4',
+    paddingHorizontal: spacing.xs,
   },
 });

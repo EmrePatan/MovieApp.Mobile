@@ -2,11 +2,11 @@ import { ImageBackground, StyleSheet, useWindowDimensions, View } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { authCinemaBackground } from '../auth-assets';
 
-// Pan/zoom the cover crop so ~half the popcorn bucket enters from the right edge
+// Pan/zoom the cover crop so red seats and popcorn stay visible on the right
 // while keeping the left side dark for hero/form readability across phone widths.
-const BACKGROUND_SCALE = 0.93;
-const BACKGROUND_TRANSLATE_X_RATIO = -0.075;
-const BACKGROUND_TRANSLATE_Y_RATIO = -0.02;
+const BACKGROUND_SCALE = 0.96;
+const BACKGROUND_TRANSLATE_X_RATIO = -0.055;
+const BACKGROUND_TRANSLATE_Y_RATIO = -0.015;
 
 export function AuthAtmosphere() {
   const { width, height } = useWindowDimensions();
@@ -28,10 +28,10 @@ export function AuthAtmosphere() {
       >
         <LinearGradient
           colors={[
-            'rgba(6, 5, 8, 0.92)',
-            'rgba(10, 8, 12, 0.78)',
-            'rgba(14, 10, 14, 0.42)',
-            'rgba(8, 6, 10, 0.18)',
+            'rgba(6, 5, 8, 0.9)',
+            'rgba(10, 8, 12, 0.72)',
+            'rgba(14, 10, 14, 0.34)',
+            'rgba(8, 6, 10, 0.12)',
           ]}
           locations={[0, 0.34, 0.68, 1]}
           start={{ x: 0, y: 0.5 }}
@@ -40,7 +40,7 @@ export function AuthAtmosphere() {
         />
 
         <LinearGradient
-          colors={['rgba(6, 5, 8, 0.55)', 'transparent', 'rgba(6, 5, 8, 0.82)']}
+          colors={['rgba(6, 5, 8, 0.5)', 'transparent', 'rgba(6, 5, 8, 0.78)']}
           locations={[0, 0.42, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -48,7 +48,7 @@ export function AuthAtmosphere() {
         />
 
         <LinearGradient
-          colors={['rgba(0, 0, 0, 0.35)', 'transparent']}
+          colors={['rgba(0, 0, 0, 0.32)', 'transparent']}
           locations={[0, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 0.45 }}

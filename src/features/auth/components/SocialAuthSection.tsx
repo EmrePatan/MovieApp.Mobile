@@ -14,7 +14,7 @@ import {
 } from '@/auth/social-auth-ui';
 import type { SocialAuthProvider } from '@/models/api/auth';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
 interface SocialAuthSectionProps {
@@ -28,8 +28,8 @@ interface SocialProviderConfig {
 }
 
 const SOCIAL_PROVIDERS: SocialProviderConfig[] = [
-  { provider: 'google', label: 'Google', icon: 'logo-google' },
-  { provider: 'apple', label: 'Apple', icon: 'logo-apple' },
+  { provider: 'google', label: 'Continue with Google', icon: 'logo-google' },
+  { provider: 'apple', label: 'Continue with Apple', icon: 'logo-apple' },
 ];
 
 export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
@@ -86,73 +86,77 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.providerRow}>
-        {visibleProviders.map((entry) => {
-          const isLoading = activeProvider === entry.provider;
-          const isDisabled = activeProvider !== null && activeProvider !== entry.provider;
+      {visibleProviders.map((entry) => {
+        const isLoading = activeProvider === entry.provider;
+        const isDisabled = activeProvider !== null && activeProvider !== entry.provider;
 
-          return (
-            <Pressable
-              key={entry.provider}
-              accessibilityRole="button"
-              accessibilityLabel={`Continue with ${entry.label}`}
-              accessibilityState={{ disabled: isDisabled, busy: isLoading }}
-              disabled={isDisabled}
-              onPress={() => void handleSocialSignIn(entry.provider)}
-              style={({ pressed }) => [
-                styles.providerButton,
-                pressed && !isDisabled && styles.providerButtonPressed,
-                isDisabled && styles.providerButtonDisabled,
-              ]}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.textPrimary} />
-              ) : (
-                <>
-                  <Ionicons name={entry.icon} size={18} color={colors.textPrimary} />
-                  <AppText variant="bodySmall" style={styles.providerLabel}>
-                    {entry.label}
-                  </AppText>
-                </>
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
+        return (
+          <Pressable
+            key={entry.provider}
+            accessibilityRole="button"
+            accessibilityLabel={entry.label}
+            accessibilityState={{ disabled: isDisabled, busy: isLoading }}
+            disabled={isDisabled}
+            onPress={() => void handleSocialSignIn(entry.provider)}
+            style={({ pressed }) => [
+              styles.providerButton,
+              pressed && !isDisabled && styles.providerButtonPressed,
+              isDisabled && styles.providerButtonDisabled,
+            ]}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.textPrimary} />
+            ) : (
+              <View style={styles.providerContent}>
+                <Ionicons name={entry.icon} size={22} color={colors.textPrimary} />
+                <AppText variant="body" style={styles.providerLabel}>
+                  {entry.label}
+                </AppText>
+                <View style={styles.providerIconSpacer} />
+              </View>
+            )}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.md,
-  },
-  providerRow: {
-    flexDirection: 'row',
     gap: spacing.sm,
   },
   providerButton: {
-    flex: 1,
-    minHeight: 52,
-    borderRadius: borderRadius.md,
+    minHeight: 56,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.14)',
-    backgroundColor: 'rgba(12, 12, 18, 0.58)',
-    flexDirection: 'row',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(12, 12, 18, 0.38)',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   providerButtonPressed: {
     opacity: interaction.pressedOpacity,
-    borderColor: 'rgba(255, 255, 255, 0.22)',
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    backgroundColor: 'rgba(18, 18, 26, 0.52)',
   },
   providerButtonDisabled: {
     opacity: interaction.disabledOpacity,
   },
+  providerContent: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   providerLabel: {
+    flex: 1,
     color: colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: '500',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  providerIconSpacer: {
+    width: 22,
   },
 });

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -11,11 +10,12 @@ import {
 } from '@/utils/validation';
 import { AUTH_REGISTER_COPY } from '@/features/auth/auth-copy';
 import { AuthDivider } from '@/features/auth/components/AuthDivider';
+import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
+import { AuthPrimaryButton } from '@/features/auth/components/AuthPrimaryButton';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function RegisterScreen() {
@@ -53,10 +53,9 @@ export default function RegisterScreen() {
 
   return (
     <AuthScreenLayout
-      tagline={AUTH_REGISTER_COPY.tagline}
+      taglineLines={AUTH_REGISTER_COPY.taglineLines}
       headlineLines={AUTH_REGISTER_COPY.headlineLines}
       headlineAccentLineIndex={AUTH_REGISTER_COPY.headlineAccentLineIndex}
-      supportingCopy={AUTH_REGISTER_COPY.supportingCopy}
       footer={
         <View style={styles.footerRow}>
           <AppText variant="bodySmall" style={styles.footerText}>Already have an account?</AppText>
@@ -70,7 +69,8 @@ export default function RegisterScreen() {
 
       <View style={styles.form}>
         <AuthInput
-          label="Display name"
+          placeholder="Display name"
+          leadingIcon="person"
           value={displayName}
           onChangeText={setDisplayName}
           error={fieldErrors.displayName}
@@ -79,7 +79,8 @@ export default function RegisterScreen() {
           returnKeyType="next"
         />
         <AuthInput
-          label="Email"
+          placeholder="Email"
+          leadingIcon="email"
           value={email}
           onChangeText={setEmail}
           error={fieldErrors.email}
@@ -90,7 +91,9 @@ export default function RegisterScreen() {
           returnKeyType="next"
         />
         <AuthInput
-          label="Password"
+          placeholder="Password"
+          leadingIcon="lock"
+          showPasswordToggle
           value={password}
           onChangeText={setPassword}
           error={fieldErrors.password}
@@ -101,13 +104,9 @@ export default function RegisterScreen() {
           onSubmitEditing={() => void handleRegister()}
         />
 
-        {formError ? (
-          <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
-            {formError}
-          </AppText>
-        ) : null}
+        {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
 
-        <AppButton
+        <AuthPrimaryButton
           title="Create account"
           onPress={() => void handleRegister()}
           loading={isSubmitting}
@@ -119,14 +118,13 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   form: {
-    gap: spacing.sm,
-  },
-  formError: {
-    color: colors.error,
+    gap: spacing.md,
   },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
     gap: spacing.xs,
   },
   footerText: {

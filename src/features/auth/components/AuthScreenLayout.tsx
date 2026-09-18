@@ -11,22 +11,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthAtmosphere } from './AuthAtmosphere';
 import { AuthBrandMark } from './AuthBrandMark';
-import { AppText } from '@/components/common/AppText';
+import { authTypography } from '../auth-typography';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 interface AuthScreenLayoutProps {
-  tagline: string;
+  taglineLines: readonly string[];
   headlineLines: readonly string[];
   headlineAccentLineIndex?: number;
-  supportingCopy: string;
+  supportingCopy?: string;
   children: ReactNode;
   footer?: ReactNode;
 }
 
 export function AuthScreenLayout({
-  tagline,
+  taglineLines,
   headlineLines,
   headlineAccentLineIndex = headlineLines.length - 1,
   supportingCopy,
@@ -34,8 +34,8 @@ export function AuthScreenLayout({
   footer,
 }: AuthScreenLayoutProps) {
   const { width } = useWindowDimensions();
-  const headlineSize = width < 360 ? 32 : width < 390 ? 36 : 40;
-  const headlineLineHeight = Math.round(headlineSize * 1.08);
+  const headlineSize = width < 360 ? 38 : width < 390 ? 44 : 48;
+  const headlineLineHeight = Math.round(headlineSize * 1.02);
 
   return (
     <View style={styles.root}>
@@ -55,9 +55,18 @@ export function AuthScreenLayout({
             <View style={styles.content}>
               <View style={styles.hero}>
                 <AuthBrandMark />
-                <AppText variant="caption" style={styles.tagline}>
-                  {tagline}
-                </AppText>
+
+                <View style={styles.taglineBlock}>
+                  {taglineLines.map((line, index) => (
+                    <Text
+                      key={`${line}-${index}`}
+                      style={styles.taglineLine}
+                      maxFontSizeMultiplier={1.2}
+                    >
+                      {line}
+                    </Text>
+                  ))}
+                </View>
 
                 <View style={styles.headlineBlock}>
                   {headlineLines.map((line, index) => (
@@ -73,16 +82,18 @@ export function AuthScreenLayout({
                           ? styles.headlineAccent
                           : styles.headlineLead,
                       ]}
-                      maxFontSizeMultiplier={1.25}
+                      maxFontSizeMultiplier={1.2}
                     >
                       {line}
                     </Text>
                   ))}
                 </View>
 
-                <AppText variant="bodySmall" style={styles.supportingCopy}>
-                  {supportingCopy}
-                </AppText>
+                {supportingCopy ? (
+                  <Text style={styles.supportingCopy} maxFontSizeMultiplier={1.2}>
+                    {supportingCopy}
+                  </Text>
+                ) : null}
               </View>
 
               <View style={styles.formSection}>{children}</View>
@@ -109,26 +120,30 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   content: {
     flexGrow: 1,
-    gap: spacing.lg,
+    gap: spacing.md,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     maxWidth: layout.maxContentWidth,
     width: '100%',
     alignSelf: 'center',
   },
   hero: {
-    gap: spacing.xs,
-    paddingTop: spacing.xs,
+    gap: spacing.sm,
   },
-  tagline: {
-    color: 'rgba(245, 245, 247, 0.72)',
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
+  taglineBlock: {
     marginTop: spacing.xs,
+    gap: 2,
+  },
+  taglineLine: {
+    color: 'rgba(245, 245, 247, 0.68)',
+    fontSize: 10.5,
+    letterSpacing: 2.4,
+    textTransform: 'uppercase',
+    lineHeight: 14,
   },
   headlineBlock: {
     marginTop: spacing.sm,
@@ -138,31 +153,31 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textShadowColor: 'rgba(0, 0, 0, 0.72)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 8,
+    textShadowRadius: 10,
   },
   headlineLead: {
-    fontWeight: '300',
-    letterSpacing: 0.6,
+    fontFamily: authTypography.editorialLight,
+    letterSpacing: 0.2,
   },
   headlineAccent: {
     color: colors.accentStrong,
-    fontWeight: '600',
-    fontStyle: 'italic',
-    letterSpacing: -0.8,
+    fontFamily: authTypography.editorialSemiboldItalic,
+    letterSpacing: -0.4,
   },
   supportingCopy: {
     color: 'rgba(245, 245, 247, 0.78)',
     maxWidth: 320,
     marginTop: spacing.xs,
     lineHeight: 21,
+    fontSize: 14,
   },
   formSection: {
     gap: spacing.md,
-    marginTop: -spacing.xs,
+    marginTop: spacing.xs,
   },
   footer: {
     alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: -spacing.xs,
+    justifyContent: 'center',
+    marginTop: spacing.sm,
   },
 });

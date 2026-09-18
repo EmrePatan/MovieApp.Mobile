@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { AppButton } from '@/components/buttons/AppButton';
 import { forgotPasswordRequest } from '@/auth/auth-api';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -10,10 +9,11 @@ import {
   type ForgotPasswordFormErrors,
 } from '@/utils/validation';
 import { AUTH_FORGOT_PASSWORD_COPY } from '@/features/auth/auth-copy';
+import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
+import { AuthPrimaryButton } from '@/features/auth/components/AuthPrimaryButton';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function ForgotPasswordScreen() {
@@ -51,7 +51,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthScreenLayout
-      tagline={AUTH_FORGOT_PASSWORD_COPY.tagline}
+      taglineLines={AUTH_FORGOT_PASSWORD_COPY.taglineLines}
       headlineLines={AUTH_FORGOT_PASSWORD_COPY.headlineLines}
       headlineAccentLineIndex={AUTH_FORGOT_PASSWORD_COPY.headlineAccentLineIndex}
       supportingCopy={AUTH_FORGOT_PASSWORD_COPY.supportingCopy}
@@ -64,7 +64,8 @@ export default function ForgotPasswordScreen() {
     >
       <View style={styles.form}>
         <AuthInput
-          label="Email"
+          placeholder="Email"
+          leadingIcon="email"
           value={email}
           onChangeText={setEmail}
           error={fieldErrors.email}
@@ -76,29 +77,19 @@ export default function ForgotPasswordScreen() {
           onSubmitEditing={() => void handleSubmit()}
         />
 
-        {successMessage ? (
-          <AppText variant="bodySmall" style={styles.successMessage} accessibilityRole="alert">
-            {successMessage}
-          </AppText>
-        ) : null}
+        {successMessage ? <AuthFormMessage message={successMessage} tone="success" /> : null}
 
-        {formError ? (
-          <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
-            {formError}
-          </AppText>
-        ) : null}
+        {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
 
-        <AppButton
+        <AuthPrimaryButton
           title="Send reset instructions"
           onPress={() => void handleSubmit()}
           loading={isSubmitting}
         />
 
-        <AuthLink
-          label="Create an account"
-          href="/(auth)/register"
-          accent={false}
-        />
+        <View style={styles.secondaryLink}>
+          <AuthLink label="Create an account" href="/(auth)/register" accent={false} />
+        </View>
       </View>
     </AuthScreenLayout>
   );
@@ -108,18 +99,17 @@ const styles = StyleSheet.create({
   form: {
     gap: spacing.md,
   },
-  formError: {
-    color: colors.error,
-  },
-  successMessage: {
-    color: colors.success,
-  },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
     gap: spacing.xs,
   },
   footerText: {
     color: 'rgba(245, 245, 247, 0.72)',
+  },
+  secondaryLink: {
+    alignItems: 'center',
   },
 });

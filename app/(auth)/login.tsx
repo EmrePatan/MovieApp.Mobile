@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -11,12 +10,13 @@ import {
 } from '@/utils/validation';
 import { AUTH_LOGIN_COPY } from '@/features/auth/auth-copy';
 import { AuthDivider } from '@/features/auth/components/AuthDivider';
+import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
+import { AuthPrimaryButton } from '@/features/auth/components/AuthPrimaryButton';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
 import { beginHomeColdStartTrace } from '@/perf/home-cold-start-trace';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function LoginScreen() {
@@ -54,10 +54,9 @@ export default function LoginScreen() {
 
   return (
     <AuthScreenLayout
-      tagline={AUTH_LOGIN_COPY.tagline}
+      taglineLines={AUTH_LOGIN_COPY.taglineLines}
       headlineLines={AUTH_LOGIN_COPY.headlineLines}
       headlineAccentLineIndex={AUTH_LOGIN_COPY.headlineAccentLineIndex}
-      supportingCopy={AUTH_LOGIN_COPY.supportingCopy}
       footer={
         <View style={styles.footerRow}>
           <AppText variant="bodySmall" style={styles.footerText}>New here?</AppText>
@@ -71,7 +70,8 @@ export default function LoginScreen() {
 
       <View style={styles.form}>
         <AuthInput
-          label="Email"
+          placeholder="Email"
+          leadingIcon="email"
           value={email}
           onChangeText={setEmail}
           error={fieldErrors.email}
@@ -82,7 +82,9 @@ export default function LoginScreen() {
           returnKeyType="next"
         />
         <AuthInput
-          label="Password"
+          placeholder="Password"
+          leadingIcon="lock"
+          showPasswordToggle
           value={password}
           onChangeText={setPassword}
           error={fieldErrors.password}
@@ -94,16 +96,16 @@ export default function LoginScreen() {
         />
 
         <View style={styles.forgotRow}>
-          <AuthLink label="Forgot password?" href="/(auth)/forgot-password" accent={false} />
+          <AuthLink label="Forgot password?" href="/(auth)/forgot-password" />
         </View>
 
-        {formError ? (
-          <AppText variant="bodySmall" style={styles.formError} accessibilityRole="alert">
-            {formError}
-          </AppText>
-        ) : null}
+        {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
 
-        <AppButton title="Sign in" onPress={() => void handleLogin()} loading={isSubmitting} />
+        <AuthPrimaryButton
+          title="Sign in"
+          onPress={() => void handleLogin()}
+          loading={isSubmitting}
+        />
       </View>
     </AuthScreenLayout>
   );
@@ -111,18 +113,17 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   form: {
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   forgotRow: {
     alignItems: 'flex-end',
     marginTop: -spacing.xs,
   },
-  formError: {
-    color: colors.error,
-  },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
     gap: spacing.xs,
   },
   footerText: {

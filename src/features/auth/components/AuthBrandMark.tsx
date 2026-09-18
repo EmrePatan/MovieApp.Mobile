@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { authTypography } from '../auth-typography';
 import { colors } from '@/theme/colors';
 
 interface AuthBrandMarkProps {
@@ -6,21 +7,34 @@ interface AuthBrandMarkProps {
 }
 
 export function AuthBrandMark({ compact = false }: AuthBrandMarkProps) {
-  const movieSize = compact ? 13 : 15;
-  const caveSize = compact ? 18 : 22;
-  const lineHeight = compact ? 22 : 26;
+  const { width } = useWindowDimensions();
+  const movieSize = compact ? 22 : width < 360 ? 30 : width < 390 ? 34 : 36;
+  const caveSize = compact ? 26 : width < 360 ? 34 : width < 390 ? 38 : 40;
+  const lineHeight = compact ? 30 : movieSize * 1.08;
 
   return (
     <View style={styles.container} accessibilityRole="header" accessibilityLabel="movie cave">
       <Text
-        style={[styles.movie, { fontSize: movieSize, lineHeight }]}
-        maxFontSizeMultiplier={1.3}
+        style={[
+          styles.movie,
+          {
+            fontSize: movieSize,
+            lineHeight,
+          },
+        ]}
+        maxFontSizeMultiplier={1.2}
       >
         movie
       </Text>
       <Text
-        style={[styles.cave, { fontSize: caveSize, lineHeight }]}
-        maxFontSizeMultiplier={1.3}
+        style={[
+          styles.cave,
+          {
+            fontSize: caveSize,
+            lineHeight,
+          },
+        ]}
+        maxFontSizeMultiplier={1.2}
       >
         cave
       </Text>
@@ -32,18 +46,18 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 4,
+    gap: 6,
   },
   movie: {
     color: colors.textPrimary,
-    fontWeight: '600',
-    letterSpacing: 1.6,
+    fontFamily: authTypography.wordmarkRegular,
+    letterSpacing: 0.8,
     textTransform: 'lowercase',
   },
   cave: {
     color: colors.accentStrong,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+    fontFamily: authTypography.wordmarkSemibold,
+    letterSpacing: 0.2,
     textTransform: 'lowercase',
   },
 });
