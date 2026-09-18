@@ -30,9 +30,9 @@ function HeroScrimLayers() {
     <>
       <LinearGradient
         colors={[
-          'rgba(10, 10, 15, 0.88)',
-          'rgba(10, 10, 15, 0.52)',
-          'rgba(10, 10, 15, 0.1)',
+          'rgba(10, 10, 15, 0.72)',
+          'rgba(10, 10, 15, 0.38)',
+          'rgba(10, 10, 15, 0.06)',
           'transparent',
         ]}
         locations={[0, 0.42, 0.72, 1]}
@@ -41,14 +41,14 @@ function HeroScrimLayers() {
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={['transparent', 'rgba(10, 10, 15, 0.08)', 'rgba(10, 10, 15, 0.42)']}
+        colors={['transparent', 'rgba(10, 10, 15, 0.05)', 'rgba(10, 10, 15, 0.28)']}
         locations={[0, 0.45, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={['transparent', 'rgba(10, 10, 15, 0.68)', 'rgba(10, 10, 15, 0.96)']}
+        colors={['transparent', 'rgba(10, 10, 15, 0.5)', 'rgba(10, 10, 15, 0.82)']}
         locations={[0, 0.42, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
