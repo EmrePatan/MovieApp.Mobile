@@ -66,7 +66,7 @@ describe('ReviewsLinkRow', () => {
     expect(screen.getByLabelText('Reviews, 121 reviews')).toBeTruthy();
   });
 
-  it('renders zero count correctly', () => {
+  it('renders a soft empty label instead of zero count', () => {
     (useMovieReviews as jest.Mock).mockReturnValue(mockCountQuery(0));
 
     render(
@@ -77,12 +77,13 @@ describe('ReviewsLinkRow', () => {
       />,
     );
 
-    expect(screen.getByTestId('reviews-count')).toHaveTextContent('0');
-    expect(screen.queryByText('(0)')).toBeNull();
-    expect(screen.getByLabelText('Reviews, 0 reviews')).toBeTruthy();
+    expect(screen.getByTestId('reviews-empty-label')).toHaveTextContent('No reviews yet');
+    expect(screen.queryByTestId('reviews-count')).toBeNull();
+    expect(screen.queryByText('0')).toBeNull();
+    expect(screen.getByLabelText('Reviews, No reviews yet')).toBeTruthy();
   });
 
-  it('uses compact navigation row styling instead of an elevated card', () => {
+  it('uses section header styling instead of separator rows or elevated cards', () => {
     render(
       <ReviewsLinkRow
         contentType="movie"
@@ -99,7 +100,8 @@ describe('ReviewsLinkRow', () => {
     expect(flattened.backgroundColor).toBeUndefined();
     expect(flattened.borderRadius).toBeUndefined();
     expect(flattened.borderWidth).toBeUndefined();
-    expect(screen.getByTestId('reviews-count')).toHaveStyle({ color: colors.textSecondary });
+    expect(screen.getByTestId('reviews-count')).toHaveStyle({ color: colors.accent });
+    expect(screen.queryByTestId('reviews-separator')).toBeNull();
   });
 
   it('uses a lightweight page size for count lookup', () => {
@@ -128,6 +130,7 @@ describe('ReviewsLinkRow', () => {
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith(
       `/movie/${movieId}/reviews?title=Interstellar`,
+      { withAnchor: true },
     );
   });
 
@@ -144,6 +147,7 @@ describe('ReviewsLinkRow', () => {
 
     expect(mockPush).toHaveBeenCalledWith(
       `/tv/${movieId}/reviews?title=Breaking+Bad`,
+      { withAnchor: true },
     );
     expect(useTvShowReviews).toHaveBeenCalledWith(movieId, REVIEW_COUNT_PAGE_SIZE);
   });

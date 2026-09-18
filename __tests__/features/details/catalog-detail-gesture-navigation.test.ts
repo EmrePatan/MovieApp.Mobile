@@ -1,6 +1,8 @@
 import {
+  buildCatalogDetailGestureOptions,
   resolveCatalogDetailGestureNavigation,
   setCatalogDetailGestureEnabled,
+  setCatalogDetailRatingGestureLock,
 } from '@/features/details/shared/navigation/catalog-detail-gesture-navigation';
 
 describe('catalog detail gesture navigation', () => {
@@ -16,7 +18,9 @@ describe('catalog detail gesture navigation', () => {
     expect(resolveCatalogDetailGestureNavigation(navigation)).toBe(parentNavigation);
     setCatalogDetailGestureEnabled(navigation, false);
 
-    expect(parentSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(parentSetOptions).toHaveBeenCalledWith(
+      buildCatalogDetailGestureOptions(false),
+    );
     expect(childSetOptions).not.toHaveBeenCalled();
   });
 
@@ -49,10 +53,41 @@ describe('catalog detail gesture navigation', () => {
     );
     setCatalogDetailGestureEnabled(reviewsNavigation, false);
 
-    expect(rootCatalogSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(rootCatalogSetOptions).toHaveBeenCalledWith(
+      buildCatalogDetailGestureOptions(false),
+    );
     expect(tvLayoutSetOptions).not.toHaveBeenCalled();
     expect(innerStackSetOptions).not.toHaveBeenCalled();
     expect(reviewsSetOptions).not.toHaveBeenCalled();
+  });
+
+  it('targets the root catalog screen from catalog detail index depth', () => {
+    const rootCatalogSetOptions = jest.fn();
+    const movieLayoutSetOptions = jest.fn();
+    const catalogStackSetOptions = jest.fn();
+    const indexSetOptions = jest.fn();
+
+    const rootStackNavigation = { setOptions: jest.fn() };
+    const rootCatalogNavigation = {
+      setOptions: rootCatalogSetOptions,
+      getParent: () => rootStackNavigation,
+    };
+    const movieLayoutNavigation = {
+      setOptions: movieLayoutSetOptions,
+      getParent: () => rootCatalogNavigation,
+    };
+    const catalogStackNavigation = {
+      setOptions: catalogStackSetOptions,
+      getParent: () => movieLayoutNavigation,
+    };
+    const indexNavigation = {
+      setOptions: indexSetOptions,
+      getParent: () => catalogStackNavigation,
+    };
+
+    expect(resolveCatalogDetailGestureNavigation(indexNavigation)).toBe(
+      rootCatalogNavigation,
+    );
   });
 
   it('falls back to the current navigator when no parent exists', () => {
@@ -61,6 +96,38 @@ describe('catalog detail gesture navigation', () => {
 
     expect(resolveCatalogDetailGestureNavigation(navigation)).toBe(navigation);
     setCatalogDetailGestureEnabled(navigation, true);
-    expect(setOptions).toHaveBeenCalledWith({ gestureEnabled: true });
+    expect(setOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(true));
+  });
+
+  it('locks every navigator in the chain during rating interaction', () => {
+    const rootSetOptions = jest.fn();
+    const rootCatalogSetOptions = jest.fn();
+    const catalogStackSetOptions = jest.fn();
+    const indexSetOptions = jest.fn();
+
+    const rootStackNavigation = { setOptions: rootSetOptions };
+    const rootCatalogNavigation = {
+      setOptions: rootCatalogSetOptions,
+      getParent: () => rootStackNavigation,
+    };
+    const catalogStackNavigation = {
+      setOptions: catalogStackSetOptions,
+      getParent: () => rootCatalogNavigation,
+    };
+    const indexNavigation = {
+      setOptions: indexSetOptions,
+      getParent: () => catalogStackNavigation,
+    };
+
+    setCatalogDetailRatingGestureLock(indexNavigation, true);
+
+    expect(indexSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(false));
+    expect(catalogStackSetOptions).toHaveBeenCalledWith(
+      buildCatalogDetailGestureOptions(false),
+    );
+    expect(rootCatalogSetOptions).toHaveBeenCalledWith(
+      buildCatalogDetailGestureOptions(false),
+    );
+    expect(rootSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(false));
   });
 });

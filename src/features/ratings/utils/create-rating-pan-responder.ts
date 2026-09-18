@@ -187,8 +187,21 @@ export function createRatingPanResponder({
     setPreviewFromEvent(event);
   };
 
+  const shouldClaimResponder = () => {
+    if (getDisabled()) {
+      return false;
+    }
+
+    if (onGestureStart && !onGestureStart()) {
+      return false;
+    }
+
+    return true;
+  };
+
   const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => false,
+    onStartShouldSetPanResponder: shouldClaimResponder,
+    onPanResponderTerminationRequest: () => gestureModeRef.current === 'vertical',
     onMoveShouldSetPanResponder: (_, gestureState) => {
       if (getDisabled()) {
         return false;
@@ -222,6 +235,7 @@ export function createRatingPanResponder({
       handleMove,
       handleTouchEnd,
       finishGesture,
+      shouldClaimOnStart: shouldClaimResponder,
       shouldClaimOnMove: () => !getDisabled(),
       getGestureMode: () => gestureModeRef.current,
     },

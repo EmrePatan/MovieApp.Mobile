@@ -64,7 +64,8 @@ jest.mock('@/features/details/collection/components/CollectionLinkRow', () => ({
 }));
 
 jest.mock('@/features/details/tv/components/SeasonList', () => ({
-  SeasonList: () => null,
+  SeasonList: () =>
+    mockReact.createElement('View', { testID: 'season-list-section' }),
 }));
 
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
@@ -109,6 +110,24 @@ const show: TvShowDetailsResponse = {
   canFollow: false,
 };
 
+function collectTestIds(node: { props?: { testID?: string }; children?: unknown[] }): string[] {
+  const ids: string[] = [];
+
+  if (node.props?.testID) {
+    ids.push(node.props.testID);
+  }
+
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      if (child && typeof child === 'object' && 'props' in child) {
+        ids.push(...collectTestIds(child as { props?: { testID?: string }; children?: unknown[] }));
+      }
+    }
+  }
+
+  return ids;
+}
+
 function mockCountQuery(totalCount: number) {
   return {
     data: {
@@ -147,13 +166,19 @@ describe('detail reviews row', () => {
     expect(screen.queryByText('Load more reviews')).toBeNull();
   });
 
-  it('shows the compact reviews row below rating on tv detail', () => {
+  it('shows the reviews section below seasons on tv detail', () => {
     render(<TvShowDetailContent show={show} />);
 
     expect(screen.getByTestId('detail-inline-rating-section')).toBeTruthy();
+    expect(screen.getByTestId('season-list-section')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
     expect(screen.getByTestId('reviews-count')).toHaveTextContent('42');
     expect(screen.queryByTestId('reviews-section')).toBeNull();
+
+    const order = collectTestIds(screen.root);
+    expect(order.indexOf('season-list-section')).toBeLessThan(
+      order.indexOf('reviews-link-row'),
+    );
   });
 
   it('navigates to the dedicated reviews screen from movie detail', () => {
@@ -163,6 +188,7 @@ describe('detail reviews row', () => {
 
     expect(mockPush).toHaveBeenCalledWith(
       `/movie/${movieId}/reviews?title=Interstellar`,
+      { withAnchor: true },
     );
   });
 
@@ -173,6 +199,7 @@ describe('detail reviews row', () => {
 
     expect(mockPush).toHaveBeenCalledWith(
       `/tv/${tvShowId}/reviews?title=Breaking+Bad`,
+      { withAnchor: true },
     );
   });
 

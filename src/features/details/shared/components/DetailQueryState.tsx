@@ -14,7 +14,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 
 import { DetailScrollProvider } from '../context/DetailScrollContext';
 import { DetailScrollLockProvider } from '../context/DetailScrollLockContext';
-import { setCatalogDetailGestureEnabled } from '../navigation/catalog-detail-gesture-navigation';
+import { setCatalogDetailRatingGestureLock } from '../navigation/catalog-detail-gesture-navigation';
 import { useDetailNavigationGestureLock } from '../navigation/useDetailNavigationGestureLock';
 
 import { DetailBackButton } from './DetailBackButton';
@@ -108,7 +108,7 @@ export function DetailQueryState<TData>({
       setInteractionLocked(locked);
 
       if (enableRatingNavigationGestureLock) {
-        setCatalogDetailGestureEnabled(navigation, !locked);
+        setCatalogDetailRatingGestureLock(navigation, locked);
       }
     },
     [enableRatingNavigationGestureLock, navigation],

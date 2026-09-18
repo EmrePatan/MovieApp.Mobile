@@ -23,10 +23,19 @@ function createResponder(
 }
 
 describe('createRatingPanResponder', () => {
-  it('claims horizontal drags inside the rating surface', () => {
+  it('claims the responder on touch start and horizontal drags', () => {
     const { handlers } = createResponder();
 
+    expect(handlers.shouldClaimOnStart()).toBe(true);
     expect(handlers.shouldClaimOnMove()).toBe(true);
+  });
+
+  it('does not claim the responder on touch start when disabled or blocked', () => {
+    const disabled = createResponder({ getDisabled: () => true });
+    const blocked = createResponder({ onGestureStart: () => false });
+
+    expect(disabled.handlers.shouldClaimOnStart()).toBe(false);
+    expect(blocked.handlers.shouldClaimOnStart()).toBe(false);
   });
 
   it('commits a tap without claiming the responder on touch start', () => {

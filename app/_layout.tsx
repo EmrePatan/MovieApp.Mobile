@@ -11,6 +11,7 @@ import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
+import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 import { colors } from '@/theme/colors';
 
 void SplashScreen.preventAutoHideAsync();
@@ -30,8 +31,8 @@ function RootNavigator() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="movie" />
-        <Stack.Screen name="tv" />
+        <Stack.Screen name="movie" options={ratedDetailStackScreenOptions} />
+        <Stack.Screen name="tv" options={ratedDetailStackScreenOptions} />
         <Stack.Screen name="person" />
         <Stack.Screen name="collection" />
         <Stack.Screen name="watch-history" />

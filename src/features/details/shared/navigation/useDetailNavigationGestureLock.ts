@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import { useNavigation } from 'expo-router';
-import { resolveCatalogDetailGestureNavigation } from './catalog-detail-gesture-navigation';
+import { setCatalogDetailRatingGestureLock } from './catalog-detail-gesture-navigation';
 
 /**
  * Temporarily disables the native stack back-swipe on the root catalog detail
@@ -11,14 +11,13 @@ export function useDetailNavigationGestureLock(
   enabled: boolean,
 ) {
   const navigation = useNavigation();
-  const gestureNavigation = resolveCatalogDetailGestureNavigation(navigation);
 
   useLayoutEffect(() => {
     if (!enabled) {
       return;
     }
 
-    gestureNavigation.setOptions({ gestureEnabled: !interactionLocked });
-  }, [enabled, gestureNavigation, interactionLocked]);
+    setCatalogDetailRatingGestureLock(navigation, interactionLocked);
+  }, [enabled, navigation, interactionLocked]);
 
 }

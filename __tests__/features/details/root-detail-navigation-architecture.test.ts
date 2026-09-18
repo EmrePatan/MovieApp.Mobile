@@ -24,14 +24,17 @@ describe('root detail navigation architecture', () => {
 
   it('registers global detail stacks on the root navigator', () => {
     const rootLayout = readFileSync(path.join(process.cwd(), 'app/_layout.tsx'), 'utf8');
+    const movieLayout = readFileSync(path.join(process.cwd(), 'app/movie/_layout.tsx'), 'utf8');
     const tvLayout = readFileSync(path.join(process.cwd(), 'app/tv/_layout.tsx'), 'utf8');
     const personLayout = readFileSync(path.join(process.cwd(), 'app/person/_layout.tsx'), 'utf8');
 
-    expect(rootLayout).toContain('name="movie"');
-    expect(rootLayout).toContain('name="tv"');
+    expect(rootLayout).toContain('name="movie" options={ratedDetailStackScreenOptions}');
+    expect(rootLayout).toContain('name="tv" options={ratedDetailStackScreenOptions}');
     expect(rootLayout).toContain('name="person"');
     expect(rootLayout).toContain('name="collection"');
+    expect(movieLayout).toContain('ratedDetailStackScreenOptions');
     expect(tvLayout).toContain('name="[id]"');
+    expect(tvLayout).toContain('ratedDetailStackScreenOptions');
     expect(personLayout).toContain('name="[tmdbId]"');
   });
 

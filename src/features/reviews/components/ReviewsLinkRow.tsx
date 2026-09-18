@@ -31,11 +31,14 @@ export function ReviewsLinkRow({
   const reviewsQuery = useReviewsQuery(contentType, contentId, REVIEW_COUNT_PAGE_SIZE);
   const totalCount = reviewsQuery.data?.pages[0]?.totalCount;
   const isCountLoading = reviewsQuery.isLoading && totalCount == null;
-  const countLabel = totalCount == null ? '0' : String(totalCount);
-  const countAccessibilityLabel =
-    totalCount == null
+  const hasReviews = totalCount != null && totalCount > 0;
+  const countLabel = totalCount == null ? null : String(totalCount);
+  const trailingAccessibilityLabel =
+    isCountLoading
       ? 'Reviews count loading'
-      : `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`;
+      : hasReviews
+        ? `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`
+        : 'No reviews yet';
 
   const handlePress = useCallback(() => {
     const reviewsRoute =
@@ -47,64 +50,67 @@ export function ReviewsLinkRow({
   }, [contentId, contentTitle, contentType, router]);
 
   return (
-    <View style={styles.container} testID="reviews-link-row">
-      <View style={styles.separator} />
+    <View style={styles.section} testID="reviews-link-row">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Reviews, ${countAccessibilityLabel}`}
+        accessibilityLabel={`Reviews, ${trailingAccessibilityLabel}`}
         onPress={handlePress}
-        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.headerRow, pressed && styles.pressed]}
         testID="reviews-link-row-button"
       >
-        <AppText variant="body" style={styles.label}>
+        <AppText variant="subtitle" style={styles.headerTitle}>
           Reviews
         </AppText>
         <View style={styles.trailing}>
           {isCountLoading ? (
             <ActivityIndicator color={colors.accent} size="small" testID="reviews-count-loading" />
-          ) : (
-            <AppText variant="bodySmall" muted style={styles.count} testID="reviews-count">
+          ) : hasReviews ? (
+            <AppText variant="caption" style={styles.count} testID="reviews-count">
               {countLabel}
             </AppText>
+          ) : (
+            <AppText variant="caption" muted style={styles.emptyLabel} testID="reviews-empty-label">
+              No reviews yet
+            </AppText>
           )}
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </View>
       </Pressable>
-      <View style={styles.separator} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: layout.screenPaddingHorizontal,
+  section: {
+    marginTop: spacing.sm,
   },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-  },
-  row: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     minHeight: layout.touchTarget,
-    paddingVertical: spacing.xs,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
   },
-  label: {
+  headerTitle: {
+    flex: 1,
     color: colors.textPrimary,
-    fontWeight: '500',
+    letterSpacing: 0.15,
   },
   trailing: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   count: {
-    minWidth: spacing.lg,
-    textAlign: 'right',
+    color: colors.accent,
+    fontWeight: '600',
     fontVariant: ['tabular-nums'],
+  },
+  emptyLabel: {
+    fontWeight: '500',
   },
 });

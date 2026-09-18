@@ -49,12 +49,12 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       />
       <DetailOverview overview={show.overview} />
       <DetailInlineRatingSection contentType="tv" contentId={show.id} />
+      <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow
         contentType="tv"
         contentId={show.id}
         contentTitle={show.title}
       />
-      <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <WhereToWatchRail contentType="tv" contentId={show.id} />
       <CatalogGallerySection
         query={galleryQuery}

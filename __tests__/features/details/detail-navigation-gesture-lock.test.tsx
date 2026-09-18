@@ -3,6 +3,7 @@ import { Pressable, Text } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 import { useDetailScrollLock } from '@/features/details/shared/context/DetailScrollLockContext';
+import { buildCatalogDetailGestureOptions } from '@/features/details/shared/navigation/catalog-detail-gesture-navigation';
 import { useDetailNavigationGestureLock } from '@/features/details/shared/navigation/useDetailNavigationGestureLock';
 
 const mockChildSetOptions = jest.fn();
@@ -45,14 +46,16 @@ describe('useDetailNavigationGestureLock', () => {
     }
 
     const { rerender } = render(<Probe locked={false} />);
-    expect(mockParentSetOptions).toHaveBeenCalledWith({ gestureEnabled: true });
-    expect(mockChildSetOptions).not.toHaveBeenCalled();
+    expect(mockChildSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(true));
+    expect(mockParentSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(true));
 
     rerender(<Probe locked={true} />);
-    expect(mockParentSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(mockChildSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(false));
+    expect(mockParentSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(false));
 
     rerender(<Probe locked={false} />);
-    expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
+    expect(mockChildSetOptions).toHaveBeenLastCalledWith(buildCatalogDetailGestureOptions(true));
+    expect(mockParentSetOptions).toHaveBeenLastCalledWith(buildCatalogDetailGestureOptions(true));
   });
 
 });
@@ -116,8 +119,8 @@ describe('DetailQueryState navigation gesture lock', () => {
     renderRatingLockProbe();
 
     fireEvent.press(screen.getByLabelText('Lock rating interaction'));
-    expect(mockParentSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
-    expect(mockChildSetOptions).not.toHaveBeenCalled();
+    expect(mockChildSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(false));
+    expect(mockParentSetOptions).toHaveBeenCalledWith(buildCatalogDetailGestureOptions(false));
   });
 
   it('restores the parent root navigator when rating interaction ends', () => {
@@ -125,7 +128,8 @@ describe('DetailQueryState navigation gesture lock', () => {
 
     fireEvent.press(screen.getByLabelText('Lock rating interaction'));
     fireEvent.press(screen.getByLabelText('Unlock rating interaction'));
-    expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
+    expect(mockChildSetOptions).toHaveBeenLastCalledWith(buildCatalogDetailGestureOptions(true));
+    expect(mockParentSetOptions).toHaveBeenLastCalledWith(buildCatalogDetailGestureOptions(true));
   });
 
   it('does not wire rating interaction lock for non-catalog detail screens', () => {

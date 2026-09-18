@@ -1,6 +1,32 @@
+export interface CatalogDetailGestureOptions {
+  gestureEnabled: boolean;
+  fullScreenGestureEnabled: boolean;
+}
+
 interface GestureNavigationTarget {
   getParent?: () => GestureNavigationTarget | undefined;
-  setOptions: (options: { gestureEnabled: boolean }) => void;
+  setOptions: (options: CatalogDetailGestureOptions) => void;
+}
+
+export function buildCatalogDetailGestureOptions(
+  gestureEnabled: boolean,
+): CatalogDetailGestureOptions {
+  return {
+    gestureEnabled,
+    fullScreenGestureEnabled: false,
+  };
+}
+
+function walkNavigationChain(navigation: GestureNavigationTarget): GestureNavigationTarget[] {
+  const chain: GestureNavigationTarget[] = [navigation];
+  let current = navigation;
+
+  while (current.getParent?.()) {
+    current = current.getParent()!;
+    chain.push(current);
+  }
+
+  return chain;
 }
 
 /**
@@ -11,25 +37,52 @@ interface GestureNavigationTarget {
 export function resolveCatalogDetailGestureNavigation(
   navigation: GestureNavigationTarget,
 ): GestureNavigationTarget {
-  const chain: GestureNavigationTarget[] = [navigation];
-  let current = navigation;
+  const chain = walkNavigationChain(navigation);
 
-  while (current.getParent?.()) {
-    current = current.getParent()!;
-    chain.push(current);
+  if (chain.length >= 2) {
+    return chain[Math.max(1, chain.length - 2)];
   }
 
-  if (chain.length === 1) {
-    return chain[0];
+  return chain[0];
+}
+
+function applyCatalogDetailGestureOptions(
+  navigation: GestureNavigationTarget,
+  options: CatalogDetailGestureOptions,
+  scope: 'target' | 'chain',
+): void {
+  if (scope === 'chain') {
+    for (const target of walkNavigationChain(navigation)) {
+      target.setOptions(options);
+    }
+    return;
   }
 
-  const rootCatalogIndex = Math.max(1, chain.length - 2);
-  return chain[rootCatalogIndex];
+  resolveCatalogDetailGestureNavigation(navigation).setOptions(options);
 }
 
 export function setCatalogDetailGestureEnabled(
   navigation: GestureNavigationTarget,
   gestureEnabled: boolean,
 ): void {
-  resolveCatalogDetailGestureNavigation(navigation).setOptions({ gestureEnabled });
+  applyCatalogDetailGestureOptions(
+    navigation,
+    buildCatalogDetailGestureOptions(gestureEnabled),
+    'target',
+  );
+}
+
+/**
+ * Disables every navigator in the catalog chain while the inline rating control
+ * is active so horizontal star drags cannot trigger a root interactive pop.
+ */
+export function setCatalogDetailRatingGestureLock(
+  navigation: GestureNavigationTarget,
+  locked: boolean,
+): void {
+  applyCatalogDetailGestureOptions(
+    navigation,
+    buildCatalogDetailGestureOptions(!locked),
+    'chain',
+  );
 }
