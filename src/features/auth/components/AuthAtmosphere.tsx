@@ -29,8 +29,8 @@ export function AuthAtmosphere() {
         {/* Left-to-right readability scrim — lighter on the right so seats/popcorn read through. */}
         <LinearGradient
           colors={[
-            'rgba(6, 5, 8, 0.78)',
-            'rgba(10, 8, 12, 0.56)',
+            'rgba(6, 5, 8, 0.82)',
+            'rgba(10, 8, 12, 0.58)',
             'rgba(14, 10, 14, 0.2)',
             'rgba(8, 6, 10, 0.05)',
           ]}
@@ -40,52 +40,61 @@ export function AuthAtmosphere() {
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Vertical balance — soften the bottom crush while keeping the hero area legible. */}
+        {/* Vertical balance — deeper blacks behind the form/footer without crushing the hero. */}
         <LinearGradient
-          colors={['rgba(6, 5, 8, 0.38)', 'transparent', 'rgba(6, 5, 8, 0.58)']}
-          locations={[0, 0.44, 1]}
+          colors={['rgba(6, 5, 8, 0.36)', 'transparent', 'rgba(4, 3, 6, 0.7)']}
+          locations={[0, 0.48, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Warm ceiling spill from the theater lights above. */}
+        {/* Localized form/footer scrim — cinematic black, not amber wash. */}
+        <LinearGradient
+          colors={['transparent', 'rgba(4, 3, 6, 0.42)', 'rgba(6, 5, 8, 0.62)']}
+          locations={[0.5, 0.76, 1]}
+          start={{ x: 0, y: 0.55 }}
+          end={{ x: 0.72, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Warm spill from upper-left theater lighting. */}
         <LinearGradient
           colors={[
-            'rgba(212, 179, 106, 0.16)',
-            'rgba(196, 163, 90, 0.08)',
+            'rgba(212, 179, 106, 0.15)',
+            'rgba(196, 163, 90, 0.06)',
             'transparent',
           ]}
-          locations={[0, 0.28, 0.62]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+          locations={[0, 0.32, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.58, y: 0.42 }}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Soft gold bloom from the lower-left aisle lighting. */}
+        {/* Tight lower-left light leak — edge only, not a broad wash. */}
         <LinearGradient
-          colors={['transparent', 'rgba(196, 163, 90, 0.1)', 'rgba(212, 179, 106, 0.14)']}
-          locations={[0.3, 0.68, 1]}
-          start={{ x: 1, y: 0.15 }}
+          colors={['transparent', 'transparent', 'rgba(196, 163, 90, 0.07)', 'rgba(212, 179, 106, 0.09)']}
+          locations={[0, 0.58, 0.86, 1]}
+          start={{ x: 0.95, y: 0.62 }}
           end={{ x: 0, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Soft gold bloom from the lower-right popcorn/seat glow. */}
+        {/* Tight lower-right light leak — preserves popcorn/seat edge glow. */}
         <LinearGradient
-          colors={['transparent', 'rgba(212, 179, 106, 0.08)', 'rgba(196, 163, 90, 0.12)']}
-          locations={[0.35, 0.72, 1]}
-          start={{ x: 0, y: 0.1 }}
+          colors={['transparent', 'transparent', 'rgba(212, 179, 106, 0.05)', 'rgba(196, 163, 90, 0.08)']}
+          locations={[0, 0.6, 0.88, 1]}
+          start={{ x: 0.05, y: 0.65 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
         {/* Gentle top vignette — warm, not flat black. */}
         <LinearGradient
-          colors={['rgba(18, 12, 8, 0.24)', 'transparent']}
+          colors={['rgba(18, 12, 8, 0.22)', 'transparent']}
           locations={[0, 1]}
           start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 0.42 }}
+          end={{ x: 0.5, y: 0.4 }}
           style={styles.topVignette}
         />
       </ImageBackground>
