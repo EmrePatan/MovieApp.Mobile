@@ -1,5 +1,7 @@
 import {
+  adjustBucketsForExcludedRating,
   buildStarBucketsFromDistribution,
+  reviewMatchesStarFilter,
   scoreToStarBucket,
 } from '@/features/reviews/utils/rating-star-buckets';
 
@@ -20,5 +22,18 @@ describe('rating-star-buckets', () => {
     expect(buckets[2]).toBe(1);
     expect(buckets[5]).toBe(1);
     expect(buckets[1]).toBe(0);
+  });
+
+  it('subtracts the current user rating from histogram buckets', () => {
+    const buckets = buildStarBucketsFromDistribution({ '8': 1 });
+
+    expect(adjustBucketsForExcludedRating(buckets, 8)[4]).toBe(0);
+  });
+
+  it('matches star filters using the same bucket rules as the API', () => {
+    expect(reviewMatchesStarFilter(7, 4)).toBe(true);
+    expect(reviewMatchesStarFilter(8, 4)).toBe(true);
+    expect(reviewMatchesStarFilter(6, 4)).toBe(false);
+    expect(reviewMatchesStarFilter(null, 4)).toBe(false);
   });
 });

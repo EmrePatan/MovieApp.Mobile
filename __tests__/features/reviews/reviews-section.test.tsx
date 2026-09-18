@@ -4,8 +4,9 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
-import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
+import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import { useMyReview } from '@/features/reviews/hooks/useMyReview';
+import { useReviewRatingDistribution } from '@/features/reviews/hooks/useReviewRatingDistribution';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';
 import {
@@ -46,7 +47,10 @@ jest.mock('@/features/reviews/hooks/useMyReview', () => ({
 
 jest.mock('@/features/ratings/hooks/useRatings', () => ({
   useMyRating: jest.fn(),
-  useRatingAggregate: jest.fn(),
+}));
+
+jest.mock('@/features/reviews/hooks/useReviewRatingDistribution', () => ({
+  useReviewRatingDistribution: jest.fn(),
 }));
 
 jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
@@ -112,10 +116,10 @@ describe('ReviewsDetailContent', () => {
       data: null,
       isLoading: false,
     });
-    (useRatingAggregate as jest.Mock).mockReturnValue({
+    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
       data: {
         averageScore: 8,
-        ratingCount: 3,
+        ratedReviewCount: 3,
         scoreDistribution: { '8': 2, '3': 1 },
       },
       isLoading: false,
@@ -135,10 +139,15 @@ describe('ReviewsDetailContent', () => {
   });
 
   it('renders review count and public reviews', () => {
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    render(
+      <ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />,
+    );
 
     expect(screen.getByText('Reviews')).toBeTruthy();
-    expect(screen.getByTestId('reviews-total-count')).toHaveTextContent('1 review');
+    expect(screen.getByTestId('reviews-content-title')).toHaveTextContent('Interstellar');
+    expect(screen.getByTestId('reviews-header-rating')).toHaveTextContent(/4\.0/);
+    expect(screen.queryByText(/3 ratings/)).toBeNull();
+    expect(screen.getByTestId('reviews-review-count')).toHaveTextContent('1 review');
     expect(screen.getByTestId('reviews-rating-distribution')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
@@ -162,6 +171,7 @@ describe('ReviewsDetailContent', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByText('No reviews yet.')).toBeTruthy();
     expect(screen.getByText('Be the first to share your thoughts.')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
   });
 
   it('shows error with retry', () => {
@@ -203,7 +213,26 @@ describe('ReviewsDetailContent', () => {
     );
   });
 
-  it('shows current user review with edit and delete actions', () => {
+  it('expands a long own review preview inline', () => {
+    const longReview = {
+      ...myReview,
+      content: 'A'.repeat(120),
+    };
+
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: longReview,
+      isLoading: false,
+    });
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.getByText('Read more')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Read more of your review'));
+    expect(screen.getByText('Show less')).toBeTruthy();
+    expect(screen.getByText(longReview.content)).toBeTruthy();
+  });
+
+  it('shows own review in header bar instead of pinning it in the list', () => {
     (useMyReview as jest.Mock).mockReturnValue({
       data: myReview,
       isLoading: false,
@@ -211,10 +240,14 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
+    expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
     expect(screen.getByText('Your review')).toBeTruthy();
-    expect(screen.getByText('Jane Doe')).toBeTruthy();
-    expect(screen.getByText('You')).toBeTruthy();
+    expect(screen.getByText('My take on this title.')).toBeTruthy();
+    expect(screen.getByLabelText('Edit review')).toBeTruthy();
+    expect(screen.queryByText('Jane Doe')).toBeNull();
+    expect(screen.queryByText('You')).toBeNull();
     expect(screen.queryByText('Write')).toBeNull();
+    expect(screen.getByText('Alex Smith')).toBeTruthy();
   });
 
   it('edits own review', () => {
@@ -226,6 +259,7 @@ describe('ReviewsDetailContent', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByLabelText('Edit review'));
+    expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText('Review'), 'Updated take.');
     fireEvent.press(screen.getByText('Save review'));
 
@@ -246,6 +280,7 @@ describe('ReviewsDetailContent', () => {
     });
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    fireEvent.press(screen.getByLabelText('Edit review'));
     fireEvent.press(screen.getByLabelText('Delete review'));
 
     expect(alertSpy).toHaveBeenCalled();
@@ -290,6 +325,167 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByTestId('review-author-rating')).toHaveTextContent('4.0');
+  });
+
+  it('shows half-star author ratings on review cards', () => {
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [{ ...otherReview, userRating: 7 }],
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    expect(screen.getByTestId('review-author-rating')).toHaveTextContent('3.5');
+  });
+
+  it('does not show review histogram when only ratings exist without written reviews', () => {
+    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+      data: {
+        averageScore: 0,
+        ratedReviewCount: 0,
+        scoreDistribution: {},
+      },
+      isLoading: false,
+    });
+    (useMyRating as jest.Mock).mockReturnValue({
+      data: { score: 8 },
+      isLoading: false,
+    });
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(
+      <ReviewsDetailContent
+        contentType="movie"
+        contentId={movieId}
+        contentTitle="Inception"
+      />,
+    );
+
+    expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-header-rating')).toBeNull();
+    expect(screen.getByText('No reviews yet.')).toBeTruthy();
+  });
+
+  it('hides histogram when only the current user has rated', () => {
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: { ...myReview, userRating: 8 },
+      isLoading: false,
+    });
+    (useMyRating as jest.Mock).mockReturnValue({
+      data: { score: 8 },
+      isLoading: false,
+    });
+    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+      data: {
+        averageScore: 0,
+        ratedReviewCount: 0,
+        scoreDistribution: {},
+      },
+      isLoading: false,
+    });
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.getByText('No other reviews yet.')).toBeTruthy();
+  });
+
+  it('hides community controls when only the current user has a review', () => {
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: myReview,
+      isLoading: false,
+    });
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [myReview],
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
+  });
+
+  it('explains when a rating filter only matches the current user review', () => {
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: { ...myReview, userRating: 8 },
+      isLoading: false,
+    });
+    (useMyRating as jest.Mock).mockReturnValue({
+      data: { score: 8 },
+      isLoading: false,
+    });
+    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+      data: {
+        averageScore: 8,
+        ratedReviewCount: 2,
+        scoreDistribution: { '8': 2 },
+      },
+      isLoading: false,
+    });
+    (useMovieReviews as jest.Mock).mockImplementation((_id, options) =>
+      mockReviewsQuery({
+        data: {
+          items: options?.ratingStars === 4 ? [{ ...myReview, userRating: 8 }] : [otherReview],
+          page: 1,
+          pageSize: 10,
+          totalCount: 2,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
+    expect(screen.getByText('Your review matches this rating. See it above.')).toBeTruthy();
   });
 
   it('uses tv review query for tv content', () => {

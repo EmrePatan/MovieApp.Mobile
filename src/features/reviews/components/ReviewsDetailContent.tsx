@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
@@ -14,23 +15,30 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
+import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import { ReviewCard } from './ReviewCard';
 import { ReviewComposer } from './ReviewComposer';
+import { ReviewsOwnReviewBar } from './ReviewsOwnReviewBar';
 import { ReviewsPaginationControl } from './ReviewsPaginationControl';
+import { ReviewsHeaderMeta } from './ReviewsHeaderMeta';
 import { ReviewsRatingDistribution } from './ReviewsRatingDistribution';
-import { ReviewsSectionHeader } from './ReviewsSectionHeader';
 import { ReviewsSortControl } from './ReviewsSortControl';
+import { ReviewsWritePrompt } from './ReviewsWritePrompt';
 import { useMyReview } from '../hooks/useMyReview';
 import {
   useCreateReviewMutation,
   useDeleteReviewMutation,
   useUpdateReviewMutation,
 } from '../hooks/useReviewMutations';
+import { useReviewRatingDistribution } from '../hooks/useReviewRatingDistribution';
 import { useReviewsQuery } from '../hooks/useReviewsQuery';
 import type { ReviewContentType, ReviewResponse, ReviewSortOption } from '../types';
 import { DEFAULT_REVIEW_SORT } from '../types';
-import { buildStarBucketsFromDistribution } from '../utils/rating-star-buckets';
+import {
+  adjustBucketsForExcludedRating,
+  buildStarBucketsFromDistribution,
+  reviewMatchesStarFilter,
+} from '../utils/rating-star-buckets';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -41,24 +49,6 @@ interface ReviewsDetailContentProps {
   contentType: ReviewContentType;
   contentId: string;
   contentTitle?: string;
-}
-
-function formatReviewCountLabel(totalCount: number): string {
-  return `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`;
-}
-
-function formatHeaderSubtitle(contentTitle?: string, totalCount?: number): string | null {
-  const parts: string[] = [];
-
-  if (contentTitle) {
-    parts.push(contentTitle);
-  }
-
-  if (totalCount !== undefined) {
-    parts.push(formatReviewCountLabel(totalCount));
-  }
-
-  return parts.length > 0 ? parts.join(' · ') : null;
 }
 
 export function ReviewsDetailContent({
@@ -72,7 +62,7 @@ export function ReviewsDetailContent({
   const [sort, setSort] = useState<ReviewSortOption>(DEFAULT_REVIEW_SORT);
   const [ratingStars, setRatingStars] = useState<number | null>(null);
   const reviewsQuery = useReviewsQuery(contentType, contentId, { page, sort, ratingStars });
-  const ratingAggregateQuery = useRatingAggregate(contentType, contentId);
+  const reviewRatingDistributionQuery = useReviewRatingDistribution(contentType, contentId);
   const myReviewQuery = useMyReview(contentType, contentId);
   const myRatingQuery = useMyRating(contentType, contentId);
   const createReview = useCreateReviewMutation(contentType, contentId);
@@ -97,10 +87,20 @@ export function ReviewsDetailContent({
 
   const totalCount = reviewsQuery.data?.totalCount ?? 0;
   const totalPages = reviewsQuery.data?.totalPages ?? 0;
-  const ratingBuckets = useMemo(
-    () => buildStarBucketsFromDistribution(ratingAggregateQuery.data?.scoreDistribution),
-    [ratingAggregateQuery.data?.scoreDistribution],
-  );
+  const reviewRatingDistribution = reviewRatingDistributionQuery.data;
+  const ownRatingScore = myReview?.userRating ?? myRatingQuery.data?.score ?? null;
+  const ratingBuckets = useMemo(() => {
+    const buckets = buildStarBucketsFromDistribution(
+      reviewRatingDistribution?.scoreDistribution,
+    );
+    return adjustBucketsForExcludedRating(buckets, ownRatingScore);
+  }, [ownRatingScore, reviewRatingDistribution?.scoreDistribution]);
+  const reviewAverageScore =
+    reviewRatingDistribution && reviewRatingDistribution.ratedReviewCount > 0
+      ? reviewRatingDistribution.averageScore
+      : undefined;
+  const ownReviewMatchesRatingFilter = reviewMatchesStarFilter(ownRatingScore, ratingStars);
+  const showCommunityControls = totalCount > (myReview ? 1 : 0);
 
   const publicReviews = useMemo(() => {
     const items = reviewsQuery.data?.items ?? [];
@@ -239,10 +239,7 @@ export function ReviewsDetailContent({
     publicReviews.length === 0 &&
     !myReview;
 
-  const headerSubtitle = formatHeaderSubtitle(
-    contentTitle,
-    !isInitialLoading && !reviewsQuery.isError ? totalCount : undefined,
-  );
+  const showMeta = !isInitialLoading && !reviewsQuery.isError;
 
   const listHeader = (
     <View style={styles.listHeader}>
@@ -252,10 +249,12 @@ export function ReviewsDetailContent({
           <AppText variant="title" style={styles.headerTitle}>
             Reviews
           </AppText>
-          {headerSubtitle ? (
-            <AppText variant="bodySmall" muted numberOfLines={2} testID="reviews-total-count">
-              {headerSubtitle}
-            </AppText>
+          {showMeta ? (
+            <ReviewsHeaderMeta
+              contentTitle={contentTitle}
+              reviewCount={totalCount}
+              averageScore={reviewAverageScore}
+            />
           ) : null}
         </View>
       </SafeAreaView>
@@ -267,12 +266,11 @@ export function ReviewsDetailContent({
       />
 
       {!myReview && composerMode !== 'create' ? (
-        <ReviewsSectionHeader
-          title="Your review"
-          actionLabel="Write"
-          onActionPress={handleWriteReview}
-          testID="reviews-write-section"
-        />
+        <ReviewsWritePrompt onPress={handleWriteReview} />
+      ) : null}
+
+      {myReview && composerMode !== 'edit' ? (
+        <ReviewsOwnReviewBar review={myReview} onEdit={handleEditReview} />
       ) : null}
 
       {composerMode === 'create' ? (
@@ -288,22 +286,8 @@ export function ReviewsDetailContent({
         </View>
       ) : null}
 
-      {myReview && composerMode !== 'edit' ? (
-        <View style={styles.myReviewSection}>
-          <ReviewsSectionHeader title="Your review" />
-          <ReviewCard
-            review={myReview}
-            isOwnReview
-            variant="surface"
-            isDeleting={deleteReview.isPending}
-            onEdit={handleEditReview}
-            onDelete={handleDelete}
-          />
-        </View>
-      ) : null}
-
       {composerMode === 'edit' && myReview ? (
-        <View testID="review-composer-anchor">
+        <View style={styles.editComposerBlock} testID="review-composer-anchor">
           <ReviewComposer
             initialContent={myReview.content}
             submitLabel="Save review"
@@ -313,10 +297,21 @@ export function ReviewsDetailContent({
             onSubmit={handleUpdate}
             onCancel={handleCancelComposer}
           />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Delete review"
+            disabled={deleteReview.isPending}
+            onPress={handleDelete}
+            style={({ pressed }) => [styles.deleteReviewButton, pressed && styles.pressed]}
+          >
+            <AppText variant="caption" style={styles.deleteReviewLabel}>
+              Delete review
+            </AppText>
+          </Pressable>
         </View>
       ) : null}
 
-      {!isInitialLoading && !reviewsQuery.isError ? (
+      {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
         <View style={styles.communityPanel}>
           <ReviewsRatingDistribution
             buckets={ratingBuckets}
@@ -355,7 +350,9 @@ export function ReviewsDetailContent({
       <View style={styles.emptyState} accessibilityRole="text">
         <AppText variant="bodySmall" muted style={styles.emptyTitle}>
           {ratingStars !== null
-            ? `No ${ratingStars}-star reviews yet.`
+            ? ownReviewMatchesRatingFilter
+              ? 'Your review matches this rating. See it above.'
+              : `No ${ratingStars}-star reviews yet.`
             : myReview
               ? 'No other reviews yet.'
               : 'No reviews yet.'}
@@ -428,7 +425,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
   headerTitle: {
@@ -439,11 +436,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   listHeader: {
-    gap: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  myReviewSection: {
-    gap: spacing.xs,
+    gap: spacing.sm,
+    paddingBottom: spacing.xs,
   },
   communityPanel: {
     gap: spacing.md,
@@ -474,5 +468,20 @@ const styles = StyleSheet.create({
   },
   listFooter: {
     gap: spacing.sm,
+  },
+  editComposerBlock: {
+    gap: spacing.xs,
+  },
+  deleteReviewButton: {
+    alignSelf: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  deleteReviewLabel: {
+    color: colors.danger,
+    fontWeight: '500',
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });

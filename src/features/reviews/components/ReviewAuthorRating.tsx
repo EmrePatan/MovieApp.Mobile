@@ -19,17 +19,18 @@ export function ReviewAuthorRating({ userRating }: ReviewAuthorRatingProps) {
   }
 
   const stars = backendScoreToStarRating(userRating);
+  const label = formatStarRatingDisplay(stars);
 
   return (
     <View
       style={styles.container}
       accessibilityRole="text"
-      accessibilityLabel={`Rated ${formatStarRatingDisplay(stars)} out of 5 stars`}
+      accessibilityLabel={`Rated ${label} out of 5 stars`}
       testID="review-author-rating"
     >
       <Ionicons name="star" size={12} color={colors.accentStrong} />
       <AppText variant="caption" style={styles.label}>
-        {formatStarRatingDisplay(stars)}
+        {label}
       </AppText>
     </View>
   );

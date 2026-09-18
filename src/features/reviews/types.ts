@@ -46,3 +46,9 @@ export interface CreateReviewRequest {
 export interface UpdateReviewRequest {
   content: string;
 }
+
+export interface ReviewRatingDistributionResponse {
+  averageScore: number;
+  ratedReviewCount: number;
+  scoreDistribution: Record<string, number>;
+}

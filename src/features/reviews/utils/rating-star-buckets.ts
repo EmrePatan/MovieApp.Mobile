@@ -1,7 +1,36 @@
+import { isValidBackendScore } from '@/features/ratings/utils/star-rating';
+
 export const RATING_STAR_COUNT = 5;
 
 export function scoreToStarBucket(score: number): number {
   return Math.ceil(score / 2);
+}
+
+export function reviewMatchesStarFilter(
+  userRating: number | null | undefined,
+  ratingStars: number | null,
+): boolean {
+  if (ratingStars === null || userRating == null || !isValidBackendScore(userRating)) {
+    return false;
+  }
+
+  return scoreToStarBucket(userRating) === ratingStars;
+}
+
+export function adjustBucketsForExcludedRating(
+  buckets: Record<number, number>,
+  excludedScore: number | null | undefined,
+): Record<number, number> {
+  if (excludedScore == null || !isValidBackendScore(excludedScore)) {
+    return buckets;
+  }
+
+  const bucket = scoreToStarBucket(excludedScore);
+
+  return {
+    ...buckets,
+    [bucket]: Math.max(0, (buckets[bucket] ?? 0) - 1),
+  };
 }
 
 export function buildStarBucketsFromDistribution(

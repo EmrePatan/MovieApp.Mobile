@@ -31,25 +31,6 @@ export function ReviewsRatingDistribution({
 
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
-      <View style={styles.headerRow}>
-        <AppText variant="caption" muted>
-          Ratings
-        </AppText>
-        {selectedStars !== null ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Clear rating filter"
-            onPress={() => onSelectStars(null)}
-            hitSlop={8}
-            testID="reviews-rating-filter-clear"
-          >
-            <AppText variant="caption" style={styles.clearLabel}>
-              Clear filter
-            </AppText>
-          </Pressable>
-        ) : null}
-      </View>
-
       <View style={styles.rows}>
         {starsDescending.map((stars) => {
           const count = buckets[stars] ?? 0;
@@ -99,17 +80,7 @@ export function ReviewsRatingDistribution({
 
 const styles = StyleSheet.create({
   wrapper: {
-    gap: spacing.sm,
     paddingHorizontal: layout.screenPaddingHorizontal,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  clearLabel: {
-    color: colors.accent,
-    fontWeight: '600',
   },
   rows: {
     gap: spacing.xs,
