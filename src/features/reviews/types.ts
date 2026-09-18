@@ -12,6 +12,7 @@ export interface ReviewsQueryOptions {
   page?: number;
   pageSize?: number;
   sort?: ReviewSortOption;
+  ratingStars?: number | null;
 }
 
 export interface ReviewAuthorResponse {

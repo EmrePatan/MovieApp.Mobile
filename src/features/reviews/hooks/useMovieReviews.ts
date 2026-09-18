@@ -11,10 +11,12 @@ export function useMovieReviews(movieId: string, options: ReviewsQueryOptions = 
   const page = options.page ?? 1;
   const pageSize = options.pageSize ?? DEFAULT_REVIEW_PAGE_SIZE;
   const sort = options.sort ?? DEFAULT_REVIEW_SORT;
+  const ratingStars = options.ratingStars ?? null;
 
   return useQuery({
-    queryKey: movieReviewsQueryKey(movieId, page, pageSize, sort),
-    queryFn: ({ signal }) => getMovieReviews(movieId, page, pageSize, sort, signal),
+    queryKey: movieReviewsQueryKey(movieId, page, pageSize, sort, ratingStars),
+    queryFn: ({ signal }) =>
+      getMovieReviews(movieId, page, pageSize, sort, ratingStars, signal),
     enabled: movieId.length > 0,
     staleTime: 30_000,
     placeholderData: keepPreviousData,

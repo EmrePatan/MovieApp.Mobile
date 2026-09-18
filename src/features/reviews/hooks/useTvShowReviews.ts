@@ -11,10 +11,12 @@ export function useTvShowReviews(tvShowId: string, options: ReviewsQueryOptions 
   const page = options.page ?? 1;
   const pageSize = options.pageSize ?? DEFAULT_REVIEW_PAGE_SIZE;
   const sort = options.sort ?? DEFAULT_REVIEW_SORT;
+  const ratingStars = options.ratingStars ?? null;
 
   return useQuery({
-    queryKey: tvReviewsQueryKey(tvShowId, page, pageSize, sort),
-    queryFn: ({ signal }) => getTvReviews(tvShowId, page, pageSize, sort, signal),
+    queryKey: tvReviewsQueryKey(tvShowId, page, pageSize, sort, ratingStars),
+    queryFn: ({ signal }) =>
+      getTvReviews(tvShowId, page, pageSize, sort, ratingStars, signal),
     enabled: tvShowId.length > 0,
     staleTime: 30_000,
     placeholderData: keepPreviousData,

@@ -25,12 +25,16 @@ export async function getMovieReviews(
   page = 1,
   pageSize = 20,
   sort?: ReviewSortOption,
+  ratingStars?: number | null,
   signal?: AbortSignal,
 ): Promise<ReviewListResponse> {
-  return api.get<ReviewListResponse>(buildMovieReviewsPath(movieId, page, pageSize, sort), {
-    authenticated: false,
-    signal,
-  });
+  return api.get<ReviewListResponse>(
+    buildMovieReviewsPath(movieId, page, pageSize, sort, ratingStars),
+    {
+      authenticated: false,
+      signal,
+    },
+  );
 }
 
 export async function getTvReviews(
@@ -38,12 +42,16 @@ export async function getTvReviews(
   page = 1,
   pageSize = 20,
   sort?: ReviewSortOption,
+  ratingStars?: number | null,
   signal?: AbortSignal,
 ): Promise<ReviewListResponse> {
-  return api.get<ReviewListResponse>(buildTvReviewsPath(tvShowId, page, pageSize, sort), {
-    authenticated: false,
-    signal,
-  });
+  return api.get<ReviewListResponse>(
+    buildTvReviewsPath(tvShowId, page, pageSize, sort, ratingStars),
+    {
+      authenticated: false,
+      signal,
+    },
+  );
 }
 
 export async function getMovieMyReview(

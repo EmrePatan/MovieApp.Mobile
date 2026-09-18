@@ -7,6 +7,7 @@ export function buildMovieReviewsPath(
   page = 1,
   pageSize = 20,
   sort?: string,
+  ratingStars?: number | null,
 ): string {
   const params = new URLSearchParams({
     page: String(page),
@@ -15,6 +16,10 @@ export function buildMovieReviewsPath(
 
   if (sort) {
     params.set('sort', sort);
+  }
+
+  if (ratingStars) {
+    params.set('ratingStars', String(ratingStars));
   }
 
   return `/api/reviews/movies/${encodePathSegment(movieId)}?${params.toString()}`;
@@ -41,6 +46,7 @@ export function buildTvReviewsPath(
   page = 1,
   pageSize = 20,
   sort?: string,
+  ratingStars?: number | null,
 ): string {
   const params = new URLSearchParams({
     page: String(page),
@@ -49,6 +55,10 @@ export function buildTvReviewsPath(
 
   if (sort) {
     params.set('sort', sort);
+  }
+
+  if (ratingStars) {
+    params.set('ratingStars', String(ratingStars));
   }
 
   return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}?${params.toString()}`;

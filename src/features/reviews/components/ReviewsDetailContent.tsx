@@ -14,10 +14,11 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useMyRating } from '@/features/ratings/hooks/useRatings';
+import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
 import { ReviewCard } from './ReviewCard';
 import { ReviewComposer } from './ReviewComposer';
 import { ReviewsPaginationControl } from './ReviewsPaginationControl';
+import { ReviewsRatingDistribution } from './ReviewsRatingDistribution';
 import { ReviewsSectionHeader } from './ReviewsSectionHeader';
 import { ReviewsSortControl } from './ReviewsSortControl';
 import { useMyReview } from '../hooks/useMyReview';
@@ -29,6 +30,7 @@ import {
 import { useReviewsQuery } from '../hooks/useReviewsQuery';
 import type { ReviewContentType, ReviewResponse, ReviewSortOption } from '../types';
 import { DEFAULT_REVIEW_SORT } from '../types';
+import { buildStarBucketsFromDistribution } from '../utils/rating-star-buckets';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -45,6 +47,20 @@ function formatReviewCountLabel(totalCount: number): string {
   return `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`;
 }
 
+function formatHeaderSubtitle(contentTitle?: string, totalCount?: number): string | null {
+  const parts: string[] = [];
+
+  if (contentTitle) {
+    parts.push(contentTitle);
+  }
+
+  if (totalCount !== undefined) {
+    parts.push(formatReviewCountLabel(totalCount));
+  }
+
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
+
 export function ReviewsDetailContent({
   contentType,
   contentId,
@@ -54,7 +70,9 @@ export function ReviewsDetailContent({
   const { requireAuth } = useRequireAuth();
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<ReviewSortOption>(DEFAULT_REVIEW_SORT);
-  const reviewsQuery = useReviewsQuery(contentType, contentId, { page, sort });
+  const [ratingStars, setRatingStars] = useState<number | null>(null);
+  const reviewsQuery = useReviewsQuery(contentType, contentId, { page, sort, ratingStars });
+  const ratingAggregateQuery = useRatingAggregate(contentType, contentId);
   const myReviewQuery = useMyReview(contentType, contentId);
   const myRatingQuery = useMyRating(contentType, contentId);
   const createReview = useCreateReviewMutation(contentType, contentId);
@@ -79,7 +97,10 @@ export function ReviewsDetailContent({
 
   const totalCount = reviewsQuery.data?.totalCount ?? 0;
   const totalPages = reviewsQuery.data?.totalPages ?? 0;
-  const communityCount = Math.max(totalCount - (myReview ? 1 : 0), 0);
+  const ratingBuckets = useMemo(
+    () => buildStarBucketsFromDistribution(ratingAggregateQuery.data?.scoreDistribution),
+    [ratingAggregateQuery.data?.scoreDistribution],
+  );
 
   const publicReviews = useMemo(() => {
     const items = reviewsQuery.data?.items ?? [];
@@ -102,6 +123,11 @@ export function ReviewsDetailContent({
 
   const handleSortChange = useCallback((nextSort: ReviewSortOption) => {
     setSort(nextSort);
+    setPage(1);
+  }, []);
+
+  const handleRatingStarsChange = useCallback((nextRatingStars: number | null) => {
+    setRatingStars(nextRatingStars);
     setPage(1);
   }, []);
 
@@ -208,8 +234,15 @@ export function ReviewsDetailContent({
     );
   }, [deleteReview]);
 
-  const isInitialLoading = reviewsQuery.isLoading && publicReviews.length === 0 && !myReview;
-  const isPageLoading = reviewsQuery.isFetching && !isInitialLoading;
+  const isInitialLoading =
+    (reviewsQuery.isLoading && !reviewsQuery.data) &&
+    publicReviews.length === 0 &&
+    !myReview;
+
+  const headerSubtitle = formatHeaderSubtitle(
+    contentTitle,
+    !isInitialLoading && !reviewsQuery.isError ? totalCount : undefined,
+  );
 
   const listHeader = (
     <View style={styles.listHeader}>
@@ -219,14 +252,9 @@ export function ReviewsDetailContent({
           <AppText variant="title" style={styles.headerTitle}>
             Reviews
           </AppText>
-          {contentTitle ? (
-            <AppText variant="bodySmall" muted numberOfLines={2}>
-              {contentTitle}
-            </AppText>
-          ) : null}
-          {!isInitialLoading && !reviewsQuery.isError ? (
-            <AppText variant="caption" muted testID="reviews-total-count">
-              {formatReviewCountLabel(totalCount)}
+          {headerSubtitle ? (
+            <AppText variant="bodySmall" muted numberOfLines={2} testID="reviews-total-count">
+              {headerSubtitle}
             </AppText>
           ) : null}
         </View>
@@ -289,17 +317,14 @@ export function ReviewsDetailContent({
       ) : null}
 
       {!isInitialLoading && !reviewsQuery.isError ? (
-        <>
-          <ReviewsSectionHeader
-            title={
-              communityCount > 0
-                ? `Community · ${formatReviewCountLabel(communityCount)}`
-                : 'Community'
-            }
-            testID="reviews-community-section"
+        <View style={styles.communityPanel}>
+          <ReviewsRatingDistribution
+            buckets={ratingBuckets}
+            selectedStars={ratingStars}
+            onSelectStars={handleRatingStarsChange}
           />
           <ReviewsSortControl value={sort} onChange={handleSortChange} />
-        </>
+        </View>
       ) : null}
     </View>
   );
@@ -316,17 +341,11 @@ export function ReviewsDetailContent({
 
   const listFooter = (
     <View style={styles.listFooter}>
-      {isPageLoading ? (
-        <View style={styles.pageLoading} testID="reviews-page-loading">
-          <ActivityIndicator color={colors.accent} size="small" />
-        </View>
-      ) : null}
       <ReviewsPaginationControl
         page={page}
         totalPages={totalPages}
         onPrevious={handlePreviousPage}
         onNext={handleNextPage}
-        isLoading={reviewsQuery.isFetching}
       />
     </View>
   );
@@ -335,9 +354,13 @@ export function ReviewsDetailContent({
     !isInitialLoading && !reviewsQuery.isError && publicReviews.length === 0 ? (
       <View style={styles.emptyState} accessibilityRole="text">
         <AppText variant="bodySmall" muted style={styles.emptyTitle}>
-          {myReview ? 'No other reviews yet.' : 'No reviews yet.'}
+          {ratingStars !== null
+            ? `No ${ratingStars}-star reviews yet.`
+            : myReview
+              ? 'No other reviews yet.'
+              : 'No reviews yet.'}
         </AppText>
-        {!myReview ? (
+        {!myReview && ratingStars === null ? (
           <AppText variant="caption" muted>
             Be the first to share your thoughts.
           </AppText>
@@ -422,6 +445,10 @@ const styles = StyleSheet.create({
   myReviewSection: {
     gap: spacing.xs,
   },
+  communityPanel: {
+    gap: spacing.md,
+    paddingBottom: spacing.xs,
+  },
   loading: {
     paddingVertical: spacing.xxl,
     alignItems: 'center',
@@ -447,9 +474,5 @@ const styles = StyleSheet.create({
   },
   listFooter: {
     gap: spacing.sm,
-  },
-  pageLoading: {
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
   },
 });

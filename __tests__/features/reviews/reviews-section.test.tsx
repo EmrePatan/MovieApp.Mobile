@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
-import { useMyRating } from '@/features/ratings/hooks/useRatings';
+import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
 import { useMyReview } from '@/features/reviews/hooks/useMyReview';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';
@@ -46,6 +46,7 @@ jest.mock('@/features/reviews/hooks/useMyReview', () => ({
 
 jest.mock('@/features/ratings/hooks/useRatings', () => ({
   useMyRating: jest.fn(),
+  useRatingAggregate: jest.fn(),
 }));
 
 jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
@@ -111,6 +112,14 @@ describe('ReviewsDetailContent', () => {
       data: null,
       isLoading: false,
     });
+    (useRatingAggregate as jest.Mock).mockReturnValue({
+      data: {
+        averageScore: 8,
+        ratingCount: 3,
+        scoreDistribution: { '8': 2, '3': 1 },
+      },
+      isLoading: false,
+    });
     (useCreateReviewMutation as jest.Mock).mockReturnValue({
       mutate: mockCreateMutate,
       isPending: false,
@@ -130,7 +139,7 @@ describe('ReviewsDetailContent', () => {
 
     expect(screen.getByText('Reviews')).toBeTruthy();
     expect(screen.getByTestId('reviews-total-count')).toHaveTextContent('1 review');
-    expect(screen.getByText('Community · 1 review')).toBeTruthy();
+    expect(screen.getByTestId('reviews-rating-distribution')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
@@ -285,6 +294,10 @@ describe('ReviewsDetailContent', () => {
 
   it('uses tv review query for tv content', () => {
     render(<ReviewsDetailContent contentType="tv" contentId={movieId} />);
-    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, { page: 1, sort: 'newest' });
+    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, {
+      page: 1,
+      sort: 'newest',
+      ratingStars: null,
+    });
   });
 });

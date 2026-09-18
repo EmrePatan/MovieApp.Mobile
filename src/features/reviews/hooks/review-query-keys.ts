@@ -5,8 +5,9 @@ export function movieReviewsQueryKey(
   page: number,
   pageSize = DEFAULT_REVIEW_PAGE_SIZE,
   sort: ReviewSortOption = DEFAULT_REVIEW_SORT,
+  ratingStars: number | null = null,
 ) {
-  return ['reviews', 'movie', movieId, page, pageSize, sort] as const;
+  return ['reviews', 'movie', movieId, page, pageSize, sort, ratingStars] as const;
 }
 
 export function tvReviewsQueryKey(
@@ -14,8 +15,9 @@ export function tvReviewsQueryKey(
   page: number,
   pageSize = DEFAULT_REVIEW_PAGE_SIZE,
   sort: ReviewSortOption = DEFAULT_REVIEW_SORT,
+  ratingStars: number | null = null,
 ) {
-  return ['reviews', 'tv', tvShowId, page, pageSize, sort] as const;
+  return ['reviews', 'tv', tvShowId, page, pageSize, sort, ratingStars] as const;
 }
 
 export function movieMyReviewQueryKey(movieId: string) {
