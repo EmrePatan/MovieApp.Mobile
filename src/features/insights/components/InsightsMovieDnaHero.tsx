@@ -1,4 +1,4 @@
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
@@ -168,27 +168,32 @@ export function InsightsMovieDnaHero({
     </>
   );
 
-  const backdropSource = resolvedBackdrop
-    ? { uri: resolvedBackdrop }
-    : FALLBACK_HERO;
-
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={backdropSource}
-        style={styles.gradient}
-        imageStyle={styles.backdropImage}
-        resizeMode="cover"
-      >
-        {heroBody}
-      </ImageBackground>
+      {resolvedBackdrop ? (
+        <ImageBackground
+          source={{ uri: resolvedBackdrop }}
+          style={styles.gradient}
+          imageStyle={styles.backdropImage}
+        >
+          {heroBody}
+        </ImageBackground>
+      ) : (
+        <View style={styles.gradient}>
+          <Image source={FALLBACK_HERO} style={styles.fallbackBackdrop} resizeMode="cover" />
+          {heroBody}
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    borderRadius: borderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
   },
   gradient: {
     minHeight: 420,
@@ -196,8 +201,14 @@ const styles = StyleSheet.create({
   },
   backdropImage: {
     resizeMode: 'cover',
-    width: '100%',
-    height: '100%',
+    transform: [{ scale: 1.08 }],
+  },
+  fallbackBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '280%',
+    height: '108%',
   },
   scrimLayer: {
     ...StyleSheet.absoluteFill,
