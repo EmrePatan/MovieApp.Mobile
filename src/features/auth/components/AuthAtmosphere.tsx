@@ -2,11 +2,11 @@ import { ImageBackground, StyleSheet, useWindowDimensions, View } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { authCinemaBackground } from '../auth-assets';
 
-// Pan/zoom the cover crop so red seats and popcorn stay visible on the right
-// while keeping the left side dark for hero/form readability across phone widths.
-const BACKGROUND_SCALE = 0.96;
-const BACKGROUND_TRANSLATE_X_RATIO = -0.055;
-const BACKGROUND_TRANSLATE_Y_RATIO = -0.015;
+// Slight zoom + left pan keeps popcorn/seats on the right while the image still
+// bleeds fully to the screen edge (scale < 1 left a visible gap on the right).
+const BACKGROUND_SCALE = 1.03;
+const BACKGROUND_TRANSLATE_X_RATIO = -0.04;
+const BACKGROUND_TRANSLATE_Y_RATIO = -0.012;
 
 export function AuthAtmosphere() {
   const { width, height } = useWindowDimensions();
@@ -19,7 +19,7 @@ export function AuthAtmosphere() {
   };
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.clip]}>
       <ImageBackground
         source={authCinemaBackground}
         resizeMode="cover"
@@ -103,6 +103,9 @@ export function AuthAtmosphere() {
 }
 
 const styles = StyleSheet.create({
+  clip: {
+    overflow: 'hidden',
+  },
   image: {
     flex: 1,
     width: '100%',
