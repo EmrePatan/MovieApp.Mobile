@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { colors } from '@/theme/colors';
 
-export default function MovieDetailLayout() {
+export default function PersonLayout() {
   return (
     <Stack
       screenOptions={{
@@ -9,7 +9,7 @@ export default function MovieDetailLayout() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
-      <Stack.Screen name="[id]" />
+      <Stack.Screen name="[tmdbId]" />
     </Stack>
   );
 }

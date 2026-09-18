@@ -207,7 +207,15 @@ export function parseCatalogIdFromPathname(
     return undefined;
   }
 
-  const pattern = contentType === 'movie' ? /\/movie\/([^/]+)/ : /\/tv\/([^/]+)/;
+  return parseCatalogStackCatalogId(pathname, contentType);
+}
+
+export function parseCatalogStackCatalogId(
+  pathname: string,
+  contentType: 'movie' | 'tv',
+): string | undefined {
+  const mediaSegment = contentType === 'movie' ? 'movie' : 'tv';
+  const pattern = new RegExp(`/${mediaSegment}/([^/]+)(?:/|$|\\?)`);
   const match = pathname.match(pattern);
   if (!match?.[1]) {
     return undefined;
@@ -256,4 +264,13 @@ export function parsePositiveInt(value: string | undefined): number | null {
   }
 
   return parsed;
+}
+
+export function parsePersonTmdbIdFromPathname(pathname: string): number | null {
+  const match = pathname.match(/\/person\/([^/]+)(?:\/|$|\?)/);
+  if (!match?.[1]) {
+    return null;
+  }
+
+  return parsePositiveInt(decodeURIComponent(match[1]));
 }

@@ -24,5 +24,5 @@ export function openGalleryDetail(
   router: ImperativeRouter,
   galleryRoute: string,
 ): void {
-  router.push(galleryRoute);
+  router.push(galleryRoute, { withAnchor: true });
 }

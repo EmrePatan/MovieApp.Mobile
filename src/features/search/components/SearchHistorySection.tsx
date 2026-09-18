@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -32,7 +33,7 @@ function formatSearchedAt(value: string): string {
   });
 }
 
-export function SearchHistorySection({
+export const SearchHistorySection = memo(function SearchHistorySection({
   items,
   isLoading,
   isError,
@@ -124,7 +125,7 @@ export function SearchHistorySection({
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   section: {

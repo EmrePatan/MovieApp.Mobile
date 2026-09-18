@@ -1,6 +1,8 @@
 import {
   isReviewsDetailRoute,
   openReviewsDetail,
+  returnToCatalogDetailFromReviews,
+  returnToCatalogDetailFromReviewsPathname,
 } from '@/features/details/shared/navigation/reviews-detail-navigation';
 import {
   buildMovieReviewsRoute,
@@ -27,6 +29,33 @@ describe('reviews detail navigation', () => {
     expect(isReviewsDetailRoute(['(tabs)', 'reviews', 'movie', 'id'])).toBe(false);
   });
 
+  it('returns to catalog detail with a single back when history exists', () => {
+    const back = jest.fn();
+    const navigate = jest.fn();
+    const router = { back, navigate, canGoBack: () => true } as never;
+    const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+
+    returnToCatalogDetailFromReviewsPathname(
+      router,
+      `/movie/${movieId}/reviews?title=Interstellar`,
+    );
+
+    expect(back).toHaveBeenCalledTimes(1);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('falls back to navigate when there is no back history', () => {
+    const back = jest.fn();
+    const navigate = jest.fn();
+    const router = { back, navigate, canGoBack: () => false } as never;
+    const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+
+    returnToCatalogDetailFromReviews(router, 'movie', movieId);
+
+    expect(back).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(`/movie/${movieId}`);
+  });
+
   it('opens reviews with a single push action in the catalog stack', () => {
     const push = jest.fn();
     const router = { push } as never;
@@ -39,6 +68,7 @@ describe('reviews detail navigation', () => {
     expect(push).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith(
       '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/reviews',
+      { withAnchor: true },
     );
   });
 });

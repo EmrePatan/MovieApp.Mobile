@@ -1,9 +1,11 @@
+import { useCatalogChildDestinationGestureGuard } from '@/features/details/shared/navigation/useCatalogChildDestinationGestureGuard';
 import { CreditsDetailContent } from '@/features/details/credits/components/CreditsDetailContent';
 import { useCreditsRouteState } from '@/features/details/credits/hooks/useCreditsRouteState';
 import { useTvShowCredits } from '@/features/details/credits/hooks/useCredits';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 
 export default function TvCreditsScreen() {
+  useCatalogChildDestinationGestureGuard();
   const { resolvedId, isActive, isInvalid, title } = useCreditsRouteState('tv');
   const query = useTvShowCredits(isActive && resolvedId ? resolvedId : '');
 

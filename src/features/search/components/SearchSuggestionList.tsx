@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
+import { memo, type ComponentProps } from 'react';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchAutocompleteItem } from '../types';
@@ -78,7 +78,7 @@ interface SearchSuggestionListProps {
   onSelect: (suggestion: SearchAutocompleteItem) => void;
 }
 
-export function SearchSuggestionList({
+export const SearchSuggestionList = memo(function SearchSuggestionList({
   suggestions,
   isLoading,
   onSelect,
@@ -128,7 +128,7 @@ export function SearchSuggestionList({
       })}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

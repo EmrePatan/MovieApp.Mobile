@@ -1,3 +1,4 @@
+import { useCatalogChildDestinationGestureGuard } from '@/features/details/shared/navigation/useCatalogChildDestinationGestureGuard';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useReviewsRouteState } from '@/features/reviews/hooks/useReviewsRouteState';
 import { AppText } from '@/components/common/AppText';
@@ -8,13 +9,14 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function MovieReviewsScreen() {
-  const { resolvedId, isActive, isInvalid, title } = useReviewsRouteState('movie');
+  useCatalogChildDestinationGestureGuard();
+  const { resolvedId, isInvalid, title } = useReviewsRouteState('movie');
 
-  if (!isActive) {
+  if (!resolvedId) {
     return null;
   }
 
-  if (isInvalid || !resolvedId) {
+  if (isInvalid) {
     return (
       <View style={styles.invalidScreen}>
         <SafeAreaView edges={['top']} style={styles.invalidHeader}>

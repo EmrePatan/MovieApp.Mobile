@@ -509,7 +509,6 @@ describe('SearchScreen', () => {
     expect(mockOpenPersonDetail).toHaveBeenCalledWith(
       expect.objectContaining({ push: mockPush }),
       6193,
-      '/search',
     );
     expect(mockPush).not.toHaveBeenCalled();
   });

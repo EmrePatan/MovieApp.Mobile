@@ -4,8 +4,12 @@ import { usePersonRouteTmdbId } from '@/features/details/person/hooks/usePersonR
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 
 export default function PersonDetailScreen() {
-  const { tmdbId, isActive, isInvalid } = usePersonRouteTmdbId();
-  const query = usePersonDetails(isActive ? tmdbId : null);
+  const { tmdbId, isInvalid } = usePersonRouteTmdbId();
+  const query = usePersonDetails(tmdbId);
+
+  if (!tmdbId) {
+    return null;
+  }
 
   return (
     <DetailQueryState

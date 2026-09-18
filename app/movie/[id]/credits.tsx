@@ -1,9 +1,11 @@
+import { useCatalogChildDestinationGestureGuard } from '@/features/details/shared/navigation/useCatalogChildDestinationGestureGuard';
 import { CreditsDetailContent } from '@/features/details/credits/components/CreditsDetailContent';
 import { useCreditsRouteState } from '@/features/details/credits/hooks/useCreditsRouteState';
 import { useMovieCredits } from '@/features/details/credits/hooks/useCredits';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 
 export default function MovieCreditsScreen() {
+  useCatalogChildDestinationGestureGuard();
   const { resolvedId, isActive, isInvalid, title } = useCreditsRouteState('movie');
   const query = useMovieCredits(isActive && resolvedId ? resolvedId : '');
 

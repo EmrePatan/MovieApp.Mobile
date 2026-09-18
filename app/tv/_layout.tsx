@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { colors } from '@/theme/colors';
 
-export default function MovieDetailLayout() {
+export default function TvLayout() {
   return (
     <Stack
       screenOptions={{

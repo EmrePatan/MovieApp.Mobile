@@ -4,6 +4,7 @@ import {
   BackHandler,
   FlatList,
   Keyboard,
+  ScrollView,
   StyleSheet,
   TextInput,
   View,
@@ -43,6 +44,7 @@ import {
   type SearchTypeFilter,
 } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
+import { getSearchResultItemLayout } from '@/features/search/utils/search-list-layout';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { useAuth } from '@/auth/useAuth';
@@ -261,69 +263,6 @@ export default function SearchScreen() {
       : 'Unable to search right now. Please try again.'
     : null;
 
-  const listHeader = useMemo(
-    () => (
-      <>
-        <SearchScreenHeader
-          value={inputText}
-          onChangeText={setInputText}
-          onSubmit={handleSubmit}
-          onClear={handleClear}
-          onBack={canNavigateBack ? handleBack : undefined}
-          inputRef={searchInputRef}
-          autoFocus
-        >
-          {showAutocomplete ? (
-            <SearchSuggestionList
-              suggestions={autocompleteQuery.data?.items ?? []}
-              isLoading={autocompleteQuery.isLoading}
-              onSelect={handleSuggestionSelect}
-            />
-          ) : null}
-          {hasActiveSearch ? (
-            <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
-          ) : null}
-        </SearchScreenHeader>
-        {!hasActiveSearch && isAuthenticated && showExplore ? (
-          <SearchHistorySection
-            items={historyItems}
-            isLoading={historyQuery.isLoading}
-            isError={historyQuery.isError}
-            isClearing={clearHistory.isPending}
-            deletingId={deletingHistoryId}
-            onSelect={handleHistorySelect}
-            onDelete={handleDeleteHistoryItem}
-            onClearAll={handleClearHistory}
-            onRetry={() => void historyQuery.refetch()}
-          />
-        ) : null}
-        {!hasActiveSearch && showExplore ? <SearchExploreLanding /> : null}
-      </>
-    ),
-    [
-      autocompleteQuery.data?.items,
-      autocompleteQuery.isLoading,
-      canNavigateBack,
-      clearHistory.isPending,
-      deletingHistoryId,
-      handleClear,
-      handleClearHistory,
-      handleDeleteHistoryItem,
-      handleHistorySelect,
-      handleBack,
-      handleSubmit,
-      handleSuggestionSelect,
-      hasActiveSearch,
-      historyItems,
-      historyQuery,
-      inputText,
-      isAuthenticated,
-      showAutocomplete,
-      showExplore,
-      typeFilter,
-    ],
-  );
-
   const listEmptyComponent = useMemo(() => {
     if (!hasActiveSearch) {
       return null;
@@ -367,30 +306,76 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <FlatList
-        data={hasActiveSearch ? results : []}
-        keyExtractor={searchResultKeyExtractor}
-        renderItem={renderResult}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={listEmptyComponent}
-        ListFooterComponent={
-          hasActiveSearch && searchQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : null
-        }
-        refreshControl={hasActiveSearch ? refreshControl : undefined}
-        contentContainerStyle={styles.listContent}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        onEndReached={hasActiveSearch ? handleLoadMore : undefined}
-        onEndReachedThreshold={0.4}
-        initialNumToRender={layout.verticalList.initialNumToRender}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-        windowSize={layout.verticalList.windowSize}
-        removeClippedSubviews={hasActiveSearch}
-      />
+      <SearchScreenHeader
+        value={inputText}
+        onChangeText={setInputText}
+        onSubmit={handleSubmit}
+        onClear={handleClear}
+        onBack={canNavigateBack ? handleBack : undefined}
+        inputRef={searchInputRef}
+        autoFocus
+      >
+        {showAutocomplete ? (
+          <SearchSuggestionList
+            suggestions={autocompleteQuery.data?.items ?? []}
+            isLoading={autocompleteQuery.isLoading}
+            onSelect={handleSuggestionSelect}
+          />
+        ) : null}
+        {hasActiveSearch ? (
+          <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+        ) : null}
+      </SearchScreenHeader>
+
+      {hasActiveSearch ? (
+        <FlatList
+          data={results}
+          keyExtractor={searchResultKeyExtractor}
+          renderItem={renderResult}
+          getItemLayout={getSearchResultItemLayout}
+          ListEmptyComponent={listEmptyComponent}
+          ListFooterComponent={
+            searchQuery.isFetchingNextPage ? (
+              <View style={styles.footerLoading}>
+                <ActivityIndicator color={colors.accent} />
+              </View>
+            ) : null
+          }
+          refreshControl={refreshControl}
+          style={styles.resultsList}
+          contentContainerStyle={styles.listContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.4}
+          initialNumToRender={layout.verticalList.initialNumToRender}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+          windowSize={layout.verticalList.windowSize}
+          removeClippedSubviews
+        />
+      ) : (
+        <ScrollView
+          style={styles.idleScroll}
+          contentContainerStyle={styles.idleScrollContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          {isAuthenticated && showExplore ? (
+            <SearchHistorySection
+              items={historyItems}
+              isLoading={historyQuery.isLoading}
+              isError={historyQuery.isError}
+              isClearing={clearHistory.isPending}
+              deletingId={deletingHistoryId}
+              onSelect={handleHistorySelect}
+              onDelete={handleDeleteHistoryItem}
+              onClearAll={handleClearHistory}
+              onRetry={() => void historyQuery.refetch()}
+            />
+          ) : null}
+          {showExplore ? <SearchExploreLanding /> : null}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -400,9 +385,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  resultsList: {
+    flex: 1,
+  },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,
+  },
+  idleScroll: {
+    flex: 1,
+  },
+  idleScrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xxl,
   },
   errorContainer: {
     flex: 1,

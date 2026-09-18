@@ -24,22 +24,27 @@ describe('catalog child destination navigation', () => {
     expect(parseCatalogIdFromPathname(`/movie/${movieId}`, 'movie')).toBe(movieId);
   });
 
-  it('registers catalog child screens in the root movie and tv stacks', () => {
+  it('registers catalog child screens in nested movie and tv detail stacks', () => {
     const movieLayout = readFileSync(
       path.join(process.cwd(), 'app/movie/_layout.tsx'),
       'utf8',
     );
-    const tvLayout = readFileSync(
+    const movieDetailLayout = readFileSync(
+      path.join(process.cwd(), 'app/movie/[id]/_layout.tsx'),
+      'utf8',
+    );
+    const tvDetailLayout = readFileSync(
       path.join(process.cwd(), 'app/tv/[id]/_layout.tsx'),
       'utf8',
     );
 
-    expect(movieLayout).toContain('name="[id]/reviews"');
-    expect(movieLayout).toContain('name="[id]/credits"');
-    expect(movieLayout).toContain('name="[id]/gallery"');
-    expect(tvLayout).toContain('name="reviews"');
-    expect(tvLayout).toContain('name="credits"');
-    expect(tvLayout).toContain('name="gallery"');
+    expect(movieLayout).toContain('name="[id]"');
+    expect(movieDetailLayout).toContain('name="reviews"');
+    expect(movieDetailLayout).toContain('name="credits"');
+    expect(movieDetailLayout).toContain('name="gallery"');
+    expect(tvDetailLayout).toContain('name="reviews"');
+    expect(tvDetailLayout).toContain('name="credits"');
+    expect(tvDetailLayout).toContain('name="gallery"');
   });
 
   it('keeps edge back gesture enabled on catalog child stack screens', () => {

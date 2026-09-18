@@ -19,6 +19,7 @@ import { flattenWatchlistPages } from '@/features/watchlists/utils/library-items
 import type { CatalogMediaFilter, LibrarySortOption } from '../types';
 import type { LibraryItem as GridLibraryItem } from '../types/library';
 import { getLibraryGridItemKey } from '../utils/library-item-key';
+import { getLibraryGridItemLayout } from '../utils/library-grid-layout';
 import { mapWatchlistItemToLibraryGridItem } from '../utils/map-watchlist-item-to-grid-item';
 import { getAvailableSortOptions } from '../utils/library-sort';
 import { LibraryEmptyState } from './LibraryEmptyState';
@@ -152,6 +153,12 @@ export function LibraryWatchlistDetailContent({
     [handleItemPress, handleRemoveItem, itemHeight, itemWidth, removingItemKey],
   );
 
+  const getItemLayout = useCallback(
+    (_data: ArrayLike<GridLibraryItem> | null | undefined, index: number) =>
+      getLibraryGridItemLayout(itemHeight, 'watchlist', GRID_COLUMNS, index),
+    [itemHeight],
+  );
+
   const listControls = (
     <LibraryWatchlistListControls
       typeFilter={typeFilter}
@@ -249,8 +256,10 @@ export function LibraryWatchlistDetailContent({
       numColumns={GRID_COLUMNS}
       columnWrapperStyle={styles.row}
       renderItem={renderItem}
+      getItemLayout={getItemLayout}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={emptyComponent}
+      removeClippedSubviews
       ListFooterComponent={
         itemsQuery.isFetchingNextPage ? (
           <View style={styles.footerLoading}>

@@ -7,6 +7,7 @@ import {
   isLibraryStackRoute,
   returnFromLibraryStackScreen,
 } from '@/features/library/navigation/library-stack-navigation';
+import { isReviewsDetailRoute } from '../navigation/reviews-detail-navigation';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -32,6 +33,13 @@ export function DetailBackButton({
   const handleBack = useCallback(() => {
     if (isLibraryStackRoute(segments)) {
       returnFromLibraryStackScreen(router);
+      return;
+    }
+
+    if (isReviewsDetailRoute(segments)) {
+      if (router.canGoBack()) {
+        router.back();
+      }
       return;
     }
 

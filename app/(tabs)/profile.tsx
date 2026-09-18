@@ -9,13 +9,10 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { Screen } from '@/components/common/Screen';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
-import { ProfileLibrarySection } from '@/features/profile/components/ProfileLibrarySection';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
-import { useFollowingCount } from '@/features/following/hooks/useFollowingCount';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { getRegionLabel } from '@/features/regions/region-options';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
-import { useProfileStatistics } from '@/features/profile/hooks/useProfileStatistics';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -23,21 +20,14 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { logout } = useAuth();
   const profileQuery = useCurrentProfile();
-  const statisticsQuery = useProfileStatistics();
-  const followingCountQuery = useFollowingCount();
   const { region: userRegion } = useRegionalPreference();
 
   const profile = profileQuery.data;
-  const isRefreshing =
-    (profileQuery.isRefetching && !profileQuery.isLoading) ||
-    (statisticsQuery.isRefetching && !statisticsQuery.isLoading) ||
-    (followingCountQuery.isRefetching && !followingCountQuery.isLoading);
+  const isRefreshing = profileQuery.isRefetching && !profileQuery.isLoading;
 
   const handleRefresh = useCallback(() => {
     void profileQuery.refetch();
-    void statisticsQuery.refetch();
-    void followingCountQuery.refetch();
-  }, [followingCountQuery, profileQuery, statisticsQuery]);
+  }, [profileQuery]);
 
   const handleLogout = useCallback(() => {
     void logout();
@@ -82,27 +72,6 @@ export default function ProfileScreen() {
         }
       >
         {profile ? <ProfileHero profile={profile} /> : null}
-
-        {statisticsQuery.isLoading && !statisticsQuery.data ? (
-          <AppText variant="bodySmall" muted>
-            Loading library summary...
-          </AppText>
-        ) : statisticsQuery.isError ? (
-          <ErrorView
-            message={
-              isApiError(statisticsQuery.error)
-                ? statisticsQuery.error.userMessage
-                : 'Unable to load your library summary.'
-            }
-            onRetry={() => void statisticsQuery.refetch()}
-            retryLabel="Retry"
-          />
-        ) : statisticsQuery.data ? (
-          <ProfileLibrarySection
-            summary={statisticsQuery.data.summary}
-            followingCount={followingCountQuery.totalCount}
-          />
-        ) : null}
 
         <ProfileSection title="Preferences">
           <ProfileMenuRow

@@ -24,23 +24,34 @@ describe('root detail navigation architecture', () => {
 
   it('registers global detail stacks on the root navigator', () => {
     const rootLayout = readFileSync(path.join(process.cwd(), 'app/_layout.tsx'), 'utf8');
+    const tvLayout = readFileSync(path.join(process.cwd(), 'app/tv/_layout.tsx'), 'utf8');
+    const personLayout = readFileSync(path.join(process.cwd(), 'app/person/_layout.tsx'), 'utf8');
 
     expect(rootLayout).toContain('name="movie"');
     expect(rootLayout).toContain('name="tv"');
     expect(rootLayout).toContain('name="person"');
     expect(rootLayout).toContain('name="collection"');
+    expect(tvLayout).toContain('name="[id]"');
+    expect(personLayout).toContain('name="[tmdbId]"');
   });
 
   it('keeps reviews, credits, and gallery nested inside catalog detail stacks', () => {
     const movieLayout = readFileSync(path.join(process.cwd(), 'app/movie/_layout.tsx'), 'utf8');
-    const tvLayout = readFileSync(path.join(process.cwd(), 'app/tv/[id]/_layout.tsx'), 'utf8');
+    const movieDetailLayout = readFileSync(
+      path.join(process.cwd(), 'app/movie/[id]/_layout.tsx'),
+      'utf8',
+    );
+    const tvLayout = readFileSync(path.join(process.cwd(), 'app/tv/_layout.tsx'), 'utf8');
+    const tvDetailLayout = readFileSync(path.join(process.cwd(), 'app/tv/[id]/_layout.tsx'), 'utf8');
 
-    expect(movieLayout).toContain('name="[id]/reviews"');
-    expect(movieLayout).toContain('name="[id]/credits"');
-    expect(movieLayout).toContain('name="[id]/gallery"');
-    expect(tvLayout).toContain('name="reviews"');
-    expect(tvLayout).toContain('name="credits"');
-    expect(tvLayout).toContain('name="gallery"');
+    expect(movieLayout).toContain('name="[id]"');
+    expect(movieDetailLayout).toContain('name="reviews"');
+    expect(movieDetailLayout).toContain('name="credits"');
+    expect(movieDetailLayout).toContain('name="gallery"');
+    expect(tvLayout).toContain('name="[id]"');
+    expect(tvDetailLayout).toContain('name="reviews"');
+    expect(tvDetailLayout).toContain('name="credits"');
+    expect(tvDetailLayout).toContain('name="gallery"');
   });
 
   it('only enables rating navigation gesture lock on catalog detail index screens', () => {

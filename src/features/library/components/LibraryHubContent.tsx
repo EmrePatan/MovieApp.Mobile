@@ -22,11 +22,11 @@ import { useLibrary } from '../hooks/useLibrary';
 import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { flattenLibraryPages } from '../utils/flatten-library-pages';
 import { getLibraryGridItemKey } from '../utils/library-item-key';
+import { getLibraryGridItemLayout } from '../utils/library-grid-layout';
 import { resolveLibraryEmptyCopy } from '../utils/library-empty-copy';
-import { LibraryCategoryControl } from './LibraryCategoryControl';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryGridCard } from './LibraryGridCard';
-import { LibraryMediaFilterControl } from './LibraryMediaFilterControl';
+import { LibraryHubHeader } from './LibraryHubHeader';
 import { LibraryWatchlistsOverview } from './LibraryWatchlistsOverview';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -127,19 +127,19 @@ export function LibraryHubContent() {
     [category, handleItemPress, itemHeight, itemWidth],
   );
 
+  const getItemLayout = useCallback(
+    (_data: ArrayLike<LibraryItem> | null | undefined, index: number) =>
+      getLibraryGridItemLayout(itemHeight, category, GRID_COLUMNS, index),
+    [category, itemHeight],
+  );
+
   const listHeader = (
-    <View style={styles.header} testID="library-hub-header">
-      <AppText variant="title" accessibilityRole="header">
-        My Library
-      </AppText>
-      <AppText variant="bodySmall" muted>
-        Your personal collection
-      </AppText>
-      <LibraryCategoryControl value={category} onChange={handleCategoryChange} />
-      {category !== 'watching' && !isWatchlistsCategory ? (
-        <LibraryMediaFilterControl value={mediaType} onChange={handleMediaTypeChange} />
-      ) : null}
-    </View>
+    <LibraryHubHeader
+      category={category}
+      mediaType={mediaType}
+      onCategoryChange={handleCategoryChange}
+      onMediaTypeChange={handleMediaTypeChange}
+    />
   );
 
   if (!isAuthenticated) {
@@ -205,8 +205,10 @@ export function LibraryHubContent() {
       numColumns={GRID_COLUMNS}
       columnWrapperStyle={styles.row}
       renderItem={renderItem}
+      getItemLayout={getItemLayout}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={emptyComponent}
+      removeClippedSubviews
       ListFooterComponent={
         libraryQuery.isFetchingNextPage ? (
           <View style={styles.footerLoading}>
@@ -238,11 +240,6 @@ export function LibraryHubContent() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-  },
-  header: {
-    paddingTop: spacing.md,
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
   },
   screenPadding: {
     paddingHorizontal: spacing.lg,

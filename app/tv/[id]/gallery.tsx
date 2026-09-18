@@ -1,3 +1,4 @@
+import { useCatalogChildDestinationGestureGuard } from '@/features/details/shared/navigation/useCatalogChildDestinationGestureGuard';
 import { GalleryDetailContent } from '@/features/gallery/components/GalleryDetailContent';
 import { useTvShowGallery } from '@/features/gallery/hooks/useGallery';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
@@ -5,6 +6,7 @@ import { isValidGuid, normalizeRouteIdParam } from '@/features/details/shared/ro
 import { useLocalSearchParams } from 'expo-router';
 
 export default function TvGalleryScreen() {
+  useCatalogChildDestinationGestureGuard();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const resolvedId = normalizeRouteIdParam(id);
   const isInvalid = !isValidGuid(resolvedId);

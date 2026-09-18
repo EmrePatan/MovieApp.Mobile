@@ -16,6 +16,7 @@ describe('credits detail navigation', () => {
     expect(push).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith(
       '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/credits?title=Interstellar',
+      { withAnchor: true },
     );
   });
 

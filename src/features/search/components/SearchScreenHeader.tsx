@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { SearchBar } from './SearchBar';
 import { colors } from '@/theme/colors';
+import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -38,12 +39,14 @@ export function SearchScreenHeader({
             onPress={onBack}
             style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
           >
-            <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
+            <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
+            <AppText variant="body">Back</AppText>
           </Pressable>
-        ) : null}
-        <AppText variant="bodySmall" muted style={styles.eyebrow} accessibilityRole="header">
-          Search
-        </AppText>
+        ) : (
+          <AppText variant="bodySmall" muted style={styles.eyebrow} accessibilityRole="header">
+            Search
+          </AppText>
+        )}
       </View>
       <SearchBar
         value={value}
@@ -70,10 +73,14 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   backButton: {
-    minWidth: layout.touchTarget,
-    minHeight: layout.touchTarget,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    alignSelf: 'flex-start',
+    minWidth: interaction.touchTarget,
+    minHeight: interaction.touchTarget,
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingRight: spacing.md,
     marginLeft: -spacing.sm,
   },
   eyebrow: {
@@ -82,6 +89,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: interaction.pressedOpacity,
   },
 });

@@ -19,5 +19,5 @@ export function openCreditsDetail(
   router: ImperativeRouter,
   creditsRoute: string,
 ): void {
-  router.push(creditsRoute);
+  router.push(creditsRoute, { withAnchor: true });
 }

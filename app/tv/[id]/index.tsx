@@ -4,10 +4,10 @@ import { useTvShowDetails } from '@/features/details/tv/hooks/useTvShowDetails';
 import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatalogRouteId';
 
 export default function TvShowDetailScreen() {
-  const { resolvedId: tvShowId, isActive, isInvalid } = useCatalogRouteIdState('tv');
-  const query = useTvShowDetails(isActive ? tvShowId : undefined);
+  const { resolvedId: tvShowId, isInvalid } = useCatalogRouteIdState('tv');
+  const query = useTvShowDetails(tvShowId);
 
-  if (!isActive) {
+  if (!tvShowId) {
     return null;
   }
 

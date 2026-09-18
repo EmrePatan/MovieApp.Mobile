@@ -20,6 +20,41 @@ describe('catalog detail gesture navigation', () => {
     expect(childSetOptions).not.toHaveBeenCalled();
   });
 
+  it('walks nested catalog stacks to reach the root movie or tv screen', () => {
+    const rootCatalogSetOptions = jest.fn();
+    const tvLayoutSetOptions = jest.fn();
+    const innerStackSetOptions = jest.fn();
+    const reviewsSetOptions = jest.fn();
+
+    const rootStackNavigation = { setOptions: jest.fn() };
+    const rootCatalogNavigation = {
+      setOptions: rootCatalogSetOptions,
+      getParent: () => rootStackNavigation,
+    };
+    const tvLayoutNavigation = {
+      setOptions: tvLayoutSetOptions,
+      getParent: () => rootCatalogNavigation,
+    };
+    const innerStackNavigation = {
+      setOptions: innerStackSetOptions,
+      getParent: () => tvLayoutNavigation,
+    };
+    const reviewsNavigation = {
+      setOptions: reviewsSetOptions,
+      getParent: () => innerStackNavigation,
+    };
+
+    expect(resolveCatalogDetailGestureNavigation(reviewsNavigation)).toBe(
+      rootCatalogNavigation,
+    );
+    setCatalogDetailGestureEnabled(reviewsNavigation, false);
+
+    expect(rootCatalogSetOptions).toHaveBeenCalledWith({ gestureEnabled: false });
+    expect(tvLayoutSetOptions).not.toHaveBeenCalled();
+    expect(innerStackSetOptions).not.toHaveBeenCalled();
+    expect(reviewsSetOptions).not.toHaveBeenCalled();
+  });
+
   it('falls back to the current navigator when no parent exists', () => {
     const setOptions = jest.fn();
     const navigation = { setOptions };

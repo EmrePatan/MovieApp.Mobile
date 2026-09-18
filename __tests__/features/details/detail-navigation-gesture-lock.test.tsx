@@ -55,22 +55,6 @@ describe('useDetailNavigationGestureLock', () => {
     expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
   });
 
-  it('restores parent gestures on blur cleanup', () => {
-    let cleanup: void | (() => void);
-    mockFocusEffect.mockImplementationOnce((callback: () => void | (() => void)) => {
-      cleanup = callback();
-    });
-
-    function Probe() {
-      useDetailNavigationGestureLock(false, true);
-      return null;
-    }
-
-    render(<Probe />);
-    cleanup?.();
-
-    expect(mockParentSetOptions).toHaveBeenLastCalledWith({ gestureEnabled: true });
-  });
 });
 
 describe('DetailQueryState navigation gesture lock', () => {

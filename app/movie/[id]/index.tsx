@@ -4,10 +4,10 @@ import { useMovieDetails } from '@/features/details/movie/hooks/useMovieDetails'
 import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatalogRouteId';
 
 export default function MovieDetailScreen() {
-  const { resolvedId: movieId, isActive, isInvalid } = useCatalogRouteIdState('movie');
-  const query = useMovieDetails(isActive ? movieId : undefined);
+  const { resolvedId: movieId, isInvalid } = useCatalogRouteIdState('movie');
+  const query = useMovieDetails(movieId);
 
-  if (!isActive) {
+  if (!movieId) {
     return null;
   }
 

@@ -1,15 +1,28 @@
+import { useRef } from 'react';
 import { useLocalSearchParams, usePathname } from 'expo-router';
-import { normalizeRouteIdParam, parsePositiveInt } from '../../shared/routes';
+import {
+  normalizeRouteIdParam,
+  parsePersonTmdbIdFromPathname,
+  parsePositiveInt,
+} from '../../shared/routes';
 
 export function usePersonRouteTmdbId() {
   const pathname = usePathname();
   const { tmdbId: rawTmdbId } = useLocalSearchParams<{ tmdbId?: string }>();
-  const isActive = /\/person\/[^/]+/.test(pathname);
-  const tmdbId = isActive ? parsePositiveInt(normalizeRouteIdParam(rawTmdbId)) : null;
+  const paramTmdbId = parsePositiveInt(normalizeRouteIdParam(rawTmdbId));
+  const pathnameTmdbId = parsePersonTmdbIdFromPathname(pathname);
+  const resolvedTmdbId = paramTmdbId ?? pathnameTmdbId;
+  const isPersonPathActive = pathnameTmdbId != null;
+
+  const stableIdRef = useRef<number | null>(null);
+  if (resolvedTmdbId != null) {
+    stableIdRef.current = resolvedTmdbId;
+  }
+  const stableTmdbId = resolvedTmdbId ?? stableIdRef.current;
 
   return {
-    tmdbId,
-    isActive,
-    isInvalid: isActive && tmdbId == null,
+    tmdbId: stableTmdbId,
+    isPersonPathActive,
+    isInvalid: Boolean(normalizeRouteIdParam(rawTmdbId)) && stableTmdbId == null,
   };
 }

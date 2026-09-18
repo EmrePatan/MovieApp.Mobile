@@ -1,5 +1,7 @@
 import {
   parseCatalogIdFromPathname,
+  parseCatalogStackCatalogId,
+  parsePersonTmdbIdFromPathname,
   resolveCatalogRouteId,
 } from '@/features/details/shared/routes';
 
@@ -25,6 +27,36 @@ describe('resolveCatalogRouteId', () => {
 
   it('returns undefined when no valid id can be resolved', () => {
     expect(resolveCatalogRouteId('invalid', ['(tabs)', 'movie', 'bad-id'])).toBeUndefined();
+  });
+
+  it('parses person ids from nested child destination pathnames', () => {
+    expect(parsePersonTmdbIdFromPathname('/person/1001/gallery')).toBe(1001);
+    expect(parsePersonTmdbIdFromPathname('/person/1001/filmography')).toBe(1001);
+    expect(parsePersonTmdbIdFromPathname('/person/1001')).toBe(1001);
+  });
+
+  it('parses catalog ids from nested child destination pathnames for stack screens', () => {
+    expect(parseCatalogStackCatalogId(`/movie/${movieId}/reviews`, 'movie')).toBe(movieId);
+    expect(parseCatalogStackCatalogId(`/tv/${tvId}/credits`, 'tv')).toBe(tvId);
+  });
+
+  it('still resolves catalog ids from route params on nested child destination pathnames', () => {
+    expect(
+      resolveCatalogRouteId(
+        movieId,
+        ['movie', movieId, 'reviews'],
+        `/movie/${movieId}/reviews`,
+        'movie',
+      ),
+    ).toBe(movieId);
+    expect(
+      resolveCatalogRouteId(
+        tvId,
+        ['tv', tvId, 'reviews'],
+        `/tv/${tvId}/reviews`,
+        'tv',
+      ),
+    ).toBe(tvId);
   });
 
   it('does not treat nested child destination pathnames as active catalog detail routes', () => {

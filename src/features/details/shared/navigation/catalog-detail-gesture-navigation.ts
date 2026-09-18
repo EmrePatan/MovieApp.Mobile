@@ -5,13 +5,26 @@ interface GestureNavigationTarget {
 
 /**
  * After catalog detail moved to the root stack (ee2d5e7), the native interactive
- * pop back to the opening origin is owned by the parent root-stack screen (`movie`
- * or `tv`), not the nested catalog index screen.
+ * pop back to the opening origin is owned by the root-stack `movie` / `tv`
+ * screen. Walk the navigator chain so nested `[id]` layouts still reach it.
  */
 export function resolveCatalogDetailGestureNavigation(
   navigation: GestureNavigationTarget,
 ): GestureNavigationTarget {
-  return navigation.getParent?.() ?? navigation;
+  const chain: GestureNavigationTarget[] = [navigation];
+  let current = navigation;
+
+  while (current.getParent?.()) {
+    current = current.getParent()!;
+    chain.push(current);
+  }
+
+  if (chain.length === 1) {
+    return chain[0];
+  }
+
+  const rootCatalogIndex = Math.max(1, chain.length - 2);
+  return chain[rootCatalogIndex];
 }
 
 export function setCatalogDetailGestureEnabled(

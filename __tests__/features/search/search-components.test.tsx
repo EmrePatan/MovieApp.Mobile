@@ -1,11 +1,39 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { SearchBar } from '@/features/search/components/SearchBar';
+import { SearchScreenHeader } from '@/features/search/components/SearchScreenHeader';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
 
 describe('search UI components', () => {
+  it('shows the Search label only when there is no back affordance', () => {
+    const { rerender } = render(
+      <SearchScreenHeader
+        value=""
+        onChangeText={jest.fn()}
+        onSubmit={jest.fn()}
+        onClear={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Search')).toBeTruthy();
+
+    rerender(
+      <SearchScreenHeader
+        value=""
+        onChangeText={jest.fn()}
+        onSubmit={jest.fn()}
+        onClear={jest.fn()}
+        onBack={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByText('Search')).toBeNull();
+    expect(screen.getByLabelText('Back')).toBeTruthy();
+    expect(screen.getByText('Back')).toBeTruthy();
+  });
+
   it('renders search bar and submits query', () => {
     const onSubmit = jest.fn();
     const onClear = jest.fn();
