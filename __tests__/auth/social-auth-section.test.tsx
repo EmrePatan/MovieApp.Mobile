@@ -72,7 +72,28 @@ describe('SocialAuthSection', () => {
   it('reports backend failures', async () => {
     const { ApiError } = require('@/api/errors');
     mockSignInWithSocial.mockRejectedValueOnce(
-      new ApiError({ kind: 'unauthorized', userMessage: 'Social sign-in failed. Please try again.' }),
+      new ApiError({
+        kind: 'unauthorized',
+        detail: 'Google identity token is invalid.',
+      }),
+    );
+    const onError = jest.fn();
+
+    render(<SocialAuthSection onError={onError} />);
+    fireEvent.press(screen.getByLabelText('Continue with Google'));
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith('Google identity token is invalid.');
+    });
+  });
+
+  it('maps unauthorized social failures to a friendly fallback message', async () => {
+    const { ApiError } = require('@/api/errors');
+    mockSignInWithSocial.mockRejectedValueOnce(
+      new ApiError({
+        kind: 'unauthorized',
+        title: 'Authentication failed.',
+      }),
     );
     const onError = jest.fn();
 
@@ -81,6 +102,29 @@ describe('SocialAuthSection', () => {
 
     await waitFor(() => {
       expect(onError).toHaveBeenCalledWith('Social sign-in failed. Please try again.');
+    });
+  });
+
+  it('shows the backend conflict message for existing password accounts', async () => {
+    const { ApiError } = require('@/api/errors');
+    mockSignInWithSocial.mockRejectedValueOnce(
+      new ApiError({
+        kind: 'conflict',
+        status: 409,
+        title: 'Social authentication conflict.',
+        detail:
+          'An account with this email already exists. Sign in with your password to continue.',
+      }),
+    );
+    const onError = jest.fn();
+
+    render(<SocialAuthSection onError={onError} />);
+    fireEvent.press(screen.getByLabelText('Continue with Google'));
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith(
+        'An account with this email already exists. Sign in with your password to continue.',
+      );
     });
   });
 });

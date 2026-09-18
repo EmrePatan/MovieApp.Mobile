@@ -1,6 +1,28 @@
 import { getApiBaseUrl, API_REQUEST_TIMEOUT_MS } from './config';
 import { ApiError, mapStatusToErrorKind, type ProblemDetails } from './errors';
 
+function isJsonResponseContentType(contentType: string): boolean {
+  const normalized = contentType.toLowerCase();
+
+  return (
+    normalized.includes('application/json') || normalized.includes('application/problem+json')
+  );
+}
+
+async function readJsonResponseBody(response: Response): Promise<unknown | null> {
+  const contentType = response.headers.get('content-type') ?? '';
+
+  if (!isJsonResponseContentType(contentType)) {
+    return null;
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 export interface RequestOptions {
   signal?: AbortSignal;
   authenticated?: boolean;
@@ -86,9 +108,7 @@ class ApiClient {
         return undefined as T;
       }
 
-      const contentType = response.headers.get('content-type') ?? '';
-      const hasJsonBody = contentType.includes('application/json');
-      const payload = hasJsonBody ? await response.json() : null;
+      const payload = await readJsonResponseBody(response);
 
       if (!response.ok) {
         const problem = (payload ?? {}) as ProblemDetails;

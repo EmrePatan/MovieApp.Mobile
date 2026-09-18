@@ -84,4 +84,49 @@ describe('api client', () => {
       kind: 'network',
     });
   });
+
+  it('maps social auth conflicts from application/problem+json responses', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 409,
+      headers: { get: () => 'application/problem+json' },
+      json: async () => ({
+        status: 409,
+        title: 'Social authentication conflict.',
+        detail:
+          'An account with this email already exists. Sign in with your password to continue.',
+      }),
+    }) as unknown as typeof fetch;
+
+    await expect(
+      api.post('/api/auth/social', { provider: 'google', identityToken: 'token' }, {
+        authenticated: false,
+      }),
+    ).rejects.toMatchObject<Partial<ApiError>>({
+      kind: 'conflict',
+      status: 409,
+      detail:
+        'An account with this email already exists. Sign in with your password to continue.',
+    });
+  });
+
+  it('preserves HTTP status when error response JSON parsing fails', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 409,
+      headers: { get: () => 'application/json' },
+      json: async () => {
+        throw new SyntaxError('Unexpected end of JSON input');
+      },
+    }) as unknown as typeof fetch;
+
+    await expect(
+      api.post('/api/auth/social', { provider: 'google', identityToken: 'token' }, {
+        authenticated: false,
+      }),
+    ).rejects.toMatchObject<Partial<ApiError>>({
+      kind: 'conflict',
+      status: 409,
+    });
+  });
 });

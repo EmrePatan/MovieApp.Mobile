@@ -66,7 +66,9 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
         }
 
         if (isApiError(error)) {
-          onError?.(getUserMessageForAuthError(error.kind, 'social'));
+          onError?.(
+            error.detail ?? getUserMessageForAuthError(error.kind, 'social'),
+          );
           return;
         }
 
