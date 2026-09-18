@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,6 +14,7 @@ import { HomePersonalizedLoadingSlot } from '@/features/home/components/HomePers
 import { HomeSection } from '@/features/home/components/HomeSection';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { openComingUpScreen } from '@/features/upcoming/navigation/coming-up-navigation';
+import { HomeScreenShell } from '@/features/home/components/HomeScreenShell';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
@@ -23,7 +23,6 @@ import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
-import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -233,10 +232,10 @@ export default function HomeScreen() {
 
   if (isInitialBrowseLoading) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <HomeScreenShell>
         {topChrome}
         <HomeLoadingState showTopChrome={false} />
-      </SafeAreaView>
+      </HomeScreenShell>
     );
   }
 
@@ -245,12 +244,12 @@ export default function HomeScreen() {
 
     if (isApiError(error) && error.kind === 'unauthorized') {
       return (
-        <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+        <HomeScreenShell>
           {topChrome}
           <View style={styles.centered}>
             <HomeLoadingState showTopChrome={false} />
           </View>
-        </SafeAreaView>
+        </HomeScreenShell>
       );
     }
 
@@ -259,17 +258,17 @@ export default function HomeScreen() {
       : 'Unable to load your home feed. Please try again.';
 
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <HomeScreenShell>
         {topChrome}
         <View style={styles.centered}>
           <ErrorView message={message} onRetry={handleRetryBrowse} retryLabel="Try Again" />
         </View>
-      </SafeAreaView>
+      </HomeScreenShell>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+    <HomeScreenShell>
       {topChrome}
       <FlatList
         data={sections}
@@ -287,15 +286,11 @@ export default function HomeScreen() {
         getItemLayout={getHomeSectionRowLayout}
         removeClippedSubviews
       />
-    </SafeAreaView>
+    </HomeScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   content: {
     paddingBottom: spacing.xl,
   },
