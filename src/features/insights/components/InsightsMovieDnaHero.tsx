@@ -20,6 +20,12 @@ const TEXT_LIFT = {
   textShadowRadius: 10,
 } as const;
 
+const CHIP_LIFT = {
+  textShadowColor: 'rgba(0, 0, 0, 0.95)',
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 8,
+} as const;
+
 interface InsightsMovieDnaHeroProps {
   movieDna: InsightsV3MovieDna;
   backdropImagePath?: string | null;
@@ -124,9 +130,11 @@ export function InsightsMovieDnaHero({
       <HeroScrimLayers />
       <View style={styles.content}>
         <View style={styles.identityCluster}>
-          <AppText variant="caption" center style={styles.kicker}>
-            Your Movie DNA
-          </AppText>
+          <View style={styles.kickerPill}>
+            <AppText variant="caption" center style={styles.kicker}>
+              Your Movie DNA
+            </AppText>
+          </View>
           <AppText variant="hero" center style={styles.headline}>
             {displayTitle}
           </AppText>
@@ -243,12 +251,20 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xl,
     paddingBottom: spacing.md,
   },
+  kickerPill: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(10, 10, 15, 0.68)',
+    borderWidth: 1,
+    borderColor: 'rgba(196, 163, 90, 0.65)',
+  },
   kicker: {
     textTransform: 'uppercase',
-    letterSpacing: 3,
-    fontSize: 10,
-    color: colors.accentMuted,
-    fontWeight: '600',
+    letterSpacing: 2.8,
+    fontSize: 11,
+    color: colors.accentStrong,
+    fontWeight: '700',
     ...TEXT_LIFT,
   },
   headline: {
@@ -277,18 +293,23 @@ const styles = StyleSheet.create({
   },
   genreChip: {
     borderRadius: borderRadius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint14,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 179, 106, 0.78)',
+    backgroundColor: 'rgba(10, 10, 15, 0.76)',
+    paddingHorizontal: spacing.md + 2,
+    paddingVertical: 7,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.38,
+    shadowRadius: 5,
+    elevation: 4,
   },
   genreText: {
-    color: colors.accentStrong,
-    fontWeight: '600',
-    fontSize: 11,
-    letterSpacing: 0.4,
-    ...TEXT_LIFT,
+    color: '#F0E2C2',
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.35,
+    ...CHIP_LIFT,
   },
   mixBlock: {
     width: '100%',
