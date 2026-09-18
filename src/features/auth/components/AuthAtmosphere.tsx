@@ -26,12 +26,13 @@ export function AuthAtmosphere() {
         style={styles.image}
         imageStyle={imageFrameStyle}
       >
+        {/* Left-to-right readability scrim — lighter on the right so seats/popcorn read through. */}
         <LinearGradient
           colors={[
-            'rgba(6, 5, 8, 0.9)',
-            'rgba(10, 8, 12, 0.72)',
-            'rgba(14, 10, 14, 0.34)',
-            'rgba(8, 6, 10, 0.12)',
+            'rgba(6, 5, 8, 0.78)',
+            'rgba(10, 8, 12, 0.56)',
+            'rgba(14, 10, 14, 0.2)',
+            'rgba(8, 6, 10, 0.05)',
           ]}
           locations={[0, 0.34, 0.68, 1]}
           start={{ x: 0, y: 0.5 }}
@@ -39,19 +40,52 @@ export function AuthAtmosphere() {
           style={StyleSheet.absoluteFill}
         />
 
+        {/* Vertical balance — soften the bottom crush while keeping the hero area legible. */}
         <LinearGradient
-          colors={['rgba(6, 5, 8, 0.5)', 'transparent', 'rgba(6, 5, 8, 0.78)']}
-          locations={[0, 0.42, 1]}
+          colors={['rgba(6, 5, 8, 0.38)', 'transparent', 'rgba(6, 5, 8, 0.58)']}
+          locations={[0, 0.44, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
+        {/* Warm ceiling spill from the theater lights above. */}
         <LinearGradient
-          colors={['rgba(0, 0, 0, 0.32)', 'transparent']}
+          colors={[
+            'rgba(212, 179, 106, 0.16)',
+            'rgba(196, 163, 90, 0.08)',
+            'transparent',
+          ]}
+          locations={[0, 0.28, 0.62]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Soft gold bloom from the lower-left aisle lighting. */}
+        <LinearGradient
+          colors={['transparent', 'rgba(196, 163, 90, 0.1)', 'rgba(212, 179, 106, 0.14)']}
+          locations={[0.3, 0.68, 1]}
+          start={{ x: 1, y: 0.15 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Soft gold bloom from the lower-right popcorn/seat glow. */}
+        <LinearGradient
+          colors={['transparent', 'rgba(212, 179, 106, 0.08)', 'rgba(196, 163, 90, 0.12)']}
+          locations={[0.35, 0.72, 1]}
+          start={{ x: 0, y: 0.1 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Gentle top vignette — warm, not flat black. */}
+        <LinearGradient
+          colors={['rgba(18, 12, 8, 0.24)', 'transparent']}
           locations={[0, 1]}
           start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 0.45 }}
+          end={{ x: 0.5, y: 0.42 }}
           style={styles.topVignette}
         />
       </ImageBackground>
