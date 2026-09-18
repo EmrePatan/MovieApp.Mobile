@@ -14,7 +14,7 @@ interface InsightsTasteSectionProps {
 }
 
 export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
-  const genres = taste.genres.slice(0, 6);
+  const genres = taste.genres.slice(0, 4);
   const dominantGenre = genres[0]?.name ?? null;
 
   return (
@@ -32,13 +32,14 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
               key={genre.genreId}
               label={genre.name}
               percent={genre.sharePercent}
+              compact
               accessibilityLabel={`${genre.name}, ${Math.round(genre.sharePercent)} percent`}
             />
           ))}
           {taste.risingGenre ? (
             <View style={styles.risingCard} testID="insights-rising-genre">
               <View style={styles.risingIcon}>
-                <Ionicons name="trending-up-outline" size={16} color={colors.accent} />
+                <Ionicons name="trending-up-outline" size={14} color={colors.accent} />
               </View>
               <View style={styles.risingCopy}>
                 <AppText variant="caption" muted style={styles.risingLabel}>
@@ -64,21 +65,21 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   card: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   risingCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
     backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },
   risingIcon: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -86,11 +87,12 @@ const styles = StyleSheet.create({
   },
   risingCopy: {
     flex: 1,
-    gap: 2,
+    gap: 1,
   },
   risingLabel: {
     textTransform: 'uppercase',
     letterSpacing: 0.8,
+    fontSize: 10,
   },
   risingTitle: {
     color: colors.accentStrong,

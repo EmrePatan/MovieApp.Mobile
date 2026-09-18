@@ -67,7 +67,9 @@ describe('insights sections', () => {
 
     render(<InsightsRatingsSection ratings={insightsV3Fixture.yourRatings} />);
 
-    expect(screen.getByText(/highest genre \(Sci-Fi\)/)).toBeTruthy();
-    expect(screen.getByText(/lowest genre \(Comedy\)/)).toBeTruthy();
+    expect(screen.getByText('Highest rated')).toBeTruthy();
+    expect(screen.getByText('Lowest rated')).toBeTruthy();
+    expect(screen.getByText('4.6 ★')).toBeTruthy();
+    expect(screen.getByText('3.2 ★')).toBeTruthy();
   });
 });

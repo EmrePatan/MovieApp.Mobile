@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { InsightsV3Era } from '../types';
+import { formatDecadeLabel } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
@@ -46,8 +47,13 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
                       ]}
                     />
                   </View>
-                  <AppText variant="caption" muted style={styles.decadeLabel}>
-                    {bucket.bucket.slice(2)}
+                  <AppText
+                    variant="caption"
+                    muted
+                    style={[styles.decadeLabel, isFavorite && styles.decadeLabelFavorite]}
+                    numberOfLines={1}
+                  >
+                    {formatDecadeLabel(bucket.bucket)}
                   </AppText>
                 </View>
               );
@@ -85,7 +91,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   body: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   favoriteCopy: {
     lineHeight: 20,
@@ -95,16 +101,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     gap: spacing.xs,
-    minHeight: 120,
+    minHeight: 112,
   },
   timelineColumn: {
     flex: 1,
     alignItems: 'center',
     gap: spacing.xs,
+    minWidth: 0,
   },
   timelineTrack: {
     width: '100%',
-    height: 96,
+    height: 88,
     justifyContent: 'flex-end',
     borderRadius: borderRadius.sm,
     backgroundColor: colors.surfaceElevated,
@@ -121,7 +128,11 @@ const styles = StyleSheet.create({
   },
   decadeLabel: {
     fontSize: 10,
-    fontVariant: ['tabular-nums'],
+    textAlign: 'center',
+  },
+  decadeLabelFavorite: {
+    color: colors.accentStrong,
+    fontWeight: '600',
   },
   oldestCard: {
     flexDirection: 'row',

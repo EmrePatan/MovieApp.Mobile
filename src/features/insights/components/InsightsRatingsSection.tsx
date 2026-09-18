@@ -53,19 +53,26 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
             </View>
           ) : null}
 
-          <View style={styles.statRow}>
-            <StatChip label={`${ratings.count} ratings`} />
-            {ratings.highestRatedGenre ? (
-              <StatChip
-                label={`${formatAverageStarRating(ratings.highestRatedGenre.averageStars)} highest genre (${ratings.highestRatedGenre.name})`}
-              />
-            ) : null}
-            {ratings.lowestRatedGenre ? (
-              <StatChip
-                label={`${formatAverageStarRating(ratings.lowestRatedGenre.averageStars)} lowest genre (${ratings.lowestRatedGenre.name})`}
-              />
-            ) : null}
-          </View>
+          <AppText variant="caption" muted>{ratings.count} ratings</AppText>
+
+          {ratings.highestRatedGenre || ratings.lowestRatedGenre ? (
+            <View style={styles.genreInsights}>
+              {ratings.highestRatedGenre ? (
+                <GenreInsight
+                  label="Highest rated"
+                  name={ratings.highestRatedGenre.name}
+                  stars={ratings.highestRatedGenre.averageStars}
+                />
+              ) : null}
+              {ratings.lowestRatedGenre ? (
+                <GenreInsight
+                  label="Lowest rated"
+                  name={ratings.lowestRatedGenre.name}
+                  stars={ratings.lowestRatedGenre.averageStars}
+                />
+              ) : null}
+            </View>
+          ) : null}
         </View>
       )}
     </View>
@@ -96,10 +103,26 @@ function StarRow({ rating }: { rating: number }) {
   );
 }
 
-function StatChip({ label }: { label: string }) {
+function GenreInsight({
+  label,
+  name,
+  stars,
+}: {
+  label: string;
+  name: string;
+  stars: number;
+}) {
   return (
-    <View style={styles.statChip}>
-      <AppText variant="caption" muted>{label}</AppText>
+    <View style={styles.genreInsight} accessibilityRole="text">
+      <AppText variant="caption" muted style={styles.genreInsightLabel}>
+        {label}
+      </AppText>
+      <View style={styles.genreInsightRow}>
+        <AppText variant="bodySmall" style={styles.genreName}>{name}</AppText>
+        <AppText variant="bodySmall" style={styles.genreStars}>
+          {formatAverageStarRating(stars)} ★
+        </AppText>
+      </View>
     </View>
   );
 }
@@ -109,7 +132,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   card: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   heroRow: {
     flexDirection: 'row',
@@ -130,8 +153,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     gap: spacing.xs,
-    minHeight: 112,
-    paddingTop: spacing.sm,
+    minHeight: 104,
+    paddingTop: spacing.xs,
   },
   distributionColumn: {
     flex: 1,
@@ -140,7 +163,7 @@ const styles = StyleSheet.create({
   },
   distributionTrack: {
     width: '100%',
-    height: 88,
+    height: 80,
     justifyContent: 'flex-end',
     borderRadius: borderRadius.sm,
     backgroundColor: colors.surfaceElevated,
@@ -155,17 +178,37 @@ const styles = StyleSheet.create({
   starLabel: {
     fontVariant: ['tabular-nums'],
   },
-  statRow: {
+  genreInsights: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: spacing.lg,
+    paddingTop: spacing.xs,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
   },
-  statChip: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+  genreInsight: {
+    gap: 4,
+    minWidth: 132,
+  },
+  genreInsightLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    fontSize: 10,
+  },
+  genreInsightRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  genreName: {
+    color: colors.textPrimary,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
+  genreStars: {
+    color: colors.accentStrong,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
 });

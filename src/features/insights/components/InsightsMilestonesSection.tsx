@@ -23,13 +23,13 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
         title="Achievements"
         subtitle="Milestones from your watching journey"
       />
-      <View style={styles.badgeRow}>
+      <View style={styles.badgeGrid}>
         {achievements.map((achievement) => (
           <AchievementBadge key={achievement.id} achievement={achievement} />
         ))}
       </View>
       <View style={styles.summaryRow}>
-        <Ionicons name="trophy-outline" size={14} color={colors.accentMuted} />
+        <Ionicons name="trophy-outline" size={13} color={colors.accentMuted} />
         <AppText variant="caption" muted>
           {unlockedCount} of {achievements.length} unlocked
         </AppText>
@@ -59,7 +59,7 @@ function AchievementBadge({ achievement }: { achievement: InsightsAchievement })
     >
       <Ionicons
         name={achievement.achieved ? 'ribbon' : 'lock-closed-outline'}
-        size={18}
+        size={14}
         color={achievement.achieved ? colors.accent : colors.textMuted}
       />
       <AppText
@@ -82,20 +82,23 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.sm,
     opacity: 0.92,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.sm,
   },
-  badgeRow: {
+  badgeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   badge: {
-    width: 92,
-    minHeight: 104,
+    width: '31%',
+    flexGrow: 1,
+    maxWidth: 108,
+    aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
-    padding: spacing.sm,
+    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
     borderWidth: StyleSheet.hairlineWidth,
   },
@@ -106,13 +109,14 @@ const styles = StyleSheet.create({
   badgeLocked: {
     borderColor: colors.borderSubtle,
     backgroundColor: colors.surface,
-    opacity: 0.85,
+    opacity: 0.88,
   },
   badgeTitle: {
     color: colors.textPrimary,
     textAlign: 'center',
     fontWeight: '600',
-    lineHeight: 14,
+    fontSize: 10,
+    lineHeight: 12,
   },
   badgeTitleLocked: {
     color: colors.textSecondary,
@@ -120,15 +124,17 @@ const styles = StyleSheet.create({
   },
   badgeProgress: {
     fontVariant: ['tabular-nums'],
+    fontSize: 10,
+    lineHeight: 12,
   },
   summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    paddingTop: spacing.xs,
+    paddingTop: 2,
   },
   progressTrack: {
-    height: 4,
+    height: 3,
     borderRadius: borderRadius.full,
     backgroundColor: colors.progressTrack,
     overflow: 'hidden',

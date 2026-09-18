@@ -105,7 +105,10 @@ export function InsightsHubContent() {
       }
     >
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-      <InsightsMovieDnaHero movieDna={insights.movieDna} />
+      <InsightsMovieDnaHero
+        movieDna={insights.movieDna}
+        backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
+      />
       <InsightsYourYearSection
         yourYear={insights.yourYear}
         year={activeYear}
@@ -141,7 +144,7 @@ function InsightsScreenHeader({ onOpenProfile }: { onOpenProfile: () => void }) 
 
 const styles = StyleSheet.create({
   scrollContent: {
-    gap: spacing.lg,
+    gap: spacing.md,
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingBottom: spacing.xxl,
   },

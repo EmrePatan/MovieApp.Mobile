@@ -179,6 +179,10 @@ export function formatDominantGenreHeadline(genreName: string): string {
   return `${genreName} dominates your library`;
 }
 
+export function formatDecadeLabel(bucket: string): string {
+  return bucket;
+}
+
 export function formatHoursShort(totalMinutes: number): string {
   if (totalMinutes <= 0) {
     return '0h';

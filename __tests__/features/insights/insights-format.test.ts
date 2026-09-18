@@ -1,6 +1,7 @@
 import {
   buildSelectableYears,
   formatActiveYearDayPercent,
+  formatDecadeLabel,
   formatDominantGenreHeadline,
   formatEstimatedDuration,
   formatEquivalentDays,
@@ -38,5 +39,7 @@ describe('insights format helpers', () => {
     );
     expect(formatDominantGenreHeadline('Drama')).toBe('Drama dominates your library');
     expect(formatActiveYearDayPercent(42, 2026, new Date('2026-09-18T12:00:00Z'))).toBeGreaterThan(0);
+    expect(formatDecadeLabel('2020s')).toBe('2020s');
+    expect(formatDecadeLabel('Older')).toBe('Older');
   });
 });

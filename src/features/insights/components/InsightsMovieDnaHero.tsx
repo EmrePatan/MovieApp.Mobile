@@ -1,98 +1,118 @@
-import { StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3MovieDna } from '../types';
 import { formatGenreGravitation } from '../utils/insights-format';
+import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
+const FALLBACK_HERO = require('../../../../assets/insights/movie-dna-hero-fallback.jpg');
+
 interface InsightsMovieDnaHeroProps {
   movieDna: InsightsV3MovieDna;
+  backdropImagePath?: string | null;
 }
 
-export function InsightsMovieDnaHero({ movieDna }: InsightsMovieDnaHeroProps) {
+export function InsightsMovieDnaHero({
+  movieDna,
+  backdropImagePath,
+}: InsightsMovieDnaHeroProps) {
   const visibleGenres = movieDna.topGenres.slice(0, 3);
   const gravitation = formatGenreGravitation(visibleGenres.map((genre) => genre.name));
   const quoteLabel = movieDna.labels[0]?.label ?? null;
   const hasMix =
     movieDna.watchingMix.movieTitleCount + movieDna.watchingMix.seriesTitleCount > 0;
+  const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
+
+  const content = (
+    <>
+      <LinearGradient
+        colors={['rgba(10, 10, 15, 0.45)', 'rgba(10, 10, 15, 0.82)', colors.background]}
+        locations={[0, 0.55, 1]}
+        style={styles.scrim}
+      />
+      <View style={styles.content}>
+        <AppText variant="caption" muted style={styles.kicker}>
+          Your Movie DNA
+        </AppText>
+        <AppText variant="hero" style={styles.headline}>
+          {movieDna.identityTitle}
+        </AppText>
+
+        {gravitation ? (
+          <AppText variant="bodySmall" muted style={styles.description}>
+            {gravitation}
+          </AppText>
+        ) : (
+          <AppText variant="bodySmall" muted style={styles.description}>
+            Keep watching and rating to shape your Movie DNA.
+          </AppText>
+        )}
+
+        {visibleGenres.length > 0 ? (
+          <View style={styles.genreRow}>
+            {visibleGenres.map((genre) => (
+              <View key={genre.genreId} style={styles.genreChip}>
+                <AppText variant="caption" style={styles.genreText}>
+                  {genre.name}
+                </AppText>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {hasMix ? (
+          <View
+            style={styles.mixRow}
+            accessibilityRole="text"
+            accessibilityLabel={`Movies ${movieDna.watchingMix.movieTitleCount}, series ${movieDna.watchingMix.seriesTitleCount}`}
+          >
+            <MixCard
+              icon="tv-outline"
+              label="Series"
+              percent={movieDna.watchingMix.seriesSharePercent}
+              count={movieDna.watchingMix.seriesTitleCount}
+            />
+            <MixCard
+              icon="film-outline"
+              label="Movies"
+              percent={movieDna.watchingMix.movieSharePercent}
+              count={movieDna.watchingMix.movieTitleCount}
+            />
+          </View>
+        ) : null}
+
+        {quoteLabel ? (
+          <View style={styles.quoteBlock} accessibilityRole="text">
+            <AppText variant="caption" style={styles.quoteMark}>“</AppText>
+            <AppText variant="bodySmall" style={styles.quoteText}>
+              {quoteLabel}
+            </AppText>
+            <AppText variant="caption" style={styles.quoteMarkEnd}>”</AppText>
+          </View>
+        ) : null}
+      </View>
+    </>
+  );
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={[colors.accentTint18, colors.surfaceElevated, colors.background]}
-        locations={[0, 0.45, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
-      >
-        <LinearGradient
-          colors={['transparent', colors.overlay]}
-          style={styles.scrim}
-        />
-        <View style={styles.content}>
-          <AppText variant="caption" muted style={styles.kicker}>
-            Your Movie DNA
-          </AppText>
-          <AppText variant="hero" style={styles.headline}>
-            {movieDna.identityTitle}
-          </AppText>
-
-          {gravitation ? (
-            <AppText variant="bodySmall" muted style={styles.description}>
-              {gravitation}
-            </AppText>
-          ) : (
-            <AppText variant="bodySmall" muted style={styles.description}>
-              Keep watching and rating to shape your Movie DNA.
-            </AppText>
-          )}
-
-          {visibleGenres.length > 0 ? (
-            <View style={styles.genreRow}>
-              {visibleGenres.map((genre) => (
-                <View key={genre.genreId} style={styles.genreChip}>
-                  <AppText variant="caption" style={styles.genreText}>
-                    {genre.name}
-                  </AppText>
-                </View>
-              ))}
-            </View>
-          ) : null}
-
-          {hasMix ? (
-            <View
-              style={styles.mixRow}
-              accessibilityRole="text"
-              accessibilityLabel={`Movies ${movieDna.watchingMix.movieTitleCount}, series ${movieDna.watchingMix.seriesTitleCount}`}
-            >
-              <MixCard
-                icon="tv-outline"
-                label="Series"
-                percent={movieDna.watchingMix.seriesSharePercent}
-                count={movieDna.watchingMix.seriesTitleCount}
-              />
-              <MixCard
-                icon="film-outline"
-                label="Movies"
-                percent={movieDna.watchingMix.movieSharePercent}
-                count={movieDna.watchingMix.movieTitleCount}
-              />
-            </View>
-          ) : null}
-
-          {quoteLabel ? (
-            <View style={styles.quoteBlock} accessibilityRole="text">
-              <AppText variant="caption" style={styles.quoteMark}>“</AppText>
-              <AppText variant="bodySmall" style={styles.quoteText}>
-                {quoteLabel}
-              </AppText>
-              <AppText variant="caption" style={styles.quoteMarkEnd}>”</AppText>
-            </View>
-          ) : null}
+      {resolvedBackdrop ? (
+        <ImageBackground
+          source={{ uri: resolvedBackdrop }}
+          style={styles.gradient}
+          imageStyle={styles.backdropImage}
+        >
+          {content}
+        </ImageBackground>
+      ) : (
+        <View style={styles.gradient}>
+          <Image source={FALLBACK_HERO} style={styles.fallbackBackdrop} resizeMode="cover" />
+          {content}
         </View>
-      </LinearGradient>
+      )}
     </View>
   );
 }
@@ -135,6 +155,14 @@ const styles = StyleSheet.create({
   gradient: {
     minHeight: 320,
     justifyContent: 'flex-end',
+  },
+  backdropImage: {
+    opacity: 0.42,
+  },
+  fallbackBackdrop: {
+    ...StyleSheet.absoluteFill,
+    width: '300%',
+    opacity: 0.34,
   },
   scrim: {
     ...StyleSheet.absoluteFill,
@@ -182,7 +210,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     padding: spacing.sm,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.accentTint12,
+    backgroundColor: 'rgba(20, 20, 28, 0.72)',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },

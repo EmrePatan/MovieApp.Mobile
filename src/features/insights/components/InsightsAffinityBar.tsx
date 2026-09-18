@@ -7,6 +7,7 @@ interface InsightsAffinityBarProps {
   label: string;
   percent: number;
   detail?: string;
+  compact?: boolean;
   accessibilityLabel: string;
 }
 
@@ -14,12 +15,17 @@ export function InsightsAffinityBar({
   label,
   percent,
   detail,
+  compact = false,
   accessibilityLabel,
 }: InsightsAffinityBarProps) {
   const widthPercent = Math.max(0, Math.min(100, percent));
 
   return (
-    <View style={styles.row} accessibilityRole="text" accessibilityLabel={accessibilityLabel}>
+    <View
+      style={[styles.row, compact && styles.rowCompact]}
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityLabel}
+    >
       <View style={styles.labelRow}>
         <AppText variant="bodySmall" numberOfLines={1} style={styles.label}>
           {label}
@@ -28,7 +34,7 @@ export function InsightsAffinityBar({
           {detail ?? `${Math.round(percent)}%`}
         </AppText>
       </View>
-      <View style={styles.track}>
+      <View style={[styles.track, compact && styles.trackCompact]}>
         <View style={[styles.fill, { width: `${widthPercent}%` }]} />
       </View>
     </View>
@@ -38,6 +44,9 @@ export function InsightsAffinityBar({
 const styles = StyleSheet.create({
   row: {
     gap: spacing.xs,
+  },
+  rowCompact: {
+    gap: 2,
   },
   labelRow: {
     flexDirection: 'row',
@@ -54,6 +63,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: colors.progressTrack,
     overflow: 'hidden',
+  },
+  trackCompact: {
+    height: 7,
   },
   fill: {
     height: '100%',
