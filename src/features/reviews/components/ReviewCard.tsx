@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -7,11 +7,18 @@ import {
   formatReviewDateLabel,
   getAuthorInitials,
 } from '../utils/review-format';
+import {
+  likelyExceedsCollapsedLines,
+  REVIEW_LIST_COLLAPSED_LINE_COUNT,
+} from '../utils/review-content-length';
 import { ReviewAuthorRating } from './ReviewAuthorRating';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
+
+const AVATAR_SIZE = 34;
+const CONTENT_INDENT = AVATAR_SIZE + spacing.sm;
 
 type ReviewCardVariant = 'row' | 'surface';
 
@@ -32,7 +39,10 @@ export const ReviewCard = memo(function ReviewCard({
   onEdit,
   onDelete,
 }: ReviewCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const dateLabel = formatReviewDateLabel(review.createdAt, review.updatedAt);
+  const content = review.content.trim();
+  const canExpand = likelyExceedsCollapsedLines(content, REVIEW_LIST_COLLAPSED_LINE_COUNT);
 
   return (
     <View
@@ -64,7 +74,7 @@ export const ReviewCard = memo(function ReviewCard({
             ) : null}
             <ReviewAuthorRating userRating={review.userRating} />
           </View>
-          <AppText variant="caption" muted>
+          <AppText variant="caption" muted style={styles.dateLabel}>
             {dateLabel}
           </AppText>
         </View>
@@ -100,18 +110,39 @@ export const ReviewCard = memo(function ReviewCard({
           </View>
         ) : null}
       </View>
-      <AppText variant="bodySmall" style={styles.content}>
-        {review.content}
-      </AppText>
+      <View style={styles.body}>
+        <AppText
+          variant="bodySmall"
+          style={styles.content}
+          numberOfLines={expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined}
+        >
+          {content}
+        </AppText>
+        {canExpand ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={expanded ? `Show less of ${review.user.displayName}'s review` : `Read more of ${review.user.displayName}'s review`}
+            onPress={() => setExpanded((current) => !current)}
+            hitSlop={4}
+            style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
+            testID="review-card-expand"
+          >
+            <AppText variant="caption" style={styles.expandLabel}>
+              {expanded ? 'Show less' : 'Read more'}
+            </AppText>
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
   card: {
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm + 2,
   },
   cardSurface: {
     marginHorizontal: layout.screenPaddingHorizontal,
@@ -127,8 +158,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   avatar: {
-    width: 40,
-    height: 40,
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
     borderRadius: borderRadius.full,
     backgroundColor: colors.surface,
     alignItems: 'center',
@@ -144,20 +175,47 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontWeight: '600',
     letterSpacing: 0.3,
+    fontSize: 11,
   },
   meta: {
     flex: 1,
-    gap: 2,
+    gap: 3,
+    paddingTop: 1,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+    flexWrap: 'wrap',
   },
   authorName: {
     fontWeight: '600',
     color: colors.textPrimary,
     flexShrink: 1,
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  dateLabel: {
+    fontSize: 11,
+    lineHeight: 14,
+  },
+  body: {
+    paddingLeft: CONTENT_INDENT,
+    gap: 3,
+  },
+  content: {
+    lineHeight: 20,
+    color: colors.textSecondary,
+    letterSpacing: 0.1,
+    fontSize: 13,
+  },
+  expandButton: {
+    alignSelf: 'flex-start',
+  },
+  expandLabel: {
+    color: colors.accent,
+    fontWeight: '600',
+    fontSize: 11,
   },
   youBadge: {
     backgroundColor: colors.accentTint12,
@@ -170,12 +228,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 11,
     lineHeight: 14,
-  },
-  content: {
-    lineHeight: 22,
-    color: colors.textSecondary,
-    letterSpacing: 0.1,
-    paddingLeft: 40 + spacing.sm,
   },
   actions: {
     flexDirection: 'row',

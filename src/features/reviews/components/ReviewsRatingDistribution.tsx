@@ -38,62 +38,68 @@ export function ReviewsRatingDistribution({
 
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
-      <View style={styles.communityHeader} testID="reviews-community-rating">
-        <AppText variant="caption" style={styles.communityLabel}>
-          Community
-        </AppText>
-        <AppText variant="caption" style={styles.communityValue}>
-          ★ {formatCommunityStarRatingDisplay(averageScore)} / 5
-        </AppText>
-        <AppText variant="caption" muted style={styles.communitySeparator}>
-          ·
-        </AppText>
-        <AppText variant="caption" style={styles.communityValue}>
-          {formatCommunityRatingCountLabel(ratingCount)}
-        </AppText>
-      </View>
-      <View style={styles.rows}>
-        {starsDescending.map((stars) => {
-          const count = buckets[stars] ?? 0;
-          const selected = selectedStars === stars;
-          const widthPercent = count === 0 ? 0 : Math.max((count / maxCount) * 100, 8);
+      <View style={styles.mainRow}>
+        <View style={styles.scoreBlock} testID="reviews-community-rating">
+          <AppText variant="caption" style={styles.communityLabel}>
+            Community
+          </AppText>
+          <View style={styles.scoreRow}>
+            <Ionicons name="star" size={18} color={colors.accentStrong} />
+            <AppText style={styles.scoreValue}>
+              {formatCommunityStarRatingDisplay(averageScore)}
+            </AppText>
+            <AppText variant="caption" muted style={styles.scoreOutOf}>
+              / 5
+            </AppText>
+          </View>
+          <AppText variant="caption" muted style={styles.countLabel}>
+            {formatCommunityRatingCountLabel(ratingCount)}
+          </AppText>
+        </View>
 
-          return (
-            <Pressable
-              key={stars}
-              accessibilityRole="button"
-              accessibilityLabel={`Filter ${stars} star reviews, ${count} ratings`}
-              accessibilityState={{ selected }}
-              disabled={count === 0}
-              onPress={() => onSelectStars(selected ? null : stars)}
-              style={({ pressed }) => [
-                styles.row,
-                count === 0 && styles.rowDisabled,
-                pressed && count > 0 && styles.rowPressed,
-              ]}
-              testID={`reviews-rating-bar-${stars}`}
-            >
-              <View style={styles.starLabel}>
-                <AppText variant="caption" style={styles.starText}>
-                  {stars}
+        <View style={styles.rows}>
+          {starsDescending.map((stars) => {
+            const count = buckets[stars] ?? 0;
+            const selected = selectedStars === stars;
+            const widthPercent = count === 0 ? 0 : Math.max((count / maxCount) * 100, 8);
+
+            return (
+              <Pressable
+                key={stars}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter ${stars} star reviews, ${count} ratings`}
+                accessibilityState={{ selected }}
+                disabled={count === 0}
+                onPress={() => onSelectStars(selected ? null : stars)}
+                style={({ pressed }) => [
+                  styles.row,
+                  count === 0 && styles.rowDisabled,
+                  pressed && count > 0 && styles.rowPressed,
+                ]}
+                testID={`reviews-rating-bar-${stars}`}
+              >
+                <View style={styles.starLabel}>
+                  <AppText variant="caption" style={styles.starText}>
+                    {stars}
+                  </AppText>
+                  <Ionicons name="star" size={9} color={colors.textMuted} />
+                </View>
+                <View style={styles.track}>
+                  <View
+                    style={[
+                      styles.fill,
+                      { width: `${widthPercent}%` },
+                      selected && styles.fillSelected,
+                    ]}
+                  />
+                </View>
+                <AppText variant="caption" muted style={styles.count}>
+                  {count}
                 </AppText>
-                <Ionicons name="star" size={11} color={colors.accent} />
-              </View>
-              <View style={styles.track}>
-                <View
-                  style={[
-                    styles.fill,
-                    { width: `${widthPercent}%` },
-                    selected && styles.fillSelected,
-                  ]}
-                />
-              </View>
-              <AppText variant="caption" muted style={styles.count}>
-                {count}
-              </AppText>
-            </Pressable>
-          );
-        })}
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -102,57 +108,80 @@ export function ReviewsRatingDistribution({
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: layout.screenPaddingHorizontal,
-    gap: spacing.sm,
   },
-  communityHeader: {
+  mainRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.md,
+  },
+  scoreBlock: {
+    minWidth: 88,
+    gap: 2,
   },
   communityLabel: {
-    color: colors.textSecondary,
+    color: colors.textMuted,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
+    fontSize: 10,
+    lineHeight: 12,
   },
-  communityValue: {
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
+    marginTop: 2,
+  },
+  scoreValue: {
     color: colors.textPrimary,
+    fontSize: 28,
+    lineHeight: 32,
+    fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
-  communitySeparator: {
-    marginHorizontal: 1,
+  scoreOutOf: {
+    fontSize: 12,
+    lineHeight: 16,
+    marginBottom: 2,
+  },
+  countLabel: {
+    fontVariant: ['tabular-nums'],
+    fontSize: 11,
+    lineHeight: 14,
   },
   rows: {
-    gap: spacing.xs,
+    flex: 1,
+    gap: 2,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 28,
+    gap: spacing.xs,
+    minHeight: 16,
   },
   rowDisabled: {
-    opacity: 0.45,
+    opacity: 0.4,
   },
   rowPressed: {
     opacity: 0.85,
   },
   starLabel: {
-    width: 28,
+    width: 22,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 2,
+    gap: 1,
   },
   starText: {
-    color: colors.textSecondary,
+    color: colors.textMuted,
     fontVariant: ['tabular-nums'],
-    fontWeight: '600',
+    fontWeight: '500',
+    fontSize: 10,
+    lineHeight: 12,
   },
   track: {
     flex: 1,
-    height: 8,
+    height: 5,
     borderRadius: borderRadius.full,
     backgroundColor: colors.surfaceElevated,
     overflow: 'hidden',
@@ -160,14 +189,16 @@ const styles = StyleSheet.create({
   fill: {
     height: '100%',
     borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint18,
+    backgroundColor: colors.accentTint14,
   },
   fillSelected: {
     backgroundColor: colors.accent,
   },
   count: {
-    width: 28,
+    width: 22,
     textAlign: 'right',
     fontVariant: ['tabular-nums'],
+    fontSize: 10,
+    lineHeight: 12,
   },
 });

@@ -10,17 +10,32 @@ const review: ReviewResponse = {
   updatedAt: '2026-01-02T00:00:00Z',
 };
 
+const shortReview: ReviewResponse = {
+  ...review,
+  content: 'A concise and natural short review.',
+};
+
 describe('ReviewCard', () => {
-  it('renders author, date, and content', () => {
-    render(<ReviewCard review={review} />);
+  it('renders author, date, and short review content without clamping', () => {
+    render(<ReviewCard review={shortReview} />);
 
     expect(screen.getByText('Jane Doe')).toBeTruthy();
     expect(screen.getByText(/edited/)).toBeTruthy();
+    expect(screen.getByText(shortReview.content)).toBeTruthy();
+    expect(screen.queryByText('Read more')).toBeNull();
+  });
+
+  it('collapses long reviews with read more', () => {
+    render(<ReviewCard review={review} />);
+
+    expect(screen.getByText('Read more')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("Read more of Jane Doe's review"));
     expect(screen.getByText(review.content)).toBeTruthy();
+    expect(screen.getByText('Show less')).toBeTruthy();
   });
 
   it('marks own review with a You badge', () => {
-    render(<ReviewCard review={review} isOwnReview />);
+    render(<ReviewCard review={shortReview} isOwnReview />);
     expect(screen.getByText('Jane Doe')).toBeTruthy();
     expect(screen.getByText('You')).toBeTruthy();
   });
@@ -31,7 +46,7 @@ describe('ReviewCard', () => {
 
     render(
       <ReviewCard
-        review={review}
+        review={shortReview}
         isOwnReview
         onEdit={onEdit}
         onDelete={onDelete}

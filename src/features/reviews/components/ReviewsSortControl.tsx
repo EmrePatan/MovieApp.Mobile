@@ -49,12 +49,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: 'row',
-    gap: spacing.xs,
+    gap: 6,
     paddingHorizontal: layout.screenPaddingHorizontal,
   },
   chip: {
-    minHeight: 32,
-    paddingHorizontal: spacing.sm + 2,
+    minHeight: 28,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.border,
@@ -69,6 +70,8 @@ const styles = StyleSheet.create({
   label: {
     color: colors.textSecondary,
     fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 14,
   },
   labelSelected: {
     color: colors.accent,

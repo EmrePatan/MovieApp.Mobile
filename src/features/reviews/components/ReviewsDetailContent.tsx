@@ -398,6 +398,7 @@ export function ReviewsDetailContent({
       data={publicReviews}
       keyExtractor={(item) => item.id}
       renderItem={renderReviewItem}
+      ItemSeparatorComponent={ReviewListSeparator}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}
       ListFooterComponent={listFooter}
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   communityPanel: {
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingBottom: spacing.xs,
   },
   loading: {
@@ -479,5 +480,18 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+});
+
+function ReviewListSeparator() {
+  return <View style={reviewListSeparatorStyles.separator} />;
+}
+
+const reviewListSeparatorStyles = StyleSheet.create({
+  separator: {
+    height: 1,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    marginVertical: spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
   },
 });

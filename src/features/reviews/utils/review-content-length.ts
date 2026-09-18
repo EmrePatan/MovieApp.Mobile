@@ -9,3 +9,13 @@ export function getReviewContentLength(content: string): number {
 export function hasReviewContent(content: string): boolean {
   return getReviewContentLength(content.trim()) > 0;
 }
+
+export const REVIEW_LIST_COLLAPSED_LINE_COUNT = 4;
+
+export const REVIEW_OWN_COLLAPSED_LINE_COUNT = 2;
+
+/** Rough width-based threshold before multi-line clamp likely truncates on phones. */
+export function likelyExceedsCollapsedLines(content: string, lineCount: number): boolean {
+  const charsPerLine = 44;
+  return content.trim().length > lineCount * charsPerLine;
+}

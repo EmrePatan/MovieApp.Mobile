@@ -3,14 +3,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { ReviewAuthorRating } from './ReviewAuthorRating';
 import type { ReviewResponse } from '../types';
+import {
+  likelyExceedsCollapsedLines,
+  REVIEW_OWN_COLLAPSED_LINE_COUNT,
+} from '../utils/review-content-length';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
-
-const COLLAPSED_LINE_COUNT = 2;
-/** Rough threshold before 2-line clamp likely truncates on typical phone widths. */
-const LIKELY_TRUNCATED_LENGTH = 96;
 
 interface ReviewsOwnReviewBarProps {
   review: ReviewResponse;
@@ -20,7 +20,7 @@ interface ReviewsOwnReviewBarProps {
 export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps) {
   const [expanded, setExpanded] = useState(false);
   const content = review.content.trim();
-  const canExpand = content.length > LIKELY_TRUNCATED_LENGTH;
+  const canExpand = likelyExceedsCollapsedLines(content, REVIEW_OWN_COLLAPSED_LINE_COUNT);
 
   return (
     <View style={styles.container} testID="reviews-own-review-bar">
@@ -34,7 +34,7 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
         <AppText
           variant="bodySmall"
           muted
-          numberOfLines={expanded ? undefined : COLLAPSED_LINE_COUNT}
+          numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
           style={styles.preview}
         >
           {content}
@@ -73,18 +73,18 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.sm,
+    gap: spacing.xs,
     marginHorizontal: layout.screenPaddingHorizontal,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   textBlock: {
     flex: 1,
-    gap: spacing.xs,
+    gap: 3,
   },
   labelRow: {
     flexDirection: 'row',
@@ -95,25 +95,33 @@ const styles = StyleSheet.create({
   label: {
     color: colors.accent,
     fontWeight: '600',
+    fontSize: 11,
+    lineHeight: 14,
+    letterSpacing: 0.2,
   },
   preview: {
-    lineHeight: 20,
+    lineHeight: 19,
+    fontSize: 13,
   },
   expandButton: {
     alignSelf: 'flex-start',
+    marginTop: 1,
   },
   expandLabel: {
     color: colors.accent,
     fontWeight: '600',
+    fontSize: 11,
   },
   editButton: {
     minHeight: interaction.touchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
+    marginTop: -2,
   },
   editLabel: {
     color: colors.accent,
     fontWeight: '600',
+    fontSize: 11,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
