@@ -15,13 +15,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 const FALLBACK_HERO = require('../../../../assets/insights/movie-dna-hero-fallback.jpg');
 
 const TEXT_LIFT = {
-  textShadowColor: 'rgba(0, 0, 0, 0.85)',
-  textShadowOffset: { width: 0, height: 1 },
-  textShadowRadius: 10,
-} as const;
-
-const CHIP_LIFT = {
-  textShadowColor: 'rgba(0, 0, 0, 0.95)',
+  textShadowColor: 'rgba(0, 0, 0, 0.9)',
   textShadowOffset: { width: 0, height: 1 },
   textShadowRadius: 8,
 } as const;
@@ -35,31 +29,18 @@ function HeroScrimLayers() {
   return (
     <>
       <LinearGradient
-        colors={['rgba(196, 163, 90, 0.1)', 'transparent', 'rgba(196, 163, 90, 0.08)']}
-        locations={[0, 0.5, 1]}
+        colors={['rgba(196, 163, 90, 0.07)', 'transparent', 'rgba(196, 163, 90, 0.05)']}
+        locations={[0, 0.45, 1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={[
-          'rgba(10, 10, 15, 0.32)',
-          'rgba(10, 10, 15, 0.14)',
-          'rgba(10, 10, 15, 0.08)',
-          'rgba(10, 10, 15, 0.42)',
-          'rgba(16, 14, 10, 0.84)',
-        ]}
-        locations={[0, 0.22, 0.48, 0.74, 1]}
+        colors={['transparent', 'rgba(10, 10, 15, 0.18)', 'rgba(10, 10, 15, 0.72)']}
+        locations={[0.28, 0.52, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
-      />
-      <LinearGradient
-        colors={['rgba(196, 163, 90, 0.14)', 'rgba(10, 10, 15, 0.18)', 'transparent']}
-        locations={[0, 0.4, 1]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.headlineScrim}
       />
     </>
   );
@@ -129,23 +110,25 @@ export function InsightsMovieDnaHero({
     <>
       <HeroScrimLayers />
       <View style={styles.content}>
-        <View style={styles.identityCluster}>
-          <View style={styles.kickerPill}>
-            <AppText variant="caption" center style={styles.kicker}>
-              Your Movie DNA
-            </AppText>
-          </View>
-          <AppText variant="hero" center style={styles.headline}>
-            {displayTitle}
-          </AppText>
-          {showGravitation ? (
-            <AppText variant="body" center style={styles.description}>
-              {gravitation ?? 'Keep watching and rating to shape your Movie DNA.'}
-            </AppText>
-          ) : null}
-        </View>
+        <View style={styles.posterReveal} />
 
-        <View style={styles.middleLowerZone}>
+        <View style={styles.mainPanel}>
+          <View style={styles.identityCluster}>
+            <View style={styles.kickerPill}>
+              <AppText variant="caption" center style={styles.kicker}>
+                Your Movie DNA
+              </AppText>
+            </View>
+            <AppText variant="hero" center style={styles.headline}>
+              {displayTitle}
+            </AppText>
+            {showGravitation ? (
+              <AppText variant="body" center style={styles.description}>
+                {gravitation ?? 'Keep watching and rating to shape your Movie DNA.'}
+              </AppText>
+            ) : null}
+          </View>
+
           {visibleGenres.length > 0 ? (
             <View style={styles.genreRow}>
               {visibleGenres.map((genre) => (
@@ -219,37 +202,32 @@ const styles = StyleSheet.create({
     height: '108%',
   },
   scrimLayer: {
-    ...StyleSheet.absoluteFill,
-  },
-  headlineScrim: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '52%',
+    ...StyleSheet.absoluteFillObject,
   },
   content: {
     flex: 1,
     minHeight: 420,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xxl,
+    justifyContent: 'flex-end',
+  },
+  posterReveal: {
+    flex: 1,
+    minHeight: 108,
+  },
+  mainPanel: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md + spacing.xs,
+    gap: spacing.lg,
+    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(10, 10, 15, 0.92)',
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
   },
   identityCluster: {
-    width: '100%',
-    maxWidth: 320,
-    alignSelf: 'center',
     alignItems: 'center',
     gap: spacing.md,
-  },
-  middleLowerZone: {
-    flex: 1,
-    width: '100%',
-    maxWidth: 320,
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
-    gap: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
   },
   kickerPill: {
     paddingHorizontal: spacing.md,
@@ -265,26 +243,22 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.accentStrong,
     fontWeight: '700',
-    ...TEXT_LIFT,
   },
   headline: {
     color: colors.textPrimary,
     letterSpacing: -0.6,
     fontWeight: '700',
-    fontSize: 34,
-    lineHeight: 40,
-    maxWidth: '92%',
-    textShadowColor: 'rgba(196, 163, 90, 0.28)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 12,
+    fontSize: 32,
+    lineHeight: 38,
+    maxWidth: '100%',
+    ...TEXT_LIFT,
   },
   description: {
     lineHeight: 22,
     fontSize: 15,
     letterSpacing: 0.15,
-    color: 'rgba(245, 245, 247, 0.78)',
-    maxWidth: '88%',
-    ...TEXT_LIFT,
+    color: colors.textSecondary,
+    maxWidth: '100%',
   },
   genreRow: {
     flexDirection: 'row',
@@ -297,21 +271,15 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint18,
+    backgroundColor: colors.accentTint14,
     paddingHorizontal: spacing.md + 2,
     paddingVertical: 7,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.22,
-    shadowRadius: 6,
-    elevation: 3,
   },
   genreText: {
     color: colors.accentStrong,
     fontWeight: '700',
     fontSize: 12,
     letterSpacing: 0.35,
-    ...CHIP_LIFT,
   },
   mixBlock: {
     width: '100%',
@@ -328,7 +296,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   mixLabel: {
-    color: 'rgba(245, 245, 247, 0.7)',
+    color: colors.textSecondary,
     fontWeight: '500',
     fontSize: 11,
     letterSpacing: 0.2,
@@ -338,7 +306,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 11,
     fontVariant: ['tabular-nums'],
-    ...TEXT_LIFT,
   },
   mixTrack: {
     flexDirection: 'row',
@@ -349,30 +316,26 @@ const styles = StyleSheet.create({
   },
   mixSegment: {
     height: '100%',
-    borderTopRightRadius: 1,
-    borderBottomRightRadius: 1,
   },
   mixSegmentMuted: {
     height: '100%',
-    backgroundColor: 'rgba(196, 163, 90, 0.32)',
+    backgroundColor: 'rgba(196, 163, 90, 0.28)',
   },
   bottomBand: {
-    marginHorizontal: -spacing.lg,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
-    backgroundColor: 'rgba(22, 18, 12, 0.52)',
+    backgroundColor: 'rgba(10, 10, 15, 0.94)',
     borderTopWidth: 1,
     borderTopColor: colors.borderAccent,
   },
   quoteText: {
-    color: 'rgba(245, 245, 247, 0.82)',
+    color: colors.textSecondary,
     fontStyle: 'italic',
     lineHeight: 21,
     letterSpacing: 0.2,
     maxWidth: '92%',
     alignSelf: 'center',
     fontSize: 13,
-    ...TEXT_LIFT,
   },
 });
