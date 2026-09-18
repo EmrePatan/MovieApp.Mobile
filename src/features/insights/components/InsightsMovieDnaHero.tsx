@@ -35,7 +35,7 @@ function HeroScrimLayers() {
   return (
     <>
       <LinearGradient
-        colors={['rgba(10, 10, 15, 0.25)', 'rgba(10, 10, 15, 0.1)', 'rgba(10, 10, 15, 0.25)']}
+        colors={['rgba(196, 163, 90, 0.1)', 'transparent', 'rgba(196, 163, 90, 0.08)']}
         locations={[0, 0.5, 1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
@@ -43,20 +43,20 @@ function HeroScrimLayers() {
       />
       <LinearGradient
         colors={[
-          'rgba(10, 10, 15, 0.62)',
+          'rgba(10, 10, 15, 0.32)',
+          'rgba(10, 10, 15, 0.14)',
+          'rgba(10, 10, 15, 0.08)',
           'rgba(10, 10, 15, 0.42)',
-          'rgba(10, 10, 15, 0.2)',
-          'rgba(10, 10, 15, 0.55)',
-          'rgba(10, 10, 15, 0.94)',
+          'rgba(16, 14, 10, 0.84)',
         ]}
-        locations={[0, 0.2, 0.42, 0.72, 1]}
+        locations={[0, 0.22, 0.48, 0.74, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={['rgba(10, 10, 15, 0.72)', 'rgba(10, 10, 15, 0.38)', 'transparent']}
-        locations={[0, 0.45, 1]}
+        colors={['rgba(196, 163, 90, 0.14)', 'rgba(10, 10, 15, 0.18)', 'transparent']}
+        locations={[0, 0.4, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.headlineScrim}
@@ -255,9 +255,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
     borderRadius: borderRadius.full,
-    backgroundColor: 'rgba(10, 10, 15, 0.68)',
+    backgroundColor: colors.accentTint18,
     borderWidth: 1,
-    borderColor: 'rgba(196, 163, 90, 0.65)',
+    borderColor: colors.borderAccent,
   },
   kicker: {
     textTransform: 'uppercase',
@@ -274,7 +274,9 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 40,
     maxWidth: '92%',
-    ...TEXT_LIFT,
+    textShadowColor: 'rgba(196, 163, 90, 0.28)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 12,
   },
   description: {
     lineHeight: 22,
@@ -294,18 +296,18 @@ const styles = StyleSheet.create({
   genreChip: {
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: 'rgba(212, 179, 106, 0.78)',
-    backgroundColor: 'rgba(10, 10, 15, 0.76)',
+    borderColor: colors.borderAccent,
+    backgroundColor: colors.accentTint18,
     paddingHorizontal: spacing.md + 2,
     paddingVertical: 7,
-    shadowColor: '#000000',
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.38,
-    shadowRadius: 5,
-    elevation: 4,
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 3,
   },
   genreText: {
-    color: '#F0E2C2',
+    color: colors.accentStrong,
     fontWeight: '700',
     fontSize: 12,
     letterSpacing: 0.35,
@@ -343,7 +345,7 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: borderRadius.full,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: colors.accentTint14,
   },
   mixSegment: {
     height: '100%',
@@ -352,15 +354,15 @@ const styles = StyleSheet.create({
   },
   mixSegmentMuted: {
     height: '100%',
-    backgroundColor: 'rgba(196, 163, 90, 0.22)',
+    backgroundColor: 'rgba(196, 163, 90, 0.32)',
   },
   bottomBand: {
     marginHorizontal: -spacing.lg,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
-    backgroundColor: 'rgba(10, 10, 15, 0.58)',
-    borderTopWidth: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(22, 18, 12, 0.52)',
+    borderTopWidth: 1,
     borderTopColor: colors.borderAccent,
   },
   quoteText: {
