@@ -52,7 +52,7 @@ describe('InsightsHubContent', () => {
     render(<InsightsHubContent />);
 
     expect(screen.getAllByLabelText('Loading insights section').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Sci-Fi Storyteller')).toBeNull();
+    expect(screen.queryByText('Sci-Fi Explorer')).toBeNull();
   });
 
   it('shows full error when insights fail without cache', () => {
@@ -75,7 +75,7 @@ describe('InsightsHubContent', () => {
 
     render(<InsightsHubContent />);
 
-    expect(screen.getByText('Sci-Fi Storyteller')).toBeTruthy();
+    expect(screen.getByText('Sci-Fi Explorer')).toBeTruthy();
     expect(screen.getByText('Your Year')).toBeTruthy();
     expect(screen.getByText('Your Taste')).toBeTruthy();
     expect(screen.getByText('Time in Stories')).toBeTruthy();

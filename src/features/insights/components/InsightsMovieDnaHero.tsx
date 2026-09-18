@@ -3,7 +3,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3MovieDna } from '../types';
-import { formatGenreGravitation, formatMovieDnaEditorialLine } from '../utils/insights-format';
+import {
+  formatGenreGravitation,
+  formatMovieDnaDisplayTitle,
+  formatMovieDnaEditorialLine,
+} from '../utils/insights-format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -84,6 +88,7 @@ export function InsightsMovieDnaHero({
   backdropImagePath,
 }: InsightsMovieDnaHeroProps) {
   const visibleGenres = movieDna.topGenres.slice(0, 3);
+  const displayTitle = formatMovieDnaDisplayTitle(movieDna);
   const gravitation = formatGenreGravitation(visibleGenres.map((genre) => genre.name));
   const editorialLine = formatMovieDnaEditorialLine(movieDna);
   const hasMix =
@@ -99,7 +104,7 @@ export function InsightsMovieDnaHero({
             Your Movie DNA
           </AppText>
           <AppText variant="hero" center style={styles.headline}>
-            {movieDna.identityTitle}
+            {displayTitle}
           </AppText>
           {gravitation ? (
             <AppText variant="bodySmall" center style={styles.description}>

@@ -10,12 +10,17 @@ import {
   formatEquivalentDays,
   formatGenreGravitation,
   formatHoursFromMinutes,
+  formatMovieDnaDisplayTitle,
   formatMovieDnaEditorialLine,
   formatWatchTimeBreakdown,
   formatWatchingMixLine,
   formatWeekdayName,
 } from '@/features/insights/utils/insights-format';
-import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
+import {
+  emptyInsightsV3Fixture,
+  insightsV3Fixture,
+} from '@/features/insights/utils/insights-fixtures';
+import type { InsightsV3MovieDna } from '@/features/insights/types';
 
 describe('insights format helpers', () => {
   it('formats estimated duration in hours and days', () => {
@@ -38,6 +43,43 @@ describe('insights format helpers', () => {
 
   it('builds selectable years from member since through current year', () => {
     expect(buildSelectableYears('2024-06-01T00:00:00Z', 2026)).toEqual([2026, 2025, 2024]);
+  });
+
+  it('maps top genres to playful Movie DNA display titles', () => {
+    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).toBe('Sci-Fi Explorer');
+    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).not.toContain('Movie-first');
+    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).not.toContain(
+      insightsV3Fixture.movieDna.identityTitle,
+    );
+
+    const dramaFirst: InsightsV3MovieDna = {
+      ...insightsV3Fixture.movieDna,
+      identityTitle: 'Drama Movie-first',
+      identityCodes: ['top_genre', 'movie_first'],
+      topGenres: [{ genreId: '2', name: 'Drama', weight: 0.4, sharePercent: 40 }],
+    };
+    expect(formatMovieDnaDisplayTitle(dramaFirst)).toBe('Drama Queen');
+
+    const horrorFirst: InsightsV3MovieDna = {
+      ...insightsV3Fixture.movieDna,
+      identityTitle: 'Horror Movie-first',
+      topGenres: [{ genreId: '3', name: 'Horror', weight: 0.3, sharePercent: 30 }],
+    };
+    expect(formatMovieDnaDisplayTitle(horrorFirst)).toBe('Horror Hunter');
+
+    const unknownGenre: InsightsV3MovieDna = {
+      ...insightsV3Fixture.movieDna,
+      topGenres: [{ genreId: '9', name: 'Western', weight: 0.3, sharePercent: 30 }],
+    };
+    expect(formatMovieDnaDisplayTitle(unknownGenre)).toBe('Western Wanderer');
+
+    const bespokeGenre: InsightsV3MovieDna = {
+      ...insightsV3Fixture.movieDna,
+      topGenres: [{ genreId: '10', name: 'Biography', weight: 0.3, sharePercent: 30 }],
+    };
+    expect(formatMovieDnaDisplayTitle(bespokeGenre)).toBe('Biography Explorer');
+
+    expect(formatMovieDnaDisplayTitle(emptyInsightsV3Fixture.movieDna)).toBe('Screen Explorer');
   });
 
   it('selects a deterministic Movie DNA editorial line from identity signals', () => {
