@@ -22,6 +22,7 @@ export class ApiError extends Error {
   readonly title: string;
   readonly detail: string | null;
   readonly userMessage: string;
+  readonly responseBody: unknown | null;
 
   constructor(options: {
     kind: ApiErrorKind;
@@ -30,6 +31,7 @@ export class ApiError extends Error {
     detail?: string | null;
     userMessage?: string;
     message?: string;
+    responseBody?: unknown | null;
   }) {
     super(options.message ?? options.userMessage ?? options.title ?? 'Request failed');
     this.name = 'ApiError';
@@ -38,7 +40,19 @@ export class ApiError extends Error {
     this.title = options.title ?? 'Request failed';
     this.detail = options.detail ?? null;
     this.userMessage = options.userMessage ?? getDefaultUserMessage(options.kind);
+    this.responseBody = options.responseBody ?? null;
   }
+}
+
+export function getApiErrorDisplayMessage(
+  error: unknown,
+  fallback = 'Something went wrong. Please try again.',
+): string {
+  if (!isApiError(error)) {
+    return fallback;
+  }
+
+  return error.detail ?? error.title ?? error.userMessage;
 }
 
 function getDefaultUserMessage(kind: ApiErrorKind): string {

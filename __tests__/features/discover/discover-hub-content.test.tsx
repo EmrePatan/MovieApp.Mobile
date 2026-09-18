@@ -143,6 +143,15 @@ describe('DiscoverHubContent', () => {
     expect(mockPush).toHaveBeenCalledWith('/pick-something');
   });
 
+  it('opens AI Recommendations from the discover hub', () => {
+    render(<DiscoverHubContent />);
+
+    expect(screen.getByLabelText('AI Recommendations')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('AI Recommendations'));
+
+    expect(mockPush).toHaveBeenCalledWith('/ai-recommendations');
+  });
+
   it('renders World Cinema hub with default collection preview', () => {
     render(<DiscoverHubContent />);
 

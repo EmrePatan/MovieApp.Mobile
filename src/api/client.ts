@@ -103,6 +103,7 @@ class ApiClient {
           status: response.status,
           title: problem.title,
           detail: problem.detail ?? null,
+          responseBody: payload,
         });
       }
 

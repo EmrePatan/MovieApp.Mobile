@@ -7,6 +7,8 @@ export const PRODUCT_METRICS = {
   worldCinemaOpened: 'world_cinema_opened',
   contentDetailOpened: 'content_detail_opened',
   pickSomethingUsed: 'pick_something_used',
+  aiRecommendationsOpened: 'ai_recommendations_opened',
+  aiRecommendationsUsed: 'ai_recommendations_used',
   libraryOpened: 'library_opened',
   libraryFilterSelected: 'library_filter_selected',
   insightsOpened: 'insights_opened',

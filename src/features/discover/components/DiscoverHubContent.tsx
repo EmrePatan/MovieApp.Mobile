@@ -84,6 +84,10 @@ export function DiscoverHubContent() {
     router.push('/pick-something');
   }, [router]);
 
+  const openAiRecommendations = useCallback(() => {
+    router.push('/ai-recommendations');
+  }, [router]);
+
   const trendingItems = previewQuery.data?.trending.items ?? [];
   const topRatedItems = previewQuery.data?.topRated.items ?? [];
   const newReleasesItems = previewQuery.data?.newReleases.items ?? [];
@@ -127,6 +131,13 @@ export function DiscoverHubContent() {
           icon="shuffle-outline"
           onPress={openPickSomething}
           accessibilityLabel="Pick Something For Me"
+        />
+        <DiscoverFeatureEntry
+          title="AI Recommendations"
+          subtitle="Describe your mood and get premium picks"
+          icon="sparkles-outline"
+          onPress={openAiRecommendations}
+          accessibilityLabel="AI Recommendations"
         />
       </View>
 
