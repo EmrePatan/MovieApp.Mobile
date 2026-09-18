@@ -12,7 +12,7 @@ import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-const FALLBACK_HERO = require('../../../../assets/insights/movie-dna-hero-fallback.jpg');
+const FALLBACK_HERO = require('../../../../assets/insights/movie-dna-hero-fallback.png');
 
 const TEXT_LIFT = {
   textShadowColor: 'rgba(0, 0, 0, 0.85)',
