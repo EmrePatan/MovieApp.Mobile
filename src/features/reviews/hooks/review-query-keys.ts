@@ -27,11 +27,3 @@ export function movieMyReviewQueryKey(movieId: string) {
 export function tvMyReviewQueryKey(tvShowId: string) {
   return ['reviews', 'tv', tvShowId, 'me'] as const;
 }
-
-export function movieReviewRatingDistributionQueryKey(movieId: string) {
-  return ['reviews', 'movie', movieId, 'rating-distribution'] as const;
-}
-
-export function tvReviewRatingDistributionQueryKey(tvShowId: string) {
-  return ['reviews', 'tv', tvShowId, 'rating-distribution'] as const;
-}

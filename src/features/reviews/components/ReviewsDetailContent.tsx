@@ -15,7 +15,7 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useMyRating } from '@/features/ratings/hooks/useRatings';
+import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
 import { ReviewCard } from './ReviewCard';
 import { ReviewComposer } from './ReviewComposer';
 import { ReviewsOwnReviewBar } from './ReviewsOwnReviewBar';
@@ -30,12 +30,10 @@ import {
   useDeleteReviewMutation,
   useUpdateReviewMutation,
 } from '../hooks/useReviewMutations';
-import { useReviewRatingDistribution } from '../hooks/useReviewRatingDistribution';
 import { useReviewsQuery } from '../hooks/useReviewsQuery';
 import type { ReviewContentType, ReviewResponse, ReviewSortOption } from '../types';
 import { DEFAULT_REVIEW_SORT } from '../types';
 import {
-  adjustBucketsForExcludedRating,
   buildStarBucketsFromDistribution,
   reviewMatchesStarFilter,
 } from '../utils/rating-star-buckets';
@@ -62,7 +60,7 @@ export function ReviewsDetailContent({
   const [sort, setSort] = useState<ReviewSortOption>(DEFAULT_REVIEW_SORT);
   const [ratingStars, setRatingStars] = useState<number | null>(null);
   const reviewsQuery = useReviewsQuery(contentType, contentId, { page, sort, ratingStars });
-  const reviewRatingDistributionQuery = useReviewRatingDistribution(contentType, contentId);
+  const ratingAggregateQuery = useRatingAggregate(contentType, contentId);
   const myReviewQuery = useMyReview(contentType, contentId);
   const myRatingQuery = useMyRating(contentType, contentId);
   const createReview = useCreateReviewMutation(contentType, contentId);
@@ -87,18 +85,13 @@ export function ReviewsDetailContent({
 
   const totalCount = reviewsQuery.data?.totalCount ?? 0;
   const totalPages = reviewsQuery.data?.totalPages ?? 0;
-  const reviewRatingDistribution = reviewRatingDistributionQuery.data;
+  const ratingAggregate = ratingAggregateQuery.data;
   const ownRatingScore = myReview?.userRating ?? myRatingQuery.data?.score ?? null;
-  const ratingBuckets = useMemo(() => {
-    const buckets = buildStarBucketsFromDistribution(
-      reviewRatingDistribution?.scoreDistribution,
-    );
-    return adjustBucketsForExcludedRating(buckets, ownRatingScore);
-  }, [ownRatingScore, reviewRatingDistribution?.scoreDistribution]);
-  const reviewAverageScore =
-    reviewRatingDistribution && reviewRatingDistribution.ratedReviewCount > 0
-      ? reviewRatingDistribution.averageScore
-      : undefined;
+  const ratingBuckets = useMemo(
+    () => buildStarBucketsFromDistribution(ratingAggregate?.scoreDistribution),
+    [ratingAggregate?.scoreDistribution],
+  );
+  const hasCommunityRatings = (ratingAggregate?.ratingCount ?? 0) > 0;
   const ownReviewMatchesRatingFilter = reviewMatchesStarFilter(ownRatingScore, ratingStars);
   const showCommunityControls = totalCount > (myReview ? 1 : 0);
 
@@ -253,7 +246,6 @@ export function ReviewsDetailContent({
             <ReviewsHeaderMeta
               contentTitle={contentTitle}
               reviewCount={totalCount}
-              averageScore={reviewAverageScore}
             />
           ) : null}
         </View>
@@ -313,11 +305,15 @@ export function ReviewsDetailContent({
 
       {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
         <View style={styles.communityPanel}>
-          <ReviewsRatingDistribution
-            buckets={ratingBuckets}
-            selectedStars={ratingStars}
-            onSelectStars={handleRatingStarsChange}
-          />
+          {hasCommunityRatings && ratingAggregate ? (
+            <ReviewsRatingDistribution
+              buckets={ratingBuckets}
+              selectedStars={ratingStars}
+              onSelectStars={handleRatingStarsChange}
+              averageScore={ratingAggregate.averageScore}
+              ratingCount={ratingAggregate.ratingCount}
+            />
+          ) : null}
           <ReviewsSortControl value={sort} onChange={handleSortChange} />
         </View>
       ) : null}

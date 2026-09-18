@@ -29,10 +29,6 @@ export function buildMovieMyReviewPath(movieId: string): string {
   return `/api/reviews/movies/${encodePathSegment(movieId)}/me`;
 }
 
-export function buildMovieReviewRatingDistributionPath(movieId: string): string {
-  return `/api/reviews/movies/${encodePathSegment(movieId)}/rating-distribution`;
-}
-
 export function buildCreateMovieReviewPath(movieId: string): string {
   return `/api/reviews/movies/${encodePathSegment(movieId)}`;
 }
@@ -70,10 +66,6 @@ export function buildTvReviewsPath(
 
 export function buildTvMyReviewPath(tvShowId: string): string {
   return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}/me`;
-}
-
-export function buildTvReviewRatingDistributionPath(tvShowId: string): string {
-  return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}/rating-distribution`;
 }
 
 export function buildCreateTvReviewPath(tvShowId: string): string {

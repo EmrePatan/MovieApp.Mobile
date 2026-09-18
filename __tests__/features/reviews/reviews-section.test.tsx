@@ -4,9 +4,8 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
-import { useMyRating } from '@/features/ratings/hooks/useRatings';
+import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
 import { useMyReview } from '@/features/reviews/hooks/useMyReview';
-import { useReviewRatingDistribution } from '@/features/reviews/hooks/useReviewRatingDistribution';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';
 import {
@@ -47,10 +46,7 @@ jest.mock('@/features/reviews/hooks/useMyReview', () => ({
 
 jest.mock('@/features/ratings/hooks/useRatings', () => ({
   useMyRating: jest.fn(),
-}));
-
-jest.mock('@/features/reviews/hooks/useReviewRatingDistribution', () => ({
-  useReviewRatingDistribution: jest.fn(),
+  useRatingAggregate: jest.fn(),
 }));
 
 jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
@@ -116,10 +112,10 @@ describe('ReviewsDetailContent', () => {
       data: null,
       isLoading: false,
     });
-    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+    (useRatingAggregate as jest.Mock).mockReturnValue({
       data: {
         averageScore: 8,
-        ratedReviewCount: 3,
+        ratingCount: 3,
         scoreDistribution: { '8': 2, '3': 1 },
       },
       isLoading: false,
@@ -145,9 +141,10 @@ describe('ReviewsDetailContent', () => {
 
     expect(screen.getByText('Reviews')).toBeTruthy();
     expect(screen.getByTestId('reviews-content-title')).toHaveTextContent('Interstellar');
-    expect(screen.getByTestId('reviews-header-rating')).toHaveTextContent(/4\.0/);
-    expect(screen.queryByText(/3 ratings/)).toBeNull();
+    expect(screen.queryByTestId('reviews-header-rating')).toBeNull();
     expect(screen.getByTestId('reviews-review-count')).toHaveTextContent('1 review');
+    expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/4\.0/);
+    expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/3 ratings/);
     expect(screen.getByTestId('reviews-rating-distribution')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
@@ -346,11 +343,11 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByTestId('review-author-rating')).toHaveTextContent('3.5');
   });
 
-  it('does not show review histogram when only ratings exist without written reviews', () => {
-    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+  it('does not show community histogram when there are no community ratings', () => {
+    (useRatingAggregate as jest.Mock).mockReturnValue({
       data: {
         averageScore: 0,
-        ratedReviewCount: 0,
+        ratingCount: 0,
         scoreDistribution: {},
       },
       isLoading: false,
@@ -387,7 +384,7 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByText('No reviews yet.')).toBeTruthy();
   });
 
-  it('hides histogram when only the current user has rated', () => {
+  it('hides community histogram when there are no community ratings', () => {
     (useMyReview as jest.Mock).mockReturnValue({
       data: { ...myReview, userRating: 8 },
       isLoading: false,
@@ -396,10 +393,10 @@ describe('ReviewsDetailContent', () => {
       data: { score: 8 },
       isLoading: false,
     });
-    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+    (useRatingAggregate as jest.Mock).mockReturnValue({
       data: {
         averageScore: 0,
-        ratedReviewCount: 0,
+        ratingCount: 0,
         scoreDistribution: {},
       },
       isLoading: false,
@@ -460,10 +457,10 @@ describe('ReviewsDetailContent', () => {
       data: { score: 8 },
       isLoading: false,
     });
-    (useReviewRatingDistribution as jest.Mock).mockReturnValue({
+    (useRatingAggregate as jest.Mock).mockReturnValue({
       data: {
         averageScore: 8,
-        ratedReviewCount: 2,
+        ratingCount: 2,
         scoreDistribution: { '8': 2 },
       },
       isLoading: false,

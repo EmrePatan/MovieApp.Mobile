@@ -6,10 +6,8 @@ import {
   buildDeleteMovieReviewPath,
   buildDeleteTvReviewPath,
   buildMovieMyReviewPath,
-  buildMovieReviewRatingDistributionPath,
   buildMovieReviewsPath,
   buildTvMyReviewPath,
-  buildTvReviewRatingDistributionPath,
   buildTvReviewsPath,
   buildUpdateMovieReviewPath,
   buildUpdateTvReviewPath,
@@ -17,17 +15,10 @@ import {
 import type {
   CreateReviewRequest,
   ReviewListResponse,
-  ReviewRatingDistributionResponse,
   ReviewResponse,
   ReviewSortOption,
   UpdateReviewRequest,
 } from '../types';
-
-export const EMPTY_REVIEW_RATING_DISTRIBUTION: ReviewRatingDistributionResponse = {
-  averageScore: 0,
-  ratedReviewCount: 0,
-  scoreDistribution: {},
-};
 
 export async function getMovieReviews(
   movieId: string,
@@ -61,48 +52,6 @@ export async function getTvReviews(
       signal,
     },
   );
-}
-
-export async function getMovieReviewRatingDistribution(
-  movieId: string,
-  signal?: AbortSignal,
-): Promise<ReviewRatingDistributionResponse> {
-  try {
-    return await api.get<ReviewRatingDistributionResponse>(
-      buildMovieReviewRatingDistributionPath(movieId),
-      {
-        authenticated: false,
-        signal,
-      },
-    );
-  } catch (error) {
-    if (isApiError(error) && (error.kind === 'not_found' || error.status === 404)) {
-      return EMPTY_REVIEW_RATING_DISTRIBUTION;
-    }
-
-    throw error;
-  }
-}
-
-export async function getTvReviewRatingDistribution(
-  tvShowId: string,
-  signal?: AbortSignal,
-): Promise<ReviewRatingDistributionResponse> {
-  try {
-    return await api.get<ReviewRatingDistributionResponse>(
-      buildTvReviewRatingDistributionPath(tvShowId),
-      {
-        authenticated: false,
-        signal,
-      },
-    );
-  } catch (error) {
-    if (isApiError(error) && (error.kind === 'not_found' || error.status === 404)) {
-      return EMPTY_REVIEW_RATING_DISTRIBUTION;
-    }
-
-    throw error;
-  }
 }
 
 export async function getMovieMyReview(

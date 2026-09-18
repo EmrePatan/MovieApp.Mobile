@@ -1,6 +1,10 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
+import {
+  formatCommunityRatingCountLabel,
+  formatCommunityStarRatingDisplay,
+} from '@/features/ratings/utils/star-rating';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -10,17 +14,20 @@ interface ReviewsRatingDistributionProps {
   buckets: Record<number, number>;
   selectedStars: number | null;
   onSelectStars: (stars: number | null) => void;
+  averageScore: number;
+  ratingCount: number;
 }
 
 export function ReviewsRatingDistribution({
   buckets,
   selectedStars,
   onSelectStars,
+  averageScore,
+  ratingCount,
 }: ReviewsRatingDistributionProps) {
   const maxCount = Math.max(...Object.values(buckets), 1);
-  const totalRatings = Object.values(buckets).reduce((sum, count) => sum + count, 0);
 
-  if (totalRatings === 0) {
+  if (ratingCount === 0) {
     return null;
   }
 
@@ -31,6 +38,20 @@ export function ReviewsRatingDistribution({
 
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
+      <View style={styles.communityHeader} testID="reviews-community-rating">
+        <AppText variant="caption" style={styles.communityLabel}>
+          Community
+        </AppText>
+        <AppText variant="caption" style={styles.communityValue}>
+          ★ {formatCommunityStarRatingDisplay(averageScore)} / 5
+        </AppText>
+        <AppText variant="caption" muted style={styles.communitySeparator}>
+          ·
+        </AppText>
+        <AppText variant="caption" style={styles.communityValue}>
+          {formatCommunityRatingCountLabel(ratingCount)}
+        </AppText>
+      </View>
       <View style={styles.rows}>
         {starsDescending.map((stars) => {
           const count = buckets[stars] ?? 0;
@@ -81,6 +102,26 @@ export function ReviewsRatingDistribution({
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: layout.screenPaddingHorizontal,
+    gap: spacing.sm,
+  },
+  communityHeader: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  communityLabel: {
+    color: colors.textSecondary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  communityValue: {
+    color: colors.textPrimary,
+    fontVariant: ['tabular-nums'],
+  },
+  communitySeparator: {
+    marginHorizontal: 1,
   },
   rows: {
     gap: spacing.xs,
