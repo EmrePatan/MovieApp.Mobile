@@ -111,7 +111,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   form: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   forgotRow: {
     alignItems: 'flex-end',

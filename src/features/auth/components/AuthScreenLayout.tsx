@@ -34,8 +34,8 @@ export function AuthScreenLayout({
   footer,
 }: AuthScreenLayoutProps) {
   const { width } = useWindowDimensions();
-  const headlineSize = width < 360 ? 30 : width < 390 ? 34 : 38;
-  const headlineLineHeight = headlineSize + 6;
+  const headlineSize = width < 360 ? 32 : width < 390 ? 36 : 40;
+  const headlineLineHeight = Math.round(headlineSize * 1.08);
 
   return (
     <View style={styles.root}>
@@ -69,7 +69,9 @@ export function AuthScreenLayout({
                           fontSize: headlineSize,
                           lineHeight: headlineLineHeight,
                         },
-                        index === headlineAccentLineIndex && styles.headlineAccent,
+                        index === headlineAccentLineIndex
+                          ? styles.headlineAccent
+                          : styles.headlineLead,
                       ]}
                       maxFontSizeMultiplier={1.25}
                     >
@@ -107,20 +109,20 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.lg,
   },
   content: {
     flexGrow: 1,
-    gap: spacing.xl,
+    gap: spacing.lg,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     maxWidth: layout.maxContentWidth,
     width: '100%',
     alignSelf: 'center',
   },
   hero: {
-    gap: spacing.sm,
-    paddingTop: spacing.sm,
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   tagline: {
     color: 'rgba(245, 245, 247, 0.72)',
@@ -129,29 +131,38 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   headlineBlock: {
-    marginTop: spacing.md,
-    gap: 2,
+    marginTop: spacing.sm,
+    gap: 0,
   },
   headlineLine: {
     color: colors.textPrimary,
-    fontWeight: '700',
-    letterSpacing: -0.6,
+    textShadowColor: 'rgba(0, 0, 0, 0.72)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
+  },
+  headlineLead: {
+    fontWeight: '300',
+    letterSpacing: 0.6,
   },
   headlineAccent: {
     color: colors.accentStrong,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    letterSpacing: -0.8,
   },
   supportingCopy: {
     color: 'rgba(245, 245, 247, 0.78)',
     maxWidth: 320,
-    marginTop: spacing.sm,
-    lineHeight: 22,
+    marginTop: spacing.xs,
+    lineHeight: 21,
   },
   formSection: {
-    gap: spacing.lg,
+    gap: spacing.md,
+    marginTop: -spacing.xs,
   },
   footer: {
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingTop: spacing.xs,
+    gap: spacing.xs,
+    marginTop: -spacing.xs,
   },
 });

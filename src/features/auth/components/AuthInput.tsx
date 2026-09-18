@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
@@ -40,7 +41,7 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInpu
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   label: {
     color: 'rgba(245, 245, 247, 0.82)',
@@ -51,7 +52,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.14)',
     color: colors.textPrimary,
-    minHeight: 48,
+    minHeight: layout.touchTarget,
+    paddingVertical: 9,
     paddingHorizontal: spacing.md,
     fontSize: typography.body.fontSize,
   },

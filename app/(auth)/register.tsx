@@ -119,7 +119,7 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   form: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   formError: {
     color: colors.error,
