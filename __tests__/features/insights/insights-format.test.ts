@@ -10,17 +10,12 @@ import {
   formatEquivalentDays,
   formatGenreGravitation,
   formatHoursFromMinutes,
-  formatMovieDnaDisplayTitle,
   formatMovieDnaEditorialLine,
   formatWatchTimeBreakdown,
   formatWatchingMixLine,
   formatWeekdayName,
 } from '@/features/insights/utils/insights-format';
-import {
-  emptyInsightsV3Fixture,
-  insightsV3Fixture,
-} from '@/features/insights/utils/insights-fixtures';
-import type { InsightsV3MovieDna } from '@/features/insights/types';
+import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 describe('insights format helpers', () => {
   it('formats estimated duration in hours and days', () => {
@@ -43,50 +38,6 @@ describe('insights format helpers', () => {
 
   it('builds selectable years from member since through current year', () => {
     expect(buildSelectableYears('2024-06-01T00:00:00Z', 2026)).toEqual([2026, 2025, 2024]);
-  });
-
-  it('maps Movie DNA identity signals to cinematic display titles', () => {
-    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).toBe('The Sci-Fi Series Devotee');
-    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).toBe(
-      formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna),
-    );
-    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).not.toContain('Series-first');
-    expect(formatMovieDnaDisplayTitle(insightsV3Fixture.movieDna)).not.toContain(
-      insightsV3Fixture.movieDna.identityTitle,
-    );
-
-    const movieFirst: InsightsV3MovieDna = {
-      ...insightsV3Fixture.movieDna,
-      identityCodes: ['top_genre', 'movie_first'],
-      identityTitle: 'Drama Movie-first',
-      labels: [
-        { code: 'top_genre', category: 'genre', label: 'Drama' },
-        { code: 'movie_first', category: 'format', label: 'Movie-first' },
-      ],
-      topGenres: [{ genreId: '2', name: 'Drama', weight: 0.4, sharePercent: 40 }],
-    };
-    expect(formatMovieDnaDisplayTitle(movieFirst)).toBe('The Drama Story Seeker');
-    expect(formatMovieDnaDisplayTitle(movieFirst)).not.toContain('Movie-first');
-
-    const recentReleases: InsightsV3MovieDna = {
-      ...insightsV3Fixture.movieDna,
-      identityCodes: ['recent_releases'],
-      identityTitle: 'Recent releases',
-      labels: [{ code: 'recent_releases', category: 'era', label: 'Recent releases' }],
-      topGenres: [],
-    };
-    expect(formatMovieDnaDisplayTitle(recentReleases)).toBe('The New Release Explorer');
-
-    const seriesOnly: InsightsV3MovieDna = {
-      ...insightsV3Fixture.movieDna,
-      identityCodes: ['series_first'],
-      identityTitle: 'Series-first',
-      labels: [{ code: 'series_first', category: 'format', label: 'Series-first' }],
-      topGenres: [],
-    };
-    expect(formatMovieDnaDisplayTitle(seriesOnly)).toBe('The Series Devotee');
-
-    expect(formatMovieDnaDisplayTitle(emptyInsightsV3Fixture.movieDna)).toBe('The Explorer');
   });
 
   it('selects a deterministic Movie DNA editorial line from identity signals', () => {

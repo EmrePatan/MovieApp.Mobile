@@ -3,11 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3MovieDna } from '../types';
-import {
-  formatGenreGravitation,
-  formatMovieDnaDisplayTitle,
-  formatMovieDnaEditorialLine,
-} from '../utils/insights-format';
+import { formatGenreGravitation, formatMovieDnaEditorialLine } from '../utils/insights-format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -15,9 +11,9 @@ import { borderRadius, spacing } from '@/theme/spacing';
 const FALLBACK_HERO = require('../../../../assets/insights/movie-dna-hero-fallback.jpg');
 
 const TEXT_LIFT = {
-  textShadowColor: 'rgba(0, 0, 0, 0.9)',
+  textShadowColor: 'rgba(0, 0, 0, 0.85)',
   textShadowOffset: { width: 0, height: 1 },
-  textShadowRadius: 8,
+  textShadowRadius: 10,
 } as const;
 
 interface InsightsMovieDnaHeroProps {
@@ -29,15 +25,20 @@ function HeroScrimLayers() {
   return (
     <>
       <LinearGradient
-        colors={['rgba(196, 163, 90, 0.07)', 'transparent', 'rgba(196, 163, 90, 0.05)']}
-        locations={[0, 0.45, 1]}
+        colors={['rgba(10, 10, 15, 0.25)', 'rgba(10, 10, 15, 0.1)', 'rgba(10, 10, 15, 0.25)']}
+        locations={[0, 0.5, 1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={['transparent', 'rgba(10, 10, 15, 0.18)', 'rgba(10, 10, 15, 0.72)']}
-        locations={[0.28, 0.52, 1]}
+        colors={[
+          'rgba(10, 10, 15, 0.35)',
+          'rgba(10, 10, 15, 0.2)',
+          'rgba(10, 10, 15, 0.55)',
+          'rgba(10, 10, 15, 0.95)',
+        ]}
+        locations={[0, 0.32, 0.62, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
@@ -46,115 +47,79 @@ function HeroScrimLayers() {
   );
 }
 
-function PremiumWatchingMix({
-  movieSharePercent,
-  seriesSharePercent,
-  movieTitleCount,
-  seriesTitleCount,
-}: {
-  movieSharePercent: number;
-  seriesSharePercent: number;
-  movieTitleCount: number;
-  seriesTitleCount: number;
-}) {
-  const movieRounded = Math.round(movieSharePercent);
-  const seriesRounded = Math.round(seriesSharePercent);
-  const movieFlex = Math.max(movieRounded, 8);
-  const seriesFlex = Math.max(seriesRounded, 8);
-
-  return (
-    <View
-      style={styles.mixBlock}
-      accessibilityRole="text"
-      accessibilityLabel={`Movies ${movieTitleCount}, series ${seriesTitleCount}. ${movieRounded}% movies, ${seriesRounded}% series.`}
-    >
-      <View style={styles.mixHeaderRow}>
-        <View style={styles.mixStat}>
-          <Ionicons name="film-outline" size={12} color={colors.accentStrong} />
-          <AppText variant="caption" style={styles.mixLabel}>Movies</AppText>
-          <AppText variant="caption" style={styles.mixPercent}>{movieRounded}%</AppText>
-        </View>
-        <View style={styles.mixStat}>
-          <Ionicons name="tv-outline" size={12} color={colors.accentMuted} />
-          <AppText variant="caption" style={styles.mixLabel}>Series</AppText>
-          <AppText variant="caption" style={styles.mixPercent}>{seriesRounded}%</AppText>
-        </View>
-      </View>
-      <View style={styles.mixTrack}>
-        <LinearGradient
-          colors={[colors.accentMuted, colors.accentStrong]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={[styles.mixSegment, { flex: movieFlex }]}
-        />
-        <View style={[styles.mixSegmentMuted, { flex: seriesFlex }]} />
-      </View>
-    </View>
-  );
-}
-
 export function InsightsMovieDnaHero({
   movieDna,
   backdropImagePath,
 }: InsightsMovieDnaHeroProps) {
   const visibleGenres = movieDna.topGenres.slice(0, 3);
-  const displayTitle = formatMovieDnaDisplayTitle(movieDna);
   const gravitation = formatGenreGravitation(visibleGenres.map((genre) => genre.name));
   const editorialLine = formatMovieDnaEditorialLine(movieDna);
   const hasMix =
     movieDna.watchingMix.movieTitleCount + movieDna.watchingMix.seriesTitleCount > 0;
-  const showGravitation = visibleGenres.length === 0;
   const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
 
   const content = (
     <>
       <HeroScrimLayers />
       <View style={styles.content}>
-        <View style={styles.posterReveal} />
+        <View style={styles.mainCluster}>
+        <View style={styles.copyBlock}>
+          <AppText variant="caption" center style={styles.kicker}>
+            Your Movie DNA
+          </AppText>
+          <AppText variant="hero" center style={styles.headline}>
+            {movieDna.identityTitle}
+          </AppText>
 
-        <View style={styles.mainPanel}>
-          <View style={styles.identityCluster}>
-            <View style={styles.kickerPill}>
-              <AppText variant="caption" center style={styles.kicker}>
-                Your Movie DNA
-              </AppText>
-            </View>
-            <AppText variant="hero" center style={styles.headline}>
-              {displayTitle}
+          {gravitation ? (
+            <AppText variant="body" center style={styles.description}>
+              {gravitation}
             </AppText>
-            {showGravitation ? (
-              <AppText variant="body" center style={styles.description}>
-                {gravitation ?? 'Keep watching and rating to shape your Movie DNA.'}
-              </AppText>
-            ) : null}
-          </View>
-
-          {visibleGenres.length > 0 ? (
-            <View style={styles.genreRow}>
-              {visibleGenres.map((genre) => (
-                <View key={genre.genreId} style={styles.genreChip}>
-                  <AppText variant="caption" style={styles.genreText}>
-                    {genre.name}
-                  </AppText>
-                </View>
-              ))}
-            </View>
-          ) : null}
-
-          {hasMix ? (
-            <PremiumWatchingMix
-              movieSharePercent={movieDna.watchingMix.movieSharePercent}
-              seriesSharePercent={movieDna.watchingMix.seriesSharePercent}
-              movieTitleCount={movieDna.watchingMix.movieTitleCount}
-              seriesTitleCount={movieDna.watchingMix.seriesTitleCount}
-            />
-          ) : null}
+          ) : (
+            <AppText variant="body" center style={styles.description}>
+              Keep watching and rating to shape your Movie DNA.
+            </AppText>
+          )}
         </View>
 
-        <View style={styles.bottomBand}>
-          <AppText variant="bodySmall" center style={styles.quoteText} accessibilityRole="text">
+        {visibleGenres.length > 0 ? (
+          <View style={styles.genreRow}>
+            {visibleGenres.map((genre) => (
+              <View key={genre.genreId} style={styles.genreChip}>
+                <AppText variant="caption" style={styles.genreText}>
+                  {genre.name}
+                </AppText>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {hasMix ? (
+          <View
+            style={styles.mixRow}
+            accessibilityRole="text"
+            accessibilityLabel={`Movies ${movieDna.watchingMix.movieTitleCount}, series ${movieDna.watchingMix.seriesTitleCount}`}
+          >
+            <MixColumn
+              icon="tv-outline"
+              label="Series"
+              percent={movieDna.watchingMix.seriesSharePercent}
+            />
+            <MixColumn
+              icon="film-outline"
+              label="Movies"
+              percent={movieDna.watchingMix.movieSharePercent}
+            />
+          </View>
+        ) : null}
+
+        <View style={styles.quotePanel} accessibilityRole="text">
+          <AppText variant="caption" style={styles.quoteMark}>“</AppText>
+          <AppText variant="bodySmall" center style={styles.quoteText}>
             {editorialLine}
           </AppText>
+          <AppText variant="caption" style={styles.quoteMark}>”</AppText>
+        </View>
         </View>
       </View>
     </>
@@ -180,6 +145,31 @@ export function InsightsMovieDnaHero({
   );
 }
 
+function MixColumn({
+  icon,
+  label,
+  percent,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  percent: number;
+}) {
+  const widthPercent = Math.max(8, Math.min(100, percent));
+
+  return (
+    <View style={styles.mixColumn}>
+      <View style={styles.mixHeader}>
+        <Ionicons name={icon} size={15} color={colors.accentStrong} />
+        <AppText variant="caption" style={styles.mixLabel}>{label}</AppText>
+        <AppText variant="caption" style={styles.mixPercent}>{Math.round(percent)}%</AppText>
+      </View>
+      <View style={styles.mixTrack}>
+        <View style={[styles.mixFill, { width: `${widthPercent}%` }]} />
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     borderRadius: borderRadius.xl,
@@ -189,6 +179,7 @@ const styles = StyleSheet.create({
   },
   gradient: {
     minHeight: 420,
+    justifyContent: 'center',
   },
   backdropImage: {
     resizeMode: 'cover',
@@ -202,63 +193,49 @@ const styles = StyleSheet.create({
     height: '108%',
   },
   scrimLayer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   content: {
     flex: 1,
     minHeight: 420,
-    justifyContent: 'flex-end',
-  },
-  posterReveal: {
-    flex: 1,
-    minHeight: 108,
-  },
-  mainPanel: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md + spacing.xs,
-    gap: spacing.lg,
-    borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(10, 10, 15, 0.92)',
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
-  },
-  identityCluster: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.md,
   },
-  kickerPill: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint18,
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
+  mainCluster: {
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+    gap: spacing.lg,
+  },
+  copyBlock: {
+    gap: spacing.md,
+    width: '100%',
+    alignItems: 'center',
   },
   kicker: {
     textTransform: 'uppercase',
-    letterSpacing: 2.8,
+    letterSpacing: 2.2,
     fontSize: 11,
     color: colors.accentStrong,
     fontWeight: '700',
+    ...TEXT_LIFT,
   },
   headline: {
     color: colors.textPrimary,
-    letterSpacing: -0.6,
+    letterSpacing: -0.8,
     fontWeight: '700',
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 38,
+    lineHeight: 44,
     maxWidth: '100%',
     ...TEXT_LIFT,
   },
   description: {
-    lineHeight: 22,
-    fontSize: 15,
-    letterSpacing: 0.15,
+    lineHeight: 24,
     color: colors.textSecondary,
-    maxWidth: '100%',
+    maxWidth: '96%',
+    ...TEXT_LIFT,
   },
   genreRow: {
     flexDirection: 'row',
@@ -269,73 +246,74 @@ const styles = StyleSheet.create({
   },
   genreChip: {
     borderRadius: borderRadius.full,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint14,
-    paddingHorizontal: spacing.md + 2,
-    paddingVertical: 7,
+    backgroundColor: 'rgba(10, 10, 15, 0.55)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
   },
   genreText: {
     color: colors.accentStrong,
-    fontWeight: '700',
-    fontSize: 12,
-    letterSpacing: 0.35,
+    fontWeight: '600',
+    ...TEXT_LIFT,
   },
-  mixBlock: {
+  mixRow: {
+    flexDirection: 'row',
+    gap: spacing.xl,
     width: '100%',
+    paddingHorizontal: spacing.sm,
+  },
+  mixColumn: {
+    flex: 1,
     gap: spacing.sm,
   },
-  mixHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.lg,
-  },
-  mixStat: {
+  mixHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
   },
   mixLabel: {
-    color: colors.textSecondary,
-    fontWeight: '500',
-    fontSize: 11,
-    letterSpacing: 0.2,
+    flex: 1,
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
   mixPercent: {
     color: colors.accentStrong,
     fontWeight: '700',
-    fontSize: 11,
     fontVariant: ['tabular-nums'],
   },
   mixTrack: {
-    flexDirection: 'row',
-    height: 4,
+    height: 6,
     borderRadius: borderRadius.full,
+    backgroundColor: colors.progressTrack,
     overflow: 'hidden',
-    backgroundColor: colors.accentTint14,
   },
-  mixSegment: {
+  mixFill: {
     height: '100%',
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.full,
   },
-  mixSegmentMuted: {
-    height: '100%',
-    backgroundColor: 'rgba(196, 163, 90, 0.28)',
+  quotePanel: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
-  bottomBand: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
-    backgroundColor: 'rgba(10, 10, 15, 0.94)',
-    borderTopWidth: 1,
-    borderTopColor: colors.borderAccent,
+  quoteMark: {
+    color: colors.accentMuted,
+    fontSize: 26,
+    lineHeight: 26,
+    ...TEXT_LIFT,
   },
   quoteText: {
     color: colors.textSecondary,
     fontStyle: 'italic',
-    lineHeight: 21,
-    letterSpacing: 0.2,
-    maxWidth: '92%',
-    alignSelf: 'center',
+    lineHeight: 22,
+    maxWidth: '88%',
     fontSize: 13,
+    ...TEXT_LIFT,
   },
 });

@@ -12,14 +12,9 @@ describe('insights sections', () => {
   it('renders Movie DNA identity and top genres', () => {
     render(<InsightsMovieDnaHero movieDna={insightsV3Fixture.movieDna} />);
 
-    expect(screen.getByText('The Sci-Fi Series Devotee')).toBeTruthy();
+    expect(screen.getByText('Sci-Fi Storyteller')).toBeTruthy();
     expect(screen.getByText('Sci-Fi')).toBeTruthy();
-    expect(screen.queryByText(/gravitate toward/i)).toBeNull();
-    expect(screen.getByText('76%')).toBeTruthy();
-    expect(screen.getByText('24%')).toBeTruthy();
-    expect(
-      screen.getByLabelText('Movies 28, series 9. 76% movies, 24% series.'),
-    ).toBeTruthy();
+    expect(screen.getByLabelText('Movies 28, series 9')).toBeTruthy();
     expect(screen.getByText('The long arc is where your story keeps returning.')).toBeTruthy();
   });
 

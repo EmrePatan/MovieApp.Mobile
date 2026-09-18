@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   donutPhotoScrim: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   donutCenter: {
     position: 'absolute',
