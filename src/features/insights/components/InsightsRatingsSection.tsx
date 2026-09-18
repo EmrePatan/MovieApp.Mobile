@@ -53,7 +53,7 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
             </View>
           ) : null}
 
-          <AppText variant="caption" muted>{ratings.count} ratings</AppText>
+          <AppText variant="caption" style={styles.ratingCount}>{ratings.count} ratings</AppText>
 
           {ratings.highestRatedGenre || ratings.lowestRatedGenre ? (
             <View style={styles.genreInsights}>
@@ -142,6 +142,13 @@ const styles = StyleSheet.create({
   average: {
     color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
+    fontWeight: '700',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  ratingCount: {
+    color: colors.textMuted,
   },
   starRow: {
     flexDirection: 'row',
@@ -194,6 +201,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.6,
     fontSize: 10,
+    color: colors.textMuted,
   },
   genreInsightRow: {
     flexDirection: 'row',

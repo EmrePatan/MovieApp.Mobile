@@ -27,12 +27,13 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
         <InsightsEmptyState message="Not enough history yet to map your taste." />
       ) : (
         <View style={styles.card}>
-          {genres.map((genre) => (
+          {genres.map((genre, index) => (
             <InsightsAffinityBar
               key={genre.genreId}
               label={genre.name}
               percent={genre.sharePercent}
               compact
+              emphasize={index === 0}
               accessibilityLabel={`${genre.name}, ${Math.round(genre.sharePercent)} percent`}
             />
           ))}

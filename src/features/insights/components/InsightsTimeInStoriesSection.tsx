@@ -46,9 +46,10 @@ export function InsightsTimeInStoriesSection({
         subtitle="The hours you've spent in other worlds"
       />
       <LinearGradient
-        colors={[colors.accentTint18, colors.surface, colors.background]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={[colors.accentTint18, 'rgba(10, 10, 15, 0.88)', colors.background]}
+        locations={[0, 0.55, 1]}
+        start={{ x: 0.2, y: 0 }}
+        end={{ x: 0.8, y: 1 }}
         style={styles.hero}
       >
         <View style={styles.donutWrap}>
@@ -57,7 +58,7 @@ export function InsightsTimeInStoriesSection({
             <AppText variant="hero" style={styles.hours}>
               {formatHoursFromMinutes(timeInStories.totalMinutes)}
             </AppText>
-            <AppText variant="caption" muted>hours</AppText>
+            <AppText variant="caption" style={styles.hoursLabel}>hours</AppText>
             <AppText variant="bodySmall" muted style={styles.daysCopy}>
               That&apos;s {formatEquivalentDays(timeInStories.totalMinutes)} in stories
             </AppText>
@@ -133,6 +134,16 @@ const styles = StyleSheet.create({
   hours: {
     color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
+    fontWeight: '700',
+    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  hoursLabel: {
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    fontSize: 11,
   },
   daysCopy: {
     textAlign: 'center',
@@ -153,7 +164,7 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
   },
   breakdownValue: {
-    color: colors.textPrimary,
+    color: colors.accentStrong,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },

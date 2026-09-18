@@ -81,7 +81,7 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
           </View>
 
           <View style={styles.summaryRow}>
-            <SummaryStat value={String(yourYear.activeDays)} label="active days" />
+            <SummaryStat value={String(yourYear.activeDays)} label="active days" accent />
             {yourYear.peakMonth ? (
               <SummaryStat
                 value={formatMonthYear(yourYear.peakMonth.month, yourYear.peakMonth.year)}
@@ -100,7 +100,11 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
             <View style={styles.callout} accessibilityRole="text">
               <Ionicons name="calendar-outline" size={16} color={colors.accent} />
               <AppText variant="bodySmall" style={styles.calloutText}>
-                You watched something on {activeDayPercent}% of the days this year.
+                You watched something on{' '}
+                <AppText variant="bodySmall" style={styles.calloutHighlight}>
+                  {activeDayPercent}%
+                </AppText>
+                {' '}of the days this year.
               </AppText>
             </View>
           ) : null}
@@ -110,11 +114,21 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
   );
 });
 
-function SummaryStat({ value, label }: { value: string; label: string }) {
+function SummaryStat({
+  value,
+  label,
+  accent = false,
+}: {
+  value: string;
+  label: string;
+  accent?: boolean;
+}) {
   return (
     <View style={styles.summaryStat}>
-      <AppText variant="body" style={styles.summaryValue}>{value}</AppText>
-      <AppText variant="caption" muted>{label}</AppText>
+      <AppText variant="subtitle" style={[styles.summaryValue, accent && styles.summaryValueAccent]}>
+        {value}
+      </AppText>
+      <AppText variant="caption" style={styles.summaryLabel}>{label}</AppText>
     </View>
   );
 }
@@ -176,6 +190,14 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
+    letterSpacing: -0.2,
+  },
+  summaryValueAccent: {
+    color: colors.accentStrong,
+  },
+  summaryLabel: {
+    color: colors.textMuted,
+    textTransform: 'lowercase',
   },
   callout: {
     flexDirection: 'row',
@@ -189,7 +211,12 @@ const styles = StyleSheet.create({
   },
   calloutText: {
     flex: 1,
-    color: colors.textSecondary,
+    color: colors.textMuted,
     lineHeight: 20,
+  },
+  calloutHighlight: {
+    color: colors.accentStrong,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
 });

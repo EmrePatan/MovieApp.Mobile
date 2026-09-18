@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
   },
   progressArc: {
     position: 'absolute',
-    borderColor: colors.accent,
-    borderTopColor: colors.accent,
-    borderRightColor: colors.accent,
+    borderColor: colors.accentStrong,
+    borderTopColor: colors.accentStrong,
+    borderRightColor: colors.accentStrong,
     borderBottomColor: 'transparent',
     borderLeftColor: 'transparent',
   },

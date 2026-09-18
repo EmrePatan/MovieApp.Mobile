@@ -41,11 +41,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
     color: colors.textPrimary,
+    fontWeight: '700',
   },
   subtitle: {
     lineHeight: 20,
+    color: colors.textMuted,
   },
   trailing: {
     paddingTop: 2,

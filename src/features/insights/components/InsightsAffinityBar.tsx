@@ -8,6 +8,7 @@ interface InsightsAffinityBarProps {
   percent: number;
   detail?: string;
   compact?: boolean;
+  emphasize?: boolean;
   accessibilityLabel: string;
 }
 
@@ -16,6 +17,7 @@ export function InsightsAffinityBar({
   percent,
   detail,
   compact = false,
+  emphasize = false,
   accessibilityLabel,
 }: InsightsAffinityBarProps) {
   const widthPercent = Math.max(0, Math.min(100, percent));
@@ -30,7 +32,7 @@ export function InsightsAffinityBar({
         <AppText variant="bodySmall" numberOfLines={1} style={styles.label}>
           {label}
         </AppText>
-        <AppText variant="caption" muted>
+        <AppText variant="caption" style={[styles.percent, emphasize && styles.percentEmphasized]}>
           {detail ?? `${Math.round(percent)}%`}
         </AppText>
       </View>
@@ -57,6 +59,15 @@ const styles = StyleSheet.create({
   label: {
     flex: 1,
     color: colors.textPrimary,
+    fontWeight: '600',
+  },
+  percent: {
+    color: colors.textMuted,
+    fontVariant: ['tabular-nums'],
+  },
+  percentEmphasized: {
+    color: colors.accentStrong,
+    fontWeight: '700',
   },
   track: {
     height: 10,

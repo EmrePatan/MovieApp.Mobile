@@ -125,11 +125,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   value: {
-    color: colors.textPrimary,
+    color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
+    fontWeight: '700',
   },
   label: {
     lineHeight: 16,
+    color: colors.textMuted,
   },
   funFact: {
     flexDirection: 'row',

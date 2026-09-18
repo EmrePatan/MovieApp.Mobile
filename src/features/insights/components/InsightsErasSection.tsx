@@ -25,8 +25,9 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
       ) : (
         <View style={styles.body}>
           {era.favoriteDecade ? (
-            <AppText variant="bodySmall" muted style={styles.favoriteCopy}>
-              {era.favoriteDecade} is your most-watched decade
+            <AppText variant="bodySmall" style={styles.favoriteCopy}>
+              <AppText variant="bodySmall" style={styles.favoriteDecade}>{era.favoriteDecade}</AppText>
+              {' '}is your most-watched decade
             </AppText>
           ) : null}
 
@@ -95,6 +96,11 @@ const styles = StyleSheet.create({
   },
   favoriteCopy: {
     lineHeight: 20,
+    color: colors.textMuted,
+  },
+  favoriteDecade: {
+    color: colors.accentStrong,
+    fontWeight: '700',
   },
   timeline: {
     flexDirection: 'row',
