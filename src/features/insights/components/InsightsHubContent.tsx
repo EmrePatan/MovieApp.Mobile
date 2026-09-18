@@ -105,10 +105,12 @@ export function InsightsHubContent() {
       }
     >
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-      <InsightsMovieDnaHero
-        movieDna={insights.movieDna}
-        backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
-      />
+      <View style={styles.heroFullBleed}>
+        <InsightsMovieDnaHero
+          movieDna={insights.movieDna}
+          backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
+        />
+      </View>
       <InsightsYourYearSection
         yourYear={insights.yourYear}
         year={activeYear}
@@ -151,6 +153,9 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingBottom: spacing.xxl,
+  },
+  heroFullBleed: {
+    marginHorizontal: -layout.screenPaddingHorizontal,
   },
   header: {
     flexDirection: 'row',
