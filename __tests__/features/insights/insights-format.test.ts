@@ -1,8 +1,11 @@
 import {
   buildSelectableYears,
   formatActiveYearDayPercent,
+  formatAchievementBadgeNumber,
+  formatAchievementCategoryLabel,
   formatDecadeLabel,
   formatDominantGenreHeadline,
+  getAchievementIconName,
   formatEstimatedDuration,
   formatEquivalentDays,
   formatGenreGravitation,
@@ -41,5 +44,8 @@ describe('insights format helpers', () => {
     expect(formatActiveYearDayPercent(42, 2026, new Date('2026-09-18T12:00:00Z'))).toBeGreaterThan(0);
     expect(formatDecadeLabel('2020s')).toBe('2020s');
     expect(formatDecadeLabel('Older')).toBe('Older');
+    expect(formatAchievementBadgeNumber(1000)).toBe('1,000');
+    expect(formatAchievementCategoryLabel('episodes')).toBe('Episodes');
+    expect(getAchievementIconName('movies')).toBe('film-outline');
   });
 });

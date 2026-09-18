@@ -191,3 +191,49 @@ export function formatHoursShort(totalMinutes: number): string {
   const hours = Math.round(totalMinutes / 60);
   return `${hours}h`;
 }
+
+export function formatAchievementBadgeNumber(value: number): string {
+  return value.toLocaleString('en-US');
+}
+
+export function formatAchievementCategoryLabel(category: string): string {
+  switch (category) {
+    case 'movies':
+      return 'Movies';
+    case 'episodes':
+      return 'Episodes';
+    case 'ratings':
+      return 'Ratings';
+    case 'shows':
+      return 'Series';
+    case 'genres':
+      return 'Genres';
+    default:
+      return category.charAt(0).toUpperCase() + category.slice(1);
+  }
+}
+
+export type AchievementIconName =
+  | 'film-outline'
+  | 'tv-outline'
+  | 'star-outline'
+  | 'albums-outline'
+  | 'grid-outline'
+  | 'ribbon-outline';
+
+export function getAchievementIconName(category: string): AchievementIconName {
+  switch (category) {
+    case 'movies':
+      return 'film-outline';
+    case 'episodes':
+      return 'tv-outline';
+    case 'ratings':
+      return 'star-outline';
+    case 'shows':
+      return 'albums-outline';
+    case 'genres':
+      return 'grid-outline';
+    default:
+      return 'ribbon-outline';
+  }
+}
