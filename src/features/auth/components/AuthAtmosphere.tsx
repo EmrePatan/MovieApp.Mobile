@@ -1,15 +1,30 @@
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { ImageBackground, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { authCinemaBackground } from '../auth-assets';
 
+// Pan/zoom the cover crop so ~half the popcorn bucket enters from the right edge
+// while keeping the left side dark for hero/form readability across phone widths.
+const BACKGROUND_SCALE = 0.93;
+const BACKGROUND_TRANSLATE_X_RATIO = -0.075;
+const BACKGROUND_TRANSLATE_Y_RATIO = -0.02;
+
 export function AuthAtmosphere() {
+  const { width, height } = useWindowDimensions();
+  const imageFrameStyle = {
+    transform: [
+      { scale: BACKGROUND_SCALE },
+      { translateX: width * BACKGROUND_TRANSLATE_X_RATIO },
+      { translateY: height * BACKGROUND_TRANSLATE_Y_RATIO },
+    ],
+  };
+
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <ImageBackground
         source={authCinemaBackground}
         resizeMode="cover"
         style={styles.image}
-        imageStyle={styles.imageFocus}
+        imageStyle={imageFrameStyle}
       >
         <LinearGradient
           colors={[
@@ -49,9 +64,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-  },
-  imageFocus: {
-    transform: [{ scale: 1.02 }],
   },
   topVignette: {
     ...StyleSheet.absoluteFill,
