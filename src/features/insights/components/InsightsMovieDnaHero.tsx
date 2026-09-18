@@ -1,23 +1,23 @@
 import { StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
-import type { InsightsMovieDnaLabel, InsightsSummaryStats } from '../types';
-import { formatAverageStarRating } from '../utils/insights-format';
+import type { InsightsV3MovieDna } from '../types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsMovieDnaHeroProps {
-  labels: InsightsMovieDnaLabel[];
-  summary: InsightsSummaryStats;
+  movieDna: InsightsV3MovieDna;
 }
 
-export function InsightsMovieDnaHero({ labels, summary }: InsightsMovieDnaHeroProps) {
-  const visibleLabels = labels.slice(0, 3);
+export function InsightsMovieDnaHero({ movieDna }: InsightsMovieDnaHeroProps) {
+  const visibleGenres = movieDna.topGenres.slice(0, 3);
+  const hasMix =
+    movieDna.watchingMix.movieTitleCount + movieDna.watchingMix.seriesTitleCount > 0;
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['rgba(196, 163, 90, 0.16)', 'rgba(20, 20, 28, 0.92)']}
+        colors={[colors.accentTint18, colors.accentSurface]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -26,75 +26,55 @@ export function InsightsMovieDnaHero({ labels, summary }: InsightsMovieDnaHeroPr
           Movie DNA
         </AppText>
         <AppText variant="title" style={styles.headline}>
-          Your movie life, in focus
+          {movieDna.identityTitle}
         </AppText>
 
-        {visibleLabels.length > 0 ? (
-          <View style={styles.labels}>
-            {visibleLabels.map((label) => (
-              <View
-                key={label.code}
-                style={styles.labelChip}
-                accessibilityRole="text"
-                accessibilityLabel={`${label.category}: ${label.label}`}
-              >
-                <AppText variant="caption" muted style={styles.labelCategory}>
-                  {label.category}
-                </AppText>
-                <AppText variant="bodySmall" style={styles.labelText}>
-                  {label.label}
+        {visibleGenres.length > 0 ? (
+          <View style={styles.genreRow}>
+            {visibleGenres.map((genre) => (
+              <View key={genre.genreId} style={styles.genreChip}>
+                <AppText variant="caption" style={styles.genreText}>
+                  {genre.name}
                 </AppText>
               </View>
             ))}
           </View>
         ) : (
-          <View
-            style={styles.discoveryState}
-            accessibilityRole="text"
-            accessibilityLabel="Still discovering your taste"
-          >
-            <AppText variant="bodySmall" muted>
-              Still discovering your taste. Keep watching and rating to shape your Movie DNA.
-            </AppText>
-          </View>
+          <AppText variant="bodySmall" muted>
+            Keep watching and rating to shape your Movie DNA.
+          </AppText>
         )}
 
-        <View style={styles.statsRow} accessibilityRole="text">
-          <StatItem label="Movies" value={String(summary.moviesWatched)} />
-          <StatDivider />
-          <StatItem label="Episodes" value={String(summary.episodesWatched)} />
-          <StatDivider />
-          <StatItem label="Shows" value={String(summary.showsStarted)} />
-          <StatDivider />
-          <StatItem
-            label="Ratings"
-            value={
-              summary.ratingsCount > 0
-                ? `${summary.ratingsCount} · ${formatAverageStarRating(summary.averageStarRating)}★`
-                : '0'
-            }
-          />
-        </View>
+        {hasMix ? (
+          <View
+            style={styles.mixBlock}
+            accessibilityRole="text"
+            accessibilityLabel={`Movies ${movieDna.watchingMix.movieTitleCount}, series ${movieDna.watchingMix.seriesTitleCount}`}
+          >
+            <AppText variant="caption" muted style={styles.mixLabel}>
+              Movies vs Series
+            </AppText>
+            <View style={styles.splitTrack}>
+              <View
+                style={[styles.movieFill, { flex: Math.max(movieDna.watchingMix.movieSharePercent, 1) }]}
+              />
+              <View
+                style={[styles.seriesFill, { flex: Math.max(movieDna.watchingMix.seriesSharePercent, 1) }]}
+              />
+            </View>
+            <View style={styles.mixLegend}>
+              <AppText variant="caption" style={styles.mixValue}>
+                Movies {movieDna.watchingMix.movieTitleCount} · {Math.round(movieDna.watchingMix.movieSharePercent)}%
+              </AppText>
+              <AppText variant="caption" style={styles.mixValue}>
+                Series {movieDna.watchingMix.seriesTitleCount} · {Math.round(movieDna.watchingMix.seriesSharePercent)}%
+              </AppText>
+            </View>
+          </View>
+        ) : null}
       </LinearGradient>
     </View>
   );
-}
-
-function StatItem({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.statItem}>
-      <AppText variant="caption" muted>
-        {label}
-      </AppText>
-      <AppText variant="bodySmall" style={styles.statValue}>
-        {value}
-      </AppText>
-    </View>
-  );
-}
-
-function StatDivider() {
-  return <View style={styles.statDivider} />;
 }
 
 const styles = StyleSheet.create({
@@ -115,43 +95,48 @@ const styles = StyleSheet.create({
   headline: {
     color: colors.textPrimary,
   },
-  labels: {
-    gap: spacing.sm,
+  genreRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
   },
-  labelChip: {
-    gap: 2,
-    paddingVertical: spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
+  genreChip: {
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.accentTint12,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
-  labelCategory: {
-    textTransform: 'capitalize',
-  },
-  labelText: {
-    color: colors.textPrimary,
+  genreText: {
+    color: colors.accentStrong,
     fontWeight: '600',
   },
-  discoveryState: {
-    paddingVertical: spacing.xs,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+  mixBlock: {
     gap: spacing.sm,
     paddingTop: spacing.xs,
   },
-  statItem: {
-    flex: 1,
+  mixLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  splitTrack: {
+    flexDirection: 'row',
+    height: 10,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    backgroundColor: colors.progressTrack,
+  },
+  movieFill: {
+    backgroundColor: colors.accent,
+    minWidth: 4,
+  },
+  seriesFill: {
+    backgroundColor: colors.libraryWatching,
+    minWidth: 4,
+  },
+  mixLegend: {
     gap: 2,
   },
-  statValue: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  statDivider: {
-    width: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch',
-    backgroundColor: colors.borderSubtle,
+  mixValue: {
+    color: colors.textSecondary,
   },
 });

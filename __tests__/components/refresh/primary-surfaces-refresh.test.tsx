@@ -9,14 +9,10 @@ import NotificationsScreen from '../../../app/notifications';
 import { InsightsHubContent } from '@/features/insights/components/InsightsHubContent';
 import { LibraryHubContent } from '@/features/library/components/LibraryHubContent';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
-import { useInsightsSummary } from '@/features/insights/hooks/useInsightsSummary';
-import { useInsightsAnalytics } from '@/features/insights/hooks/useInsightsAnalytics';
+import { useInsightsV3 } from '@/features/insights/hooks/useInsightsV3';
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
 import { createHomeFeedMockReturnValue } from '../../features/home/home-feed-test-utils';
-import {
-  insightsAnalyticsFixture,
-  insightsSummaryFixture,
-} from '@/features/insights/utils/insights-fixtures';
+import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 const repoRoot = path.resolve(__dirname, '../../..');
 
@@ -37,12 +33,8 @@ jest.mock('@/features/home/hooks/useHomeFeed', () => ({
   useHomeFeed: jest.fn(),
 }));
 
-jest.mock('@/features/insights/hooks/useInsightsSummary', () => ({
-  useInsightsSummary: jest.fn(),
-}));
-
-jest.mock('@/features/insights/hooks/useInsightsAnalytics', () => ({
-  useInsightsAnalytics: jest.fn(),
+jest.mock('@/features/insights/hooks/useInsightsV3', () => ({
+  useInsightsV3: jest.fn(),
 }));
 
 jest.mock('@/features/notifications/hooks/useNotificationsInbox', () => ({
@@ -278,26 +270,16 @@ describe('primary surface refresh presentation', () => {
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps Insights summary and analytics refresh semantics', () => {
-    const refetchSummary = jest.fn();
-    const refetchAnalytics = jest.fn();
-    (useInsightsSummary as jest.Mock).mockReturnValue({
-      data: insightsSummaryFixture,
+  it('keeps Insights v3 refresh semantics', () => {
+    const refetch = jest.fn();
+    (useInsightsV3 as jest.Mock).mockReturnValue({
+      data: insightsV3Fixture,
       isLoading: false,
       isFetching: false,
       isRefetching: true,
       isError: false,
       isSuccess: true,
-      refetch: refetchSummary,
-    });
-    (useInsightsAnalytics as jest.Mock).mockReturnValue({
-      data: insightsAnalyticsFixture,
-      isLoading: false,
-      isFetching: false,
-      isRefetching: false,
-      isError: false,
-      isSuccess: true,
-      refetch: refetchAnalytics,
+      refetch,
     });
 
     const { UNSAFE_getByType } = render(<InsightsHubContent />);
@@ -306,8 +288,7 @@ describe('primary surface refresh presentation', () => {
     expect(refreshControl.props.refreshing).toBe(true);
 
     refreshControl.props.onRefresh();
-    expect(refetchSummary).toHaveBeenCalledTimes(1);
-    expect(refetchAnalytics).toHaveBeenCalledTimes(1);
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('keeps Notifications refresh semantics with shared control', () => {

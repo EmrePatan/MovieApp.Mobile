@@ -1,5 +1,5 @@
-import { getInsightsAnalytics, getInsightsSummary } from '@/features/insights/api/insights-api';
-import { buildInsightsAnalyticsPath, buildInsightsSummaryPath } from '@/features/insights/api/routes';
+import { getInsightsV3 } from '@/features/insights/api/insights-api';
+import { buildInsightsV3Path } from '@/features/insights/api/routes';
 import { api } from '@/api/client';
 
 jest.mock('@/api/client', () => ({
@@ -13,16 +13,16 @@ describe('insights api', () => {
     jest.clearAllMocks();
   });
 
-  it('requests summary and analytics independently with timezone', async () => {
+  it('requests insights v3 with timezone and optional year', async () => {
     (api.get as jest.Mock).mockResolvedValue({});
 
-    await getInsightsSummary('Europe/London');
-    await getInsightsAnalytics('Europe/London');
+    await getInsightsV3('Europe/London');
+    await getInsightsV3('Europe/London', 2025);
 
-    expect(api.get).toHaveBeenNthCalledWith(1, buildInsightsSummaryPath('Europe/London'), {
+    expect(api.get).toHaveBeenNthCalledWith(1, buildInsightsV3Path('Europe/London'), {
       signal: undefined,
     });
-    expect(api.get).toHaveBeenNthCalledWith(2, buildInsightsAnalyticsPath('Europe/London'), {
+    expect(api.get).toHaveBeenNthCalledWith(2, buildInsightsV3Path('Europe/London', 2025), {
       signal: undefined,
     });
   });

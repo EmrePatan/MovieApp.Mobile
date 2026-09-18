@@ -1,115 +1,69 @@
 import { memo, useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import type { InsightsActivity } from '../types';
+import type { InsightsV3YourYear } from '../types';
 import {
+  formatMonthName,
+  formatMonthYear,
   formatWeekdayName,
-  getActivityDayAccessibilityLabel,
-  normalizeActivityDayState,
 } from '../utils/insights-format';
-import { getHeatmapCellBorderColor, getHeatmapCellColor } from '../utils/insights-heatmap-colors';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsYourYearSectionProps {
-  activity: InsightsActivity;
+  yourYear: InsightsV3YourYear;
+  year: number;
 }
 
-const WEEKS = 52;
-const ROWS = 7;
-const CELL_GAP = 2;
-
 export const InsightsYourYearSection = memo(function InsightsYourYearSection({
-  activity,
+  yourYear,
+  year,
 }: InsightsYourYearSectionProps) {
-  const { width } = useWindowDimensions();
-  const horizontalPadding = spacing.lg * 2;
-  const availableWidth = width - horizontalPadding - spacing.lg * 2;
-  const cellSize = Math.max(4, Math.floor((availableWidth - CELL_GAP * (WEEKS - 1)) / WEEKS));
-
-  const weeks = useMemo(() => {
-    const grid: (InsightsActivity['days'][number] | null)[][] = Array.from({ length: WEEKS }, () =>
-      Array.from({ length: ROWS }, () => null),
-    );
-
-    activity.days.forEach((day, index) => {
-      const weekIndex = Math.floor(index / ROWS);
-      const dayIndex = index % ROWS;
-      if (weekIndex < WEEKS) {
-        grid[weekIndex][dayIndex] = day;
-      }
-    });
-
-    return grid;
-  }, [activity.days]);
-
-  const hasAnyActivity = activity.days.some(
-    (day) => normalizeActivityDayState(day.state) === 'active',
+  const maxTotal = useMemo(
+    () => Math.max(...yourYear.months.map((month) => month.total), 1),
+    [yourYear.months],
   );
+  const hasActivity = yourYear.months.some((month) => month.total > 0);
 
   return (
     <View style={styles.section}>
       <InsightsSectionHeader
         title="Your Year"
-        subtitle="Rolling 52-week watching activity"
+        subtitle={`How ${year} unfolded in your watch history`}
       />
-      {!hasAnyActivity ? (
-        <InsightsEmptyState message="Your activity map will grow as you watch and track titles." />
+      {!hasActivity ? (
+        <InsightsEmptyState message="Your year will take shape as you watch and track titles." />
       ) : (
         <View style={styles.card}>
-          <View style={styles.heatmap} accessibilityRole="summary">
-            {weeks.map((week, weekIndex) => (
-              <View key={`week-${weekIndex}`} style={styles.weekColumn}>
-                {week.map((day, dayIndex) => {
-                  if (!day) {
-                    return (
-                      <View
-                        key={`empty-${weekIndex}-${dayIndex}`}
-                        style={[styles.cell, { width: cellSize, height: cellSize }]}
-                      />
-                    );
-                  }
-
-                  return (
-                    <View
-                      key={day.date}
-                      style={[
-                        styles.cell,
-                        {
-                          width: cellSize,
-                          height: cellSize,
-                          backgroundColor: getHeatmapCellColor(day.state, day.intensityBucket),
-                          borderColor: getHeatmapCellBorderColor(day.state),
-                          borderWidth: getHeatmapCellBorderColor(day.state) ? 1 : 0,
-                        },
-                      ]}
-                      accessibilityLabel={getActivityDayAccessibilityLabel(
-                        day.date,
-                        day.movies,
-                        day.episodes,
-                        day.state,
-                        day.total,
-                      )}
-                    />
-                  );
-                })}
-              </View>
-            ))}
+          <View style={styles.chart} accessibilityRole="summary">
+            {yourYear.months.map((month) => {
+              const heightPercent = Math.max(8, (month.total / maxTotal) * 100);
+              return (
+                <View key={month.month} style={styles.barColumn}>
+                  <View style={styles.barTrack}>
+                    <View style={[styles.barFill, { height: `${heightPercent}%` }]} />
+                  </View>
+                  <AppText variant="caption" muted style={styles.monthLabel}>
+                    {formatMonthName(month.month)}
+                  </AppText>
+                </View>
+              );
+            })}
           </View>
           <View style={styles.summaryRow}>
-            <SummaryStat label="Active days" value={String(activity.summary.totalActiveDays)} />
-            {activity.summary.longestStreakDays != null ? (
+            <SummaryStat label="Active days" value={String(yourYear.activeDays)} />
+            {yourYear.peakMonth ? (
               <SummaryStat
-                label="Longest streak"
-                value={`${activity.summary.longestStreakDays} days`}
+                label="Peak month"
+                value={formatMonthYear(yourYear.peakMonth.month, yourYear.peakMonth.year)}
               />
             ) : null}
-            {activity.summary.mostActiveWeekday != null ? (
+            {yourYear.favoriteWeekday != null ? (
               <SummaryStat
-                label="Most active day"
-                value={formatWeekdayName(activity.summary.mostActiveWeekday)}
+                label="Favorite weekday"
+                value={formatWeekdayName(yourYear.favoriteWeekday)}
               />
             ) : null}
           </View>
@@ -133,22 +87,38 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    padding: spacing.md,
     gap: spacing.md,
   },
-  heatmap: {
+  chart: {
     flexDirection: 'row',
-    gap: CELL_GAP,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 4,
+    minHeight: 120,
+    paddingTop: spacing.sm,
   },
-  weekColumn: {
-    gap: CELL_GAP,
+  barColumn: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
   },
-  cell: {
-    borderRadius: 2,
+  barTrack: {
+    width: '100%',
+    height: 96,
+    justifyContent: 'flex-end',
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surfaceElevated,
+    overflow: 'hidden',
+  },
+  barFill: {
+    width: '100%',
+    backgroundColor: colors.accent,
+    borderTopLeftRadius: borderRadius.sm,
+    borderTopRightRadius: borderRadius.sm,
+  },
+  monthLabel: {
+    fontSize: 10,
+    fontVariant: ['tabular-nums'],
   },
   summaryRow: {
     flexDirection: 'row',

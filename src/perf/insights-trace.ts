@@ -2,12 +2,10 @@ import { getAppEnvironment } from '@/api/environment';
 
 type InsightsPerfEvent =
   | 'insights_mount'
-  | 'insights_summary_api_start'
-  | 'insights_summary_api_end'
-  | 'insights_first_meaningful_render'
-  | 'insights_analytics_api_start'
-  | 'insights_analytics_api_end'
-  | 'insights_analytics_render';
+  | 'insights_v3_api_start'
+  | 'insights_v3_api_end'
+  | 'insights_v3_render'
+  | 'insights_first_meaningful_render';
 
 let traceActive = false;
 let originMs = 0;

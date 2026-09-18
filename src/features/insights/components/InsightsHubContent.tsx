@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useRouter } from 'expo-router';
@@ -6,19 +6,18 @@ import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { HomeHeaderProfileAvatar } from '@/features/home/components/HomeHeaderProfileAvatar';
-import { useInsightsAnalytics } from '../hooks/useInsightsAnalytics';
-import { useInsightsSummary } from '../hooks/useInsightsSummary';
+import { useInsightsV3 } from '../hooks/useInsightsV3';
 import { beginInsightsTrace, markInsightsPerfEvent, resetInsightsTrace } from '@/perf/insights-trace';
-import { InsightsAnalyticsError } from './InsightsAnalyticsError';
-import { InsightsEstimatedTimeSection } from './InsightsEstimatedTimeSection';
+import { buildSelectableYears } from '../utils/insights-format';
 import { InsightsErasSection } from './InsightsErasSection';
 import { InsightsLoadingSkeleton } from './InsightsLoadingSkeleton';
 import { InsightsMilestonesSection } from './InsightsMilestonesSection';
 import { InsightsMovieDnaHero } from './InsightsMovieDnaHero';
 import { InsightsRatingsSection } from './InsightsRatingsSection';
-import { InsightsSectionSkeleton } from './InsightsSectionSkeleton';
+import { InsightsRecordsSection } from './InsightsRecordsSection';
 import { InsightsTasteSection } from './InsightsTasteSection';
-import { InsightsWatchingMixSection } from './InsightsWatchingMixSection';
+import { InsightsTimeInStoriesSection } from './InsightsTimeInStoriesSection';
+import { InsightsYearSelector } from './InsightsYearSelector';
 import { InsightsYourYearSection } from './InsightsYourYearSection';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -26,10 +25,9 @@ import { spacing } from '@/theme/spacing';
 
 export function InsightsHubContent() {
   const router = useRouter();
-  const summaryQuery = useInsightsSummary();
-  const analyticsQuery = useInsightsAnalytics();
-  const hasMarkedSummaryStart = useRef(false);
-  const hasMarkedAnalyticsStart = useRef(false);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
+  const insightsQuery = useInsightsV3(selectedYear);
+  const hasMarkedApiStart = useRef(false);
 
   useEffect(() => {
     beginInsightsTrace();
@@ -39,60 +37,54 @@ export function InsightsHubContent() {
   }, []);
 
   useEffect(() => {
-    if (summaryQuery.isFetching && !hasMarkedSummaryStart.current) {
-      hasMarkedSummaryStart.current = true;
-      markInsightsPerfEvent('insights_summary_api_start');
+    if (insightsQuery.isFetching && !hasMarkedApiStart.current) {
+      hasMarkedApiStart.current = true;
+      markInsightsPerfEvent('insights_v3_api_start');
     }
 
-    if (summaryQuery.isSuccess && hasMarkedSummaryStart.current) {
-      markInsightsPerfEvent('insights_summary_api_end');
+    if (insightsQuery.isSuccess && hasMarkedApiStart.current) {
+      markInsightsPerfEvent('insights_v3_api_end');
+      markInsightsPerfEvent('insights_v3_render');
     }
-  }, [summaryQuery.isFetching, summaryQuery.isSuccess]);
-
-  useEffect(() => {
-    if (analyticsQuery.isFetching && !hasMarkedAnalyticsStart.current) {
-      hasMarkedAnalyticsStart.current = true;
-      markInsightsPerfEvent('insights_analytics_api_start');
-    }
-
-    if (analyticsQuery.isSuccess && hasMarkedAnalyticsStart.current) {
-      markInsightsPerfEvent('insights_analytics_api_end');
-      markInsightsPerfEvent('insights_analytics_render');
-    }
-  }, [analyticsQuery.isFetching, analyticsQuery.isSuccess]);
+  }, [insightsQuery.isFetching, insightsQuery.isSuccess]);
 
   useEffect(() => {
-    if (summaryQuery.data) {
+    if (insightsQuery.data) {
       markInsightsPerfEvent('insights_first_meaningful_render');
     }
-  }, [summaryQuery.data]);
+  }, [insightsQuery.data]);
+
+  const selectableYears = useMemo(() => {
+    if (!insightsQuery.data) {
+      return [];
+    }
+
+    const currentYear = new Date().getFullYear();
+    return buildSelectableYears(insightsQuery.data.meta.memberSinceUtc, currentYear);
+  }, [insightsQuery.data]);
+
+  const activeYear = insightsQuery.data?.meta.year ?? selectedYear ?? new Date().getFullYear();
 
   const handleRefresh = useCallback(() => {
-    void summaryQuery.refetch();
-    void analyticsQuery.refetch();
-  }, [analyticsQuery, summaryQuery]);
+    void insightsQuery.refetch();
+  }, [insightsQuery]);
 
-  const isRefreshing =
-    (summaryQuery.isRefetching && !summaryQuery.isLoading) ||
-    (analyticsQuery.isRefetching && !analyticsQuery.isLoading);
+  const isRefreshing = insightsQuery.isRefetching && !insightsQuery.isLoading;
 
-  const showFullSkeleton =
-    summaryQuery.isLoading && !summaryQuery.data && analyticsQuery.isLoading && !analyticsQuery.data;
-
-  if (summaryQuery.isError && !summaryQuery.data) {
-    const message = isApiError(summaryQuery.error)
-      ? summaryQuery.error.userMessage
+  if (insightsQuery.isError && !insightsQuery.data) {
+    const message = isApiError(insightsQuery.error)
+      ? insightsQuery.error.userMessage
       : 'Unable to load your insights. Please try again.';
 
     return (
       <View style={styles.errorContainer}>
         <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-        <ErrorView message={message} onRetry={() => void summaryQuery.refetch()} retryLabel="Try Again" />
+        <ErrorView message={message} onRetry={() => void insightsQuery.refetch()} retryLabel="Try Again" />
       </View>
     );
   }
 
-  if (showFullSkeleton) {
+  if (insightsQuery.isLoading && !insightsQuery.data) {
     return (
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
@@ -101,42 +93,10 @@ export function InsightsHubContent() {
     );
   }
 
-  const summary = summaryQuery.data;
-  const analytics = analyticsQuery.data;
-  const analyticsFailed = analyticsQuery.isError && !analytics;
-
-  const analyticsContent = analytics ? (
-    <>
-      <InsightsYourYearSection activity={analytics.activity} />
-      <InsightsTasteSection taste={analytics.taste} />
-      <InsightsErasSection eras={analytics.eras} />
-      <InsightsEstimatedTimeSection estimatedTime={analytics.estimatedTimeWatched} />
-      <InsightsRatingsSection ratings={analytics.ratings} />
-    </>
-  ) : analyticsFailed ? (
-    <InsightsAnalyticsError
-      message={
-        isApiError(analyticsQuery.error)
-          ? analyticsQuery.error.userMessage
-          : 'Unable to load detailed analytics right now.'
-      }
-      onRetry={() => void analyticsQuery.refetch()}
-    />
-  ) : (
-    <>
-      <InsightsSectionSkeleton height={180} />
-      <InsightsSectionSkeleton height={160} />
-      <InsightsSectionSkeleton height={150} />
-      <InsightsSectionSkeleton height={130} />
-      <InsightsSectionSkeleton height={170} />
-    </>
-  );
-
-  const milestonesContent = analytics ? (
-    <InsightsMilestonesSection milestones={analytics.milestones} />
-  ) : analyticsFailed ? null : (
-    <InsightsSectionSkeleton height={140} />
-  );
+  const insights = insightsQuery.data;
+  if (!insights) {
+    return null;
+  }
 
   return (
     <ScrollView
@@ -146,17 +106,19 @@ export function InsightsHubContent() {
       }
     >
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-
-      {summary ? (
-        <>
-          <InsightsMovieDnaHero labels={summary.movieDna} summary={summary.summary} />
-          {analyticsContent}
-          <InsightsWatchingMixSection watchingMix={summary.watchingMix} />
-          {milestonesContent}
-        </>
-      ) : (
-        <InsightsLoadingSkeleton />
-      )}
+      <InsightsYearSelector
+        years={selectableYears}
+        selectedYear={activeYear}
+        onSelectYear={setSelectedYear}
+      />
+      <InsightsMovieDnaHero movieDna={insights.movieDna} />
+      <InsightsYourYearSection yourYear={insights.yourYear} year={activeYear} />
+      <InsightsTasteSection taste={insights.yourTaste} />
+      <InsightsTimeInStoriesSection timeInStories={insights.timeInStories} year={activeYear} />
+      <InsightsRatingsSection ratings={insights.yourRatings} />
+      <InsightsErasSection era={insights.yourEra} />
+      <InsightsRecordsSection records={insights.yourRecords} />
+      <InsightsMilestonesSection achievements={insights.achievements} />
     </ScrollView>
   );
 }

@@ -1,13 +1,14 @@
 import { StyleSheet, View } from 'react-native';
-import type { InsightsTaste } from '../types';
+import type { InsightsV3Taste } from '../types';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
+import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsTasteSectionProps {
-  taste: InsightsTaste;
+  taste: InsightsV3Taste;
 }
 
 export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
@@ -15,7 +16,7 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Your Taste" subtitle="Top genre affinities from your history" />
+      <InsightsSectionHeader title="Your Taste" subtitle="The genres that define your history" />
       {genres.length === 0 ? (
         <InsightsEmptyState message="Not enough history yet to map your taste." />
       ) : (
@@ -28,6 +29,19 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
               accessibilityLabel={`${genre.name}, ${Math.round(genre.sharePercent)} percent`}
             />
           ))}
+          {taste.risingGenre ? (
+            <View style={styles.risingCard} testID="insights-rising-genre">
+              <AppText variant="caption" muted style={styles.risingLabel}>
+                Rising this year
+              </AppText>
+              <AppText variant="bodySmall" style={styles.risingTitle}>
+                {taste.risingGenre.name}
+              </AppText>
+              <AppText variant="caption" muted>
+                {Math.round(taste.risingGenre.shareDeltaPercent)} pts since last year
+              </AppText>
+            </View>
+          ) : null}
         </View>
       )}
     </View>
@@ -39,11 +53,20 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    padding: spacing.md,
     gap: spacing.md,
+  },
+  risingCard: {
+    gap: 2,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
+  },
+  risingLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  risingTitle: {
+    color: colors.accentStrong,
+    fontWeight: '600',
   },
 });

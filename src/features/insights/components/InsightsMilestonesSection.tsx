@@ -1,76 +1,76 @@
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import type { InsightsMilestone } from '../types';
+import type { InsightsAchievement } from '../types';
 import { formatAchievedDate } from '../utils/insights-format';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsMilestonesSectionProps {
-  milestones: InsightsMilestone[];
+  achievements: InsightsAchievement[];
 }
 
-export function InsightsMilestonesSection({ milestones }: InsightsMilestonesSectionProps) {
-  if (milestones.length === 0) {
+export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSectionProps) {
+  if (achievements.length === 0) {
     return null;
   }
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Milestones" subtitle="Markers from your watching journey" />
-      <View style={styles.grid}>
-        {milestones.map((milestone) => (
-          <MilestoneCard key={milestone.id} milestone={milestone} />
+      <InsightsSectionHeader title="Achievements" subtitle="Milestones from your watching journey" />
+      <View style={styles.list}>
+        {achievements.map((achievement) => (
+          <AchievementRow key={achievement.id} achievement={achievement} />
         ))}
       </View>
     </View>
   );
 }
 
-function MilestoneCard({ milestone }: { milestone: InsightsMilestone }) {
-  const progressPercent = milestone.targetValue > 0
-    ? Math.min(100, Math.round((milestone.currentValue / milestone.targetValue) * 100))
+function AchievementRow({ achievement }: { achievement: InsightsAchievement }) {
+  const progressPercent = achievement.targetValue > 0
+    ? Math.min(100, Math.round((achievement.currentValue / achievement.targetValue) * 100))
     : 0;
 
-  const accessibilityLabel = milestone.achieved
-    ? `${milestone.title}, achieved`
-    : `${milestone.title}, in progress, ${milestone.currentValue} of ${milestone.targetValue}`;
+  const accessibilityLabel = achievement.achieved
+    ? `${achievement.title}, achieved`
+    : `${achievement.title}, in progress, ${achievement.currentValue} of ${achievement.targetValue}`;
 
   return (
     <View
-      style={[styles.card, milestone.achieved && styles.cardAchieved]}
+      style={[styles.row, achievement.achieved && styles.rowAchieved]}
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel}
     >
-      <View style={styles.cardHeader}>
-        <Ionicons
-          name={milestone.achieved ? 'ribbon' : 'ribbon-outline'}
-          size={16}
-          color={milestone.achieved ? colors.progressCompleted : colors.accent}
-        />
+      <Ionicons
+        name={achievement.achieved ? 'ribbon' : 'ribbon-outline'}
+        size={15}
+        color={achievement.achieved ? colors.progressCompleted : colors.accentMuted}
+      />
+      <View style={styles.copy}>
         <AppText variant="bodySmall" style={styles.title} numberOfLines={2}>
-          {milestone.title}
+          {achievement.title}
         </AppText>
-      </View>
-      {milestone.achieved ? (
-        milestone.achievedAt ? (
-          <AppText variant="caption" muted>
-            Achieved {formatAchievedDate(milestone.achievedAt)}
-          </AppText>
+        {achievement.achieved ? (
+          achievement.achievedAt ? (
+            <AppText variant="caption" muted>
+              Achieved {formatAchievedDate(achievement.achievedAt)}
+            </AppText>
+          ) : (
+            <AppText variant="caption" muted>Achieved</AppText>
+          )
         ) : (
-          <AppText variant="caption" muted>Achieved</AppText>
-        )
-      ) : (
-        <>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-          </View>
-          <AppText variant="caption" muted>
-            {milestone.currentValue} / {milestone.targetValue}
-          </AppText>
-        </>
-      )}
+          <>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+            </View>
+            <AppText variant="caption" muted>
+              {achievement.currentValue} / {achievement.targetValue}
+            </AppText>
+          </>
+        )}
+      </View>
     </View>
   );
 }
@@ -78,45 +78,38 @@ function MilestoneCard({ milestone }: { milestone: InsightsMilestone }) {
 const styles = StyleSheet.create({
   section: {
     gap: spacing.sm,
+    opacity: 0.96,
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  card: {
-    width: '48%',
-    minWidth: 148,
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    padding: spacing.sm,
+  list: {
     gap: spacing.xs,
   },
-  cardAchieved: {
-    borderColor: colors.progressCompletedTint12,
-    backgroundColor: colors.progressCompletedTint12,
-  },
-  cardHeader: {
+  row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.xs,
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderSubtle,
+  },
+  rowAchieved: {
+    opacity: 0.9,
+  },
+  copy: {
+    flex: 1,
+    gap: 4,
   },
   title: {
-    flex: 1,
     color: colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   progressTrack: {
-    height: 6,
-    borderRadius: 999,
+    height: 4,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.progressTrack,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.progressInProgress,
+    backgroundColor: colors.accentMuted,
   },
 });

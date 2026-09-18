@@ -1,9 +1,8 @@
-export function buildInsightsSummaryPath(timeZone: string): string {
+export function buildInsightsV3Path(timeZone: string, year?: number): string {
   const params = new URLSearchParams({ timeZone });
-  return `/api/insights/summary?${params.toString()}`;
-}
+  if (year !== undefined) {
+    params.set('year', String(year));
+  }
 
-export function buildInsightsAnalyticsPath(timeZone: string): string {
-  const params = new URLSearchParams({ timeZone });
-  return `/api/insights/analytics?${params.toString()}`;
+  return `/api/insights/v3?${params.toString()}`;
 }

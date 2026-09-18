@@ -1,52 +1,7 @@
-export type InsightsActivityDayState = 'Active' | 'NoActivity' | 'BeforeJoin' | 0 | 1 | 2;
-
 export interface InsightsMovieDnaLabel {
   code: string;
   category: string;
   label: string;
-}
-
-export interface InsightsSummaryStats {
-  moviesWatched: number;
-  episodesWatched: number;
-  showsStarted: number;
-  ratingsCount: number;
-  averageStarRating: number | null;
-}
-
-export interface InsightsWatchingMix {
-  movieTitleCount: number;
-  seriesTitleCount: number;
-}
-
-export interface InsightsSummaryResponse {
-  memberSince: string;
-  movieDna: InsightsMovieDnaLabel[];
-  summary: InsightsSummaryStats;
-  watchingMix: InsightsWatchingMix;
-  generatedAtUtc: string;
-}
-
-export interface InsightsActivityDay {
-  date: string;
-  movies: number;
-  episodes: number;
-  total: number;
-  state: InsightsActivityDayState;
-  intensityBucket: number;
-}
-
-export interface InsightsActivitySummary {
-  totalActiveDays: number;
-  mostActiveWeekday: number | null;
-  longestStreakDays: number | null;
-  currentWeekTotal: number;
-  previousWeekTotal: number;
-}
-
-export interface InsightsActivity {
-  days: InsightsActivityDay[];
-  summary: InsightsActivitySummary;
 }
 
 export interface InsightsTasteGenre {
@@ -56,8 +11,83 @@ export interface InsightsTasteGenre {
   sharePercent: number;
 }
 
-export interface InsightsTaste {
+export interface InsightsWatchingMix {
+  movieTitleCount: number;
+  seriesTitleCount: number;
+  movieSharePercent: number;
+  seriesSharePercent: number;
+}
+
+export interface InsightsV3MovieDna {
+  identityTitle: string;
+  identityCodes: string[];
+  labels: InsightsMovieDnaLabel[];
+  topGenres: InsightsTasteGenre[];
+  watchingMix: InsightsWatchingMix;
+}
+
+export interface InsightsV3MonthlyActivity {
+  year: number;
+  month: number;
+  movies: number;
+  episodes: number;
+  total: number;
+}
+
+export interface InsightsV3MonthHighlight {
+  year: number;
+  month: number;
+  movies: number;
+  episodes: number;
+  total: number;
+}
+
+export interface InsightsV3YourYear {
+  months: InsightsV3MonthlyActivity[];
+  activeDays: number;
+  peakMonth: InsightsV3MonthHighlight | null;
+  favoriteWeekday: number | string | null;
+}
+
+export interface InsightsV3RisingGenre {
+  genreId: string;
+  name: string;
+  currentYearSharePercent: number;
+  previousYearSharePercent: number;
+  shareDeltaPercent: number;
+}
+
+export interface InsightsV3Taste {
   genres: InsightsTasteGenre[];
+  risingGenre: InsightsV3RisingGenre | null;
+}
+
+export interface InsightsV3TimeInStories {
+  totalMinutes: number;
+  movieMinutes: number;
+  episodeMinutes: number;
+  yearMinutes: number;
+  runtimeCoveragePercent: number;
+}
+
+export interface InsightsRatingsDistributionItem {
+  stars: number;
+  count: number;
+}
+
+export interface InsightsV3GenreRating {
+  genreId: string;
+  name: string;
+  ratingCount: number;
+  averageStars: number;
+}
+
+export interface InsightsV3Ratings {
+  count: number;
+  averageStars: number | null;
+  distribution: InsightsRatingsDistributionItem[];
+  highestRatedGenre: InsightsV3GenreRating | null;
+  lowestRatedGenre: InsightsV3GenreRating | null;
 }
 
 export interface InsightsEraBucket {
@@ -66,34 +96,35 @@ export interface InsightsEraBucket {
   percent: number | null;
 }
 
-export interface InsightsEras {
-  buckets: InsightsEraBucket[];
+export interface InsightsV3OldestTitle {
+  contentType: string;
+  contentId: string;
+  title: string;
+  year: number | null;
+  posterPath: string | null;
+}
+
+export interface InsightsV3Era {
+  decades: InsightsEraBucket[];
+  favoriteDecade: string | null;
   unknownCount: number;
+  oldestTitle: InsightsV3OldestTitle | null;
 }
 
-export interface InsightsEstimatedTimeWatched {
-  totalEstimatedMinutes: number;
-  movieEstimatedMinutes: number;
-  episodeEstimatedMinutes: number;
-  knownRuntimeItemCount: number;
-  totalWatchedItemCount: number;
-  coveragePercent: number;
-  currentYearEstimatedMinutes: number | null;
-}
-
-export interface InsightsRatingsDistributionItem {
-  stars: number;
+export interface InsightsV3WeeklyPeak {
+  year: number;
+  week: number;
   count: number;
 }
 
-export interface InsightsRatingsAnalytics {
-  ratingCount: number;
-  averageStarRating: number | null;
-  distribution: InsightsRatingsDistributionItem[];
-  mostUsedStars: number | null;
+export interface InsightsV3Records {
+  longestStreakDays: number | null;
+  bestMovieWeek: InsightsV3WeeklyPeak | null;
+  bestEpisodeWeek: InsightsV3WeeklyPeak | null;
+  highestRatingStars: number | null;
 }
 
-export interface InsightsMilestone {
+export interface InsightsAchievement {
   id: string;
   category: string;
   title: string;
@@ -103,12 +134,21 @@ export interface InsightsMilestone {
   achievedAt: string | null;
 }
 
-export interface InsightsAnalyticsResponse {
-  activity: InsightsActivity;
-  taste: InsightsTaste;
-  eras: InsightsEras;
-  estimatedTimeWatched: InsightsEstimatedTimeWatched;
-  ratings: InsightsRatingsAnalytics;
-  milestones: InsightsMilestone[];
+export interface InsightsV3Meta {
+  memberSinceUtc: string;
   generatedAtUtc: string;
+  timeZone: string;
+  year: number;
+}
+
+export interface InsightsV3Response {
+  meta: InsightsV3Meta;
+  movieDna: InsightsV3MovieDna;
+  yourYear: InsightsV3YourYear;
+  yourTaste: InsightsV3Taste;
+  timeInStories: InsightsV3TimeInStories;
+  yourRatings: InsightsV3Ratings;
+  yourEra: InsightsV3Era;
+  yourRecords: InsightsV3Records;
+  achievements: InsightsAchievement[];
 }

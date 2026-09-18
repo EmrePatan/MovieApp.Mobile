@@ -1,7 +1,3 @@
-export function insightsSummaryQueryKey(timeZone: string) {
-  return ['insights', 'summary', timeZone] as const;
-}
-
-export function insightsAnalyticsQueryKey(timeZone: string) {
-  return ['insights', 'analytics', timeZone] as const;
+export function insightsV3QueryKey(timeZone: string, year?: number) {
+  return ['insights', 'v3', timeZone, year ?? 'current'] as const;
 }

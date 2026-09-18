@@ -1,5 +1,3 @@
-import type { InsightsActivityDayState } from '../types';
-
 const WEEKDAY_NAMES = [
   'Sunday',
   'Monday',
@@ -10,20 +8,39 @@ const WEEKDAY_NAMES = [
   'Saturday',
 ];
 
-export function normalizeActivityDayState(state: InsightsActivityDayState): 'active' | 'noActivity' | 'beforeJoin' {
-  if (state === 'Active' || state === 0) {
-    return 'active';
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+export function formatWeekdayName(dayOfWeek: number | string | null | undefined): string {
+  if (dayOfWeek == null) {
+    return '—';
   }
 
-  if (state === 'BeforeJoin' || state === 2) {
-    return 'beforeJoin';
+  if (typeof dayOfWeek === 'string') {
+    return dayOfWeek;
   }
 
-  return 'noActivity';
+  return WEEKDAY_NAMES[dayOfWeek] ?? 'Unknown';
 }
 
-export function formatWeekdayName(dayOfWeek: number): string {
-  return WEEKDAY_NAMES[dayOfWeek] ?? 'Unknown';
+export function formatMonthName(month: number): string {
+  return MONTH_NAMES[month - 1] ?? String(month);
+}
+
+export function formatMonthYear(month: number, year: number): string {
+  return `${formatMonthName(month)} ${year}`;
 }
 
 export function formatEstimatedDuration(totalMinutes: number): string {
@@ -47,8 +64,31 @@ export function formatEstimatedDuration(totalMinutes: number): string {
   return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
 }
 
-export function formatAverageStarRating(value: number | null): string {
-  if (value === null) {
+export function formatHoursFromMinutes(totalMinutes: number): string {
+  if (totalMinutes <= 0) {
+    return '0';
+  }
+
+  const hours = totalMinutes / 60;
+  return hours >= 10 ? Math.round(hours).toString() : hours.toFixed(1);
+}
+
+export function formatEquivalentDays(totalMinutes: number): string {
+  if (totalMinutes <= 0) {
+    return '0 days';
+  }
+
+  const days = totalMinutes / (60 * 24);
+  if (days < 1) {
+    return '< 1 day';
+  }
+
+  const rounded = Math.round(days);
+  return `${rounded} ${rounded === 1 ? 'day' : 'days'}`;
+}
+
+export function formatAverageStarRating(value: number | null | undefined): string {
+  if (value == null) {
     return '—';
   }
 
@@ -63,36 +103,21 @@ export function formatAchievedDate(achievedAt: string): string {
   });
 }
 
-export function getWatchingMixPercentages(movieTitleCount: number, seriesTitleCount: number) {
-  const total = movieTitleCount + seriesTitleCount;
-
-  if (total <= 0) {
-    return { moviePercent: 0, seriesPercent: 0 };
-  }
-
-  const seriesPercent = Math.round((seriesTitleCount / total) * 100);
-  return {
-    moviePercent: 100 - seriesPercent,
-    seriesPercent,
-  };
+export function formatIsoWeekLabel(year: number, week: number): string {
+  return `Week ${week}, ${year}`;
 }
 
-export function getActivityDayAccessibilityLabel(
-  date: string,
-  movies: number,
-  episodes: number,
-  state: InsightsActivityDayState,
-  total: number,
-): string {
-  const normalized = normalizeActivityDayState(state);
+export function getMemberSinceYear(memberSinceUtc: string): number {
+  return new Date(memberSinceUtc).getFullYear();
+}
 
-  if (normalized === 'beforeJoin') {
-    return `${date}: before you joined MovieApp`;
+export function buildSelectableYears(memberSinceUtc: string, currentYear: number): number[] {
+  const firstYear = Math.min(getMemberSinceYear(memberSinceUtc), currentYear);
+  const years: number[] = [];
+
+  for (let year = currentYear; year >= firstYear; year -= 1) {
+    years.push(year);
   }
 
-  if (normalized === 'noActivity') {
-    return `${date}: no activity`;
-  }
-
-  return `${date}: ${total} watched items, ${movies} movies and ${episodes} episodes`;
+  return years;
 }

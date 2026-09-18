@@ -1,12 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { InsightsHubContent } from '@/features/insights/components/InsightsHubContent';
-import { useInsightsAnalytics } from '@/features/insights/hooks/useInsightsAnalytics';
-import { useInsightsSummary } from '@/features/insights/hooks/useInsightsSummary';
-import {
-  insightsAnalyticsFixture,
-  insightsSummaryFixture,
-} from '@/features/insights/utils/insights-fixtures';
+import { useInsightsV3 } from '@/features/insights/hooks/useInsightsV3';
+import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 const mockPush = jest.fn();
 
@@ -14,12 +10,8 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-jest.mock('@/features/insights/hooks/useInsightsSummary', () => ({
-  useInsightsSummary: jest.fn(),
-}));
-
-jest.mock('@/features/insights/hooks/useInsightsAnalytics', () => ({
-  useInsightsAnalytics: jest.fn(),
+jest.mock('@/features/insights/hooks/useInsightsV3', () => ({
+  useInsightsV3: jest.fn(),
 }));
 
 jest.mock('@/features/home/components/HomeHeaderProfileAvatar', () => ({
@@ -33,20 +25,7 @@ jest.mock('@/features/home/components/HomeHeaderProfileAvatar', () => ({
   },
 }));
 
-function createSummaryQuery(overrides: Record<string, unknown> = {}) {
-  return {
-    data: undefined,
-    isLoading: false,
-    isFetching: false,
-    isRefetching: false,
-    isError: false,
-    isSuccess: false,
-    refetch: jest.fn(),
-    ...overrides,
-  };
-}
-
-function createAnalyticsQuery(overrides: Record<string, unknown> = {}) {
+function createInsightsQuery(overrides: Record<string, unknown> = {}) {
   return {
     data: undefined,
     isLoading: false,
@@ -62,74 +41,57 @@ function createAnalyticsQuery(overrides: Record<string, unknown> = {}) {
 describe('InsightsHubContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useInsightsSummary as jest.Mock).mockReturnValue(createSummaryQuery());
-    (useInsightsAnalytics as jest.Mock).mockReturnValue(createAnalyticsQuery());
+    (useInsightsV3 as jest.Mock).mockReturnValue(createInsightsQuery());
   });
 
-  it('renders Movie DNA before analytics resolves', () => {
-    (useInsightsSummary as jest.Mock).mockReturnValue(
-      createSummaryQuery({ data: insightsSummaryFixture, isSuccess: true }),
-    );
-    (useInsightsAnalytics as jest.Mock).mockReturnValue(
-      createAnalyticsQuery({ isLoading: true }),
+  it('shows loading skeleton while insights load', () => {
+    (useInsightsV3 as jest.Mock).mockReturnValue(
+      createInsightsQuery({ isLoading: true }),
     );
 
     render(<InsightsHubContent />);
 
-    expect(screen.getByText('Movie DNA')).toBeTruthy();
     expect(screen.getAllByLabelText('Loading insights section').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Your Taste')).toBeNull();
+    expect(screen.queryByText('Sci-Fi Storyteller')).toBeNull();
   });
 
-  it('shows full error when summary fails without cache', () => {
-    (useInsightsSummary as jest.Mock).mockReturnValue(
-      createSummaryQuery({
+  it('shows full error when insights fail without cache', () => {
+    (useInsightsV3 as jest.Mock).mockReturnValue(
+      createInsightsQuery({
         isError: true,
-        error: new ApiError({ kind: 'server', userMessage: 'Summary failed' }),
+        error: new ApiError({ kind: 'server', userMessage: 'Insights failed' }),
       }),
     );
 
     render(<InsightsHubContent />);
 
-    expect(screen.getByText('Summary failed')).toBeTruthy();
+    expect(screen.getByText('Insights failed')).toBeTruthy();
   });
 
-  it('keeps summary visible when analytics fails and supports retry', () => {
-    const refetchAnalytics = jest.fn();
-    (useInsightsSummary as jest.Mock).mockReturnValue(
-      createSummaryQuery({ data: insightsSummaryFixture, isSuccess: true }),
-    );
-    (useInsightsAnalytics as jest.Mock).mockReturnValue(
-      createAnalyticsQuery({
-        isError: true,
-        error: new ApiError({ kind: 'server', userMessage: 'Analytics failed' }),
-        refetch: refetchAnalytics,
-      }),
+  it('renders all insight sections when data is available', () => {
+    (useInsightsV3 as jest.Mock).mockReturnValue(
+      createInsightsQuery({ data: insightsV3Fixture, isSuccess: true }),
     );
 
     render(<InsightsHubContent />);
 
-    expect(screen.getByText('Sci-Fi explorer')).toBeTruthy();
-    expect(screen.getByText('Analytics failed')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Retry loading analytics'));
-    expect(refetchAnalytics).toHaveBeenCalled();
+    expect(screen.getByText('Sci-Fi Storyteller')).toBeTruthy();
+    expect(screen.getByText('Your Year')).toBeTruthy();
+    expect(screen.getByText('Your Taste')).toBeTruthy();
+    expect(screen.getByText('Time in Stories')).toBeTruthy();
+    expect(screen.getByText('Your Ratings')).toBeTruthy();
+    expect(screen.getByText('Your Era')).toBeTruthy();
+    expect(screen.getByText('Your Records')).toBeTruthy();
+    expect(screen.getByText('Achievements')).toBeTruthy();
   });
 
-  it('refetches summary and analytics on pull to refresh', () => {
-    const refetchSummary = jest.fn();
-    const refetchAnalytics = jest.fn();
-    (useInsightsSummary as jest.Mock).mockReturnValue(
-      createSummaryQuery({
-        data: insightsSummaryFixture,
+  it('refetches insights on pull to refresh', () => {
+    const refetch = jest.fn();
+    (useInsightsV3 as jest.Mock).mockReturnValue(
+      createInsightsQuery({
+        data: insightsV3Fixture,
         isSuccess: true,
-        refetch: refetchSummary,
-      }),
-    );
-    (useInsightsAnalytics as jest.Mock).mockReturnValue(
-      createAnalyticsQuery({
-        data: insightsAnalyticsFixture,
-        isSuccess: true,
-        refetch: refetchAnalytics,
+        refetch,
       }),
     );
 
@@ -138,16 +100,12 @@ describe('InsightsHubContent', () => {
     const scrollView = UNSAFE_getByType(ScrollView);
     scrollView.props.refreshControl.props.onRefresh();
 
-    expect(refetchSummary).toHaveBeenCalled();
-    expect(refetchAnalytics).toHaveBeenCalled();
+    expect(refetch).toHaveBeenCalled();
   });
 
   it('opens profile from header avatar', () => {
-    (useInsightsSummary as jest.Mock).mockReturnValue(
-      createSummaryQuery({ data: insightsSummaryFixture, isSuccess: true }),
-    );
-    (useInsightsAnalytics as jest.Mock).mockReturnValue(
-      createAnalyticsQuery({ data: insightsAnalyticsFixture, isSuccess: true }),
+    (useInsightsV3 as jest.Mock).mockReturnValue(
+      createInsightsQuery({ data: insightsV3Fixture, isSuccess: true }),
     );
 
     render(<InsightsHubContent />);

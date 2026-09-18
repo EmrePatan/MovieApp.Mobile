@@ -1,18 +1,12 @@
 import { api } from '@/api/client';
-import { buildInsightsAnalyticsPath, buildInsightsSummaryPath } from './routes';
-import type { InsightsAnalyticsResponse, InsightsSummaryResponse } from '../types';
+import { buildInsightsV3Path } from './routes';
+import type { InsightsV3Response } from '../types';
 import { getInsightsTimeZone } from '../utils/insights-timezone';
 
-export async function getInsightsSummary(
+export async function getInsightsV3(
   timeZone = getInsightsTimeZone(),
+  year?: number,
   signal?: AbortSignal,
-): Promise<InsightsSummaryResponse> {
-  return api.get<InsightsSummaryResponse>(buildInsightsSummaryPath(timeZone), { signal });
-}
-
-export async function getInsightsAnalytics(
-  timeZone = getInsightsTimeZone(),
-  signal?: AbortSignal,
-): Promise<InsightsAnalyticsResponse> {
-  return api.get<InsightsAnalyticsResponse>(buildInsightsAnalyticsPath(timeZone), { signal });
+): Promise<InsightsV3Response> {
+  return api.get<InsightsV3Response>(buildInsightsV3Path(timeZone, year), { signal });
 }

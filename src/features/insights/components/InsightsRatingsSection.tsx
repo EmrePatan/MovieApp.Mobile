@@ -1,24 +1,23 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import type { InsightsRatingsAnalytics } from '../types';
+import type { InsightsV3Ratings } from '../types';
 import { formatAverageStarRating } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 interface InsightsRatingsSectionProps {
-  ratings: InsightsRatingsAnalytics;
+  ratings: InsightsV3Ratings;
 }
 
 export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps) {
   const maxCount = Math.max(...ratings.distribution.map((item) => item.count), 1);
-  const showMostUsed = ratings.ratingCount >= 5 && ratings.mostUsedStars != null;
 
   return (
     <View style={styles.section}>
       <InsightsSectionHeader title="Your Ratings" subtitle="How you score what you watch" />
-      {ratings.ratingCount === 0 ? (
+      {ratings.count === 0 ? (
         <InsightsEmptyState message="No ratings yet. Rate titles to build this view." />
       ) : (
         <View style={styles.card}>
@@ -26,43 +25,75 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
             <View>
               <AppText variant="caption" muted>Average</AppText>
               <AppText variant="title" style={styles.average}>
-                {formatAverageStarRating(ratings.averageStarRating)}★
+                {formatAverageStarRating(ratings.averageStars)}★
               </AppText>
             </View>
             <View>
               <AppText variant="caption" muted>Total ratings</AppText>
-              <AppText variant="body" style={styles.count}>{ratings.ratingCount}</AppText>
+              <AppText variant="body" style={styles.count}>{ratings.count}</AppText>
             </View>
-            {showMostUsed ? (
-              <View>
-                <AppText variant="caption" muted>Most used</AppText>
-                <AppText variant="body" style={styles.count}>{ratings.mostUsedStars}★</AppText>
-              </View>
-            ) : null}
           </View>
-          <View style={styles.distribution}>
-            {ratings.distribution.map((item) => {
-              const widthPercent = Math.max(6, (item.count / maxCount) * 100);
-              return (
-                <View
-                  key={item.stars}
-                  style={styles.distributionRow}
-                  accessibilityRole="text"
-                  accessibilityLabel={`${item.stars} stars, ${item.count} ratings`}
-                >
-                  <AppText variant="caption" style={styles.starLabel}>{item.stars}★</AppText>
-                  <View style={styles.barTrack}>
-                    <View style={[styles.barFill, { width: `${widthPercent}%` }]} />
+          {ratings.distribution.length > 0 ? (
+            <View style={styles.distribution}>
+              {ratings.distribution.map((item) => {
+                const widthPercent = Math.max(6, (item.count / maxCount) * 100);
+                return (
+                  <View
+                    key={item.stars}
+                    style={styles.distributionRow}
+                    accessibilityRole="text"
+                    accessibilityLabel={`${item.stars} stars, ${item.count} ratings`}
+                  >
+                    <AppText variant="caption" style={styles.starLabel}>{item.stars}★</AppText>
+                    <View style={styles.barTrack}>
+                      <View style={[styles.barFill, { width: `${widthPercent}%` }]} />
+                    </View>
+                    <AppText variant="caption" muted style={styles.countLabel}>
+                      {item.count}
+                    </AppText>
                   </View>
-                  <AppText variant="caption" muted style={styles.countLabel}>
-                    {item.count}
-                  </AppText>
-                </View>
-              );
-            })}
-          </View>
+                );
+              })}
+            </View>
+          ) : null}
+          {ratings.highestRatedGenre || ratings.lowestRatedGenre ? (
+            <View style={styles.genreRow}>
+              {ratings.highestRatedGenre ? (
+                <GenreHighlight
+                  label="Highest genre"
+                  name={ratings.highestRatedGenre.name}
+                  stars={ratings.highestRatedGenre.averageStars}
+                />
+              ) : null}
+              {ratings.lowestRatedGenre ? (
+                <GenreHighlight
+                  label="Lowest genre"
+                  name={ratings.lowestRatedGenre.name}
+                  stars={ratings.lowestRatedGenre.averageStars}
+                />
+              ) : null}
+            </View>
+          ) : null}
         </View>
       )}
+    </View>
+  );
+}
+
+function GenreHighlight({
+  label,
+  name,
+  stars,
+}: {
+  label: string;
+  name: string;
+  stars: number;
+}) {
+  return (
+    <View style={styles.genreHighlight}>
+      <AppText variant="caption" muted>{label}</AppText>
+      <AppText variant="bodySmall" style={styles.genreName}>{name}</AppText>
+      <AppText variant="caption" muted>{formatAverageStarRating(stars)}★</AppText>
     </View>
   );
 }
@@ -72,11 +103,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    padding: spacing.md,
     gap: spacing.md,
   },
   summaryRow: {
@@ -118,5 +144,19 @@ const styles = StyleSheet.create({
   countLabel: {
     width: 24,
     textAlign: 'right',
+  },
+  genreRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.lg,
+    paddingTop: spacing.xs,
+  },
+  genreHighlight: {
+    gap: 2,
+    minWidth: 120,
+  },
+  genreName: {
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
 });

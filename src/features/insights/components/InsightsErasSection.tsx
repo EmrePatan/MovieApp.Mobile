@@ -1,28 +1,37 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import type { InsightsEras } from '../types';
+import { PosterImage } from '@/components/common/PosterImage';
+import type { InsightsV3Era } from '../types';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 interface InsightsErasSectionProps {
-  eras: InsightsEras;
+  era: InsightsV3Era;
 }
 
-export function InsightsErasSection({ eras }: InsightsErasSectionProps) {
-  const knownBuckets = eras.buckets.filter((bucket) => bucket.percent != null && bucket.count > 0);
-  const hasKnownEras = knownBuckets.length > 0;
+export function InsightsErasSection({ era }: InsightsErasSectionProps) {
+  const knownDecades = era.decades.filter((bucket) => bucket.count > 0);
+  const hasKnownEras = knownDecades.length > 0;
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Your Eras" subtitle="Release decades in your watch history" />
+      <InsightsSectionHeader title="Your Era" subtitle="The decades your watch history spans" />
       {!hasKnownEras ? (
         <InsightsEmptyState message="Not enough release-year data to chart your eras yet." />
       ) : (
         <View style={styles.card}>
-          {eras.buckets.map((bucket) => (
+          {era.favoriteDecade ? (
+            <View style={styles.favoriteBlock}>
+              <AppText variant="caption" muted>Favorite decade</AppText>
+              <AppText variant="title" style={styles.favoriteDecade}>
+                {era.favoriteDecade}
+              </AppText>
+            </View>
+          ) : null}
+          {era.decades.map((bucket) => (
             <InsightsAffinityBar
               key={bucket.bucket}
               label={bucket.bucket}
@@ -35,9 +44,23 @@ export function InsightsErasSection({ eras }: InsightsErasSectionProps) {
               }
             />
           ))}
-          {eras.unknownCount > 0 ? (
-            <AppText variant="caption" muted style={styles.unknownNote}>
-              {eras.unknownCount} watched titles are missing release-year metadata.
+          {era.oldestTitle ? (
+            <View style={styles.oldestRow} testID="insights-oldest-title">
+              <PosterImage uri={era.oldestTitle.posterPath} width={44} height={66} />
+              <View style={styles.oldestCopy}>
+                <AppText variant="caption" muted>Oldest watched</AppText>
+                <AppText variant="bodySmall" style={styles.oldestTitle}>
+                  {era.oldestTitle.title}
+                </AppText>
+                {era.oldestTitle.year ? (
+                  <AppText variant="caption" muted>{era.oldestTitle.year}</AppText>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
+          {era.unknownCount > 0 ? (
+            <AppText variant="caption" muted>
+              {era.unknownCount} watched titles are missing release-year metadata.
             </AppText>
           ) : null}
         </View>
@@ -51,14 +74,28 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    padding: spacing.md,
     gap: spacing.md,
   },
-  unknownNote: {
+  favoriteBlock: {
+    gap: 2,
+  },
+  favoriteDecade: {
+    color: colors.accentStrong,
+  },
+  oldestRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
     paddingTop: spacing.xs,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
+  },
+  oldestCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  oldestTitle: {
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
 });
