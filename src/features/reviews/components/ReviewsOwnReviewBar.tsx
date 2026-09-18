@@ -24,55 +24,53 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
 
   return (
     <View style={styles.container} testID="reviews-own-review-bar">
-      <View style={styles.textBlock}>
+      <View style={styles.headerRow}>
         <View style={styles.labelRow}>
           <AppText variant="caption" style={styles.label}>
             Your review
           </AppText>
           <ReviewAuthorRating userRating={review.userRating} />
         </View>
-        <AppText
-          variant="bodySmall"
-          muted
-          numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
-          style={styles.preview}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Edit review"
+          onPress={onEdit}
+          hitSlop={8}
+          style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
         >
-          {content}
-        </AppText>
-        {canExpand ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={expanded ? 'Show less of your review' : 'Read more of your review'}
-            onPress={() => setExpanded((current) => !current)}
-            hitSlop={4}
-            style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
-            testID="reviews-own-review-expand"
-          >
-            <AppText variant="caption" style={styles.expandLabel}>
-              {expanded ? 'Show less' : 'Read more'}
-            </AppText>
-          </Pressable>
-        ) : null}
+          <AppText variant="caption" style={styles.editLabel}>
+            Edit
+          </AppText>
+        </Pressable>
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Edit review"
-        onPress={onEdit}
-        hitSlop={8}
-        style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+      <AppText
+        variant="bodySmall"
+        muted
+        numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
+        style={styles.preview}
       >
-        <AppText variant="caption" style={styles.editLabel}>
-          Edit
-        </AppText>
-      </Pressable>
+        {content}
+      </AppText>
+      {canExpand ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={expanded ? 'Show less of your review' : 'Read more of your review'}
+          onPress={() => setExpanded((current) => !current)}
+          hitSlop={4}
+          style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
+          testID="reviews-own-review-expand"
+        >
+          <AppText variant="caption" style={styles.expandLabel}>
+            {expanded ? 'Show less' : 'Read more'}
+          </AppText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     gap: spacing.xs,
     marginHorizontal: layout.screenPaddingHorizontal,
     paddingHorizontal: spacing.sm + 2,
@@ -82,11 +80,14 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
-  textBlock: {
-    flex: 1,
-    gap: 3,
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   labelRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
@@ -114,9 +115,12 @@ const styles = StyleSheet.create({
   },
   editButton: {
     minHeight: interaction.touchTarget,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-    marginTop: -2,
+    minWidth: interaction.touchTarget,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    paddingTop: 1,
+    marginTop: -6,
+    marginRight: -4,
   },
   editLabel: {
     color: colors.accent,

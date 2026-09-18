@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 
@@ -37,27 +37,30 @@ export function ReviewsPaginationControl({
         disabled={!hasPreviousPage || isLoading}
         onPress={onPrevious}
         style={({ pressed }) => [
-          styles.button,
-          (!hasPreviousPage || isLoading) && styles.buttonDisabled,
+          styles.control,
+          (!hasPreviousPage || isLoading) && styles.controlDisabled,
           pressed && hasPreviousPage && !isLoading && styles.pressed,
         ]}
         testID="reviews-pagination-previous"
       >
         <Ionicons
           name="chevron-back"
-          size={16}
-          color={hasPreviousPage ? colors.textPrimary : colors.textMuted}
+          size={14}
+          color={hasPreviousPage && !isLoading ? colors.textSecondary : colors.textMuted}
         />
         <AppText
           variant="caption"
-          style={[styles.buttonLabel, !hasPreviousPage && styles.buttonLabelDisabled]}
+          style={[
+            styles.controlLabel,
+            (!hasPreviousPage || isLoading) && styles.controlLabelDisabled,
+          ]}
         >
           Previous
         </AppText>
       </Pressable>
 
       <AppText variant="caption" muted style={styles.pageLabel} testID="reviews-pagination-label">
-        Page {page} of {totalPages}
+        {page} / {totalPages}
       </AppText>
 
       <Pressable
@@ -67,22 +70,25 @@ export function ReviewsPaginationControl({
         disabled={!hasNextPage || isLoading}
         onPress={onNext}
         style={({ pressed }) => [
-          styles.button,
-          (!hasNextPage || isLoading) && styles.buttonDisabled,
+          styles.control,
+          (!hasNextPage || isLoading) && styles.controlDisabled,
           pressed && hasNextPage && !isLoading && styles.pressed,
         ]}
         testID="reviews-pagination-next"
       >
         <AppText
           variant="caption"
-          style={[styles.buttonLabel, !hasNextPage && styles.buttonLabelDisabled]}
+          style={[
+            styles.controlLabel,
+            (!hasNextPage || isLoading) && styles.controlLabelDisabled,
+          ]}
         >
           Next
         </AppText>
         <Ionicons
           name="chevron-forward"
-          size={16}
-          color={hasNextPage ? colors.textPrimary : colors.textMuted}
+          size={14}
+          color={hasNextPage && !isLoading ? colors.textSecondary : colors.textMuted}
         />
       </Pressable>
     </View>
@@ -93,35 +99,38 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
+    justifyContent: 'center',
+    gap: spacing.md,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  button: {
+  control: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 2,
     minHeight: interaction.touchTarget,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xs,
   },
-  buttonDisabled: {
-    opacity: 0.5,
+  controlDisabled: {
+    opacity: 0.35,
   },
-  buttonLabel: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+  controlLabel: {
+    color: colors.textSecondary,
+    fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 14,
   },
-  buttonLabelDisabled: {
+  controlLabelDisabled: {
     color: colors.textMuted,
   },
   pageLabel: {
+    minWidth: 44,
+    textAlign: 'center',
     fontVariant: ['tabular-nums'],
     fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textMuted,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

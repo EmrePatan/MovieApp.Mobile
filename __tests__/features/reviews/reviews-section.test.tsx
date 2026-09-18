@@ -302,7 +302,7 @@ describe('ReviewsDetailContent', () => {
     );
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    expect(screen.getByTestId('reviews-pagination-label')).toHaveTextContent('Page 1 of 2');
+    expect(screen.getByTestId('reviews-pagination-label')).toHaveTextContent('1 / 2');
   });
 
   it('renders author rating when present on a review', () => {

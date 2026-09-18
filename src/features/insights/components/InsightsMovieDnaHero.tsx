@@ -25,27 +25,20 @@ function HeroScrimLayers() {
   return (
     <>
       <LinearGradient
+        colors={['rgba(10, 10, 15, 0.25)', 'rgba(10, 10, 15, 0.1)', 'rgba(10, 10, 15, 0.25)']}
+        locations={[0, 0.5, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.scrimLayer}
+      />
+      <LinearGradient
         colors={[
-          'rgba(10, 10, 15, 0.92)',
-          'rgba(10, 10, 15, 0.62)',
-          'rgba(10, 10, 15, 0.12)',
-          'transparent',
+          'rgba(10, 10, 15, 0.35)',
+          'rgba(10, 10, 15, 0.2)',
+          'rgba(10, 10, 15, 0.55)',
+          'rgba(10, 10, 15, 0.95)',
         ]}
-        locations={[0, 0.42, 0.72, 1]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.4 }}
-        style={styles.scrimLayer}
-      />
-      <LinearGradient
-        colors={['transparent', 'rgba(10, 10, 15, 0.05)', 'rgba(10, 10, 15, 0.35)']}
-        locations={[0, 0.45, 1]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.scrimLayer}
-      />
-      <LinearGradient
-        colors={['transparent', 'rgba(10, 10, 15, 0.72)', 'rgba(10, 10, 15, 0.98)']}
-        locations={[0, 0.42, 1]}
+        locations={[0, 0.32, 0.62, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
@@ -60,7 +53,6 @@ export function InsightsMovieDnaHero({
 }: InsightsMovieDnaHeroProps) {
   const visibleGenres = movieDna.topGenres.slice(0, 3);
   const gravitation = formatGenreGravitation(visibleGenres.map((genre) => genre.name));
-  const quoteLabel = movieDna.labels[0]?.label ?? null;
   const hasMix =
     movieDna.watchingMix.movieTitleCount + movieDna.watchingMix.seriesTitleCount > 0;
   const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
@@ -69,20 +61,21 @@ export function InsightsMovieDnaHero({
     <>
       <HeroScrimLayers />
       <View style={styles.content}>
+        <View style={styles.mainCluster}>
         <View style={styles.copyBlock}>
-          <AppText variant="caption" style={styles.kicker}>
+          <AppText variant="caption" center style={styles.kicker}>
             Your Movie DNA
           </AppText>
-          <AppText variant="hero" style={styles.headline}>
+          <AppText variant="hero" center style={styles.headline}>
             {movieDna.identityTitle}
           </AppText>
 
           {gravitation ? (
-            <AppText variant="bodySmall" style={styles.description}>
+            <AppText variant="body" center style={styles.description}>
               {gravitation}
             </AppText>
           ) : (
-            <AppText variant="bodySmall" style={styles.description}>
+            <AppText variant="body" center style={styles.description}>
               Keep watching and rating to shape your Movie DNA.
             </AppText>
           )}
@@ -106,29 +99,19 @@ export function InsightsMovieDnaHero({
             accessibilityRole="text"
             accessibilityLabel={`Movies ${movieDna.watchingMix.movieTitleCount}, series ${movieDna.watchingMix.seriesTitleCount}`}
           >
-            <MixCard
+            <MixColumn
               icon="tv-outline"
               label="Series"
               percent={movieDna.watchingMix.seriesSharePercent}
-              count={movieDna.watchingMix.seriesTitleCount}
             />
-            <MixCard
+            <MixColumn
               icon="film-outline"
               label="Movies"
               percent={movieDna.watchingMix.movieSharePercent}
-              count={movieDna.watchingMix.movieTitleCount}
             />
           </View>
         ) : null}
-
-        {quoteLabel ? (
-          <View style={styles.quotePanel} accessibilityRole="text">
-            <Ionicons name="chatbox-ellipses-outline" size={15} color={colors.accentMuted} />
-            <AppText variant="bodySmall" style={styles.quoteText}>
-              {quoteLabel}
-            </AppText>
-          </View>
-        ) : null}
+        </View>
       </View>
     </>
   );
@@ -153,30 +136,27 @@ export function InsightsMovieDnaHero({
   );
 }
 
-function MixCard({
+function MixColumn({
   icon,
   label,
   percent,
-  count,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   percent: number;
-  count: number;
 }) {
   const widthPercent = Math.max(8, Math.min(100, percent));
 
   return (
-    <View style={styles.mixCard}>
+    <View style={styles.mixColumn}>
       <View style={styles.mixHeader}>
-        <Ionicons name={icon} size={14} color={colors.accentStrong} />
+        <Ionicons name={icon} size={15} color={colors.accentStrong} />
         <AppText variant="caption" style={styles.mixLabel}>{label}</AppText>
         <AppText variant="caption" style={styles.mixPercent}>{Math.round(percent)}%</AppText>
       </View>
       <View style={styles.mixTrack}>
         <View style={[styles.mixFill, { width: `${widthPercent}%` }]} />
       </View>
-      <AppText variant="caption" style={styles.mixMeta}>{count} titles</AppText>
     </View>
   );
 }
@@ -185,10 +165,12 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: borderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
   },
   gradient: {
-    minHeight: 380,
-    justifyContent: 'flex-end',
+    minHeight: 420,
+    justifyContent: 'center',
   },
   backdropImage: {
     resizeMode: 'cover',
@@ -205,45 +187,61 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
   },
   content: {
-    padding: spacing.lg,
-    gap: spacing.md,
+    flex: 1,
+    minHeight: 420,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainCluster: {
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+    gap: spacing.lg,
   },
   copyBlock: {
-    gap: spacing.sm,
-    maxWidth: '94%',
+    gap: spacing.md,
+    width: '100%',
+    alignItems: 'center',
   },
   kicker: {
     textTransform: 'uppercase',
-    letterSpacing: 1.8,
+    letterSpacing: 2.2,
+    fontSize: 11,
     color: colors.accentStrong,
     fontWeight: '700',
     ...TEXT_LIFT,
   },
   headline: {
     color: colors.textPrimary,
-    letterSpacing: -0.6,
+    letterSpacing: -0.8,
     fontWeight: '700',
-    fontSize: 34,
-    lineHeight: 40,
+    fontSize: 38,
+    lineHeight: 44,
+    maxWidth: '100%',
     ...TEXT_LIFT,
   },
   description: {
-    lineHeight: 22,
+    lineHeight: 24,
     color: colors.textSecondary,
+    maxWidth: '96%',
     ...TEXT_LIFT,
   },
   genreRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.xs,
+    width: '100%',
   },
   genreChip: {
     borderRadius: borderRadius.full,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderAccent,
     backgroundColor: 'rgba(10, 10, 15, 0.55)',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
   },
   genreText: {
     color: colors.accentStrong,
@@ -252,14 +250,13 @@ const styles = StyleSheet.create({
   },
   mixRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.xl,
+    width: '100%',
+    paddingHorizontal: spacing.sm,
   },
-  mixCard: {
+  mixColumn: {
     flex: 1,
-    gap: spacing.xs,
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: 'rgba(10, 10, 15, 0.68)',
+    gap: spacing.sm,
   },
   mixHeader: {
     flexDirection: 'row',
@@ -276,11 +273,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
-  mixMeta: {
-    color: colors.textMuted,
-  },
   mixTrack: {
-    height: 4,
+    height: 6,
     borderRadius: borderRadius.full,
     backgroundColor: colors.progressTrack,
     overflow: 'hidden',
@@ -289,20 +283,5 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.accent,
     borderRadius: borderRadius.full,
-  },
-  quotePanel: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    backgroundColor: 'rgba(10, 10, 15, 0.72)',
-  },
-  quoteText: {
-    flex: 1,
-    color: colors.textSecondary,
-    fontStyle: 'italic',
-    lineHeight: 22,
-    ...TEXT_LIFT,
   },
 });
