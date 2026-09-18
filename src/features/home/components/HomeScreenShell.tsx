@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { HomeAtmosphere } from './HomeAtmosphere';
 import { colors } from '@/theme/colors';
 
 interface HomeScreenShellProps {
@@ -11,7 +10,6 @@ interface HomeScreenShellProps {
 export function HomeScreenShell({ children }: HomeScreenShellProps) {
   return (
     <View style={styles.screen}>
-      <HomeAtmosphere />
       <SafeAreaView style={styles.foreground} edges={['top', 'left', 'right']}>
         {children}
       </SafeAreaView>
@@ -26,6 +24,5 @@ const styles = StyleSheet.create({
   },
   foreground: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
 });
