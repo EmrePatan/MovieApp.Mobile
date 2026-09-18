@@ -1,8 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3TimeInStories } from '../types';
 import { formatWatchTimeBreakdown } from '../utils/insights-format';
+import { resolveImageUri } from '@/utils/image-url';
 import { InsightsDonutRing } from './InsightsDonutRing';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
@@ -12,11 +14,13 @@ import { borderRadius, spacing } from '@/theme/spacing';
 interface InsightsTimeInStoriesSectionProps {
   timeInStories: InsightsV3TimeInStories;
   year: number;
+  backdropImagePath?: string | null;
 }
 
 export function InsightsTimeInStoriesSection({
   timeInStories,
   year,
+  backdropImagePath,
 }: InsightsTimeInStoriesSectionProps) {
   if (timeInStories.totalMinutes <= 0) {
     return (
@@ -34,6 +38,7 @@ export function InsightsTimeInStoriesSection({
     (timeInStories.movieMinutes / timeInStories.totalMinutes) * 100,
   );
   const totalBreakdown = formatWatchTimeBreakdown(timeInStories.totalMinutes);
+  const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
 
   return (
     <View style={styles.section}>
@@ -43,6 +48,15 @@ export function InsightsTimeInStoriesSection({
       />
       <View style={styles.hero}>
         <View style={styles.donutWrap}>
+          {resolvedBackdrop ? (
+            <View style={styles.donutPhotoClip}>
+              <Image source={{ uri: resolvedBackdrop }} style={styles.donutPhoto} />
+              <LinearGradient
+                colors={['rgba(10, 10, 15, 0.35)', 'rgba(10, 10, 15, 0.88)']}
+                style={styles.donutPhotoScrim}
+              />
+            </View>
+          ) : null}
           <InsightsDonutRing size={176} strokeWidth={13} progressPercent={movieSharePercent} />
           <View style={styles.donutCenter}>
             <AppText variant="hero" center style={styles.duration} numberOfLines={2}>
@@ -115,6 +129,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 196,
+  },
+  donutPhotoClip: {
+    position: 'absolute',
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    overflow: 'hidden',
+  },
+  donutPhoto: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  donutPhotoScrim: {
+    ...StyleSheet.absoluteFillObject,
   },
   donutCenter: {
     position: 'absolute',
