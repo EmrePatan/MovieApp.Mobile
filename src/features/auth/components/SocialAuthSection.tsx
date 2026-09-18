@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
+import { SocialAuthProviderIcon } from './SocialAuthProviderIcon';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -24,12 +24,11 @@ interface SocialAuthSectionProps {
 interface SocialProviderConfig {
   provider: SocialAuthProvider;
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
 }
 
 const SOCIAL_PROVIDERS: SocialProviderConfig[] = [
-  { provider: 'google', label: 'Continue with Google', icon: 'logo-google' },
-  { provider: 'apple', label: 'Continue with Apple', icon: 'logo-apple' },
+  { provider: 'google', label: 'Continue with Google' },
+  { provider: 'apple', label: 'Continue with Apple' },
 ];
 
 export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
@@ -108,7 +107,7 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
               <ActivityIndicator color={colors.textPrimary} />
             ) : (
               <View style={styles.providerContent}>
-                <Ionicons name={entry.icon} size={22} color={colors.textPrimary} />
+                <SocialAuthProviderIcon provider={entry.provider} size={22} />
                 <AppText variant="body" style={styles.providerLabel}>
                   {entry.label}
                 </AppText>
