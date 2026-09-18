@@ -95,18 +95,18 @@ export function InsightsMovieDnaHero({
       <HeroScrimLayers />
       <View style={styles.content}>
         <View style={styles.copyBlock}>
-          <AppText variant="caption" style={styles.kicker}>
+          <AppText variant="caption" center style={styles.kicker}>
             Your Movie DNA
           </AppText>
-          <AppText variant="hero" style={styles.headline}>
+          <AppText variant="hero" center style={styles.headline}>
             {movieDna.identityTitle}
           </AppText>
           {gravitation ? (
-            <AppText variant="bodySmall" style={styles.description}>
+            <AppText variant="bodySmall" center style={styles.description}>
               {gravitation}
             </AppText>
           ) : (
-            <AppText variant="bodySmall" style={styles.description}>
+            <AppText variant="bodySmall" center style={styles.description}>
               Keep watching and rating to shape your Movie DNA.
             </AppText>
           )}
@@ -191,6 +191,8 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: borderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
   },
   gradient: {
     minHeight: 380,
@@ -213,10 +215,14 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.md,
+    alignItems: 'center',
+    width: '100%',
   },
   copyBlock: {
     gap: spacing.sm,
     maxWidth: '94%',
+    width: '100%',
+    alignItems: 'center',
   },
   kicker: {
     textTransform: 'uppercase',
@@ -236,12 +242,15 @@ const styles = StyleSheet.create({
   description: {
     lineHeight: 22,
     color: colors.textPrimary,
+    maxWidth: '96%',
     ...TEXT_LIFT,
   },
   genreRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.xs,
+    width: '100%',
   },
   genreChip: {
     borderRadius: borderRadius.full,
@@ -269,6 +278,8 @@ const styles = StyleSheet.create({
   mixRow: {
     flexDirection: 'row',
     gap: spacing.sm,
+    width: '100%',
+    maxWidth: 340,
   },
   mixCard: {
     flex: 1,
