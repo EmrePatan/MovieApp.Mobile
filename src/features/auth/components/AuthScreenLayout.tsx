@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    gap: spacing.md,
+    gap: spacing.md + spacing.xs,
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.md,
     maxWidth: layout.maxContentWidth,
@@ -132,11 +132,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   hero: {
-    gap: spacing.sm,
+    gap: spacing.sm + 2,
   },
   taglineBlock: {
-    marginTop: spacing.xs,
-    gap: 2,
+    marginTop: spacing.sm,
+    gap: spacing.xs,
   },
   taglineLine: {
     color: 'rgba(245, 245, 247, 0.68)',
@@ -146,8 +146,8 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
   headlineBlock: {
-    marginTop: spacing.sm,
-    gap: 0,
+    marginTop: spacing.sm + spacing.xs,
+    gap: 2,
   },
   headlineLine: {
     color: colors.textPrimary,
@@ -167,17 +167,17 @@ const styles = StyleSheet.create({
   supportingCopy: {
     color: 'rgba(245, 245, 247, 0.78)',
     maxWidth: 320,
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
     lineHeight: 21,
     fontSize: 14,
   },
   formSection: {
     gap: spacing.md,
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   footer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing.sm,
+    marginTop: spacing.sm + spacing.xs,
   },
 });

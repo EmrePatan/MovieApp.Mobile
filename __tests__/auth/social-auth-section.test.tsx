@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
 
@@ -32,9 +33,25 @@ jest.mock('@/auth/social-auth-service', () => ({
 }));
 
 describe('SocialAuthSection', () => {
+  const originalPlatform = Platform.OS;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockSignInWithSocial.mockResolvedValue(undefined);
+    Platform.OS = originalPlatform;
+  });
+
+  afterAll(() => {
+    Platform.OS = originalPlatform;
+  });
+
+  it('renders only Google on Android', () => {
+    Platform.OS = 'android';
+
+    render(<SocialAuthSection />);
+
+    expect(screen.getByLabelText('Continue with Google')).toBeTruthy();
+    expect(screen.queryByLabelText('Continue with Apple')).toBeNull();
   });
 
   it('renders Google action when configured', () => {
