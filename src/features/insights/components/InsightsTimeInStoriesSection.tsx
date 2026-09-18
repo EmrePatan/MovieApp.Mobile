@@ -1,15 +1,18 @@
 import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3TimeInStories } from '../types';
 import {
   formatEquivalentDays,
-  formatEstimatedDuration,
   formatHoursFromMinutes,
+  formatHoursShort,
 } from '../utils/insights-format';
+import { InsightsDonutRing } from './InsightsDonutRing';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsTimeInStoriesSectionProps {
   timeInStories: InsightsV3TimeInStories;
@@ -25,52 +28,82 @@ export function InsightsTimeInStoriesSection({
       <View style={styles.section}>
         <InsightsSectionHeader
           title="Time in Stories"
-          subtitle="Runtime across everything you've watched"
+          subtitle="The hours you've spent in other worlds"
         />
         <InsightsEmptyState message="Runtime data will appear as you build your watch history." />
       </View>
     );
   }
 
+  const movieSharePercent = Math.round(
+    (timeInStories.movieMinutes / timeInStories.totalMinutes) * 100,
+  );
+
   return (
     <View style={styles.section}>
       <InsightsSectionHeader
         title="Time in Stories"
-        subtitle="Runtime across everything you've watched"
+        subtitle="The hours you've spent in other worlds"
       />
-      <View style={styles.hero}>
-        <AppText variant="caption" muted>All-time</AppText>
-        <AppText variant="title" style={styles.hours}>
-          {formatHoursFromMinutes(timeInStories.totalMinutes)} hours
-        </AppText>
-        <AppText variant="bodySmall" muted>
-          About {formatEquivalentDays(timeInStories.totalMinutes)} of stories
-        </AppText>
+      <LinearGradient
+        colors={[colors.accentTint18, colors.surface, colors.background]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
+        <View style={styles.donutWrap}>
+          <InsightsDonutRing size={168} strokeWidth={12} progressPercent={movieSharePercent} />
+          <View style={styles.donutCenter}>
+            <AppText variant="hero" style={styles.hours}>
+              {formatHoursFromMinutes(timeInStories.totalMinutes)}
+            </AppText>
+            <AppText variant="caption" muted>hours</AppText>
+            <AppText variant="bodySmall" muted style={styles.daysCopy}>
+              That&apos;s {formatEquivalentDays(timeInStories.totalMinutes)} in stories
+            </AppText>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.breakdownRow}>
+        <BreakdownCard
+          icon="film-outline"
+          label="Movies"
+          value={formatHoursShort(timeInStories.movieMinutes)}
+        />
+        <BreakdownCard
+          icon="tv-outline"
+          label="Series"
+          value={formatHoursShort(timeInStories.episodeMinutes)}
+        />
       </View>
-      <View style={styles.breakdown}>
-        <BreakdownItem label="Movies" value={formatEstimatedDuration(timeInStories.movieMinutes)} />
-        <BreakdownItem label="Episodes" value={formatEstimatedDuration(timeInStories.episodeMinutes)} />
-        {timeInStories.yearMinutes > 0 ? (
-          <BreakdownItem
-            label={`In ${year}`}
-            value={formatEstimatedDuration(timeInStories.yearMinutes)}
-          />
-        ) : null}
-      </View>
-      {timeInStories.runtimeCoveragePercent > 0 ? (
-        <AppText variant="caption" muted>
-          Runtime coverage {Math.round(timeInStories.runtimeCoveragePercent)}%
-        </AppText>
+
+      {timeInStories.yearMinutes > 0 ? (
+        <View style={styles.yearLine}>
+          <Ionicons name="time-outline" size={14} color={colors.accentMuted} />
+          <AppText variant="caption" muted>
+            In {year}, you&apos;ve watched {formatHoursFromMinutes(timeInStories.yearMinutes)} hours
+          </AppText>
+        </View>
       ) : null}
     </View>
   );
 }
 
-function BreakdownItem({ label, value }: { label: string; value: string }) {
+function BreakdownCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+}) {
   return (
-    <View style={styles.breakdownItem}>
+    <View style={styles.breakdownCard}>
+      <Ionicons name={icon} size={16} color={colors.accent} />
+      <AppText variant="body" style={styles.breakdownValue}>{value}</AppText>
       <AppText variant="caption" muted>{label}</AppText>
-      <AppText variant="bodySmall" style={styles.breakdownValue}>{value}</AppText>
     </View>
   );
 }
@@ -80,23 +113,54 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   hero: {
-    gap: 4,
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderAccent,
+  },
+  donutWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 188,
+  },
+  donutCenter: {
+    position: 'absolute',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: spacing.md,
   },
   hours: {
     color: colors.accentStrong,
+    fontVariant: ['tabular-nums'],
   },
-  breakdown: {
+  daysCopy: {
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  breakdownRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.lg,
-    paddingTop: spacing.xs,
+    gap: spacing.sm,
   },
-  breakdownItem: {
-    gap: 2,
-    minWidth: 88,
+  breakdownCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
   },
   breakdownValue: {
     color: colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  yearLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
 });

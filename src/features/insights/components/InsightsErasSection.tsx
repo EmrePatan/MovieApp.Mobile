@@ -2,11 +2,10 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { InsightsV3Era } from '../types';
-import { InsightsAffinityBar } from './InsightsAffinityBar';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsErasSectionProps {
   era: InsightsV3Era;
@@ -15,6 +14,7 @@ interface InsightsErasSectionProps {
 export function InsightsErasSection({ era }: InsightsErasSectionProps) {
   const knownDecades = era.decades.filter((bucket) => bucket.count > 0);
   const hasKnownEras = knownDecades.length > 0;
+  const maxCount = Math.max(...knownDecades.map((bucket) => bucket.count), 1);
 
   return (
     <View style={styles.section}>
@@ -22,34 +22,44 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
       {!hasKnownEras ? (
         <InsightsEmptyState message="Not enough release-year data to chart your eras yet." />
       ) : (
-        <View style={styles.card}>
+        <View style={styles.body}>
           {era.favoriteDecade ? (
-            <View style={styles.favoriteBlock}>
-              <AppText variant="caption" muted>Favorite decade</AppText>
-              <AppText variant="title" style={styles.favoriteDecade}>
-                {era.favoriteDecade}
-              </AppText>
-            </View>
+            <AppText variant="bodySmall" muted style={styles.favoriteCopy}>
+              {era.favoriteDecade} is your most-watched decade
+            </AppText>
           ) : null}
-          {era.decades.map((bucket) => (
-            <InsightsAffinityBar
-              key={bucket.bucket}
-              label={bucket.bucket}
-              percent={bucket.percent ?? 0}
-              detail={bucket.percent != null ? `${Math.round(bucket.percent)}% · ${bucket.count}` : `${bucket.count}`}
-              accessibilityLabel={
-                bucket.percent != null
-                  ? `${bucket.bucket}, ${Math.round(bucket.percent)} percent, ${bucket.count} titles`
-                  : `${bucket.bucket}, ${bucket.count} titles`
-              }
-            />
-          ))}
+
+          <View style={styles.timeline} accessibilityRole="summary">
+            {era.decades.map((bucket) => {
+              const isFavorite = bucket.bucket === era.favoriteDecade;
+              const heightPercent = bucket.count > 0
+                ? Math.max(12, (bucket.count / maxCount) * 100)
+                : 6;
+              return (
+                <View key={bucket.bucket} style={styles.timelineColumn}>
+                  <View style={styles.timelineTrack}>
+                    <View
+                      style={[
+                        styles.timelineFill,
+                        { height: `${heightPercent}%` },
+                        isFavorite && styles.timelineFillFavorite,
+                      ]}
+                    />
+                  </View>
+                  <AppText variant="caption" muted style={styles.decadeLabel}>
+                    {bucket.bucket.slice(2)}
+                  </AppText>
+                </View>
+              );
+            })}
+          </View>
+
           {era.oldestTitle ? (
-            <View style={styles.oldestRow} testID="insights-oldest-title">
-              <PosterImage uri={era.oldestTitle.posterPath} width={44} height={66} />
+            <View style={styles.oldestCard} testID="insights-oldest-title">
+              <PosterImage uri={era.oldestTitle.posterPath} width={56} height={84} />
               <View style={styles.oldestCopy}>
                 <AppText variant="caption" muted>Oldest watched</AppText>
-                <AppText variant="bodySmall" style={styles.oldestTitle}>
+                <AppText variant="body" style={styles.oldestTitle}>
                   {era.oldestTitle.title}
                 </AppText>
                 {era.oldestTitle.year ? (
@@ -58,6 +68,7 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
               </View>
             </View>
           ) : null}
+
           {era.unknownCount > 0 ? (
             <AppText variant="caption" muted>
               {era.unknownCount} watched titles are missing release-year metadata.
@@ -71,28 +82,60 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
 
 const styles = StyleSheet.create({
   section: {
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
-  card: {
+  body: {
     gap: spacing.md,
   },
-  favoriteBlock: {
-    gap: 2,
+  favoriteCopy: {
+    lineHeight: 20,
   },
-  favoriteDecade: {
-    color: colors.accentStrong,
-  },
-  oldestRow: {
+  timeline: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+    minHeight: 120,
+  },
+  timelineColumn: {
+    flex: 1,
     alignItems: 'center',
-    paddingTop: spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
+    gap: spacing.xs,
+  },
+  timelineTrack: {
+    width: '100%',
+    height: 96,
+    justifyContent: 'flex-end',
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surfaceElevated,
+    overflow: 'hidden',
+  },
+  timelineFill: {
+    width: '100%',
+    backgroundColor: colors.accentMuted,
+    borderTopLeftRadius: borderRadius.sm,
+    borderTopRightRadius: borderRadius.sm,
+  },
+  timelineFillFavorite: {
+    backgroundColor: colors.accent,
+  },
+  decadeLabel: {
+    fontSize: 10,
+    fontVariant: ['tabular-nums'],
+  },
+  oldestCard: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
   },
   oldestCopy: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   oldestTitle: {
     color: colors.textPrimary,

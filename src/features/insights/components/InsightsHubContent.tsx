@@ -17,7 +17,6 @@ import { InsightsRatingsSection } from './InsightsRatingsSection';
 import { InsightsRecordsSection } from './InsightsRecordsSection';
 import { InsightsTasteSection } from './InsightsTasteSection';
 import { InsightsTimeInStoriesSection } from './InsightsTimeInStoriesSection';
-import { InsightsYearSelector } from './InsightsYearSelector';
 import { InsightsYourYearSection } from './InsightsYourYearSection';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -106,18 +105,21 @@ export function InsightsHubContent() {
       }
     >
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-      <InsightsYearSelector
+      <InsightsMovieDnaHero movieDna={insights.movieDna} />
+      <InsightsYourYearSection
+        yourYear={insights.yourYear}
+        year={activeYear}
         years={selectableYears}
-        selectedYear={activeYear}
         onSelectYear={setSelectedYear}
       />
-      <InsightsMovieDnaHero movieDna={insights.movieDna} />
-      <InsightsYourYearSection yourYear={insights.yourYear} year={activeYear} />
       <InsightsTasteSection taste={insights.yourTaste} />
       <InsightsTimeInStoriesSection timeInStories={insights.timeInStories} year={activeYear} />
       <InsightsRatingsSection ratings={insights.yourRatings} />
       <InsightsErasSection era={insights.yourEra} />
-      <InsightsRecordsSection records={insights.yourRecords} />
+      <InsightsRecordsSection
+        records={insights.yourRecords}
+        favoriteWeekday={insights.yourYear.favoriteWeekday}
+      />
       <InsightsMilestonesSection achievements={insights.achievements} />
     </ScrollView>
   );

@@ -7,8 +7,7 @@ describe('InsightsMilestonesSection', () => {
     render(<InsightsMilestonesSection achievements={insightsV3Fixture.achievements} />);
 
     expect(screen.getByLabelText(/First movie watched, achieved/)).toBeTruthy();
-    expect(screen.getByText(/Achieved/)).toBeTruthy();
     expect(screen.getByLabelText(/10 movies watched, in progress, 7 of 10/)).toBeTruthy();
-    expect(screen.queryByText(/Achieved Nov/)).toBeNull();
+    expect(screen.getByText('1 of 2 unlocked')).toBeTruthy();
   });
 });

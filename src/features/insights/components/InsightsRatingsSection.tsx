@@ -1,11 +1,12 @@
 import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3Ratings } from '../types';
 import { formatAverageStarRating } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsRatingsSectionProps {
   ratings: InsightsV3Ratings;
@@ -13,6 +14,7 @@ interface InsightsRatingsSectionProps {
 
 export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps) {
   const maxCount = Math.max(...ratings.distribution.map((item) => item.count), 1);
+  const sortedDistribution = [...ratings.distribution].sort((a, b) => a.stars - b.stars);
 
   return (
     <View style={styles.section}>
@@ -21,142 +23,149 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
         <InsightsEmptyState message="No ratings yet. Rate titles to build this view." />
       ) : (
         <View style={styles.card}>
-          <View style={styles.summaryRow}>
-            <View>
-              <AppText variant="caption" muted>Average</AppText>
-              <AppText variant="title" style={styles.average}>
-                {formatAverageStarRating(ratings.averageStars)}★
-              </AppText>
-            </View>
-            <View>
-              <AppText variant="caption" muted>Total ratings</AppText>
-              <AppText variant="body" style={styles.count}>{ratings.count}</AppText>
-            </View>
+          <View style={styles.heroRow}>
+            <AppText variant="hero" style={styles.average}>
+              {formatAverageStarRating(ratings.averageStars)}
+            </AppText>
+            <StarRow rating={ratings.averageStars ?? 0} />
           </View>
-          {ratings.distribution.length > 0 ? (
-            <View style={styles.distribution}>
-              {ratings.distribution.map((item) => {
-                const widthPercent = Math.max(6, (item.count / maxCount) * 100);
+
+          {sortedDistribution.length > 0 ? (
+            <View style={styles.distribution} accessibilityRole="summary">
+              {sortedDistribution.map((item) => {
+                const heightPercent = Math.max(10, (item.count / maxCount) * 100);
                 return (
                   <View
                     key={item.stars}
-                    style={styles.distributionRow}
+                    style={styles.distributionColumn}
                     accessibilityRole="text"
                     accessibilityLabel={`${item.stars} stars, ${item.count} ratings`}
                   >
-                    <AppText variant="caption" style={styles.starLabel}>{item.stars}★</AppText>
-                    <View style={styles.barTrack}>
-                      <View style={[styles.barFill, { width: `${widthPercent}%` }]} />
+                    <View style={styles.distributionTrack}>
+                      <View style={[styles.distributionFill, { height: `${heightPercent}%` }]} />
                     </View>
-                    <AppText variant="caption" muted style={styles.countLabel}>
-                      {item.count}
+                    <AppText variant="caption" muted style={styles.starLabel}>
+                      {item.stars}
                     </AppText>
                   </View>
                 );
               })}
             </View>
           ) : null}
-          {ratings.highestRatedGenre || ratings.lowestRatedGenre ? (
-            <View style={styles.genreRow}>
-              {ratings.highestRatedGenre ? (
-                <GenreHighlight
-                  label="Highest genre"
-                  name={ratings.highestRatedGenre.name}
-                  stars={ratings.highestRatedGenre.averageStars}
-                />
-              ) : null}
-              {ratings.lowestRatedGenre ? (
-                <GenreHighlight
-                  label="Lowest genre"
-                  name={ratings.lowestRatedGenre.name}
-                  stars={ratings.lowestRatedGenre.averageStars}
-                />
-              ) : null}
-            </View>
-          ) : null}
+
+          <View style={styles.statRow}>
+            <StatChip label={`${ratings.count} ratings`} />
+            {ratings.highestRatedGenre ? (
+              <StatChip
+                label={`${formatAverageStarRating(ratings.highestRatedGenre.averageStars)} highest genre (${ratings.highestRatedGenre.name})`}
+              />
+            ) : null}
+            {ratings.lowestRatedGenre ? (
+              <StatChip
+                label={`${formatAverageStarRating(ratings.lowestRatedGenre.averageStars)} lowest genre (${ratings.lowestRatedGenre.name})`}
+              />
+            ) : null}
+          </View>
         </View>
       )}
     </View>
   );
 }
 
-function GenreHighlight({
-  label,
-  name,
-  stars,
-}: {
-  label: string;
-  name: string;
-  stars: number;
-}) {
+function StarRow({ rating }: { rating: number }) {
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating - fullStars >= 0.25 && rating - fullStars < 0.75;
+  const roundUp = rating - fullStars >= 0.75;
+
   return (
-    <View style={styles.genreHighlight}>
+    <View style={styles.starRow}>
+      {[1, 2, 3, 4, 5].map((star) => {
+        const filled = star <= fullStars || (roundUp && star === fullStars + 1);
+        const half = hasHalf && star === fullStars + 1;
+        const iconName = filled ? 'star' : half ? 'star-half' : 'star-outline';
+        return (
+          <Ionicons
+            key={star}
+            name={iconName}
+            size={18}
+            color={colors.accent}
+          />
+        );
+      })}
+    </View>
+  );
+}
+
+function StatChip({ label }: { label: string }) {
+  return (
+    <View style={styles.statChip}>
       <AppText variant="caption" muted>{label}</AppText>
-      <AppText variant="bodySmall" style={styles.genreName}>{name}</AppText>
-      <AppText variant="caption" muted>{formatAverageStarRating(stars)}★</AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   section: {
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   card: {
     gap: spacing.md,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.lg,
-  },
-  average: {
-    color: colors.accent,
-  },
-  count: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  distribution: {
-    gap: spacing.sm,
-  },
-  distributionRow: {
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
   },
-  starLabel: {
-    width: 28,
-    color: colors.textPrimary,
+  average: {
+    color: colors.accentStrong,
+    fontVariant: ['tabular-nums'],
   },
-  barTrack: {
-    flex: 1,
-    height: 8,
-    borderRadius: 999,
-    backgroundColor: colors.progressTrack,
-    overflow: 'hidden',
-  },
-  barFill: {
-    height: '100%',
-    backgroundColor: colors.accent,
-    borderRadius: 999,
-  },
-  countLabel: {
-    width: 24,
-    textAlign: 'right',
-  },
-  genreRow: {
+  starRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.lg,
+    gap: 2,
     paddingTop: spacing.xs,
   },
-  genreHighlight: {
-    gap: 2,
-    minWidth: 120,
+  distribution: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+    minHeight: 112,
+    paddingTop: spacing.sm,
   },
-  genreName: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+  distributionColumn: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  distributionTrack: {
+    width: '100%',
+    height: 88,
+    justifyContent: 'flex-end',
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surfaceElevated,
+    overflow: 'hidden',
+  },
+  distributionFill: {
+    width: '100%',
+    backgroundColor: colors.accent,
+    borderTopLeftRadius: borderRadius.sm,
+    borderTopRightRadius: borderRadius.sm,
+  },
+  starLabel: {
+    fontVariant: ['tabular-nums'],
+  },
+  statRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  statChip: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
   },
 });

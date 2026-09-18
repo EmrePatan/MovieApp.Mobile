@@ -25,13 +25,19 @@ describe('insights sections', () => {
 
   it('renders monthly activity and year stats without heatmap cells', () => {
     render(
-      <InsightsYourYearSection yourYear={insightsV3Fixture.yourYear} year={2026} />,
+      <InsightsYourYearSection
+        yourYear={insightsV3Fixture.yourYear}
+        year={2026}
+        years={[2026, 2025]}
+        onSelectYear={jest.fn()}
+      />,
     );
 
-    expect(screen.getByText('Active days')).toBeTruthy();
+    expect(screen.getByText('active days')).toBeTruthy();
     expect(screen.getByText('42')).toBeTruthy();
     expect(screen.getByText('Jun 2026')).toBeTruthy();
     expect(screen.getByText('Saturday')).toBeTruthy();
+    expect(screen.getByText(/watched something on/i)).toBeTruthy();
     expect(screen.queryByLabelText(/before you joined MovieApp/)).toBeNull();
   });
 
@@ -61,7 +67,7 @@ describe('insights sections', () => {
 
     render(<InsightsRatingsSection ratings={insightsV3Fixture.yourRatings} />);
 
-    expect(screen.getByText('Highest genre')).toBeTruthy();
-    expect(screen.getByText('Lowest genre')).toBeTruthy();
+    expect(screen.getByText(/highest genre \(Sci-Fi\)/)).toBeTruthy();
+    expect(screen.getByText(/lowest genre \(Comedy\)/)).toBeTruthy();
   });
 });

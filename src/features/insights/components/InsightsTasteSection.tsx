@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import type { InsightsV3Taste } from '../types';
+import { formatDominantGenreHeadline } from '../utils/insights-format';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
@@ -13,10 +15,14 @@ interface InsightsTasteSectionProps {
 
 export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
   const genres = taste.genres.slice(0, 6);
+  const dominantGenre = genres[0]?.name ?? null;
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Your Taste" subtitle="The genres that define your history" />
+      <InsightsSectionHeader
+        title="Your Taste"
+        subtitle={dominantGenre ? formatDominantGenreHeadline(dominantGenre) : undefined}
+      />
       {genres.length === 0 ? (
         <InsightsEmptyState message="Not enough history yet to map your taste." />
       ) : (
@@ -31,15 +37,20 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
           ))}
           {taste.risingGenre ? (
             <View style={styles.risingCard} testID="insights-rising-genre">
-              <AppText variant="caption" muted style={styles.risingLabel}>
-                Rising this year
-              </AppText>
-              <AppText variant="bodySmall" style={styles.risingTitle}>
-                {taste.risingGenre.name}
-              </AppText>
-              <AppText variant="caption" muted>
-                {Math.round(taste.risingGenre.shareDeltaPercent)} pts since last year
-              </AppText>
+              <View style={styles.risingIcon}>
+                <Ionicons name="trending-up-outline" size={16} color={colors.accent} />
+              </View>
+              <View style={styles.risingCopy}>
+                <AppText variant="caption" muted style={styles.risingLabel}>
+                  Rising taste
+                </AppText>
+                <AppText variant="bodySmall" style={styles.risingTitle}>
+                  {taste.risingGenre.name}
+                </AppText>
+                <AppText variant="caption" muted>
+                  +{Math.round(taste.risingGenre.shareDeltaPercent)} pts since last year
+                </AppText>
+              </View>
             </View>
           ) : null}
         </View>
@@ -50,16 +61,32 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
 
 const styles = StyleSheet.create({
   section: {
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   card: {
     gap: spacing.md,
   },
   risingCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
+  },
+  risingIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentTint12,
+  },
+  risingCopy: {
+    flex: 1,
     gap: 2,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
   },
   risingLabel: {
     textTransform: 'uppercase',

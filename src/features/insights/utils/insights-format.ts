@@ -121,3 +121,69 @@ export function buildSelectableYears(memberSinceUtc: string, currentYear: number
 
   return years;
 }
+
+function isLeapYear(year: number): boolean {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+export function getElapsedDaysInYear(year: number, asOf = new Date()): number {
+  if (year < asOf.getFullYear()) {
+    return isLeapYear(year) ? 366 : 365;
+  }
+
+  if (year > asOf.getFullYear()) {
+    return 0;
+  }
+
+  const start = new Date(year, 0, 1);
+  const diff = Math.floor((asOf.getTime() - start.getTime()) / 86_400_000) + 1;
+  return Math.max(diff, 1);
+}
+
+export function formatActiveYearDayPercent(
+  activeDays: number,
+  year: number,
+  asOf = new Date(),
+): number | null {
+  if (activeDays <= 0) {
+    return null;
+  }
+
+  const elapsedDays = getElapsedDaysInYear(year, asOf);
+  if (elapsedDays <= 0) {
+    return null;
+  }
+
+  return Math.min(100, Math.round((activeDays / elapsedDays) * 100));
+}
+
+export function formatGenreGravitation(genreNames: string[]): string | null {
+  if (genreNames.length === 0) {
+    return null;
+  }
+
+  if (genreNames.length === 1) {
+    return `You gravitate toward ${genreNames[0]}.`;
+  }
+
+  if (genreNames.length === 2) {
+    return `You gravitate toward ${genreNames[0]} and ${genreNames[1]}.`;
+  }
+
+  const last = genreNames[genreNames.length - 1];
+  const rest = genreNames.slice(0, -1).join(', ');
+  return `You gravitate toward ${rest} and ${last}.`;
+}
+
+export function formatDominantGenreHeadline(genreName: string): string {
+  return `${genreName} dominates your library`;
+}
+
+export function formatHoursShort(totalMinutes: number): string {
+  if (totalMinutes <= 0) {
+    return '0h';
+  }
+
+  const hours = Math.round(totalMinutes / 60);
+  return `${hours}h`;
+}

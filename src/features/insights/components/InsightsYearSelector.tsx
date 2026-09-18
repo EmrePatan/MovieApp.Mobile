@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -7,12 +7,14 @@ interface InsightsYearSelectorProps {
   years: number[];
   selectedYear: number;
   onSelectYear: (year: number) => void;
+  compact?: boolean;
 }
 
 export function InsightsYearSelector({
   years,
   selectedYear,
   onSelectYear,
+  compact = false,
 }: InsightsYearSelectorProps) {
   if (years.length <= 1) {
     return null;
@@ -22,7 +24,7 @@ export function InsightsYearSelector({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, compact && styles.contentCompact]}
       testID="insights-year-selector"
     >
       {years.map((year) => {
@@ -36,6 +38,7 @@ export function InsightsYearSelector({
             onPress={() => onSelectYear(year)}
             style={({ pressed }) => [
               styles.chip,
+              compact && styles.chipCompact,
               selected && styles.chipSelected,
               pressed && styles.chipPressed,
             ]}
@@ -56,6 +59,10 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.xs,
   },
+  contentCompact: {
+    paddingVertical: 0,
+    justifyContent: 'flex-end',
+  },
   chip: {
     borderRadius: borderRadius.full,
     borderWidth: StyleSheet.hairlineWidth,
@@ -63,6 +70,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     backgroundColor: colors.surface,
+  },
+  chipCompact: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
   chipSelected: {
     borderColor: colors.borderAccent,

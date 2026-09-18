@@ -2,7 +2,6 @@ import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsAchievement } from '../types';
-import { formatAchievedDate } from '../utils/insights-format';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -16,61 +15,65 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
     return null;
   }
 
+  const unlockedCount = achievements.filter((achievement) => achievement.achieved).length;
+
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Achievements" subtitle="Milestones from your watching journey" />
-      <View style={styles.list}>
+      <InsightsSectionHeader
+        title="Achievements"
+        subtitle="Milestones from your watching journey"
+      />
+      <View style={styles.badgeRow}>
         {achievements.map((achievement) => (
-          <AchievementRow key={achievement.id} achievement={achievement} />
+          <AchievementBadge key={achievement.id} achievement={achievement} />
         ))}
+      </View>
+      <View style={styles.summaryRow}>
+        <Ionicons name="trophy-outline" size={14} color={colors.accentMuted} />
+        <AppText variant="caption" muted>
+          {unlockedCount} of {achievements.length} unlocked
+        </AppText>
+      </View>
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${Math.round((unlockedCount / achievements.length) * 100)}%` },
+          ]}
+        />
       </View>
     </View>
   );
 }
 
-function AchievementRow({ achievement }: { achievement: InsightsAchievement }) {
-  const progressPercent = achievement.targetValue > 0
-    ? Math.min(100, Math.round((achievement.currentValue / achievement.targetValue) * 100))
-    : 0;
-
+function AchievementBadge({ achievement }: { achievement: InsightsAchievement }) {
   const accessibilityLabel = achievement.achieved
     ? `${achievement.title}, achieved`
     : `${achievement.title}, in progress, ${achievement.currentValue} of ${achievement.targetValue}`;
 
   return (
     <View
-      style={[styles.row, achievement.achieved && styles.rowAchieved]}
+      style={[styles.badge, achievement.achieved ? styles.badgeUnlocked : styles.badgeLocked]}
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel}
     >
       <Ionicons
-        name={achievement.achieved ? 'ribbon' : 'ribbon-outline'}
-        size={15}
-        color={achievement.achieved ? colors.progressCompleted : colors.accentMuted}
+        name={achievement.achieved ? 'ribbon' : 'lock-closed-outline'}
+        size={18}
+        color={achievement.achieved ? colors.accent : colors.textMuted}
       />
-      <View style={styles.copy}>
-        <AppText variant="bodySmall" style={styles.title} numberOfLines={2}>
-          {achievement.title}
+      <AppText
+        variant="caption"
+        style={[styles.badgeTitle, !achievement.achieved && styles.badgeTitleLocked]}
+        numberOfLines={2}
+      >
+        {achievement.title}
+      </AppText>
+      {!achievement.achieved ? (
+        <AppText variant="caption" muted style={styles.badgeProgress}>
+          {achievement.currentValue}/{achievement.targetValue}
         </AppText>
-        {achievement.achieved ? (
-          achievement.achievedAt ? (
-            <AppText variant="caption" muted>
-              Achieved {formatAchievedDate(achievement.achievedAt)}
-            </AppText>
-          ) : (
-            <AppText variant="caption" muted>Achieved</AppText>
-          )
-        ) : (
-          <>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-            </View>
-            <AppText variant="caption" muted>
-              {achievement.currentValue} / {achievement.targetValue}
-            </AppText>
-          </>
-        )}
-      </View>
+      ) : null}
     </View>
   );
 }
@@ -78,29 +81,51 @@ function AchievementRow({ achievement }: { achievement: InsightsAchievement }) {
 const styles = StyleSheet.create({
   section: {
     gap: spacing.sm,
-    opacity: 0.96,
+    opacity: 0.92,
+    paddingBottom: spacing.md,
   },
-  list: {
-    gap: spacing.xs,
-  },
-  row: {
+  badgeRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexWrap: 'wrap',
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
   },
-  rowAchieved: {
-    opacity: 0.9,
+  badge: {
+    width: 92,
+    minHeight: 104,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    padding: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  copy: {
-    flex: 1,
-    gap: 4,
+  badgeUnlocked: {
+    borderColor: colors.borderAccent,
+    backgroundColor: colors.accentTint12,
   },
-  title: {
+  badgeLocked: {
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surface,
+    opacity: 0.85,
+  },
+  badgeTitle: {
     color: colors.textPrimary,
+    textAlign: 'center',
+    fontWeight: '600',
+    lineHeight: 14,
+  },
+  badgeTitleLocked: {
+    color: colors.textSecondary,
     fontWeight: '500',
+  },
+  badgeProgress: {
+    fontVariant: ['tabular-nums'],
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   progressTrack: {
     height: 4,

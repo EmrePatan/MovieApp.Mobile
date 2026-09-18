@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   track: {
-    height: 8,
+    height: 10,
     borderRadius: 999,
     backgroundColor: colors.progressTrack,
     overflow: 'hidden',
