@@ -131,17 +131,13 @@ function collectTestIds(node: { props?: { testID?: string }; children?: unknown[
 function mockCountQuery(totalCount: number) {
   return {
     data: {
-      pages: [
-        {
-          items: [],
-          page: 1,
-          pageSize: REVIEW_COUNT_PAGE_SIZE,
-          totalCount,
-          totalPages: totalCount,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        },
-      ],
+      items: [],
+      page: 1,
+      pageSize: REVIEW_COUNT_PAGE_SIZE,
+      totalCount,
+      totalPages: totalCount,
+      hasNextPage: false,
+      hasPreviousPage: false,
     },
     isLoading: false,
     isError: false,

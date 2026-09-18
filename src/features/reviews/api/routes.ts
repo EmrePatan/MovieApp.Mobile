@@ -2,11 +2,20 @@ function encodePathSegment(value: string): string {
   return encodeURIComponent(value);
 }
 
-export function buildMovieReviewsPath(movieId: string, page = 1, pageSize = 20): string {
+export function buildMovieReviewsPath(
+  movieId: string,
+  page = 1,
+  pageSize = 20,
+  sort?: string,
+): string {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),
   });
+
+  if (sort) {
+    params.set('sort', sort);
+  }
 
   return `/api/reviews/movies/${encodePathSegment(movieId)}?${params.toString()}`;
 }
@@ -27,11 +36,20 @@ export function buildDeleteMovieReviewPath(movieId: string): string {
   return `/api/reviews/movies/${encodePathSegment(movieId)}`;
 }
 
-export function buildTvReviewsPath(tvShowId: string, page = 1, pageSize = 20): string {
+export function buildTvReviewsPath(
+  tvShowId: string,
+  page = 1,
+  pageSize = 20,
+  sort?: string,
+): string {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),
   });
+
+  if (sort) {
+    params.set('sort', sort);
+  }
 
   return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}?${params.toString()}`;
 }

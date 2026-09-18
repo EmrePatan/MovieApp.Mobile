@@ -1,8 +1,18 @@
-export const DEFAULT_REVIEW_PAGE_SIZE = 20;
+export const DEFAULT_REVIEW_PAGE_SIZE = 10;
 export const REVIEW_COUNT_PAGE_SIZE = 1;
 export const MAX_REVIEW_CONTENT_LENGTH = 5000;
 
 export type ReviewContentType = 'movie' | 'tv';
+
+export type ReviewSortOption = 'newest' | 'oldest' | 'ratingDesc' | 'ratingAsc';
+
+export const DEFAULT_REVIEW_SORT: ReviewSortOption = 'newest';
+
+export interface ReviewsQueryOptions {
+  page?: number;
+  pageSize?: number;
+  sort?: ReviewSortOption;
+}
 
 export interface ReviewAuthorResponse {
   id: string;
@@ -15,6 +25,7 @@ export interface ReviewResponse {
   content: string;
   createdAt: string;
   updatedAt: string;
+  userRating?: number | null;
 }
 
 export interface ReviewListResponse {

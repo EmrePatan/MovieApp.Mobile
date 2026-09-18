@@ -76,7 +76,7 @@ describe('ReviewComposer', () => {
   it('renders elevated composer shell', () => {
     render(<ReviewComposer submitLabel="Post review" onSubmit={jest.fn()} />);
     expect(screen.getByTestId('review-composer')).toBeTruthy();
-    expect(screen.getByText('Your thoughts')).toBeTruthy();
+    expect(screen.getByText('Write review')).toBeTruthy();
   });
 
   it('shows server error and closes via header action', () => {

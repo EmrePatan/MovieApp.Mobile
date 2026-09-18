@@ -1,9 +1,13 @@
 import { useMovieReviews } from './useMovieReviews';
 import { useTvShowReviews } from './useTvShowReviews';
-import type { ReviewContentType } from '../types';
+import type { ReviewContentType, ReviewsQueryOptions } from '../types';
 
-export function useReviewsQuery(contentType: ReviewContentType, contentId: string, pageSize?: number) {
-  const movieQuery = useMovieReviews(contentType === 'movie' ? contentId : '', pageSize);
-  const tvQuery = useTvShowReviews(contentType === 'tv' ? contentId : '', pageSize);
+export function useReviewsQuery(
+  contentType: ReviewContentType,
+  contentId: string,
+  options: ReviewsQueryOptions = {},
+) {
+  const movieQuery = useMovieReviews(contentType === 'movie' ? contentId : '', options);
+  const tvQuery = useTvShowReviews(contentType === 'tv' ? contentId : '', options);
   return contentType === 'movie' ? movieQuery : tvQuery;
 }

@@ -42,6 +42,9 @@ describe('reviews api routes', () => {
     expect(buildMovieReviewsPath(movieId, 1, 20)).toBe(
       `/api/reviews/movies/${movieId}?page=1&pageSize=20`,
     );
+    expect(buildMovieReviewsPath(movieId, 2, 10, 'ratingDesc')).toBe(
+      `/api/reviews/movies/${movieId}?page=2&pageSize=10&sort=ratingDesc`,
+    );
     expect(buildMovieMyReviewPath(movieId)).toBe(`/api/reviews/movies/${movieId}/me`);
     expect(buildCreateMovieReviewPath(movieId)).toBe(`/api/reviews/movies/${movieId}`);
     expect(buildUpdateMovieReviewPath(movieId)).toBe(`/api/reviews/movies/${movieId}`);
@@ -75,12 +78,15 @@ describe('reviews api client', () => {
       hasPreviousPage: false,
     });
 
-    await getMovieReviews(movieId, 1, 20);
+    await getMovieReviews(movieId, 1, 20, 'newest');
 
-    expect(api.get).toHaveBeenCalledWith(`/api/reviews/movies/${movieId}?page=1&pageSize=20`, {
+    expect(api.get).toHaveBeenCalledWith(
+      `/api/reviews/movies/${movieId}?page=1&pageSize=20&sort=newest`,
+      {
       authenticated: false,
       signal: undefined,
-    });
+      },
+    );
   });
 
   it('loads public tv reviews without auth', async () => {

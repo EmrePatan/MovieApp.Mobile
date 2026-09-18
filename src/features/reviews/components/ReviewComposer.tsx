@@ -15,6 +15,7 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { interaction } from '@/theme/interaction';
+import { layout } from '@/theme/layout';
 
 interface ReviewComposerProps {
   initialContent?: string;
@@ -92,17 +93,9 @@ function ReviewComposerInner({
   return (
     <View style={styles.container} testID="review-composer">
       <View style={styles.header}>
-        <View style={styles.headerIcon}>
-          <Ionicons name="create-outline" size={16} color={colors.accent} />
-        </View>
-        <View style={styles.headerCopy}>
-          <AppText variant="bodySmall" style={styles.headerTitle}>
-            Your thoughts
-          </AppText>
-          <AppText variant="caption" muted>
-            Honest takes welcome — emoji too.
-          </AppText>
-        </View>
+        <AppText variant="subtitle" style={styles.headerTitle}>
+          Write review
+        </AppText>
         {onCancel ? (
           <Pressable
             accessibilityRole="button"
@@ -191,38 +184,27 @@ export function ReviewComposer(props: ReviewComposerProps) {
 const styles = StyleSheet.create({
   container: {
     gap: spacing.md,
+    marginHorizontal: layout.screenPaddingHorizontal,
     backgroundColor: colors.surfaceElevated,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  headerIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  headerCopy: {
-    flex: 1,
-    gap: 2,
-  },
   headerTitle: {
+    flex: 1,
     color: colors.textPrimary,
-    fontWeight: '600',
-    letterSpacing: 0.1,
+    letterSpacing: 0.15,
   },
   closeButton: {
-    width: 32,
-    height: 32,
+    width: layout.touchTarget,
+    height: layout.touchTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -287,9 +269,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingTop: spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
   },
   submitButton: {
     minHeight: 40,

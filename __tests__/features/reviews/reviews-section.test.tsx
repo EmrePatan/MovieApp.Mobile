@@ -1,9 +1,10 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
+import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import { useMyReview } from '@/features/reviews/hooks/useMyReview';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';
@@ -17,7 +18,6 @@ import type { ReviewResponse } from '@/features/reviews/types';
 const mockCreateMutate = jest.fn();
 const mockUpdateMutate = jest.fn();
 const mockDeleteMutate = jest.fn();
-const mockFetchNextPage = jest.fn();
 const mockRefetch = jest.fn();
 const mockRequireAuth = jest.fn(() => true);
 
@@ -44,18 +44,14 @@ jest.mock('@/features/reviews/hooks/useMyReview', () => ({
   useMyReview: jest.fn(),
 }));
 
+jest.mock('@/features/ratings/hooks/useRatings', () => ({
+  useMyRating: jest.fn(),
+}));
+
 jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
   useCreateReviewMutation: jest.fn(),
   useUpdateReviewMutation: jest.fn(),
   useDeleteReviewMutation: jest.fn(),
-}));
-
-const mockScrollToCenter = jest.fn();
-
-jest.mock('@/features/details/shared/context/DetailScrollContext', () => ({
-  useDetailScroll: () => ({
-    scrollToCenter: mockScrollToCenter,
-  }),
 }));
 
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
@@ -80,25 +76,18 @@ const myReview: ReviewResponse = {
 function mockReviewsQuery(overrides: Record<string, unknown> = {}) {
   return {
     data: {
-      pages: [
-        {
-          items: [otherReview],
-          page: 1,
-          pageSize: 20,
-          totalCount: 1,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        },
-      ],
+      items: [otherReview],
+      page: 1,
+      pageSize: 10,
+      totalCount: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
     },
     isLoading: false,
     isError: false,
     error: null,
-    hasNextPage: false,
-    isFetchingNextPage: false,
     isFetching: false,
-    fetchNextPage: mockFetchNextPage,
     refetch: mockRefetch,
     ...overrides,
   };
@@ -115,6 +104,10 @@ describe('ReviewsDetailContent', () => {
     (useMovieReviews as jest.Mock).mockReturnValue(mockReviewsQuery());
     (useTvShowReviews as jest.Mock).mockReturnValue(mockReviewsQuery());
     (useMyReview as jest.Mock).mockReturnValue({
+      data: null,
+      isLoading: false,
+    });
+    (useMyRating as jest.Mock).mockReturnValue({
       data: null,
       isLoading: false,
     });
@@ -136,7 +129,8 @@ describe('ReviewsDetailContent', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByText('Reviews')).toBeTruthy();
-    expect(screen.getByText('1 review')).toBeTruthy();
+    expect(screen.getByTestId('reviews-total-count')).toHaveTextContent('1 review');
+    expect(screen.getByText('Community · 1 review')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
@@ -145,23 +139,19 @@ describe('ReviewsDetailContent', () => {
     (useMovieReviews as jest.Mock).mockReturnValue(
       mockReviewsQuery({
         data: {
-          pages: [
-            {
-              items: [],
-              page: 1,
-              pageSize: 20,
-              totalCount: 0,
-              totalPages: 0,
-              hasNextPage: false,
-              hasPreviousPage: false,
-            },
-          ],
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
         },
       }),
     );
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    expect(screen.getByText('No reviews yet')).toBeTruthy();
+    expect(screen.getByText('No reviews yet.')).toBeTruthy();
     expect(screen.getByText('Be the first to share your thoughts.')).toBeTruthy();
   });
 
@@ -184,7 +174,7 @@ describe('ReviewsDetailContent', () => {
     mockRequireAuth.mockReturnValue(false);
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    fireEvent.press(screen.getByText('Write a review'));
+    fireEvent.press(screen.getByText('Write'));
 
     expect(mockCreateMutate).not.toHaveBeenCalled();
     expect(screen.getByText('Please sign in to write a review.')).toBeTruthy();
@@ -193,11 +183,8 @@ describe('ReviewsDetailContent', () => {
   it('opens composer and submits a new review', async () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
-    fireEvent.press(screen.getByText('Write a review'));
+    fireEvent.press(screen.getByText('Write'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
-    await waitFor(() => {
-      expect(mockScrollToCenter).toHaveBeenCalled();
-    });
     fireEvent.changeText(screen.getByLabelText('Review'), 'Great film.');
     fireEvent.press(screen.getByText('Post review'));
 
@@ -218,7 +205,7 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByText('Your review')).toBeTruthy();
     expect(screen.getByText('Jane Doe')).toBeTruthy();
     expect(screen.getByText('You')).toBeTruthy();
-    expect(screen.queryByText('Write a review')).toBeNull();
+    expect(screen.queryByText('Write')).toBeNull();
   });
 
   it('edits own review', () => {
@@ -258,20 +245,46 @@ describe('ReviewsDetailContent', () => {
     alertSpy.mockRestore();
   });
 
-  it('loads more reviews when next page is available', () => {
+  it('shows pagination controls when multiple pages are available', () => {
     (useMovieReviews as jest.Mock).mockReturnValue(
       mockReviewsQuery({
-        hasNextPage: true,
+        data: {
+          items: [otherReview],
+          page: 1,
+          pageSize: 10,
+          totalCount: 12,
+          totalPages: 2,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
       }),
     );
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    fireEvent.press(screen.getByText('Load more reviews'));
-    expect(mockFetchNextPage).toHaveBeenCalled();
+    expect(screen.getByTestId('reviews-pagination-label')).toHaveTextContent('Page 1 of 2');
+  });
+
+  it('renders author rating when present on a review', () => {
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [{ ...otherReview, userRating: 8 }],
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    expect(screen.getByTestId('review-author-rating')).toHaveTextContent('4.0');
   });
 
   it('uses tv review query for tv content', () => {
     render(<ReviewsDetailContent contentType="tv" contentId={movieId} />);
-    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, undefined);
+    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, { page: 1, sort: 'newest' });
   });
 });

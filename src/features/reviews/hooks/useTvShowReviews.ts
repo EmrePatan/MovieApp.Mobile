@@ -1,16 +1,22 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getTvReviews } from '../api/reviews-api';
-import { tvReviewsInfiniteQueryKey } from './review-query-keys';
-import { DEFAULT_REVIEW_PAGE_SIZE } from '../types';
+import { tvReviewsQueryKey } from './review-query-keys';
+import {
+  DEFAULT_REVIEW_PAGE_SIZE,
+  DEFAULT_REVIEW_SORT,
+  type ReviewsQueryOptions,
+} from '../types';
 
-export function useTvShowReviews(tvShowId: string, pageSize = DEFAULT_REVIEW_PAGE_SIZE) {
-  return useInfiniteQuery({
-    queryKey: tvReviewsInfiniteQueryKey(tvShowId, pageSize),
-    queryFn: ({ pageParam, signal }) => getTvReviews(tvShowId, pageParam, pageSize, signal),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
+export function useTvShowReviews(tvShowId: string, options: ReviewsQueryOptions = {}) {
+  const page = options.page ?? 1;
+  const pageSize = options.pageSize ?? DEFAULT_REVIEW_PAGE_SIZE;
+  const sort = options.sort ?? DEFAULT_REVIEW_SORT;
+
+  return useQuery({
+    queryKey: tvReviewsQueryKey(tvShowId, page, pageSize, sort),
+    queryFn: ({ signal }) => getTvReviews(tvShowId, page, pageSize, sort, signal),
     enabled: tvShowId.length > 0,
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
 }

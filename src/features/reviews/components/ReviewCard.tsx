@@ -7,11 +7,13 @@ import {
   formatReviewDateLabel,
   getAuthorInitials,
 } from '../utils/review-format';
+import { ReviewAuthorRating } from './ReviewAuthorRating';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { layout } from '@/theme/layout';
 
-type ReviewCardVariant = 'elevated' | 'flat';
+type ReviewCardVariant = 'row' | 'surface';
 
 interface ReviewCardProps {
   review: ReviewResponse;
@@ -25,7 +27,7 @@ interface ReviewCardProps {
 export const ReviewCard = memo(function ReviewCard({
   review,
   isOwnReview = false,
-  variant = 'flat',
+  variant = 'row',
   isDeleting = false,
   onEdit,
   onDelete,
@@ -36,10 +38,10 @@ export const ReviewCard = memo(function ReviewCard({
     <View
       style={[
         styles.card,
-        variant === 'elevated' && styles.cardElevated,
-        isOwnReview && variant === 'elevated' && styles.cardOwn,
+        variant === 'surface' && styles.cardSurface,
       ]}
       accessibilityRole="summary"
+      testID={isOwnReview ? 'review-card-own' : 'review-card'}
     >
       <View style={styles.header}>
         <View
@@ -60,6 +62,7 @@ export const ReviewCard = memo(function ReviewCard({
                 <AppText variant="caption" style={styles.youBadgeText}>You</AppText>
               </View>
             ) : null}
+            <ReviewAuthorRating userRating={review.userRating} />
           </View>
           <AppText variant="caption" muted>
             {dateLabel}
@@ -75,7 +78,7 @@ export const ReviewCard = memo(function ReviewCard({
                 onPress={onEdit}
                 style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
               >
-                <Ionicons name="pencil-outline" size={15} color={colors.textMuted} />
+                <Ionicons name="pencil-outline" size={16} color={colors.textMuted} />
               </Pressable>
             ) : null}
             {onDelete ? (
@@ -90,7 +93,7 @@ export const ReviewCard = memo(function ReviewCard({
                 {isDeleting ? (
                   <ActivityIndicator color={colors.textMuted} size="small" />
                 ) : (
-                  <Ionicons name="trash-outline" size={15} color={colors.danger} />
+                  <Ionicons name="trash-outline" size={16} color={colors.danger} />
                 )}
               </Pressable>
             ) : null}
@@ -107,15 +110,16 @@ export const ReviewCard = memo(function ReviewCard({
 const styles = StyleSheet.create({
   card: {
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingVertical: spacing.md,
   },
-  cardElevated: {
-    paddingVertical: 0,
-  },
-  cardOwn: {
-    borderLeftWidth: 2,
-    borderLeftColor: colors.accent,
-    paddingLeft: spacing.md,
+  cardSurface: {
+    marginHorizontal: layout.screenPaddingHorizontal,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   header: {
     flexDirection: 'row',
@@ -123,15 +127,18 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   avatar: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: borderRadius.full,
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   avatarOwn: {
-    backgroundColor: colors.accentTint18,
+    backgroundColor: colors.accentTint12,
+    borderColor: colors.accentTint18,
   },
   avatarText: {
     color: colors.textSecondary,
@@ -168,6 +175,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: colors.textSecondary,
     letterSpacing: 0.1,
+    paddingLeft: 40 + spacing.sm,
   },
   actions: {
     flexDirection: 'row',
@@ -177,8 +185,8 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   actionButton: {
-    width: 28,
-    height: 28,
+    width: layout.touchTarget,
+    height: layout.touchTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,15 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useDetailScroll } from '@/features/details/shared/context/DetailScrollContext';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
@@ -17,8 +14,12 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import { ReviewCard } from './ReviewCard';
 import { ReviewComposer } from './ReviewComposer';
+import { ReviewsPaginationControl } from './ReviewsPaginationControl';
+import { ReviewsSectionHeader } from './ReviewsSectionHeader';
+import { ReviewsSortControl } from './ReviewsSortControl';
 import { useMyReview } from '../hooks/useMyReview';
 import {
   useCreateReviewMutation,
@@ -26,11 +27,11 @@ import {
   useUpdateReviewMutation,
 } from '../hooks/useReviewMutations';
 import { useReviewsQuery } from '../hooks/useReviewsQuery';
-import type { ReviewContentType, ReviewResponse } from '../types';
+import type { ReviewContentType, ReviewResponse, ReviewSortOption } from '../types';
+import { DEFAULT_REVIEW_SORT } from '../types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
-import { interaction } from '@/theme/interaction';
 
 type ComposerMode = 'hidden' | 'create' | 'edit';
 
@@ -40,14 +41,8 @@ interface ReviewsDetailContentProps {
   contentTitle?: string;
 }
 
-function formatReviewsSubtitle(totalCount: number, contentTitle?: string): string {
-  const countLabel = `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`;
-
-  if (!contentTitle) {
-    return countLabel;
-  }
-
-  return `${contentTitle} · ${countLabel}`;
+function formatReviewCountLabel(totalCount: number): string {
+  return `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`;
 }
 
 export function ReviewsDetailContent({
@@ -57,10 +52,11 @@ export function ReviewsDetailContent({
 }: ReviewsDetailContentProps) {
   const { user } = useAuth();
   const { requireAuth } = useRequireAuth();
-  const detailScroll = useDetailScroll();
-  const composerRef = useRef<View>(null);
-  const reviewsQuery = useReviewsQuery(contentType, contentId);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<ReviewSortOption>(DEFAULT_REVIEW_SORT);
+  const reviewsQuery = useReviewsQuery(contentType, contentId, { page, sort });
   const myReviewQuery = useMyReview(contentType, contentId);
+  const myRatingQuery = useMyRating(contentType, contentId);
   const createReview = useCreateReviewMutation(contentType, contentId);
   const updateReview = useUpdateReviewMutation(contentType, contentId);
   const deleteReview = useDeleteReviewMutation(contentType, contentId);
@@ -69,11 +65,24 @@ export function ReviewsDetailContent({
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [authFeedback, setAuthFeedback] = useState<string | null>(null);
 
-  const myReview = myReviewQuery.data ?? null;
-  const totalCount = reviewsQuery.data?.pages[0]?.totalCount ?? 0;
+  const myReview = useMemo<ReviewResponse | null>(() => {
+    const review = myReviewQuery.data;
+    if (!review) {
+      return null;
+    }
+
+    return {
+      ...review,
+      userRating: myRatingQuery.data?.score ?? review.userRating ?? null,
+    };
+  }, [myRatingQuery.data, myReviewQuery.data]);
+
+  const totalCount = reviewsQuery.data?.totalCount ?? 0;
+  const totalPages = reviewsQuery.data?.totalPages ?? 0;
+  const communityCount = Math.max(totalCount - (myReview ? 1 : 0), 0);
 
   const publicReviews = useMemo(() => {
-    const items = reviewsQuery.data?.pages.flatMap((page) => page.items) ?? [];
+    const items = reviewsQuery.data?.items ?? [];
     const seen = new Set<string>();
 
     return items.filter((review) => {
@@ -89,7 +98,20 @@ export function ReviewsDetailContent({
 
       return true;
     });
-  }, [myReview, reviewsQuery.data?.pages]);
+  }, [myReview, reviewsQuery.data?.items]);
+
+  const handleSortChange = useCallback((nextSort: ReviewSortOption) => {
+    setSort(nextSort);
+    setPage(1);
+  }, []);
+
+  const handlePreviousPage = useCallback(() => {
+    setPage((currentPage) => Math.max(1, currentPage - 1));
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    setPage((currentPage) => Math.min(totalPages, currentPage + 1));
+  }, [totalPages]);
 
   const handleWriteReview = useCallback(() => {
     if (!requireAuth()) {
@@ -105,20 +127,6 @@ export function ReviewsDetailContent({
     setMutationError(null);
     setComposerMode('edit');
   }, []);
-
-  useEffect(() => {
-    if (composerMode === 'hidden') {
-      return;
-    }
-
-    const scrollTimer = setTimeout(() => {
-      detailScroll?.scrollToCenter(composerRef);
-    }, 0);
-
-    return () => {
-      clearTimeout(scrollTimer);
-    };
-  }, [composerMode, detailScroll]);
 
   const handleCancelComposer = useCallback(() => {
     setComposerMode('hidden');
@@ -200,22 +208,30 @@ export function ReviewsDetailContent({
     );
   }, [deleteReview]);
 
-  const handleLoadMore = useCallback(() => {
-    if (
-      !reviewsQuery.hasNextPage ||
-      reviewsQuery.isFetchingNextPage ||
-      reviewsQuery.isFetching
-    ) {
-      return;
-    }
-
-    void reviewsQuery.fetchNextPage();
-  }, [reviewsQuery]);
-
   const isInitialLoading = reviewsQuery.isLoading && publicReviews.length === 0 && !myReview;
+  const isPageLoading = reviewsQuery.isFetching && !isInitialLoading;
 
   const listHeader = (
     <View style={styles.listHeader}>
+      <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
+        <DetailBackButton contentInset={false} />
+        <View style={styles.header}>
+          <AppText variant="title" style={styles.headerTitle}>
+            Reviews
+          </AppText>
+          {contentTitle ? (
+            <AppText variant="bodySmall" muted numberOfLines={2}>
+              {contentTitle}
+            </AppText>
+          ) : null}
+          {!isInitialLoading && !reviewsQuery.isError ? (
+            <AppText variant="caption" muted testID="reviews-total-count">
+              {formatReviewCountLabel(totalCount)}
+            </AppText>
+          ) : null}
+        </View>
+      </SafeAreaView>
+
       <FeedbackMessage
         message={authFeedback}
         tone="info"
@@ -223,24 +239,16 @@ export function ReviewsDetailContent({
       />
 
       {!myReview && composerMode !== 'create' ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Write a review"
-          onPress={handleWriteReview}
-          style={({ pressed }) => [styles.writeCta, pressed && styles.pressed]}
-        >
-          <View style={styles.writeCtaIcon}>
-            <Ionicons name="create-outline" size={18} color={colors.accent} />
-          </View>
-          <AppText variant="bodySmall" style={styles.writeCtaText}>
-            Write a review
-          </AppText>
-          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-        </Pressable>
+        <ReviewsSectionHeader
+          title="Your review"
+          actionLabel="Write"
+          onActionPress={handleWriteReview}
+          testID="reviews-write-section"
+        />
       ) : null}
 
       {composerMode === 'create' ? (
-        <View ref={composerRef} collapsable={false} testID="review-composer-anchor">
+        <View testID="review-composer-anchor">
           <ReviewComposer
             submitLabel="Post review"
             isSubmitting={createReview.isPending}
@@ -254,27 +262,20 @@ export function ReviewsDetailContent({
 
       {myReview && composerMode !== 'edit' ? (
         <View style={styles.myReviewSection}>
-          <View style={styles.myReviewLabelRow}>
-            <Ionicons name="person-circle-outline" size={16} color={colors.textMuted} />
-            <AppText variant="caption" style={styles.myReviewLabel}>
-              Your review
-            </AppText>
-          </View>
-          <View style={styles.myReviewCard}>
-            <ReviewCard
-              review={myReview}
-              isOwnReview
-              variant="elevated"
-              isDeleting={deleteReview.isPending}
-              onEdit={handleEditReview}
-              onDelete={handleDelete}
-            />
-          </View>
+          <ReviewsSectionHeader title="Your review" />
+          <ReviewCard
+            review={myReview}
+            isOwnReview
+            variant="surface"
+            isDeleting={deleteReview.isPending}
+            onEdit={handleEditReview}
+            onDelete={handleDelete}
+          />
         </View>
       ) : null}
 
       {composerMode === 'edit' && myReview ? (
-        <View ref={composerRef} collapsable={false} testID="review-composer-anchor">
+        <View testID="review-composer-anchor">
           <ReviewComposer
             initialContent={myReview.content}
             submitLabel="Save review"
@@ -286,82 +287,79 @@ export function ReviewsDetailContent({
           />
         </View>
       ) : null}
+
+      {!isInitialLoading && !reviewsQuery.isError ? (
+        <>
+          <ReviewsSectionHeader
+            title={
+              communityCount > 0
+                ? `Community · ${formatReviewCountLabel(communityCount)}`
+                : 'Community'
+            }
+            testID="reviews-community-section"
+          />
+          <ReviewsSortControl value={sort} onChange={handleSortChange} />
+        </>
+      ) : null}
     </View>
   );
 
   const renderReviewItem = useCallback(
-    ({ item, index }: { item: ReviewResponse; index: number }) => (
-      <View>
-        <ReviewCard
-          review={item}
-          isOwnReview={Boolean(user && item.user.id === user.id)}
-        />
-        {index < publicReviews.length - 1 ? <View style={styles.reviewDivider} /> : null}
-      </View>
+    ({ item }: { item: ReviewResponse }) => (
+      <ReviewCard
+        review={item}
+        isOwnReview={Boolean(user && item.user.id === user.id)}
+      />
     ),
-    [publicReviews.length, user],
+    [user],
   );
 
-  const listFooter = reviewsQuery.hasNextPage ? (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Load more reviews"
-      accessibilityState={{ disabled: reviewsQuery.isFetchingNextPage }}
-      disabled={reviewsQuery.isFetchingNextPage}
-      onPress={handleLoadMore}
-      style={({ pressed }) => [styles.loadMore, pressed && styles.pressed]}
-    >
-      {reviewsQuery.isFetchingNextPage ? (
-        <ActivityIndicator color={colors.accent} size="small" />
-      ) : (
-        <>
-          <AppText variant="caption" style={styles.loadMoreText}>
-            Load more reviews
-          </AppText>
-          <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
-        </>
-      )}
-    </Pressable>
-  ) : (
-    <View style={styles.listFooterSpacer} />
+  const listFooter = (
+    <View style={styles.listFooter}>
+      {isPageLoading ? (
+        <View style={styles.pageLoading} testID="reviews-page-loading">
+          <ActivityIndicator color={colors.accent} size="small" />
+        </View>
+      ) : null}
+      <ReviewsPaginationControl
+        page={page}
+        totalPages={totalPages}
+        onPrevious={handlePreviousPage}
+        onNext={handleNextPage}
+        isLoading={reviewsQuery.isFetching}
+      />
+    </View>
   );
 
   const listEmpty =
-    !isInitialLoading && !reviewsQuery.isError && publicReviews.length === 0 && !myReview ? (
+    !isInitialLoading && !reviewsQuery.isError && publicReviews.length === 0 ? (
       <View style={styles.emptyState} accessibilityRole="text">
-        <View style={styles.emptyIcon}>
-          <Ionicons name="chatbubbles-outline" size={22} color={colors.textMuted} />
-        </View>
-        <AppText variant="bodySmall" style={styles.emptyTitle}>
-          No reviews yet
+        <AppText variant="bodySmall" muted style={styles.emptyTitle}>
+          {myReview ? 'No other reviews yet.' : 'No reviews yet.'}
         </AppText>
-        <AppText variant="caption" muted>
-          Be the first to share your thoughts.
-        </AppText>
+        {!myReview ? (
+          <AppText variant="caption" muted>
+            Be the first to share your thoughts.
+          </AppText>
+        ) : null}
       </View>
     ) : null;
 
-  return (
-    <View style={styles.container} testID="reviews-detail-content">
-      <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <DetailBackButton contentInset={false} />
-        <View style={styles.header}>
-          <AppText variant="title" style={styles.headerTitle}>
-            Reviews
-          </AppText>
-          <AppText variant="bodySmall" muted numberOfLines={2}>
-            {formatReviewsSubtitle(totalCount, contentTitle)}
-          </AppText>
-        </View>
-      </SafeAreaView>
-
-      {isInitialLoading ? (
+  if (isInitialLoading) {
+    return (
+      <View style={styles.container} testID="reviews-detail-content">
+        {listHeader}
         <View style={styles.loading}>
           <ActivityIndicator color={colors.accent} />
         </View>
-      ) : null}
+      </View>
+    );
+  }
 
-      {reviewsQuery.isError && publicReviews.length === 0 && !myReview ? (
+  if (reviewsQuery.isError && publicReviews.length === 0 && !myReview) {
+    return (
+      <View style={styles.container} testID="reviews-detail-content">
+        {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
             message={
@@ -373,24 +371,27 @@ export function ReviewsDetailContent({
             retryLabel="Try Again"
           />
         </View>
-      ) : (
-        <FlatList
-          testID="reviews-detail-list"
-          data={isInitialLoading || reviewsQuery.isError ? [] : publicReviews}
-          keyExtractor={(item) => item.id}
-          renderItem={renderReviewItem}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={listEmpty}
-          ListFooterComponent={listFooter}
-          contentContainerStyle={styles.listContent}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.4}
-          initialNumToRender={layout.verticalList.initialNumToRender}
-          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-          windowSize={layout.verticalList.windowSize}
-        />
-      )}
-    </View>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      testID="reviews-detail-content"
+      style={styles.container}
+      data={publicReviews}
+      keyExtractor={(item) => item.id}
+      renderItem={renderReviewItem}
+      ListHeaderComponent={listHeader}
+      ListEmptyComponent={listEmpty}
+      ListFooterComponent={listFooter}
+      contentContainerStyle={styles.listContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      initialNumToRender={layout.verticalList.initialNumToRender}
+      maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+      windowSize={layout.verticalList.windowSize}
+    />
   );
 }
 
@@ -411,60 +412,15 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   listContent: {
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     flexGrow: 1,
   },
   listHeader: {
     gap: spacing.md,
-    paddingBottom: spacing.md,
-  },
-  writeCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    minHeight: interaction.touchTarget,
-  },
-  writeCtaIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  writeCtaText: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontWeight: '500',
+    paddingBottom: spacing.sm,
   },
   myReviewSection: {
-    gap: spacing.sm,
-  },
-  myReviewLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.xs,
-  },
-  myReviewLabel: {
-    color: colors.textMuted,
-    fontWeight: '500',
-    letterSpacing: 0.2,
-    textTransform: 'uppercase',
-  },
-  myReviewCard: {
-    backgroundColor: colors.accentTint12,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.accentTint18,
-  },
-  pressed: {
-    opacity: interaction.pressedOpacity,
   },
   loading: {
     paddingVertical: spacing.xxl,
@@ -476,45 +432,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   emptyState: {
-    alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.sm,
-  },
-  emptyIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xs,
+    marginHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   emptyTitle: {
     color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  reviewDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-    marginVertical: spacing.xs,
-  },
-  loadMore: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    minHeight: interaction.touchTarget,
-    paddingVertical: spacing.md,
-  },
-  loadMoreText: {
-    color: colors.textSecondary,
     fontWeight: '500',
   },
-  listFooterSpacer: {
-    height: spacing.lg,
+  listFooter: {
+    gap: spacing.sm,
+  },
+  pageLoading: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
 });

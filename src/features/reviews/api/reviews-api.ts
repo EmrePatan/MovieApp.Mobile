@@ -16,6 +16,7 @@ import type {
   CreateReviewRequest,
   ReviewListResponse,
   ReviewResponse,
+  ReviewSortOption,
   UpdateReviewRequest,
 } from '../types';
 
@@ -23,9 +24,10 @@ export async function getMovieReviews(
   movieId: string,
   page = 1,
   pageSize = 20,
+  sort?: ReviewSortOption,
   signal?: AbortSignal,
 ): Promise<ReviewListResponse> {
-  return api.get<ReviewListResponse>(buildMovieReviewsPath(movieId, page, pageSize), {
+  return api.get<ReviewListResponse>(buildMovieReviewsPath(movieId, page, pageSize, sort), {
     authenticated: false,
     signal,
   });
@@ -35,9 +37,10 @@ export async function getTvReviews(
   tvShowId: string,
   page = 1,
   pageSize = 20,
+  sort?: ReviewSortOption,
   signal?: AbortSignal,
 ): Promise<ReviewListResponse> {
-  return api.get<ReviewListResponse>(buildTvReviewsPath(tvShowId, page, pageSize), {
+  return api.get<ReviewListResponse>(buildTvReviewsPath(tvShowId, page, pageSize, sort), {
     authenticated: false,
     signal,
   });

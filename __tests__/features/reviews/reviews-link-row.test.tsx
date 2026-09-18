@@ -26,17 +26,13 @@ const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 function mockCountQuery(totalCount: number, overrides: Record<string, unknown> = {}) {
   return {
     data: {
-      pages: [
-        {
-          items: totalCount > 0 ? [{ id: 'review-1' }] : [],
-          page: 1,
-          pageSize: REVIEW_COUNT_PAGE_SIZE,
-          totalCount,
-          totalPages: totalCount,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        },
-      ],
+      items: totalCount > 0 ? [{ id: 'review-1' }] : [],
+      page: 1,
+      pageSize: REVIEW_COUNT_PAGE_SIZE,
+      totalCount,
+      totalPages: totalCount,
+      hasNextPage: false,
+      hasPreviousPage: false,
     },
     isLoading: false,
     isError: false,
@@ -113,7 +109,10 @@ describe('ReviewsLinkRow', () => {
       />,
     );
 
-    expect(useMovieReviews).toHaveBeenCalledWith(movieId, REVIEW_COUNT_PAGE_SIZE);
+    expect(useMovieReviews).toHaveBeenCalledWith(movieId, {
+      page: 1,
+      pageSize: REVIEW_COUNT_PAGE_SIZE,
+    });
   });
 
   it('opens the movie reviews route with exactly one navigation action when pressed', () => {
@@ -149,6 +148,9 @@ describe('ReviewsLinkRow', () => {
       `/tv/${movieId}/reviews?title=Breaking+Bad`,
       { withAnchor: true },
     );
-    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, REVIEW_COUNT_PAGE_SIZE);
+    expect(useTvShowReviews).toHaveBeenCalledWith(movieId, {
+      page: 1,
+      pageSize: REVIEW_COUNT_PAGE_SIZE,
+    });
   });
 });

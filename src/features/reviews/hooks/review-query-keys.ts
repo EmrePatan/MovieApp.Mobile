@@ -1,17 +1,21 @@
-import { DEFAULT_REVIEW_PAGE_SIZE } from '../types';
+import { DEFAULT_REVIEW_PAGE_SIZE, DEFAULT_REVIEW_SORT, type ReviewSortOption } from '../types';
 
-export function movieReviewsInfiniteQueryKey(
+export function movieReviewsQueryKey(
   movieId: string,
+  page: number,
   pageSize = DEFAULT_REVIEW_PAGE_SIZE,
+  sort: ReviewSortOption = DEFAULT_REVIEW_SORT,
 ) {
-  return ['reviews', 'movie', movieId, pageSize] as const;
+  return ['reviews', 'movie', movieId, page, pageSize, sort] as const;
 }
 
-export function tvReviewsInfiniteQueryKey(
+export function tvReviewsQueryKey(
   tvShowId: string,
+  page: number,
   pageSize = DEFAULT_REVIEW_PAGE_SIZE,
+  sort: ReviewSortOption = DEFAULT_REVIEW_SORT,
 ) {
-  return ['reviews', 'tv', tvShowId, pageSize] as const;
+  return ['reviews', 'tv', tvShowId, page, pageSize, sort] as const;
 }
 
 export function movieMyReviewQueryKey(movieId: string) {

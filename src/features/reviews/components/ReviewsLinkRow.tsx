@@ -28,8 +28,11 @@ export function ReviewsLinkRow({
   contentTitle,
 }: ReviewsLinkRowProps) {
   const router = useRouter();
-  const reviewsQuery = useReviewsQuery(contentType, contentId, REVIEW_COUNT_PAGE_SIZE);
-  const totalCount = reviewsQuery.data?.pages[0]?.totalCount;
+  const reviewsQuery = useReviewsQuery(contentType, contentId, {
+    page: 1,
+    pageSize: REVIEW_COUNT_PAGE_SIZE,
+  });
+  const totalCount = reviewsQuery.data?.totalCount;
   const isCountLoading = reviewsQuery.isLoading && totalCount == null;
   const hasReviews = totalCount != null && totalCount > 0;
   const countLabel = totalCount == null ? null : String(totalCount);
