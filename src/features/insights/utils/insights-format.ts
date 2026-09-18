@@ -1,4 +1,5 @@
 import type { InsightsV3MovieDna } from '../types';
+import { resolveMovieDnaGenreDisplayTitle } from './movie-dna-genre-titles';
 
 const WEEKDAY_NAMES = [
   'Sunday',
@@ -159,28 +160,6 @@ export function formatActiveYearDayPercent(
   return Math.min(100, Math.round((activeDays / elapsedDays) * 100));
 }
 
-const MOVIE_DNA_GENRE_DISPLAY_TITLES: Record<string, string> = {
-  drama: 'Drama Queen',
-  'sci-fi': 'Sci-Fi Explorer',
-  'science fiction': 'Sci-Fi Explorer',
-  comedy: 'Comedy Connoisseur',
-  horror: 'Horror Hunter',
-  thriller: 'Thriller Chaser',
-  action: 'Action Aficionado',
-  romance: 'Hopeless Romantic',
-  documentary: 'Truth Seeker',
-  fantasy: 'Fantasy Wanderer',
-  adventure: 'Adventure Addict',
-  mystery: 'Mystery Solver',
-  crime: 'Crime Sleuth',
-  animation: 'Animation Devotee',
-  war: 'War Story Buff',
-  history: 'History Buff',
-  music: 'Music Lover',
-  western: 'Western Wanderer',
-  family: 'Family Night Regular',
-};
-
 const MOVIE_DNA_DEFAULT_DISPLAY_TITLE = 'Screen Explorer';
 
 function getTopGenreName(movieDna: InsightsV3MovieDna): string | null {
@@ -193,22 +172,13 @@ function getTopGenreName(movieDna: InsightsV3MovieDna): string | null {
   return genreLabel?.label ?? null;
 }
 
-function normalizeGenreName(name: string): string {
-  return name.trim().toLowerCase();
-}
-
 export function formatMovieDnaDisplayTitle(movieDna: InsightsV3MovieDna): string {
   const genreName = getTopGenreName(movieDna);
   if (!genreName) {
     return MOVIE_DNA_DEFAULT_DISPLAY_TITLE;
   }
 
-  const mappedTitle = MOVIE_DNA_GENRE_DISPLAY_TITLES[normalizeGenreName(genreName)];
-  if (mappedTitle) {
-    return mappedTitle;
-  }
-
-  return `${genreName.trim()} Explorer`;
+  return resolveMovieDnaGenreDisplayTitle(genreName);
 }
 
 const MOVIE_DNA_EDITORIAL_BY_CODE: Record<string, string> = {

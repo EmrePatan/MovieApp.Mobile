@@ -21,6 +21,12 @@ import {
   insightsV3Fixture,
 } from '@/features/insights/utils/insights-fixtures';
 import type { InsightsV3MovieDna } from '@/features/insights/types';
+import {
+  MOVIE_DNA_GENRE_DISPLAY_TITLES,
+  MOVIE_DNA_KNOWN_GENRE_NAMES,
+  normalizeMovieDnaGenreName,
+  resolveMovieDnaGenreDisplayTitle,
+} from '@/features/insights/utils/movie-dna-genre-titles';
 
 describe('insights format helpers', () => {
   it('formats estimated duration in hours and days', () => {
@@ -67,11 +73,19 @@ describe('insights format helpers', () => {
     };
     expect(formatMovieDnaDisplayTitle(horrorFirst)).toBe('Horror Hunter');
 
-    const unknownGenre: InsightsV3MovieDna = {
+    const westernGenre: InsightsV3MovieDna = {
       ...insightsV3Fixture.movieDna,
       topGenres: [{ genreId: '9', name: 'Western', weight: 0.3, sharePercent: 30 }],
     };
-    expect(formatMovieDnaDisplayTitle(unknownGenre)).toBe('Western Wanderer');
+    expect(formatMovieDnaDisplayTitle(westernGenre)).toBe('Western Wanderer');
+
+    expect(resolveMovieDnaGenreDisplayTitle('Science Fiction')).toBe('Sci-Fi Explorer');
+    expect(resolveMovieDnaGenreDisplayTitle('Sci-Fi & Fantasy')).toBe('Realm Wanderer');
+    expect(resolveMovieDnaGenreDisplayTitle('TV Movie')).toBe('Couch Cinema Fan');
+
+    for (const genreName of MOVIE_DNA_KNOWN_GENRE_NAMES) {
+      expect(MOVIE_DNA_GENRE_DISPLAY_TITLES[normalizeMovieDnaGenreName(genreName)]).toBeTruthy();
+    }
 
     const bespokeGenre: InsightsV3MovieDna = {
       ...insightsV3Fixture.movieDna,
