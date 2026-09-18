@@ -74,6 +74,9 @@ describe('AiRecommendationsContent', () => {
     renderScreen();
 
     expect(screen.getByText('AI Recommendations')).toBeTruthy();
+    expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
+      '3 of 3 requests left today',
+    );
     expect(screen.getByLabelText('AI recommendation prompt')).toBeTruthy();
     expect(screen.getByText('Get Recommendations')).toBeTruthy();
     expect(screen.getByLabelText('Use prompt: A cozy mystery for a rainy night')).toBeTruthy();
@@ -106,6 +109,9 @@ describe('AiRecommendationsContent', () => {
 
     expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
     expect(screen.getByText('Arrival')).toBeTruthy();
+    expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
+      '2 of 3 requests left today',
+    );
     expect(screen.getByText('1 of 5 · 2 left today')).toBeTruthy();
     expect(postAiRecommendations).toHaveBeenCalledWith({
       message: 'mind-bending sci-fi with emotional stakes',
@@ -113,41 +119,14 @@ describe('AiRecommendationsContent', () => {
     });
   });
 
-  it('shows premium required state for forbidden responses', async () => {
-    (postAiRecommendations as jest.Mock).mockRejectedValue(
-      new ApiError({
-        kind: 'forbidden',
-        status: 403,
-        title: 'Premium required.',
-        detail: 'Premium subscription is required for AI movie recommendations.',
-      }),
-    );
-
-    renderScreen();
-
-    fireEvent.changeText(
-      screen.getByLabelText('AI recommendation prompt'),
-      'cozy mystery for a rainy night',
-    );
-    fireEvent.press(screen.getByText('Get Recommendations'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('ai-recommendations-premium-required')).toBeTruthy();
-    });
-
-    expect(screen.getByText('Premium required')).toBeTruthy();
-    expect(
-      screen.getByText('Premium subscription is required for AI movie recommendations.'),
-    ).toBeTruthy();
-  });
-
   it('shows quota exceeded state for rate limited responses', async () => {
     (postAiRecommendations as jest.Mock).mockRejectedValue(
       new ApiError({
         kind: 'rate_limited',
         status: 429,
-        title: 'Quota exceeded.',
-        detail: 'Daily AI recommendation limit reached.',
+        title: 'Daily limit reached',
+        detail:
+          "You've used all 3 AI recommendation requests for today. Try again tomorrow.",
       }),
     );
 
@@ -164,7 +143,14 @@ describe('AiRecommendationsContent', () => {
     });
 
     expect(screen.getByText('Daily limit reached')).toBeTruthy();
-    expect(screen.getByText('Daily AI recommendation limit reached.')).toBeTruthy();
+    expect(
+      screen.getByText(
+        "You've used all 3 AI recommendation requests for today. Try again tomorrow.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
+      '0 of 3 requests left today',
+    );
   });
 
   it('shows empty state when the API returns zero validated results', async () => {

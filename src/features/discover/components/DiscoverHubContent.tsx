@@ -134,7 +134,7 @@ export function DiscoverHubContent() {
         />
         <DiscoverFeatureEntry
           title="AI Recommendations"
-          subtitle="Describe your mood and get premium picks"
+          subtitle="Describe your mood and get personalized picks"
           icon="sparkles-outline"
           onPress={openAiRecommendations}
           accessibilityLabel="AI Recommendations"

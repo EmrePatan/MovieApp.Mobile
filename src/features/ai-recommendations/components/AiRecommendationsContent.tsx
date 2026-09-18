@@ -24,6 +24,7 @@ import type { RecommendationItem } from '@/features/recommendations/types';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { useAiRecommendations } from '../hooks/useAiRecommendations';
 import {
+  AI_RECOMMENDATION_DAILY_LIMIT,
   AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
   AI_RECOMMENDATION_SUGGESTED_PROMPTS,
 } from '../types';
@@ -42,6 +43,7 @@ export function AiRecommendationsContent() {
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [quotaRemaining, setQuotaRemaining] = useState(AI_RECOMMENDATION_DAILY_LIMIT);
   const recommendationsMutation = useAiRecommendations();
 
   const trimmedMessage = message.trim();
@@ -63,9 +65,15 @@ export function AiRecommendationsContent() {
       {
         onSuccess: (response) => {
           setSessionId(response.sessionId);
+          setQuotaRemaining(response.quotaRemaining);
           if (!hasTrackedMetricRef.current && response.returnedCount > 0) {
             trackProductMetric(PRODUCT_METRICS.aiRecommendationsUsed);
             hasTrackedMetricRef.current = true;
+          }
+        },
+        onError: (error) => {
+          if (isApiError(error) && error.kind === 'rate_limited') {
+            setQuotaRemaining(0);
           }
         },
       },
@@ -99,6 +107,8 @@ export function AiRecommendationsContent() {
     recommendationsMutation.reset();
   }, [recommendationsMutation]);
 
+  const isQuotaExhausted = quotaRemaining <= 0;
+
   const resultItems = useMemo(() => {
     const response = recommendationsMutation.data;
     if (!response) {
@@ -123,25 +133,6 @@ export function AiRecommendationsContent() {
     if (recommendationsMutation.isError) {
       const error = recommendationsMutation.error;
 
-      if (isApiError(error) && error.kind === 'forbidden') {
-        return (
-          <View style={styles.stateContainer} testID="ai-recommendations-premium-required">
-            <View style={styles.stateIconWrap}>
-              <Ionicons name="diamond-outline" size={28} color={colors.accent} />
-            </View>
-            <AppText variant="subtitle" center>
-              Premium required
-            </AppText>
-            <AppText variant="bodySmall" muted center style={styles.stateMessage}>
-              {getApiErrorDisplayMessage(
-                error,
-                'Premium subscription is required for AI movie recommendations.',
-              )}
-            </AppText>
-          </View>
-        );
-      }
-
       if (isApiError(error) && error.kind === 'rate_limited') {
         return (
           <View style={styles.stateContainer} testID="ai-recommendations-quota-exceeded">
@@ -152,7 +143,10 @@ export function AiRecommendationsContent() {
               Daily limit reached
             </AppText>
             <AppText variant="bodySmall" muted center style={styles.stateMessage}>
-              {getApiErrorDisplayMessage(error, 'You have used all AI recommendations for today.')}
+              {getApiErrorDisplayMessage(
+                error,
+                `You've used all ${AI_RECOMMENDATION_DAILY_LIMIT} AI recommendation requests for today. Try again tomorrow.`,
+              )}
             </AppText>
           </View>
         );
@@ -254,7 +248,10 @@ export function AiRecommendationsContent() {
               </AppText>
             </View>
             <AppText variant="bodySmall" muted>
-              Describe the mood, genre, or vibe you want. Premium picks are tailored to your taste.
+              Describe the mood, genre, or vibe you want. Picks are tailored to your taste.
+            </AppText>
+            <AppText variant="caption" muted testID="ai-recommendations-quota-remaining">
+              {quotaRemaining} of {AI_RECOMMENDATION_DAILY_LIMIT} requests left today
             </AppText>
           </View>
         </View>
@@ -313,7 +310,7 @@ export function AiRecommendationsContent() {
             <AppButton
               title={sessionId ? 'Get More Picks' : 'Get Recommendations'}
               onPress={handleSubmit}
-              disabled={recommendationsMutation.isPending}
+              disabled={recommendationsMutation.isPending || isQuotaExhausted}
             />
           </View>
         ) : null}
