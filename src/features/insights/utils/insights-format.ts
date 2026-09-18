@@ -288,6 +288,12 @@ export function formatMovieDnaEditorialLine(movieDna: InsightsV3MovieDna): strin
   return 'Every watch leaves another clue on the reel.';
 }
 
+export function formatWatchingMixLine(movieSharePercent: number, seriesSharePercent: number): string {
+  const movies = Math.round(movieSharePercent);
+  const series = Math.round(seriesSharePercent);
+  return `${movies}% films · ${series}% series`;
+}
+
 export function formatGenreGravitation(genreNames: string[]): string | null {
   if (genreNames.length === 0) {
     return null;

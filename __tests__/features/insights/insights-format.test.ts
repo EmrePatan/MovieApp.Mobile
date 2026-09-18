@@ -12,6 +12,7 @@ import {
   formatHoursFromMinutes,
   formatMovieDnaDisplayTitle,
   formatMovieDnaEditorialLine,
+  formatWatchingMixLine,
   formatWeekdayName,
 } from '@/features/insights/utils/insights-format';
 import {
@@ -93,6 +94,11 @@ describe('insights format helpers', () => {
     expect(line).not.toContain(insightsV3Fixture.movieDna.identityTitle);
     expect(line).not.toContain('gravitate');
     expect(formatMovieDnaEditorialLine(insightsV3Fixture.movieDna)).toBe(line);
+  });
+
+  it('formats watching mix as a compact editorial line', () => {
+    expect(formatWatchingMixLine(65.4, 34.6)).toBe('65% films · 35% series');
+    expect(formatWatchingMixLine(76, 24)).toBe('76% films · 24% series');
   });
 
   it('formats genre copy and active day percent from real values', () => {

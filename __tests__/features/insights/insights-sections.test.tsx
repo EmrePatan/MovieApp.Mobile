@@ -14,7 +14,9 @@ describe('insights sections', () => {
 
     expect(screen.getByText('The Sci-Fi Series Devotee')).toBeTruthy();
     expect(screen.getByText('Sci-Fi')).toBeTruthy();
-    expect(screen.getByLabelText('Movies 28, series 9')).toBeTruthy();
+    expect(screen.queryByText(/gravitate toward/i)).toBeNull();
+    expect(screen.getByText('76% films · 24% series')).toBeTruthy();
+    expect(screen.getByLabelText('76% movies, 24% series')).toBeTruthy();
     expect(screen.getByText('The long arc is where your story keeps returning.')).toBeTruthy();
   });
 
