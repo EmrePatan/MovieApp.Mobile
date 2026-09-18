@@ -86,10 +86,6 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
 
   return (
     <View style={styles.container}>
-      <AppText variant="bodySmall" muted center style={styles.heading}>
-        Continue in one tap
-      </AppText>
-
       <View style={styles.providerRow}>
         {visibleProviders.map((entry) => {
           const isLoading = activeProvider === entry.provider;
@@ -104,18 +100,16 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
               disabled={isDisabled}
               onPress={() => void handleSocialSignIn(entry.provider)}
               style={({ pressed }) => [
-                styles.providerChip,
-                pressed && !isDisabled && styles.providerChipPressed,
-                isDisabled && styles.providerChipDisabled,
+                styles.providerButton,
+                pressed && !isDisabled && styles.providerButtonPressed,
+                isDisabled && styles.providerButtonDisabled,
               ]}
             >
               {isLoading ? (
-                <ActivityIndicator color={colors.accent} />
+                <ActivityIndicator color={colors.textPrimary} />
               ) : (
                 <>
-                  <View style={styles.iconBadge}>
-                    <Ionicons name={entry.icon} size={16} color={colors.textPrimary} />
-                  </View>
+                  <Ionicons name={entry.icon} size={18} color={colors.textPrimary} />
                   <AppText variant="bodySmall" style={styles.providerLabel}>
                     {entry.label}
                   </AppText>
@@ -133,40 +127,29 @@ const styles = StyleSheet.create({
   container: {
     gap: spacing.md,
   },
-  heading: {
-    letterSpacing: 0.3,
-  },
   providerRow: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
-  providerChip: {
+  providerButton: {
     flex: 1,
-    minHeight: 56,
+    minHeight: 52,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: 'rgba(12, 12, 18, 0.58)',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
-  providerChipPressed: {
+  providerButtonPressed: {
     opacity: interaction.pressedOpacity,
-    borderColor: colors.borderAccent,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
   },
-  providerChipDisabled: {
+  providerButtonDisabled: {
     opacity: interaction.disabledOpacity,
-  },
-  iconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.accentTint14,
   },
   providerLabel: {
     color: colors.textPrimary,

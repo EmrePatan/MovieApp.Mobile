@@ -1,6 +1,5 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 interface AuthDividerProps {
@@ -11,7 +10,7 @@ export function AuthDivider({ label }: AuthDividerProps) {
   return (
     <View style={styles.container}>
       <View style={styles.line} />
-      <AppText variant="caption" muted style={styles.label}>
+      <AppText variant="caption" style={styles.label}>
         {label}
       </AppText>
       <View style={styles.line} />
@@ -28,11 +27,12 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
   },
   label: {
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    color: colors.textMuted,
+    letterSpacing: 1.4,
+    color: 'rgba(245, 245, 247, 0.58)',
+    fontWeight: '600',
   },
 });

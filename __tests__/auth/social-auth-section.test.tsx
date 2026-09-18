@@ -40,7 +40,6 @@ describe('SocialAuthSection', () => {
   it('renders Google action when configured', () => {
     render(<SocialAuthSection />);
 
-    expect(screen.getByText('Continue in one tap')).toBeTruthy();
     expect(screen.getByLabelText('Continue with Google')).toBeTruthy();
   });
 

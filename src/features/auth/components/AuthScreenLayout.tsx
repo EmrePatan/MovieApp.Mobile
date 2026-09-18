@@ -1,56 +1,95 @@
 import { type ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { Screen } from '@/components/common/Screen';
-import { AppText } from '@/components/common/AppText';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthAtmosphere } from './AuthAtmosphere';
+import { AuthBrandMark } from './AuthBrandMark';
+import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
-import { shadows } from '@/theme/shadows';
+import { spacing } from '@/theme/spacing';
 
 interface AuthScreenLayoutProps {
-  eyebrow: string;
-  title: string;
-  subtitle: string;
+  tagline: string;
+  headlineLines: readonly string[];
+  headlineAccentLineIndex?: number;
+  supportingCopy: string;
   children: ReactNode;
   footer?: ReactNode;
 }
 
 export function AuthScreenLayout({
-  eyebrow,
-  title,
-  subtitle,
+  tagline,
+  headlineLines,
+  headlineAccentLineIndex = headlineLines.length - 1,
+  supportingCopy,
   children,
   footer,
 }: AuthScreenLayoutProps) {
+  const { width } = useWindowDimensions();
+  const headlineSize = width < 360 ? 30 : width < 390 ? 34 : 38;
+  const headlineLineHeight = headlineSize + 6;
+
   return (
     <View style={styles.root}>
       <AuthAtmosphere />
-      <Screen scrollable padded={false}>
+
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboard}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
         >
-          <View style={styles.content}>
-            <View style={styles.brandBlock}>
-              <AppText variant="caption" style={styles.eyebrow}>
-                {eyebrow}
-              </AppText>
-              <AppText variant="hero" style={styles.title}>
-                {title}
-              </AppText>
-              <View style={styles.titleRule} />
-              <AppText variant="body" muted center style={styles.subtitle}>
-                {subtitle}
-              </AppText>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.content}>
+              <View style={styles.hero}>
+                <AuthBrandMark />
+                <AppText variant="caption" style={styles.tagline}>
+                  {tagline}
+                </AppText>
+
+                <View style={styles.headlineBlock}>
+                  {headlineLines.map((line, index) => (
+                    <Text
+                      key={`${line}-${index}`}
+                      style={[
+                        styles.headlineLine,
+                        {
+                          fontSize: headlineSize,
+                          lineHeight: headlineLineHeight,
+                        },
+                        index === headlineAccentLineIndex && styles.headlineAccent,
+                      ]}
+                      maxFontSizeMultiplier={1.25}
+                    >
+                      {line}
+                    </Text>
+                  ))}
+                </View>
+
+                <AppText variant="bodySmall" style={styles.supportingCopy}>
+                  {supportingCopy}
+                </AppText>
+              </View>
+
+              <View style={styles.formSection}>{children}</View>
+
+              {footer ? <View style={styles.footer}>{footer}</View> : null}
             </View>
-
-            <View style={styles.card}>{children}</View>
-
-            {footer ? <View style={styles.footer}>{footer}</View> : null}
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
-      </Screen>
+      </SafeAreaView>
     </View>
   );
 }
@@ -60,54 +99,59 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  safeArea: {
+    flex: 1,
+  },
   keyboard: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xl,
+  },
   content: {
     flexGrow: 1,
-    justifyContent: 'center',
     gap: spacing.xl,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: layout.screenPaddingVertical,
+    paddingTop: spacing.md,
     maxWidth: layout.maxContentWidth,
     width: '100%',
     alignSelf: 'center',
   },
-  brandBlock: {
-    alignItems: 'center',
+  hero: {
     gap: spacing.sm,
+    paddingTop: spacing.sm,
   },
-  eyebrow: {
-    color: colors.accentStrong,
+  tagline: {
+    color: 'rgba(245, 245, 247, 0.72)',
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
-    letterSpacing: 2.4,
-    fontWeight: '600',
-  },
-  title: {
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  titleRule: {
-    width: 56,
-    height: 2,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accent,
     marginTop: spacing.xs,
   },
-  subtitle: {
-    maxWidth: 300,
+  headlineBlock: {
+    marginTop: spacing.md,
+    gap: 2,
   },
-  card: {
+  headlineLine: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+    letterSpacing: -0.6,
+  },
+  headlineAccent: {
+    color: colors.accentStrong,
+  },
+  supportingCopy: {
+    color: 'rgba(245, 245, 247, 0.78)',
+    maxWidth: 320,
+    marginTop: spacing.sm,
+    lineHeight: 22,
+  },
+  formSection: {
     gap: spacing.lg,
-    padding: spacing.lg,
-    borderRadius: borderRadius.xl,
-    backgroundColor: colors.accentSurface,
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
-    ...shadows.card,
   },
   footer: {
     alignItems: 'center',
     gap: spacing.sm,
+    paddingTop: spacing.xs,
   },
 });

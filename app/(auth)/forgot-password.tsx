@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
-import { AppInput } from '@/components/inputs/AppInput';
 import { forgotPasswordRequest } from '@/auth/auth-api';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -10,6 +9,8 @@ import {
   validateForgotPasswordForm,
   type ForgotPasswordFormErrors,
 } from '@/utils/validation';
+import { AUTH_FORGOT_PASSWORD_COPY } from '@/features/auth/auth-copy';
+import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { colors } from '@/theme/colors';
@@ -50,18 +51,19 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthScreenLayout
-      eyebrow="Need a reset"
-      title="Forgot password"
-      subtitle="Enter your email and we will send reset instructions if an account exists."
+      tagline={AUTH_FORGOT_PASSWORD_COPY.tagline}
+      headlineLines={AUTH_FORGOT_PASSWORD_COPY.headlineLines}
+      headlineAccentLineIndex={AUTH_FORGOT_PASSWORD_COPY.headlineAccentLineIndex}
+      supportingCopy={AUTH_FORGOT_PASSWORD_COPY.supportingCopy}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" muted>Remembered it?</AppText>
+          <AppText variant="bodySmall" style={styles.footerText}>Remembered it?</AppText>
           <AuthLink label="Back to sign in" href="/(auth)/login" />
         </View>
       }
     >
       <View style={styles.form}>
-        <AppInput
+        <AuthInput
           label="Email"
           value={email}
           onChangeText={setEmail}
@@ -116,5 +118,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+  },
+  footerText: {
+    color: 'rgba(245, 245, 247, 0.72)',
   },
 });

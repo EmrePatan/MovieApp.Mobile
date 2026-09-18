@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
-import { AppInput } from '@/components/inputs/AppInput';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -10,7 +9,9 @@ import {
   validateLoginForm,
   type LoginFormErrors,
 } from '@/utils/validation';
+import { AUTH_LOGIN_COPY } from '@/features/auth/auth-copy';
 import { AuthDivider } from '@/features/auth/components/AuthDivider';
+import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
@@ -53,22 +54,23 @@ export default function LoginScreen() {
 
   return (
     <AuthScreenLayout
-      eyebrow="Now showing"
-      title="MovieApp"
-      subtitle="Your seat is waiting. Sign in to pick up where you left off."
+      tagline={AUTH_LOGIN_COPY.tagline}
+      headlineLines={AUTH_LOGIN_COPY.headlineLines}
+      headlineAccentLineIndex={AUTH_LOGIN_COPY.headlineAccentLineIndex}
+      supportingCopy={AUTH_LOGIN_COPY.supportingCopy}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" muted>New here?</AppText>
+          <AppText variant="bodySmall" style={styles.footerText}>New here?</AppText>
           <AuthLink label="Create an account" href="/(auth)/register" />
         </View>
       }
     >
       <SocialAuthSection onError={setFormError} />
 
-      <AuthDivider label="or with email" />
+      <AuthDivider label={AUTH_LOGIN_COPY.emailDivider} />
 
       <View style={styles.form}>
-        <AppInput
+        <AuthInput
           label="Email"
           value={email}
           onChangeText={setEmail}
@@ -79,7 +81,7 @@ export default function LoginScreen() {
           textContentType="emailAddress"
           returnKeyType="next"
         />
-        <AppInput
+        <AuthInput
           label="Password"
           value={password}
           onChangeText={setPassword}
@@ -122,5 +124,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+  },
+  footerText: {
+    color: 'rgba(245, 245, 247, 0.72)',
   },
 });

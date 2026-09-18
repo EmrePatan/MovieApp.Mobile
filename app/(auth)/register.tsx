@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
-import { AppInput } from '@/components/inputs/AppInput';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
@@ -10,7 +9,9 @@ import {
   validateRegisterForm,
   type RegisterFormErrors,
 } from '@/utils/validation';
+import { AUTH_REGISTER_COPY } from '@/features/auth/auth-copy';
 import { AuthDivider } from '@/features/auth/components/AuthDivider';
+import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection';
@@ -52,22 +53,23 @@ export default function RegisterScreen() {
 
   return (
     <AuthScreenLayout
-      eyebrow="Opening night"
-      title="Create account"
-      subtitle="Join MovieApp to save favorites, watchlists, and more."
+      tagline={AUTH_REGISTER_COPY.tagline}
+      headlineLines={AUTH_REGISTER_COPY.headlineLines}
+      headlineAccentLineIndex={AUTH_REGISTER_COPY.headlineAccentLineIndex}
+      supportingCopy={AUTH_REGISTER_COPY.supportingCopy}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" muted>Already have an account?</AppText>
+          <AppText variant="bodySmall" style={styles.footerText}>Already have an account?</AppText>
           <AuthLink label="Sign in" href="/(auth)/login" />
         </View>
       }
     >
       <SocialAuthSection onError={setFormError} />
 
-      <AuthDivider label="or create with email" />
+      <AuthDivider label={AUTH_REGISTER_COPY.emailDivider} />
 
       <View style={styles.form}>
-        <AppInput
+        <AuthInput
           label="Display name"
           value={displayName}
           onChangeText={setDisplayName}
@@ -76,7 +78,7 @@ export default function RegisterScreen() {
           textContentType="name"
           returnKeyType="next"
         />
-        <AppInput
+        <AuthInput
           label="Email"
           value={email}
           onChangeText={setEmail}
@@ -87,7 +89,7 @@ export default function RegisterScreen() {
           textContentType="emailAddress"
           returnKeyType="next"
         />
-        <AppInput
+        <AuthInput
           label="Password"
           value={password}
           onChangeText={setPassword}
@@ -126,5 +128,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+  },
+  footerText: {
+    color: 'rgba(245, 245, 247, 0.72)',
   },
 });
