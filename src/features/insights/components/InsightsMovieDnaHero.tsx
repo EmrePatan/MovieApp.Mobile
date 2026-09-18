@@ -151,43 +151,39 @@ export function InsightsMovieDnaHero({
             />
           </View>
         ) : null}
+
+        <View style={styles.quotePanel} accessibilityRole="text">
+          <AppText variant="caption" style={styles.quoteMark}>“</AppText>
+          <AppText variant="bodySmall" center style={styles.quoteText}>
+            {editorialLine}
+          </AppText>
+          <AppText variant="caption" style={styles.quoteMark}>”</AppText>
+        </View>
       </View>
     </>
   );
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.container}>
-        {resolvedBackdrop ? (
-          <ImageBackground
-            source={{ uri: resolvedBackdrop }}
-            style={styles.gradient}
-            imageStyle={styles.backdropImage}
-          >
-            {heroBody}
-          </ImageBackground>
-        ) : (
-          <View style={styles.gradient}>
-            <Image source={FALLBACK_HERO} style={styles.fallbackBackdrop} resizeMode="cover" />
-            {heroBody}
-          </View>
-        )}
-      </View>
-
-      <View style={styles.quoteCard} accessibilityRole="text">
-        <AppText variant="caption" style={styles.quoteMark}>“</AppText>
-        <AppText variant="bodySmall" style={styles.quoteText}>
-          {editorialLine}
-        </AppText>
-      </View>
+    <View style={styles.container}>
+      {resolvedBackdrop ? (
+        <ImageBackground
+          source={{ uri: resolvedBackdrop }}
+          style={styles.gradient}
+          imageStyle={styles.backdropImage}
+        >
+          {heroBody}
+        </ImageBackground>
+      ) : (
+        <View style={styles.gradient}>
+          <Image source={FALLBACK_HERO} style={styles.fallbackBackdrop} resizeMode="cover" />
+          {heroBody}
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    gap: spacing.sm,
-  },
   container: {
     borderRadius: borderRadius.xl,
     overflow: 'hidden',
@@ -195,8 +191,8 @@ const styles = StyleSheet.create({
     borderColor: colors.borderAccent,
   },
   gradient: {
-    minHeight: 380,
-    justifyContent: 'flex-end',
+    minHeight: 420,
+    justifyContent: 'center',
   },
   backdropImage: {
     resizeMode: 'cover',
@@ -213,9 +209,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
   },
   content: {
-    padding: spacing.lg,
-    gap: spacing.md,
+    flex: 1,
+    minHeight: 420,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+    gap: spacing.lg,
     alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
   },
   copyBlock: {
@@ -314,26 +314,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderRadius: borderRadius.full,
   },
-  quoteCard: {
+  quotePanel: {
+    width: '100%',
+    maxWidth: 340,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   quoteMark: {
-    color: colors.accentStrong,
-    fontSize: 24,
-    lineHeight: 24,
-    marginTop: -2,
+    color: colors.accentMuted,
+    fontSize: 26,
+    lineHeight: 26,
+    ...TEXT_LIFT,
   },
   quoteText: {
-    flex: 1,
     color: colors.textSecondary,
     fontStyle: 'italic',
     lineHeight: 22,
+    maxWidth: '88%',
+    fontSize: 13,
+    ...TEXT_LIFT,
   },
 });
