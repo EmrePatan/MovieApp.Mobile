@@ -1,4 +1,5 @@
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3MovieDna } from '../types';
@@ -6,7 +7,6 @@ import {
   formatGenreGravitation,
   formatMovieDnaDisplayTitle,
   formatMovieDnaEditorialLine,
-  formatWatchingMixLine,
 } from '../utils/insights-format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
@@ -59,6 +59,53 @@ function HeroScrimLayers() {
   );
 }
 
+function PremiumWatchingMix({
+  movieSharePercent,
+  seriesSharePercent,
+  movieTitleCount,
+  seriesTitleCount,
+}: {
+  movieSharePercent: number;
+  seriesSharePercent: number;
+  movieTitleCount: number;
+  seriesTitleCount: number;
+}) {
+  const movieRounded = Math.round(movieSharePercent);
+  const seriesRounded = Math.round(seriesSharePercent);
+  const movieFlex = Math.max(movieRounded, 8);
+  const seriesFlex = Math.max(seriesRounded, 8);
+
+  return (
+    <View
+      style={styles.mixBlock}
+      accessibilityRole="text"
+      accessibilityLabel={`Movies ${movieTitleCount}, series ${seriesTitleCount}. ${movieRounded}% movies, ${seriesRounded}% series.`}
+    >
+      <View style={styles.mixHeaderRow}>
+        <View style={styles.mixStat}>
+          <Ionicons name="film-outline" size={12} color={colors.accentStrong} />
+          <AppText variant="caption" style={styles.mixLabel}>Movies</AppText>
+          <AppText variant="caption" style={styles.mixPercent}>{movieRounded}%</AppText>
+        </View>
+        <View style={styles.mixStat}>
+          <Ionicons name="tv-outline" size={12} color={colors.accentMuted} />
+          <AppText variant="caption" style={styles.mixLabel}>Series</AppText>
+          <AppText variant="caption" style={styles.mixPercent}>{seriesRounded}%</AppText>
+        </View>
+      </View>
+      <View style={styles.mixTrack}>
+        <LinearGradient
+          colors={[colors.accentMuted, colors.accentStrong]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={[styles.mixSegment, { flex: movieFlex }]}
+        />
+        <View style={[styles.mixSegmentMuted, { flex: seriesFlex }]} />
+      </View>
+    </View>
+  );
+}
+
 export function InsightsMovieDnaHero({
   movieDna,
   backdropImagePath,
@@ -69,12 +116,6 @@ export function InsightsMovieDnaHero({
   const editorialLine = formatMovieDnaEditorialLine(movieDna);
   const hasMix =
     movieDna.watchingMix.movieTitleCount + movieDna.watchingMix.seriesTitleCount > 0;
-  const mixLine = hasMix
-    ? formatWatchingMixLine(
-        movieDna.watchingMix.movieSharePercent,
-        movieDna.watchingMix.seriesSharePercent,
-      )
-    : null;
   const showGravitation = visibleGenres.length === 0;
   const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
 
@@ -108,20 +149,18 @@ export function InsightsMovieDnaHero({
               ))}
             </View>
           ) : null}
+
+          {hasMix ? (
+            <PremiumWatchingMix
+              movieSharePercent={movieDna.watchingMix.movieSharePercent}
+              seriesSharePercent={movieDna.watchingMix.seriesSharePercent}
+              movieTitleCount={movieDna.watchingMix.movieTitleCount}
+              seriesTitleCount={movieDna.watchingMix.seriesTitleCount}
+            />
+          ) : null}
         </View>
 
         <View style={styles.bottomBand}>
-          {mixLine ? (
-            <AppText
-              variant="caption"
-              center
-              style={styles.mixLine}
-              accessibilityRole="text"
-              accessibilityLabel={`${Math.round(movieDna.watchingMix.movieSharePercent)}% movies, ${Math.round(movieDna.watchingMix.seriesSharePercent)}% series`}
-            >
-              {mixLine}
-            </AppText>
-          ) : null}
           <AppText variant="bodySmall" center style={styles.quoteText} accessibilityRole="text">
             {editorialLine}
           </AppText>
@@ -233,35 +272,70 @@ const styles = StyleSheet.create({
   genreChip: {
     borderRadius: borderRadius.full,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.14)',
-    backgroundColor: 'rgba(10, 10, 15, 0.38)',
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 5,
+    borderColor: colors.borderAccent,
+    backgroundColor: colors.accentTint14,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
   },
   genreText: {
-    color: 'rgba(245, 245, 247, 0.88)',
+    color: colors.accentStrong,
+    fontWeight: '600',
+    fontSize: 11,
+    letterSpacing: 0.4,
+    ...TEXT_LIFT,
+  },
+  mixBlock: {
+    width: '100%',
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
+  },
+  mixHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.lg,
+  },
+  mixStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  mixLabel: {
+    color: 'rgba(245, 245, 247, 0.7)',
     fontWeight: '500',
     fontSize: 11,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
+  },
+  mixPercent: {
+    color: colors.accentStrong,
+    fontWeight: '700',
+    fontSize: 11,
+    fontVariant: ['tabular-nums'],
     ...TEXT_LIFT,
+  },
+  mixTrack: {
+    flexDirection: 'row',
+    height: 4,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  mixSegment: {
+    height: '100%',
+    borderTopRightRadius: 1,
+    borderBottomRightRadius: 1,
+  },
+  mixSegmentMuted: {
+    height: '100%',
+    backgroundColor: 'rgba(196, 163, 90, 0.22)',
   },
   bottomBand: {
     marginHorizontal: -spacing.lg,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
-    gap: spacing.sm,
     backgroundColor: 'rgba(10, 10, 15, 0.58)',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255, 255, 255, 0.12)',
-  },
-  mixLine: {
-    color: 'rgba(245, 245, 247, 0.72)',
-    fontWeight: '500',
-    fontSize: 11,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    ...TEXT_LIFT,
+    borderTopColor: colors.borderAccent,
   },
   quoteText: {
     color: 'rgba(245, 245, 247, 0.82)',
