@@ -11,9 +11,9 @@ import { borderRadius, spacing } from '@/theme/spacing';
 const FALLBACK_HERO = require('../../../../assets/insights/movie-dna-hero-fallback.jpg');
 
 const TEXT_LIFT = {
-  textShadowColor: 'rgba(0, 0, 0, 0.8)',
+  textShadowColor: 'rgba(0, 0, 0, 0.85)',
   textShadowOffset: { width: 0, height: 1 },
-  textShadowRadius: 8,
+  textShadowRadius: 10,
 } as const;
 
 interface InsightsMovieDnaHeroProps {
@@ -26,26 +26,26 @@ function HeroScrimLayers() {
     <>
       <LinearGradient
         colors={[
-          'rgba(10, 10, 15, 0.95)',
-          'rgba(10, 10, 15, 0.78)',
-          'rgba(10, 10, 15, 0.28)',
+          'rgba(10, 10, 15, 0.92)',
+          'rgba(10, 10, 15, 0.62)',
+          'rgba(10, 10, 15, 0.12)',
           'transparent',
         ]}
-        locations={[0, 0.38, 0.68, 1]}
-        start={{ x: 0, y: 0.45 }}
-        end={{ x: 1, y: 0.35 }}
+        locations={[0, 0.42, 0.72, 1]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.4 }}
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={['rgba(10, 10, 15, 0.08)', 'transparent', 'rgba(10, 10, 15, 0.18)']}
-        locations={[0, 0.5, 1]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0, y: 1 }}
+        colors={['transparent', 'rgba(10, 10, 15, 0.05)', 'rgba(10, 10, 15, 0.35)']}
+        locations={[0, 0.45, 1]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
       />
       <LinearGradient
-        colors={['transparent', 'rgba(10, 10, 15, 0.5)', 'rgba(10, 10, 15, 0.94)']}
-        locations={[0, 0.5, 1]}
+        colors={['transparent', 'rgba(10, 10, 15, 0.72)', 'rgba(10, 10, 15, 0.98)']}
+        locations={[0, 0.42, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.scrimLayer}
@@ -69,22 +69,24 @@ export function InsightsMovieDnaHero({
     <>
       <HeroScrimLayers />
       <View style={styles.content}>
-        <AppText variant="caption" style={styles.kicker}>
-          Your Movie DNA
-        </AppText>
-        <AppText variant="hero" style={styles.headline}>
-          {movieDna.identityTitle}
-        </AppText>
+        <View style={styles.copyBlock}>
+          <AppText variant="caption" style={styles.kicker}>
+            Your Movie DNA
+          </AppText>
+          <AppText variant="hero" style={styles.headline}>
+            {movieDna.identityTitle}
+          </AppText>
 
-        {gravitation ? (
-          <AppText variant="bodySmall" style={styles.description}>
-            {gravitation}
-          </AppText>
-        ) : (
-          <AppText variant="bodySmall" style={styles.description}>
-            Keep watching and rating to shape your Movie DNA.
-          </AppText>
-        )}
+          {gravitation ? (
+            <AppText variant="bodySmall" style={styles.description}>
+              {gravitation}
+            </AppText>
+          ) : (
+            <AppText variant="bodySmall" style={styles.description}>
+              Keep watching and rating to shape your Movie DNA.
+            </AppText>
+          )}
+        </View>
 
         {visibleGenres.length > 0 ? (
           <View style={styles.genreRow}>
@@ -120,12 +122,11 @@ export function InsightsMovieDnaHero({
         ) : null}
 
         {quoteLabel ? (
-          <View style={styles.quoteBlock} accessibilityRole="text">
-            <AppText variant="caption" style={styles.quoteMark}>“</AppText>
+          <View style={styles.quotePanel} accessibilityRole="text">
+            <Ionicons name="chatbox-ellipses-outline" size={15} color={colors.accentMuted} />
             <AppText variant="bodySmall" style={styles.quoteText}>
               {quoteLabel}
             </AppText>
-            <AppText variant="caption" style={styles.quoteMarkEnd}>”</AppText>
           </View>
         ) : null}
       </View>
@@ -184,22 +185,21 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: borderRadius.xl,
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderAccent,
   },
   gradient: {
-    minHeight: 320,
+    minHeight: 380,
     justifyContent: 'flex-end',
   },
   backdropImage: {
     resizeMode: 'cover',
+    transform: [{ scale: 1.08 }],
   },
   fallbackBackdrop: {
     position: 'absolute',
     top: 0,
     left: 0,
     width: '280%',
-    height: '100%',
+    height: '108%',
   },
   scrimLayer: {
     ...StyleSheet.absoluteFill,
@@ -208,24 +208,27 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
+  copyBlock: {
+    gap: spacing.sm,
+    maxWidth: '94%',
+  },
   kicker: {
     textTransform: 'uppercase',
-    letterSpacing: 1.6,
+    letterSpacing: 1.8,
     color: colors.accentStrong,
     fontWeight: '700',
-    marginBottom: 2,
     ...TEXT_LIFT,
   },
   headline: {
     color: colors.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
     fontWeight: '700',
-    marginBottom: 4,
+    fontSize: 34,
+    lineHeight: 40,
     ...TEXT_LIFT,
   },
   description: {
     lineHeight: 22,
-    maxWidth: '92%',
     color: colors.textSecondary,
     ...TEXT_LIFT,
   },
@@ -233,13 +236,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
-    marginTop: 2,
   },
   genreChip: {
     borderRadius: borderRadius.full,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint14,
+    backgroundColor: 'rgba(10, 10, 15, 0.55)',
     paddingHorizontal: spacing.sm,
     paddingVertical: 5,
   },
@@ -251,16 +253,13 @@ const styles = StyleSheet.create({
   mixRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    marginTop: 2,
   },
   mixCard: {
     flex: 1,
     gap: spacing.xs,
     padding: spacing.sm,
     borderRadius: borderRadius.md,
-    backgroundColor: 'rgba(10, 10, 15, 0.78)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    backgroundColor: 'rgba(10, 10, 15, 0.68)',
   },
   mixHeader: {
     flexDirection: 'row',
@@ -291,28 +290,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderRadius: borderRadius.full,
   },
-  quoteBlock: {
-    paddingTop: spacing.xs,
-    gap: 2,
-  },
-  quoteMark: {
-    color: colors.accentMuted,
-    fontSize: 18,
-    lineHeight: 18,
-    ...TEXT_LIFT,
-  },
-  quoteMarkEnd: {
-    color: colors.accentMuted,
-    fontSize: 18,
-    lineHeight: 18,
-    alignSelf: 'flex-end',
-    ...TEXT_LIFT,
+  quotePanel: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: 'rgba(10, 10, 15, 0.72)',
   },
   quoteText: {
+    flex: 1,
     color: colors.textSecondary,
     fontStyle: 'italic',
     lineHeight: 22,
-    paddingHorizontal: spacing.xs,
     ...TEXT_LIFT,
   },
 });

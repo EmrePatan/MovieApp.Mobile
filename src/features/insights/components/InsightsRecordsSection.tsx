@@ -105,8 +105,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
     padding: spacing.md,
     gap: spacing.sm,
     minHeight: 132,
@@ -140,8 +138,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
   },
   funFactText: {
     flex: 1,

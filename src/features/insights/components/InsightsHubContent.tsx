@@ -116,7 +116,11 @@ export function InsightsHubContent() {
         onSelectYear={setSelectedYear}
       />
       <InsightsTasteSection taste={insights.yourTaste} />
-      <InsightsTimeInStoriesSection timeInStories={insights.timeInStories} year={activeYear} />
+      <InsightsTimeInStoriesSection
+        timeInStories={insights.timeInStories}
+        year={activeYear}
+        backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
+      />
       <InsightsRatingsSection ratings={insights.yourRatings} />
       <InsightsErasSection era={insights.yourEra} />
       <InsightsRecordsSection
@@ -144,7 +148,7 @@ function InsightsScreenHeader({ onOpenProfile }: { onOpenProfile: () => void }) 
 
 const styles = StyleSheet.create({
   scrollContent: {
-    gap: spacing.md,
+    gap: spacing.lg,
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingBottom: spacing.xxl,
   },

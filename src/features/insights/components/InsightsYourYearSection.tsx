@@ -86,12 +86,14 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
               <SummaryStat
                 value={formatMonthYear(yourYear.peakMonth.month, yourYear.peakMonth.year)}
                 label="peak month"
+                accent
               />
             ) : null}
             {yourYear.favoriteWeekday != null ? (
               <SummaryStat
                 value={formatWeekdayName(yourYear.favoriteWeekday)}
                 label="favorite day"
+                accent
               />
             ) : null}
           </View>
@@ -164,7 +166,7 @@ const styles = StyleSheet.create({
   },
   barFill: {
     width: '100%',
-    backgroundColor: colors.accentMuted,
+    backgroundColor: colors.progressTrack,
     borderTopLeftRadius: borderRadius.sm,
     borderTopRightRadius: borderRadius.sm,
     minHeight: 8,
@@ -206,8 +208,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
   },
   calloutText: {
     flex: 1,

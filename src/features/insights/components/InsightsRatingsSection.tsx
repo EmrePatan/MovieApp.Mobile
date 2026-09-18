@@ -23,11 +23,28 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
         <InsightsEmptyState message="No ratings yet. Rate titles to build this view." />
       ) : (
         <View style={styles.card}>
-          <View style={styles.heroRow}>
-            <AppText variant="hero" style={styles.average}>
-              {formatAverageStarRating(ratings.averageStars)}
-            </AppText>
-            <StarRow rating={ratings.averageStars ?? 0} />
+          <View style={styles.summaryPanel}>
+            <View style={styles.scoreColumn}>
+              <AppText variant="hero" style={styles.average}>
+                {formatAverageStarRating(ratings.averageStars)}
+              </AppText>
+              <StarRow rating={ratings.averageStars ?? 0} />
+            </View>
+            <View style={styles.metaColumn}>
+              <AppText variant="caption" style={styles.ratingCount}>{ratings.count} ratings</AppText>
+              {ratings.highestRatedGenre ? (
+                <MetaLine
+                  label="Highest rated genre"
+                  value={`${formatAverageStarRating(ratings.highestRatedGenre.averageStars)} ${ratings.highestRatedGenre.name}`}
+                />
+              ) : null}
+              {ratings.lowestRatedGenre ? (
+                <MetaLine
+                  label="Lowest rated genre"
+                  value={`${formatAverageStarRating(ratings.lowestRatedGenre.averageStars)} ${ratings.lowestRatedGenre.name}`}
+                />
+              ) : null}
+            </View>
           </View>
 
           {sortedDistribution.length > 0 ? (
@@ -52,27 +69,6 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
               })}
             </View>
           ) : null}
-
-          <AppText variant="caption" style={styles.ratingCount}>{ratings.count} ratings</AppText>
-
-          {ratings.highestRatedGenre || ratings.lowestRatedGenre ? (
-            <View style={styles.genreInsights}>
-              {ratings.highestRatedGenre ? (
-                <GenreInsight
-                  label="Highest rated"
-                  name={ratings.highestRatedGenre.name}
-                  stars={ratings.highestRatedGenre.averageStars}
-                />
-              ) : null}
-              {ratings.lowestRatedGenre ? (
-                <GenreInsight
-                  label="Lowest rated"
-                  name={ratings.lowestRatedGenre.name}
-                  stars={ratings.lowestRatedGenre.averageStars}
-                />
-              ) : null}
-            </View>
-          ) : null}
         </View>
       )}
     </View>
@@ -94,7 +90,7 @@ function StarRow({ rating }: { rating: number }) {
           <Ionicons
             key={star}
             name={iconName}
-            size={18}
+            size={20}
             color={colors.accent}
           />
         );
@@ -103,26 +99,11 @@ function StarRow({ rating }: { rating: number }) {
   );
 }
 
-function GenreInsight({
-  label,
-  name,
-  stars,
-}: {
-  label: string;
-  name: string;
-  stars: number;
-}) {
+function MetaLine({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.genreInsight} accessibilityRole="text">
-      <AppText variant="caption" muted style={styles.genreInsightLabel}>
-        {label}
-      </AppText>
-      <View style={styles.genreInsightRow}>
-        <AppText variant="bodySmall" style={styles.genreName}>{name}</AppText>
-        <AppText variant="bodySmall" style={styles.genreStars}>
-          {formatAverageStarRating(stars)} ★
-        </AppText>
-      </View>
+    <View style={styles.metaLine}>
+      <AppText variant="caption" style={styles.metaLabel}>{label}</AppText>
+      <AppText variant="caption" style={styles.metaValue}>{value}</AppText>
     </View>
   );
 }
@@ -132,28 +113,49 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   card: {
-    gap: spacing.sm,
-  },
-  heroRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.md,
   },
+  summaryPanel: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.lg,
+  },
+  scoreColumn: {
+    gap: spacing.xs,
+  },
   average: {
-    color: colors.accentStrong,
+    color: colors.textPrimary,
     fontVariant: ['tabular-nums'],
     fontWeight: '700',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  ratingCount: {
-    color: colors.textMuted,
+    fontSize: 40,
+    lineHeight: 44,
   },
   starRow: {
     flexDirection: 'row',
     gap: 2,
+  },
+  metaColumn: {
+    flex: 1,
+    gap: spacing.sm,
     paddingTop: spacing.xs,
+  },
+  ratingCount: {
+    color: colors.accentStrong,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  metaLine: {
+    gap: 2,
+  },
+  metaLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  metaValue: {
+    color: colors.textSecondary,
+    lineHeight: 16,
   },
   distribution: {
     flexDirection: 'row',
@@ -183,40 +185,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: borderRadius.sm,
   },
   starLabel: {
-    fontVariant: ['tabular-nums'],
-  },
-  genreInsights: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.lg,
-    paddingTop: spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
-  },
-  genreInsight: {
-    gap: 4,
-    minWidth: 132,
-  },
-  genreInsightLabel: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    fontSize: 10,
-    color: colors.textMuted,
-  },
-  genreInsightRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  genreName: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-    flexShrink: 1,
-  },
-  genreStars: {
-    color: colors.accentStrong,
-    fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
 });

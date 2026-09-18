@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
@@ -8,6 +8,7 @@ import {
   formatHoursFromMinutes,
   formatHoursShort,
 } from '../utils/insights-format';
+import { resolveImageUri } from '@/utils/image-url';
 import { InsightsDonutRing } from './InsightsDonutRing';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
@@ -17,11 +18,13 @@ import { borderRadius, spacing } from '@/theme/spacing';
 interface InsightsTimeInStoriesSectionProps {
   timeInStories: InsightsV3TimeInStories;
   year: number;
+  backdropImagePath?: string | null;
 }
 
 export function InsightsTimeInStoriesSection({
   timeInStories,
   year,
+  backdropImagePath,
 }: InsightsTimeInStoriesSectionProps) {
   if (timeInStories.totalMinutes <= 0) {
     return (
@@ -38,6 +41,7 @@ export function InsightsTimeInStoriesSection({
   const movieSharePercent = Math.round(
     (timeInStories.movieMinutes / timeInStories.totalMinutes) * 100,
   );
+  const resolvedBackdrop = resolveImageUri(backdropImagePath, 'w500');
 
   return (
     <View style={styles.section}>
@@ -45,26 +49,29 @@ export function InsightsTimeInStoriesSection({
         title="Time in Stories"
         subtitle="The hours you've spent in other worlds"
       />
-      <LinearGradient
-        colors={[colors.accentTint18, 'rgba(10, 10, 15, 0.88)', colors.background]}
-        locations={[0, 0.55, 1]}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
-        style={styles.hero}
-      >
+      <View style={styles.hero}>
         <View style={styles.donutWrap}>
-          <InsightsDonutRing size={168} strokeWidth={12} progressPercent={movieSharePercent} />
+          {resolvedBackdrop ? (
+            <View style={styles.donutPhotoClip}>
+              <Image source={{ uri: resolvedBackdrop }} style={styles.donutPhoto} />
+              <LinearGradient
+                colors={['rgba(10, 10, 15, 0.35)', 'rgba(10, 10, 15, 0.88)']}
+                style={styles.donutPhotoScrim}
+              />
+            </View>
+          ) : null}
+          <InsightsDonutRing size={176} strokeWidth={13} progressPercent={movieSharePercent} />
           <View style={styles.donutCenter}>
             <AppText variant="hero" style={styles.hours}>
               {formatHoursFromMinutes(timeInStories.totalMinutes)}
             </AppText>
             <AppText variant="caption" style={styles.hoursLabel}>hours</AppText>
-            <AppText variant="bodySmall" muted style={styles.daysCopy}>
+            <AppText variant="bodySmall" style={styles.daysCopy}>
               That&apos;s {formatEquivalentDays(timeInStories.totalMinutes)} in stories
             </AppText>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       <View style={styles.breakdownRow}>
         <BreakdownCard
@@ -83,7 +90,10 @@ export function InsightsTimeInStoriesSection({
         <View style={styles.yearLine}>
           <Ionicons name="time-outline" size={14} color={colors.accentMuted} />
           <AppText variant="caption" muted>
-            In {year}, you&apos;ve watched {formatHoursFromMinutes(timeInStories.yearMinutes)} hours
+            In {year}, you&apos;ve watched{' '}
+            <AppText variant="caption" style={styles.yearHighlight}>
+              {formatHoursFromMinutes(timeInStories.yearMinutes)} hours
+            </AppText>
           </AppText>
         </View>
       ) : null}
@@ -104,7 +114,7 @@ function BreakdownCard({
     <View style={styles.breakdownCard}>
       <Ionicons name={icon} size={16} color={colors.accent} />
       <AppText variant="body" style={styles.breakdownValue}>{value}</AppText>
-      <AppText variant="caption" muted>{label}</AppText>
+      <AppText variant="caption" style={styles.breakdownLabel}>{label}</AppText>
     </View>
   );
 }
@@ -117,13 +127,27 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.xl,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderAccent,
+    backgroundColor: colors.surface,
   },
   donutWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 188,
+    minHeight: 196,
+  },
+  donutPhotoClip: {
+    position: 'absolute',
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    overflow: 'hidden',
+  },
+  donutPhoto: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  donutPhotoScrim: {
+    ...StyleSheet.absoluteFill,
   },
   donutCenter: {
     position: 'absolute',
@@ -135,9 +159,9 @@ const styles = StyleSheet.create({
     color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
     fontWeight: '700',
-    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
+    textShadowRadius: 8,
   },
   hoursLabel: {
     color: colors.textMuted,
@@ -148,6 +172,7 @@ const styles = StyleSheet.create({
   daysCopy: {
     textAlign: 'center',
     marginTop: 2,
+    color: colors.textMuted,
   },
   breakdownRow: {
     flexDirection: 'row',
@@ -160,18 +185,23 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
   },
   breakdownValue: {
     color: colors.accentStrong,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
+  breakdownLabel: {
+    color: colors.textMuted,
+  },
   yearLine: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
     paddingTop: spacing.xs,
+  },
+  yearHighlight: {
+    color: colors.accentStrong,
+    fontWeight: '700',
   },
 });
