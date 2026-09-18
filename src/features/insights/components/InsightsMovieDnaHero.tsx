@@ -123,21 +123,21 @@ export function InsightsMovieDnaHero({
     <>
       <HeroScrimLayers />
       <View style={styles.content}>
-        <View style={styles.heroColumn}>
-          <View style={styles.identityCluster}>
-            <AppText variant="caption" center style={styles.kicker}>
-              Your Movie DNA
+        <View style={styles.identityCluster}>
+          <AppText variant="caption" center style={styles.kicker}>
+            Your Movie DNA
+          </AppText>
+          <AppText variant="hero" center style={styles.headline}>
+            {displayTitle}
+          </AppText>
+          {showGravitation ? (
+            <AppText variant="body" center style={styles.description}>
+              {gravitation ?? 'Keep watching and rating to shape your Movie DNA.'}
             </AppText>
-            <AppText variant="hero" center style={styles.headline}>
-              {displayTitle}
-            </AppText>
-            {showGravitation ? (
-              <AppText variant="body" center style={styles.description}>
-                {gravitation ?? 'Keep watching and rating to shape your Movie DNA.'}
-              </AppText>
-            ) : null}
-          </View>
+          ) : null}
+        </View>
 
+        <View style={styles.middleLowerZone}>
           {visibleGenres.length > 0 ? (
             <View style={styles.genreRow}>
               {visibleGenres.map((genre) => (
@@ -225,17 +225,23 @@ const styles = StyleSheet.create({
     minHeight: 420,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xxl,
-    justifyContent: 'space-between',
   },
-  heroColumn: {
+  identityCluster: {
     width: '100%',
     maxWidth: 320,
     alignSelf: 'center',
-    gap: spacing.lg,
-  },
-  identityCluster: {
     alignItems: 'center',
     gap: spacing.md,
+  },
+  middleLowerZone: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 320,
+    alignSelf: 'center',
+    justifyContent: 'flex-end',
+    gap: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
   },
   kicker: {
     textTransform: 'uppercase',
@@ -287,7 +293,6 @@ const styles = StyleSheet.create({
   mixBlock: {
     width: '100%',
     gap: spacing.sm,
-    paddingTop: spacing.xs,
   },
   mixHeaderRow: {
     flexDirection: 'row',
