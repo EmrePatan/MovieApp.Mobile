@@ -32,14 +32,20 @@ export interface RequestOptions {
 
 type TokenGetter = () => string | null;
 type UnauthorizedHandler = () => void;
+type AcceptLanguageGetter = () => string;
 
 class ApiClient {
   private tokenGetter: TokenGetter | null = null;
+  private acceptLanguageGetter: AcceptLanguageGetter | null = null;
   private unauthorizedHandler: UnauthorizedHandler | null = null;
   private isHandlingUnauthorized = false;
 
   setTokenGetter(getter: TokenGetter): void {
     this.tokenGetter = getter;
+  }
+
+  setAcceptLanguageGetter(getter: AcceptLanguageGetter): void {
+    this.acceptLanguageGetter = getter;
   }
 
   setUnauthorizedHandler(handler: UnauthorizedHandler): void {
@@ -79,6 +85,11 @@ class ApiClient {
       Accept: 'application/json',
       ...headers,
     };
+
+    const acceptLanguage = this.acceptLanguageGetter?.();
+    if (acceptLanguage) {
+      requestHeaders['Accept-Language'] = acceptLanguage;
+    }
 
     if (body !== undefined) {
       requestHeaders['Content-Type'] = 'application/json';

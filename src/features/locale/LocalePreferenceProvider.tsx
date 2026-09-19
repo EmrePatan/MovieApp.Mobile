@@ -1,5 +1,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { changeUiLanguage } from '@/i18n';
+import { api } from '@/api/client';
+import { queryClient } from '@/api/query-client';
+import { changeUiLanguage, getUiFormatLocaleTag } from '@/i18n';
 import type { UiLanguage } from '@/i18n/types';
 import {
   clearSavedUiLanguage,
@@ -8,6 +10,7 @@ import {
 } from './locale-preference-storage';
 import type { LocalePreferenceContextValue } from './locale-preference-types';
 import { getDeviceLanguageCode, resolveInitialUiLanguage } from './resolve-ui-locale';
+import { invalidateLocalizedDetailQueries } from './utils/invalidate-localized-detail-queries';
 
 export const LocalePreferenceContext = createContext<LocalePreferenceContextValue | null>(null);
 
@@ -15,6 +18,10 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
   const [language, setLanguageState] = useState<UiLanguage>('en');
   const [source, setSource] = useState<LocalePreferenceContextValue['source']>('fallback');
   const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    api.setAcceptLanguageGetter(() => getUiFormatLocaleTag());
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +48,7 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
   const setLanguage = useCallback(async (nextLanguage: UiLanguage) => {
     await saveUiLanguage(nextLanguage);
     await changeUiLanguage(nextLanguage);
+    invalidateLocalizedDetailQueries(queryClient);
     setLanguageState(nextLanguage);
     setSource('saved');
   }, []);
@@ -49,6 +57,7 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
     await clearSavedUiLanguage();
     const resolved = resolveInitialUiLanguage(null, getDeviceLanguageCode());
     await changeUiLanguage(resolved.language);
+    invalidateLocalizedDetailQueries(queryClient);
     setLanguageState(resolved.language);
     setSource(resolved.source);
   }, []);

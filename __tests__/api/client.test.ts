@@ -7,12 +7,35 @@ describe('api client', () => {
   beforeEach(() => {
     process.env.EXPO_PUBLIC_API_URL = 'http://localhost:5027';
     api.setTokenGetter(() => 'test-token');
+    api.setAcceptLanguageGetter(() => 'en-US');
     api.setUnauthorizedHandler(jest.fn());
   });
 
   afterEach(() => {
     global.fetch = originalFetch;
     jest.restoreAllMocks();
+  });
+
+  it('sends Accept-Language header from locale getter', async () => {
+    api.setAcceptLanguageGetter(() => 'tr-TR');
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ id: 'movie-1' }),
+    }) as unknown as typeof fetch;
+
+    await api.get<{ id: string }>('/api/movies/11111111-1111-1111-1111-111111111111');
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:5027/api/movies/11111111-1111-1111-1111-111111111111',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Accept-Language': 'tr-TR',
+        }),
+      }),
+    );
   });
 
   it('sends JSON requests with authorization header', async () => {
