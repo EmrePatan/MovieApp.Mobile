@@ -93,4 +93,44 @@ describe('MovieFollowButton', () => {
     render(<MovieFollowButton movieId={movieId} />);
     expect(screen.getByLabelText('Release alert on').props.accessibilityState?.selected).toBe(true);
   });
+
+  describe('detail optimistic UX', () => {
+    it('shows spinner only while initial status is unresolved', () => {
+      (useMovieFollowStatus as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      });
+
+      render(<MovieFollowButton movieId={movieId} />);
+
+      const button = screen.getByLabelText('Notify me when released');
+      expect(button.props.accessibilityState.busy).toBe(true);
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
+
+    it('keeps icon visible while mutation is pending', () => {
+      (useCreateMovieFollow as jest.Mock).mockReturnValue({
+        mutate: mockCreateMutate,
+        isPending: true,
+      });
+
+      render(<MovieFollowButton movieId={movieId} />);
+
+      const button = screen.getByLabelText('Notify me when released');
+      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
+
+    it('prevents duplicate mutation while pending', () => {
+      (useCreateMovieFollow as jest.Mock).mockReturnValue({
+        mutate: mockCreateMutate,
+        isPending: true,
+      });
+
+      render(<MovieFollowButton movieId={movieId} />);
+      fireEvent.press(screen.getByLabelText('Notify me when released'));
+
+      expect(mockCreateMutate).not.toHaveBeenCalled();
+    });
+  });
 });

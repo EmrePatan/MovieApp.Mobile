@@ -36,24 +36,29 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const shouldQueryStatus = !favoriteStatusResolved && !favoriteStatusPending;
-  const { data: queriedIsFavorited = false, isLoading: isStatusLoading } = useFavoriteStatus(
+  const { data: queriedIsFavorited, isLoading: isStatusLoading } = useFavoriteStatus(
     contentType,
     contentId,
     { enabled: shouldQueryStatus },
   );
   const isFavorited = favoriteStatusResolved
     ? (favoriteIsFavorited ?? false)
-    : queriedIsFavorited;
+    : (queriedIsFavorited ?? false);
   const toggleFavorite = useToggleFavorite(contentType, contentId);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const isBusy =
-    toggleFavorite.isPending || (isAuthenticated && shouldQueryStatus && isStatusLoading);
+  const isInitialLoading = isAuthenticated && shouldQueryStatus && isStatusLoading;
+  const isMutationPending = toggleFavorite.isPending;
+  const isInteractionDisabled = isInitialLoading || isMutationPending;
   const active = isAuthenticated && isFavorited;
 
   const handlePress = () => {
     if (!requireAuth()) {
       setFeedback('Please sign in to use favorites.');
+      return;
+    }
+
+    if (isMutationPending) {
       return;
     }
 
@@ -78,7 +83,8 @@ export function FavoriteButton({
           label="Favorite"
           accessibilityLabel={label}
           active={active}
-          busy={isBusy}
+          busy={isInitialLoading}
+          disabled={isMutationPending}
           onPress={handlePress}
         >
           <Ionicons
@@ -97,18 +103,22 @@ export function FavoriteButton({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityState={{ selected: active, disabled: isBusy, busy: isBusy }}
-        disabled={isBusy}
+        accessibilityState={{
+          selected: active,
+          disabled: isInteractionDisabled,
+          busy: isInitialLoading,
+        }}
+        disabled={isInteractionDisabled}
         onPress={handlePress}
         style={({ pressed }) => [
           styles.button,
           { width: size, height: size },
           active && styles.buttonActive,
-          pressed && !isBusy && styles.pressed,
-          isBusy && styles.disabled,
+          pressed && !isInteractionDisabled && styles.pressed,
+          isInteractionDisabled && styles.disabled,
         ]}
       >
-        {isBusy ? (
+        {isInitialLoading ? (
           <ActivityIndicator color={colors.accent} size="small" />
         ) : (
           <Ionicons

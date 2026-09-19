@@ -116,4 +116,50 @@ describe('WatchedButton', () => {
     expect(mockMutate).not.toHaveBeenCalled();
     expect(screen.getByText('Please sign in to track watch history.')).toBeTruthy();
   });
+
+  describe('detail optimistic UX', () => {
+    it('shows spinner only while initial status is unresolved', () => {
+      (useMovieWatchStatus as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      });
+
+      render(
+        <WatchedButton target={{ type: 'movie', contentId: 'movie-id' }} variant="detail" />,
+      );
+
+      const button = screen.getByLabelText('Mark as watched');
+      expect(button.props.accessibilityState.busy).toBe(true);
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
+
+    it('keeps icon visible while mutation is pending', () => {
+      (useToggleMovieWatched as jest.Mock).mockReturnValue({
+        mutate: mockMutate,
+        isPending: true,
+      });
+
+      render(
+        <WatchedButton target={{ type: 'movie', contentId: 'movie-id' }} variant="detail" />,
+      );
+
+      const button = screen.getByLabelText('Mark as watched');
+      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
+
+    it('prevents duplicate mutation while pending', () => {
+      (useToggleMovieWatched as jest.Mock).mockReturnValue({
+        mutate: mockMutate,
+        isPending: true,
+      });
+
+      render(
+        <WatchedButton target={{ type: 'movie', contentId: 'movie-id' }} variant="detail" />,
+      );
+      fireEvent.press(screen.getByLabelText('Mark as watched'));
+
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
+  });
 });

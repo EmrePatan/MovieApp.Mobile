@@ -10,6 +10,18 @@ export function useCreateMovieFollow(movieId: string) {
 
   return useMutation({
     mutationFn: () => createMovieFollow(movieId),
+    onMutate: async () => {
+      const queryKey = movieFollowStatusQueryKey(movieId);
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<MovieFollowStatusResponse>(queryKey);
+      queryClient.setQueryData<MovieFollowStatusResponse>(queryKey, { isFollowing: true });
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(movieFollowStatusQueryKey(movieId), context.previous);
+      }
+    },
     onSuccess: (status) => {
       queryClient.setQueryData(movieFollowStatusQueryKey(movieId), status);
       invalidateFollowCatalogQueries(queryClient);
@@ -25,6 +37,18 @@ export function useRemoveMovieFollow(movieId: string) {
       await removeMovieFollow(movieId);
       const status: MovieFollowStatusResponse = { isFollowing: false };
       return status;
+    },
+    onMutate: async () => {
+      const queryKey = movieFollowStatusQueryKey(movieId);
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<MovieFollowStatusResponse>(queryKey);
+      queryClient.setQueryData<MovieFollowStatusResponse>(queryKey, { isFollowing: false });
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(movieFollowStatusQueryKey(movieId), context.previous);
+      }
     },
     onSuccess: (status) => {
       queryClient.setQueryData(movieFollowStatusQueryKey(movieId), status);

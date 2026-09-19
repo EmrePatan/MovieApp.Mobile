@@ -21,8 +21,8 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
   const [permissionHint, setPermissionHint] = useState<string | null>(null);
 
   const isFollowing = status?.isFollowing ?? false;
-  const isBusy =
-    isAuthenticated && (isLoading || createFollow.isPending || removeFollow.isPending);
+  const isInitialLoading = isAuthenticated && isLoading;
+  const isMutationPending = createFollow.isPending || removeFollow.isPending;
 
   const handleFollowSuccess = async () => {
     const registrationResult = await ensurePushDeviceRegisteredAsync();
@@ -41,6 +41,10 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
 
     setFeedback(null);
     setPermissionHint(null);
+
+    if (isMutationPending) {
+      return;
+    }
 
     if (isFollowing) {
       removeFollow.mutate();
@@ -69,7 +73,8 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
         label={label}
         accessibilityLabel={accessibilityLabel}
         active={isAuthenticated && isFollowing}
-        busy={isBusy}
+        busy={isInitialLoading}
+        disabled={isMutationPending}
         onPress={handlePress}
       >
         <Ionicons

@@ -101,12 +101,14 @@ describe('DetailActionBar premium circular actions', () => {
     expect(mockFavoriteMutate).toHaveBeenCalledWith(false, expect.any(Object));
   });
 
-  it('shows loading accessibility state while favorite mutation is pending', () => {
+  it('disables favorite without spinner while mutation is pending', () => {
     (useToggleFavorite as jest.Mock).mockReturnValue({ mutate: mockFavoriteMutate, isPending: true });
 
     render(<DetailActionBar contentType="movie" contentId="movie-id" showWatched />);
 
-    expect(screen.getByLabelText('Add to favorites').props.accessibilityState.busy).toBe(true);
+    const button = screen.getByLabelText('Add to favorites');
+    expect(button.props.accessibilityState.busy).toBe(false);
+    expect(button.props.accessibilityState.disabled).toBe(true);
   });
 
   it('does not render Follow on movie detail', () => {

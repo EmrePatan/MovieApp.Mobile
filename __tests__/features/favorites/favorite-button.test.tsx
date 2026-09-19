@@ -62,15 +62,46 @@ describe('FavoriteButton', () => {
     expect(mockMutate).toHaveBeenCalledWith(false, expect.any(Object));
   });
 
-  it('shows loading state while mutation is pending', () => {
-    (useToggleFavorite as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
-      isPending: true,
+  describe('detail optimistic UX', () => {
+    it('shows spinner only while initial status is unresolved', () => {
+      (useFavoriteStatus as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      });
+
+      render(<FavoriteButton contentType="movie" contentId="movie-id" variant="detail" />);
+
+      const button = screen.getByLabelText('Add to favorites');
+      expect(button.props.accessibilityState.busy).toBe(true);
+      expect(button.props.accessibilityState.disabled).toBe(true);
     });
 
-    render(<FavoriteButton contentType="movie" contentId="movie-id" />);
-    expect(screen.getByLabelText('Add to favorites').props.accessibilityState.disabled).toBe(true);
+    it('keeps icon visible while mutation is pending', () => {
+      (useToggleFavorite as jest.Mock).mockReturnValue({
+        mutate: mockMutate,
+        isPending: true,
+      });
+
+      render(<FavoriteButton contentType="movie" contentId="movie-id" variant="detail" />);
+
+      const button = screen.getByLabelText('Add to favorites');
+      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
+
+    it('prevents duplicate mutation while pending', () => {
+      (useToggleFavorite as jest.Mock).mockReturnValue({
+        mutate: mockMutate,
+        isPending: true,
+      });
+
+      render(<FavoriteButton contentType="movie" contentId="movie-id" variant="detail" />);
+      fireEvent.press(screen.getByLabelText('Add to favorites'));
+
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
   });
+
 
   it('uses resolved favorite status without querying when provided', () => {
     render(
