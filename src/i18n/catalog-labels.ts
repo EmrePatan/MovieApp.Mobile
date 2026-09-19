@@ -11,7 +11,6 @@ import type {
 } from '@/features/discovery/types';
 import type { LibraryCategory } from '@/features/library/types/library';
 import type { LibrarySortOption } from '@/features/library/types';
-import { normalizeMovieDnaGenreName } from '@/features/insights/utils/movie-dna-genre-titles';
 import { i18n } from './index';
 
 export type CatalogContentType =
@@ -109,7 +108,7 @@ export function translateAchievementCategory(category: string): string {
 }
 
 export function translateMovieDnaGenreTitle(genreName: string): string {
-  const normalized = normalizeMovieDnaGenreName(genreName);
+  const normalized = genreName.trim().toLowerCase();
   const key = `insights.movieDna.genreTitles.${normalized}`;
   if (i18n.exists(key)) {
     return i18n.t(key);
