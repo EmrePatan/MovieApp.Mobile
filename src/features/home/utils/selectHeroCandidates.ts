@@ -4,7 +4,7 @@ import {
   PERSONALIZED_HERO_SOURCE_ORDER,
 } from './home-section-policy';
 
-export const HERO_MAX_CANDIDATES = 5;
+export const HERO_MAX_CANDIDATES = 10;
 
 const HERO_ELIGIBLE_SECTION_TYPES: HomeSectionType[] = ['HotThisWeek'];
 

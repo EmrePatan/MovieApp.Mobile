@@ -72,7 +72,7 @@ describe('selectHeroCandidates', () => {
     const sections = [
       createSection(
         'HotThisWeek',
-        Array.from({ length: 7 }, (_, index) => createItem({ id: `hot-${index + 1}` })),
+        Array.from({ length: 12 }, (_, index) => createItem({ id: `hot-${index + 1}` })),
       ),
     ];
 
