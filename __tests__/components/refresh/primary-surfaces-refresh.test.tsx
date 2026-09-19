@@ -18,8 +18,11 @@ import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 const repoRoot = path.resolve(__dirname, '../../..');
 
 const iosOnlyRefreshSurfaceFiles = [
-  'app/(tabs)/home.tsx',
   'app/(tabs)/profile.tsx',
+];
+
+const androidPullRefreshSurfaceFiles = [
+  'app/(tabs)/home.tsx',
   'src/features/insights/components/InsightsHubContent.tsx',
 ];
 
@@ -147,6 +150,15 @@ describe('primary surface refresh presentation', () => {
     }
   });
 
+  it('uses Android pull refresh wiring in Home and Insights source files', () => {
+    for (const relativePath of androidPullRefreshSurfaceFiles) {
+      const source = fs.readFileSync(path.join(repoRoot, relativePath), 'utf8');
+      expect(source).toContain('useAndroidPullToRefresh');
+      expect(source).toContain('createIosRefreshControl');
+      expect(source).not.toContain('MovieAppRefreshControl');
+    }
+  });
+
   it('uses MovieAppRefreshControl in shared refresh surface source files', () => {
     for (const relativePath of sharedRefreshSurfaceFiles) {
       const source = fs.readFileSync(path.join(repoRoot, relativePath), 'utf8');
@@ -196,7 +208,7 @@ describe('primary surface refresh presentation', () => {
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
-  it('omits Home refresh control on Android', () => {
+  it('omits native Home refresh control on Android and shows pull refresh header', () => {
     Platform.OS = 'android';
     const refetch = jest.fn();
     (useHomeFeed as jest.Mock).mockReturnValue(
@@ -229,8 +241,9 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_getByType } = render(<HomeScreen />);
+    const { UNSAFE_getByType, getByTestId } = render(<HomeScreen />);
     expect(UNSAFE_getByType(FlatList).props.refreshControl).toBeUndefined();
+    expect(getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
 
   it('does not mount Home refresh control during initial browse loading', () => {
@@ -314,7 +327,7 @@ describe('primary surface refresh presentation', () => {
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
-  it('omits Insights refresh control on Android', () => {
+  it('omits native Insights refresh control on Android and shows pull refresh header', () => {
     Platform.OS = 'android';
     const refetch = jest.fn();
     (useInsightsV3 as jest.Mock).mockReturnValue({
@@ -327,8 +340,9 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType } = render(<InsightsHubContent />);
+    const { UNSAFE_getByType, getByTestId } = render(<InsightsHubContent />);
     expect(UNSAFE_getByType(ScrollView).props.refreshControl).toBeUndefined();
+    expect(getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
 
   it('keeps Notifications refresh semantics with shared control', () => {

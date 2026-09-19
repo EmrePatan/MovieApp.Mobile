@@ -111,12 +111,13 @@ describe('InsightsHubContent', () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it('omits refresh control on Android', () => {
+  it('omits native refresh control on Android and renders pull refresh header', () => {
     Platform.OS = 'android';
     (useInsightsV3 as jest.Mock).mockReturnValue(
       createInsightsQuery({
         data: insightsV3Fixture,
         isSuccess: true,
+        isRefetching: true,
       }),
     );
 
@@ -125,6 +126,7 @@ describe('InsightsHubContent', () => {
     const scrollView = UNSAFE_getByType(ScrollView);
 
     expect(scrollView.props.refreshControl).toBeUndefined();
+    expect(screen.getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
 
   it('opens profile from header avatar', () => {

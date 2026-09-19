@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
+import { useAndroidPullToRefresh } from '@/components/refresh/useAndroidPullToRefresh';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -21,6 +24,8 @@ import { InsightsYourYearSection } from './InsightsYourYearSection';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export function InsightsHubContent() {
   const router = useRouter();
@@ -74,6 +79,11 @@ export function InsightsHubContent() {
     onRefresh: handleRefresh,
   });
 
+  const androidPullToRefresh = useAndroidPullToRefresh({
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh,
+  });
+
   if (insightsQuery.isError && !insightsQuery.data) {
     const message = isApiError(insightsQuery.error)
       ? insightsQuery.error.userMessage
@@ -101,8 +111,14 @@ export function InsightsHubContent() {
     return null;
   }
 
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContent} refreshControl={refreshControl}>
+  const insightsScrollView = (
+    <AnimatedScrollView
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={refreshControl}
+      onScroll={androidPullToRefresh.scrollHandler}
+      scrollEventThrottle={16}
+    >
+      {androidPullToRefresh.RefreshHeader}
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
       <InsightsMovieDnaHero
         movieDna={insights.movieDna}
@@ -127,7 +143,15 @@ export function InsightsHubContent() {
         favoriteWeekday={insights.yourYear.favoriteWeekday}
       />
       <InsightsMilestonesSection achievements={insights.achievements} />
-    </ScrollView>
+    </AnimatedScrollView>
+  );
+
+  return androidPullToRefresh.enabled ? (
+    <GestureDetector gesture={androidPullToRefresh.composedGesture}>
+      {insightsScrollView}
+    </GestureDetector>
+  ) : (
+    insightsScrollView
   );
 }
 

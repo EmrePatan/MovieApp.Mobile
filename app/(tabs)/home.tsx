@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
+import { useAndroidPullToRefresh } from '@/components/refresh/useAndroidPullToRefresh';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +28,8 @@ import { presentHomeSections } from '@/features/home/utils/present-home-sections
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<HomeSectionModel>);
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -215,13 +220,30 @@ export default function HomeScreen() {
     [sections.length, showColdWelcome],
   );
 
+  const isRefreshing = isFetching && !isInitialBrowseLoading;
+
   const refreshControl = useMemo(
     () =>
       createIosRefreshControl({
-        refreshing: isFetching && !isInitialBrowseLoading,
+        refreshing: isRefreshing,
         onRefresh: handleRefresh,
       }),
-    [handleRefresh, isFetching, isInitialBrowseLoading],
+    [handleRefresh, isRefreshing],
+  );
+
+  const androidPullToRefresh = useAndroidPullToRefresh({
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh,
+  });
+
+  const mergedListHeader = useMemo(
+    () => (
+      <>
+        {androidPullToRefresh.RefreshHeader}
+        {listHeader}
+      </>
+    ),
+    [androidPullToRefresh.RefreshHeader, listHeader],
   );
 
   const listFooter = useMemo(
@@ -266,25 +288,37 @@ export default function HomeScreen() {
     );
   }
 
+  const homeList = (
+    <AnimatedFlatList
+      data={sections}
+      keyExtractor={homeSectionKeyExtractor}
+      renderItem={renderSection}
+      ListHeaderComponent={mergedListHeader}
+      ListFooterComponent={listFooter}
+      ListEmptyComponent={showColdWelcome ? null : HomeEmptyState}
+      contentContainerStyle={listContentStyle}
+      refreshControl={refreshControl}
+      onScroll={androidPullToRefresh.scrollHandler}
+      scrollEventThrottle={16}
+      showsVerticalScrollIndicator={false}
+      initialNumToRender={layout.verticalList.initialNumToRender}
+      maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+      windowSize={layout.verticalList.windowSize}
+      getItemLayout={getHomeSectionRowLayout}
+      removeClippedSubviews
+    />
+  );
+
   return (
     <HomeScreenShell>
       {topChrome}
-      <FlatList
-        data={sections}
-        keyExtractor={homeSectionKeyExtractor}
-        renderItem={renderSection}
-        ListHeaderComponent={listHeader}
-        ListFooterComponent={listFooter}
-        ListEmptyComponent={showColdWelcome ? null : HomeEmptyState}
-        contentContainerStyle={listContentStyle}
-        refreshControl={refreshControl}
-        showsVerticalScrollIndicator={false}
-        initialNumToRender={layout.verticalList.initialNumToRender}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-        windowSize={layout.verticalList.windowSize}
-        getItemLayout={getHomeSectionRowLayout}
-        removeClippedSubviews
-      />
+      {androidPullToRefresh.enabled ? (
+        <GestureDetector gesture={androidPullToRefresh.composedGesture}>
+          {homeList}
+        </GestureDetector>
+      ) : (
+        homeList
+      )}
     </HomeScreenShell>
   );
 }

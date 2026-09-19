@@ -10,6 +10,7 @@ jest.mock('react-native-gesture-handler', () => {
       failOffsetX: jest.fn(() => gesture),
       onUpdate: jest.fn(() => gesture),
       onEnd: jest.fn(() => gesture),
+      onFinalize: jest.fn(() => gesture),
     };
 
     return gesture;
@@ -58,6 +59,7 @@ jest.mock('react-native-gesture-handler', () => {
     Gesture: {
       Pan: jest.fn(() => createMockPanGesture()),
       Native: jest.fn(() => createMockPanGesture()),
+      Simultaneous: jest.fn((...gestures: unknown[]) => gestures[0] ?? createMockPanGesture()),
     },
     Swipeable,
   };
@@ -74,6 +76,13 @@ jest.mock('react-native-reanimated', () => {
     },
     useSharedValue: (initialValue: unknown) => ({ value: initialValue }),
     useAnimatedStyle: (updater: () => object) => updater(),
+    useAnimatedScrollHandler: (handler: {
+      onScroll?: (event: { contentOffset: { y: number } }) => void;
+    }) => (event?: { nativeEvent?: { contentOffset?: { y: number } } }) => {
+      handler.onScroll?.({
+        contentOffset: { y: event?.nativeEvent?.contentOffset?.y ?? 0 },
+      });
+    },
     withSpring: (value: unknown) => value,
     withTiming: (value: unknown) => value,
     runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
