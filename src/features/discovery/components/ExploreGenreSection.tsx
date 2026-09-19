@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import type { Genre } from '../types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -24,12 +25,12 @@ export function ExploreGenreSection({ genres, onGenrePress }: ExploreGenreSectio
           <Pressable
             key={genre.id}
             accessibilityRole="button"
-            accessibilityLabel={`Browse ${genre.name}`}
+            accessibilityLabel={`Browse ${translateGenreName(genre.name)}`}
             onPress={() => onGenrePress(genre.id)}
             style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
           >
             <AppText variant="caption" style={styles.chipLabel}>
-              {genre.name}
+              {translateGenreName(genre.name)}
             </AppText>
           </Pressable>
         ))}

@@ -63,7 +63,7 @@ export function PlayTrailerButton({ contentType, contentId }: PlayTrailerButtonP
     >
       <Ionicons name="play" size={14} color={colors.accent} style={styles.playIcon} />
       <AppText variant="bodySmall" style={styles.label}>
-        Trailer
+        {t('details.actions.trailerButton')}
       </AppText>
     </Pressable>
   );

@@ -17,7 +17,7 @@ const stage1Tr = {
     home: 'Ana Sayfa',
     discover: 'Keşfet',
     library: 'Kütüphane',
-    insights: 'İçgörüler',
+    insights: 'İstatistikler',
   },
   auth: {
     email: 'E-posta',

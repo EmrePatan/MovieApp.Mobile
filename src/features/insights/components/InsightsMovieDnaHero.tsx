@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3MovieDna } from '../types';
 import {
   formatGenreGravitation,
@@ -132,7 +133,7 @@ export function InsightsMovieDnaHero({
                     variant="caption"
                     style={[styles.genreText, !isActive && styles.genreTextMuted]}
                   >
-                    {genre.name}
+                    {translateGenreName(genre.name)}
                   </AppText>
                 </View>
               );

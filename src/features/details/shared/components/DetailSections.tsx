@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -38,7 +39,7 @@ export function DetailGenres({ genres }: DetailGenresProps) {
       <View style={[styles.body, styles.genreRow]}>
         {genres.map((genre) => (
           <View key={genre} style={styles.genreChip}>
-            <AppText variant="caption">{genre}</AppText>
+            <AppText variant="caption">{translateGenreName(genre)}</AppText>
           </View>
         ))}
       </View>

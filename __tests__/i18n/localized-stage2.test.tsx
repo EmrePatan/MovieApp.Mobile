@@ -5,6 +5,7 @@ import {
   translateContentType,
   translateDiscoveryBrowseMode,
   translateLibrarySort,
+  translateGenreName,
   translateMovieDnaGenreTitle,
 } from '@/i18n/catalog-labels';
 import { formatContentType } from '@/utils/format';
@@ -39,6 +40,8 @@ describe('Stage 2 localization', () => {
     expect(translateContentType('person')).toBe('Kişi');
     expect(translateDiscoveryBrowseMode('top_rated')).toBe('En Yüksek Puanlı');
     expect(translateLibrarySort('recentlyAdded')).toBe('Son Eklenenler');
+    expect(translateGenreName('Action')).toBe('Aksiyon');
+    expect(translateGenreName('Science Fiction')).toBe('Bilim Kurgu');
     expect(formatContentType('movie')).toBe('Film');
   });
 

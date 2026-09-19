@@ -107,6 +107,24 @@ export function translateAchievementCategory(category: string): string {
   return category.charAt(0).toUpperCase() + category.slice(1);
 }
 
+export function translateGenreName(genreName: string): string {
+  const trimmed = genreName.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  const key = `genres.names.${trimmed.toLowerCase()}`;
+  if (i18n.exists(key)) {
+    return i18n.t(key);
+  }
+
+  return trimmed;
+}
+
+export function translateGenreNames(genreNames: string[]): string[] {
+  return genreNames.map((genreName) => translateGenreName(genreName));
+}
+
 export function translateMovieDnaGenreTitle(genreName: string): string {
   const normalized = genreName.trim().toLowerCase();
   const key = `insights.movieDna.genreTitles.${normalized}`;
@@ -114,7 +132,9 @@ export function translateMovieDnaGenreTitle(genreName: string): string {
     return i18n.t(key);
   }
 
-  return i18n.t('insights.movieDna.fallbackExplorer', { genreName: genreName.trim() });
+  return i18n.t('insights.movieDna.fallbackExplorer', {
+    genreName: translateGenreName(genreName),
+  });
 }
 
 export function translateMovieDnaEditorialByCode(code: MovieDnaEditorialCode): string {

@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3Taste } from '../types';
 import { formatDominantGenreHeadline } from '../utils/insights-format';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
@@ -32,12 +33,12 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
           {genres.map((genre, index) => (
             <InsightsAffinityBar
               key={genre.genreId}
-              label={genre.name}
+              label={translateGenreName(genre.name)}
               percent={genre.sharePercent}
               compact
               emphasize={index === 0}
               accessibilityLabel={t('insights.taste.affinityAccessibility', {
-                genre: genre.name,
+                genre: translateGenreName(genre.name),
                 percent: Math.round(genre.sharePercent),
               })}
             />
@@ -52,7 +53,7 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
                   {t('insights.taste.risingTaste')}
                 </AppText>
                 <AppText variant="bodySmall" style={styles.risingTitle}>
-                  {taste.risingGenre.name}
+                  {translateGenreName(taste.risingGenre.name)}
                 </AppText>
                 <AppText variant="caption" muted>
                   {t('insights.taste.risingDelta', {

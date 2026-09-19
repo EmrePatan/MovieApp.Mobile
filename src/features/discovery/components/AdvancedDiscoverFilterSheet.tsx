@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import { AppInput } from '@/components/inputs/AppInput';
 import { useDiscoveryWatchProviders } from '../hooks/useDiscoveryWatchProviders';
 import { useGenres } from '../hooks/useGenres';
@@ -82,7 +83,7 @@ function GenreSelector({
             key={genre.id}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={genreAccessibilityLabel(genre.name)}
+            accessibilityLabel={genreAccessibilityLabel(translateGenreName(genre.name))}
             onPress={() => onToggle(genre.id)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
@@ -90,7 +91,7 @@ function GenreSelector({
               variant="caption"
               style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
             >
-              {genre.name}
+              {translateGenreName(genre.name)}
             </AppText>
           </Pressable>
         );

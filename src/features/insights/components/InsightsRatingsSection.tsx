@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3Ratings } from '../types';
 import { formatAverageStarRating } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
@@ -44,7 +45,7 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
                   label={t('insights.ratingsSection.highestRatedGenre')}
                   value={t('insights.ratingsSection.metaValue', {
                     average: formatAverageStarRating(ratings.highestRatedGenre.averageStars),
-                    genreName: ratings.highestRatedGenre.name,
+                    genreName: translateGenreName(ratings.highestRatedGenre.name),
                   })}
                 />
               ) : null}
@@ -53,7 +54,7 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
                   label={t('insights.ratingsSection.lowestRatedGenre')}
                   value={t('insights.ratingsSection.metaValue', {
                     average: formatAverageStarRating(ratings.lowestRatedGenre.averageStars),
-                    genreName: ratings.lowestRatedGenre.name,
+                    genreName: translateGenreName(ratings.lowestRatedGenre.name),
                   })}
                 />
               ) : null}

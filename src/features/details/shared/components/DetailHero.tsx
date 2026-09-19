@@ -9,6 +9,7 @@ import { BackdropImage, CatalogImage } from './CatalogImage';
 import { DetailBackButton } from './DetailBackButton';
 import { DetailMetadataRow } from './DetailMetadataRow';
 import { DetailScrim } from './DetailScrim';
+import { translateGenreNames } from '@/i18n/catalog-labels';
 import { shouldShowOriginalTitle } from '@/utils/format';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
@@ -125,7 +126,7 @@ export const DetailHero = memo(function DetailHero({
             <DetailMetadataRow value={metadataLine} />
             {genres.length > 0 ? (
               <AppText variant="caption" muted numberOfLines={2}>
-                {genres.join(' · ')}
+                {translateGenreNames(genres).join(' · ')}
               </AppText>
             ) : null}
             {identityAccessory}

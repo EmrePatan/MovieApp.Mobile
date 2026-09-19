@@ -2,6 +2,7 @@ import {
   translateAchievementCategory,
   translateMovieDnaEditorialByCode,
   translateMovieDnaEditorialFallback,
+  translateGenreName,
   translateMovieDnaGenreTitle,
   type MovieDnaEditorialCode,
 } from '@/i18n/catalog-labels';
@@ -235,23 +236,30 @@ export function formatGenreGravitation(genreNames: string[]): string | null {
   }
 
   if (genreNames.length === 1) {
-    return i18n.t('insights.movieDna.gravitation.one', { genre: genreNames[0] });
+    return i18n.t('insights.movieDna.gravitation.one', {
+      genre: translateGenreName(genreNames[0]),
+    });
   }
 
   if (genreNames.length === 2) {
     return i18n.t('insights.movieDna.gravitation.two', {
-      first: genreNames[0],
-      second: genreNames[1],
+      first: translateGenreName(genreNames[0]),
+      second: translateGenreName(genreNames[1]),
     });
   }
 
-  const last = genreNames[genreNames.length - 1];
-  const rest = genreNames.slice(0, -1).join(', ');
+  const last = translateGenreName(genreNames[genreNames.length - 1]);
+  const rest = genreNames
+    .slice(0, -1)
+    .map((genreName) => translateGenreName(genreName))
+    .join(', ');
   return i18n.t('insights.movieDna.gravitation.many', { list: rest, last });
 }
 
 export function formatDominantGenreHeadline(genreName: string): string {
-  return i18n.t('insights.movieDna.dominantGenreHeadline', { genreName });
+  return i18n.t('insights.movieDna.dominantGenreHeadline', {
+    genreName: translateGenreName(genreName),
+  });
 }
 
 export function formatDecadeLabel(bucket: string): string {

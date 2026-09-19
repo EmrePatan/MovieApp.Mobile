@@ -705,6 +705,7 @@ export const stage2En = {
       enableNotificationsSettings:
         'Enable notifications in device settings to receive release alerts.',
       playTrailer: 'Play Trailer',
+      trailerButton: 'Trailer',
       trailerOpenError: 'Unable to open trailer',
       trailerOpenErrorMessage: 'Please try again later.',
       seasonProgressError: 'Could not update season watch progress. Please try again.',

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import type { GenreStatisticResponse } from '../types';
 import { getGenrePercentage } from '../utils/profile-analytics';
 import { ProfileBarRow } from './ProfileBarRow';
@@ -33,10 +34,12 @@ export function ProfileTasteSection({ genres }: ProfileTasteSectionProps) {
   const insight =
     topGenres.length >= 2
       ? t('profile.preview.tasteTopPair', {
-          first: topGenres[0].name,
-          second: topGenres[1].name,
+          first: translateGenreName(topGenres[0].name),
+          second: translateGenreName(topGenres[1].name),
         })
-      : t('profile.preview.tasteTopSingle', { genre: topGenres[0].name });
+      : t('profile.preview.tasteTopSingle', {
+          genre: translateGenreName(topGenres[0].name),
+        });
 
   return (
     <View style={styles.section}>
@@ -50,11 +53,11 @@ export function ProfileTasteSection({ genres }: ProfileTasteSectionProps) {
           return (
             <ProfileBarRow
               key={genre.genreId}
-              label={genre.name}
+              label={translateGenreName(genre.name)}
               valueLabel={`${percent}%`}
               progress={percent / 100}
               accessibilityLabel={t('profile.preview.tasteGenreAccessibility', {
-                genre: genre.name,
+                genre: translateGenreName(genre.name),
                 percent,
               })}
               accentColor={colors.accent}

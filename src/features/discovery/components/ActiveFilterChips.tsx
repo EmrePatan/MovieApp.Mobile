@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { i18n } from '@/i18n';
+import { translateGenreName } from '@/i18n/catalog-labels';
 import type { Genre } from '../types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -50,7 +51,9 @@ export function buildActiveFilterChips(
     const genre = genres.find((entry) => entry.id === genreId);
     chips.push({
       key: `genre-${genreId}`,
-      label: genre?.name ?? i18n.t('discovery.activeFilterChips.genreFallback'),
+      label: genre?.name
+        ? translateGenreName(genre.name)
+        : i18n.t('discovery.activeFilterChips.genreFallback'),
       onRemove: () => handlers.onRemoveGenre(genreId),
     });
   }
