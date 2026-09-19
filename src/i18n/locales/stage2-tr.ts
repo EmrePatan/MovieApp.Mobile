@@ -1130,8 +1130,7 @@ export const stage2Tr = {
     maxPicksPerRequest: 'Her istek en fazla {{count}} katalog eşleşmesi döndürür.',
     sessionPromptLabel: 'İstemin',
     whyItFits: 'Neden uyuyor',
-    getMorePicksHint:
-      'Bu istemi koru ve aynı oturumda en fazla {{count}} öneri daha al.',
+    getMorePicksHint: 'Aynı istemle yeni öneriler alır · 1 istek hakkı kullanır',
     startFreshHint: 'Sonuçları temizle ve yeni bir ruh hâli, tür veya hava yaz.',
     startFresh: 'Yeniden Başla',
     validationMinLength: 'Ne istediğini en az {{count}} karakterle anlat.',

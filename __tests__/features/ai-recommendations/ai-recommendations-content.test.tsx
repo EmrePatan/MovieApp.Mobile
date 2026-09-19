@@ -118,6 +118,9 @@ describe('AiRecommendationsContent', () => {
     expect(screen.getByTestId('ai-recommendations-collapsed-prompt')).toBeTruthy();
     expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
     expect(screen.getByText('Get More Picks')).toBeTruthy();
+    expect(
+      screen.getByText('Get new picks with the same prompt · Uses 1 request'),
+    ).toBeTruthy();
     expect(screen.getByText('Start Fresh')).toBeTruthy();
     expect(screen.queryByText('Refine This Session')).toBeNull();
     expect(postAiRecommendations).toHaveBeenCalledWith({
@@ -144,6 +147,7 @@ describe('AiRecommendationsContent', () => {
     (postAiRecommendations as jest.Mock).mockResolvedValue({
       ...successResponse,
       returnedCount: 2,
+      quotaRemaining: 1,
       recommendations: [
         ...successResponse.recommendations,
         {
@@ -161,6 +165,10 @@ describe('AiRecommendationsContent', () => {
         message: 'mind-bending sci-fi with emotional stakes',
         sessionId: 'session-1',
       });
+      expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
+        '1 of 3 requests left today',
+      );
+      expect(screen.getByText('2 of up to 5 picks · 1 requests left today')).toBeTruthy();
     });
   });
 

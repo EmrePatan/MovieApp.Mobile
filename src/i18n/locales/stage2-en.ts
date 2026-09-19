@@ -1074,8 +1074,7 @@ export const stage2En = {
     maxPicksPerRequest: 'Each request returns up to {{count}} catalog matches.',
     sessionPromptLabel: 'Your prompt',
     whyItFits: 'Why it fits',
-    getMorePicksHint:
-      'Keep this prompt and fetch up to {{count}} more picks in the same session.',
+    getMorePicksHint: 'Get new picks with the same prompt · Uses 1 request',
     startFreshHint: 'Clear results and write a new mood, genre, or vibe.',
     startFresh: 'Start Fresh',
     validationMinLength: 'Describe what you want in at least {{count}} characters.',

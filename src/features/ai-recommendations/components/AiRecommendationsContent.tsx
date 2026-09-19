@@ -263,9 +263,7 @@ export function AiRecommendationsContent() {
               disabled={isQuotaExhausted}
             />
             <AppText variant="caption" muted center style={styles.actionHint}>
-              {t('aiRecommendations.getMorePicksHint', {
-                count: AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
-              })}
+              {t('aiRecommendations.getMorePicksHint')}
             </AppText>
           </View>
           <View style={styles.actionBlock}>
