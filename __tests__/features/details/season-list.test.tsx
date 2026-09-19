@@ -4,6 +4,7 @@ import {
   SeasonList,
   SeasonListItemProgress,
 } from '@/features/details/tv/components/SeasonList';
+import { TvShowCompletionCelebrationLayer } from '@/features/details/tv/components/TvShowCompletionCelebrationLayer';
 import { useAuth } from '@/auth/useAuth';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
 import { useSeasonProgress } from '@/features/watch-history/hooks/useSeasonProgress';
@@ -39,6 +40,18 @@ jest.mock('@/features/watch-history/hooks/useTvShowProgress', () => ({
 jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
   useToggleSeasonWatched: jest.fn(),
 }));
+
+function renderSeasonListWithCelebration(
+  props: React.ComponentProps<typeof SeasonList>,
+  tvShowId = props.tvShowId,
+) {
+  return render(
+    <>
+      <TvShowCompletionCelebrationLayer tvShowId={tvShowId} />
+      <SeasonList {...props} />
+    </>,
+  );
+}
 
 const seasons = [
   {
@@ -159,9 +172,11 @@ describe('SeasonList progress UI', () => {
       isError: false,
     });
 
-    const { rerender } = render(
-      <SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />,
-    );
+    const { rerender } = renderSeasonListWithCelebration({
+      tvShowId: 'tv-id',
+      seasons,
+      showTitle: 'Breaking Bad',
+    });
 
     expect(screen.queryByTestId('show-completed-banner')).toBeNull();
     expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
@@ -181,7 +196,12 @@ describe('SeasonList progress UI', () => {
       isError: false,
     });
 
-    rerender(<SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />);
+    rerender(
+      <>
+        <TvShowCompletionCelebrationLayer tvShowId="tv-id" />
+        <SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />
+      </>,
+    );
 
     expect(screen.getByTestId('show-completed-confetti')).toBeTruthy();
     expect(screen.getByTestId('show-completed-banner')).toBeTruthy();
@@ -200,9 +220,11 @@ describe('SeasonList progress UI', () => {
       isError: false,
     });
 
-    const { rerender } = render(
-      <SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />,
-    );
+    const { rerender } = renderSeasonListWithCelebration({
+      tvShowId: 'tv-id',
+      seasons,
+      showTitle: 'Breaking Bad',
+    });
 
     (useTvShowProgress as jest.Mock).mockReturnValue({
       data: {
@@ -230,7 +252,12 @@ describe('SeasonList progress UI', () => {
       isError: false,
     });
 
-    rerender(<SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />);
+    rerender(
+      <>
+        <TvShowCompletionCelebrationLayer tvShowId="tv-id" />
+        <SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Breaking Bad" />
+      </>,
+    );
 
     expect(screen.getByTestId('show-completed-banner')).toBeTruthy();
     expect(screen.queryByTestId('show-completed-confetti')).toBeNull();

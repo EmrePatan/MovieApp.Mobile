@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { Animated, Dimensions, Easing, Modal, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Animated, Dimensions, Easing, Modal, Platform, StyleSheet, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
 const CONFETTI_DURATION_MS = 1800;
@@ -48,9 +48,11 @@ function createParticles(screenWidth: number, screenHeight: number): ParticleCon
 
 function ConfettiParticle({
   particle,
+  screenWidth,
   screenHeight,
 }: {
   particle: ParticleConfig;
+  screenWidth: number;
   screenHeight: number;
 }) {
   const progress = useMemo(() => new Animated.Value(0), []);
@@ -86,10 +88,11 @@ function ConfettiParticle({
   return (
     <Animated.View
       pointerEvents="none"
+      testID={`show-completed-confetti-particle-${particle.id}`}
       style={[
         styles.particle,
         {
-          left: `${particle.left}%`,
+          left: (particle.left / 100) * screenWidth,
           width: particle.size,
           height: particle.size * particle.aspectRatio,
           backgroundColor: particle.color,
@@ -107,17 +110,20 @@ export function ShowCompletedConfettiOverlay({
 }: ShowCompletedConfettiOverlayProps) {
   const { width, height } = Dimensions.get('window');
   const particles = useMemo(() => createParticles(width, height), [height, width]);
+  const handleDismiss = useCallback(() => {
+    onDismiss();
+  }, [onDismiss]);
 
   useEffect(() => {
     if (!visible) {
       return;
     }
 
-    const dismissTimer = setTimeout(onDismiss, CONFETTI_DURATION_MS);
+    const dismissTimer = setTimeout(handleDismiss, CONFETTI_DURATION_MS);
     return () => {
       clearTimeout(dismissTimer);
     };
-  }, [onDismiss, visible]);
+  }, [handleDismiss, visible]);
 
   if (!visible) {
     return null;
@@ -129,11 +135,18 @@ export function ShowCompletedConfettiOverlay({
       transparent
       animationType="none"
       statusBarTranslucent
+      presentationStyle="overFullScreen"
+      hardwareAccelerated={Platform.OS === 'android'}
       testID="show-completed-confetti"
     >
       <View style={styles.overlay} pointerEvents="none">
         {particles.map((particle) => (
-          <ConfettiParticle key={particle.id} particle={particle} screenHeight={height} />
+          <ConfettiParticle
+            key={particle.id}
+            particle={particle}
+            screenWidth={width}
+            screenHeight={height}
+          />
         ))}
       </View>
     </Modal>
@@ -142,8 +155,9 @@ export function ShowCompletedConfettiOverlay({
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'transparent',
+    overflow: 'visible',
   },
   particle: {
     position: 'absolute',

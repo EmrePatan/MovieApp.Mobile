@@ -13,8 +13,6 @@ import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgr
 import { buildSeasonProgressMap } from '@/features/watch-history/utils/tv-show-progress-cache';
 import type { TvShowSeasonProgressResponse } from '@/features/watch-history/types';
 import { ShowCompletedBanner } from '@/features/watch-history/components/ShowCompletedBanner';
-import { ShowCompletedConfettiOverlay } from '@/features/watch-history/components/ShowCompletedConfettiOverlay';
-import { useShowCompletionCelebration } from '@/features/watch-history/hooks/useShowCompletionCelebration';
 import { useToggleSeasonWatched } from '@/features/watch-history/hooks/useWatchHistoryMutations';
 import { isShowFullyWatched } from '@/features/watch-history/utils/show-completion-celebration';
 import {
@@ -248,11 +246,6 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
   const watchedEpisodes = tvProgress?.watchedEpisodes ?? 0;
   const totalEpisodes = tvProgress?.totalEpisodes ?? 0;
   const isFullyWatched = isShowFullyWatched(watchedEpisodes, totalEpisodes);
-  const { confettiVisible, dismissConfetti } = useShowCompletionCelebration({
-    watchedEpisodes,
-    totalEpisodes,
-    enabled: isAuthenticated && progressReady,
-  });
   const tvSummary =
     isAuthenticated && tvProgress
       ? formatTvShowWatchedSummary(tvProgress.watchedEpisodes, tvProgress.totalEpisodes)
@@ -293,11 +286,6 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
           </AppText>
         ) : null}
       </View>
-
-      <ShowCompletedConfettiOverlay
-        visible={confettiVisible}
-        onDismiss={dismissConfetti}
-      />
 
       {isFullyWatched && showTitle ? (
         <ShowCompletedBanner showTitle={showTitle} />

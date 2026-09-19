@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { shouldTriggerShowCompletionCelebration } from '../utils/show-completion-celebration';
 
 interface UseShowCompletionCelebrationOptions {
@@ -40,9 +40,9 @@ export function useShowCompletionCelebration({
     previousWatchedRef.current = watchedEpisodes;
   }, [enabled, totalEpisodes, watchedEpisodes]);
 
-  const dismissConfetti = () => {
+  const dismissConfetti = useCallback(() => {
     setConfettiVisible(false);
-  };
+  }, []);
 
   return { confettiVisible, dismissConfetti };
 }
