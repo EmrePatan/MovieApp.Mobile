@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { colors } from '@/theme/colors';
 
@@ -15,7 +15,7 @@ export default function AuthLayout() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
-        animation: 'fade',
+        animation: Platform.OS === 'android' ? 'default' : 'fade',
       }}
     >
       <Stack.Screen name="login" />

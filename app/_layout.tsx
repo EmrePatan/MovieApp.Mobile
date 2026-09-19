@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SplashScreen, Stack } from 'expo-router';
+import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
@@ -30,7 +31,12 @@ function RootNavigator() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="(tabs)"
+          options={
+            Platform.OS === 'android' ? { animationTypeForReplace: 'push' } : undefined
+          }
+        />
         <Stack.Screen name="movie" options={ratedDetailStackScreenOptions} />
         <Stack.Screen name="tv" options={ratedDetailStackScreenOptions} />
         <Stack.Screen name="person" />
