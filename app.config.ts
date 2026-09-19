@@ -16,6 +16,10 @@ const config: ExpoConfig = {
     resizeMode: 'contain',
     backgroundColor: '#0A0A0F',
   },
+  androidStatusBar: {
+    backgroundColor: '#0A0A0F',
+    barStyle: 'light-content',
+  },
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.movieapp.mobile',

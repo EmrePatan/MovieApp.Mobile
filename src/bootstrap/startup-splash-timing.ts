@@ -1,0 +1,3 @@
+export const MIN_BRANDED_SPLASH_MS = 1000;
+export const BRANDED_SPLASH_FADE_MS = 250;
+export const BRANDED_SPLASH_BACKGROUND = '#0A0A0F';
