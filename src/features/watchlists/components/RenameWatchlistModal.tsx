@@ -124,7 +124,9 @@ export function RenameWatchlistModal({
 
             <FeedbackMessage
               message={feedback}
-              tone={feedback?.includes('Could not') ? 'error' : 'info'}
+              tone={
+                feedback === t('watchlists.renameModal.enterName') ? 'info' : feedback ? 'error' : 'info'
+              }
               onDismiss={() => setFeedback(null)}
             />
 

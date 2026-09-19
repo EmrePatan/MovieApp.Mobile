@@ -47,10 +47,7 @@ export function HomeHeaderProfileAvatar({
       compact={compact}
       onPress={onPress}
     >
-      <View
-        style={[styles.avatar, overlay && styles.avatarOverlay]}
-        accessibilityLabel={`${displayName} avatar`}
-      >
+      <View style={[styles.avatar, overlay && styles.avatarOverlay]} importantForAccessibility="no-hide-descendants">
         <AppText variant="caption" style={styles.initials}>
           {initials}
         </AppText>

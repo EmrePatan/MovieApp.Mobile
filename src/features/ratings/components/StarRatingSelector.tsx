@@ -167,8 +167,8 @@ export function StarRatingSelector({
       accessibilityLabel={t('ratings.yourRating')}
       accessibilityValue={{ text: formatStarRatingAccessibilityValue(displayRating) }}
       accessibilityActions={[
-        { name: 'increment', label: 'Increase rating' },
-        { name: 'decrement', label: 'Decrease rating' },
+        { name: 'increment', label: t('ratings.increaseRating') },
+        { name: 'decrement', label: t('ratings.decreaseRating') },
       ]}
       onAccessibilityAction={handleAccessibilityAction}
       style={styles.touchSurface}

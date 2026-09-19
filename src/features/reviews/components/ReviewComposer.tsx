@@ -160,7 +160,10 @@ function ReviewComposerInner({
         <AppText
           variant="caption"
           style={[styles.counter, isNearLimit && styles.counterWarning]}
-          accessibilityLabel={`${contentLength} of ${MAX_REVIEW_CONTENT_LENGTH} characters`}
+          accessibilityLabel={t('reviews.characterCountAccessibility', {
+            current: contentLength,
+            max: MAX_REVIEW_CONTENT_LENGTH,
+          })}
         >
           {contentLength}/{MAX_REVIEW_CONTENT_LENGTH}
         </AppText>

@@ -107,7 +107,9 @@ export function CreateWatchlistModal({
 
             <FeedbackMessage
               message={feedback}
-              tone={feedback?.includes('Could not') ? 'error' : 'info'}
+              tone={
+                feedback === t('watchlists.createModal.enterName') ? 'info' : feedback ? 'error' : 'info'
+              }
               onDismiss={() => setFeedback(null)}
             />
 

@@ -95,7 +95,10 @@ export const HomeHero = memo(function HomeHero({
   );
 
   const year = formatCatalogYear(item.releaseDate, null);
-  const ratingLabel = item.voteAverage > 0 ? `rating ${formatRating(item.voteAverage)}` : null;
+  const ratingLabel =
+    item.voteAverage > 0
+      ? t('common.ratingAccessibility', { rating: formatRating(item.voteAverage) })
+      : null;
   const hasBackdrop = Boolean(resolveImageUri(item.backdropUrl));
   const posterUri = resolveImageUri(item.posterUrl);
   const showPosterFallback = !hasBackdrop && Boolean(posterUri) && !posterFailed;
@@ -122,7 +125,7 @@ export const HomeHero = memo(function HomeHero({
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Open ${item.title}`}
+        accessibilityLabel={t('common.openTitle', { title: item.title })}
         unstable_pressDelay={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
         onPress={handleHeroPress}
         style={[styles.card, { width: cardWidth, height: heroHeight }]}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { authTypography } from '../auth-typography';
 import { colors } from '@/theme/colors';
@@ -7,13 +8,14 @@ interface AuthBrandMarkProps {
 }
 
 export function AuthBrandMark({ compact = false }: AuthBrandMarkProps) {
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const movieSize = compact ? 22 : width < 360 ? 30 : width < 390 ? 34 : 36;
   const caveSize = compact ? 26 : width < 360 ? 34 : width < 390 ? 38 : 40;
   const lineHeight = compact ? 30 : movieSize * 1.08;
 
   return (
-    <View style={styles.container} accessibilityRole="header" accessibilityLabel="movie cave">
+    <View style={styles.container} accessibilityRole="header" accessibilityLabel={t('home.brandMark')}>
       <Text
         style={[
           styles.movie,

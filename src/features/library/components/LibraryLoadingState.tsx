@@ -10,7 +10,7 @@ interface LibraryLoadingStateProps {
 }
 
 export function LibraryLoadingState({
-  accessibilityLabel = 'Loading library',
+  accessibilityLabel,
   rowCount = 5,
 }: LibraryLoadingStateProps) {
   const { t } = useTranslation();

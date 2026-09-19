@@ -58,7 +58,9 @@ export const ReviewCard = memo(function ReviewCard({
       <View style={styles.header}>
         <View
           style={[styles.avatar, isOwnReview && styles.avatarOwn]}
-          accessibilityLabel={`${review.user.displayName} avatar`}
+          accessibilityLabel={t('profile.avatarAccessibility', {
+            name: review.user.displayName,
+          })}
         >
           <AppText variant="caption" style={styles.avatarText}>
             {getAuthorInitials(review.user.displayName)}

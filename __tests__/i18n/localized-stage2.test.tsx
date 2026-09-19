@@ -42,6 +42,9 @@ describe('Stage 2 localization', () => {
     expect(translateLibrarySort('recentlyAdded')).toBe('Son Eklenenler');
     expect(translateGenreName('Action')).toBe('Aksiyon');
     expect(translateGenreName('Science Fiction')).toBe('Bilim Kurgu');
+    expect(translateGenreName('Reality')).toBe('Gerçeklik');
+    expect(translateGenreName('Talk')).toBe('Söyleşi');
+    expect(translateGenreName('Western')).toBe('Kovboy');
     expect(formatContentType('movie')).toBe('Film');
   });
 

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -17,6 +18,7 @@ export function HomeHeroMetadata({
   releaseDate,
   voteAverage,
 }: HomeHeroMetadataProps) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(releaseDate, null);
   const typeLabel = formatContentType(contentType);
   const hasRating = voteAverage > 0;
@@ -38,7 +40,9 @@ export function HomeHeroMetadata({
       {hasRating ? (
         <View
           style={styles.ratingChip}
-          accessibilityLabel={`Rating ${formatRating(voteAverage)}`}
+          accessibilityLabel={t('common.ratingAccessibility', {
+            rating: formatRating(voteAverage),
+          })}
         >
           <Ionicons name="star" size={12} color={colors.accent} />
           <AppText variant="caption" style={styles.ratingText}>

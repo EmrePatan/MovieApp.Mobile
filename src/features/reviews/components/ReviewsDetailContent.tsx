@@ -205,7 +205,7 @@ export function ReviewsDetailContent({
       t('common.deleteReviewTitle'),
       t('common.deleteReviewMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.delete'),
           style: 'destructive',

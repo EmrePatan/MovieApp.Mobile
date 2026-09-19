@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -25,6 +26,7 @@ export function ReviewsRatingDistribution({
   averageScore,
   ratingCount,
 }: ReviewsRatingDistributionProps) {
+  const { t } = useTranslation();
   const maxCount = Math.max(...Object.values(buckets), 1);
 
   if (ratingCount === 0) {
@@ -67,7 +69,10 @@ export function ReviewsRatingDistribution({
               <Pressable
                 key={stars}
                 accessibilityRole="button"
-                accessibilityLabel={`Filter ${stars} star reviews, ${count} ratings`}
+                accessibilityLabel={t('reviews.filterStarReviews', {
+                  stars,
+                  count,
+                })}
                 accessibilityState={{ selected }}
                 disabled={count === 0}
                 onPress={() => onSelectStars(selected ? null : stars)}

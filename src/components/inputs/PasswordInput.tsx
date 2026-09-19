@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -12,6 +13,7 @@ interface PasswordInputProps extends TextInputProps {
 }
 
 export function PasswordInput({ label, error, style, ...props }: PasswordInputProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const inputId = props.nativeID ?? label.toLowerCase().replace(/\s+/g, '-');
 
@@ -31,7 +33,7 @@ export function PasswordInput({ label, error, style, ...props }: PasswordInputPr
         />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={visible ? 'Hide password' : 'Show password'}
+          accessibilityLabel={visible ? t('common.hidePassword') : t('common.showPassword')}
           onPress={() => setVisible((current) => !current)}
           style={styles.toggle}
         >

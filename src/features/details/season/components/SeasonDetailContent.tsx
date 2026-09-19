@@ -12,7 +12,8 @@ interface SeasonDetailContentProps {
 
 export function SeasonDetailContent({ season }: SeasonDetailContentProps) {
   const { t } = useTranslation();
-  const title = season.name ?? `Season ${season.seasonNumber}`;
+  const title =
+    season.name ?? t('common.seasonNumber', { number: season.seasonNumber });
   const metadataLine = formatSeasonDetailMetadataLine({
     seasonNumber: season.seasonNumber,
     airDate: season.airDate,

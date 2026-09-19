@@ -1,8 +1,5 @@
 import { Platform, RefreshControl } from 'react-native';
-import {
-  REFRESH_IOS_PULL_TITLE,
-  REFRESH_IOS_REFRESHING_TITLE,
-} from './refresh-control-constants';
+import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
 
 export interface MovieAppRefreshControlProps {
@@ -18,23 +15,24 @@ export function MovieAppRefreshControl({
   testID = 'movieapp-refresh-control',
   progressViewOffset,
 }: MovieAppRefreshControlProps) {
-  const accessibilityLabel = refreshing ? 'Refreshing content' : 'Pull to refresh';
+  const { t } = useTranslation();
+  const accessibilityLabel = refreshing
+    ? t('common.refreshRefreshing')
+    : t('common.refreshPulling');
 
   return (
     <RefreshControl
       testID={testID}
       accessibilityLabel={accessibilityLabel}
-      accessibilityHint={
-        refreshing ? undefined : 'Pull down and release to refresh this list'
-      }
+      accessibilityHint={refreshing ? undefined : t('common.refreshHint')}
       refreshing={refreshing}
       onRefresh={onRefresh}
       tintColor={colors.accent}
       title={
         Platform.OS === 'ios'
           ? refreshing
-            ? REFRESH_IOS_REFRESHING_TITLE
-            : REFRESH_IOS_PULL_TITLE
+            ? t('common.refreshRefreshing')
+            : t('common.refreshPulling')
           : undefined
       }
       titleColor={colors.textSecondary}

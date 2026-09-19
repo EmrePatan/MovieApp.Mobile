@@ -104,11 +104,11 @@ export function ImageViewerModal({
                         source={{ uri }}
                         style={styles.image}
                         resizeMode="contain"
-                        accessibilityLabel={`Gallery image ${index + 1}`}
+                        accessibilityLabel={t('gallery.imageAccessibility', { index: index + 1 })}
                       />
                     ) : (
                       <AppText variant="body" muted>
-                        Image unavailable
+                        {t('gallery.imageUnavailable')}
                       </AppText>
                     )}
                   </View>

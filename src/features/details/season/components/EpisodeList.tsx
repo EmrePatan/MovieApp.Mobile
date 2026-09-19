@@ -79,10 +79,10 @@ function EpisodeListItem({
 
     Alert.alert(title, undefined, [
       {
-        text: 'Mark through here as watched',
+        text: t('common.markThroughHereAsWatched'),
         onPress: () => onMarkThrough(episode),
       },
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
     ]);
   };
 
@@ -130,13 +130,13 @@ function EpisodeListItem({
           path={episode.stillPath}
           width={layout.posterList.width}
           height={Math.round(layout.posterList.width * (9 / 16))}
-          accessibilityLabel={`${title} still`}
+          accessibilityLabel={t('common.episodeStillAccessibility', { title })}
           rounded
         />
 
         <View style={styles.meta}>
           <AppText variant="bodySmall" numberOfLines={2}>
-            E{episode.episodeNumber} · {title}
+            {t('common.episodeLine', { episode: episode.episodeNumber, title })}
           </AppText>
           {metadata ? (
             <AppText variant="caption" muted numberOfLines={1}>
@@ -182,11 +182,11 @@ export function EpisodeList({
 
       markThroughMutation.mutate(episode.id, {
         onError: () => {
-          setFeedback('Could not mark episodes as watched. Please try again.');
+          setFeedback(t('details.actions.markThroughEpisodesError'));
         },
       });
     },
-    [markThroughMutation, requireAuth],
+    [markThroughMutation, requireAuth, t],
   );
 
   const watchedControlWidth = 44;

@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ const POSTER_HEIGHT = Math.round(POSTER_WIDTH * 1.5);
 export const CollectionLinkRow = memo(function CollectionLinkRow({
   collection,
 }: CollectionLinkRowProps) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   if (!collection) {
@@ -34,7 +36,7 @@ export const CollectionLinkRow = memo(function CollectionLinkRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Part of ${collection.name}`}
+      accessibilityLabel={t('details.collection.partOf', { name: collection.name })}
       onPress={handlePress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       testID="collection-link-row"
@@ -43,11 +45,11 @@ export const CollectionLinkRow = memo(function CollectionLinkRow({
         path={collection.posterPath}
         width={POSTER_WIDTH}
         height={POSTER_HEIGHT}
-        accessibilityLabel={`${collection.name} poster`}
+        accessibilityLabel={t('details.sections.collectionPoster', { name: collection.name })}
       />
       <View style={styles.labelRow}>
         <AppText variant="bodySmall" numberOfLines={1} style={styles.label}>
-          Part of {collection.name}
+          {t('details.collection.partOf', { name: collection.name })}
         </AppText>
         <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
       </View>

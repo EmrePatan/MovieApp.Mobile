@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -14,6 +15,8 @@ interface ReviewAuthorRatingProps {
 }
 
 export function ReviewAuthorRating({ userRating }: ReviewAuthorRatingProps) {
+  const { t } = useTranslation();
+
   if (userRating == null || !isValidBackendScore(userRating)) {
     return null;
   }
@@ -25,7 +28,7 @@ export function ReviewAuthorRating({ userRating }: ReviewAuthorRatingProps) {
     <View
       style={styles.container}
       accessibilityRole="text"
-      accessibilityLabel={`Rated ${label} out of 5 stars`}
+      accessibilityLabel={t('reviews.ratedOutOfFiveStars', { label })}
       testID="review-author-rating"
     >
       <Ionicons name="star" size={12} color={colors.accentStrong} />

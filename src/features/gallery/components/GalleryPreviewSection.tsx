@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { openGalleryDetail } from '@/features/details/shared/navigation/gallery-detail-navigation';
@@ -28,6 +29,7 @@ export function GalleryPreviewSection({
   isLoading = false,
   seeAllRoute,
 }: GalleryPreviewSectionProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const previewImages = useMemo(() => getGalleryPreviewImages(images), [images]);
@@ -92,7 +94,7 @@ export function GalleryPreviewSection({
             <Pressable
               key={galleryImageKey(item, index)}
               accessibilityRole="button"
-              accessibilityLabel={`Gallery preview image ${index + 1}`}
+              accessibilityLabel={t('gallery.previewImageAccessibility', { index: index + 1 })}
               onPress={() => handleImagePress(index)}
               style={[styles.previewItem, styles.previewFrame]}
               testID={`gallery-preview-item-${index}`}

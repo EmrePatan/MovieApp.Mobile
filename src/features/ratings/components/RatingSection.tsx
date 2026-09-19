@@ -90,11 +90,7 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
         setFeedback(t('ratings.removed'));
       },
       onError: (error) => {
-        setFeedback(
-          isApiError(error)
-            ? 'Could not update your rating. Please try again.'
-            : 'Could not update your rating. Please try again.',
-        );
+        setFeedback(t('ratings.removeError'));
       },
     });
   };
@@ -104,7 +100,15 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
       <AppText variant="subtitle">{t('ratings.yourRating')}</AppText>
       <FeedbackMessage
         message={feedback}
-        tone={feedback?.includes('Could not') ? 'error' : 'success'}
+        tone={
+          feedback === t('ratings.removed') || feedback === t('ratings.saved')
+            ? 'success'
+            : feedback === t('ratings.signInRequired')
+              ? 'info'
+              : feedback
+                ? 'error'
+                : 'info'
+        }
         onDismiss={() => setFeedback(null)}
       />
 

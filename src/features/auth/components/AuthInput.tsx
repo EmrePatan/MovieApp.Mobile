@@ -1,4 +1,5 @@
 import { forwardRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -33,6 +34,7 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInpu
   },
   ref,
 ) {
+  const { t } = useTranslation();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const inputId = props.nativeID ?? placeholder.toLowerCase().replace(/\s+/g, '-');
   const isSecure = showPasswordToggle ? !isPasswordVisible : secureTextEntry;
@@ -61,7 +63,9 @@ export const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInpu
         {showPasswordToggle ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+            accessibilityLabel={
+              isPasswordVisible ? t('common.hidePassword') : t('common.showPassword')
+            }
             hitSlop={8}
             onPress={() => setIsPasswordVisible((visible) => !visible)}
             style={styles.trailingButton}

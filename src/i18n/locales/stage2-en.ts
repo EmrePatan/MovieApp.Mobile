@@ -215,6 +215,15 @@ export const stage2En = {
     progress: 'Progress',
     seasonCompleted: 'Season completed',
     seasonProgressAccessibility: 'Season progress {{count}}',
+    refreshPulling: 'Pull to refresh',
+    refreshRefreshing: 'Refreshing content',
+    refreshHint: 'Pull down and release to refresh this list',
+    hidePassword: 'Hide password',
+    showPassword: 'Show password',
+    ratingAccessibility: 'Rating {{rating}}',
+    episodeStillAccessibility: '{{title}} still',
+    episodeLine: 'E{{episode}} · {{title}}',
+    markThroughHereAsWatched: 'Mark through here as watched',
   },
   contentType: {
     movie: 'Movie',
@@ -408,6 +417,8 @@ export const stage2En = {
       title_desc: 'Title Z–A',
     },
     releaseRegion: 'Release region',
+    exploreByGenre: 'Explore by Genre',
+    browseGenre: 'Browse {{genre}}',
     browseScreen: {
       filters: 'Filters',
       noTitlesMatchFiltersTitle: 'No titles match your filters',
@@ -709,6 +720,11 @@ export const stage2En = {
       trailerOpenError: 'Unable to open trailer',
       trailerOpenErrorMessage: 'Please try again later.',
       seasonProgressError: 'Could not update season watch progress. Please try again.',
+      markThroughEpisodesError:
+        'Could not mark episodes as watched. Please try again.',
+    },
+    collection: {
+      partOf: 'Part of {{name}}',
     },
     followPreferences: {
       titleFollowing: 'Follow preferences',
@@ -782,6 +798,8 @@ export const stage2En = {
     saved: 'Rating saved.',
     removed: 'Rating removed.',
     updateError: 'Could not update your rating. Please try again.',
+    increaseRating: 'Increase rating',
+    decreaseRating: 'Decrease rating',
     youRated: 'You rated this {{score}}/10.',
     notRatedYet: 'You have not rated this yet.',
     rateOutOfTen: 'Rate {{score}} out of 10',
@@ -823,6 +841,9 @@ export const stage2En = {
       contentRequired: 'Review content is required.',
       contentTooLong: 'Review must be at most {{max}} characters.',
     },
+    ratedOutOfFiveStars: 'Rated {{label}} out of 5 stars',
+    filterStarReviews: 'Filter {{stars}} star reviews, {{count}} ratings',
+    characterCountAccessibility: '{{current}} of {{max}} characters',
   },
   notifications: {
     title: 'Notifications',
@@ -1053,6 +1074,11 @@ export const stage2En = {
   gallery: {
     title: 'Gallery',
     closeImageViewer: 'Close image viewer',
+    empty: 'No photos are available yet.',
+    imageAccessibility: 'Gallery image {{index}}',
+    previewImageAccessibility: 'Gallery preview image {{index}}',
+    openImageAccessibility: 'Open gallery image {{index}}',
+    imageUnavailable: 'Image unavailable',
     filters: {
       all: 'All',
       backdrops: 'Backdrops',
