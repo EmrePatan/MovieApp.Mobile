@@ -1,6 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
+import { getHomeHeaderLayout } from '@/features/home/utils/home-header-layout';
 import { useUnreadNotificationCount } from '@/features/notifications/hooks/useUnreadNotificationCount';
+
+const headerLayout = getHomeHeaderLayout(390);
 
 const mockPush = jest.fn();
 
@@ -33,7 +36,7 @@ describe('HomeHeader notification bell', () => {
   });
 
   it('opens notifications without a badge when unread count is zero', () => {
-    render(<HomeHeader />);
+    render(<HomeHeader layout={headerLayout} />);
 
     fireEvent.press(screen.getByLabelText('Open notifications'));
     expect(mockPush).toHaveBeenCalledWith('/notifications');
@@ -45,14 +48,14 @@ describe('HomeHeader notification bell', () => {
       data: { unreadCount: 3 },
     });
 
-    render(<HomeHeader />);
+    render(<HomeHeader layout={headerLayout} />);
 
     expect(screen.getByLabelText('Open notifications, 3 unread')).toBeTruthy();
     expect(screen.getByText('3')).toBeTruthy();
   });
 
   it('renders profile avatar initials', () => {
-    render(<HomeHeader />);
+    render(<HomeHeader layout={headerLayout} />);
 
     expect(screen.getByLabelText('Open Emre User profile')).toBeTruthy();
     expect(screen.getByText('EU')).toBeTruthy();
@@ -63,7 +66,7 @@ describe('HomeHeader notification bell', () => {
       data: { unreadCount: 12 },
     });
 
-    render(<HomeHeader />);
+    render(<HomeHeader layout={headerLayout} />);
 
     expect(screen.getByLabelText('Open notifications, 9+ unread')).toBeTruthy();
     expect(screen.getByText('9+')).toBeTruthy();

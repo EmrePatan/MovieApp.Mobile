@@ -24,6 +24,7 @@ export const homeHeaderStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
+    paddingRight: spacing.md,
   },
   actionCluster: {
     flexDirection: 'row',
