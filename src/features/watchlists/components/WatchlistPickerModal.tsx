@@ -204,7 +204,7 @@ function WatchlistPickerBody({
                   {watchlist.name}
                 </AppText>
                 <AppText variant="caption" muted>
-                  {watchlist.itemCount} {watchlist.itemCount === 1 ? 'item' : 'items'}
+                  {t('watchlists.picker.itemCount', { count: watchlist.itemCount })}
                 </AppText>
               </View>
               {rowBusy ? (
@@ -282,7 +282,7 @@ function WatchlistPickerBody({
                   {t('common.addToWatchlist')}
                 </AppText>
                 <AppText variant="caption" muted>
-                  Save to one or more lists
+                  {t('watchlists.picker.subtitle')}
                 </AppText>
               </View>
               <Pressable

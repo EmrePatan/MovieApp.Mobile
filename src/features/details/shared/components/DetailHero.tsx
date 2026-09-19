@@ -52,7 +52,7 @@ export const DetailHero = memo(function DetailHero({
     [width],
   );
 
-  const heroImagePath = useStillAsHero ? stillPath : backdropPath;
+  const heroImagePath = useStillAsHero ? stillPath : (backdropPath ?? posterPath);
   const showPoster = !useStillAsHero;
   const [isPosterViewerOpen, setIsPosterViewerOpen] = useState(false);
 

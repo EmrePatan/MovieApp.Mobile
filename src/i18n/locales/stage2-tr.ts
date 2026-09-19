@@ -675,6 +675,9 @@ export const stage2Tr = {
       signInRequired: 'İzleme listelerini kullanmak için giriş yap.',
     },
     picker: {
+      subtitle: 'Bir veya daha fazla listeye kaydet',
+      itemCount_one: '1 öğe',
+      itemCount_other: '{{count}} öğe',
       enterName: 'Bir izleme listesi adı gir.',
       updateError: 'Bu izleme listesi güncellenemedi.',
       createConflict: 'Bu isimde bir izleme listesi zaten var.',
@@ -718,7 +721,7 @@ export const stage2Tr = {
       whereToWatch: 'Nerede İzlenir',
       castAndCrew: 'Oyuncular ve Ekip',
       similar: 'Bunları da Beğenebilirsin',
-      reviews: 'İncelemeler',
+      reviews: 'Yorumlar',
       knownFor: 'Bilinen İşleri',
       biography: 'Biyografi',
       biographyEmpty: 'Biyografi bulunmuyor.',
@@ -834,10 +837,10 @@ export const stage2Tr = {
       empty: 'Şu anda benzer başlık yok.',
     },
     reviewsLink: {
-      title: 'İncelemeler',
-      countLoading: 'İnceleme sayısı yükleniyor',
-      noReviewsYet: 'Henüz inceleme yok',
-      accessibility: 'İncelemeler, {{status}}',
+      title: 'Yorumlar',
+      countLoading: 'Yorum sayısı yükleniyor',
+      noReviewsYet: 'Henüz yorum yok',
+      accessibility: 'Yorumlar, {{status}}',
     },
   },
   ratings: {
@@ -860,7 +863,7 @@ export const stage2Tr = {
     communityAverageLine: 'Topluluk ortalaması: ★ {{average}} ({{count}} puan)',
   },
   reviews: {
-    title: 'İncelemeler',
+    title: 'Yorumlar',
     writePrompt: 'Düşüncelerini paylaş',
     writeAction: 'Yaz',
     writeAccessibility: 'İnceleme yaz',
@@ -872,7 +875,7 @@ export const stage2Tr = {
     submitError: 'İnceleme gönderilemedi. Lütfen tekrar dene.',
     updateError: 'İnceleme güncellenemedi. Lütfen tekrar dene.',
     deleteError: 'İnceleme silinemedi. Lütfen tekrar dene.',
-    loadError: 'İncelemeler yüklenemedi. Lütfen tekrar dene.',
+    loadError: 'Yorumlar yüklenemedi. Lütfen tekrar dene.',
     empty: {
       none: 'Henüz inceleme yok.',
       noneOther: 'Henüz başka inceleme yok.',
@@ -972,7 +975,7 @@ export const stage2Tr = {
         top_genre: 'İzlediğin her şeyin altında güçlü bir akım var.',
       },
       editorialFallback: {
-        findingSignature: 'Makaran hâlâ imzasını arıyor.',
+        findingSignature: 'Film arşivin henüz kendi tarzını buluyor.',
         balancedMix: 'Destan ile bölüm arasında özgürce geçiş yapıyorsun.',
         seriesHeavy: 'Her bölümle derinleşen dünyaları takip ediyorsun.',
         movieHeavy: 'Tek bir oturuş hâlâ tam dikkatini çekiyor.',
@@ -988,7 +991,7 @@ export const stage2Tr = {
       watchingMixLine: '%{{movies}} film · %{{series}} dizi',
     },
     yourYear: {
-      title: 'Yılın',
+      title: 'Senin Yılın',
       empty: 'Başlıkları izleyip takip ettikçe yılın şekillenecek.',
       legendMovies: 'Filmler',
       legendEpisodes: 'Bölümler',

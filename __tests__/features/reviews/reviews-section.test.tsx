@@ -422,6 +422,43 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByText('No other reviews yet.')).toBeTruthy();
   });
 
+  it('does not flash community distribution when only the current user has rated', () => {
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: null,
+      isLoading: false,
+    });
+    (useMyRating as jest.Mock).mockReturnValue({
+      data: { score: 8 },
+      isLoading: false,
+    });
+    (useRatingAggregate as jest.Mock).mockReturnValue({
+      data: {
+        averageScore: 8,
+        ratingCount: 1,
+        scoreDistribution: { '8': 1 },
+      },
+      isLoading: false,
+    });
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [myReview],
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+  });
+
   it('hides community controls when only the current user has a review', () => {
     (useMyReview as jest.Mock).mockReturnValue({
       data: myReview,

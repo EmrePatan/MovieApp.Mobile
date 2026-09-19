@@ -625,6 +625,9 @@ export const stage2En = {
       signInRequired: 'Please sign in to use watchlists.',
     },
     picker: {
+      subtitle: 'Save to one or more lists',
+      itemCount_one: '1 item',
+      itemCount_other: '{{count}} items',
       enterName: 'Enter a watchlist name.',
       updateError: 'Could not update this watchlist.',
       createConflict: 'A watchlist with this name already exists.',

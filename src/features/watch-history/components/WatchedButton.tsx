@@ -108,8 +108,8 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
           label={t('details.actions.watchedLabel')}
           accessibilityLabel={label}
           active={active}
-          busy={isInitialLoading}
-          disabled={isMutationPending}
+          busy={isMutationPending}
+          disabled={isInitialLoading || isMutationPending}
           onPress={handlePress}
         >
           <Ionicons

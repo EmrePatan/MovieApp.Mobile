@@ -66,7 +66,8 @@ export function AddToWatchlistButton({
           label={t('common.watchlist')}
           accessibilityLabel={label}
           active={active}
-          busy={isBusy}
+          busy={false}
+          disabled={isBusy}
           onPress={handlePress}
         >
           <Ionicons

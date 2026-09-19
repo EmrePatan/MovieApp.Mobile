@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { CollapsibleText } from '@/components/common/CollapsibleText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import { colors } from '@/theme/colors';
@@ -61,9 +62,7 @@ export function DetailOverview({ overview }: DetailOverviewProps) {
   return (
     <View style={styles.section}>
       <HomeSectionHeader title={t('details.sections.overview')} />
-      <AppText variant="body" muted style={styles.body}>
-        {overview}
-      </AppText>
+      <CollapsibleText text={overview} textStyle={styles.body} toggleTestID="detail-overview-toggle" />
     </View>
   );
 }

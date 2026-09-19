@@ -85,8 +85,8 @@ export function FavoriteButton({
           label={t('details.actions.favoriteLabel')}
           accessibilityLabel={label}
           active={active}
-          busy={isInitialLoading}
-          disabled={isMutationPending}
+          busy={isMutationPending}
+          disabled={isInitialLoading || isMutationPending}
           onPress={handlePress}
         >
           <Ionicons

@@ -1,9 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
   FlatList,
-  Image,
   Modal,
   Pressable,
   StyleSheet,
@@ -16,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { resolveOriginalImageUri } from '@/utils/image-url';
 import { useImageViewerDismissGesture } from '../hooks/useImageViewerDismissGesture';
+import { ZoomableGalleryImage } from './ZoomableGalleryImage';
 import type { GalleryImage } from '../types';
 import { galleryImageKey } from '../utils/gallery-images';
 import { colors } from '@/theme/colors';
@@ -39,6 +39,8 @@ export function ImageViewerModal({
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const isZoomedRef = useRef(false);
+  const isDismissEnabled = useCallback(() => !isZoomedRef.current, []);
 
   const {
     dismissGesture,
@@ -47,6 +49,7 @@ export function ImageViewerModal({
   } = useImageViewerDismissGesture({
     height,
     onClose,
+    enabled: isDismissEnabled,
   });
 
   const imageUris = useMemo(
@@ -58,9 +61,14 @@ export function ImageViewerModal({
     (offsetX: number) => {
       const nextIndex = Math.round(offsetX / width);
       setActiveIndex(Math.max(0, Math.min(nextIndex, images.length - 1)));
+      isZoomedRef.current = false;
     },
     [images.length, width],
   );
+
+  const handleZoomChange = useCallback((isZoomed: boolean) => {
+    isZoomedRef.current = isZoomed;
+  }, []);
 
   if (!visible || images.length === 0) {
     return null;
@@ -100,10 +108,10 @@ export function ImageViewerModal({
                 return (
                   <View style={[styles.slide, { width, height }]}>
                     {uri ? (
-                      <Image
-                        source={{ uri }}
-                        style={styles.image}
-                        resizeMode="contain"
+                      <ZoomableGalleryImage
+                        uri={uri}
+                        isActive={index === activeIndex}
+                        onZoomChange={handleZoomChange}
                         accessibilityLabel={t('gallery.imageAccessibility', { index: index + 1 })}
                       />
                     ) : (

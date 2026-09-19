@@ -93,9 +93,7 @@ export function ReviewsDetailContent({
     () => buildStarBucketsFromDistribution(ratingAggregate?.scoreDistribution),
     [ratingAggregate?.scoreDistribution],
   );
-  const hasCommunityRatings = (ratingAggregate?.ratingCount ?? 0) > 0;
   const ownReviewMatchesRatingFilter = reviewMatchesStarFilter(ownRatingScore, ratingStars);
-  const showCommunityControls = totalCount > (myReview ? 1 : 0);
 
   const publicReviews = useMemo(() => {
     const items = reviewsQuery.data?.items ?? [];
@@ -112,9 +110,20 @@ export function ReviewsDetailContent({
         return false;
       }
 
+      if (user && review.user.id === user.id) {
+        return false;
+      }
+
       return true;
     });
-  }, [myReview, reviewsQuery.data?.items]);
+  }, [myReview, reviewsQuery.data?.items, user]);
+
+  const communityRatingCount = Math.max(
+    0,
+    (ratingAggregate?.ratingCount ?? 0) - (ownRatingScore != null ? 1 : 0),
+  );
+  const showCommunityControls = publicReviews.length > 0;
+  const hasCommunityRatings = communityRatingCount > 0;
 
   const handleSortChange = useCallback((nextSort: ReviewSortOption) => {
     setSort(nextSort);
