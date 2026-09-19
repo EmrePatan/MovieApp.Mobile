@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
@@ -67,9 +67,10 @@ export default function ProfileScreen() {
     <Screen>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <MovieAppRefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
-        }
+        refreshControl={createIosRefreshControl({
+          refreshing: isRefreshing,
+          onRefresh: handleRefresh,
+        })}
       >
         {profile ? <ProfileHero profile={profile} /> : null}
 

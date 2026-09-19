@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 import { ApiError } from '@/api/errors';
 import { InsightsHubContent } from '@/features/insights/components/InsightsHubContent';
 import { useInsightsV3 } from '@/features/insights/hooks/useInsightsV3';
@@ -39,9 +40,16 @@ function createInsightsQuery(overrides: Record<string, unknown> = {}) {
 }
 
 describe('InsightsHubContent', () => {
+  const originalPlatform = Platform.OS;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Platform.OS = 'ios';
     (useInsightsV3 as jest.Mock).mockReturnValue(createInsightsQuery());
+  });
+
+  afterEach(() => {
+    Platform.OS = originalPlatform;
   });
 
   it('shows loading skeleton while insights load', () => {
@@ -85,7 +93,7 @@ describe('InsightsHubContent', () => {
     expect(screen.getByText('Achievements')).toBeTruthy();
   });
 
-  it('refetches insights on pull to refresh', () => {
+  it('refetches insights on pull to refresh on iOS', () => {
     const refetch = jest.fn();
     (useInsightsV3 as jest.Mock).mockReturnValue(
       createInsightsQuery({
@@ -101,6 +109,22 @@ describe('InsightsHubContent', () => {
     scrollView.props.refreshControl.props.onRefresh();
 
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it('omits refresh control on Android', () => {
+    Platform.OS = 'android';
+    (useInsightsV3 as jest.Mock).mockReturnValue(
+      createInsightsQuery({
+        data: insightsV3Fixture,
+        isSuccess: true,
+      }),
+    );
+
+    const { UNSAFE_getByType } = render(<InsightsHubContent />);
+    const { ScrollView } = require('react-native');
+    const scrollView = UNSAFE_getByType(ScrollView);
+
+    expect(scrollView.props.refreshControl).toBeUndefined();
   });
 
   it('opens profile from header avatar', () => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
@@ -216,12 +216,11 @@ export default function HomeScreen() {
   );
 
   const refreshControl = useMemo(
-    () => (
-      <MovieAppRefreshControl
-        refreshing={isFetching && !isInitialBrowseLoading}
-        onRefresh={handleRefresh}
-      />
-    ),
+    () =>
+      createIosRefreshControl({
+        refreshing: isFetching && !isInitialBrowseLoading,
+        onRefresh: handleRefresh,
+      }),
     [handleRefresh, isFetching, isInitialBrowseLoading],
   );
 

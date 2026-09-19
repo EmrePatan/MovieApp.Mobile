@@ -1,27 +1,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
-import { FlatList, ScrollView } from 'react-native';
+import { FlatList, Platform, ScrollView } from 'react-native';
 import { render } from '@testing-library/react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import HomeScreen from '../../../app/(tabs)/home';
 import NotificationsScreen from '../../../app/notifications';
+import ProfileScreen from '../../../app/(tabs)/profile';
 import { InsightsHubContent } from '@/features/insights/components/InsightsHubContent';
-import { LibraryHubContent } from '@/features/library/components/LibraryHubContent';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { useInsightsV3 } from '@/features/insights/hooks/useInsightsV3';
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
+import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { createHomeFeedMockReturnValue } from '../../features/home/home-feed-test-utils';
 import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 const repoRoot = path.resolve(__dirname, '../../..');
 
-const primarySurfaceFiles = [
+const iosOnlyRefreshSurfaceFiles = [
   'app/(tabs)/home.tsx',
-  'src/features/library/components/LibraryHubContent.tsx',
+  'app/(tabs)/profile.tsx',
   'src/features/insights/components/InsightsHubContent.tsx',
-  'app/notifications.tsx',
 ];
+
+const sharedRefreshSurfaceFiles = ['app/notifications.tsx'];
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
@@ -54,7 +56,7 @@ jest.mock('@/features/notifications/hooks/useDeleteNotification', () => ({
 }));
 
 jest.mock('@/auth/useAuth', () => ({
-  useAuth: jest.fn(() => ({ isAuthenticated: true, user: { id: 'user-1' } })),
+  useAuth: jest.fn(() => ({ isAuthenticated: true, user: { id: 'user-1' }, logout: jest.fn() })),
 }));
 
 jest.mock('expo-router', () => ({
@@ -71,52 +73,18 @@ jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
   useUnreadNotificationCount: jest.fn(() => ({ data: { unreadCount: 0 } })),
 }));
 
-jest.mock('@/features/library/hooks/useLibrary', () => ({
-  useLibrary: jest.fn(() => ({
-    data: {
-      pages: [
-        {
-          items: [
-            {
-              id: 'movie-1',
-              type: 'movie',
-              title: 'Library Movie',
-              originalTitle: null,
-              posterUrl: null,
-              backdropUrl: null,
-              year: 2024,
-              voteAverage: 7.5,
-              addedAt: null,
-              watchedAt: null,
-              lastActivityAt: '2026-01-01T00:00:00Z',
-              progressPercentage: null,
-              nextEpisode: null,
-              collectionStatus: 'watching',
-            },
-          ],
-          page: 1,
-          pageSize: 24,
-          totalCount: 1,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        },
-      ],
-    },
-    isLoading: false,
-    isError: false,
-    isRefetching: false,
-    isFetching: false,
-    isFetchingNextPage: false,
-    isFetchNextPageError: false,
-    hasNextPage: false,
-    refetch: jest.fn(),
-    fetchNextPage: jest.fn(),
-  })),
+jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
+  useCurrentProfile: jest.fn(),
 }));
 
-jest.mock('@/features/library/components/LibraryWatchlistsOverview', () => ({
-  LibraryWatchlistsOverview: () => null,
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: jest.fn(() => ({
+    region: 'TR',
+    source: 'fallback',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
 }));
 
 jest.mock('@/features/metrics/track-product-metric', () => ({
@@ -147,19 +115,47 @@ function expectMovieAppRefreshControl(refreshControl: React.ReactElement | undef
 }
 
 describe('primary surface refresh presentation', () => {
+  const originalPlatform = Platform.OS;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Platform.OS = 'ios';
+    (useCurrentProfile as jest.Mock).mockReturnValue({
+      data: {
+        id: 'user-id',
+        email: 'user@example.com',
+        userName: 'user',
+        displayName: 'Emre',
+        createdAt: '2026-09-11T14:30:00Z',
+      },
+      isLoading: false,
+      isError: false,
+      isRefetching: true,
+      refetch: jest.fn(),
+    });
   });
 
-  it('uses MovieAppRefreshControl in primary surface source files', () => {
-    for (const relativePath of primarySurfaceFiles) {
+  afterEach(() => {
+    Platform.OS = originalPlatform;
+  });
+
+  it('uses createIosRefreshControl in iOS-only primary surface source files', () => {
+    for (const relativePath of iosOnlyRefreshSurfaceFiles) {
+      const source = fs.readFileSync(path.join(repoRoot, relativePath), 'utf8');
+      expect(source).toContain('createIosRefreshControl');
+      expect(source).not.toMatch(/import\s*\{[^}]*\bRefreshControl\b[^}]*\}\s*from 'react-native'/);
+    }
+  });
+
+  it('uses MovieAppRefreshControl in shared refresh surface source files', () => {
+    for (const relativePath of sharedRefreshSurfaceFiles) {
       const source = fs.readFileSync(path.join(repoRoot, relativePath), 'utf8');
       expect(source).toContain('MovieAppRefreshControl');
       expect(source).not.toMatch(/import\s*\{[^}]*\bRefreshControl\b[^}]*\}\s*from 'react-native'/);
     }
   });
 
-  it('keeps Home progressive refresh semantics and shared control', () => {
+  it('keeps Home progressive refresh semantics and shared control on iOS', () => {
     const refetch = jest.fn();
     (useHomeFeed as jest.Mock).mockReturnValue(
       createHomeFeedMockReturnValue({
@@ -200,6 +196,43 @@ describe('primary surface refresh presentation', () => {
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
+  it('omits Home refresh control on Android', () => {
+    Platform.OS = 'android';
+    const refetch = jest.fn();
+    (useHomeFeed as jest.Mock).mockReturnValue(
+      createHomeFeedMockReturnValue({
+        data: {
+          sections: [
+            {
+              type: 'Trending',
+              title: 'Trending Now',
+              displayOrder: 1,
+              items: [
+                {
+                  id: 'trending-1',
+                  contentType: 'movie',
+                  title: 'Trending Movie',
+                  originalTitle: null,
+                  posterUrl: null,
+                  backdropUrl: null,
+                  releaseDate: '2020-01-01',
+                  voteAverage: 8,
+                  voteCount: 50,
+                },
+              ],
+            },
+          ],
+          isPersonalized: false,
+        },
+        isFetching: true,
+        refetch,
+      }),
+    );
+
+    const { UNSAFE_getByType } = render(<HomeScreen />);
+    expect(UNSAFE_getByType(FlatList).props.refreshControl).toBeUndefined();
+  });
+
   it('does not mount Home refresh control during initial browse loading', () => {
     const refetch = jest.fn();
     (useHomeFeed as jest.Mock).mockReturnValue(
@@ -214,55 +247,24 @@ describe('primary surface refresh presentation', () => {
     expect(UNSAFE_queryByType(FlatList)).toBeNull();
   });
 
-  it('keeps Library refresh semantics with shared control', () => {
+  it('keeps Profile refresh semantics with shared control on iOS', () => {
     const refetch = jest.fn();
-    const { useLibrary } = jest.requireMock('@/features/library/hooks/useLibrary') as {
-      useLibrary: jest.Mock;
-    };
-    useLibrary.mockReturnValue({
+    (useCurrentProfile as jest.Mock).mockReturnValue({
       data: {
-        pages: [
-          {
-            items: [
-              {
-                id: 'movie-1',
-                type: 'movie',
-                title: 'Library Movie',
-                originalTitle: null,
-                posterUrl: null,
-                backdropUrl: null,
-                year: 2024,
-                voteAverage: 7.5,
-                addedAt: null,
-                watchedAt: null,
-                lastActivityAt: '2026-01-01T00:00:00Z',
-                progressPercentage: null,
-                nextEpisode: null,
-                collectionStatus: 'watching',
-              },
-            ],
-            page: 1,
-            pageSize: 24,
-            totalCount: 1,
-            totalPages: 1,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          },
-        ],
+        id: 'user-id',
+        email: 'user@example.com',
+        userName: 'user',
+        displayName: 'Emre',
+        createdAt: '2026-09-11T14:30:00Z',
       },
       isLoading: false,
       isError: false,
       isRefetching: true,
-      isFetching: true,
-      isFetchingNextPage: false,
-      isFetchNextPageError: false,
-      hasNextPage: false,
       refetch,
-      fetchNextPage: jest.fn(),
     });
 
-    const { UNSAFE_getByType } = render(<LibraryHubContent />);
-    const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
+    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const refreshControl = UNSAFE_getByType(ScrollView).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(true);
 
@@ -270,7 +272,28 @@ describe('primary surface refresh presentation', () => {
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps Insights v3 refresh semantics', () => {
+  it('omits Profile refresh control on Android', () => {
+    Platform.OS = 'android';
+    const refetch = jest.fn();
+    (useCurrentProfile as jest.Mock).mockReturnValue({
+      data: {
+        id: 'user-id',
+        email: 'user@example.com',
+        userName: 'user',
+        displayName: 'Emre',
+        createdAt: '2026-09-11T14:30:00Z',
+      },
+      isLoading: false,
+      isError: false,
+      isRefetching: true,
+      refetch,
+    });
+
+    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    expect(UNSAFE_getByType(ScrollView).props.refreshControl).toBeUndefined();
+  });
+
+  it('keeps Insights v3 refresh semantics on iOS', () => {
     const refetch = jest.fn();
     (useInsightsV3 as jest.Mock).mockReturnValue({
       data: insightsV3Fixture,
@@ -289,6 +312,23 @@ describe('primary surface refresh presentation', () => {
 
     refreshControl.props.onRefresh();
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits Insights refresh control on Android', () => {
+    Platform.OS = 'android';
+    const refetch = jest.fn();
+    (useInsightsV3 as jest.Mock).mockReturnValue({
+      data: insightsV3Fixture,
+      isLoading: false,
+      isFetching: false,
+      isRefetching: true,
+      isError: false,
+      isSuccess: true,
+      refetch,
+    });
+
+    const { UNSAFE_getByType } = render(<InsightsHubContent />);
+    expect(UNSAFE_getByType(ScrollView).props.refreshControl).toBeUndefined();
   });
 
   it('keeps Notifications refresh semantics with shared control', () => {

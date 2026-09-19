@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -69,6 +69,10 @@ export function InsightsHubContent() {
   }, [insightsQuery]);
 
   const isRefreshing = insightsQuery.isRefetching && !insightsQuery.isLoading;
+  const refreshControl = createIosRefreshControl({
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh,
+  });
 
   if (insightsQuery.isError && !insightsQuery.data) {
     const message = isApiError(insightsQuery.error)
@@ -98,12 +102,7 @@ export function InsightsHubContent() {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      refreshControl={
-        <MovieAppRefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
-      }
-    >
+    <ScrollView contentContainerStyle={styles.scrollContent} refreshControl={refreshControl}>
       <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
       <InsightsMovieDnaHero
         movieDna={insights.movieDna}

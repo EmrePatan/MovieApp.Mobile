@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 import ProfileScreen from '../../../app/(tabs)/profile';
 import { useAuth } from '@/auth/useAuth';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
@@ -29,8 +30,11 @@ jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
 }));
 
 describe('ProfileScreen', () => {
+  const originalPlatform = Platform.OS;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Platform.OS = 'ios';
     (useAuth as jest.Mock).mockReturnValue({
       logout: mockLogout,
     });
@@ -47,6 +51,10 @@ describe('ProfileScreen', () => {
       refetch: jest.fn(),
       isRefetching: false,
     });
+  });
+
+  afterEach(() => {
+    Platform.OS = originalPlatform;
   });
 
   it('renders profile identity and account sections', () => {
@@ -82,5 +90,40 @@ describe('ProfileScreen', () => {
 
     fireEvent.press(screen.getByText('Sign out'));
     expect(mockLogout).toHaveBeenCalled();
+  });
+
+  it('attaches refresh control on iOS', () => {
+    const refetch = jest.fn();
+    (useCurrentProfile as jest.Mock).mockReturnValue({
+      data: {
+        id: 'user-id',
+        email: 'user@example.com',
+        userName: 'user',
+        displayName: 'Emre',
+        createdAt: '2026-09-11T14:30:00Z',
+      },
+      isLoading: false,
+      isError: false,
+      isRefetching: true,
+      refetch,
+    });
+
+    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const { ScrollView } = require('react-native');
+    const scrollView = UNSAFE_getByType(ScrollView);
+
+    expect(scrollView.props.refreshControl).toBeTruthy();
+    scrollView.props.refreshControl.props.onRefresh();
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('omits refresh control on Android', () => {
+    Platform.OS = 'android';
+
+    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const { ScrollView } = require('react-native');
+    const scrollView = UNSAFE_getByType(ScrollView);
+
+    expect(scrollView.props.refreshControl).toBeUndefined();
   });
 });
