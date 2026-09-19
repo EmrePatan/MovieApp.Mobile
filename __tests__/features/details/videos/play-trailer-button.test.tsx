@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { useMovieVideos, useTvShowVideos } from '@/features/details/videos/hooks/useVideos';
@@ -23,8 +23,11 @@ const mockUseTvShowVideos = useTvShowVideos as jest.Mock;
 const validWatchUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
 describe('PlayTrailerButton', () => {
+  const originalPlatform = Platform.OS;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Platform.OS = 'ios';
     mockUseMovieVideos.mockReturnValue({
       data: { primary: { watchUrl: validWatchUrl } },
       isLoading: false,
@@ -38,6 +41,10 @@ describe('PlayTrailerButton', () => {
     mockCanOpenURL.mockResolvedValue(true);
     mockOpenURL.mockResolvedValue(true);
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    Platform.OS = originalPlatform;
   });
 
   it('renders for movie when primary trailer is available', () => {
@@ -100,7 +107,7 @@ describe('PlayTrailerButton', () => {
     expect(screen.queryByText('Trailer')).toBeNull();
   });
 
-  it('opens valid canonical YouTube URLs through Linking', async () => {
+  it('opens valid canonical YouTube URLs through Linking on iOS', async () => {
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
 
     fireEvent.press(screen.getByLabelText('Play Trailer'));
@@ -109,6 +116,45 @@ describe('PlayTrailerButton', () => {
       expect(mockCanOpenURL).toHaveBeenCalledWith(validWatchUrl);
       expect(mockOpenURL).toHaveBeenCalledWith(validWatchUrl);
     });
+  });
+
+  it('opens valid canonical YouTube URLs on Android without canOpenURL preflight', async () => {
+    Platform.OS = 'android';
+
+    render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
+
+    fireEvent.press(screen.getByLabelText('Play Trailer'));
+
+    await waitFor(() => {
+      expect(mockCanOpenURL).not.toHaveBeenCalled();
+      expect(mockOpenURL).toHaveBeenCalledWith(validWatchUrl);
+    });
+  });
+
+  it('shows feedback on iOS when Linking.canOpenURL returns false', async () => {
+    mockCanOpenURL.mockResolvedValueOnce(false);
+
+    render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
+    fireEvent.press(screen.getByLabelText('Play Trailer'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Unable to open trailer', 'Please try again later.');
+    });
+    expect(mockOpenURL).not.toHaveBeenCalled();
+  });
+
+  it('opens trailer on Android even when canOpenURL would return false', async () => {
+    Platform.OS = 'android';
+    mockCanOpenURL.mockResolvedValueOnce(false);
+
+    render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
+    fireEvent.press(screen.getByLabelText('Play Trailer'));
+
+    await waitFor(() => {
+      expect(mockCanOpenURL).not.toHaveBeenCalled();
+      expect(mockOpenURL).toHaveBeenCalledWith(validWatchUrl);
+    });
+    expect(Alert.alert).not.toHaveBeenCalled();
   });
 
   it('does not open invalid URLs', async () => {
@@ -124,7 +170,7 @@ describe('PlayTrailerButton', () => {
     expect(mockOpenURL).not.toHaveBeenCalled();
   });
 
-  it('shows feedback when Linking.openURL fails', async () => {
+  it('shows feedback when Linking.openURL fails on iOS', async () => {
     mockOpenURL.mockRejectedValueOnce(new Error('failed'));
 
     render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
@@ -133,5 +179,18 @@ describe('PlayTrailerButton', () => {
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith('Unable to open trailer', 'Please try again later.');
     });
+  });
+
+  it('shows feedback when Linking.openURL fails on Android', async () => {
+    Platform.OS = 'android';
+    mockOpenURL.mockRejectedValueOnce(new Error('failed'));
+
+    render(<PlayTrailerButton contentType="movie" contentId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />);
+    fireEvent.press(screen.getByLabelText('Play Trailer'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Unable to open trailer', 'Please try again later.');
+    });
+    expect(mockCanOpenURL).not.toHaveBeenCalled();
   });
 });

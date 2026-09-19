@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Alert, Pressable, StyleSheet } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { AppText } from '@/components/common/AppText';
@@ -26,10 +26,12 @@ export function PlayTrailerButton({ contentType, contentId }: PlayTrailerButtonP
     }
 
     try {
-      const canOpen = await Linking.canOpenURL(watchUrl);
-      if (!canOpen) {
-        Alert.alert('Unable to open trailer', 'Please try again later.');
-        return;
+      if (Platform.OS === 'ios') {
+        const canOpen = await Linking.canOpenURL(watchUrl);
+        if (!canOpen) {
+          Alert.alert('Unable to open trailer', 'Please try again later.');
+          return;
+        }
       }
 
       await Linking.openURL(watchUrl);
