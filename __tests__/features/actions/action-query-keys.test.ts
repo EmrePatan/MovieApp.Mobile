@@ -22,9 +22,9 @@ import {
 } from '@/features/profile/hooks/profile-query-keys';
 import {
   movieMyReviewQueryKey,
-  movieReviewsInfiniteQueryKey,
+  movieReviewsQueryKey,
   tvMyReviewQueryKey,
-  tvReviewsInfiniteQueryKey,
+  tvReviewsQueryKey,
 } from '@/features/reviews/hooks/review-query-keys';
 import {
   recommendationHomeQueryKey,
@@ -78,8 +78,24 @@ describe('action query keys', () => {
   });
 
   it('uses review query keys', () => {
-    expect(movieReviewsInfiniteQueryKey(id, 20)).toEqual(['reviews', 'movie', id, 20]);
-    expect(tvReviewsInfiniteQueryKey(id, 20)).toEqual(['reviews', 'tv', id, 20]);
+    expect(movieReviewsQueryKey(id, 1, 20)).toEqual([
+      'reviews',
+      'movie',
+      id,
+      1,
+      20,
+      'newest',
+      null,
+    ]);
+    expect(tvReviewsQueryKey(id, 1, 20)).toEqual([
+      'reviews',
+      'tv',
+      id,
+      1,
+      20,
+      'newest',
+      null,
+    ]);
     expect(movieMyReviewQueryKey(id)).toEqual(['reviews', 'movie', id, 'me']);
     expect(tvMyReviewQueryKey(id)).toEqual(['reviews', 'tv', id, 'me']);
   });

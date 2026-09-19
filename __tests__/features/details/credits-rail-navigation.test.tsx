@@ -87,6 +87,7 @@ describe('CastRail navigation', () => {
 
     expect(mockPush).toHaveBeenCalledWith(
       `/movie/${movieId}/credits?title=Interstellar`,
+      { withAnchor: true },
     );
   });
 });

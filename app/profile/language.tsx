@@ -5,55 +5,56 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { Screen } from '@/components/common/Screen';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
-import { RegionSelector } from '@/features/regions/components/RegionSelector';
-import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
-import { getRegionLabel } from '@/features/regions/region-options';
+import { LanguageSelector } from '@/features/locale/components/LanguageSelector';
+import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
+import { getLanguageLabel } from '@/i18n/locale-tags';
 import { spacing } from '@/theme/spacing';
 
-export default function RegionPreferenceScreen() {
+export default function LanguagePreferenceScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { region, source, setRegion, resetToDeviceDefault } = useRegionalPreference();
+  const { language, source, setLanguage, resetToDeviceDefault } = useLocalePreference();
   const [expanded, setExpanded] = useState(true);
-
-  const handleSelect = async (regionCode: string) => {
-    await setRegion(regionCode);
-    setExpanded(false);
-    router.back();
-  };
 
   const sourceLabel =
     source === 'saved'
-      ? t('profile.regionSourceSaved')
+      ? t('profile.languageSourceSaved')
       : source === 'device'
-        ? t('profile.regionSourceDevice')
-        : t('profile.regionSourceFallback');
+        ? t('profile.languageSourceDevice')
+        : t('profile.languageSourceFallback');
+
+  const handleSelect = async (nextLanguage: typeof language) => {
+    await setLanguage(nextLanguage);
+    setExpanded(false);
+    router.back();
+  };
 
   return (
     <Screen scrollable>
       <View style={styles.header}>
         <DetailBackButton />
         <AppText variant="title" accessibilityRole="header">
-          {t('profile.regionTitle')}
+          {t('profile.languageTitle')}
         </AppText>
         <AppText variant="bodySmall" muted>
-          {t('profile.regionDescription')}
+          {t('profile.languageDescription')}
         </AppText>
       </View>
 
       <View style={styles.content}>
-        <RegionSelector
-          label={t('profile.defaultRegion')}
-          value={region}
+        <LanguageSelector
+          label={t('profile.appLanguage')}
+          value={language}
+          viewerLanguage={language}
           expanded={expanded}
           onToggleExpanded={() => setExpanded((current) => !current)}
-          onSelect={(regionCode) => void handleSelect(regionCode)}
-          testID="user-region-selector"
+          onSelect={(nextLanguage) => void handleSelect(nextLanguage)}
+          testID="user-language-selector"
         />
 
         <AppText variant="bodySmall" muted>
-          {t('profile.regionCurrent', {
-            region: getRegionLabel(region),
+          {t('profile.languageCurrent', {
+            language: getLanguageLabel(language, language),
             source: sourceLabel,
           })}
         </AppText>
@@ -61,11 +62,11 @@ export default function RegionPreferenceScreen() {
         {source === 'saved' ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('profile.resetRegionAccessibility')}
+            accessibilityLabel={t('profile.resetLanguageAccessibility')}
             onPress={() => void resetToDeviceDefault().then(() => router.back())}
           >
             <AppText variant="bodySmall" style={styles.resetAction}>
-              {t('profile.resetRegionToDevice')}
+              {t('profile.resetLanguageToDevice')}
             </AppText>
           </Pressable>
         ) : null}

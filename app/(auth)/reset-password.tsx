@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Screen } from '@/components/common/Screen';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -18,6 +19,7 @@ import { colors } from '@/theme/colors';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ token?: string | string[] }>();
   const deepLinkToken = useMemo(
     () => parseResetPasswordTokenParam(params.token),
@@ -63,7 +65,7 @@ export default function ResetPasswordScreen() {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'reset-password'));
       } else {
-        setFormError('Unable to reset your password. Please try again.');
+        setFormError(t('auth.unableToResetPassword'));
       }
     } finally {
       setIsSubmitting(false);
@@ -77,18 +79,18 @@ export default function ResetPasswordScreen() {
         style={styles.container}
       >
         <View style={styles.header}>
-          <AppText variant="title">Reset password</AppText>
+          <AppText variant="title">{t('auth.resetPassword')}</AppText>
           <AppText variant="body" muted center>
             {tokenFromDeepLink
-              ? 'Choose a new password to finish resetting your account.'
-              : 'Enter the reset token from your email and choose a new password.'}
+              ? t('auth.resetPasswordDeepLinkHint')
+              : t('auth.resetPasswordManualHint')}
           </AppText>
         </View>
 
         <View style={styles.form}>
           {!tokenFromDeepLink ? (
             <AppInput
-              label="Reset token"
+              label={t('auth.resetToken')}
               value={manualToken}
               onChangeText={setManualToken}
               error={fieldErrors.token}
@@ -100,7 +102,7 @@ export default function ResetPasswordScreen() {
           ) : null}
 
           <AppInput
-            label="New password"
+            label={t('auth.newPassword')}
             value={newPassword}
             onChangeText={setNewPassword}
             error={fieldErrors.newPassword}
@@ -110,7 +112,7 @@ export default function ResetPasswordScreen() {
             returnKeyType="next"
           />
           <AppInput
-            label="Confirm password"
+            label={t('auth.confirmPassword')}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             error={fieldErrors.confirmPassword}
@@ -133,9 +135,9 @@ export default function ResetPasswordScreen() {
             </AppText>
           ) : null}
 
-          <AppButton title="Reset password" onPress={() => void handleSubmit()} loading={isSubmitting} />
+          <AppButton title={t('auth.resetPassword')} onPress={() => void handleSubmit()} loading={isSubmitting} />
 
-          <AppButton title="Back to sign in" variant="secondary" onPress={() => router.replace('/(auth)/login')} />
+          <AppButton title={t('common.backToSignIn')} variant="secondary" onPress={() => router.replace('/(auth)/login')} />
         </View>
       </KeyboardAvoidingView>
     </Screen>

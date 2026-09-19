@@ -1,4 +1,5 @@
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -8,19 +9,19 @@ interface LoadingViewProps {
   fullScreen?: boolean;
 }
 
-export function LoadingView({
-  message = 'Loading...',
-  fullScreen = true,
-}: LoadingViewProps) {
+export function LoadingView({ message, fullScreen = true }: LoadingViewProps) {
+  const { t } = useTranslation();
+  const resolvedMessage = message ?? t('common.loading');
+
   return (
     <View
       style={[styles.container, fullScreen && styles.fullScreen]}
       accessibilityRole="progressbar"
-      accessibilityLabel={message}
+      accessibilityLabel={resolvedMessage}
     >
       <ActivityIndicator size="large" color={colors.accent} />
       <AppText variant="bodySmall" muted center style={styles.message}>
-        {message}
+        {resolvedMessage}
       </AppText>
     </View>
   );

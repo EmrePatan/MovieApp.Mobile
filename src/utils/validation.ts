@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n';
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface LoginFormErrors {
@@ -26,15 +28,15 @@ export function validateLoginForm(email: string, password: string): LoginFormErr
   const trimmedEmail = email.trim();
 
   if (!trimmedEmail) {
-    errors.email = 'Email is required.';
+    errors.email = i18n.t('validation.emailRequired');
   } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-    errors.email = 'Enter a valid email address.';
+    errors.email = i18n.t('validation.emailInvalid');
   }
 
   if (!password) {
-    errors.password = 'Password is required.';
+    errors.password = i18n.t('validation.passwordRequired');
   } else if (password.length > 128) {
-    errors.password = 'Password must be at most 128 characters.';
+    errors.password = i18n.t('validation.passwordTooLong');
   }
 
   return errors;
@@ -50,25 +52,25 @@ export function validateRegisterForm(
   const trimmedDisplayName = displayName.trim();
 
   if (!trimmedEmail) {
-    errors.email = 'Email is required.';
+    errors.email = i18n.t('validation.emailRequired');
   } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-    errors.email = 'Enter a valid email address.';
+    errors.email = i18n.t('validation.emailInvalid');
   } else if (trimmedEmail.length > 320) {
-    errors.email = 'Email must be at most 320 characters.';
+    errors.email = i18n.t('validation.emailTooLong');
   }
 
   if (!password) {
-    errors.password = 'Password is required.';
+    errors.password = i18n.t('validation.passwordRequired');
   } else if (password.length < 8) {
-    errors.password = 'Password must be at least 8 characters.';
+    errors.password = i18n.t('validation.passwordTooShort');
   } else if (password.length > 128) {
-    errors.password = 'Password must be at most 128 characters.';
+    errors.password = i18n.t('validation.passwordTooLong');
   }
 
   if (!trimmedDisplayName) {
-    errors.displayName = 'Display name is required.';
+    errors.displayName = i18n.t('validation.displayNameRequired');
   } else if (trimmedDisplayName.length > 100) {
-    errors.displayName = 'Display name must be at most 100 characters.';
+    errors.displayName = i18n.t('validation.displayNameTooLong');
   }
 
   return errors;
@@ -79,11 +81,11 @@ export function validateForgotPasswordForm(email: string): ForgotPasswordFormErr
   const trimmedEmail = email.trim();
 
   if (!trimmedEmail) {
-    errors.email = 'Email is required.';
+    errors.email = i18n.t('validation.emailRequired');
   } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-    errors.email = 'Enter a valid email address.';
+    errors.email = i18n.t('validation.emailInvalid');
   } else if (trimmedEmail.length > 320) {
-    errors.email = 'Email must be at most 320 characters.';
+    errors.email = i18n.t('validation.emailTooLong');
   }
 
   return errors;
@@ -98,21 +100,21 @@ export function validateResetPasswordForm(
   const trimmedToken = token.trim();
 
   if (!trimmedToken) {
-    errors.token = 'Reset token is required.';
+    errors.token = i18n.t('validation.resetTokenRequired');
   }
 
   if (!newPassword) {
-    errors.newPassword = 'Password is required.';
+    errors.newPassword = i18n.t('validation.passwordRequired');
   } else if (newPassword.length < 8) {
-    errors.newPassword = 'Password must be at least 8 characters.';
+    errors.newPassword = i18n.t('validation.passwordTooShort');
   } else if (newPassword.length > 128) {
-    errors.newPassword = 'Password must be at most 128 characters.';
+    errors.newPassword = i18n.t('validation.passwordTooLong');
   }
 
   if (!confirmPassword) {
-    errors.confirmPassword = 'Please confirm your password.';
+    errors.confirmPassword = i18n.t('validation.confirmPasswordRequired');
   } else if (confirmPassword !== newPassword) {
-    errors.confirmPassword = 'Passwords do not match.';
+    errors.confirmPassword = i18n.t('validation.passwordsDoNotMatch');
   }
 
   return errors;

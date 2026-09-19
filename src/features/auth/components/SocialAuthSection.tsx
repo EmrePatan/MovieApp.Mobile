@@ -1,10 +1,13 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SocialAuthProviderIcon } from './SocialAuthProviderIcon';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
+  formatGoogleSignInDevelopmentErrorMessage,
+  isGoogleSocialAuthDebugDiagnosticsEnabled,
   SocialAuthCancelledError,
   SocialAuthConfigurationError,
 } from '@/auth/social-auth-service';
@@ -23,25 +26,33 @@ interface SocialAuthSectionProps {
 
 interface SocialProviderConfig {
   provider: SocialAuthProvider;
-  label: string;
+  labelKey: 'continueWithGoogle' | 'continueWithApple';
 }
 
 const SOCIAL_PROVIDERS: SocialProviderConfig[] = [
-  { provider: 'google', label: 'Continue with Google' },
-  { provider: 'apple', label: 'Continue with Apple' },
+  { provider: 'google', labelKey: 'continueWithGoogle' },
+  { provider: 'apple', labelKey: 'continueWithApple' },
 ];
 
 export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
+  const { t } = useTranslation();
   const { signInWithSocial } = useAuth();
   const [activeProvider, setActiveProvider] = useState<SocialAuthProvider | null>(null);
 
-  const visibleProviders = SOCIAL_PROVIDERS.filter((entry) => {
-    if (entry.provider === 'google') {
-      return shouldShowGoogleSocialAuthButton();
-    }
+  const visibleProviders = useMemo(
+    () =>
+      SOCIAL_PROVIDERS.map((entry) => ({
+        ...entry,
+        label: t(`auth.${entry.labelKey}`),
+      })).filter((entry) => {
+        if (entry.provider === 'google') {
+          return shouldShowGoogleSocialAuthButton();
+        }
 
-    return shouldShowAppleSocialAuthButton();
-  });
+        return shouldShowAppleSocialAuthButton();
+      }),
+    [t],
+  );
 
   const handleSocialSignIn = useCallback(
     async (provider: SocialAuthProvider) => {
@@ -71,12 +82,20 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
           return;
         }
 
-        onError?.('Unable to continue with social sign-in. Please try again.');
+        if (
+          provider === 'google' &&
+          isGoogleSocialAuthDebugDiagnosticsEnabled()
+        ) {
+          onError?.(formatGoogleSignInDevelopmentErrorMessage(error));
+          return;
+        }
+
+        onError?.(t('auth.unableToContinueSocialSignIn'));
       } finally {
         setActiveProvider(null);
       }
     },
-    [activeProvider, onError, signInWithSocial],
+    [activeProvider, onError, signInWithSocial, t],
   );
 
   if (visibleProviders.length === 0) {

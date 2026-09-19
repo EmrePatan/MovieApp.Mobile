@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
@@ -9,7 +10,6 @@ import {
   validateRegisterForm,
   type RegisterFormErrors,
 } from '@/utils/validation';
-import { AUTH_REGISTER_COPY } from '@/features/auth/auth-copy';
 import { AuthDivider } from '@/features/auth/components/AuthDivider';
 import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthInput } from '@/features/auth/components/AuthInput';
@@ -21,6 +21,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,7 +51,7 @@ export default function RegisterScreen() {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'register'));
       } else {
-        setFormError('Unable to create your account. Please try again.');
+        setFormError(t('auth.unableToCreateAccount'));
       }
     } finally {
       setIsSubmitting(false);
@@ -59,23 +60,23 @@ export default function RegisterScreen() {
 
   return (
     <AuthScreenLayout
-      taglineLines={AUTH_REGISTER_COPY.taglineLines}
-      headlineLines={AUTH_REGISTER_COPY.headlineLines}
-      headlineAccentLineIndex={AUTH_REGISTER_COPY.headlineAccentLineIndex}
+      taglineLines={[t('auth.registerTagline1'), t('auth.registerTagline2')]}
+      headlineLines={[t('auth.registerHeadline1'), t('auth.registerHeadline2'), t('auth.registerHeadline3')]}
+      headlineAccentLineIndex={1}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" style={styles.footerText}>Already have an account?</AppText>
-          <AuthLink label="Sign in" href="/(auth)/login" />
+          <AppText variant="bodySmall" style={styles.footerText}>{t('auth.alreadyHaveAccount')}</AppText>
+          <AuthLink label={t('auth.signIn')} href="/(auth)/login" />
         </View>
       }
     >
       <SocialAuthSection onError={setFormError} />
 
-      <AuthDivider label={AUTH_REGISTER_COPY.emailDivider} />
+      <AuthDivider label={t('auth.registerDivider')} />
 
       <View style={styles.form}>
         <AuthInput
-          placeholder="Display name"
+          placeholder={t('auth.displayName')}
           leadingIcon="person"
           value={displayName}
           onChangeText={setDisplayName}
@@ -85,7 +86,7 @@ export default function RegisterScreen() {
           returnKeyType="next"
         />
         <AuthInput
-          placeholder="Email"
+          placeholder={t('auth.email')}
           leadingIcon="email"
           value={email}
           onChangeText={setEmail}
@@ -97,7 +98,7 @@ export default function RegisterScreen() {
           returnKeyType="next"
         />
         <AuthInput
-          placeholder="Password"
+          placeholder={t('auth.password')}
           leadingIcon="lock"
           showPasswordToggle
           value={password}
@@ -113,7 +114,7 @@ export default function RegisterScreen() {
         {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
 
         <AuthPrimaryButton
-          title="Create account"
+          title={t('auth.createAccount')}
           onPress={() => void handleRegister()}
           loading={isSubmitting}
         />

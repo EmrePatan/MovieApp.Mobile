@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
-import { useHome } from '@/features/home/hooks/useHome';
+import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import HomeScreen from '../../../app/(tabs)/home';
 
 const mockReplace = jest.fn();
@@ -28,9 +28,15 @@ jest.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-jest.mock('@/features/home/hooks/useHome', () => ({
-  homeQueryKey: (type: string, sectionSize: number) => ['home', type, sectionSize],
-  useHome: jest.fn(),
+jest.mock('@/features/home/hooks/useHomeFeed', () => ({
+  useHomeFeed: jest.fn(),
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: jest.fn(() => ({
+    isAuthenticated: true,
+    isLoading: false,
+  })),
 }));
 
 jest.mock('@/features/favorites/components/FavoriteButton', () => ({
@@ -102,29 +108,41 @@ function createTrendingFillers(count: number) {
   }));
 }
 
-function mockHomeData() {
-  (useHome as jest.Mock).mockReturnValue({
-    data: {
-      sections: [
-        {
-          type: 'HotThisWeek',
-          title: 'Hot This Week',
-          displayOrder: 0,
-          items: homeSectionItems,
-        },
-        {
-          type: 'TopRated',
-          title: 'Top Rated',
-          displayOrder: 1,
-          items: homeSectionItems,
-        },
-      ],
-      isPersonalized: false,
+function mockHomeData(
+  sections = [
+    {
+      type: 'HotThisWeek',
+      title: 'Hot This Week',
+      displayOrder: 0,
+      items: homeSectionItems,
     },
-    error: null,
-    isLoading: false,
+    {
+      type: 'TopRated',
+      title: 'Top Rated',
+      displayOrder: 1,
+      items: homeSectionItems,
+    },
+  ],
+) {
+  (useHomeFeed as jest.Mock).mockReturnValue({
+    browse: {
+      data: { sections },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      refetch: mockRefetch,
+    },
+    personalized: {
+      data: { sections: [], isPersonalized: false },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      refetch: jest.fn(),
+    },
+    mergedSections: sections,
+    personalization: 'not-personalized',
+    isInitialBrowseLoading: false,
     isFetching: false,
-    isError: false,
     refetch: mockRefetch,
   });
 }
@@ -135,76 +153,66 @@ describe('Home detail navigation', () => {
     mockHomeData();
   });
 
-  it('replaces movie detail from home to avoid hidden tab stack buildup', () => {
+  it('pushes movie detail from home using the tab catalog navigation helper', () => {
     render(<HomeScreen />);
     fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016 · ★ 7.9'));
 
-    expect(mockReplace).toHaveBeenCalledWith('/movie/movie-b');
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith('/movie/movie-b');
+    expect(mockReplace).not.toHaveBeenCalled();
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockDismissTo).not.toHaveBeenCalled();
   });
 
-  it('replaces tv detail from home to avoid hidden tab stack buildup', () => {
-    (useHome as jest.Mock).mockReturnValue({
-      data: {
-        sections: [
+  it('pushes tv detail from home using the tab catalog navigation helper', () => {
+    mockHomeData([
+      {
+        type: 'TopRated',
+        title: 'Top Rated',
+        displayOrder: 1,
+        items: [
           {
-            type: 'TopRated',
-            title: 'Top Rated',
-            displayOrder: 1,
-            items: [
-              {
-                id: 'tv-a',
-                contentType: 'tv',
-                title: 'Breaking Bad',
-                originalTitle: 'Breaking Bad',
-                posterUrl: null,
-                backdropUrl: null,
-                releaseDate: null,
-                voteAverage: 8.9,
-                voteCount: 100,
-              },
-              {
-                id: 'tv-b',
-                contentType: 'tv',
-                title: 'Better Call Saul',
-                originalTitle: 'Better Call Saul',
-                posterUrl: null,
-                backdropUrl: null,
-                releaseDate: '2015-02-08',
-                voteAverage: 8.7,
-                voteCount: 90,
-              },
-            ],
+            id: 'tv-a',
+            contentType: 'tv',
+            title: 'Breaking Bad',
+            originalTitle: 'Breaking Bad',
+            posterUrl: null,
+            backdropUrl: null,
+            releaseDate: null,
+            voteAverage: 8.9,
+            voteCount: 100,
+          },
+          {
+            id: 'tv-b',
+            contentType: 'tv',
+            title: 'Better Call Saul',
+            originalTitle: 'Better Call Saul',
+            posterUrl: null,
+            backdropUrl: null,
+            releaseDate: '2015-02-08',
+            voteAverage: 8.7,
+            voteCount: 90,
           },
         ],
-        isPersonalized: false,
       },
-      error: null,
-      isLoading: false,
-      isFetching: false,
-      isError: false,
-      refetch: mockRefetch,
-    });
+    ]);
 
     render(<HomeScreen />);
     fireEvent.press(screen.getByLabelText('Better Call Saul, TV · 2015 · ★ 8.7'));
 
-    expect(mockReplace).toHaveBeenCalledWith('/tv/tv-b');
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith('/tv/tv-b');
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it('replaces each selected detail in order', () => {
+  it('pushes each selected detail in order', () => {
     render(<HomeScreen />);
 
     fireEvent.press(screen.getByLabelText('Interstellar, Movie · ★ 8.4'));
     fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016 · ★ 7.9'));
     fireEvent.press(screen.getByLabelText('Dune, Movie · 2021 · ★ 8.0'));
 
-    expect(mockReplace).toHaveBeenNthCalledWith(1, '/movie/movie-a');
-    expect(mockReplace).toHaveBeenNthCalledWith(2, '/movie/movie-b');
-    expect(mockReplace).toHaveBeenNthCalledWith(3, '/movie/movie-c');
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenNthCalledWith(1, '/movie/movie-a');
+    expect(mockPush).toHaveBeenNthCalledWith(2, '/movie/movie-b');
+    expect(mockPush).toHaveBeenNthCalledWith(3, '/movie/movie-c');
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 });

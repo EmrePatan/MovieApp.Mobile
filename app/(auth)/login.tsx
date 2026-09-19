@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
 import {
@@ -12,7 +13,6 @@ import {
   validateLoginForm,
   type LoginFormErrors,
 } from '@/utils/validation';
-import { AUTH_LOGIN_COPY } from '@/features/auth/auth-copy';
 import { AuthDivider } from '@/features/auth/components/AuthDivider';
 import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthInput } from '@/features/auth/components/AuthInput';
@@ -24,6 +24,7 @@ import { beginHomeColdStartTrace } from '@/perf/home-cold-start-trace';
 import { spacing } from '@/theme/spacing';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const { login, resendVerification } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,7 +50,7 @@ export default function LoginScreen() {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'resend-verification'));
       } else {
-        setFormError('Unable to resend the verification email. Please try again.');
+        setFormError(t('auth.unableToResendVerification'));
       }
     } finally {
       setIsResending(false);
@@ -77,7 +78,7 @@ export default function LoginScreen() {
         const code = (error.responseBody as { code?: string }).code;
         if (code === EMAIL_NOT_VERIFIED_CODE) {
           setPendingVerificationEmail(email.trim());
-          setFormError('Please verify your email address before signing in.');
+          setFormError(t('auth.verifyBeforeSignIn'));
           return;
         }
       }
@@ -85,7 +86,7 @@ export default function LoginScreen() {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'login'));
       } else {
-        setFormError('Unable to sign in. Please try again.');
+        setFormError(t('auth.unableToSignIn'));
       }
     } finally {
       setIsSubmitting(false);
@@ -94,23 +95,23 @@ export default function LoginScreen() {
 
   return (
     <AuthScreenLayout
-      taglineLines={AUTH_LOGIN_COPY.taglineLines}
-      headlineLines={AUTH_LOGIN_COPY.headlineLines}
-      headlineAccentLineIndex={AUTH_LOGIN_COPY.headlineAccentLineIndex}
+      taglineLines={[t('auth.loginTagline1'), t('auth.loginTagline2')]}
+      headlineLines={[t('auth.loginHeadline1'), t('auth.loginHeadline2'), t('auth.loginHeadline3')]}
+      headlineAccentLineIndex={2}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" style={styles.footerText}>New here?</AppText>
-          <AuthLink label="Create an account" href="/(auth)/register" />
+          <AppText variant="bodySmall" style={styles.footerText}>{t('auth.newHere')}</AppText>
+          <AuthLink label={t('auth.createAnAccount')} href="/(auth)/register" />
         </View>
       }
     >
       <SocialAuthSection onError={setFormError} />
 
-      <AuthDivider label={AUTH_LOGIN_COPY.emailDivider} />
+      <AuthDivider label={t('auth.loginDivider')} />
 
       <View style={styles.form}>
         <AuthInput
-          placeholder="Email"
+          placeholder={t('auth.email')}
           leadingIcon="email"
           value={email}
           onChangeText={setEmail}
@@ -122,7 +123,7 @@ export default function LoginScreen() {
           returnKeyType="next"
         />
         <AuthInput
-          placeholder="Password"
+          placeholder={t('auth.password')}
           leadingIcon="lock"
           showPasswordToggle
           value={password}
@@ -136,7 +137,7 @@ export default function LoginScreen() {
         />
 
         <View style={styles.forgotRow}>
-          <AuthLink label="Forgot password?" href="/(auth)/forgot-password" />
+          <AuthLink label={t('auth.forgotPassword')} href="/(auth)/forgot-password" />
         </View>
 
         {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
@@ -144,14 +145,14 @@ export default function LoginScreen() {
 
         {pendingVerificationEmail ? (
           <AuthPrimaryButton
-            title="Resend verification email"
+            title={t('auth.resendVerificationEmail')}
             onPress={() => void handleResendVerification()}
             loading={isResending}
           />
         ) : null}
 
         <AuthPrimaryButton
-          title="Sign in"
+          title={t('auth.signIn')}
           onPress={() => void handleLogin()}
           loading={isSubmitting}
         />

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -20,6 +21,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function ChangeEmailScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const profileQuery = useCurrentProfile();
   const changeEmail = useChangeEmailMutation();
   const [email, setEmail] = useState('');
@@ -42,16 +44,16 @@ export default function ChangeEmailScreen() {
       {
         onSuccess: () => {
           setCurrentPassword('');
-          setFeedback({ message: 'Email updated successfully.', tone: 'success' });
+          setFeedback({ message: t('profile.emailUpdated'), tone: 'success' });
           setTimeout(() => router.back(), 800);
         },
         onError: (error) => {
           setFeedback({
             message: isApiError(error)
               ? error.kind === 'conflict'
-                ? 'That email address is already in use.'
+                ? t('profile.emailInUse')
                 : error.userMessage
-              : 'Could not change email. Please try again.',
+              : t('profile.emailChangeFailed'),
             tone: 'error',
           });
         },
@@ -66,9 +68,9 @@ export default function ChangeEmailScreen() {
         style={styles.container}
       >
         <DetailBackButton />
-        <AppText variant="title">Change Email</AppText>
+        <AppText variant="title">{t('profile.changeEmailTitle')}</AppText>
         <AppText variant="bodySmall" muted>
-          Current email: {profileQuery.data?.email ?? '—'}
+          {t('profile.currentEmail', { email: profileQuery.data?.email ?? '—' })}
         </AppText>
 
         <FeedbackMessage
@@ -79,7 +81,7 @@ export default function ChangeEmailScreen() {
 
         <View style={styles.form}>
           <AppInput
-            label="New email"
+            label={t('profile.newEmail')}
             value={email}
             onChangeText={setEmail}
             error={fieldErrors.email}
@@ -89,7 +91,7 @@ export default function ChangeEmailScreen() {
             textContentType="emailAddress"
           />
           <PasswordInput
-            label="Current password"
+            label={t('profile.currentPassword')}
             value={currentPassword}
             onChangeText={setCurrentPassword}
             error={fieldErrors.currentPassword}
@@ -97,7 +99,7 @@ export default function ChangeEmailScreen() {
             textContentType="password"
           />
           <AppButton
-            title="Update email"
+            title={t('profile.updateEmail')}
             loading={changeEmail.isPending}
             disabled={changeEmail.isPending}
             onPress={handleSubmit}

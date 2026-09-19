@@ -1,3 +1,4 @@
+import { getUiFormatLocaleTag } from '@/i18n';
 import type {
   MonthlyActivityResponse,
   UserStatisticsActivityResponse,
@@ -9,11 +10,14 @@ export function getTotalWatchedCount(statistics: UserStatisticsResponse): number
 }
 
 export function formatMonthLabel(month: number, year: number): string {
-  return new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'short' });
+  return new Date(year, month - 1, 1).toLocaleString(getUiFormatLocaleTag(), { month: 'short' });
 }
 
 export function formatMonthDetailLabel(month: number, year: number): string {
-  return new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  return new Date(year, month - 1, 1).toLocaleString(getUiFormatLocaleTag(), {
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 export function getMonthAccessibilityLabel(month: MonthlyActivityResponse): string {

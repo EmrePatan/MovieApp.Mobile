@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Platform } from 'react-native';
+import { I18nextProvider } from 'react-i18next';
 import ProfileScreen from '../../../app/(tabs)/profile';
+import { i18n } from '@/i18n';
 import { useAuth } from '@/auth/useAuth';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 
@@ -28,6 +30,14 @@ jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
     resetToDeviceDefault: jest.fn(),
   })),
 }));
+
+function renderProfileScreen() {
+  return render(
+    <I18nextProvider i18n={i18n}>
+      <ProfileScreen />
+    </I18nextProvider>,
+  );
+}
 
 describe('ProfileScreen', () => {
   const originalPlatform = Platform.OS;
@@ -58,7 +68,7 @@ describe('ProfileScreen', () => {
   });
 
   it('renders profile identity and account sections', () => {
-    render(<ProfileScreen />);
+    renderProfileScreen();
 
     expect(screen.getByText('Emre')).toBeTruthy();
     expect(screen.getByText('Your movie and TV identity')).toBeTruthy();
@@ -68,7 +78,7 @@ describe('ProfileScreen', () => {
   });
 
   it('navigates to account settings', () => {
-    render(<ProfileScreen />);
+    renderProfileScreen();
 
     fireEvent.press(screen.getByLabelText('Edit profile'));
 
@@ -77,7 +87,7 @@ describe('ProfileScreen', () => {
   });
 
   it('renders account settings rows', () => {
-    render(<ProfileScreen />);
+    renderProfileScreen();
 
     expect(screen.getByLabelText('Edit profile')).toBeTruthy();
     expect(screen.getByLabelText('Change email')).toBeTruthy();
@@ -86,7 +96,7 @@ describe('ProfileScreen', () => {
   });
 
   it('logs out from profile screen', () => {
-    render(<ProfileScreen />);
+    renderProfileScreen();
 
     fireEvent.press(screen.getByText('Sign out'));
     expect(mockLogout).toHaveBeenCalled();
@@ -108,7 +118,7 @@ describe('ProfileScreen', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const { UNSAFE_getByType } = renderProfileScreen();
     const { ScrollView } = require('react-native');
     const scrollView = UNSAFE_getByType(ScrollView);
 
@@ -120,7 +130,7 @@ describe('ProfileScreen', () => {
   it('omits refresh control on Android', () => {
     Platform.OS = 'android';
 
-    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const { UNSAFE_getByType } = renderProfileScreen();
     const { ScrollView } = require('react-native');
     const scrollView = UNSAFE_getByType(ScrollView);
 

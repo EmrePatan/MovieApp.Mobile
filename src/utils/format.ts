@@ -1,3 +1,5 @@
+import { getUiFormatLocaleTag } from '@/i18n';
+
 export function formatIsoDate(value: string | null | undefined): string | null {
   if (!value) {
     return null;
@@ -8,7 +10,7 @@ export function formatIsoDate(value: string | null | undefined): string | null {
     return value;
   }
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(getUiFormatLocaleTag(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -80,7 +82,7 @@ export function formatVoteCount(count: number): string {
     return '0';
   }
 
-  return count.toLocaleString();
+  return count.toLocaleString(getUiFormatLocaleTag());
 }
 
 export function shouldShowOriginalTitle(

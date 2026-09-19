@@ -7,7 +7,7 @@ describe('insights navigation', () => {
     const layoutSource = readFileSync(layoutPath, 'utf8');
 
     expect(layoutSource).toContain('name="insights"');
-    expect(layoutSource).toContain("title: 'Insights'");
+    expect(layoutSource).toContain("t('tabs.insights')");
     expect(layoutSource).toContain('name="profile" options={{ href: null }}');
   });
 

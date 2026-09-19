@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { UserProfileResponse } from '../types';
 import { formatIsoDate } from '@/utils/format';
@@ -23,11 +24,18 @@ function getInitials(displayName: string): string {
 }
 
 export function ProfileHero({ profile }: ProfileHeroProps) {
+  const { t } = useTranslation();
   const initials = getInitials(profile.displayName);
+  const formattedDate = profile.createdAt
+    ? formatIsoDate(profile.createdAt.slice(0, 10))
+    : null;
 
   return (
     <View style={styles.container}>
-      <View style={styles.avatar} accessibilityLabel={`${profile.displayName} avatar`}>
+      <View
+        style={styles.avatar}
+        accessibilityLabel={t('profile.avatarAccessibility', { name: profile.displayName })}
+      >
         <AppText variant="subtitle" style={styles.initials}>
           {initials}
         </AppText>
@@ -37,11 +45,11 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
           {profile.displayName}
         </AppText>
         <AppText variant="bodySmall" muted>
-          Your movie and TV identity
+          {t('profile.identityTagline')}
         </AppText>
-        {profile.createdAt ? (
+        {formattedDate ? (
           <AppText variant="caption" muted>
-            Member since {formatIsoDate(profile.createdAt.slice(0, 10))}
+            {t('profile.memberSince', { date: formattedDate })}
           </AppText>
         ) : null}
       </View>

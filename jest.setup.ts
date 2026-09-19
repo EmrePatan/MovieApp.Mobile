@@ -1,3 +1,11 @@
+jest.mock('@/auth/social-auth-service', () => ({
+  requestSocialIdentityToken: jest.fn(),
+  SocialAuthCancelledError: class SocialAuthCancelledError extends Error {},
+  SocialAuthConfigurationError: class SocialAuthConfigurationError extends Error {},
+  formatGoogleSignInDevelopmentErrorMessage: jest.fn((error: unknown) => String(error)),
+  isGoogleSocialAuthDebugDiagnosticsEnabled: jest.fn(() => false),
+}));
+
 jest.mock('expo-apple-authentication', () => {
   const React = require('react');
   const { Pressable, Text } = require('react-native');
@@ -42,6 +50,25 @@ jest.mock('expo-secure-store', () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
+
+jest.mock('expo-localization', () => ({
+  getLocales: jest.fn(() => [{ languageCode: 'en', regionCode: 'US' }]),
+}));
+
+jest.mock('@/features/locale/hooks/useLocalePreference', () => ({
+  useLocalePreference: jest.fn(() => ({
+    language: 'en',
+    source: 'fallback',
+    isHydrated: true,
+    setLanguage: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  })),
+}));
+
+beforeAll(async () => {
+  const { ensureI18nInitialized } = require('@/i18n') as typeof import('@/i18n');
+  await ensureI18nInitialized('en');
+});
 
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ replace: jest.fn() })),

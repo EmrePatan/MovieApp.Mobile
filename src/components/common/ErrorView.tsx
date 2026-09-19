@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { commonStyles } from '@/theme/theme';
@@ -12,22 +13,24 @@ interface ErrorViewProps {
 }
 
 export function ErrorView({
-  title = 'Something went wrong',
+  title,
   message,
   onRetry,
-  retryLabel = 'Try Again',
+  retryLabel,
 }: ErrorViewProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={[commonStyles.surfaceCardCentered, styles.container]} accessibilityRole="alert">
       <AppText variant="subtitle" center>
-        {title}
+        {title ?? t('common.somethingWentWrong')}
       </AppText>
       <AppText variant="bodySmall" muted center>
         {message}
       </AppText>
       {onRetry ? (
         <AppButton
-          title={retryLabel}
+          title={retryLabel ?? t('common.tryAgain')}
           onPress={onRetry}
           variant="secondary"
           style={styles.button}

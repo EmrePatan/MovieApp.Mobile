@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n';
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface UpdateProfileFormErrors {
@@ -24,9 +26,9 @@ export function validateUpdateProfile(displayName: string): UpdateProfileFormErr
   const trimmed = displayName.trim();
 
   if (!trimmed) {
-    errors.displayName = 'Display name is required.';
+    errors.displayName = i18n.t('validation.displayNameRequired');
   } else if (trimmed.length > 100) {
-    errors.displayName = 'Display name must be at most 100 characters.';
+    errors.displayName = i18n.t('validation.displayNameTooLong');
   }
 
   return errors;
@@ -40,15 +42,15 @@ export function validateChangeEmail(
   const trimmedEmail = email.trim();
 
   if (!trimmedEmail) {
-    errors.email = 'Email is required.';
+    errors.email = i18n.t('validation.emailRequired');
   } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-    errors.email = 'Enter a valid email address.';
+    errors.email = i18n.t('validation.emailInvalid');
   } else if (trimmedEmail.length > 320) {
-    errors.email = 'Email must be at most 320 characters.';
+    errors.email = i18n.t('validation.emailTooLong');
   }
 
   if (!currentPassword) {
-    errors.currentPassword = 'Current password is required.';
+    errors.currentPassword = i18n.t('validation.currentPasswordRequired');
   }
 
   return errors;
@@ -62,23 +64,23 @@ export function validateChangePassword(
   const errors: ChangePasswordFormErrors = {};
 
   if (!currentPassword) {
-    errors.currentPassword = 'Current password is required.';
+    errors.currentPassword = i18n.t('validation.currentPasswordRequired');
   }
 
   if (!newPassword) {
-    errors.newPassword = 'New password is required.';
+    errors.newPassword = i18n.t('validation.newPasswordRequired');
   } else if (newPassword.length < 8) {
-    errors.newPassword = 'New password must be at least 8 characters.';
+    errors.newPassword = i18n.t('validation.newPasswordTooShort');
   } else if (newPassword.length > 128) {
-    errors.newPassword = 'New password must be at most 128 characters.';
+    errors.newPassword = i18n.t('validation.newPasswordTooLong');
   } else if (newPassword === currentPassword) {
-    errors.newPassword = 'New password must differ from your current password.';
+    errors.newPassword = i18n.t('validation.newPasswordMustDiffer');
   }
 
   if (!confirmPassword) {
-    errors.confirmPassword = 'Confirm your new password.';
+    errors.confirmPassword = i18n.t('validation.confirmNewPasswordRequired');
   } else if (newPassword !== confirmPassword) {
-    errors.confirmPassword = 'Passwords do not match.';
+    errors.confirmPassword = i18n.t('validation.passwordsDoNotMatch');
   }
 
   return errors;
@@ -88,7 +90,7 @@ export function validateDeleteAccount(currentPassword: string): DeleteAccountFor
   const errors: DeleteAccountFormErrors = {};
 
   if (!currentPassword) {
-    errors.currentPassword = 'Current password is required.';
+    errors.currentPassword = i18n.t('validation.currentPasswordRequired');
   }
 
   return errors;

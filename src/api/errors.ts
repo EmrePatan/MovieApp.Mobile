@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n';
+
 export type ApiErrorKind =
   | 'network'
   | 'timeout'
@@ -34,11 +36,16 @@ export class ApiError extends Error {
     message?: string;
     responseBody?: unknown | null;
   }) {
-    super(options.message ?? options.userMessage ?? options.title ?? 'Request failed');
+    super(
+      options.message ??
+        options.userMessage ??
+        options.title ??
+        i18n.t('errors.requestFailed'),
+    );
     this.name = 'ApiError';
     this.kind = options.kind;
     this.status = options.status ?? null;
-    this.title = options.title ?? 'Request failed';
+    this.title = options.title ?? i18n.t('errors.requestFailed');
     this.detail = options.detail ?? null;
     this.userMessage = options.userMessage ?? getDefaultUserMessage(options.kind);
     this.responseBody = options.responseBody ?? null;
@@ -47,7 +54,7 @@ export class ApiError extends Error {
 
 export function getApiErrorDisplayMessage(
   error: unknown,
-  fallback = 'Something went wrong. Please try again.',
+  fallback = i18n.t('errors.generic'),
 ): string {
   if (!isApiError(error)) {
     return fallback;
@@ -56,28 +63,28 @@ export function getApiErrorDisplayMessage(
   return error.detail ?? error.title ?? error.userMessage;
 }
 
-function getDefaultUserMessage(kind: ApiErrorKind): string {
+export function getDefaultUserMessage(kind: ApiErrorKind): string {
   switch (kind) {
     case 'network':
-      return 'Unable to connect. Check your internet connection and try again.';
+      return i18n.t('errors.network');
     case 'timeout':
-      return 'The request timed out. Please try again.';
+      return i18n.t('errors.timeout');
     case 'validation':
-      return 'Please check your input and try again.';
+      return i18n.t('errors.validation');
     case 'unauthorized':
-      return 'Your session has expired. Please sign in again.';
+      return i18n.t('errors.unauthorized');
     case 'forbidden':
-      return 'You do not have permission to perform this action.';
+      return i18n.t('errors.forbidden');
     case 'not_found':
-      return 'The requested resource was not found.';
+      return i18n.t('errors.notFound');
     case 'conflict':
-      return 'This action could not be completed because of a conflict.';
+      return i18n.t('errors.conflict');
     case 'rate_limited':
-      return 'Too many requests. Please wait a moment and try again.';
+      return i18n.t('errors.rateLimited');
     case 'server':
-      return 'Something went wrong on our end. Please try again later.';
+      return i18n.t('errors.server');
     default:
-      return 'Something went wrong. Please try again.';
+      return i18n.t('errors.generic');
   }
 }
 
@@ -119,51 +126,51 @@ export function getUserMessageForAuthError(
     | 'social',
 ): string {
   if (kind === 'unauthorized' && context === 'login') {
-    return 'Invalid email or password.';
+    return i18n.t('errors.authLoginInvalid');
   }
 
   if (kind === 'validation' && context === 'verify-email') {
-    return 'Invalid or expired verification link.';
+    return i18n.t('errors.authVerifyEmailInvalid');
   }
 
   if (kind === 'conflict' && context === 'register') {
-    return 'An account with this email already exists.';
+    return i18n.t('errors.authRegisterConflict');
   }
 
   if (kind === 'conflict' && context === 'social') {
-    return 'An account with this email already exists. Sign in with your password to continue.';
+    return i18n.t('errors.authSocialConflict');
   }
 
   if (kind === 'unauthorized' && context === 'social') {
-    return 'Social sign-in failed. Please try again.';
+    return i18n.t('errors.authSocialFailed');
   }
 
   if (kind === 'rate_limited') {
-    return 'Too many attempts. Please try again later.';
+    return i18n.t('errors.authRateLimited');
   }
 
   if (kind === 'validation' && context === 'reset-password') {
-    return 'Invalid or expired reset token.';
+    return i18n.t('errors.authResetTokenInvalid');
   }
 
   if (kind === 'validation') {
     if (context === 'register') {
-      return 'Please check your registration details and try again.';
+      return i18n.t('errors.authRegisterValidation');
     }
 
     if (context === 'forgot-password') {
-      return 'Please enter a valid email address.';
+      return i18n.t('errors.authForgotPasswordValidation');
     }
 
     if (context === 'reset-password') {
-      return 'Please check your password and try again.';
+      return i18n.t('errors.authResetPasswordValidation');
     }
 
-    return 'Please check your email and password.';
+    return i18n.t('errors.authCredentialsValidation');
   }
 
   if (kind === 'network' || kind === 'timeout') {
-    return 'Unable to reach the server. Check your connection and try again.';
+    return i18n.t('errors.authNetwork');
   }
 
   return getDefaultUserMessage(kind);
@@ -173,7 +180,7 @@ export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
 
-export function getErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.'): string {
+export function getErrorMessage(error: unknown, fallback = i18n.t('errors.generic')): string {
   if (isApiError(error)) {
     return error.userMessage;
   }

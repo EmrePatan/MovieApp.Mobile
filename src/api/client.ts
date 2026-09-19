@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { getApiBaseUrl, API_REQUEST_TIMEOUT_MS } from './config';
 import { ApiError, mapStatusToErrorKind, type ProblemDetails } from './errors';
 
@@ -135,7 +136,7 @@ class ApiClient {
 
       if (error instanceof DOMException && error.name === 'AbortError') {
         if (signal?.aborted) {
-          throw new ApiError({ kind: 'unknown', message: 'Request was cancelled.' });
+          throw new ApiError({ kind: 'unknown', message: i18n.t('errors.requestCancelled') });
         }
 
         throw new ApiError({ kind: 'timeout' });

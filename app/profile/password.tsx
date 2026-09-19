@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -18,6 +19,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const changePassword = useChangePasswordMutation();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -42,14 +44,14 @@ export default function ChangePasswordScreen() {
           setCurrentPassword('');
           setNewPassword('');
           setConfirmPassword('');
-          setFeedback({ message: 'Password updated successfully.', tone: 'success' });
+          setFeedback({ message: t('profile.passwordUpdated'), tone: 'success' });
           setTimeout(() => router.back(), 800);
         },
         onError: (error) => {
           setFeedback({
             message: isApiError(error)
               ? error.userMessage
-              : 'Could not change password. Please try again.',
+              : t('profile.passwordChangeFailed'),
             tone: 'error',
           });
         },
@@ -64,9 +66,9 @@ export default function ChangePasswordScreen() {
         style={styles.container}
       >
         <DetailBackButton />
-        <AppText variant="title">Change Password</AppText>
+        <AppText variant="title">{t('profile.changePasswordTitle')}</AppText>
         <AppText variant="bodySmall" muted>
-          Choose a strong password that is at least 8 characters.
+          {t('profile.changePasswordHint')}
         </AppText>
 
         <FeedbackMessage
@@ -77,7 +79,7 @@ export default function ChangePasswordScreen() {
 
         <View style={styles.form}>
           <PasswordInput
-            label="Current password"
+            label={t('profile.currentPassword')}
             value={currentPassword}
             onChangeText={setCurrentPassword}
             error={fieldErrors.currentPassword}
@@ -85,7 +87,7 @@ export default function ChangePasswordScreen() {
             textContentType="password"
           />
           <PasswordInput
-            label="New password"
+            label={t('auth.newPassword')}
             value={newPassword}
             onChangeText={setNewPassword}
             error={fieldErrors.newPassword}
@@ -93,7 +95,7 @@ export default function ChangePasswordScreen() {
             textContentType="newPassword"
           />
           <PasswordInput
-            label="Confirm new password"
+            label={t('profile.confirmNewPassword')}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             error={fieldErrors.confirmPassword}
@@ -101,7 +103,7 @@ export default function ChangePasswordScreen() {
             textContentType="newPassword"
           />
           <AppButton
-            title="Update password"
+            title={t('profile.updatePassword')}
             loading={changePassword.isPending}
             disabled={changePassword.isPending}
             onPress={handleSubmit}

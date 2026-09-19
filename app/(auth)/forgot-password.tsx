@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { forgotPasswordRequest } from '@/auth/auth-api';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
@@ -8,7 +9,6 @@ import {
   validateForgotPasswordForm,
   type ForgotPasswordFormErrors,
 } from '@/utils/validation';
-import { AUTH_FORGOT_PASSWORD_COPY } from '@/features/auth/auth-copy';
 import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthInput } from '@/features/auth/components/AuthInput';
 import { AuthLink } from '@/features/auth/components/AuthLink';
@@ -17,6 +17,7 @@ import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { spacing } from '@/theme/spacing';
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [fieldErrors, setFieldErrors] = useState<ForgotPasswordFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export default function ForgotPasswordScreen() {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'forgot-password'));
       } else {
-        setFormError('Unable to process your request. Please try again.');
+        setFormError(t('auth.unableToProcessRequest'));
       }
     } finally {
       setIsSubmitting(false);
@@ -51,20 +52,20 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthScreenLayout
-      taglineLines={AUTH_FORGOT_PASSWORD_COPY.taglineLines}
-      headlineLines={AUTH_FORGOT_PASSWORD_COPY.headlineLines}
-      headlineAccentLineIndex={AUTH_FORGOT_PASSWORD_COPY.headlineAccentLineIndex}
-      supportingCopy={AUTH_FORGOT_PASSWORD_COPY.supportingCopy}
+      taglineLines={[t('auth.forgotPasswordTagline1'), t('auth.forgotPasswordTagline2')]}
+      headlineLines={[t('auth.forgotPasswordHeadline1'), t('auth.forgotPasswordHeadline2')]}
+      headlineAccentLineIndex={1}
+      supportingCopy={t('auth.forgotPasswordSupporting')}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" style={styles.footerText}>Remembered it?</AppText>
-          <AuthLink label="Back to sign in" href="/(auth)/login" />
+          <AppText variant="bodySmall" style={styles.footerText}>{t('auth.rememberedIt')}</AppText>
+          <AuthLink label={t('common.backToSignIn')} href="/(auth)/login" />
         </View>
       }
     >
       <View style={styles.form}>
         <AuthInput
-          placeholder="Email"
+          placeholder={t('auth.email')}
           leadingIcon="email"
           value={email}
           onChangeText={setEmail}
@@ -82,13 +83,13 @@ export default function ForgotPasswordScreen() {
         {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
 
         <AuthPrimaryButton
-          title="Send reset instructions"
+          title={t('auth.sendResetInstructions')}
           onPress={() => void handleSubmit()}
           loading={isSubmitting}
         />
 
         <View style={styles.secondaryLink}>
-          <AuthLink label="Create an account" href="/(auth)/register" accent={false} />
+          <AuthLink label={t('auth.createAnAccount')} href="/(auth)/register" accent={false} />
         </View>
       </View>
     </AuthScreenLayout>

@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -10,17 +11,20 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { Screen } from '@/components/common/Screen';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
+import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { getRegionLabel } from '@/features/regions/region-options';
+import { getLanguageLabel } from '@/i18n/locale-tags';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { logout } = useAuth();
   const profileQuery = useCurrentProfile();
   const { region: userRegion } = useRegionalPreference();
+  const { language } = useLocalePreference();
 
   const profile = profileQuery.data;
   const isRefreshing = profileQuery.isRefetching && !profileQuery.isLoading;
@@ -38,7 +42,7 @@ export default function ProfileScreen() {
       <Screen>
         <View style={styles.loadingContainer}>
           <AppText variant="bodySmall" muted>
-            Loading profile...
+            {t('profile.loadingProfile')}
           </AppText>
         </View>
       </Screen>
@@ -48,16 +52,12 @@ export default function ProfileScreen() {
   if (profileQuery.isError && !profile) {
     const message = isApiError(profileQuery.error)
       ? profileQuery.error.userMessage
-      : 'Unable to load your profile. Please try again.';
+      : t('profile.loadProfileError');
 
     return (
       <Screen>
         <View style={styles.errorContainer}>
-          <ErrorView
-            message={message}
-            onRetry={() => void profileQuery.refetch()}
-            retryLabel="Try Again"
-          />
+          <ErrorView message={message} onRetry={() => void profileQuery.refetch()} />
         </View>
       </Screen>
     );
@@ -74,35 +74,42 @@ export default function ProfileScreen() {
       >
         {profile ? <ProfileHero profile={profile} /> : null}
 
-        <ProfileSection title="Preferences">
+        <ProfileSection title={t('profile.preferences')}>
           <ProfileMenuRow
-            label="Region"
-            subtitle={`Default for streaming and theaters (${getRegionLabel(userRegion)})`}
+            label={t('profile.language')}
+            subtitle={t('profile.languageSubtitle', {
+              language: getLanguageLabel(language, language),
+            })}
+            onPress={() => router.push('/profile/language')}
+          />
+          <ProfileMenuRow
+            label={t('profile.region')}
+            subtitle={t('profile.regionSubtitle', { region: getRegionLabel(userRegion) })}
             onPress={() => router.push('/profile/region')}
           />
         </ProfileSection>
 
-        <ProfileSection title="Account">
+        <ProfileSection title={t('profile.account')}>
           <ProfileMenuRow
-            label="Edit profile"
+            label={t('profile.editProfile')}
             onPress={() => router.push('/profile/edit')}
           />
           <ProfileMenuRow
-            label="Change email"
+            label={t('profile.changeEmail')}
             onPress={() => router.push('/profile/email')}
           />
           <ProfileMenuRow
-            label="Change password"
+            label={t('profile.changePassword')}
             onPress={() => router.push('/profile/password')}
           />
           <ProfileMenuRow
-            label="Delete account"
+            label={t('profile.deleteAccount')}
             destructive
             onPress={() => router.push('/profile/delete-account')}
           />
         </ProfileSection>
 
-        <AppButton title="Sign out" variant="ghost" onPress={handleLogout} />
+        <AppButton title={t('profile.signOut')} variant="ghost" onPress={handleLogout} />
       </ScrollView>
     </Screen>
   );

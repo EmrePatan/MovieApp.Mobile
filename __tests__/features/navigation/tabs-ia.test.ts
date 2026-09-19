@@ -8,14 +8,13 @@ describe('primary bottom navigation IA', () => {
   );
 
   it('exposes Home, Discover, Library, and Profile tabs', () => {
-    expect(layoutSource).toMatch(/title:\s*'Home'/);
-    expect(layoutSource).toMatch(/title:\s*'Discover'/);
-    expect(layoutSource).toMatch(/title:\s*'Library'/);
-    expect(layoutSource).toMatch(/title:\s*'Profile'/);
+    expect(layoutSource).toMatch(/t\('tabs\.home'\)/);
+    expect(layoutSource).toMatch(/t\('tabs\.discover'\)/);
+    expect(layoutSource).toMatch(/t\('tabs\.library'\)/);
+    expect(layoutSource).toMatch(/name="profile"/);
   });
 
-  it('hides Search and Watchlist from the bottom tab bar', () => {
-    expect(layoutSource).toMatch(/name="search"\s+options=\{\{\s*href:\s*null\s*\}\}/);
+  it('hides Watchlist from the bottom tab bar', () => {
     expect(layoutSource).toMatch(/name="watchlist"\s+options=\{\{\s*href:\s*null\s*\}\}/);
   });
 });

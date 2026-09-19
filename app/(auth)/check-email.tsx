@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
-import { AUTH_CHECK_EMAIL_COPY } from '@/features/auth/auth-copy';
 import { AuthFormMessage } from '@/features/auth/components/AuthFormMessage';
 import { AuthLink } from '@/features/auth/components/AuthLink';
 import { AuthPrimaryButton } from '@/features/auth/components/AuthPrimaryButton';
@@ -12,6 +12,7 @@ import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { spacing } from '@/theme/spacing';
 
 export default function CheckEmailScreen() {
+  const { t } = useTranslation();
   const { resendVerification } = useAuth();
   const params = useLocalSearchParams<{ email?: string | string[] }>();
   const emailParam = Array.isArray(params.email) ? params.email[0] : params.email;
@@ -23,7 +24,7 @@ export default function CheckEmailScreen() {
 
   async function handleResend() {
     if (!email) {
-      setFormError('Missing email address. Please register again.');
+      setFormError(t('auth.missingEmailRegisterAgain'));
       return;
     }
 
@@ -38,7 +39,7 @@ export default function CheckEmailScreen() {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'resend-verification'));
       } else {
-        setFormError('Unable to resend the verification email. Please try again.');
+        setFormError(t('auth.unableToResendVerification'));
       }
     } finally {
       setIsSubmitting(false);
@@ -47,21 +48,21 @@ export default function CheckEmailScreen() {
 
   return (
     <AuthScreenLayout
-      taglineLines={AUTH_CHECK_EMAIL_COPY.taglineLines}
-      headlineLines={AUTH_CHECK_EMAIL_COPY.headlineLines}
-      headlineAccentLineIndex={AUTH_CHECK_EMAIL_COPY.headlineAccentLineIndex}
-      supportingCopy={AUTH_CHECK_EMAIL_COPY.supportingCopy}
+      taglineLines={[t('auth.checkEmailTagline1'), t('auth.checkEmailTagline2')]}
+      headlineLines={[t('auth.checkEmailHeadline1'), t('auth.checkEmailHeadline2')]}
+      headlineAccentLineIndex={1}
+      supportingCopy={t('auth.checkEmailSupporting')}
       footer={
         <View style={styles.footerRow}>
-          <AppText variant="bodySmall" style={styles.footerText}>Already verified?</AppText>
-          <AuthLink label="Sign in" href="/(auth)/login" />
+          <AppText variant="bodySmall" style={styles.footerText}>{t('auth.alreadyVerified')}</AppText>
+          <AuthLink label={t('auth.signIn')} href="/(auth)/login" />
         </View>
       }
     >
       <View style={styles.form}>
         {email ? (
           <AppText variant="bodySmall" style={styles.emailText}>
-            Verification email sent to {email}
+            {t('auth.verificationEmailSentTo', { email })}
           </AppText>
         ) : null}
 
@@ -69,7 +70,7 @@ export default function CheckEmailScreen() {
         {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
 
         <AuthPrimaryButton
-          title="Resend verification email"
+          title={t('auth.resendVerificationEmail')}
           onPress={() => void handleResend()}
           loading={isSubmitting}
         />

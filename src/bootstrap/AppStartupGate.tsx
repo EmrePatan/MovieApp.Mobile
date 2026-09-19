@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native';
 import { SplashScreen } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
+import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
 import {
   canRevealApplicationUi,
   preloadStartupIconFonts,
@@ -13,6 +14,7 @@ interface AppStartupGateProps {
 
 export function AppStartupGate({ children }: AppStartupGateProps) {
   const { isLoading: authIsLoading } = useAuth();
+  const { isHydrated: localeHydrated } = useLocalePreference();
   const [iconFontsReady, setIconFontsReady] = useState(false);
   const hasHiddenSplashRef = useRef(false);
 
@@ -32,7 +34,7 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
     };
   }, []);
 
-  const shouldReveal = canRevealApplicationUi(iconFontsReady, authIsLoading);
+  const shouldReveal = canRevealApplicationUi(iconFontsReady, authIsLoading) && localeHydrated;
 
   const hideSplashOnce = useCallback(() => {
     if (!shouldReveal || hasHiddenSplashRef.current) {

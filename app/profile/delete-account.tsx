@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -17,6 +18,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function DeleteAccountScreen() {
+  const { t } = useTranslation();
   const deleteAccount = useDeleteAccountMutation();
   const [step, setStep] = useState<'confirm' | 'password'>('confirm');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -42,7 +44,7 @@ export default function DeleteAccountScreen() {
           setFeedback(
             isApiError(error)
               ? error.userMessage
-              : 'Could not delete account. Please try again.',
+              : t('profile.deleteAccountFailed'),
           );
         },
       },
@@ -56,7 +58,7 @@ export default function DeleteAccountScreen() {
         style={styles.container}
       >
         <DetailBackButton />
-        <AppText variant="title">Delete Account</AppText>
+        <AppText variant="title">{t('profile.deleteAccountTitle')}</AppText>
 
         <FeedbackMessage
           message={feedback}
@@ -66,22 +68,19 @@ export default function DeleteAccountScreen() {
 
         {step === 'confirm' ? (
           <View style={styles.content}>
-            <AppText variant="body">
-              This permanently deletes your account and all personal data including favorites,
-              watchlists, ratings, reviews, and watch history.
-            </AppText>
+            <AppText variant="body">{t('profile.deleteAccountWarning')}</AppText>
             <AppText variant="bodySmall" muted>
-              This action cannot be undone.
+              {t('profile.deleteAccountIrreversible')}
             </AppText>
-            <AppButton title="Continue" variant="secondary" onPress={handleContinue} />
+            <AppButton title={t('common.continue')} variant="secondary" onPress={handleContinue} />
           </View>
         ) : (
           <View style={styles.content}>
             <AppText variant="bodySmall" muted>
-              Enter your current password to permanently delete your account.
+              {t('profile.deleteAccountPasswordHint')}
             </AppText>
             <PasswordInput
-              label="Current password"
+              label={t('profile.currentPassword')}
               value={currentPassword}
               onChangeText={setCurrentPassword}
               error={fieldErrors.currentPassword}
@@ -89,7 +88,7 @@ export default function DeleteAccountScreen() {
               textContentType="password"
             />
             <AppButton
-              title="Delete my account"
+              title={t('profile.deleteMyAccount')}
               loading={deleteAccount.isPending}
               disabled={deleteAccount.isPending}
               onPress={handleDelete}

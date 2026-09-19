@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -19,6 +20,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const profileQuery = useCurrentProfile();
   const updateProfile = useUpdateProfileMutation();
   const profileDisplayName = profileQuery.data?.displayName ?? '';
@@ -41,14 +43,14 @@ export default function EditProfileScreen() {
       { displayName: displayName.trim() },
       {
         onSuccess: () => {
-          setFeedback({ message: 'Profile updated successfully.', tone: 'success' });
+          setFeedback({ message: t('profile.profileUpdated'), tone: 'success' });
           setTimeout(() => router.back(), 800);
         },
         onError: (error) => {
           setFeedback({
             message: isApiError(error)
               ? error.userMessage
-              : 'Could not update profile. Please try again.',
+              : t('profile.profileUpdateFailed'),
             tone: 'error',
           });
         },
@@ -63,9 +65,9 @@ export default function EditProfileScreen() {
         style={styles.container}
       >
         <DetailBackButton />
-        <AppText variant="title">Edit Profile</AppText>
+        <AppText variant="title">{t('profile.editProfileTitle')}</AppText>
         <AppText variant="bodySmall" muted>
-          Update your display name.
+          {t('profile.editProfileHint')}
         </AppText>
 
         <FeedbackMessage
@@ -76,7 +78,7 @@ export default function EditProfileScreen() {
 
         <View style={styles.form}>
           <AppInput
-            label="Display name"
+            label={t('auth.displayName')}
             value={displayName}
             onChangeText={setDisplayNameDraft}
             error={fieldErrors.displayName}
@@ -84,7 +86,7 @@ export default function EditProfileScreen() {
             autoCapitalize="words"
           />
           <AppButton
-            title="Save changes"
+            title={t('common.saveChanges')}
             loading={updateProfile.isPending}
             disabled={updateProfile.isPending}
             onPress={handleSubmit}

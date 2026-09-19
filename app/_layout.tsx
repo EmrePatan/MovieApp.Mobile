@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { AppStartupGate } from '@/bootstrap/AppStartupGate';
+import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
 import { RegionalPreferenceProvider } from '@/features/regions/RegionalPreferenceProvider';
 import { queryClient } from '@/api/query-client';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
@@ -13,16 +14,18 @@ import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
 import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
+import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
 
 void SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
+  const { t } = useTranslation();
   const { isLoading } = useAuth();
   useProtectedRoute();
 
   if (isLoading) {
-    return <LoadingView message="Starting MovieApp..." />;
+    return <LoadingView message={t('common.startingApp')} />;
   }
 
   return (
@@ -66,15 +69,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <RegionalPreferenceProvider>
-          <AuthProvider>
-            <AppStartupGate>
-              <NotificationBootstrapProvider>
-                <RootNavigator />
-              </NotificationBootstrapProvider>
-            </AppStartupGate>
-          </AuthProvider>
-        </RegionalPreferenceProvider>
+        <LocalePreferenceProvider>
+          <RegionalPreferenceProvider>
+            <AuthProvider>
+              <AppStartupGate>
+                <NotificationBootstrapProvider>
+                  <RootNavigator />
+                </NotificationBootstrapProvider>
+              </AppStartupGate>
+            </AuthProvider>
+          </RegionalPreferenceProvider>
+        </LocalePreferenceProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
   );
