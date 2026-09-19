@@ -1114,12 +1114,25 @@ export const stage2Tr = {
     generateError: 'AI önerileri şu anda oluşturulamıyor.',
     emptyTitle: 'Bu sefer eşleşme yok',
     emptyMessage:
-      'Daha geniş bir ruh hâli, tür veya dönem dene. AI önerileri MovieApp kataloğuna göre doğrulanır.',
-    tryAnotherPrompt: 'Başka Bir İstem Dene',
-    partialResults: 'Bazı öneriler katalogda eşleştirilemedi.',
+      'Bu istem için AI önerilerinden hiçbiri Movie Cave kataloğundaki başlıklarla eşleşmedi.',
+    emptyRejectedHint:
+      '{{count}} öneri kataloğumuzda doğrulanamadı. İsteğini biraz genişletmeyi dene.',
+    emptyDiversityHint:
+      'Tür, dönem veya tonu değiştir—her istek en fazla {{count}} katalog eşleşmesi döndürür.',
+    tryAnotherPrompt: 'Yeniden Başla',
+    partialResults:
+      '{{count}} öneri Movie Cave kataloğunda eşleşmedi. Bulduklarımızı gösteriyoruz.',
+    lowYieldResults:
+      'En fazla {{max}} öneriden yalnızca {{returned}} katalogda eşleşti. {{count}} öneri elendi.',
     yourPicks: 'Senin seçimlerin',
-    resultsSummary: '{{returned}} / {{requested}} · bugün {{remaining}} kaldı',
-    refineSession: 'Bu Oturumu İyileştir',
+    resultsSummary:
+      'En fazla {{max}} öneriden {{returned}} · bugün {{remaining}} istek kaldı',
+    maxPicksPerRequest: 'Her istek en fazla {{count}} katalog eşleşmesi döndürür.',
+    sessionPromptLabel: 'İstemin',
+    whyItFits: 'Neden uyuyor',
+    getMorePicksHint:
+      'Bu istemi koru ve aynı oturumda en fazla {{count}} öneri daha al.',
+    startFreshHint: 'Sonuçları temizle ve yeni bir ruh hâli, tür veya hava yaz.',
     startFresh: 'Yeniden Başla',
     validationMinLength: 'Ne istediğini en az {{count}} karakterle anlat.',
     validationMaxLength: 'İsteğini {{count}} karakterin altında tut.',

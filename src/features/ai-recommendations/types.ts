@@ -2,6 +2,7 @@ import type { ContentType } from '@/models/api/pagination';
 
 export const AI_RECOMMENDATION_MIN_MESSAGE_LENGTH = 3;
 export const AI_RECOMMENDATION_DAILY_LIMIT = 3;
+export const AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST = 5;
 
 export const AI_RECOMMENDATION_MAX_MESSAGE_LENGTH = 500;
 

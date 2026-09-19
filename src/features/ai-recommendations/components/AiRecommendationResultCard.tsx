@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
@@ -18,11 +19,15 @@ export const AiRecommendationResultCard = memo(function AiRecommendationResultCa
   item,
   onPress,
 }: AiRecommendationResultCardProps) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(item.releaseDate, item.year);
   const metadataLine = [formatContentType(item.type), year, `★ ${formatRating(item.voteAverage)}`]
     .filter(Boolean)
     .join(' · ');
-  const accessibilityLabel = `${item.title}, ${metadataLine}${item.reason ? `, ${item.reason}` : ''}`;
+  const reasonLabel = t('aiRecommendations.whyItFits');
+  const accessibilityLabel = `${item.title}, ${metadataLine}${
+    item.reason ? `, ${reasonLabel}: ${item.reason}` : ''
+  }`;
 
   return (
     <Pressable
@@ -47,6 +52,9 @@ export const AiRecommendationResultCard = memo(function AiRecommendationResultCa
         </AppText>
         {item.reason ? (
           <View style={styles.reasonWrap}>
+            <AppText variant="caption" style={styles.reasonLabel}>
+              {reasonLabel}
+            </AppText>
             <AppText variant="caption" style={styles.reason}>
               {item.reason}
             </AppText>
@@ -84,9 +92,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentTint12,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
+    gap: 2,
+  },
+  reasonLabel: {
+    color: colors.accent,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    fontSize: 10,
+    lineHeight: 14,
   },
   reason: {
-    color: colors.accent,
+    color: colors.textSecondary,
     lineHeight: 18,
   },
 });

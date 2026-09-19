@@ -27,6 +27,7 @@ import { useAiRecommendations } from '../hooks/useAiRecommendations';
 import {
   AI_RECOMMENDATION_DAILY_LIMIT,
   AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
+  AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
   AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS,
 } from '../types';
 import { mapAiRecommendationToRecommendationItem } from '../utils/map-ai-recommendation-item';
@@ -174,12 +175,24 @@ export function AiRecommendationsContent() {
     }
 
     if (response.returnedCount === 0) {
+      const rejectedCount = response.validationSummary.rejectedCount;
+
       return (
         <View style={styles.stateContainer} testID="ai-recommendations-empty">
           <SearchEmptyState
             title={t('aiRecommendations.emptyTitle')}
             message={t('aiRecommendations.emptyMessage')}
           />
+          {rejectedCount > 0 ? (
+            <AppText variant="caption" muted center style={styles.stateMessage}>
+              {t('aiRecommendations.emptyRejectedHint', { count: rejectedCount })}
+            </AppText>
+          ) : null}
+          <AppText variant="caption" muted center style={styles.stateMessage}>
+            {t('aiRecommendations.emptyDiversityHint', {
+              count: AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
+            })}
+          </AppText>
           <AppButton
             title={t('aiRecommendations.tryAnotherPrompt')}
             variant="secondary"
@@ -189,13 +202,30 @@ export function AiRecommendationsContent() {
       );
     }
 
+    const rejectedCount = response.validationSummary.rejectedCount;
+    const showLowYieldBanner =
+      response.returnedCount < response.requestedCount && rejectedCount > 0;
+
     return (
       <View style={styles.resultsSection} testID="ai-recommendations-results">
         {response.partialResults ? (
-          <View style={styles.partialBanner}>
+          <View style={styles.infoBanner}>
             <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
-            <AppText variant="caption" style={styles.partialBannerText}>
-              {t('aiRecommendations.partialResults')}
+            <AppText variant="caption" style={styles.infoBannerText}>
+              {t('aiRecommendations.partialResults', { count: rejectedCount })}
+            </AppText>
+          </View>
+        ) : null}
+
+        {showLowYieldBanner && !response.partialResults ? (
+          <View style={styles.infoBanner}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
+            <AppText variant="caption" style={styles.infoBannerText}>
+              {t('aiRecommendations.lowYieldResults', {
+                returned: response.returnedCount,
+                max: response.requestedCount,
+                count: rejectedCount,
+              })}
             </AppText>
           </View>
         ) : null}
@@ -207,8 +237,13 @@ export function AiRecommendationsContent() {
           <AppText variant="caption" muted>
             {t('aiRecommendations.resultsSummary', {
               returned: response.returnedCount,
-              requested: response.requestedCount,
+              max: response.requestedCount,
               remaining: response.quotaRemaining,
+            })}
+          </AppText>
+          <AppText variant="caption" muted>
+            {t('aiRecommendations.maxPicksPerRequest', {
+              count: AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
             })}
           </AppText>
         </View>
@@ -219,12 +254,31 @@ export function AiRecommendationsContent() {
           ))}
         </View>
 
-        <AppButton
-          title={t('aiRecommendations.refineSession')}
-          variant="secondary"
-          onPress={handleSubmit}
-        />
-        <AppButton title={t('aiRecommendations.startFresh')} variant="ghost" onPress={handleStartOver} />
+        <View style={styles.actionsSection}>
+          <View style={styles.actionBlock}>
+            <AppButton
+              title={t('aiRecommendations.getMorePicks')}
+              variant="secondary"
+              onPress={handleSubmit}
+              disabled={isQuotaExhausted}
+            />
+            <AppText variant="caption" muted center style={styles.actionHint}>
+              {t('aiRecommendations.getMorePicksHint', {
+                count: AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
+              })}
+            </AppText>
+          </View>
+          <View style={styles.actionBlock}>
+            <AppButton
+              title={t('aiRecommendations.startFresh')}
+              variant="ghost"
+              onPress={handleStartOver}
+            />
+            <AppText variant="caption" muted center style={styles.actionHint}>
+              {t('aiRecommendations.startFreshHint')}
+            </AppText>
+          </View>
+        </View>
       </View>
     );
   }, [
@@ -232,6 +286,7 @@ export function AiRecommendationsContent() {
     handleRetry,
     handleStartOver,
     handleSubmit,
+    isQuotaExhausted,
     recommendationsMutation.data,
     recommendationsMutation.error,
     recommendationsMutation.isError,
@@ -240,7 +295,16 @@ export function AiRecommendationsContent() {
     t,
   ]);
 
-  const showComposer = !recommendationsMutation.isPending;
+  const response = recommendationsMutation.data;
+  const hasCompletedAttempt = !!response && !recommendationsMutation.isPending;
+  const showFullComposer =
+    !recommendationsMutation.isPending &&
+    (!hasCompletedAttempt || recommendationsMutation.isError);
+  const showCollapsedPrompt =
+    !recommendationsMutation.isPending &&
+    hasCompletedAttempt &&
+    !recommendationsMutation.isError &&
+    trimmedMessage.length > 0;
 
   return (
     <KeyboardAvoidingView
@@ -274,7 +338,18 @@ export function AiRecommendationsContent() {
           </View>
         </View>
 
-        {showComposer ? (
+        {showCollapsedPrompt ? (
+          <View style={styles.collapsedPromptSection} testID="ai-recommendations-collapsed-prompt">
+            <AppText variant="caption" muted style={styles.collapsedPromptLabel}>
+              {t('aiRecommendations.sessionPromptLabel')}
+            </AppText>
+            <AppText variant="bodySmall" numberOfLines={4} style={styles.collapsedPromptText}>
+              {trimmedMessage}
+            </AppText>
+          </View>
+        ) : null}
+
+        {showFullComposer ? (
           <View style={styles.composerSection}>
             <AppText variant="bodySmall" style={styles.composerLabel}>
               {t('aiRecommendations.composerLabel')}
@@ -329,7 +404,7 @@ export function AiRecommendationsContent() {
             </View>
 
             <AppButton
-              title={sessionId ? t('aiRecommendations.getMorePicks') : t('aiRecommendations.getRecommendations')}
+              title={t('aiRecommendations.getRecommendations')}
               onPress={handleSubmit}
               disabled={recommendationsMutation.isPending || isQuotaExhausted}
             />
@@ -361,6 +436,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  collapsedPromptSection: {
+    marginHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surfaceElevated,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: spacing.xs,
+  },
+  collapsedPromptLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    fontSize: 10,
+    lineHeight: 14,
+  },
+  collapsedPromptText: {
+    color: colors.textSecondary,
   },
   composerSection: {
     paddingHorizontal: spacing.lg,
@@ -438,23 +532,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
-  partialBanner: {
+  infoBanner: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.sm,
     borderRadius: borderRadius.md,
     backgroundColor: colors.accentTint12,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  partialBannerText: {
+  infoBannerText: {
     color: colors.accent,
     flex: 1,
+    lineHeight: 18,
   },
   resultsHeader: {
     gap: spacing.xs,
   },
   resultsList: {
     gap: spacing.sm,
+  },
+  actionsSection: {
+    gap: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  actionBlock: {
+    gap: spacing.xs,
+  },
+  actionHint: {
+    maxWidth: 320,
+    alignSelf: 'center',
   },
 });

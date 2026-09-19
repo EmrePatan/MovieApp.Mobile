@@ -1059,12 +1059,24 @@ export const stage2En = {
     generateError: 'Unable to generate AI recommendations right now.',
     emptyTitle: 'No matches this time',
     emptyMessage:
-      'Try a broader mood, genre, or era. AI suggestions are validated against the MovieApp catalog.',
-    tryAnotherPrompt: 'Try Another Prompt',
-    partialResults: 'Some suggestions could not be matched to the catalog.',
+      'We could not match any AI suggestions to titles in the Movie Cave catalog for this prompt.',
+    emptyRejectedHint:
+      '{{count}} suggestions could not be verified in our catalog. Try broadening your request.',
+    emptyDiversityHint:
+      'Vary genre, era, or tone—each request can return up to {{count}} catalog matches.',
+    tryAnotherPrompt: 'Start Fresh',
+    partialResults:
+      '{{count}} suggestions could not be matched to the Movie Cave catalog. Showing what we found.',
+    lowYieldResults:
+      'Only {{returned}} of up to {{max}} picks matched the catalog. {{count}} suggestions were filtered out.',
     yourPicks: 'Your picks',
-    resultsSummary: '{{returned}} of {{requested}} · {{remaining}} left today',
-    refineSession: 'Refine This Session',
+    resultsSummary: '{{returned}} of up to {{max}} picks · {{remaining}} requests left today',
+    maxPicksPerRequest: 'Each request returns up to {{count}} catalog matches.',
+    sessionPromptLabel: 'Your prompt',
+    whyItFits: 'Why it fits',
+    getMorePicksHint:
+      'Keep this prompt and fetch up to {{count}} more picks in the same session.',
+    startFreshHint: 'Clear results and write a new mood, genre, or vibe.',
     startFresh: 'Start Fresh',
     validationMinLength: 'Describe what you want in at least {{count}} characters.',
     validationMaxLength: 'Keep your request under {{count}} characters.',

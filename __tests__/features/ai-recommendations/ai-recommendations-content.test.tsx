@@ -112,10 +112,55 @@ describe('AiRecommendationsContent', () => {
     expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
       '2 of 3 requests left today',
     );
-    expect(screen.getByText('1 of 5 · 2 left today')).toBeTruthy();
+    expect(screen.getByText('1 of up to 5 picks · 2 requests left today')).toBeTruthy();
+    expect(screen.getByText('Each request returns up to 5 catalog matches.')).toBeTruthy();
+    expect(screen.getByText('Why it fits')).toBeTruthy();
+    expect(screen.getByTestId('ai-recommendations-collapsed-prompt')).toBeTruthy();
+    expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
+    expect(screen.getByText('Get More Picks')).toBeTruthy();
+    expect(screen.getByText('Start Fresh')).toBeTruthy();
+    expect(screen.queryByText('Refine This Session')).toBeNull();
     expect(postAiRecommendations).toHaveBeenCalledWith({
       message: 'mind-bending sci-fi with emotional stakes',
       sessionId: null,
+    });
+  });
+
+  it('requests more picks in the same session from results actions', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue(successResponse);
+
+    renderScreen();
+
+    fireEvent.changeText(
+      screen.getByLabelText('AI recommendation prompt'),
+      'mind-bending sci-fi with emotional stakes',
+    );
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
+    });
+
+    (postAiRecommendations as jest.Mock).mockResolvedValue({
+      ...successResponse,
+      returnedCount: 2,
+      recommendations: [
+        ...successResponse.recommendations,
+        {
+          ...successResponse.recommendations[0],
+          id: 'movie-2',
+          title: 'Interstellar',
+        },
+      ],
+    });
+
+    fireEvent.press(screen.getByText('Get More Picks'));
+
+    await waitFor(() => {
+      expect(postAiRecommendations).toHaveBeenLastCalledWith({
+        message: 'mind-bending sci-fi with emotional stakes',
+        sessionId: 'session-1',
+      });
     });
   });
 
@@ -178,5 +223,35 @@ describe('AiRecommendationsContent', () => {
     });
 
     expect(screen.getByText('No matches this time')).toBeTruthy();
+    expect(screen.getByTestId('ai-recommendations-collapsed-prompt')).toBeTruthy();
+    expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
+  });
+
+  it('shows low-yield guidance when fewer picks match than requested', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue({
+      ...successResponse,
+      partialResults: false,
+      validationSummary: {
+        geminiSuggestionCount: 3,
+        validatedCount: 1,
+        rejectedCount: 2,
+      },
+    });
+
+    renderScreen();
+
+    fireEvent.changeText(
+      screen.getByLabelText('AI recommendation prompt'),
+      'mind-bending sci-fi with emotional stakes',
+    );
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Only 1 of up to 5 picks matched the catalog. 2 suggestions were filtered out.',
+        ),
+      ).toBeTruthy();
+    });
   });
 });
