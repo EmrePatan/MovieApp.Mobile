@@ -32,9 +32,7 @@ const config: ExpoConfig = {
   android: {
     adaptiveIcon: {
       backgroundColor: '#0D0D0C',
-      foregroundImage: './assets/android-icon-foreground.png',
-      backgroundImage: './assets/android-icon-background.png',
-      monochromeImage: './assets/android-icon-monochrome.png',
+      foregroundImage: './assets/branding/adaptive-icon-foreground.png',
     },
     package: 'com.movieapp.mobile',
     versionCode: 1,
