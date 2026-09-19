@@ -3,7 +3,7 @@ import type { ExpoConfig } from 'expo/config';
 const VERSION = '1.0.0';
 
 const config: ExpoConfig = {
-  name: 'MovieApp',
+  name: 'Movie Cave',
   slug: 'movieapp-mobile',
   version: VERSION,
   orientation: 'portrait',
@@ -27,7 +27,7 @@ const config: ExpoConfig = {
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: '#0A0A0F',
+      backgroundColor: '#0D0D0C',
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
       monochromeImage: './assets/android-icon-monochrome.png',

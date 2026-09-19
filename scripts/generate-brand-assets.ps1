@@ -1,43 +1,55 @@
 param(
-    [string]$SourcePath = (Join-Path $PSScriptRoot '..\assets\images\logo.png'),
+    [string]$SourcePath = (Join-Path $PSScriptRoot '..\assets\images\movie-cave-app-icon-source.png'),
     [string]$AssetsPath = (Join-Path $PSScriptRoot '..\assets')
 )
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
-$bg = [System.Drawing.Color]::FromArgb(10, 10, 15)
+if (-not (Test-Path $SourcePath)) {
+    throw "Approved app icon source not found: $SourcePath"
+}
 
 function Save-Png($bitmap, $path) {
     $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
 }
 
-$source = [System.Drawing.Bitmap]::FromFile($SourcePath)
-$cropRect = New-Object System.Drawing.Rectangle(200, 130, 854, 560)
-$emblem = $source.Clone($cropRect, $source.PixelFormat)
-
-function Draw-EmblemOnCanvas($size, $emblemScale, $opaqueBackground) {
+function Resize-Square($bitmap, $size) {
     $canvas = New-Object System.Drawing.Bitmap($size, $size)
     $graphics = [System.Drawing.Graphics]::FromImage($canvas)
     $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-    if ($opaqueBackground) {
-        $graphics.Clear($bg)
-    } else {
-        $graphics.Clear([System.Drawing.Color]::Transparent)
-    }
-
-    $targetWidth = [int]($size * $emblemScale)
-    $targetHeight = [int]($targetWidth * $emblem.Height / $emblem.Width)
-    $x = [int](($size - $targetWidth) / 2)
-    $y = [int](($size - $targetHeight) / 2)
-    $graphics.DrawImage($emblem, $x, $y, $targetWidth, $targetHeight)
+    $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+    $graphics.DrawImage($bitmap, 0, 0, $size, $size)
     $graphics.Dispose()
     return $canvas
 }
 
-function New-Monochrome($size, $emblemScale) {
-    $rendered = Draw-EmblemOnCanvas $size $emblemScale $true
+function Get-CornerBackgroundColor($bitmap) {
+    $width = $bitmap.Width - 1
+    $height = $bitmap.Height - 1
+    $pixels = @(
+        $bitmap.GetPixel(0, 0),
+        $bitmap.GetPixel($width, 0),
+        $bitmap.GetPixel(0, $height),
+        $bitmap.GetPixel($width, $height)
+    )
+
+    $red = [int][Math]::Round(($pixels | ForEach-Object { $_.R } | Measure-Object -Average).Average)
+    $green = [int][Math]::Round(($pixels | ForEach-Object { $_.G } | Measure-Object -Average).Average)
+    $blue = [int][Math]::Round(($pixels | ForEach-Object { $_.B } | Measure-Object -Average).Average)
+
+    return [System.Drawing.Color]::FromArgb($red, $green, $blue)
+}
+
+function ColorTo-Hex($color) {
+    return '#' + $color.R.ToString('X2') + $color.G.ToString('X2') + $color.B.ToString('X2')
+}
+
+function New-Monochrome($bitmap, $size) {
+    $rendered = Resize-Square $bitmap $size
     $mono = New-Object System.Drawing.Bitmap($size, $size)
+
     for ($y = 0; $y -lt $size; $y++) {
         for ($x = 0; $x -lt $size; $x++) {
             $pixel = $rendered.GetPixel($x, $y)
@@ -52,29 +64,30 @@ function New-Monochrome($size, $emblemScale) {
     return $mono
 }
 
-$icon = Draw-EmblemOnCanvas 1024 0.56 $true
+$source = [System.Drawing.Bitmap]::FromFile($SourcePath)
+$backgroundColor = Get-CornerBackgroundColor $source
+$icon = Resize-Square $source 1024
+
 Save-Png $icon (Join-Path $AssetsPath 'icon.png')
-$splash = Draw-EmblemOnCanvas 1024 0.62 $true
-Save-Png $splash (Join-Path $AssetsPath 'splash-icon.png')
-$foreground = Draw-EmblemOnCanvas 1024 0.48 $true
-Save-Png $foreground (Join-Path $AssetsPath 'android-icon-foreground.png')
+Save-Png $icon (Join-Path $AssetsPath 'android-icon-foreground.png')
+
 $background = New-Object System.Drawing.Bitmap(1024, 1024)
 $backgroundGraphics = [System.Drawing.Graphics]::FromImage($background)
-$backgroundGraphics.Clear($bg)
+$backgroundGraphics.Clear($backgroundColor)
 $backgroundGraphics.Dispose()
 Save-Png $background (Join-Path $AssetsPath 'android-icon-background.png')
-$monochrome = New-Monochrome 1024 0.48
+
+$monochrome = New-Monochrome $source 1024
 Save-Png $monochrome (Join-Path $AssetsPath 'android-icon-monochrome.png')
-$favicon = Draw-EmblemOnCanvas 48 0.56 $true
+
+$favicon = Resize-Square $source 48
 Save-Png $favicon (Join-Path $AssetsPath 'favicon.png')
 
 $icon.Dispose()
-$splash.Dispose()
-$foreground.Dispose()
 $background.Dispose()
 $monochrome.Dispose()
 $favicon.Dispose()
-$emblem.Dispose()
 $source.Dispose()
 
-Write-Host "Generated Movie Cave brand assets in $AssetsPath"
+Write-Host "Generated Movie Cave launcher assets from approved source."
+Write-Host "Adaptive icon background color: $(ColorTo-Hex $backgroundColor)"
