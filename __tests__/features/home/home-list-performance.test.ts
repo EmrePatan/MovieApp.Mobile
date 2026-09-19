@@ -1,5 +1,9 @@
 import { layout } from '@/theme/layout';
-import { homeItemKeyExtractor, homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
+import {
+  homeComingUpItemKeyExtractor,
+  homeItemKeyExtractor,
+  homeSectionKeyExtractor,
+} from '@/features/home/utils/home-list-keys';
 import {
   getHomeRailItemLayout,
   getHomeSectionRowLayout,
@@ -38,8 +42,45 @@ describe('home list performance helpers', () => {
     expect(homeSectionKeyExtractor(section)).toBe('Genre-4');
   });
 
-  it('builds stable item keys from content id', () => {
-    expect(homeItemKeyExtractor(createItem({ id: 'abc-123' }))).toBe('abc-123');
+  it('builds stable item keys from content type and id', () => {
+    expect(homeItemKeyExtractor(createItem({ id: 'abc-123', contentType: 'movie' }))).toBe(
+      'movie:abc-123',
+    );
+    expect(homeItemKeyExtractor(createItem({ id: 'abc-123', contentType: 'tv' }))).toBe(
+      'tv:abc-123',
+    );
+  });
+
+  it('builds unique Coming Up keys for multiple episodes from the same show', () => {
+    const sharedShowId = '11111111-1111-1111-1111-111111111111';
+    const firstEpisodeKey = homeComingUpItemKeyExtractor(
+      createItem({
+        id: sharedShowId,
+        contentType: 'tv',
+        upcomingKind: 'TvEpisode',
+        episodeId: '22222222-2222-2222-2222-222222222222',
+        seasonNumber: 1,
+        episodeNumber: 1,
+      }),
+    );
+    const secondEpisodeKey = homeComingUpItemKeyExtractor(
+      createItem({
+        id: sharedShowId,
+        contentType: 'tv',
+        upcomingKind: 'TvEpisode',
+        episodeId: '33333333-3333-3333-3333-333333333333',
+        seasonNumber: 1,
+        episodeNumber: 2,
+      }),
+    );
+
+    expect(firstEpisodeKey).toBe(
+      'tv:11111111-1111-1111-1111-111111111111:episode:22222222-2222-2222-2222-222222222222',
+    );
+    expect(secondEpisodeKey).toBe(
+      'tv:11111111-1111-1111-1111-111111111111:episode:33333333-3333-3333-3333-333333333333',
+    );
+    expect(firstEpisodeKey).not.toBe(secondEpisodeKey);
   });
 
   it('defines a fixed home section row height aligned to card layout', () => {

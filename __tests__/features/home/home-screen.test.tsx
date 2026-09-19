@@ -250,7 +250,8 @@ describe('HomeScreen', () => {
     });
 
     render(<HomeScreen />);
-    expect(screen.getByText('Find your next favorite')).toBeTruthy();
+    expect(screen.getByText('Hot Show')).toBeTruthy();
+    expect(screen.queryByText('Find your next favorite')).toBeNull();
     expect(screen.getByText('Top Rated')).toBeTruthy();
     expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.getByText('New Releases')).toBeTruthy();

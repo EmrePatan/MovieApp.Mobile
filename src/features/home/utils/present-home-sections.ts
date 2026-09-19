@@ -22,7 +22,8 @@ export function presentHomeSections(
   const isPersonalized = personalizationState === 'personalized';
   const heroCandidates = selectHeroCandidates(sections, isPersonalized);
   const visibleSections = applyHomeSectionPolicy(sections, isPersonalized);
-  const showColdWelcome = personalizationState === 'not-personalized';
+  const showColdWelcome =
+    personalizationState === 'not-personalized' && heroCandidates.length === 0;
   const heroIds = new Set(heroCandidates.map((candidate) => candidate.item.id));
 
   const presentedSections = visibleSections

@@ -62,7 +62,7 @@ describe('presentHomeSections', () => {
 
     const presented = presentHomeSections(sections, false);
 
-    expect(presented.showColdWelcome).toBe(true);
+    expect(presented.showColdWelcome).toBe(false);
     expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
     expect(presented.sections.map((section) => section.type)).toEqual([
       'Trending',
@@ -88,6 +88,18 @@ describe('presentHomeSections', () => {
       'TopRated',
       'NewReleases',
     ]);
+  });
+
+  it('shows cold welcome only when cold user has no hero items', () => {
+    const sections = [
+      createSection('Trending', [createItem({ id: 'trending-id' })]),
+      createSection('TopRated', [createItem({ id: 'top-id' })]),
+    ];
+
+    const presented = presentHomeSections(sections, false);
+
+    expect(presented.showColdWelcome).toBe(true);
+    expect(presented.heroItems).toEqual([]);
   });
 
   it('does not show cold welcome while personalization is unknown', () => {

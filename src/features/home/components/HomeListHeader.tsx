@@ -39,7 +39,7 @@ export const HomeListHeader = memo(function HomeListHeader({
   onExplorePress,
   isScreenFocused = true,
 }: HomeListHeaderProps) {
-  if (showColdWelcome) {
+  if (showColdWelcome && heroItems.length === 0) {
     return <ColdHomeWelcome onExplorePress={onExplorePress} />;
   }
 

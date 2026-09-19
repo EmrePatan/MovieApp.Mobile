@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import type { HomeItem, HomeSection as HomeSectionModel } from '../types';
 import { HomeComingUpCard } from './HomeComingUpCard';
 import { HomeSectionHeader } from './HomeSectionHeader';
-import { homeItemKeyExtractor } from '../utils/home-list-keys';
+import { homeComingUpItemKeyExtractor } from '../utils/home-list-keys';
 import { getHomeRailItemLayout } from '../utils/home-list-layout';
 import { layout } from '@/theme/layout';
 
@@ -35,7 +35,7 @@ export const HomeComingUpSection = memo(function HomeComingUpSection({
       <FlatList
         horizontal
         data={section.items}
-        keyExtractor={homeItemKeyExtractor}
+        keyExtractor={homeComingUpItemKeyExtractor}
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
