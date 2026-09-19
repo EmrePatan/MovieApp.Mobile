@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
 import {
@@ -28,6 +28,12 @@ export function useAndroidPullToRefresh({
   const triggerRefresh = useCallback(() => {
     onRefresh();
   }, [onRefresh]);
+
+  useEffect(() => {
+    if (!refreshing) {
+      pullDistance.value = 0;
+    }
+  }, [pullDistance, refreshing]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {

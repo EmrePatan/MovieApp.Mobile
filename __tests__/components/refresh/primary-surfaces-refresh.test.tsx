@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
 import { FlatList, Platform, ScrollView } from 'react-native';
-import { render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import HomeScreen from '../../../app/(tabs)/home';
 import NotificationsScreen from '../../../app/notifications';
@@ -167,8 +167,14 @@ describe('primary surface refresh presentation', () => {
     }
   });
 
-  it('keeps Home progressive refresh semantics and shared control on iOS', () => {
-    const refetch = jest.fn();
+  it('keeps Home progressive refresh semantics and shared control on iOS', async () => {
+    let resolveRefetch: (() => void) | undefined;
+    const refetch = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRefetch = resolve;
+        }),
+    );
     (useHomeFeed as jest.Mock).mockReturnValue(
       createHomeFeedMockReturnValue({
         data: {
@@ -202,10 +208,23 @@ describe('primary surface refresh presentation', () => {
     const { UNSAFE_getByType } = render(<HomeScreen />);
     const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
-    expect(refreshControl.props.refreshing).toBe(true);
+    expect(refreshControl.props.refreshing).toBe(false);
 
-    refreshControl.props.onRefresh();
+    await act(async () => {
+      refreshControl.props.onRefresh();
+    });
     expect(refetch).toHaveBeenCalledTimes(1);
+
+    const activeRefreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
+    expect(activeRefreshControl.props.refreshing).toBe(true);
+
+    await act(async () => {
+      resolveRefetch?.();
+      await Promise.resolve();
+    });
+
+    const settledRefreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
+    expect(settledRefreshControl.props.refreshing).toBe(false);
   });
 
   it('omits native Home refresh control on Android and shows pull refresh header', () => {

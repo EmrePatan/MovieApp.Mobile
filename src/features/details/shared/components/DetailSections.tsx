@@ -62,7 +62,12 @@ export function DetailOverview({ overview }: DetailOverviewProps) {
   return (
     <View style={styles.section}>
       <HomeSectionHeader title={t('details.sections.overview')} />
-      <CollapsibleText text={overview} textStyle={styles.body} toggleTestID="detail-overview-toggle" />
+      <CollapsibleText
+        text={overview}
+        style={styles.body}
+        textStyle={styles.overviewText}
+        toggleTestID="detail-overview-toggle"
+      />
     </View>
   );
 }
@@ -100,6 +105,9 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: spacing.lg,
+  },
+  overviewText: {
+    lineHeight: 24,
   },
   item: {
     gap: 2,

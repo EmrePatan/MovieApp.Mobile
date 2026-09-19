@@ -10,7 +10,8 @@ export function CollapsibleBiography({ biography }: CollapsibleBiographyProps) {
   return (
     <CollapsibleText
       text={biography}
-      textStyle={styles.biography}
+      style={styles.biography}
+      textStyle={styles.biographyText}
       toggleTestID="person-biography-toggle"
     />
   );
@@ -19,6 +20,8 @@ export function CollapsibleBiography({ biography }: CollapsibleBiographyProps) {
 const styles = StyleSheet.create({
   biography: {
     paddingHorizontal: spacing.lg,
+  },
+  biographyText: {
     lineHeight: 24,
   },
 });

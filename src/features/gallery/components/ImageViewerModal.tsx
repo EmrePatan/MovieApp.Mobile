@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -39,8 +40,7 @@ export function ImageViewerModal({
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
-  const isZoomedRef = useRef(false);
-  const isDismissEnabled = useCallback(() => !isZoomedRef.current, []);
+  const dismissEnabled = useSharedValue(true);
 
   const {
     dismissGesture,
@@ -49,7 +49,7 @@ export function ImageViewerModal({
   } = useImageViewerDismissGesture({
     height,
     onClose,
-    enabled: isDismissEnabled,
+    dismissEnabled,
   });
 
   const imageUris = useMemo(
@@ -61,14 +61,17 @@ export function ImageViewerModal({
     (offsetX: number) => {
       const nextIndex = Math.round(offsetX / width);
       setActiveIndex(Math.max(0, Math.min(nextIndex, images.length - 1)));
-      isZoomedRef.current = false;
+      dismissEnabled.value = true;
     },
-    [images.length, width],
+    [dismissEnabled, images.length, width],
   );
 
-  const handleZoomChange = useCallback((isZoomed: boolean) => {
-    isZoomedRef.current = isZoomed;
-  }, []);
+  const handleZoomChange = useCallback(
+    (isZoomed: boolean) => {
+      dismissEnabled.value = !isZoomed;
+    },
+    [dismissEnabled],
+  );
 
   if (!visible || images.length === 0) {
     return null;

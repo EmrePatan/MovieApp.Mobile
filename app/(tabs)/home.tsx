@@ -101,8 +101,13 @@ export default function HomeScreen() {
     markHomePerfEvent('home_personalized_render');
   }, [personalization, sections, showColdWelcome]);
 
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   const handleRefresh = useCallback(() => {
-    void refetch();
+    setIsManualRefreshing(true);
+    void refetch().finally(() => {
+      setIsManualRefreshing(false);
+    });
   }, [refetch]);
 
   const handleRetryBrowse = useCallback(() => {
@@ -222,7 +227,7 @@ export default function HomeScreen() {
     [sections.length, showColdWelcome],
   );
 
-  const isRefreshing = isFetching && !isInitialBrowseLoading;
+  const isRefreshing = isManualRefreshing;
 
   const refreshControl = useMemo(
     () =>

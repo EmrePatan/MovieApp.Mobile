@@ -2,13 +2,13 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import { runOnJS, type SharedValue } from 'react-native-reanimated';
 import { shouldDismissImageViewerOnRelease } from '../utils/image-viewer-dismiss-gesture';
 
 interface UseImageViewerDismissGestureOptions {
   height: number;
   onClose: () => void;
-  enabled?: () => boolean;
+  dismissEnabled?: SharedValue<boolean>;
 }
 
 interface UseImageViewerDismissGestureResult {
@@ -23,7 +23,7 @@ interface UseImageViewerDismissGestureResult {
 export function useImageViewerDismissGesture({
   height,
   onClose,
-  enabled,
+  dismissEnabled,
 }: UseImageViewerDismissGestureOptions): UseImageViewerDismissGestureResult {
   const translateY = useRef(new Animated.Value(0)).current;
   const backdropOpacity = useRef(new Animated.Value(1)).current;
@@ -115,21 +115,21 @@ export function useImageViewerDismissGesture({
         .activeOffsetY(8)
         .failOffsetX([-12, 12])
         .onUpdate((event) => {
-          if (enabled && !enabled()) {
+          if (dismissEnabled && !dismissEnabled.value) {
             return;
           }
 
           runOnJS(updateDrag)(event.translationY);
         })
         .onEnd((event) => {
-          if (enabled && !enabled()) {
+          if (dismissEnabled && !dismissEnabled.value) {
             runOnJS(snapBack)();
             return;
           }
 
           runOnJS(handleRelease)(event.translationY, event.velocityY);
         }),
-    [enabled, handleRelease, snapBack, updateDrag],
+    [dismissEnabled, handleRelease, snapBack, updateDrag],
   );
 
   const scale = translateY.interpolate({
