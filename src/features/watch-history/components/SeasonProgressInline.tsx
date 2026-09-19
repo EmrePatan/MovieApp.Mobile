@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -23,6 +24,7 @@ export function SeasonProgressInline({
   seasonNumber,
   fallbackTotalEpisodes = null,
 }: SeasonProgressInlineProps) {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const progressQuery = useSeasonProgress(tvShowId, seasonNumber);
 
@@ -49,12 +51,12 @@ export function SeasonProgressInline({
     <View
       style={styles.container}
       accessibilityRole="summary"
-      accessibilityLabel={`Season progress ${countLabel}`}
+      accessibilityLabel={t('common.seasonProgressAccessibility', { count: countLabel })}
       testID="season-progress-inline"
     >
       <View style={styles.summaryRow}>
         <AppText variant="caption" muted>
-          Progress
+          {t('common.progress')}
         </AppText>
         <View style={styles.countRow}>
           <AppText variant="caption" style={styles.countLabel}>
@@ -65,7 +67,7 @@ export function SeasonProgressInline({
               name="checkmark-circle"
               size={14}
               color={colors.progressCompleted}
-              accessibilityLabel="Season completed"
+              accessibilityLabel={t('common.seasonCompleted')}
             />
           ) : null}
         </View>

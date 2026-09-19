@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { SeasonProgressInline } from '@/features/watch-history/components/SeasonProgressInline';
@@ -10,6 +11,7 @@ interface SeasonDetailContentProps {
 }
 
 export function SeasonDetailContent({ season }: SeasonDetailContentProps) {
+  const { t } = useTranslation();
   const title = season.name ?? `Season ${season.seasonNumber}`;
   const metadataLine = formatSeasonDetailMetadataLine({
     seasonNumber: season.seasonNumber,
@@ -30,7 +32,7 @@ export function SeasonDetailContent({ season }: SeasonDetailContentProps) {
             posterPath={season.posterPath}
             backdropPath={season.posterPath}
             metadataLine={metadataLine}
-            posterAccessibilityLabel={`${title} poster`}
+            posterAccessibilityLabel={t('common.posterAccessibility', { title })}
           />
           <DetailOverview overview={season.overview} />
           <SeasonProgressInline

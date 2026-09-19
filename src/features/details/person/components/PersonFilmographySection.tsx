@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ interface PersonFilmographySectionProps {
 }
 
 export function PersonFilmographySection({ filmography }: PersonFilmographySectionProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const resolvingKeyRef = useRef<string | null>(null);
@@ -39,22 +41,22 @@ export function PersonFilmographySection({ filmography }: PersonFilmographySecti
         setErrorMessage(
           isApiError(error)
             ? error.userMessage
-            : 'Could not open this title right now. Please try again.',
+            : t('details.sections.filmographyOpenError'),
         );
       } finally {
         resolvingKeyRef.current = null;
         setResolvingKey(null);
       }
     },
-    [queryClient, router],
+    [queryClient, router, t],
   );
 
   if (filmography.length === 0) {
     return (
       <View style={styles.container} testID="person-filmography-empty">
-        <HomeSectionHeader title="Filmography" />
+        <HomeSectionHeader title={t('details.sections.filmography')} />
         <AppText variant="bodySmall" muted style={styles.empty}>
-          No acting credits are available yet.
+          {t('details.sections.knownForEmpty')}
         </AppText>
       </View>
     );
@@ -62,7 +64,7 @@ export function PersonFilmographySection({ filmography }: PersonFilmographySecti
 
   return (
     <View style={styles.container} testID="person-filmography">
-      <HomeSectionHeader title="Filmography" />
+      <HomeSectionHeader title={t('details.sections.filmography')} />
       <FeedbackMessage
         message={errorMessage}
         tone="error"

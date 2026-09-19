@@ -27,7 +27,7 @@ import { useAiRecommendations } from '../hooks/useAiRecommendations';
 import {
   AI_RECOMMENDATION_DAILY_LIMIT,
   AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
-  AI_RECOMMENDATION_SUGGESTED_PROMPTS,
+  AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS,
 } from '../types';
 import { mapAiRecommendationToRecommendationItem } from '../utils/map-ai-recommendation-item';
 import { validateAiRecommendationMessage } from '../utils/validate-ai-message';
@@ -126,7 +126,7 @@ export function AiRecommendationsContent() {
         <View style={styles.stateContainer} testID="ai-recommendations-loading">
           <ActivityIndicator size="large" color={colors.accent} />
           <AppText variant="bodySmall" muted center>
-            Curating picks from your taste profile...
+            {t('aiRecommendations.loading')}
           </AppText>
         </View>
       );
@@ -142,12 +142,12 @@ export function AiRecommendationsContent() {
               <Ionicons name="hourglass-outline" size={28} color={colors.accent} />
             </View>
             <AppText variant="subtitle" center>
-              Daily limit reached
+              {t('aiRecommendations.dailyLimitTitle')}
             </AppText>
             <AppText variant="bodySmall" muted center style={styles.stateMessage}>
               {getApiErrorDisplayMessage(
                 error,
-                `You've used all ${AI_RECOMMENDATION_DAILY_LIMIT} AI recommendation requests for today. Try again tomorrow.`,
+                t('aiRecommendations.dailyLimitFallback', { limit: AI_RECOMMENDATION_DAILY_LIMIT }),
               )}
             </AppText>
           </View>
@@ -159,7 +159,7 @@ export function AiRecommendationsContent() {
           <ErrorView
             message={getApiErrorDisplayMessage(
               error,
-              'Unable to generate AI recommendations right now.',
+              t('aiRecommendations.generateError'),
             )}
             onRetry={handleRetry}
             retryLabel={t('common.retry')}
@@ -177,10 +177,14 @@ export function AiRecommendationsContent() {
       return (
         <View style={styles.stateContainer} testID="ai-recommendations-empty">
           <SearchEmptyState
-            title="No matches this time"
-            message="Try a broader mood, genre, or era. AI suggestions are validated against the MovieApp catalog."
+            title={t('aiRecommendations.emptyTitle')}
+            message={t('aiRecommendations.emptyMessage')}
           />
-          <AppButton title="Try Another Prompt" variant="secondary" onPress={handleStartOver} />
+          <AppButton
+            title={t('aiRecommendations.tryAnotherPrompt')}
+            variant="secondary"
+            onPress={handleStartOver}
+          />
         </View>
       );
     }
@@ -191,17 +195,21 @@ export function AiRecommendationsContent() {
           <View style={styles.partialBanner}>
             <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
             <AppText variant="caption" style={styles.partialBannerText}>
-              Some suggestions could not be matched to the catalog.
+              {t('aiRecommendations.partialResults')}
             </AppText>
           </View>
         ) : null}
 
         <View style={styles.resultsHeader}>
           <AppText variant="subtitle" accessibilityRole="header">
-            Your picks
+            {t('aiRecommendations.yourPicks')}
           </AppText>
           <AppText variant="caption" muted>
-            {response.returnedCount} of {response.requestedCount} · {response.quotaRemaining} left today
+            {t('aiRecommendations.resultsSummary', {
+              returned: response.returnedCount,
+              requested: response.requestedCount,
+              remaining: response.quotaRemaining,
+            })}
           </AppText>
         </View>
 
@@ -211,8 +219,12 @@ export function AiRecommendationsContent() {
           ))}
         </View>
 
-        <AppButton title="Refine This Session" variant="secondary" onPress={handleSubmit} />
-        <AppButton title="Start Fresh" variant="ghost" onPress={handleStartOver} />
+        <AppButton
+          title={t('aiRecommendations.refineSession')}
+          variant="secondary"
+          onPress={handleSubmit}
+        />
+        <AppButton title={t('aiRecommendations.startFresh')} variant="ghost" onPress={handleStartOver} />
       </View>
     );
   }, [
@@ -225,6 +237,7 @@ export function AiRecommendationsContent() {
     recommendationsMutation.isError,
     recommendationsMutation.isPending,
     resultItems,
+    t,
   ]);
 
   const showComposer = !recommendationsMutation.isPending;
@@ -250,10 +263,13 @@ export function AiRecommendationsContent() {
               </AppText>
             </View>
             <AppText variant="bodySmall" muted>
-              Describe the mood, genre, or vibe you want. Picks are tailored to your taste.
+              {t('aiRecommendations.subtitle')}
             </AppText>
             <AppText variant="caption" muted testID="ai-recommendations-quota-remaining">
-              {quotaRemaining} of {AI_RECOMMENDATION_DAILY_LIMIT} requests left today
+              {t('aiRecommendations.quotaRemaining', {
+                remaining: quotaRemaining,
+                limit: AI_RECOMMENDATION_DAILY_LIMIT,
+              })}
             </AppText>
           </View>
         </View>
@@ -261,10 +277,10 @@ export function AiRecommendationsContent() {
         {showComposer ? (
           <View style={styles.composerSection}>
             <AppText variant="bodySmall" style={styles.composerLabel}>
-              What should we find?
+              {t('aiRecommendations.composerLabel')}
             </AppText>
             <TextInput
-              accessibilityLabel="AI recommendation prompt"
+              accessibilityLabel={t('aiRecommendations.promptAccessibility')}
               multiline
               value={message}
               onChangeText={(next) => {
@@ -277,7 +293,7 @@ export function AiRecommendationsContent() {
                   setValidationError(null);
                 }
               }}
-              placeholder="e.g. A slow-burn thriller with a strong female lead"
+              placeholder={t('aiRecommendations.promptPlaceholder')}
               placeholderTextColor={colors.textMuted}
               style={[styles.promptInput, validationError && styles.promptInputError]}
               textAlignVertical="top"
@@ -294,11 +310,13 @@ export function AiRecommendationsContent() {
             </View>
 
             <View style={styles.promptChipRow}>
-              {AI_RECOMMENDATION_SUGGESTED_PROMPTS.map((prompt) => (
+              {AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS.map((promptKey) => {
+                const prompt = t(promptKey);
+                return (
                 <Pressable
-                  key={prompt}
+                  key={promptKey}
                   accessibilityRole="button"
-                  accessibilityLabel={`Use prompt: ${prompt}`}
+                  accessibilityLabel={t('aiRecommendations.usePromptAccessibility', { prompt })}
                   onPress={() => handlePromptPress(prompt)}
                   style={({ pressed }) => [styles.promptChip, pressed && styles.promptChipPressed]}
                 >
@@ -306,11 +324,12 @@ export function AiRecommendationsContent() {
                     {prompt}
                   </AppText>
                 </Pressable>
-              ))}
+              );
+              })}
             </View>
 
             <AppButton
-              title={sessionId ? 'Get More Picks' : 'Get Recommendations'}
+              title={sessionId ? t('aiRecommendations.getMorePicks') : t('aiRecommendations.getRecommendations')}
               onPress={handleSubmit}
               disabled={recommendationsMutation.isPending || isQuotaExhausted}
             />

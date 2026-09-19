@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { GalleryResponse } from '../types';
 import { getMovieTvGalleryImages } from '../utils/gallery-images';
@@ -13,8 +14,9 @@ interface CatalogGallerySectionProps {
 export function CatalogGallerySection({
   query,
   seeAllRoute,
-  title = 'Photos',
+  title,
 }: CatalogGallerySectionProps) {
+  const { t } = useTranslation();
   const images = useMemo(
     () => (query.data ? getMovieTvGalleryImages(query.data, 'all') : []),
     [query.data],
@@ -22,7 +24,7 @@ export function CatalogGallerySection({
 
   return (
     <GalleryPreviewSection
-      title={title}
+      title={title ?? t('details.sections.photos')}
       images={images}
       isLoading={query.isPending && !query.isError}
       seeAllRoute={seeAllRoute}

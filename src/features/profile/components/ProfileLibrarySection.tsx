@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { UserStatisticsSummaryResponse } from '../types';
@@ -20,6 +21,7 @@ export function ProfileLibrarySection({
   summary,
   followingCount,
 }: ProfileLibrarySectionProps) {
+  const { t } = useTranslation();
   const collectionSummary = [
     formatFavoritesSubtitle(summary.favoritesCount),
     formatWatchlistSubtitle(summary.watchlistCount),
@@ -29,11 +31,11 @@ export function ProfileLibrarySection({
 
   return (
     <View style={styles.section}>
-      <ProfileSectionHeader title="My Library" />
+      <ProfileSectionHeader title={t('profile.preview.libraryTitle')} />
       <View
         style={styles.card}
         accessibilityRole="text"
-        accessibilityLabel={`Library collections: ${collectionSummary}`}
+        accessibilityLabel={t('profile.preview.libraryAccessibility', { summary: collectionSummary })}
       >
         <AppText variant="bodySmall" muted>
           {collectionSummary}

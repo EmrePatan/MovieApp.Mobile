@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { UserStatisticsRatingsResponse } from '../types';
@@ -14,11 +15,16 @@ interface ProfileRatingsSectionProps {
 }
 
 export function ProfileRatingsSection({ ratings, ratingsCount }: ProfileRatingsSectionProps) {
+  const { t } = useTranslation();
+
   if (ratingsCount === 0) {
     return (
       <View style={styles.section}>
-        <ProfileSectionHeader title="Your Ratings" subtitle="How you score what you watch" />
-        <ProfileEmptyInsight message="Rate a few titles to reveal your rating style." />
+        <ProfileSectionHeader
+          title={t('profile.preview.ratingsTitle')}
+          subtitle={t('profile.preview.ratingsSubtitle')}
+        />
+        <ProfileEmptyInsight message={t('profile.preview.ratingsEmpty')} />
       </View>
     );
   }
@@ -31,15 +37,18 @@ export function ProfileRatingsSection({ ratings, ratingsCount }: ProfileRatingsS
 
   return (
     <View style={styles.section}>
-      <ProfileSectionHeader title="Your Ratings" subtitle="How you score what you watch" />
+      <ProfileSectionHeader
+        title={t('profile.preview.ratingsTitle')}
+        subtitle={t('profile.preview.ratingsSubtitle')}
+      />
       <View style={styles.card}>
         <View style={styles.summaryRow}>
-          <SummaryStat label="Average" value={formatAverageRating(ratings.averageStarRating)} />
+          <SummaryStat label={t('profile.preview.average')} value={formatAverageRating(ratings.averageStarRating)} />
           <SummaryStat
-            label="Most used"
+            label={t('profile.preview.mostUsed')}
             value={ratings.mostUsedStars ? `${ratings.mostUsedStars}★` : '—'}
           />
-          <SummaryStat label="Total" value={String(ratingsCount)} />
+          <SummaryStat label={t('profile.preview.total')} value={String(ratingsCount)} />
         </View>
 
         {ratings.distribution.map((item) => (
@@ -48,24 +57,27 @@ export function ProfileRatingsSection({ ratings, ratingsCount }: ProfileRatingsS
             label={`${item.stars}★`}
             valueLabel={String(item.count)}
             progress={item.count / maxCount}
-            accessibilityLabel={`${item.stars} stars: ${item.count} ratings.`}
+            accessibilityLabel={t('profile.preview.starsAccessibility', {
+              stars: item.stars,
+              count: item.count,
+            })}
             accentColor={colors.accent}
           />
         ))}
 
         {ratings.mostUsedStars ? (
           <AppText variant="caption" muted style={styles.insight}>
-            You most often rate titles {ratings.mostUsedStars}★.
+            {t('profile.preview.mostOftenRate', { stars: ratings.mostUsedStars })}
           </AppText>
         ) : null}
         {fiveStarCount > 0 ? (
           <AppText variant="caption" muted>
-            {fiveStarCount} perfect 5★ ratings in your history.
+            {t('profile.preview.perfectRatings', { count: fiveStarCount })}
           </AppText>
         ) : null}
         {lowRatingCount > 0 ? (
           <AppText variant="caption" muted>
-            {lowRatingCount} ratings at 2★ or below.
+            {t('profile.preview.lowRatings', { count: lowRatingCount })}
           </AppText>
         ) : null}
       </View>

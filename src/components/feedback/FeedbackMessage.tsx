@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -16,6 +17,8 @@ export function FeedbackMessage({
   tone = 'info',
   onDismiss,
 }: FeedbackMessageProps) {
+  const { t } = useTranslation();
+
   if (!message) {
     return null;
   }
@@ -28,7 +31,7 @@ export function FeedbackMessage({
       {onDismiss ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Dismiss message"
+          accessibilityLabel={t('common.dismissMessage')}
           onPress={onDismiss}
           hitSlop={8}
         >

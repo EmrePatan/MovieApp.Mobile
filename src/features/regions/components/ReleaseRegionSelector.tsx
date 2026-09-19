@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { RegionSelector } from './RegionSelector';
 
 interface ReleaseRegionSelectorProps {
@@ -8,9 +9,11 @@ interface ReleaseRegionSelectorProps {
 }
 
 export function ReleaseRegionSelector(props: ReleaseRegionSelectorProps) {
+  const { t } = useTranslation();
+
   return (
     <RegionSelector
-      label="Release region"
+      label={t('discovery.releaseRegion')}
       testID="release-region-selector"
       {...props}
     />

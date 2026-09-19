@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { GenreStatisticResponse } from '../types';
@@ -13,11 +14,16 @@ interface ProfileTasteSectionProps {
 }
 
 export function ProfileTasteSection({ genres }: ProfileTasteSectionProps) {
+  const { t } = useTranslation();
+
   if (genres.length === 0) {
     return (
       <View style={styles.section}>
-        <ProfileSectionHeader title="Your Taste" subtitle="Genres from titles you have watched" />
-        <ProfileEmptyInsight message="Your favorite genres will appear here as you watch." />
+        <ProfileSectionHeader
+          title={t('profile.preview.tasteTitle')}
+          subtitle={t('profile.preview.tasteSubtitle')}
+        />
+        <ProfileEmptyInsight message={t('profile.preview.tasteEmpty')} />
       </View>
     );
   }
@@ -26,12 +32,18 @@ export function ProfileTasteSection({ genres }: ProfileTasteSectionProps) {
   const topGenres = genres.slice(0, 4);
   const insight =
     topGenres.length >= 2
-      ? `${topGenres[0].name} and ${topGenres[1].name} are your top genres.`
-      : `${topGenres[0].name} is your top genre.`;
+      ? t('profile.preview.tasteTopPair', {
+          first: topGenres[0].name,
+          second: topGenres[1].name,
+        })
+      : t('profile.preview.tasteTopSingle', { genre: topGenres[0].name });
 
   return (
     <View style={styles.section}>
-      <ProfileSectionHeader title="Your Taste" subtitle="Genres from titles you have watched" />
+      <ProfileSectionHeader
+        title={t('profile.preview.tasteTitle')}
+        subtitle={t('profile.preview.tasteSubtitle')}
+      />
       <View style={styles.card}>
         {topGenres.map((genre) => {
           const percent = getGenrePercentage(genre.count, total);
@@ -41,7 +53,10 @@ export function ProfileTasteSection({ genres }: ProfileTasteSectionProps) {
               label={genre.name}
               valueLabel={`${percent}%`}
               progress={percent / 100}
-              accessibilityLabel={`${genre.name}: ${percent} percent of watched titles.`}
+              accessibilityLabel={t('profile.preview.tasteGenreAccessibility', {
+                genre: genre.name,
+                percent,
+              })}
               accentColor={colors.accent}
             />
           );

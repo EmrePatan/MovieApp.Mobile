@@ -1,4 +1,4 @@
-import { getUiFormatLocaleTag } from '@/i18n';
+import { getUiFormatLocaleTag, i18n } from '@/i18n';
 import type {
   MonthlyActivityResponse,
   UserStatisticsActivityResponse,
@@ -22,7 +22,12 @@ export function formatMonthDetailLabel(month: number, year: number): string {
 
 export function getMonthAccessibilityLabel(month: MonthlyActivityResponse): string {
   const label = formatMonthDetailLabel(month.month, month.year);
-  return `${label}: ${month.total} watched items, ${month.movies} movies and ${month.episodes} episodes.`;
+  return i18n.t('profile.preview.monthAccessibility', {
+    label,
+    total: month.total,
+    movies: month.movies,
+    episodes: month.episodes,
+  });
 }
 
 export function getPreviousMonthComparison(activity: UserStatisticsActivityResponse): number | null {

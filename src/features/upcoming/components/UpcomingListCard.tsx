@@ -1,5 +1,7 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { i18n } from '@/i18n';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
@@ -25,20 +27,21 @@ function formatSeasonEpisode(seasonNumber?: number, episodeNumber?: number): str
 
 function getKindLabel(item: UpcomingCatalogItem): string | null {
   if (item.upcomingKind === 'TvEpisode') {
-    return 'Next episode';
+    return i18n.t('upcoming.card.nextEpisode');
   }
 
   if (item.upcomingKind === 'TvShowPremiere') {
-    return 'Series premiere';
+    return i18n.t('upcoming.card.seriesPremiere');
   }
 
-  return 'Release';
+  return i18n.t('upcoming.card.release');
 }
 
 export const UpcomingListCard = memo(function UpcomingListCard({
   item,
   onPress,
 }: UpcomingListCardProps) {
+  const { t } = useTranslation();
   const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const year = formatCatalogYear(item.releaseDate, item.year);
   const releaseDate = formatIsoDate(item.releaseDate);
@@ -47,13 +50,13 @@ export const UpcomingListCard = memo(function UpcomingListCard({
   const kindLabel = getKindLabel(item);
   const trackedLabel = item.isFollowed
     ? item.type === 'movie'
-      ? 'release alert on'
-      : 'followed'
+      ? t('upcoming.card.releaseAlertOn')
+      : t('upcoming.card.followed')
     : null;
   const trackedBadge = item.isFollowed
     ? item.type === 'movie'
-      ? 'Alert on'
-      : 'Following'
+      ? t('upcoming.card.alertOn')
+      : t('upcoming.card.following')
     : null;
   const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeDate ? `, ${relativeDate}` : releaseDate ? `, ${releaseDate}` : ''}${trackedLabel ? `, ${trackedLabel}` : ''}`;
 
@@ -69,7 +72,7 @@ export const UpcomingListCard = memo(function UpcomingListCard({
           path={item.posterUrl}
           width={layout.posterList.width}
           height={layout.posterList.height}
-          accessibilityLabel={`${item.title} poster`}
+          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         />
         {trackedBadge ? (
           <View style={styles.followedBadge}>

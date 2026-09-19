@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -23,6 +24,7 @@ export function DiscoverFeatureEntry({
   comingSoon = false,
   accessibilityLabel,
 }: DiscoverFeatureEntryProps) {
+  const { t } = useTranslation();
   const isInteractive = Boolean(onPress) && !disabled && !comingSoon;
 
   return (
@@ -49,7 +51,7 @@ export function DiscoverFeatureEntry({
           {comingSoon ? (
             <View style={styles.soonBadge}>
               <AppText variant="caption" style={styles.soonBadgeText}>
-                Coming soon
+                {t('discover.hub.comingSoon')}
               </AppText>
             </View>
           ) : null}

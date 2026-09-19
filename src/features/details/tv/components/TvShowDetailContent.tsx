@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
@@ -20,6 +21,7 @@ interface TvShowDetailContentProps {
 }
 
 export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
+  const { t } = useTranslation();
   const galleryQuery = useTvShowGallery(show.id);
   const metadataLine = formatTvDetailMetadataLine({
     firstAirDate: show.firstAirDate,
@@ -36,7 +38,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         backdropPath={show.backdropPath}
         metadataLine={metadataLine}
         genres={show.genres}
-        posterAccessibilityLabel={`${show.title} poster`}
+        posterAccessibilityLabel={t('common.posterAccessibility', { title: show.title })}
         identityAccessory={
           <PlayTrailerButton contentType="tv" contentId={show.id} />
         }

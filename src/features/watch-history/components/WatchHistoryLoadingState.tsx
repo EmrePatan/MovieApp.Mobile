@@ -1,14 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export function WatchHistoryLoadingState() {
+  const { t } = useTranslation();
+
   return (
     <View
       style={styles.container}
       accessibilityRole="progressbar"
-      accessibilityLabel="Loading watch history"
+      accessibilityLabel={t('common.loadingWatchHistory')}
     >
       {[0, 1, 2, 3].map((index) => (
         <View key={index} style={styles.row}>

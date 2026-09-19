@@ -209,4 +209,8 @@ export const en = {
     ...stage1En.common,
     ...stage2En.common,
   },
+  profile: {
+    ...stage1En.profile,
+    ...stage2En.profile,
+  },
 } as const;

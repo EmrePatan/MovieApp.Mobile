@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Animated,
   FlatList,
@@ -34,6 +35,7 @@ export function ImageViewerModal({
   initialIndex,
   onClose,
 }: ImageViewerModalProps) {
+  const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
@@ -116,7 +118,7 @@ export function ImageViewerModal({
 
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close image viewer"
+              accessibilityLabel={t('gallery.closeImageViewer')}
               onPress={closeViewer}
               hitSlop={12}
               style={({ pressed }) => [

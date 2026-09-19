@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
@@ -19,6 +20,7 @@ interface MovieDetailContentProps {
 }
 
 export function MovieDetailContent({ movie }: MovieDetailContentProps) {
+  const { t } = useTranslation();
   const galleryQuery = useMovieGallery(movie.id);
   const metadataLine = formatMovieDetailMetadataLine({
     releaseDate: movie.releaseDate,
@@ -35,7 +37,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         backdropPath={movie.backdropPath}
         metadataLine={metadataLine}
         genres={movie.genres}
-        posterAccessibilityLabel={`${movie.title} poster`}
+        posterAccessibilityLabel={t('common.posterAccessibility', { title: movie.title })}
         identityAccessory={
           <PlayTrailerButton contentType="movie" contentId={movie.id} />
         }

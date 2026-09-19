@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { UserStatisticsResponse } from '../types';
@@ -12,14 +13,18 @@ interface ProfileWatchingDnaSectionProps {
 }
 
 export function ProfileWatchingDnaSection({ statistics }: ProfileWatchingDnaSectionProps) {
+  const { t } = useTranslation();
   const totalTitles =
     statistics.watchingMix.movieTitleCount + statistics.watchingMix.seriesTitleCount;
 
   if (totalTitles === 0) {
     return (
       <View style={styles.section}>
-        <ProfileSectionHeader title="Movies vs Series" subtitle="Based on unique titles" />
-        <ProfileEmptyInsight message="Your viewing mix will appear once you start watching." />
+        <ProfileSectionHeader
+          title={t('profile.preview.watchingDnaTitle')}
+          subtitle={t('profile.preview.watchingDnaSubtitle')}
+        />
+        <ProfileEmptyInsight message={t('profile.preview.watchingDnaEmpty')} />
       </View>
     );
   }
@@ -32,10 +37,16 @@ export function ProfileWatchingDnaSection({ statistics }: ProfileWatchingDnaSect
 
   return (
     <View style={styles.section}>
-      <ProfileSectionHeader title="Movies vs Series" subtitle="Based on unique titles" />
+      <ProfileSectionHeader
+        title={t('profile.preview.watchingDnaTitle')}
+        subtitle={t('profile.preview.watchingDnaSubtitle')}
+      />
       <View
         style={styles.card}
-        accessibilityLabel={`Movies ${moviePercent} percent, TV ${tvPercent} percent.`}
+        accessibilityLabel={t('profile.preview.watchingDnaAccessibility', {
+          moviePercent,
+          tvPercent,
+        })}
       >
         <View style={styles.splitTrack}>
           <View style={[styles.movieFill, { width: `${moviePercent}%` }]} />
@@ -43,23 +54,35 @@ export function ProfileWatchingDnaSection({ statistics }: ProfileWatchingDnaSect
         </View>
         <View style={styles.splitLabels}>
           <AppText variant="bodySmall" style={styles.splitLabel}>
-            Movies {moviePercent}%
+            {t('profile.preview.moviesPercent', { percent: moviePercent })}
           </AppText>
           <AppText variant="bodySmall" style={styles.splitLabel}>
-            Series {tvPercent}%
+            {t('profile.preview.seriesPercent', { percent: tvPercent })}
           </AppText>
         </View>
 
         <View style={styles.metrics}>
-          <Metric label="Movies watched" value={statistics.summary.moviesWatched} />
-          <Metric label="Episodes watched" value={statistics.summary.episodesWatched} />
-          <Metric label="Shows started" value={statistics.summary.showsStarted} />
-          <Metric label="Shows completed" value={statistics.summary.showsCompleted} />
+          <Metric
+            label={t('profile.preview.moviesWatched')}
+            value={statistics.summary.moviesWatched}
+          />
+          <Metric
+            label={t('profile.preview.episodesWatched')}
+            value={statistics.summary.episodesWatched}
+          />
+          <Metric
+            label={t('profile.preview.showsStarted')}
+            value={statistics.summary.showsStarted}
+          />
+          <Metric
+            label={t('profile.preview.showsCompleted')}
+            value={statistics.summary.showsCompleted}
+          />
         </View>
 
         {completionRatio !== null && statistics.summary.showsStarted >= 2 ? (
           <AppText variant="caption" muted style={styles.completion}>
-            Completion ratio: {completionRatio}% of started series fully finished.
+            {t('profile.preview.completionRatio', { percent: completionRatio })}
           </AppText>
         ) : null}
       </View>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -21,6 +22,8 @@ export function ReviewsPaginationControl({
   onNext,
   isLoading = false,
 }: ReviewsPaginationControlProps) {
+  const { t } = useTranslation();
+
   if (totalPages <= 1) {
     return null;
   }
@@ -32,7 +35,7 @@ export function ReviewsPaginationControl({
     <View style={styles.container} testID="reviews-pagination-control">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Previous page"
+        accessibilityLabel={t('common.previousPage')}
         accessibilityState={{ disabled: !hasPreviousPage || isLoading }}
         disabled={!hasPreviousPage || isLoading}
         onPress={onPrevious}
@@ -55,7 +58,7 @@ export function ReviewsPaginationControl({
             (!hasPreviousPage || isLoading) && styles.controlLabelDisabled,
           ]}
         >
-          Previous
+          {t('common.previous')}
         </AppText>
       </Pressable>
 
@@ -65,7 +68,7 @@ export function ReviewsPaginationControl({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Next page"
+        accessibilityLabel={t('common.nextPage')}
         accessibilityState={{ disabled: !hasNextPage || isLoading }}
         disabled={!hasNextPage || isLoading}
         onPress={onNext}
@@ -83,7 +86,7 @@ export function ReviewsPaginationControl({
             (!hasNextPage || isLoading) && styles.controlLabelDisabled,
           ]}
         >
-          Next
+          {t('common.next')}
         </AppText>
         <Ionicons
           name="chevron-forward"

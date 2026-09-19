@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { ReviewAuthorRating } from './ReviewAuthorRating';
@@ -18,6 +19,7 @@ interface ReviewsOwnReviewBarProps {
 }
 
 export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const content = review.content.trim();
   const canExpand = likelyExceedsCollapsedLines(content, REVIEW_OWN_COLLAPSED_LINE_COUNT);
@@ -27,19 +29,19 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
       <View style={styles.headerRow}>
         <View style={styles.labelRow}>
           <AppText variant="caption" style={styles.label}>
-            Your review
+            {t('reviews.yourReview')}
           </AppText>
           <ReviewAuthorRating userRating={review.userRating} />
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Edit review"
+          accessibilityLabel={t('reviews.editReview')}
           onPress={onEdit}
           hitSlop={8}
           style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
         >
           <AppText variant="caption" style={styles.editLabel}>
-            Edit
+            {t('reviews.edit')}
           </AppText>
         </Pressable>
       </View>
@@ -54,14 +56,16 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
       {canExpand ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={expanded ? 'Show less of your review' : 'Read more of your review'}
+          accessibilityLabel={
+            expanded ? t('common.showLessOfYourReview') : t('common.readMoreOfYourReview')
+          }
           onPress={() => setExpanded((current) => !current)}
           hitSlop={4}
           style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
           testID="reviews-own-review-expand"
         >
           <AppText variant="caption" style={styles.expandLabel}>
-            {expanded ? 'Show less' : 'Read more'}
+            {expanded ? t('common.showLess') : t('common.readMore')}
           </AppText>
         </Pressable>
       ) : null}

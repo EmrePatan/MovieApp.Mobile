@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
@@ -14,6 +15,7 @@ interface UpcomingSectionProps {
 }
 
 export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
+  const { t } = useTranslation();
   const upcomingQuery = useUpcomingCatalog('followed');
   const items = upcomingQuery.data?.pages[0]?.items ?? [];
   const renderItem = useCallback(
@@ -26,7 +28,7 @@ export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
   if (upcomingQuery.isLoading) {
     return (
       <View style={styles.container}>
-        <HomeSectionHeader title="Upcoming" />
+        <HomeSectionHeader title={t('upcoming.tabs.upcoming')} />
         <View style={styles.loading}>
           <ActivityIndicator color={colors.accent} />
         </View>
@@ -40,7 +42,7 @@ export function UpcomingSection({ onItemPress }: UpcomingSectionProps) {
 
   return (
     <View style={styles.container}>
-      <HomeSectionHeader title="Upcoming" />
+      <HomeSectionHeader title={t('upcoming.tabs.upcoming')} />
       <FlatList
         horizontal
         data={items}

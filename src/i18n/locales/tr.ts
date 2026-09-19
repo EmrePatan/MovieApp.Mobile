@@ -208,4 +208,8 @@ export const tr = {
     ...stage1Tr.common,
     ...stage2Tr.common,
   },
+  profile: {
+    ...stage1Tr.profile,
+    ...stage2Tr.profile,
+  },
 };

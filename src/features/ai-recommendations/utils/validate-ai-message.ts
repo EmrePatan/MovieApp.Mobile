@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
   AI_RECOMMENDATION_MIN_MESSAGE_LENGTH,
@@ -7,11 +8,15 @@ export function validateAiRecommendationMessage(message: string): string | null 
   const trimmed = message.trim();
 
   if (trimmed.length < AI_RECOMMENDATION_MIN_MESSAGE_LENGTH) {
-    return `Describe what you want in at least ${AI_RECOMMENDATION_MIN_MESSAGE_LENGTH} characters.`;
+    return i18n.t('aiRecommendations.validationMinLength', {
+      count: AI_RECOMMENDATION_MIN_MESSAGE_LENGTH,
+    });
   }
 
   if (trimmed.length > AI_RECOMMENDATION_MAX_MESSAGE_LENGTH) {
-    return `Keep your request under ${AI_RECOMMENDATION_MAX_MESSAGE_LENGTH} characters.`;
+    return i18n.t('aiRecommendations.validationMaxLength', {
+      count: AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
+    });
   }
 
   return null;

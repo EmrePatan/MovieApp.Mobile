@@ -24,7 +24,11 @@ function getCastSubtitle(member: CastMember, contentType: 'movie' | 'tv'): strin
     const roles = member.roles ?? [];
     if (roles.length > 1) {
       const primaryRole = roles[0]?.character?.trim();
-      return primaryRole ? `${primaryRole} · Multiple roles` : 'Multiple roles';
+      if (primaryRole) {
+        return i18n.t('details.credits.rolesWithMultiple', { role: primaryRole });
+      }
+
+      return i18n.t('details.credits.multipleRoles');
     }
 
     if (roles.length === 1) {

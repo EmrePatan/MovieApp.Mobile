@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
@@ -15,6 +16,7 @@ interface FollowingSectionProps {
 }
 
 export function FollowingSection({ onItemPress }: FollowingSectionProps) {
+  const { t } = useTranslation();
   const followingQuery = useFollowingCatalog();
   const items = followingQuery.data?.pages[0]?.items ?? [];
 
@@ -28,7 +30,7 @@ export function FollowingSection({ onItemPress }: FollowingSectionProps) {
   if (followingQuery.isLoading) {
     return (
       <View style={styles.container}>
-        <HomeSectionHeader title="Following" />
+        <HomeSectionHeader title={t('following.title')} />
         <View style={styles.loading}>
           <ActivityIndicator color={colors.accent} />
         </View>
@@ -43,7 +45,7 @@ export function FollowingSection({ onItemPress }: FollowingSectionProps) {
   if (items.length === 0) {
     return (
       <View style={styles.container}>
-        <HomeSectionHeader title="Following" />
+        <HomeSectionHeader title={t('following.title')} />
         <FollowingEmptyState />
       </View>
     );
@@ -51,7 +53,7 @@ export function FollowingSection({ onItemPress }: FollowingSectionProps) {
 
   return (
     <View style={styles.container}>
-      <HomeSectionHeader title="Following" />
+      <HomeSectionHeader title={t('following.title')} />
       <FlatList
         horizontal
         data={items}

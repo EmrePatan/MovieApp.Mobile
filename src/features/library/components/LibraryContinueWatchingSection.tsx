@@ -47,7 +47,7 @@ export function LibraryContinueWatchingSection({
   return (
     <View style={styles.section}>
       <AppText variant="subtitle" style={styles.title}>
-        Continue Watching
+        {t('library.continueWatching')}
       </AppText>
       <FlatList
         horizontal

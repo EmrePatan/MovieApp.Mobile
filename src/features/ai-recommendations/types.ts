@@ -43,8 +43,8 @@ export interface AiRecommendationResponse {
   validationSummary: AiRecommendationValidationSummary;
 }
 
-export const AI_RECOMMENDATION_SUGGESTED_PROMPTS = [
-  'A cozy mystery for a rainy night',
-  'Mind-bending sci-fi with emotional stakes',
-  'Feel-good comedy under two hours',
+export const AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS = [
+  'aiRecommendations.suggestedPrompts.cozyMystery',
+  'aiRecommendations.suggestedPrompts.sciFi',
+  'aiRecommendations.suggestedPrompts.comedy',
 ] as const;

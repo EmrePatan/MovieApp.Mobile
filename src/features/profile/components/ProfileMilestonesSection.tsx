@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -11,13 +12,18 @@ interface ProfileMilestonesSectionProps {
 }
 
 export function ProfileMilestonesSection({ milestones }: ProfileMilestonesSectionProps) {
+  const { t } = useTranslation();
+
   if (milestones.length === 0) {
     return null;
   }
 
   return (
     <View style={styles.section}>
-      <ProfileSectionHeader title="Milestones" subtitle="Quiet markers from your journey" />
+      <ProfileSectionHeader
+        title={t('profile.preview.milestonesTitle')}
+        subtitle={t('profile.preview.milestonesSubtitle')}
+      />
       <View style={styles.list}>
         {milestones.map((milestone) => (
           <View

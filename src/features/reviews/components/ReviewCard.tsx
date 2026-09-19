@@ -85,7 +85,7 @@ export const ReviewCard = memo(function ReviewCard({
             {onEdit ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Edit review"
+                accessibilityLabel={t('reviews.editReview')}
                 hitSlop={8}
                 onPress={onEdit}
                 style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
@@ -123,14 +123,18 @@ export const ReviewCard = memo(function ReviewCard({
         {canExpand ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={expanded ? `Show less of ${review.user.displayName}'s review` : `Read more of ${review.user.displayName}'s review`}
+            accessibilityLabel={
+              expanded
+                ? t('common.showLessOfReview', { name: review.user.displayName })
+                : t('common.readMoreOfReview', { name: review.user.displayName })
+            }
             onPress={() => setExpanded((current) => !current)}
             hitSlop={4}
             style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
             testID="review-card-expand"
           >
             <AppText variant="caption" style={styles.expandLabel}>
-              {expanded ? 'Show less' : 'Read more'}
+              {expanded ? t('common.showLess') : t('common.readMore')}
             </AppText>
           </Pressable>
         ) : null}

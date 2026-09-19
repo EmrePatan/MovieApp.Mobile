@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { UserStatisticsActivityResponse } from '../types';
@@ -19,6 +20,7 @@ interface ProfileYourYearSectionProps {
 }
 
 export function ProfileYourYearSection({ activity }: ProfileYourYearSectionProps) {
+  const { t } = useTranslation();
   const [chartWidth, setChartWidth] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const months = activity.last12Months;
@@ -44,15 +46,21 @@ export function ProfileYourYearSection({ activity }: ProfileYourYearSectionProps
   if (!hasActivity) {
     return (
       <View style={styles.section}>
-        <ProfileSectionHeader title="Your Year" subtitle="Last 12 months of activity" />
-        <ProfileEmptyInsight message="Start watching to build your activity timeline." />
+        <ProfileSectionHeader
+          title={t('profile.preview.yourYearTitle')}
+          subtitle={t('profile.preview.yourYearSubtitle')}
+        />
+        <ProfileEmptyInsight message={t('profile.preview.yourYearEmpty')} />
       </View>
     );
   }
 
   return (
     <View style={styles.section}>
-      <ProfileSectionHeader title="Your Year" subtitle="Last 12 months of activity" />
+      <ProfileSectionHeader
+        title={t('profile.preview.yourYearTitle')}
+        subtitle={t('profile.preview.yourYearSubtitle')}
+      />
       <View style={styles.card}>
         <View style={styles.chart} onLayout={handleLayout}>
           {months.map((month, index) => {
@@ -100,7 +108,11 @@ export function ProfileYourYearSection({ activity }: ProfileYourYearSectionProps
               {formatMonthDetailLabel(selectedMonth.month, selectedMonth.year)}
             </AppText>
             <AppText variant="caption" muted>
-              {selectedMonth.total} watched · {selectedMonth.movies} movies · {selectedMonth.episodes} episodes
+              {t('profile.preview.monthDetail', {
+                total: selectedMonth.total,
+                movies: selectedMonth.movies,
+                episodes: selectedMonth.episodes,
+              })}
             </AppText>
           </View>
         ) : null}
@@ -108,20 +120,33 @@ export function ProfileYourYearSection({ activity }: ProfileYourYearSectionProps
         <View style={styles.insights}>
           {activity.mostActiveMonth ? (
             <InsightRow
-              label="Most active month"
-              value={`${formatMonthLabel(activity.mostActiveMonth.month, activity.mostActiveMonth.year)} · ${activity.mostActiveMonth.total} watched`}
+              label={t('profile.preview.mostActiveMonth')}
+              value={t('profile.preview.mostActiveMonthValue', {
+                month: formatMonthLabel(
+                  activity.mostActiveMonth.month,
+                  activity.mostActiveMonth.year,
+                ),
+                total: activity.mostActiveMonth.total,
+              })}
             />
           ) : null}
           {activity.longestStreakDays ? (
             <InsightRow
-              label="Longest watching streak"
-              value={`${activity.longestStreakDays} days`}
+              label={t('profile.preview.longestStreak')}
+              value={t('profile.preview.longestStreakValue', {
+                days: activity.longestStreakDays,
+              })}
             />
           ) : null}
-          <InsightRow label="Current month" value={`${activity.currentMonthTotal} watched`} />
+          <InsightRow
+            label={t('profile.preview.currentMonth')}
+            value={t('profile.preview.currentMonthValue', {
+              total: activity.currentMonthTotal,
+            })}
+          />
           {monthComparison !== null ? (
             <InsightRow
-              label="Previous month comparison"
+              label={t('profile.preview.previousMonthComparison')}
               value={`${monthComparison > 0 ? '+' : ''}${monthComparison}%`}
             />
           ) : null}

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
@@ -17,6 +18,7 @@ interface GalleryDetailContentProps {
 }
 
 export function GalleryDetailContent({ gallery, mode, subtitle }: GalleryDetailContentProps) {
+  const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<GalleryFilter>('all');
 
   const images = useMemo<GalleryImage[]>(() => {
@@ -33,7 +35,7 @@ export function GalleryDetailContent({ gallery, mode, subtitle }: GalleryDetailC
         <DetailBackButton contentInset={false} />
         <View style={styles.header}>
           <AppText variant="title" style={styles.headerTitle}>
-            {mode === 'person' ? 'Photos' : 'Gallery'}
+            {mode === 'person' ? t('details.sections.photos') : t('gallery.title')}
           </AppText>
           {subtitle ? (
             <AppText variant="bodySmall" muted numberOfLines={2}>

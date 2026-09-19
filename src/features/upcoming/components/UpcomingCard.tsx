@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
@@ -25,12 +26,14 @@ function formatSeasonEpisode(seasonNumber?: number, episodeNumber?: number): str
 }
 
 export const UpcomingCard = memo(function UpcomingCard({ item, onPress }: UpcomingCardProps) {
+  const { t } = useTranslation();
   const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const year = formatCatalogYear(item.releaseDate, item.year);
   const releaseDate = formatIsoDate(item.releaseDate);
   const relativeAirDate = formatRelativeAirDate(item.releaseDate);
   const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeAirDate ? `, ${relativeAirDate}` : releaseDate ? `, ${releaseDate}` : ''}${item.isFollowed ? ', notified' : ''}`;
+  const trackedLabel = item.isFollowed ? t('upcoming.card.notified') : null;
+  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeAirDate ? `, ${relativeAirDate}` : releaseDate ? `, ${releaseDate}` : ''}${trackedLabel ? `, ${trackedLabel}` : ''}`;
 
   return (
     <Pressable
@@ -44,13 +47,13 @@ export const UpcomingCard = memo(function UpcomingCard({ item, onPress }: Upcomi
           uri={item.posterUrl}
           width={layout.posterCarousel.width}
           height={layout.posterCarousel.height}
-          accessibilityLabel={`${item.title} poster`}
+          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
           elevated
         />
         {item.isFollowed ? (
-          <View style={styles.badge} accessibilityLabel="Notified">
+          <View style={styles.badge} accessibilityLabel={t('upcoming.card.notified')}>
             <AppText variant="caption" style={styles.badgeText}>
-              Notified
+              {t('upcoming.card.notified')}
             </AppText>
           </View>
         ) : null}

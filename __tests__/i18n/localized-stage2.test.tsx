@@ -10,6 +10,11 @@ import {
 import { formatContentType } from '@/utils/format';
 import { NotificationsEmptyState } from '@/features/notifications/components/NotificationsEmptyState';
 import { InsightsMilestonesSection } from '@/features/insights/components/InsightsMilestonesSection';
+import { ProfileYourYearSection } from '@/features/profile/components/ProfileYourYearSection';
+import { LibraryContinueWatchingSection } from '@/features/library/components/LibraryContinueWatchingSection';
+import { createProfileStatisticsFixture } from '@/features/profile/utils/profile-statistics-fixtures';
+import { AiRecommendationsContent } from '@/features/ai-recommendations/components/AiRecommendationsContent';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function renderWithI18n(ui: React.ReactElement) {
   return render(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
@@ -85,5 +90,84 @@ describe('Stage 2 localization', () => {
     );
 
     expect(screen.getByText('Başarılar')).toBeTruthy();
+  });
+
+  it('renders localized profile preview section headers', async () => {
+    const statistics = createProfileStatisticsFixture();
+    renderWithI18n(<ProfileYourYearSection activity={statistics.activity} />);
+
+    expect(screen.getByText('Your Year')).toBeTruthy();
+
+    await changeUiLanguage('tr');
+    renderWithI18n(<ProfileYourYearSection activity={statistics.activity} />);
+
+    expect(screen.getByText('Senin Yılın')).toBeTruthy();
+  });
+
+  it('renders localized continue watching section title', async () => {
+    renderWithI18n(
+      <LibraryContinueWatchingSection
+        items={[
+          {
+            id: 'tv-1',
+            title: 'Breaking Bad',
+            contentType: 'tv',
+            posterUrl: null,
+            voteAverage: 9,
+            seasonNumber: 1,
+            episodeNumber: 1,
+            episodeName: 'Pilot',
+          },
+        ]}
+        onItemPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Continue Watching')).toBeTruthy();
+
+    await changeUiLanguage('tr');
+    renderWithI18n(
+      <LibraryContinueWatchingSection
+        items={[
+          {
+            id: 'tv-1',
+            title: 'Breaking Bad',
+            contentType: 'tv',
+            posterUrl: null,
+            voteAverage: 9,
+            seasonNumber: 1,
+            episodeNumber: 1,
+            episodeName: 'Pilot',
+          },
+        ]}
+        onItemPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('İzlemeye Devam Et')).toBeTruthy();
+  });
+
+  it('renders localized AI recommendations composer copy', async () => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <I18nextProvider i18n={i18n}>
+          <AiRecommendationsContent />
+        </I18nextProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('What should we find?')).toBeTruthy();
+
+    await changeUiLanguage('tr');
+    render(
+      <QueryClientProvider client={queryClient}>
+        <I18nextProvider i18n={i18n}>
+          <AiRecommendationsContent />
+        </I18nextProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('Ne bulalım?')).toBeTruthy();
   });
 });

@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { UserStatisticsSummaryResponse } from '../types';
 import { formatAverageRating } from '../utils/profile-analytics';
@@ -10,20 +11,21 @@ interface ProfileHeroStatsProps {
 }
 
 export function ProfileHeroStats({ summary }: ProfileHeroStatsProps) {
+  const { t } = useTranslation();
   const watchedTotal = summary.moviesWatched + summary.episodesWatched;
 
   return (
     <View style={styles.container} accessibilityRole="summary">
       <StatItem
-        label="Watch Activity"
+        label={t('profile.preview.watchActivity')}
         value={String(watchedTotal)}
-        caption="movies & episodes"
+        caption={t('profile.preview.moviesAndEpisodes')}
       />
       <View style={styles.divider} />
-      <StatItem label="Ratings" value={String(summary.ratingsCount)} />
+      <StatItem label={t('profile.preview.ratingsLabel')} value={String(summary.ratingsCount)} />
       <View style={styles.divider} />
       <StatItem
-        label="Average"
+        label={t('profile.preview.average')}
         value={formatAverageRating(summary.averageStarRating)}
       />
     </View>
