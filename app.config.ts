@@ -35,6 +35,7 @@ const config: ExpoConfig = {
     package: 'com.movieapp.mobile',
     versionCode: 1,
     predictiveBackGestureEnabled: false,
+    softwareKeyboardLayoutMode: 'resize',
   },
   web: {
     favicon: './assets/favicon.png',

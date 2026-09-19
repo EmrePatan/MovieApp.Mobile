@@ -25,6 +25,20 @@ export interface RegisterRequest {
   displayName: string;
 }
 
+export interface RegisterResponse {
+  email: string;
+  requiresEmailVerification: boolean;
+  message: string;
+}
+
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }

@@ -6,16 +6,31 @@ import type {
   LoginRequest,
   MessageResponse,
   RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
   ResetPasswordRequest,
   SocialAuthRequest,
+  VerifyEmailRequest,
 } from '@/models/api/auth';
 
 export async function loginRequest(payload: LoginRequest): Promise<AuthResponse> {
   return api.post<AuthResponse>('/api/auth/login', payload, { authenticated: false });
 }
 
-export async function registerRequest(payload: RegisterRequest): Promise<AuthResponse> {
-  return api.post<AuthResponse>('/api/auth/register', payload, { authenticated: false });
+export async function registerRequest(payload: RegisterRequest): Promise<RegisterResponse> {
+  return api.post<RegisterResponse>('/api/auth/register', payload, { authenticated: false });
+}
+
+export async function verifyEmailRequest(payload: VerifyEmailRequest): Promise<AuthResponse> {
+  return api.post<AuthResponse>('/api/auth/verify-email', payload, { authenticated: false });
+}
+
+export async function resendVerificationRequest(
+  payload: ResendVerificationRequest,
+): Promise<MessageResponse> {
+  return api.post<MessageResponse>('/api/auth/resend-verification', payload, {
+    authenticated: false,
+  });
 }
 
 export async function forgotPasswordRequest(payload: ForgotPasswordRequest): Promise<MessageResponse> {

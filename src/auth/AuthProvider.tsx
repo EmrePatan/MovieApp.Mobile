@@ -9,7 +9,14 @@ import {
 } from 'react';
 import { api } from '@/api/client';
 import { isApiError } from '@/api/errors';
-import { getCurrentUser, loginRequest, registerRequest, socialAuthRequest } from './auth-api';
+import {
+  getCurrentUser,
+  loginRequest,
+  registerRequest,
+  resendVerificationRequest,
+  socialAuthRequest,
+  verifyEmailRequest,
+} from './auth-api';
 import { requestSocialIdentityToken } from './social-auth-service';
 import type { SocialAuthProvider } from '@/models/api/auth';
 import { getAccessToken, removeAccessToken, saveAccessToken } from './auth-storage';
@@ -145,13 +152,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [establishSession],
   );
 
-  const register = useCallback(
-    async (email: string, password: string, displayName: string) => {
-      const response = await registerRequest({ email, password, displayName });
+  const register = useCallback(async (email: string, password: string, displayName: string) => {
+    const response = await registerRequest({ email, password, displayName });
+    return {
+      email: response.email,
+      message: response.message,
+    };
+  }, []);
+
+  const verifyEmail = useCallback(
+    async (token: string) => {
+      const response = await verifyEmailRequest({ token });
       await establishSession(response.accessToken, response.user);
     },
     [establishSession],
   );
+
+  const resendVerification = useCallback(async (email: string) => {
+    const response = await resendVerificationRequest({ email });
+    return response.message;
+  }, []);
 
   const signInWithSocial = useCallback(
     async (provider: SocialAuthProvider) => {
@@ -198,12 +218,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: Boolean(token),
       login,
       register,
+      verifyEmail,
+      resendVerification,
       signInWithSocial,
       logout,
       refreshUser,
       updateSession,
     }),
-    [user, token, isLoading, login, register, signInWithSocial, logout, refreshUser, updateSession],
+    [
+      user,
+      token,
+      isLoading,
+      login,
+      register,
+      verifyEmail,
+      resendVerification,
+      signInWithSocial,
+      logout,
+      refreshUser,
+      updateSession,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

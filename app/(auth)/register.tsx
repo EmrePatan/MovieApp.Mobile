@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
@@ -19,6 +20,7 @@ import { SocialAuthSection } from '@/features/auth/components/SocialAuthSection'
 import { spacing } from '@/theme/spacing';
 
 export default function RegisterScreen() {
+  const router = useRouter();
   const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,7 +41,11 @@ export default function RegisterScreen() {
     setIsSubmitting(true);
 
     try {
-      await register(email.trim(), password, displayName.trim());
+      const result = await register(email.trim(), password, displayName.trim());
+      router.push({
+        pathname: '/(auth)/check-email',
+        params: { email: result.email },
+      });
     } catch (error) {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'register'));

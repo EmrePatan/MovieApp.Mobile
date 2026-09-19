@@ -8,7 +8,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthAtmosphere } from './AuthAtmosphere';
 import { AuthBrandMark } from './AuthBrandMark';
 import { authTypography } from '../auth-typography';
@@ -34,22 +34,29 @@ export function AuthScreenLayout({
   footer,
 }: AuthScreenLayoutProps) {
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const headlineSize = width < 360 ? 38 : width < 390 ? 44 : 48;
   const headlineLineHeight = Math.round(headlineSize * 1.02);
+  const keyboardVerticalOffset = Platform.OS === 'ios' ? insets.top + spacing.sm : 0;
 
   return (
     <View style={styles.root}>
       <AuthAtmosphere />
 
-      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboard}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
+          keyboardVerticalOffset={keyboardVerticalOffset}
         >
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingBottom: Math.max(spacing.xl, insets.bottom + spacing.md) },
+            ]}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            automaticallyAdjustKeyboardInsets
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.content}>
@@ -120,7 +127,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: spacing.xl,
+    justifyContent: 'center',
   },
   content: {
     flexGrow: 1,
@@ -130,6 +137,7 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxContentWidth,
     width: '100%',
     alignSelf: 'center',
+    justifyContent: 'center',
   },
   hero: {
     gap: spacing.sm + 2,

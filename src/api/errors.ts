@@ -14,6 +14,7 @@ export interface ProblemDetails {
   status?: number;
   title?: string;
   detail?: string;
+  code?: string;
 }
 
 export class ApiError extends Error {
@@ -91,12 +92,38 @@ export function mapStatusToErrorKind(status: number): ApiErrorKind {
   return 'unknown';
 }
 
+export function getProblemCode(responseBody: unknown): string | null {
+  if (!responseBody || typeof responseBody !== 'object') {
+    return null;
+  }
+
+  const code = (responseBody as ProblemDetails).code;
+  return typeof code === 'string' ? code : null;
+}
+
+export const EMAIL_NOT_VERIFIED_CODE = 'email_not_verified';
+
+export function isEmailNotVerifiedError(error: unknown): boolean {
+  return isApiError(error) && getProblemCode(error.responseBody) === EMAIL_NOT_VERIFIED_CODE;
+}
+
 export function getUserMessageForAuthError(
   kind: ApiErrorKind,
-  context: 'login' | 'register' | 'forgot-password' | 'reset-password' | 'social',
+  context:
+    | 'login'
+    | 'register'
+    | 'forgot-password'
+    | 'reset-password'
+    | 'verify-email'
+    | 'resend-verification'
+    | 'social',
 ): string {
   if (kind === 'unauthorized' && context === 'login') {
     return 'Invalid email or password.';
+  }
+
+  if (kind === 'validation' && context === 'verify-email') {
+    return 'Invalid or expired verification link.';
   }
 
   if (kind === 'conflict' && context === 'register') {

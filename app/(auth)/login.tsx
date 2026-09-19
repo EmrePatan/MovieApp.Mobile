@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
-import { getUserMessageForAuthError, isApiError } from '@/api/errors';
+import {
+  EMAIL_NOT_VERIFIED_CODE,
+  getUserMessageForAuthError,
+  isApiError,
+} from '@/api/errors';
 import {
   hasValidationErrors,
   validateLoginForm,
@@ -20,12 +24,37 @@ import { beginHomeColdStartTrace } from '@/perf/home-cold-start-trace';
 import { spacing } from '@/theme/spacing';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, resendVerification } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<LoginFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleResendVerification() {
+    if (!pendingVerificationEmail) {
+      return;
+    }
+
+    setResendMessage(null);
+    setIsResending(true);
+
+    try {
+      const message = await resendVerification(pendingVerificationEmail);
+      setResendMessage(message);
+    } catch (error) {
+      if (isApiError(error)) {
+        setFormError(getUserMessageForAuthError(error.kind, 'resend-verification'));
+      } else {
+        setFormError('Unable to resend the verification email. Please try again.');
+      }
+    } finally {
+      setIsResending(false);
+    }
+  }
 
   async function handleLogin() {
     const errors = validateLoginForm(email, password);
@@ -36,12 +65,23 @@ export default function LoginScreen() {
     }
 
     setFormError(null);
+    setResendMessage(null);
+    setPendingVerificationEmail(null);
     setIsSubmitting(true);
     beginHomeColdStartTrace();
 
     try {
       await login(email.trim(), password);
     } catch (error) {
+      if (isApiError(error) && error.kind === 'unauthorized' && error.responseBody) {
+        const code = (error.responseBody as { code?: string }).code;
+        if (code === EMAIL_NOT_VERIFIED_CODE) {
+          setPendingVerificationEmail(email.trim());
+          setFormError('Please verify your email address before signing in.');
+          return;
+        }
+      }
+
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'login'));
       } else {
@@ -100,6 +140,15 @@ export default function LoginScreen() {
         </View>
 
         {formError ? <AuthFormMessage message={formError} tone="error" /> : null}
+        {resendMessage ? <AuthFormMessage message={resendMessage} tone="success" /> : null}
+
+        {pendingVerificationEmail ? (
+          <AuthPrimaryButton
+            title="Resend verification email"
+            onPress={() => void handleResendVerification()}
+            loading={isResending}
+          />
+        ) : null}
 
         <AuthPrimaryButton
           title="Sign in"
