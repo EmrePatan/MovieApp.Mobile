@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -24,6 +25,7 @@ export function AddToWatchlistButton({
   contentId,
   variant = 'button',
 }: AddToWatchlistButtonProps) {
+  const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { data: membership = {}, isLoading: isMembershipLoading } = useWatchlistMembership(
     contentType,
@@ -35,12 +37,12 @@ export function AddToWatchlistButton({
 
   const isBusy = isAuthenticated && isMembershipLoading;
   const active = isAuthenticated && isContentInAnyWatchlist(membership);
-  const label = active ? 'In watchlist' : 'Add to watchlist';
-  const buttonTitle = active ? 'In Watchlist' : 'Add to Watchlist';
+  const label = active ? t('watchlists.addButton.active') : t('watchlists.addButton.inactive');
+  const buttonTitle = active ? t('watchlists.addButton.activeTitle') : t('watchlists.addButton.inactiveTitle');
 
   const handlePress = () => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to use watchlists.');
+      setFeedback(t('watchlists.addButton.signInRequired'));
       return;
     }
 
@@ -61,7 +63,7 @@ export function AddToWatchlistButton({
       <View>
         <FeedbackMessage message={feedback} tone="info" onDismiss={() => setFeedback(null)} />
         <DetailCircularAction
-          label="Watchlist"
+          label={t('common.watchlist')}
           accessibilityLabel={label}
           active={active}
           busy={isBusy}

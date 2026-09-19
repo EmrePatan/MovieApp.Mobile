@@ -182,7 +182,7 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByText('Server error.')).toBeTruthy();
-    fireEvent.press(screen.getByText('Try Again'));
+    fireEvent.press(screen.getByText('Retry'));
     expect(mockRefetch).toHaveBeenCalled();
   });
 

@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
@@ -21,6 +22,7 @@ export const HomeContentCard = memo(function HomeContentCard({
   item,
   onPress,
 }: HomeContentCardProps) {
+  const { t } = useTranslation();
   const metadataLine = useMemo(() => {
     const parts = [
       formatContentType(item.contentType),
@@ -44,7 +46,7 @@ export const HomeContentCard = memo(function HomeContentCard({
         uri={item.posterUrl}
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
-        accessibilityLabel={`${item.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         elevated
       />
       <View style={styles.meta}>

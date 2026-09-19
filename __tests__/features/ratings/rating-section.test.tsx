@@ -108,8 +108,8 @@ describe('DetailInlineRatingSection', () => {
 
     render(<DetailInlineRatingSection contentType="movie" contentId="movie-id" />);
 
-    expect(screen.getByLabelText('Your rating')).toHaveAccessibilityValue({
-      text: '3.5 out of 5 stars',
+    expect(screen.getByLabelText('Your Rating')).toHaveAccessibilityValue({
+      text: '3.5 / 5',
     });
   });
 
@@ -166,7 +166,7 @@ describe('StarRatingSelector', () => {
     const onCommit = jest.fn();
     render(<StarRatingSelector value={3} onCommit={onCommit} onClear={jest.fn()} />);
 
-    fireEvent(screen.getByLabelText('Your rating'), 'onAccessibilityAction', {
+    fireEvent(screen.getByLabelText('Your Rating'), 'onAccessibilityAction', {
       nativeEvent: { actionName: 'increment' },
     });
 
@@ -177,7 +177,7 @@ describe('StarRatingSelector', () => {
     const onCommit = jest.fn();
     render(<StarRatingSelector value={3} onCommit={onCommit} onClear={jest.fn()} />);
 
-    fireEvent(screen.getByLabelText('Your rating'), 'onAccessibilityAction', {
+    fireEvent(screen.getByLabelText('Your Rating'), 'onAccessibilityAction', {
       nativeEvent: { actionName: 'decrement' },
     });
 

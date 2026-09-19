@@ -1,4 +1,6 @@
-export const tr = {
+import { stage2Tr } from './stage2-tr';
+
+const stage1Tr = {
   common: {
     loading: 'Yükleniyor...',
     startingApp: 'MovieApp başlatılıyor...',
@@ -196,5 +198,14 @@ export const tr = {
     authResetPasswordValidation: 'Şifreni kontrol edip tekrar dene.',
     authCredentialsValidation: 'E-posta ve şifreni kontrol edip tekrar dene.',
     authNetwork: 'Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.',
+  },
+};
+
+export const tr = {
+  ...stage1Tr,
+  ...stage2Tr,
+  common: {
+    ...stage1Tr.common,
+    ...stage2Tr.common,
   },
 };

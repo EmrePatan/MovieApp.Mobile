@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { HOME_HEADER_COMPACT_TARGET } from './home-header-styles';
 import { colors } from '@/theme/colors';
@@ -107,12 +108,13 @@ function CaveBackdrop({ overlay, children }: CaveBackdropProps) {
 }
 
 export function HomeBrandMark({ overlay = false }: HomeBrandMarkProps) {
+  const { t } = useTranslation();
   const caveSize = overlay ? 15 : 22;
   const leadSize = overlay ? 9 : 11;
   const lineHeight = overlay ? 18 : 24;
 
   return (
-    <View style={styles.container} accessibilityRole="header" accessibilityLabel="Movie Cave">
+    <View style={styles.container} accessibilityRole="header" accessibilityLabel={t('home.brandMark')}>
       <CaveBackdrop overlay={overlay}>
         <Text
           style={[

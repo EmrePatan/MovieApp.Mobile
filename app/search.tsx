@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   BackHandler,
@@ -53,6 +54,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function SearchScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { explore, from } = useLocalSearchParams<{ explore?: string; from?: string }>();
@@ -260,7 +262,7 @@ export default function SearchScreen() {
   const searchErrorMessage = searchQuery.isError
     ? isApiError(searchQuery.error)
       ? searchQuery.error.userMessage
-      : 'Unable to search right now. Please try again.'
+      : t('search.results.error')
     : null;
 
   const listEmptyComponent = useMemo(() => {
@@ -276,9 +278,9 @@ export default function SearchScreen() {
       return (
         <View style={styles.errorContainer}>
           <ErrorView
-            message={searchErrorMessage ?? 'Unable to search right now. Please try again.'}
+            message={searchErrorMessage ?? t('search.results.error')}
             onRetry={handleRefresh}
-            retryLabel="Try Again"
+            retryLabel={t('common.tryAgain')}
           />
         </View>
       );
@@ -287,8 +289,8 @@ export default function SearchScreen() {
     if (results.length === 0) {
       return (
         <SearchEmptyState
-          title={`No results for “${normalizedSubmittedQuery}”`}
-          message="Try a different spelling or a broader search term."
+          title={t('search.results.noResultsTitle', { query: normalizedSubmittedQuery })}
+          message={t('search.results.noResultsMessage')}
         />
       );
     }
@@ -302,6 +304,7 @@ export default function SearchScreen() {
     searchErrorMessage,
     searchQuery.isError,
     searchQuery.isLoading,
+    t,
   ]);
 
   return (

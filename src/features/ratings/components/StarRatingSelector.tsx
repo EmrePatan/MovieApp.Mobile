@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AccessibilityActionEvent,
   LayoutChangeEvent,
@@ -71,6 +72,7 @@ export function StarRatingSelector({
   onCommit,
   onClear,
 }: StarRatingSelectorProps) {
+  const { t } = useTranslation();
   const [trackWidth, setTrackWidth] = useState(0);
   const [localPreviewRating, setLocalPreviewRating] = useState<number | 'clear' | null>(null);
 
@@ -162,7 +164,7 @@ export function StarRatingSelector({
     <View
       accessible
       accessibilityRole="adjustable"
-      accessibilityLabel="Your rating"
+      accessibilityLabel={t('ratings.yourRating')}
       accessibilityValue={{ text: formatStarRatingAccessibilityValue(displayRating) }}
       accessibilityActions={[
         { name: 'increment', label: 'Increase rating' },

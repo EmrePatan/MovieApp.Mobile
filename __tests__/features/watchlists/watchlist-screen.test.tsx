@@ -9,6 +9,7 @@ import {
 } from '@/features/watchlists/hooks/useWatchlistMutations';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import WatchlistScreen from '../../../app/(tabs)/watchlist';
+import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();
 
@@ -83,8 +84,8 @@ describe('WatchlistScreen', () => {
     mockItems();
 
     render(<WatchlistScreen />);
-    expect(screen.getByText('Sign in to manage your watchlists')).toBeTruthy();
-    fireEvent.press(screen.getByText('Sign In'));
+    expect(screen.getByText(t('library.hub.signInCopy'))).toBeTruthy();
+    fireEvent.press(screen.getByText(t('common.signInTitleCase')));
     expect(mockPush).toHaveBeenCalledWith('/(auth)/login');
   });
 
@@ -278,8 +279,8 @@ describe('WatchlistScreen', () => {
     });
 
     render(<WatchlistScreen />);
-    expect(screen.getByText('Your watchlist is empty')).toBeTruthy();
-    fireEvent.press(screen.getByText('Browse'));
+    expect(screen.getByText(t('library.watchlistDetail.emptyTitle'))).toBeTruthy();
+    fireEvent.press(screen.getByText(t('common.explore')));
     expect(mockPush).toHaveBeenCalledWith('/search');
   });
 
@@ -332,7 +333,11 @@ describe('WatchlistScreen', () => {
     fireEvent.press(screen.getByLabelText('Breaking Bad, TV, 2008, rating 8.9'));
     expect(mockPush).toHaveBeenCalledWith('/tv/tv-id');
 
-    fireEvent.press(screen.getByLabelText('Remove Breaking Bad from watchlist'));
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.removeFromList', { title: 'Breaking Bad', listName: t('common.watchlist') }),
+      ),
+    );
     expect(removeMutate).toHaveBeenCalledWith(
       { contentType: 'tv', contentId: 'tv-id' },
       expect.any(Object),
@@ -409,7 +414,7 @@ describe('WatchlistScreen', () => {
     render(<WatchlistScreen />);
     expect(screen.getByText('Unable to load watchlist items. Please try again.')).toBeTruthy();
     expect(screen.queryByText('Server error.')).toBeNull();
-    fireEvent.press(screen.getByText('Try Again'));
+    fireEvent.press(screen.getByText(t('common.tryAgain')));
     expect(refetch).toHaveBeenCalled();
   });
 });

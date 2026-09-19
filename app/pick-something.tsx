@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translatePickSomethingType } from '@/i18n/catalog-labels';
 import {
   ActivityIndicator,
   Image,
@@ -88,6 +90,7 @@ function PickSomethingHeroMedia({
 }
 
 export default function PickSomethingScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
@@ -139,7 +142,7 @@ export default function PickSomethingScreen() {
         <View style={styles.stateContainer}>
           <ActivityIndicator size="large" color={colors.accent} />
           <AppText variant="bodySmall" muted style={styles.loadingMessage}>
-            Finding something for you...
+            {t('discovery.pickSomething.loading')}
           </AppText>
         </View>
       );
@@ -148,11 +151,11 @@ export default function PickSomethingScreen() {
     if (pickQuery.isError) {
       const message = isApiError(pickQuery.error)
         ? pickQuery.error.userMessage
-        : 'Unable to pick something right now.';
+        : t('discovery.pickSomething.error');
 
       return (
         <View style={styles.stateContainer}>
-          <ErrorView message={message} onRetry={() => void pickQuery.refetch()} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={() => void pickQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
     }
@@ -161,8 +164,8 @@ export default function PickSomethingScreen() {
       return (
         <View style={styles.stateContainer}>
           <SearchEmptyState
-            title="Nothing to pick right now"
-            message="Try a different media type or check back after more titles are available in the catalog."
+            title={t('discovery.pickSomething.emptyTitle')}
+            message={t('discovery.pickSomething.emptyMessage')}
           />
         </View>
       );
@@ -197,8 +200,8 @@ export default function PickSomethingScreen() {
         </View>
 
         <View style={styles.actions}>
-          <AppButton title="Try Another" variant="secondary" onPress={handleTryAnother} />
-          <AppButton title="View Details" onPress={handleViewDetails} />
+          <AppButton title={t('discovery.pickSomething.tryAnother')} variant="secondary" onPress={handleTryAnother} />
+          <AppButton title={t('discovery.pickSomething.viewDetails')} onPress={handleViewDetails} />
         </View>
       </View>
     );
@@ -212,6 +215,7 @@ export default function PickSomethingScreen() {
     pickQuery.isFetching,
     pickQuery.isLoading,
     pickQuery.refetch,
+    t,
   ]);
 
   return (
@@ -221,25 +225,26 @@ export default function PickSomethingScreen() {
           <DetailBackButton />
           <View style={styles.headerCopy}>
             <AppText variant="title" accessibilityRole="header">
-              Pick Something For Me
+              {t('discovery.pickSomething.title')}
             </AppText>
             <AppText variant="bodySmall" muted>
-              One personalized pick to help you decide fast
+              {t('discovery.pickSomething.subtitle')}
             </AppText>
           </View>
         </View>
 
         <View style={styles.mediaTypeRow} accessibilityRole="tablist">
           {PICK_SOMETHING_MEDIA_OPTIONS.map((option) => {
-            const selected = option.value === mediaType;
+            const selected = option === mediaType;
+            const label = translatePickSomethingType(option);
 
             return (
               <Pressable
-                key={option.value}
+                key={option}
                 accessibilityRole="tab"
                 accessibilityState={{ selected }}
-                accessibilityLabel={option.label}
-                onPress={() => handleMediaTypeChange(option.value)}
+                accessibilityLabel={label}
+                onPress={() => handleMediaTypeChange(option)}
                 style={({ pressed }) => [
                   styles.mediaTypeChip,
                   selected && styles.mediaTypeChipSelected,
@@ -250,7 +255,7 @@ export default function PickSomethingScreen() {
                   variant="caption"
                   style={[styles.mediaTypeLabel, selected && styles.mediaTypeLabelSelected]}
                 >
-                  {option.label}
+                  {label}
                 </AppText>
               </Pressable>
             );

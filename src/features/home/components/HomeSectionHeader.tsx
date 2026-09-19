@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -10,6 +11,8 @@ interface HomeSectionHeaderProps {
 }
 
 export function HomeSectionHeader({ title, onSeeAllPress }: HomeSectionHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container} accessibilityRole="header">
       <View style={styles.titleRow}>
@@ -17,12 +20,12 @@ export function HomeSectionHeader({ title, onSeeAllPress }: HomeSectionHeaderPro
         {onSeeAllPress ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`See all ${title}`}
+            accessibilityLabel={t('home.seeAllTitle', { title })}
             onPress={onSeeAllPress}
             hitSlop={8}
           >
             <AppText variant="caption" style={styles.seeAll}>
-              See All
+              {t('common.seeAll')}
             </AppText>
           </Pressable>
         ) : (

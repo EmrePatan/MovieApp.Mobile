@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3Ratings } from '../types';
 import { formatAverageStarRating } from '../utils/insights-format';
@@ -13,14 +14,18 @@ interface InsightsRatingsSectionProps {
 }
 
 export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps) {
+  const { t } = useTranslation();
   const maxCount = Math.max(...ratings.distribution.map((item) => item.count), 1);
   const sortedDistribution = [...ratings.distribution].sort((a, b) => a.stars - b.stars);
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Your Ratings" subtitle="How you score what you watch" />
+      <InsightsSectionHeader
+        title={t('insights.ratingsSection.title')}
+        subtitle={t('insights.ratingsSection.subtitle')}
+      />
       {ratings.count === 0 ? (
-        <InsightsEmptyState message="No ratings yet. Rate titles to build this view." />
+        <InsightsEmptyState message={t('insights.ratingsSection.empty')} />
       ) : (
         <View style={styles.card}>
           <View style={styles.summaryPanel}>
@@ -31,17 +36,25 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
               <StarRow rating={ratings.averageStars ?? 0} />
             </View>
             <View style={styles.metaColumn}>
-              <AppText variant="caption" style={styles.ratingCount}>{ratings.count} ratings</AppText>
+              <AppText variant="caption" style={styles.ratingCount}>
+                {t('insights.ratingsSection.ratingsCount', { count: ratings.count })}
+              </AppText>
               {ratings.highestRatedGenre ? (
                 <MetaLine
-                  label="Highest rated genre"
-                  value={`${formatAverageStarRating(ratings.highestRatedGenre.averageStars)} ${ratings.highestRatedGenre.name}`}
+                  label={t('insights.ratingsSection.highestRatedGenre')}
+                  value={t('insights.ratingsSection.metaValue', {
+                    average: formatAverageStarRating(ratings.highestRatedGenre.averageStars),
+                    genreName: ratings.highestRatedGenre.name,
+                  })}
                 />
               ) : null}
               {ratings.lowestRatedGenre ? (
                 <MetaLine
-                  label="Lowest rated genre"
-                  value={`${formatAverageStarRating(ratings.lowestRatedGenre.averageStars)} ${ratings.lowestRatedGenre.name}`}
+                  label={t('insights.ratingsSection.lowestRatedGenre')}
+                  value={t('insights.ratingsSection.metaValue', {
+                    average: formatAverageStarRating(ratings.lowestRatedGenre.averageStars),
+                    genreName: ratings.lowestRatedGenre.name,
+                  })}
                 />
               ) : null}
             </View>
@@ -56,7 +69,10 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
                     key={item.stars}
                     style={styles.distributionColumn}
                     accessibilityRole="text"
-                    accessibilityLabel={`${item.stars} stars, ${item.count} ratings`}
+                    accessibilityLabel={t('insights.ratingsSection.distributionAccessibility', {
+                      stars: item.stars,
+                      count: item.count,
+                    })}
                   >
                     <View style={styles.distributionTrack}>
                       <View style={[styles.distributionFill, { height: `${heightPercent}%` }]} />

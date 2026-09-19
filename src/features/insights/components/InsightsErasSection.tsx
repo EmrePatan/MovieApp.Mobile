@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3Era } from '../types';
 import { formatDecadeLabel } from '../utils/insights-format';
@@ -12,21 +13,24 @@ interface InsightsErasSectionProps {
 }
 
 export function InsightsErasSection({ era }: InsightsErasSectionProps) {
+  const { t } = useTranslation();
   const knownDecades = era.decades.filter((bucket) => bucket.count > 0);
   const hasKnownEras = knownDecades.length > 0;
   const maxCount = Math.max(...knownDecades.map((bucket) => bucket.count), 1);
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Your Era" subtitle="The decades your watch history spans" />
+      <InsightsSectionHeader
+        title={t('insights.eras.title')}
+        subtitle={t('insights.eras.subtitle')}
+      />
       {!hasKnownEras ? (
-        <InsightsEmptyState message="Not enough release-year data to chart your eras yet." />
+        <InsightsEmptyState message={t('insights.eras.empty')} />
       ) : (
         <View style={styles.body}>
           {era.favoriteDecade ? (
             <AppText variant="bodySmall" style={styles.favoriteCopy}>
-              <AppText variant="bodySmall" style={styles.favoriteDecade}>{era.favoriteDecade}</AppText>
-              {' '}is your most-watched decade
+              {t('insights.eras.favoriteDecade', { decade: era.favoriteDecade })}
             </AppText>
           ) : null}
 
@@ -62,7 +66,7 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
 
           {era.unknownCount > 0 ? (
             <AppText variant="caption" muted>
-              {era.unknownCount} watched titles are missing release-year metadata.
+              {t('insights.eras.unknownMetadata', { count: era.unknownCount })}
             </AppText>
           ) : null}
         </View>

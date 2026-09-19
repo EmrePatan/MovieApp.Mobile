@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -21,13 +22,15 @@ export function SearchBar({
   onChangeText,
   onSubmit,
   onClear,
-  placeholder = 'Search movies, TV shows, and people',
+  placeholder,
   inputRef,
   autoFocus = false,
 }: SearchBarProps) {
+  const { t } = useTranslation();
   const internalInputRef = useRef<TextInput>(null);
   const resolvedInputRef = inputRef ?? internalInputRef;
   const showClear = value.length > 0;
+  const resolvedPlaceholder = placeholder ?? t('search.bar.placeholder');
 
   useEffect(() => {
     if (!autoFocus) {
@@ -48,12 +51,12 @@ export function SearchBar({
       <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
       <TextInput
         ref={resolvedInputRef}
-        accessibilityLabel="Search movies, TV shows, and people"
+        accessibilityLabel={t('search.bar.accessibility')}
         accessibilityRole="search"
         autoCapitalize="none"
         autoCorrect={false}
         clearButtonMode="never"
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         placeholderTextColor={colors.textMuted}
         returnKeyType="search"
         style={styles.input}
@@ -64,7 +67,7 @@ export function SearchBar({
       {showClear ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Clear search"
+          accessibilityLabel={t('search.bar.clear')}
           hitSlop={8}
           onPress={onClear}
           style={({ pressed }) => [styles.clearButton, pressed && styles.clearPressed]}

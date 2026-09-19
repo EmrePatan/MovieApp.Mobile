@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -11,18 +12,19 @@ interface CreditsSegmentedControlProps {
   onTabChange: (tab: CreditsTab) => void;
 }
 
-const TABS: { key: CreditsTab; label: string }[] = [
-  { key: 'cast', label: 'Cast' },
-  { key: 'crew', label: 'Crew' },
-];
-
 export function CreditsSegmentedControl({
   activeTab,
   onTabChange,
 }: CreditsSegmentedControlProps) {
+  const { t } = useTranslation();
+  const tabs: { key: CreditsTab; label: string }[] = [
+    { key: 'cast', label: t('details.credits.cast') },
+    { key: 'crew', label: t('details.credits.crew') },
+  ];
+
   return (
     <View style={styles.container} testID="credits-segmented-control">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const isActive = tab.key === activeTab;
 
         return (

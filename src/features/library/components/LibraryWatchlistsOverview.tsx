@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -25,6 +26,7 @@ interface LibraryWatchlistsOverviewProps {
 }
 
 export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverviewProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const watchlistsQuery = useWatchlists();
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -59,7 +61,7 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
   const createListFooter = (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Create new watchlist"
+      accessibilityLabel={t('library.watchlistsOverview.createAccessibility')}
       onPress={() => setCreateModalVisible(true)}
       style={({ pressed }) => [styles.newListAction, pressed && styles.newListPressed]}
     >
@@ -67,7 +69,7 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
         <Ionicons name="add" size={20} color={colors.accent} />
       </View>
       <AppText variant="body" style={styles.newListLabel}>
-        New List
+        {t('common.newList')}
       </AppText>
     </Pressable>
   );
@@ -84,7 +86,7 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
     return (
       <View style={styles.screen}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading watchlists" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingWatchlists')} />
         {createModal}
       </View>
     );
@@ -96,9 +98,8 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
         {listHeader}
         <View style={styles.centered}>
           <ErrorView
-            message="Unable to load watchlists. Please try again."
+            message={t('library.watchlistsOverview.loadError')}
             onRetry={() => void watchlistsQuery.refetch()}
-            retryLabel="Try Again"
           />
         </View>
         {createModal}
@@ -112,9 +113,9 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
         {listHeader}
         <LibraryEmptyState
           icon="bookmark"
-          title="You don't have any watchlists yet"
-          message="Create a list to save movies and TV shows you want to watch."
-          actionLabel="New List"
+          title={t('library.watchlistsOverview.emptyTitle')}
+          message={t('library.watchlistsOverview.emptyMessage')}
+          actionLabel={t('library.watchlistsOverview.newListAction')}
           onAction={() => setCreateModalVisible(true)}
         />
         {createModal}

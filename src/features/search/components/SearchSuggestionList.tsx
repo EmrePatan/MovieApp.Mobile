@@ -1,6 +1,8 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { memo, type ComponentProps } from 'react';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchAutocompleteItem } from '../types';
@@ -23,7 +25,13 @@ function formatSuggestionTypeLabel(suggestion: SearchAutocompleteItem): string {
   return formatContentType(suggestion.type);
 }
 
-function SearchSuggestionLeadingVisual({ suggestion }: { suggestion: SearchAutocompleteItem }) {
+function SearchSuggestionLeadingVisual({
+  suggestion,
+  t,
+}: {
+  suggestion: SearchAutocompleteItem;
+  t: TFunction;
+}) {
   if (suggestion.type === 'person') {
     if (suggestion.posterUrl) {
       return (
@@ -31,7 +39,7 @@ function SearchSuggestionLeadingVisual({ suggestion }: { suggestion: SearchAutoc
           uri={suggestion.posterUrl}
           width={AUTOCOMPLETE_PERSON_THUMB_SIZE}
           height={AUTOCOMPLETE_PERSON_THUMB_SIZE}
-          accessibilityLabel={`${suggestion.title} portrait`}
+          accessibilityLabel={t('details.sections.personPortrait', { name: suggestion.title })}
         />
       );
     }
@@ -39,7 +47,7 @@ function SearchSuggestionLeadingVisual({ suggestion }: { suggestion: SearchAutoc
     return (
       <View
         style={styles.personLeadingIcon}
-        accessibilityLabel="Person suggestion"
+        accessibilityLabel={t('search.suggestions.personSuggestion')}
       >
         <Ionicons name="person-outline" size={20} color={colors.textSecondary} />
       </View>
@@ -52,7 +60,7 @@ function SearchSuggestionLeadingVisual({ suggestion }: { suggestion: SearchAutoc
         uri={suggestion.posterUrl}
         width={AUTOCOMPLETE_THUMB_WIDTH}
         height={AUTOCOMPLETE_THUMB_HEIGHT}
-        accessibilityLabel={`${suggestion.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: suggestion.title })}
       />
     );
   }
@@ -64,7 +72,9 @@ function SearchSuggestionLeadingVisual({ suggestion }: { suggestion: SearchAutoc
     <View
       style={styles.leadingIcon}
       accessibilityLabel={
-        suggestion.type === 'tv' ? 'TV show suggestion' : 'Movie suggestion'
+        suggestion.type === 'tv'
+          ? t('search.suggestions.tvSuggestion')
+          : t('search.suggestions.movieSuggestion')
       }
     >
       <Ionicons name={iconName} size={20} color={colors.textSecondary} />
@@ -83,9 +93,11 @@ export const SearchSuggestionList = memo(function SearchSuggestionList({
   isLoading,
   onSelect,
 }: SearchSuggestionListProps) {
+  const { t } = useTranslation();
+
   if (isLoading && suggestions.length === 0) {
     return (
-      <View style={styles.loading} accessibilityLabel="Loading suggestions">
+      <View style={styles.loading} accessibilityLabel={t('common.loadingSuggestions')}>
         <ActivityIndicator color={colors.accent} size="small" />
       </View>
     );
@@ -93,8 +105,8 @@ export const SearchSuggestionList = memo(function SearchSuggestionList({
 
   if (suggestions.length === 0) {
     return (
-      <View style={styles.empty} accessibilityLabel="No suggestions">
-        <AppText variant="caption" muted>No suggestions</AppText>
+      <View style={styles.empty} accessibilityLabel={t('search.suggestions.empty')}>
+        <AppText variant="caption" muted>{t('search.suggestions.empty')}</AppText>
       </View>
     );
   }
@@ -108,7 +120,10 @@ export const SearchSuggestionList = memo(function SearchSuggestionList({
           <Pressable
             key={`${suggestion.type}-${suggestion.id}`}
             accessibilityRole="button"
-            accessibilityLabel={`Search for ${suggestion.title}, ${typeLabel}`}
+            accessibilityLabel={t('search.suggestions.searchForTitleType', {
+              title: suggestion.title,
+              type: typeLabel,
+            })}
             onPress={() => onSelect(suggestion)}
             style={({ pressed }) => [
               styles.row,
@@ -116,7 +131,7 @@ export const SearchSuggestionList = memo(function SearchSuggestionList({
               pressed && styles.pressed,
             ]}
           >
-            <SearchSuggestionLeadingVisual suggestion={suggestion} />
+            <SearchSuggestionLeadingVisual suggestion={suggestion} t={t} />
             <AppText variant="bodySmall" numberOfLines={1} style={styles.title}>
               {suggestion.title}
             </AppText>

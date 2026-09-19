@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -12,11 +13,14 @@ export function LibraryLoadingState({
   accessibilityLabel = 'Loading library',
   rowCount = 5,
 }: LibraryLoadingStateProps) {
+  const { t } = useTranslation();
+  const resolvedAccessibilityLabel = accessibilityLabel ?? t('common.loadingYourLibrary');
+
   return (
     <View
       style={styles.container}
       accessibilityRole="progressbar"
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={resolvedAccessibilityLabel}
     >
       {Array.from({ length: rowCount }, (_, index) => (
         <View key={index} style={styles.row}>

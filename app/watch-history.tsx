@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -24,6 +25,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function WatchHistoryScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const historyQuery = useRecentWatchHistory();
@@ -73,9 +75,9 @@ export default function WatchHistoryScreen() {
   const listHeader = (
     <View style={styles.header}>
       <DetailBackButton />
-      <AppText variant="title">Watch History</AppText>
+      <AppText variant="title">{t('common.watched')}</AppText>
       <AppText variant="bodySmall" muted>
-        Recently watched movies and episodes
+        {t('library.empty.watchedMessage')}
       </AppText>
     </View>
   );
@@ -85,9 +87,9 @@ export default function WatchHistoryScreen() {
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <WatchHistoryEmptyState
-          title="Sign in to view your watch history"
-          message="Your recently watched movies and episodes will appear here."
-          actionLabel="Sign In"
+          title={t('details.actions.signInWatchHistory')}
+          message={t('library.hub.signInCopy')}
+          actionLabel={t('common.signInTitleCase')}
           onAction={handleSignIn}
         />
       </SafeAreaView>
@@ -106,7 +108,7 @@ export default function WatchHistoryScreen() {
   if (historyQuery.isError && items.length === 0) {
     const message = isApiError(historyQuery.error)
       ? historyQuery.error.userMessage
-      : 'Unable to load watch history. Please try again.';
+      : t('details.queryState.loadError');
 
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -115,7 +117,6 @@ export default function WatchHistoryScreen() {
           <ErrorView
             message={message}
             onRetry={() => void historyQuery.refetch()}
-            retryLabel="Try Again"
           />
         </View>
       </SafeAreaView>
@@ -131,8 +132,8 @@ export default function WatchHistoryScreen() {
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
           <WatchHistoryEmptyState
-            title="No watch history yet"
-            message="Mark movies and episodes as watched from their detail pages."
+            title={t('library.empty.watchedTitle', { mediaLabel: t('library.empty.mediaLabels.titles') })}
+            message={t('library.empty.watchedMessage')}
           />
         }
         ListFooterComponent={

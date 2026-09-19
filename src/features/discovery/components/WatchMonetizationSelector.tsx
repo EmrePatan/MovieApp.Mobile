@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { translateWatchProviderType } from '@/i18n/catalog-labels';
 import { WATCH_MONETIZATION_OPTIONS, type WatchMonetizationType } from '../watch-provider-types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -15,24 +16,25 @@ export function WatchMonetizationSelector({
 }: WatchMonetizationSelectorProps) {
   return (
     <View style={styles.chipGrid}>
-      {WATCH_MONETIZATION_OPTIONS.map((option) => {
-        const selected = selectedTypes.includes(option.value);
+      {WATCH_MONETIZATION_OPTIONS.map((type) => {
+        const selected = selectedTypes.includes(type);
+        const label = translateWatchProviderType(type);
 
         return (
           <Pressable
-            key={option.value}
+            key={type}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={option.label}
-            onPress={() => onToggle(option.value)}
+            accessibilityLabel={label}
+            onPress={() => onToggle(type)}
             style={[styles.chip, selected && styles.chipSelected]}
-            testID={`watch-monetization-${option.value}`}
+            testID={`watch-monetization-${type}`}
           >
             <AppText
               variant="caption"
               style={[styles.chipLabel, selected && styles.chipLabelSelected]}
             >
-              {option.label}
+              {label}
             </AppText>
           </Pressable>
         );

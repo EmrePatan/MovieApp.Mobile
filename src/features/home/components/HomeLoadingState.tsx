@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -8,8 +9,14 @@ interface HomeLoadingStateProps {
 }
 
 export function HomeLoadingState({ showTopChrome = true }: HomeLoadingStateProps) {
+  const { t } = useTranslation();
+
   return (
-    <View style={styles.container} accessibilityRole="progressbar" accessibilityLabel="Loading home">
+    <View
+      style={styles.container}
+      accessibilityRole="progressbar"
+      accessibilityLabel={t('common.loadingHome')}
+    >
       {showTopChrome ? (
         <>
           <SkeletonBlock width="100%" height={320} style={styles.heroSkeleton} />

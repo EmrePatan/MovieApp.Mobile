@@ -1,14 +1,12 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '../types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-const FILTERS: { label: string; value: CatalogMediaFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Movies', value: 'movie' },
-  { label: 'TV Shows', value: 'tv' },
-];
+const FILTER_VALUES: CatalogMediaFilter[] = ['all', 'movie', 'tv'];
 
 interface LibraryMediaFilterControlProps {
   value: CatalogMediaFilter;
@@ -16,9 +14,19 @@ interface LibraryMediaFilterControlProps {
 }
 
 export function LibraryMediaFilterControl({ value, onChange }: LibraryMediaFilterControlProps) {
+  const { t } = useTranslation();
+  const filters = useMemo(
+    () =>
+      FILTER_VALUES.map((filterValue) => ({
+        value: filterValue,
+        label: t(`library.mediaFilter.${filterValue}`),
+      })),
+    [t],
+  );
+
   return (
     <View style={styles.container} accessibilityRole="tablist">
-      {FILTERS.map((filter) => {
+      {filters.map((filter) => {
         const selected = value === filter.value;
 
         return (
@@ -26,7 +34,7 @@ export function LibraryMediaFilterControl({ value, onChange }: LibraryMediaFilte
             key={filter.value}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Filter ${filter.label}`}
+            accessibilityLabel={t('common.filterLabel', { label: filter.label })}
             onPress={() => onChange(filter.value)}
             style={[styles.chip, selected && styles.chipSelected]}
           >

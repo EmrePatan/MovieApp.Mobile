@@ -1,6 +1,7 @@
+import { i18n } from '@/i18n';
+import { translateContentType } from '@/i18n/catalog-labels';
 import {
   formatCatalogYear,
-  formatContentType,
   formatIsoDate,
   formatRating,
   formatRuntimeMinutes,
@@ -12,9 +13,11 @@ export function formatMovieDetailMetadataLine(input: {
   voteAverage: number;
 }): string {
   const parts = [
-    formatContentType('movie'),
+    translateContentType('movie'),
     formatCatalogYear(input.releaseDate, null),
-    input.voteAverage > 0 ? `★ ${formatRating(input.voteAverage)}` : null,
+    input.voteAverage > 0
+      ? i18n.t('common.ratingStar', { rating: formatRating(input.voteAverage) })
+      : null,
     formatRuntimeMinutes(input.runtimeMinutes),
   ].filter(Boolean);
 
@@ -27,11 +30,15 @@ export function formatTvDetailMetadataLine(input: {
   seasonCount: number;
 }): string {
   const parts = [
-    formatContentType('tv'),
+    translateContentType('tv'),
     formatCatalogYear(input.firstAirDate, null),
-    input.voteAverage > 0 ? `★ ${formatRating(input.voteAverage)}` : null,
+    input.voteAverage > 0
+      ? i18n.t('common.ratingStar', { rating: formatRating(input.voteAverage) })
+      : null,
     input.seasonCount > 0
-      ? `${input.seasonCount} ${input.seasonCount === 1 ? 'Season' : 'Seasons'}`
+      ? i18n.t(input.seasonCount === 1 ? 'common.seasonCount' : 'common.seasonsCount', {
+          count: input.seasonCount,
+        })
       : null,
   ].filter(Boolean);
 
@@ -45,10 +52,12 @@ export function formatSeasonDetailMetadataLine(input: {
 }): string {
   const year = input.airDate ? input.airDate.slice(0, 4) : null;
   const parts = [
-    `Season ${input.seasonNumber}`,
+    i18n.t('details.metadata.seasonDetail', { number: input.seasonNumber }),
     year,
     input.episodeCount != null
-      ? `${input.episodeCount} ${input.episodeCount === 1 ? 'Episode' : 'Episodes'}`
+      ? i18n.t(input.episodeCount === 1 ? 'common.episodeCount' : 'common.episodesCount', {
+          count: input.episodeCount,
+        })
       : null,
   ].filter(Boolean);
 
@@ -63,10 +72,15 @@ export function formatEpisodeDetailMetadataLine(input: {
   voteAverage: number;
 }): string {
   const parts = [
-    `S${input.seasonNumber} E${input.episodeNumber}`,
+    i18n.t('details.metadata.episodeDetail', {
+      season: input.seasonNumber,
+      episode: input.episodeNumber,
+    }),
     formatIsoDate(input.airDate),
     formatRuntimeMinutes(input.runtimeMinutes),
-    input.voteAverage > 0 ? `★ ${formatRating(input.voteAverage)}` : null,
+    input.voteAverage > 0
+      ? i18n.t('common.ratingStar', { rating: formatRating(input.voteAverage) })
+      : null,
   ].filter(Boolean);
 
   return parts.join(' · ');
@@ -76,5 +90,8 @@ export function formatEpisodeBreadcrumb(input: {
   seasonNumber: number;
   episodeNumber: number;
 }): string {
-  return `Season ${input.seasonNumber} · Episode ${input.episodeNumber}`;
+  return i18n.t('details.metadata.breadcrumb', {
+    season: input.seasonNumber,
+    episode: input.episodeNumber,
+  });
 }

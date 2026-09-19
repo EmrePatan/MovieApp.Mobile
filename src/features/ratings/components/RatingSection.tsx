@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -20,6 +21,7 @@ interface RatingSectionProps {
 }
 
 export function RatingSection({ contentType, contentId }: RatingSectionProps) {
+  const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const myRatingQuery = useMyRating(contentType, contentId);
   const aggregateQuery = useRatingAggregate(contentType, contentId);
@@ -35,20 +37,23 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
 
   const aggregateLabel = useMemo(() => {
     if (aggregateQuery.isLoading) {
-      return 'Loading community ratings...';
+      return t('common.loadingCommunityRatings');
     }
 
     if (aggregateQuery.isError || !aggregateQuery.data) {
-      return 'Community ratings unavailable.';
+      return t('ratings.communityUnavailable');
     }
 
     const { averageScore, ratingCount } = aggregateQuery.data;
-    return `Community average: ★ ${formatRating(averageScore)} (${formatVoteCount(ratingCount)} ratings)`;
-  }, [aggregateQuery.data, aggregateQuery.isError, aggregateQuery.isLoading]);
+    return t('ratings.communityAverageLine', {
+      average: formatRating(averageScore),
+      count: formatVoteCount(ratingCount),
+    });
+  }, [aggregateQuery.data, aggregateQuery.isError, aggregateQuery.isLoading, t]);
 
   const handleSelectScore = (score: number) => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to rate this title.');
+      setFeedback(t('ratings.signInRequired'));
       return;
     }
 
@@ -60,18 +65,18 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
     rateContent.mutate(score, {
       onSuccess: () => {
         setSelectedScore(null);
-        setFeedback('Rating saved.');
+        setFeedback(t('ratings.saved'));
       },
       onError: () => {
         setSelectedScore(null);
-        setFeedback('Could not update your rating. Please try again.');
+        setFeedback(t('ratings.updateError'));
       },
     });
   };
 
   const handleRemoveRating = () => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to rate this title.');
+      setFeedback(t('ratings.signInRequired'));
       return;
     }
 
@@ -82,7 +87,7 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
     deleteRating.mutate(undefined, {
       onSuccess: () => {
         setSelectedScore(null);
-        setFeedback('Rating removed.');
+        setFeedback(t('ratings.removed'));
       },
       onError: (error) => {
         setFeedback(
@@ -96,7 +101,7 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
 
   return (
     <View style={styles.section}>
-      <AppText variant="subtitle">Your Rating</AppText>
+      <AppText variant="subtitle">{t('ratings.yourRating')}</AppText>
       <FeedbackMessage
         message={feedback}
         tone={feedback?.includes('Could not') ? 'error' : 'success'}
@@ -107,7 +112,9 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
         <ActivityIndicator color={colors.accent} />
       ) : (
         <AppText variant="bodySmall" muted>
-          {currentScore != null ? `You rated this ${currentScore}/10.` : 'You have not rated this yet.'}
+          {currentScore != null
+            ? t('ratings.youRated', { score: currentScore })
+            : t('ratings.notRatedYet')}
         </AppText>
       )}
 
@@ -119,7 +126,7 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
             <Pressable
               key={score}
               accessibilityRole="button"
-              accessibilityLabel={`Rate ${score} out of 10`}
+              accessibilityLabel={t('ratings.rateOutOfTen', { score })}
               accessibilityState={{ selected, disabled: isMutating }}
               disabled={isMutating}
               onPress={() => handleSelectScore(score)}
@@ -140,7 +147,7 @@ export function RatingSection({ contentType, contentId }: RatingSectionProps) {
 
       {currentScore != null ? (
         <AppButton
-          title="Remove My Rating"
+          title={t('ratings.removeMyRating')}
           variant="ghost"
           loading={deleteRating.isPending}
           disabled={isMutating}

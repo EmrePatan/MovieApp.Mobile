@@ -69,7 +69,7 @@ describe('star-rating conversions', () => {
 
   it('formats accessibility values on the 5-star scale', () => {
     expect(formatStarRatingAccessibilityValue(null)).toBe('Not rated');
-    expect(formatStarRatingAccessibilityValue(3.5)).toBe('3.5 out of 5 stars');
+    expect(formatStarRatingAccessibilityValue(3.5)).toBe('3.5 / 5');
   });
 
   it('steps ratings in 0.5 increments for accessibility', () => {

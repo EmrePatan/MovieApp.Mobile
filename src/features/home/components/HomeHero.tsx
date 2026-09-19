@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -73,6 +74,7 @@ export const HomeHero = memo(function HomeHero({
   cardWidth: cardWidthProp,
   embedded = false,
 }: HomeHeroProps) {
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const [posterFailed, setPosterFailed] = useState(false);
   const [posterFailedItemId, setPosterFailedItemId] = useState(item.id);
@@ -99,7 +101,7 @@ export const HomeHero = memo(function HomeHero({
   const showPosterFallback = !hasBackdrop && Boolean(posterUri) && !posterFailed;
 
   const accessibilityLabel = [
-    'Featured',
+    t('home.featured'),
     item.title,
     formatContentType(item.contentType),
     year,

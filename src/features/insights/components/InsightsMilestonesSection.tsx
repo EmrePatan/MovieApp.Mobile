@@ -1,5 +1,7 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsAchievement } from '../types';
 import {
@@ -16,6 +18,8 @@ interface InsightsMilestonesSectionProps {
 }
 
 export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSectionProps) {
+  const { t } = useTranslation();
+
   if (achievements.length === 0) {
     return null;
   }
@@ -26,8 +30,8 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
   return (
     <View style={styles.section}>
       <InsightsSectionHeader
-        title="Achievements"
-        subtitle="Milestones from your watching journey"
+        title={t('insights.milestones.title')}
+        subtitle={t('insights.milestones.subtitle')}
       />
       <ScrollView
         horizontal
@@ -41,19 +45,27 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
       </ScrollView>
       <View style={styles.summaryBlock}>
         <View style={styles.summaryRow}>
-          <Ionicons name="trophy-outline" size={14} color={colors.accent} />
+          <View style={styles.trophyBadge}>
+            <Ionicons name="trophy" size={12} color={colors.accentStrong} />
+          </View>
           <AppText variant="caption" style={styles.summaryPrimary}>
-            {unlockedCount} of {achievements.length} unlocked
+            {t('insights.milestones.unlockedSummary', {
+              unlocked: unlockedCount,
+              total: achievements.length,
+            })}
           </AppText>
         </View>
         {hasLocked ? (
           <AppText variant="caption" style={styles.summarySecondary}>
-            Keep watching to unlock your next milestone!
+            {t('insights.milestones.keepWatching')}
           </AppText>
         ) : null}
       </View>
       <View style={styles.progressTrack}>
-        <View
+        <LinearGradient
+          colors={[colors.accentMuted, colors.accentStrong]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
           style={[
             styles.progressFill,
             { width: `${Math.round((unlockedCount / achievements.length) * 100)}%` },
@@ -65,9 +77,14 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
 }
 
 function AchievementBadge({ achievement }: { achievement: InsightsAchievement }) {
+  const { t } = useTranslation();
   const accessibilityLabel = achievement.achieved
-    ? `${achievement.title}, achieved`
-    : `${achievement.title}, in progress, ${achievement.currentValue} of ${achievement.targetValue}`;
+    ? t('insights.milestones.achievedAccessibility', { title: achievement.title })
+    : t('insights.milestones.inProgressAccessibility', {
+        title: achievement.title,
+        current: achievement.currentValue,
+        target: achievement.targetValue,
+      });
 
   const iconName = achievement.achieved
     ? getAchievementIconName(achievement.category)
@@ -81,15 +98,33 @@ function AchievementBadge({ achievement }: { achievement: InsightsAchievement })
     >
       <View
         style={[
-          styles.badgeCircle,
-          achievement.achieved ? styles.badgeCircleUnlocked : styles.badgeCircleLocked,
+          styles.badgeRing,
+          achievement.achieved ? styles.badgeRingUnlocked : styles.badgeRingLocked,
         ]}
       >
-        <Ionicons
-          name={iconName}
-          size={22}
-          color={achievement.achieved ? colors.background : colors.textMuted}
-        />
+        <LinearGradient
+          colors={
+            achievement.achieved
+              ? [colors.accentTint18, colors.surfaceElevated, colors.surface]
+              : [colors.surfaceElevated, colors.surface]
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.badgeCircle}
+        >
+          <View
+            style={[
+              styles.iconWell,
+              achievement.achieved ? styles.iconWellUnlocked : styles.iconWellLocked,
+            ]}
+          >
+            <Ionicons
+              name={iconName}
+              size={achievement.achieved ? 24 : 20}
+              color={achievement.achieved ? colors.accentStrong : colors.textMuted}
+            />
+          </View>
+        </LinearGradient>
       </View>
       <AppText
         variant="bodySmall"
@@ -108,7 +143,7 @@ function AchievementBadge({ achievement }: { achievement: InsightsAchievement })
   );
 }
 
-const BADGE_SIZE = 64;
+const BADGE_SIZE = 68;
 
 const styles = StyleSheet.create({
   section: {
@@ -117,14 +152,28 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   badgeRow: {
-    gap: spacing.md,
+    gap: spacing.lg,
     paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
     paddingRight: spacing.sm,
   },
   badgeColumn: {
-    width: 76,
+    width: 80,
     alignItems: 'center',
     gap: 6,
+  },
+  badgeRing: {
+    padding: 2,
+    borderRadius: (BADGE_SIZE + 4) / 2,
+  },
+  badgeRingUnlocked: {
+    borderWidth: 1.5,
+    borderColor: colors.borderAccent,
+  },
+  badgeRingLocked: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
+    opacity: 0.85,
   },
   badgeCircle: {
     width: BADGE_SIZE,
@@ -132,15 +181,20 @@ const styles = StyleSheet.create({
     borderRadius: BADGE_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  badgeCircleUnlocked: {
-    backgroundColor: colors.accent,
+  iconWell: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  badgeCircleLocked: {
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    opacity: 0.9,
+  iconWellUnlocked: {
+    backgroundColor: colors.accentTint12,
+  },
+  iconWellLocked: {
+    backgroundColor: colors.progressTrack,
   },
   badgeNumber: {
     color: colors.textPrimary,
@@ -164,7 +218,17 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
+  },
+  trophyBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentTint12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderAccent,
   },
   summaryPrimary: {
     color: colors.accentStrong,
@@ -174,7 +238,7 @@ const styles = StyleSheet.create({
   summarySecondary: {
     color: colors.textMuted,
     lineHeight: 16,
-    paddingLeft: 22,
+    paddingLeft: 30,
   },
   progressTrack: {
     height: 4,
@@ -184,6 +248,6 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.accent,
+    borderRadius: borderRadius.full,
   },
 });

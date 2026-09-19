@@ -1,4 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  translateAdvancedDiscoverMediaType,
+  translateWorldCinemaSort,
+} from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -41,6 +46,7 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 export default function WorldCinemaScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
@@ -93,27 +99,28 @@ export default function WorldCinemaScreen() {
     [currentRoute, queryClient, router],
   );
 
-  const listHeader = useMemo(
+  const listHeaderContent = useMemo(
     () => (
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
-          World Cinema
+          {t('discovery.worldCinemaScreen.title')}
         </AppText>
         <AppText variant="bodySmall" muted>
-          Discover movies and TV by content origin country
+          {t('discovery.worldCinemaScreen.subtitle')}
         </AppText>
 
         <View style={styles.toggleRow}>
-          {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((option) => {
-            const selected = discoverState.mediaType === option.value;
+          {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
+            const selected = discoverState.mediaType === mediaType;
+            const label = translateAdvancedDiscoverMediaType(mediaType);
 
             return (
               <Pressable
-                key={option.value}
+                key={mediaType}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
-                accessibilityLabel={option.label}
-                onPress={() => replaceState({ ...discoverState, mediaType: option.value })}
+                accessibilityLabel={label}
+                onPress={() => replaceState({ ...discoverState, mediaType })}
                 style={({ pressed }) => [
                   styles.toggleChip,
                   selected && styles.toggleChipSelected,
@@ -121,7 +128,7 @@ export default function WorldCinemaScreen() {
                 ]}
               >
                 <AppText variant="bodySmall" style={selected ? styles.toggleLabelSelected : undefined}>
-                  {option.label}
+                  {label}
                 </AppText>
               </Pressable>
             );
@@ -140,16 +147,17 @@ export default function WorldCinemaScreen() {
         />
 
         <View style={styles.sortRow}>
-          {WORLD_CINEMA_SORT_OPTIONS.map((option) => {
-            const selected = discoverState.sort === option.value;
+          {WORLD_CINEMA_SORT_OPTIONS.map((sort) => {
+            const selected = discoverState.sort === sort;
+            const label = translateWorldCinemaSort(sort);
 
             return (
               <Pressable
-                key={option.value}
+                key={sort}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
-                accessibilityLabel={`Sort by ${option.label}`}
-                onPress={() => replaceState({ ...discoverState, sort: option.value })}
+                accessibilityLabel={t('common.sortByLabel', { label })}
+                onPress={() => replaceState({ ...discoverState, sort })}
                 style={({ pressed }) => [
                   styles.sortChip,
                   selected && styles.sortChipSelected,
@@ -157,7 +165,7 @@ export default function WorldCinemaScreen() {
                 ]}
               >
                 <AppText variant="bodySmall" style={selected ? styles.sortLabelSelected : undefined}>
-                  {option.label}
+                  {label}
                 </AppText>
               </Pressable>
             );
@@ -165,8 +173,10 @@ export default function WorldCinemaScreen() {
         </View>
       </View>
     ),
-    [countryExpanded, discoverState, replaceState],
+    [countryExpanded, discoverState, replaceState, t],
   );
+
+  const renderListHeader = useCallback(() => listHeaderContent, [listHeaderContent]);
 
   const listEmpty = useMemo(() => {
     if (resultsQuery.isLoading) {
@@ -176,11 +186,11 @@ export default function WorldCinemaScreen() {
     if (resultsQuery.isError) {
       const message = isApiError(resultsQuery.error)
         ? resultsQuery.error.userMessage
-        : 'Unable to load world cinema results right now.';
+        : t('discovery.worldCinemaScreen.loadError');
 
       return (
         <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
     }
@@ -188,14 +198,14 @@ export default function WorldCinemaScreen() {
     if (items.length === 0) {
       return (
         <SearchEmptyState
-          title="No titles found"
-          message="Try another origin country or media type."
+          title={t('discovery.worldCinemaScreen.emptyTitle')}
+          message={t('discovery.worldCinemaScreen.emptyMessage')}
         />
       );
     }
 
     return null;
-  }, [items.length, resultsQuery]);
+  }, [items.length, resultsQuery, t]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -208,7 +218,7 @@ export default function WorldCinemaScreen() {
         renderItem={({ item }) => (
           <SearchResultCard item={item} onPress={handleResultPress} />
         )}
-        ListHeaderComponent={listHeader}
+        ListHeaderComponent={renderListHeader}
         ListEmptyComponent={listEmpty}
         ListFooterComponent={
           resultsQuery.isFetchingNextPage ? (

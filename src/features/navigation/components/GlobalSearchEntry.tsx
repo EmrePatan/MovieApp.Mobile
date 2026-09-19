@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { SearchReturnOrigin } from '../search-navigation';
 import { openSearch } from '../search-navigation';
@@ -28,12 +29,13 @@ export function GlobalSearchIconButton({
   overlay = false,
   compact = false,
 }: GlobalSearchIconButtonProps) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Search movies, TV shows, and people"
+      accessibilityLabel={t('home.search.accessibility')}
       onPress={() => openSearch(router, origin)}
       style={({ pressed }) => [
         styles.iconButton,
@@ -51,16 +53,15 @@ export function GlobalSearchIconButton({
   );
 }
 
-const DISCOVER_SEARCH_PLACEHOLDER = 'Search movies, shows & people';
-
 export function GlobalSearchEntry({ origin, variant = 'default' }: GlobalSearchEntryProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const isDiscover = variant === 'discover';
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Search movies, TV shows, and people"
+      accessibilityLabel={t('home.search.accessibility')}
       onPress={() => openSearch(router, origin)}
       testID={isDiscover ? 'discover-search-entry' : 'global-search-entry'}
       style={({ pressed }) => [
@@ -79,7 +80,7 @@ export function GlobalSearchEntry({ origin, variant = 'default' }: GlobalSearchE
         muted
         style={[styles.placeholder, isDiscover && styles.placeholderDiscover]}
       >
-        {isDiscover ? DISCOVER_SEARCH_PLACEHOLDER : 'Search movies, TV & people'}
+        {isDiscover ? t('discover.hub.searchPlaceholder') : t('home.search.placeholder')}
       </AppText>
     </Pressable>
   );

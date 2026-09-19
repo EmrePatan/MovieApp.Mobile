@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -19,9 +20,13 @@ export function LibraryWatchlistDetailHeader({
   title,
   subtitle,
   onOverflowPress,
-  overflowAccessibilityLabel = 'Watchlist options',
+  overflowAccessibilityLabel,
   children,
 }: LibraryWatchlistDetailHeaderProps) {
+  const { t } = useTranslation();
+  const resolvedOverflowLabel =
+    overflowAccessibilityLabel ?? t('library.watchlistDetail.overflowAccessibility');
+
   return (
     <View style={styles.header} testID="library-watchlist-detail-header">
       <View style={styles.toolbar}>
@@ -42,7 +47,7 @@ export function LibraryWatchlistDetailHeader({
           {onOverflowPress ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={overflowAccessibilityLabel}
+              accessibilityLabel={resolvedOverflowLabel}
               hitSlop={8}
               onPress={onOverflowPress}
               style={({ pressed }) => [styles.overflowButton, pressed && styles.pressed]}

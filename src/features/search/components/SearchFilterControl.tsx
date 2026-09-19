@@ -1,15 +1,27 @@
 import type { SearchTypeFilter } from '../types';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-const FILTERS: { label: string; value: SearchTypeFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Movies', value: 'movie' },
-  { label: 'TV Shows', value: 'tv' },
-  { label: 'People', value: 'person' },
-];
+const FILTERS: SearchTypeFilter[] = ['all', 'movie', 'tv', 'person'];
+
+function getFilterLabel(filter: SearchTypeFilter, t: (key: string) => string): string {
+  if (filter === 'all') {
+    return t('search.filter.all');
+  }
+
+  if (filter === 'movie') {
+    return t('search.filter.movies');
+  }
+
+  if (filter === 'tv') {
+    return t('search.filter.tvShows');
+  }
+
+  return t('search.filter.people');
+}
 
 interface SearchFilterControlProps {
   value: SearchTypeFilter;
@@ -17,25 +29,28 @@ interface SearchFilterControlProps {
 }
 
 export function SearchFilterControl({ value, onChange }: SearchFilterControlProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container} accessibilityRole="tablist">
       {FILTERS.map((filter) => {
-        const selected = value === filter.value;
+        const selected = value === filter;
+        const label = getFilterLabel(filter, t);
 
         return (
           <Pressable
-            key={filter.value}
+            key={filter}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Filter ${filter.label}`}
-            onPress={() => onChange(filter.value)}
+            accessibilityLabel={t('search.filter.filterAccessibility', { label })}
+            onPress={() => onChange(filter)}
             style={[styles.chip, selected && styles.chipSelected]}
           >
             <AppText
               variant="caption"
               style={[styles.label, selected && styles.labelSelected]}
             >
-              {filter.label}
+              {label}
             </AppText>
           </Pressable>
         );

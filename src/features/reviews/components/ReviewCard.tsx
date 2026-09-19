@@ -1,4 +1,5 @@
 import { memo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -39,6 +40,7 @@ export const ReviewCard = memo(function ReviewCard({
   onEdit,
   onDelete,
 }: ReviewCardProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const dateLabel = formatReviewDateLabel(review.createdAt, review.updatedAt);
   const content = review.content.trim();
@@ -94,7 +96,7 @@ export const ReviewCard = memo(function ReviewCard({
             {onDelete ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Delete review"
+                accessibilityLabel={t('common.deleteReview')}
                 disabled={isDeleting}
                 hitSlop={8}
                 onPress={onDelete}

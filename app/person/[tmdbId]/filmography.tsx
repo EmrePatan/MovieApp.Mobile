@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { PersonFilmographyDetailContent } from '@/features/details/person/components/PersonFilmographyDetailContent';
 import { usePersonDetails } from '@/features/details/person/hooks/usePersonDetails';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
@@ -5,6 +6,7 @@ import { parsePositiveInt } from '@/features/details/shared/routes';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function PersonFilmographyScreen() {
+  const { t } = useTranslation();
   const { tmdbId } = useLocalSearchParams<{ tmdbId?: string }>();
   const resolvedTmdbId = parsePositiveInt(tmdbId);
   const isInvalid = resolvedTmdbId === null;
@@ -14,9 +16,9 @@ export default function PersonFilmographyScreen() {
     <DetailQueryState
       query={query}
       contentLayout="list"
-      invalidParamsMessage={isInvalid ? 'The filmography link is invalid.' : undefined}
-      notFoundTitle="Filmography not found"
-      notFoundMessage="Filmography could not be found for this person."
+      invalidParamsMessage={isInvalid ? t('details.queryState.invalidRequestMessage') : undefined}
+      notFoundTitle={t('details.sections.filmography')}
+      notFoundMessage={t('details.queryState.invalidRequestMessage')}
     >
       {(person) => <PersonFilmographyDetailContent person={person} />}
     </DetailQueryState>

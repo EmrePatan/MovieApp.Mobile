@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -38,6 +39,7 @@ function ReviewComposerInner({
   onSubmit,
   onCancel,
 }: ReviewComposerProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
   const [content, setContent] = useState(initialContent);
   const [fieldErrors, setFieldErrors] = useState<ReviewFormErrors>({});
@@ -94,12 +96,12 @@ function ReviewComposerInner({
     <View style={styles.container} testID="review-composer">
       <View style={styles.header}>
         <AppText variant="subtitle" style={styles.headerTitle}>
-          Write review
+          {t('reviews.writeReviewTitle')}
         </AppText>
         {onCancel ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close composer"
+            accessibilityLabel={t('common.closeComposer')}
             disabled={isSubmitting}
             hitSlop={8}
             onPress={handleClose}
@@ -125,13 +127,13 @@ function ReviewComposerInner({
       >
         <TextInput
           ref={inputRef}
-          accessibilityLabel="Review"
+          accessibilityLabel={t('reviews.reviewFieldLabel')}
           multiline
           value={content}
           onChangeText={handleChangeText}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="What stood out? A scene, a performance, a mood..."
+          placeholder={t('reviews.placeholder')}
           placeholderTextColor={colors.textMuted}
           autoCorrect
           style={styles.input}

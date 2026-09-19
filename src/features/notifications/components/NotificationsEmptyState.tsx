@@ -1,20 +1,23 @@
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export function NotificationsEmptyState() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container} accessibilityRole="text">
       <View style={styles.iconWrap}>
         <Ionicons name="notifications-outline" size={40} color={colors.textMuted} />
       </View>
       <AppText variant="subtitle" center>
-        No notifications yet
+        {t('notifications.emptyTitle')}
       </AppText>
       <AppText variant="bodySmall" muted center>
-        Release alerts for movies and shows you follow will appear here.
+        {t('notifications.emptyMessage')}
       </AppText>
     </View>
   );

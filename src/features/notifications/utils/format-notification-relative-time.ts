@@ -1,3 +1,5 @@
+import { getUiFormatLocaleTag, i18n } from '@/i18n';
+
 export function formatNotificationRelativeTime(createdAtUtc: string): string {
   const createdAt = new Date(createdAtUtc);
   if (Number.isNaN(createdAt.getTime())) {
@@ -8,24 +10,24 @@ export function formatNotificationRelativeTime(createdAtUtc: string): string {
   const diffMinutes = Math.floor(diffMs / (60 * 1000));
 
   if (diffMinutes < 1) {
-    return 'Just now';
+    return i18n.t('notifications.relativeTime.justNow');
   }
 
   if (diffMinutes < 60) {
-    return `${diffMinutes}m ago`;
+    return i18n.t('notifications.relativeTime.minutesAgo', { count: diffMinutes });
   }
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) {
-    return `${diffHours}h ago`;
+    return i18n.t('notifications.relativeTime.hoursAgo', { count: diffHours });
   }
 
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) {
-    return `${diffDays}d ago`;
+    return i18n.t('notifications.relativeTime.daysAgo', { count: diffDays });
   }
 
-  return createdAt.toLocaleDateString(undefined, {
+  return createdAt.toLocaleDateString(getUiFormatLocaleTag(), {
     month: 'short',
     day: 'numeric',
     year: createdAt.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,

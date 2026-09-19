@@ -1,4 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  translateAdvancedDiscoverMediaType,
+  translateAdvancedDiscoverSort,
+  translateAdvancedDiscoverTitle,
+} from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -53,13 +59,11 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 function getMediaTypeLabel(mediaType: AdvancedDiscoverMediaType): string {
-  return (
-    ADVANCED_DISCOVER_MEDIA_OPTIONS.find((option) => option.value === mediaType)?.label ??
-    'Movies'
-  );
+  return translateAdvancedDiscoverMediaType(mediaType);
 }
 
 export default function AdvancedDiscoverScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
@@ -174,8 +178,7 @@ export default function AdvancedDiscoverScreen() {
       return null;
     }
 
-    return ADVANCED_DISCOVER_SORT_OPTIONS.find((option) => option.value === filters.sort)?.label ??
-      null;
+    return translateAdvancedDiscoverSort(filters.sort);
   }, [filters.sort]);
 
   const renderResult = useCallback(
@@ -189,7 +192,7 @@ export default function AdvancedDiscoverScreen() {
     () => (
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
-          Advanced Discover
+          {translateAdvancedDiscoverTitle()}
         </AppText>
         <AppText variant="bodySmall" muted>
           {getMediaTypeLabel(mediaType)}
@@ -200,15 +203,15 @@ export default function AdvancedDiscoverScreen() {
             accessibilityRole="button"
             accessibilityLabel={
               activeFilterCount > 0
-                ? `Filters, ${activeFilterCount} active`
-                : 'Filters'
+                ? t('common.filtersActive', { count: activeFilterCount })
+                : t('discovery.browseScreen.filters')
             }
             onPress={() => setFilterSheetVisible(true)}
             style={({ pressed }) => [styles.filtersButton, pressed && styles.pressed]}
           >
             <Ionicons name="options-outline" size={18} color={colors.textPrimary} />
             <AppText variant="bodySmall" style={styles.filtersButtonText}>
-              Filters
+              {t('discovery.browseScreen.filters')}
             </AppText>
             {activeFilterCount > 0 ? (
               <View style={styles.filterBadge}>
@@ -221,7 +224,7 @@ export default function AdvancedDiscoverScreen() {
         </View>
       </View>
     ),
-    [activeFilterCount, mediaType, sortLabel],
+    [activeFilterCount, mediaType, sortLabel, t],
   );
 
   const topBar = (
@@ -239,16 +242,16 @@ export default function AdvancedDiscoverScreen() {
       return (
         <View style={styles.emptyWithAction}>
           <SearchEmptyState
-            title="No titles match your filters"
-            message="Try adjusting or clearing your filters."
+            title={t('discovery.browseScreen.noTitlesMatchFiltersTitle')}
+            message={t('discovery.browseScreen.noTitlesMatchFiltersMessage')}
           />
-          <AppButton title="Clear filters" variant="secondary" onPress={clearFilters} />
+          <AppButton title={t('common.clearFilters')} variant="secondary" onPress={clearFilters} />
         </View>
       );
     }
 
-    return <SearchEmptyState title="No titles found." />;
-  }, [clearFilters, filters, mediaType, shouldFetchResults]);
+    return <SearchEmptyState title={t('discovery.advancedDiscover.noTitlesFound')} />;
+  }, [clearFilters, filters, mediaType, shouldFetchResults, t]);
 
   const filterSheet = (
     <AdvancedDiscoverFilterSheet
@@ -277,7 +280,7 @@ export default function AdvancedDiscoverScreen() {
   if (shouldFetchResults && discoverQuery.isError && items.length === 0) {
     const message = isApiError(discoverQuery.error)
       ? discoverQuery.error.userMessage
-      : 'Unable to load discovery results. Please try again.';
+      : t('discovery.advancedDiscover.loadError');
 
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -285,7 +288,7 @@ export default function AdvancedDiscoverScreen() {
         <View style={styles.listContent}>
           {pageHeader}
           <View style={styles.errorContainer}>
-            <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
+            <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
           </View>
         </View>
         {filterSheet}

@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 import { DISCOVERY_BROWSE_MODES, type DiscoveryBrowseMode } from '../types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -17,16 +18,17 @@ export function DiscoveryModeControl({ value, onChange }: DiscoveryModeControlPr
       contentContainerStyle={styles.content}
       accessibilityRole="tablist"
     >
-      {DISCOVERY_BROWSE_MODES.map((option) => {
-        const selected = option.value === value;
+      {DISCOVERY_BROWSE_MODES.map((mode) => {
+        const selected = mode === value;
+        const label = translateDiscoveryBrowseMode(mode);
 
         return (
           <Pressable
-            key={option.value}
+            key={mode}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={option.label}
-            onPress={() => onChange(option.value)}
+            accessibilityLabel={label}
+            onPress={() => onChange(mode)}
             style={({ pressed }) => [
               styles.chip,
               selected && styles.chipSelected,
@@ -37,7 +39,7 @@ export function DiscoveryModeControl({ value, onChange }: DiscoveryModeControlPr
               variant="caption"
               style={[styles.label, selected && styles.labelSelected]}
             >
-              {option.label}
+              {label}
             </AppText>
           </Pressable>
         );

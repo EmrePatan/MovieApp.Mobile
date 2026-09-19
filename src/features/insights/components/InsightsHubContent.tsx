@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
@@ -28,6 +29,7 @@ import { spacing } from '@/theme/spacing';
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export function InsightsHubContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const insightsQuery = useInsightsV3(selectedYear);
@@ -87,12 +89,12 @@ export function InsightsHubContent() {
   if (insightsQuery.isError && !insightsQuery.data) {
     const message = isApiError(insightsQuery.error)
       ? insightsQuery.error.userMessage
-      : 'Unable to load your insights. Please try again.';
+      : t('insights.hub.loadError');
 
     return (
       <View style={styles.errorContainer}>
         <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
-        <ErrorView message={message} onRetry={() => void insightsQuery.refetch()} retryLabel="Try Again" />
+        <ErrorView message={message} onRetry={() => void insightsQuery.refetch()} />
       </View>
     );
   }
@@ -156,12 +158,14 @@ export function InsightsHubContent() {
 }
 
 function InsightsScreenHeader({ onOpenProfile }: { onOpenProfile: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.header}>
       <View style={styles.headerCopy}>
-        <AppText variant="title">Insights</AppText>
+        <AppText variant="title">{t('insights.hub.title')}</AppText>
         <AppText variant="bodySmall" muted>
-          What your watching history reveals
+          {t('insights.hub.subtitle')}
         </AppText>
       </View>
       <HomeHeaderProfileAvatar compact onPress={onOpenProfile} />

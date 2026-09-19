@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +26,7 @@ export function PersonFilmographyPreviewSection({
   tmdbPersonId,
   filmography,
 }: PersonFilmographyPreviewSectionProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const resolvingKeyRef = useRef<string | null>(null);
@@ -49,14 +51,14 @@ export function PersonFilmographyPreviewSection({
         setErrorMessage(
           isApiError(error)
             ? error.userMessage
-            : 'Could not open this title right now. Please try again.',
+            : t('details.sections.filmographyOpenError'),
         );
       } finally {
         resolvingKeyRef.current = null;
         setResolvingKey(null);
       }
     },
-    [queryClient, router],
+    [queryClient, router, t],
   );
 
   const handleSeeAllPress = useCallback(() => {
@@ -66,9 +68,9 @@ export function PersonFilmographyPreviewSection({
   if (filmography.length === 0) {
     return (
       <View style={styles.container} testID="person-filmography-empty">
-        <HomeSectionHeader title="Known For" />
+        <HomeSectionHeader title={t('details.sections.knownFor')} />
         <AppText variant="bodySmall" muted style={styles.empty}>
-          No acting credits are available yet.
+          {t('details.sections.knownForEmpty')}
         </AppText>
       </View>
     );
@@ -77,7 +79,7 @@ export function PersonFilmographyPreviewSection({
   return (
     <View style={styles.container} testID="person-filmography-preview">
       <HomeSectionHeader
-        title="Known For"
+        title={t('details.sections.knownFor')}
         onSeeAllPress={filmography.length > FILMOGRAPHY_PREVIEW_LIMIT ? handleSeeAllPress : undefined}
       />
       <FeedbackMessage

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -51,6 +52,7 @@ function upcomingItemKey(item: UpcomingCatalogItem): string {
 }
 
 export default function UpcomingScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
   const { isAuthenticated } = useAuth();
@@ -125,16 +127,16 @@ export default function UpcomingScreen() {
 
   const subtitle = activeTab === 'for-you'
     ? isAuthenticated
-      ? 'Movies and TV you follow with upcoming releases or episodes'
-      : 'Sign in to see your followed upcoming releases and episodes'
-    : 'Discover upcoming movies and TV premieres from the catalog';
+      ? t('upcoming.subtitleForYouAuth')
+      : t('upcoming.subtitleForYouGuest')
+    : t('upcoming.subtitleCatalog');
 
   const listHeader = (
     <>
-      <LibraryStackHeader title="Coming Up" subtitle={subtitle}>
+      <LibraryStackHeader title={t('upcoming.title')} subtitle={subtitle}>
         {activeTab === 'for-you' && !isAuthenticated ? (
           <AppButton
-            title="Sign In for Followed Updates"
+            title={t('upcoming.signInCta')}
             variant="secondary"
             onPress={handleSignIn}
           />
@@ -159,12 +161,12 @@ export default function UpcomingScreen() {
           ListEmptyComponent={
             <View style={styles.filteredEmpty}>
               <AppText variant="subtitle" center>
-                Sign in to see your Coming Up list
+                {t('upcoming.guestTitle')}
               </AppText>
               <AppText variant="bodySmall" muted center>
-                Follow shows and set release alerts to track what is next for you.
+                {t('upcoming.guestMessage')}
               </AppText>
-              <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />
+              <AppButton title={t('common.signInTitleCase')} variant="secondary" onPress={handleSignIn} />
             </View>
           }
           contentContainerStyle={styles.listContent}
@@ -177,7 +179,7 @@ export default function UpcomingScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading upcoming" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingUpcoming')} />
       </SafeAreaView>
     );
   }
@@ -188,9 +190,9 @@ export default function UpcomingScreen() {
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message="Unable to load upcoming titles. Please try again."
+            message={t('upcoming.loadError')}
             onRetry={() => void activeQuery.refetch()}
-            retryLabel="Retry"
+            retryLabel={t('common.retry')}
           />
         </View>
       </SafeAreaView>
@@ -200,20 +202,20 @@ export default function UpcomingScreen() {
   const emptyComponent = activeTab === 'for-you' ? (
     <View style={styles.filteredEmpty}>
       <AppText variant="subtitle" center>
-        Nothing coming up yet
+        {t('upcoming.emptyForYouTitle')}
       </AppText>
       <AppText variant="bodySmall" muted center>
-        Follow a show or set an alert for an upcoming movie and it will appear here.
+        {t('upcoming.emptyForYouMessage')}
       </AppText>
-      <AppButton title="Explore Upcoming" variant="secondary" onPress={handleExploreUpcoming} />
+      <AppButton title={t('upcoming.exploreUpcoming')} variant="secondary" onPress={handleExploreUpcoming} />
     </View>
   ) : (
     <View style={styles.filteredEmpty}>
       <AppText variant="subtitle" center>
-        Nothing upcoming yet
+        {t('upcoming.emptyCatalogTitle')}
       </AppText>
       <AppText variant="bodySmall" muted center>
-        New catalog releases will appear here as they are announced.
+        {t('upcoming.emptyCatalogMessage')}
       </AppText>
     </View>
   );
@@ -235,9 +237,9 @@ export default function UpcomingScreen() {
           ) : activeQuery.isFetchNextPageError ? (
             <View style={styles.footerError}>
               <AppText variant="bodySmall" muted center>
-                Unable to load more upcoming titles. Please try again.
+                {t('common.unableToLoadMoreUpcoming')}
               </AppText>
-              <AppButton title="Retry" variant="secondary" onPress={handleRetryNextPage} />
+              <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
             </View>
           ) : null
         }

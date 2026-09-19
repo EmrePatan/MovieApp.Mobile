@@ -18,6 +18,9 @@ jest.mock('@/auth/social-auth-config', () => ({
 jest.mock('@/auth/social-auth-service', () => ({
   isGoogleSocialAuthAvailable: () => true,
   isAppleSocialAuthAvailable: () => false,
+  isGoogleSocialAuthDebugDiagnosticsEnabled: () => false,
+  formatGoogleSignInDevelopmentErrorMessage: (error: unknown) =>
+    error instanceof Error ? error.message : 'Google sign-in failed.',
   SocialAuthCancelledError: class SocialAuthCancelledError extends Error {
     constructor() {
       super('cancelled');

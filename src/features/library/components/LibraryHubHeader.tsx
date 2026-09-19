@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '../types';
 import type { LibraryCategory } from '../types/library';
@@ -20,15 +21,16 @@ export const LibraryHubHeader = memo(function LibraryHubHeader({
   onCategoryChange,
   onMediaTypeChange,
 }: LibraryHubHeaderProps) {
+  const { t } = useTranslation();
   const isWatchlistsCategory = category === 'watchlist';
 
   return (
     <View style={styles.header} testID="library-hub-header">
       <AppText variant="title" accessibilityRole="header">
-        My Library
+        {t('library.hub.title')}
       </AppText>
       <AppText variant="bodySmall" muted>
-        Your personal collection
+        {t('library.hub.subtitle')}
       </AppText>
       <LibraryCategoryControl value={category} onChange={onCategoryChange} />
       {category !== 'watching' && !isWatchlistsCategory ? (

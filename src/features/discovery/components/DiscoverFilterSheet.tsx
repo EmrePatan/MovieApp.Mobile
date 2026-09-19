@@ -1,4 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  translateDiscoverySort,
+  translateDiscoveryTypeFilter,
+} from '@/i18n/catalog-labels';
 import {
   ActivityIndicator,
   Modal,
@@ -46,15 +51,19 @@ function GenreSelector({
   genres,
   selectedIds,
   onToggle,
+  noGenresLabel,
+  genreAccessibilityLabel,
 }: {
   genres: Genre[];
   selectedIds: string[];
   onToggle: (genreId: string) => void;
+  noGenresLabel: string;
+  genreAccessibilityLabel: (name: string) => string;
 }) {
   if (genres.length === 0) {
     return (
       <AppText variant="bodySmall" muted>
-        No genres available.
+        {noGenresLabel}
       </AppText>
     );
   }
@@ -69,7 +78,7 @@ function GenreSelector({
             key={genre.id}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Genre ${genre.name}`}
+            accessibilityLabel={genreAccessibilityLabel(genre.name)}
             onPress={() => onToggle(genre.id)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
@@ -89,29 +98,32 @@ function GenreSelector({
 function TypeSelector({
   value,
   onChange,
+  contentTypeAccessibilityLabel,
 }: {
   value: DiscoveryTypeFilter;
   onChange: (value: DiscoveryTypeFilter) => void;
+  contentTypeAccessibilityLabel: (label: string) => string;
 }) {
   return (
     <View style={styles.chipGrid}>
-      {DISCOVERY_TYPE_OPTIONS.map((option) => {
-        const selected = option.value === value;
+      {DISCOVERY_TYPE_OPTIONS.map((typeOption) => {
+        const selected = typeOption === value;
+        const label = translateDiscoveryTypeFilter(typeOption);
 
         return (
           <Pressable
-            key={option.value}
+            key={typeOption}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Content type ${option.label}`}
-            onPress={() => onChange(option.value)}
+            accessibilityLabel={contentTypeAccessibilityLabel(label)}
+            onPress={() => onChange(typeOption)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
             <AppText
               variant="caption"
               style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
             >
-              {option.label}
+              {label}
             </AppText>
           </Pressable>
         );
@@ -123,29 +135,32 @@ function TypeSelector({
 function SortSelector({
   value,
   onChange,
+  sortAccessibilityLabel,
 }: {
   value: DiscoverySort;
   onChange: (value: DiscoverySort) => void;
+  sortAccessibilityLabel: (label: string) => string;
 }) {
   return (
     <View style={styles.chipGrid}>
-      {DISCOVERY_SORT_OPTIONS.map((option) => {
-        const selected = option.value === value;
+      {DISCOVERY_SORT_OPTIONS.map((sortOption) => {
+        const selected = sortOption === value;
+        const label = translateDiscoverySort(sortOption);
 
         return (
           <Pressable
-            key={option.value}
+            key={sortOption}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Sort ${option.label}`}
-            onPress={() => onChange(option.value)}
+            accessibilityLabel={sortAccessibilityLabel(label)}
+            onPress={() => onChange(sortOption)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
             <AppText
               variant="caption"
               style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
             >
-              {option.label}
+              {label}
             </AppText>
           </Pressable>
         );
@@ -163,6 +178,7 @@ export function DiscoverFilterSheet({
   onApply,
   onClear,
 }: DiscoverFilterSheetProps) {
+  const { t } = useTranslation();
   const genresQuery = useGenres();
   const wasVisibleRef = useRef(false);
   const [draftType, setDraftType] = useState<DiscoveryTypeFilter>(type);
@@ -206,8 +222,8 @@ export function DiscoverFilterSheet({
       <View style={styles.overlay}>
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
           <View style={styles.header}>
-            <AppText variant="subtitle">Filters</AppText>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={handleClose}>
+            <AppText variant="subtitle">{t('discovery.filterSheet.title')}</AppText>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
               <Ionicons name="close" size={24} color={colors.textPrimary} />
             </Pressable>
           </View>
@@ -218,18 +234,24 @@ export function DiscoverFilterSheet({
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Content Type</AppText>
-              <TypeSelector value={draftType} onChange={setDraftType} />
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.contentTypeSection')}</AppText>
+              <TypeSelector
+                value={draftType}
+                onChange={setDraftType}
+                contentTypeAccessibilityLabel={(label) => t('common.contentTypeLabel', { label })}
+              />
             </View>
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Genres</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.genresSection')}</AppText>
               {genresQuery.isLoading ? (
                 <ActivityIndicator color={colors.accent} />
               ) : (
                 <GenreSelector
                   genres={genresQuery.data ?? []}
                   selectedIds={draft.genreIds}
+                  noGenresLabel={t('common.noGenresAvailable')}
+                  genreAccessibilityLabel={(name) => t('common.genreLabel', { name })}
                   onToggle={(genreId) =>
                     setDraft((current) => ({
                       ...current,
@@ -241,7 +263,7 @@ export function DiscoverFilterSheet({
             </View>
 
             <AppInput
-              label="Year"
+              label={t('common.year')}
               value={draft.year != null ? String(draft.year) : ''}
               onChangeText={(text) => {
                 const trimmed = text.trim();
@@ -250,13 +272,13 @@ export function DiscoverFilterSheet({
                   year: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
                 }));
               }}
-              placeholder="e.g. 2020"
+              placeholder={t('common.placeholderYearExample')}
               keyboardType="number-pad"
               maxLength={4}
             />
 
             <AppInput
-              label="Minimum rating"
+              label={t('common.minimumRating')}
               value={draft.minRating != null ? String(draft.minRating) : ''}
               onChangeText={(text) => {
                 const trimmed = text.trim();
@@ -265,13 +287,13 @@ export function DiscoverFilterSheet({
                   minRating: trimmed.length === 0 ? null : Number.parseFloat(trimmed) || null,
                 }));
               }}
-              placeholder="0–10"
+              placeholder={t('common.placeholderRatingRange')}
               keyboardType="decimal-pad"
               maxLength={4}
             />
 
             <AppInput
-              label="Language"
+              label={t('common.language')}
               value={draft.language ?? ''}
               onChangeText={(text) =>
                 setDraft((current) => ({
@@ -279,24 +301,25 @@ export function DiscoverFilterSheet({
                   language: text.trim().length > 0 ? text.trim().toLowerCase() : null,
                 }))
               }
-              placeholder="e.g. en"
+              placeholder={t('common.placeholderLanguageExample')}
               autoCapitalize="none"
               autoCorrect={false}
               maxLength={8}
             />
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Sort by</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.sortSection')}</AppText>
               <SortSelector
                 value={draft.sort ?? getDefaultSortForMode(mode)}
+                sortAccessibilityLabel={(label) => t('common.sortByLabel', { label })}
                 onChange={(sort) => setDraft((current) => ({ ...current, sort }))}
               />
             </View>
           </ScrollView>
 
           <View style={styles.actions}>
-            <AppButton title="Reset" variant="secondary" onPress={handleClear} />
-            <AppButton title="Show Results" onPress={handleApply} />
+            <AppButton title={t('discovery.filterSheet.reset')} variant="secondary" onPress={handleClear} />
+            <AppButton title={t('discovery.filterSheet.showResults')} onPress={handleApply} />
           </View>
         </SafeAreaView>
       </View>

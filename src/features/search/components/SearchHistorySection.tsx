@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import type { SearchHistoryItem } from '../types';
@@ -44,6 +45,8 @@ export const SearchHistorySection = memo(function SearchHistorySection({
   onClearAll,
   onRetry,
 }: SearchHistorySectionProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -56,9 +59,9 @@ export const SearchHistorySection = memo(function SearchHistorySection({
     return (
       <View style={styles.section}>
         <AppText variant="bodySmall" muted>
-          Could not load recent searches.
+          {t('search.history.loadError')}
         </AppText>
-        <AppButton title="Retry" variant="ghost" onPress={onRetry} />
+        <AppButton title={t('search.history.retry')} variant="ghost" onPress={onRetry} />
       </View>
     );
   }
@@ -70,16 +73,16 @@ export const SearchHistorySection = memo(function SearchHistorySection({
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <AppText variant="subtitle" style={styles.title}>Recent Searches</AppText>
+        <AppText variant="subtitle" style={styles.title}>{t('search.history.recentSearches')}</AppText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Clear all search history"
+          accessibilityLabel={t('common.clearAllSearchHistory')}
           disabled={isClearing}
           onPress={onClearAll}
           hitSlop={8}
         >
           <AppText variant="caption" style={styles.clearAll}>
-            Clear all
+            {t('search.history.clearAll')}
           </AppText>
         </Pressable>
       </View>
@@ -92,7 +95,7 @@ export const SearchHistorySection = memo(function SearchHistorySection({
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Search for ${item.query}`}
+              accessibilityLabel={t('search.history.searchFor', { query: item.query })}
               onPress={() => onSelect(item.query)}
               style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}
             >
@@ -108,7 +111,7 @@ export const SearchHistorySection = memo(function SearchHistorySection({
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Delete ${item.query} from history`}
+              accessibilityLabel={t('search.history.deleteItem', { query: item.query })}
               disabled={deletingId === item.id}
               onPress={() => onDelete(item.id)}
               hitSlop={8}

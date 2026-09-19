@@ -1,4 +1,5 @@
 import { memo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   type AccessibilityActionEvent,
   ActivityIndicator,
@@ -10,6 +11,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { translateContentType } from '@/i18n/catalog-labels';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 import { formatRating } from '@/utils/format';
 import type { LibraryRemoveIcon } from '../types';
@@ -30,7 +32,7 @@ interface LibraryContentCardProps {
 }
 
 function formatContentType(type: LibraryItem['type']): string {
-  return type === 'movie' ? 'Movie' : 'TV';
+  return translateContentType(type);
 }
 
 function formatYear(item: LibraryItem): string | null {
@@ -58,10 +60,14 @@ export const LibraryContentCard = memo(function LibraryContentCard({
   onPress,
   onRemove,
 }: LibraryContentCardProps) {
+  const { t } = useTranslation();
   const swipeableRef = useRef<Swipeable>(null);
   const year = formatYear(item);
   const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}, rating ${formatRating(item.voteAverage)}`;
-  const removeActionLabel = `Remove ${item.title} from ${removeAccessibilityLabel}`;
+  const removeActionLabel = t('common.removeFromList', {
+    title: item.title,
+    listName: removeAccessibilityLabel,
+  });
   const usesSwipeRemove = Boolean(onRemove) && removalMode === 'swipe';
 
   const handleRemove = useCallback(() => {
@@ -125,7 +131,7 @@ export const LibraryContentCard = memo(function LibraryContentCard({
           path={item.posterPath}
           width={layout.posterList.width}
           height={layout.posterList.height}
-          accessibilityLabel={`${item.title} poster`}
+          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         />
         <View style={styles.meta}>
           <AppText variant="body" numberOfLines={2} style={styles.title}>

@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
@@ -18,6 +19,7 @@ export const RecommendationCard = memo(function RecommendationCard({
   item,
   onPress,
 }: RecommendationCardProps) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(item.releaseDate, item.year);
   const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}, rating ${formatRating(item.voteAverage)}${item.reason ? `, ${item.reason}` : ''}`;
 
@@ -32,7 +34,7 @@ export const RecommendationCard = memo(function RecommendationCard({
         uri={item.posterUrl}
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
-        accessibilityLabel={`${item.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         elevated
       />
       <View style={styles.meta}>

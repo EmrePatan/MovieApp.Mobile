@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { RegionSelector } from '@/features/regions/components/RegionSelector';
 
 interface WatchRegionSelectorProps {
@@ -8,9 +9,11 @@ interface WatchRegionSelectorProps {
 }
 
 export function WatchRegionSelector(props: WatchRegionSelectorProps) {
+  const { t } = useTranslation();
+
   return (
     <RegionSelector
-      label="Watch region"
+      label={t('discovery.streamingDiscover.watchRegion')}
       testID="watch-region-selector"
       {...props}
     />

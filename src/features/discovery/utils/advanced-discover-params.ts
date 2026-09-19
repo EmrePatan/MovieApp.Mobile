@@ -11,7 +11,7 @@ import type { WatchMonetizationType } from '../watch-provider-types';
 
 const MEDIA_TYPES = new Set<AdvancedDiscoverMediaType>(['movie', 'tv']);
 const SORT_VALUES = new Set<AdvancedDiscoverSort>(
-  ADVANCED_DISCOVER_SORT_OPTIONS.map((option) => option.value),
+  ADVANCED_DISCOVER_SORT_OPTIONS,
 );
 const MONETIZATION_TYPES = new Set<WatchMonetizationType>(['stream', 'free', 'ads', 'rent', 'buy']);
 

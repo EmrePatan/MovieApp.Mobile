@@ -34,7 +34,7 @@ describe('season progress utilities', () => {
     expect(calculateSeasonProgressPercentage(0, 0)).toBe(0);
     expect(calculateSeasonProgressPercentage(12, 0)).toBe(0);
     expect(calculateSeasonProgressPercentage(140, 22)).toBe(100);
-    expect(formatTvShowWatchedSummary(34, 208)).toBe('34 of 208 episodes watched');
+    expect(formatTvShowWatchedSummary(34, 208)).toBe('34 of 208 episodes');
     expect(formatTvShowWatchedSummary(0, 0)).toBeNull();
   });
 });

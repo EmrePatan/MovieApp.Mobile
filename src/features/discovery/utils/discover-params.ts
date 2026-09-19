@@ -12,7 +12,7 @@ import {
 } from '../types';
 
 const BROWSE_MODES = new Set<DiscoveryBrowseMode>(
-  DISCOVERY_BROWSE_MODES.map((option) => option.value),
+  DISCOVERY_BROWSE_MODES,
 );
 const TYPE_FILTERS = new Set<DiscoveryTypeFilter>(['all', 'movie', 'tv']);
 const SORT_VALUES = new Set<DiscoverySort>(DISCOVERY_SORT_VALUES);

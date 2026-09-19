@@ -1,5 +1,6 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
@@ -30,13 +31,15 @@ export function DiscoverPreviewSection({
   items,
   isLoading = false,
   isError = false,
-  emptyMessage = 'Nothing to show right now.',
+  emptyMessage,
   onRetry,
   onItemPress,
   onSeeAll,
   testID,
   hideTitle = false,
 }: DiscoverPreviewSectionProps) {
+  const { t } = useTranslation();
+  const resolvedEmptyMessage = emptyMessage ?? t('common.nothingToShow');
   const showHeader = !hideTitle && Boolean(title);
 
   if (!isLoading && !isError && items.length === 0) {
@@ -51,7 +54,7 @@ export function DiscoverPreviewSection({
         </View>
         ) : null}
         <AppText variant="bodySmall" muted style={styles.emptyMessage}>
-          {emptyMessage}
+          {resolvedEmptyMessage}
         </AppText>
       </View>
     );
@@ -75,11 +78,11 @@ export function DiscoverPreviewSection({
         {onSeeAll && !isLoading && !isError && items.length > 0 ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`See All ${title}`}
+            accessibilityLabel={t('common.seeAllTitle', { title })}
             onPress={onSeeAll}
           >
             <AppText variant="bodySmall" style={styles.seeAll}>
-              See All
+              {t('common.seeAll')}
             </AppText>
           </Pressable>
         ) : null}
@@ -108,12 +111,16 @@ export function DiscoverPreviewSection({
       {isError ? (
         <View style={styles.errorContainer}>
           <AppText variant="bodySmall" muted>
-            Unable to load this section right now.
+            {t('common.unableToLoadSection')}
           </AppText>
           {onRetry ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Retry ${title}`} onPress={onRetry}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('discover.hub.nowInTheaters.retry', { title })}
+              onPress={onRetry}
+            >
               <AppText variant="bodySmall" style={styles.retry}>
-                Try again
+                {t('discover.hub.nowInTheaters.tryAgain')}
               </AppText>
             </Pressable>
           ) : null}
@@ -138,7 +145,7 @@ export function DiscoverPreviewSection({
                 path={item.posterUrl}
                 width={layout.posterCarousel.width}
                 height={layout.posterCarousel.height}
-                accessibilityLabel={`${item.title} poster`}
+                accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
               />
               <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
                 {item.title}

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -38,6 +39,7 @@ const DEFAULT_CATEGORY: LibraryCategory = 'watching';
 const DEFAULT_MEDIA_FILTER: CatalogMediaFilter = 'all';
 
 export function LibraryHubContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
@@ -145,11 +147,11 @@ export function LibraryHubContent() {
   if (!isAuthenticated) {
     return (
       <View style={styles.centered}>
-        <AppText variant="title">My Library</AppText>
+        <AppText variant="title">{t('library.hub.title')}</AppText>
         <AppText variant="bodySmall" muted style={styles.signInCopy}>
-          Sign in to save titles, track progress, and build your collection.
+          {t('library.hub.signInCopy')}
         </AppText>
-        <AppButton title="Sign in" onPress={() => router.push('/(auth)/login')} />
+        <AppButton title={t('library.hub.signInButton')} onPress={() => router.push('/(auth)/login')} />
       </View>
     );
   }
@@ -164,7 +166,7 @@ export function LibraryHubContent() {
         {listHeader}
         <View style={styles.centered}>
           <ActivityIndicator color={colors.accent} />
-          <AppText variant="bodySmall" muted>Loading your library...</AppText>
+          <AppText variant="bodySmall" muted>{t('common.loadingYourLibrary')}</AppText>
         </View>
       </View>
     );
@@ -173,13 +175,13 @@ export function LibraryHubContent() {
   if (libraryQuery.isError && displayItems.length === 0) {
     const message = isApiError(libraryQuery.error)
       ? libraryQuery.error.userMessage
-      : 'Unable to load your library.';
+      : t('library.hub.loadError');
 
     return (
       <View style={[styles.screen, styles.screenPadding]}>
         {listHeader}
         <View style={styles.centered}>
-          <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={handleRefresh} />
         </View>
       </View>
     );
@@ -192,7 +194,7 @@ export function LibraryHubContent() {
       icon={emptyCopy.icon}
       title={emptyCopy.title}
       message={emptyCopy.message}
-      actionLabel="Browse Discover"
+      actionLabel={t('library.hub.browseDiscoverAction')}
       onAction={handleBrowseDiscover}
     />
   );
@@ -217,10 +219,10 @@ export function LibraryHubContent() {
         ) : libraryQuery.isFetchNextPageError ? (
           <View style={styles.footerError}>
             <AppText variant="bodySmall" muted center>
-              Unable to load more titles. Please try again.
+              {t('common.unableToLoadMore')}
             </AppText>
             <AppButton
-              title="Retry"
+              title={t('common.retry')}
               variant="secondary"
               onPress={() => void libraryQuery.fetchNextPage()}
             />

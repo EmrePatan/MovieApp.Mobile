@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { DiscoverHubContent } from '@/features/discover/components/DiscoverHubContent';
+import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();
 const mockOpenLibraryStackScreen = jest.fn();
@@ -158,13 +159,13 @@ describe('DiscoverHubContent', () => {
     expect(screen.getByTestId('world-cinema-hub')).toBeTruthy();
     expect(screen.getByTestId('world-cinema-preview')).toBeTruthy();
     expect(screen.getByText('Parasite')).toBeTruthy();
-    expect(screen.getByLabelText('See All World Cinema')).toBeTruthy();
+    expect(screen.getByLabelText(t('discover.worldCinemaHub.seeAllAccessibility'))).toBeTruthy();
   });
 
   it('opens world cinema with selected origin country from Explore', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('See All World Cinema'));
+    fireEvent.press(screen.getByLabelText(t('discover.worldCinemaHub.seeAllAccessibility')));
 
     expect(mockPush).toHaveBeenCalledWith(
       expect.stringContaining('originCountry=KR'),
@@ -187,13 +188,21 @@ describe('DiscoverHubContent', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByTestId('on-tv-this-week-preview')).toBeTruthy();
-    expect(screen.getByLabelText('See All On TV This Week')).toBeTruthy();
+    expect(
+      screen.getByLabelText(
+        t('common.seeAllTitle', { title: t('discover.hub.onTvThisWeek.title') }),
+      ),
+    ).toBeTruthy();
   });
 
   it('opens on tv this week from See All', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('See All On TV This Week'));
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.seeAllTitle', { title: t('discover.hub.onTvThisWeek.title') }),
+      ),
+    );
 
     expect(mockPush).toHaveBeenCalledWith('/on-tv-this-week');
   });
@@ -202,13 +211,21 @@ describe('DiscoverHubContent', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByTestId('now-in-theaters-preview')).toBeTruthy();
-    expect(screen.getByLabelText('See All Now in Theaters')).toBeTruthy();
+    expect(
+      screen.getByLabelText(
+        t('common.seeAllTitle', { title: t('discover.hub.nowInTheaters.title') }),
+      ),
+    ).toBeTruthy();
   });
 
   it('opens now in theaters from See All', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('See All Now in Theaters'));
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.seeAllTitle', { title: t('discover.hub.nowInTheaters.title') }),
+      ),
+    );
 
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/now-in-theaters'));
   });
@@ -227,14 +244,22 @@ describe('DiscoverHubContent', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByText('Fresh Release')).toBeTruthy();
-    expect(screen.getByLabelText('See All New Releases')).toBeTruthy();
+    expect(
+      screen.getByLabelText(
+        t('common.seeAllTitle', { title: t('discover.hub.newReleases') }),
+      ),
+    ).toBeTruthy();
     expect(screen.queryByText('Explore by Genre')).toBeNull();
   });
 
   it('opens new releases browse from See All', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('See All New Releases'));
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.seeAllTitle', { title: t('discover.hub.newReleases') }),
+      ),
+    );
 
     expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
       expect.anything(),

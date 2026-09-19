@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -29,6 +30,7 @@ import { spacing } from '@/theme/spacing';
 const RETURN_ROUTE = '/on-tv-this-week';
 
 export default function OnTvThisWeekScreen() {
+  const { t } = useTranslation();
   useTrackProductMetricOnFocus(PRODUCT_METRICS.onTvThisWeekOpened);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -61,14 +63,14 @@ export default function OnTvThisWeekScreen() {
     () => (
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
-          On TV This Week
+          {t('discover.hub.onTvThisWeek.title')}
         </AppText>
         <AppText variant="bodySmall" muted>
-          TV shows with episodes airing in the next 7 days
+          {t('discover.hub.onTvThisWeek.subtitle')}
         </AppText>
       </View>
     ),
-    [],
+    [t],
   );
 
   const listEmpty = useMemo(() => {
@@ -79,11 +81,11 @@ export default function OnTvThisWeekScreen() {
     if (resultsQuery.isError) {
       const message = isApiError(resultsQuery.error)
         ? resultsQuery.error.userMessage
-        : 'Unable to load TV airing listings right now.';
+        : t('discovery.browseScreen.loadError');
 
       return (
         <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
     }
@@ -91,14 +93,14 @@ export default function OnTvThisWeekScreen() {
     if (items.length === 0) {
       return (
         <SearchEmptyState
-          title="No shows airing this week"
-          message="There are no TV shows with episodes scheduled in the current airing window."
+          title={t('discover.hub.onTvThisWeek.title')}
+          message={t('discover.hub.onTvThisWeek.empty')}
         />
       );
     }
 
     return null;
-  }, [items.length, resultsQuery]);
+  }, [items.length, resultsQuery, t]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>

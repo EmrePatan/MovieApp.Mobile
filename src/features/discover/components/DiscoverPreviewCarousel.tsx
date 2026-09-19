@@ -1,4 +1,5 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { SearchResultItem } from '@/features/search/types';
@@ -19,6 +20,8 @@ export function DiscoverPreviewCarousel({
   onItemPress,
   onSeeAll,
 }: DiscoverPreviewCarouselProps) {
+  const { t } = useTranslation();
+
   if (items.length === 0) {
     return null;
   }
@@ -28,9 +31,13 @@ export function DiscoverPreviewCarousel({
       <View style={styles.header}>
         <AppText variant="subtitle">{title}</AppText>
         {onSeeAll ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={`See All ${title}`} onPress={onSeeAll}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.seeAllTitle', { title })}
+            onPress={onSeeAll}
+          >
             <AppText variant="bodySmall" style={styles.seeAll}>
-              See All
+              {t('common.seeAll')}
             </AppText>
           </Pressable>
         ) : null}
@@ -52,7 +59,7 @@ export function DiscoverPreviewCarousel({
               path={item.posterUrl}
               width={layout.posterCarousel.width}
               height={layout.posterCarousel.height}
-              accessibilityLabel={`${item.title} poster`}
+              accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
             />
             <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
               {item.title}

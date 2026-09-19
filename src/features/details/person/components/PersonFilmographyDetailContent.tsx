@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   StyleSheet,
@@ -42,6 +43,7 @@ function filterFilmography(
 }
 
 export function PersonFilmographyDetailContent({ person }: PersonFilmographyDetailContentProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
@@ -73,14 +75,14 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
         setErrorMessage(
           isApiError(error)
             ? error.userMessage
-            : 'Could not open this title right now. Please try again.',
+            : t('details.sections.filmographyOpenError'),
         );
       } finally {
         resolvingKeyRef.current = null;
         setResolvingKey(null);
       }
     },
-    [queryClient, router],
+    [queryClient, router, t],
   );
 
   const listHeader = (
@@ -89,7 +91,7 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
         <DetailBackButton contentInset={false} />
         <View style={styles.header}>
           <AppText variant="title" style={styles.headerTitle}>
-            Filmography
+            {t('details.sections.filmography')}
           </AppText>
           <AppText variant="bodySmall" muted numberOfLines={2}>
             {person.name}
@@ -110,7 +112,7 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
       <View style={styles.container} testID="person-filmography-detail-empty">
         {listHeader}
         <AppText variant="bodySmall" muted style={styles.empty}>
-          No titles match this filter yet.
+          {t('library.watchlistDetail.filteredEmpty.all')}
         </AppText>
       </View>
     );

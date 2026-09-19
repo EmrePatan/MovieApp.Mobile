@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -35,6 +36,7 @@ export function RenameWatchlistModal({
   onClose,
   onRenamed,
 }: RenameWatchlistModalProps) {
+  const { t } = useTranslation();
   const renameWatchlist = useRenameWatchlistMutation();
   const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState(initialName);
@@ -75,7 +77,7 @@ export function RenameWatchlistModal({
 
     const trimmed = name.trim();
     if (trimmed.length === 0) {
-      setFeedback('Enter a list name.');
+      setFeedback(t('watchlists.renameModal.enterName'));
       return;
     }
 
@@ -97,8 +99,8 @@ export function RenameWatchlistModal({
         onError: (error) => {
           setFeedback(
             isApiError(error) && error.kind === 'conflict'
-              ? 'A list with this name already exists.'
-              : 'Could not rename list. Please try again.',
+              ? t('watchlists.renameModal.nameConflict')
+              : t('watchlists.renameModal.renameError'),
           );
         },
       },
@@ -114,8 +116,8 @@ export function RenameWatchlistModal({
         >
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
             <View style={styles.header}>
-              <AppText variant="subtitle">Rename List</AppText>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={handleClose}>
+              <AppText variant="subtitle">{t('watchlists.renameModal.title')}</AppText>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
                 <Ionicons name="close" size={24} color={colors.textPrimary} />
               </Pressable>
             </View>
@@ -128,10 +130,10 @@ export function RenameWatchlistModal({
 
             <AppInput
               ref={nameInputRef}
-              label="List name"
+              label={t('common.listName')}
               value={name}
               onChangeText={setName}
-              placeholder="My List"
+              placeholder={t('common.myList')}
               maxLength={100}
               autoCorrect={false}
               returnKeyType="done"
@@ -139,7 +141,7 @@ export function RenameWatchlistModal({
             />
 
             <AppButton
-              title="Save"
+              title={t('common.save')}
               loading={renameWatchlist.isPending}
               disabled={renameWatchlist.isPending}
               onPress={handleSave}

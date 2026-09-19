@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +32,7 @@ import {
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { i18n } from '@/i18n';
 
 const SEASON_POSTER_WIDTH = 64;
 const SEASON_POSTER_HEIGHT = 96;
@@ -99,11 +101,12 @@ export function SeasonListItem({
   seasonProgress,
   progressReady,
 }: SeasonListItemProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { requireAuth } = useRequireAuth();
   const toggleSeasonWatched = useToggleSeasonWatched(tvShowId, season.seasonNumber);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const label = season.name ?? `Season ${season.seasonNumber}`;
+  const label = season.name ?? t('common.seasonNumber', { number: season.seasonNumber });
   const airYear = season.airDate ? season.airDate.slice(0, 4) : null;
   const totalEpisodes = Math.max(
     seasonProgress?.totalEpisodes ?? 0,
@@ -115,10 +118,12 @@ export function SeasonListItem({
   const canToggleSeason = totalEpisodes > 0;
 
   const metadata = [
-    `Season ${season.seasonNumber}`,
+    t('common.seasonNumber', { number: season.seasonNumber }),
     airYear,
     season.episodeCount != null
-      ? `${season.episodeCount} ${season.episodeCount === 1 ? 'ep' : 'eps'}`
+      ? i18n.t(season.episodeCount === 1 ? 'common.episodeCount' : 'common.episodesCount', {
+          count: season.episodeCount,
+        })
       : null,
   ]
     .filter(Boolean)
@@ -141,7 +146,7 @@ export function SeasonListItem({
       },
       {
         onError: () => {
-          setFeedback('Could not update season watch progress. Please try again.');
+          setFeedback(t('details.actions.seasonProgressError'));
         },
       },
     );
@@ -156,7 +161,7 @@ export function SeasonListItem({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            isFullyWatched ? 'Mark season as unwatched' : 'Mark season as watched'
+            isFullyWatched ? t('common.markSeasonUnwatched') : t('common.markSeasonWatched')
           }
           accessibilityState={{ selected: isFullyWatched, busy: toggleSeasonWatched.isPending }}
           disabled={toggleSeasonWatched.isPending || !canToggleSeason}
@@ -182,7 +187,7 @@ export function SeasonListItem({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Open ${label}`}
+        accessibilityLabel={t('common.openTitle', { title: label })}
         onPress={handleOpenSeason}
         style={({ pressed }) => [styles.content, pressed && styles.pressed]}
         testID={`season-content-${season.seasonNumber}`}
@@ -191,7 +196,7 @@ export function SeasonListItem({
           path={season.posterPath}
           width={SEASON_POSTER_WIDTH}
           height={SEASON_POSTER_HEIGHT}
-          accessibilityLabel={`${label} poster`}
+          accessibilityLabel={t('common.posterAccessibility', { title: label })}
         />
         {showProgress ? (
           <SeasonListItemProgress
@@ -227,6 +232,7 @@ interface SeasonListProps {
 }
 
 export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProps) {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const [seasonsExpanded, setSeasonsExpanded] = useState(false);
   const tvProgressQuery = useTvShowProgress(tvShowId);
@@ -267,7 +273,7 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
     return (
       <View style={styles.emptySection}>
         <AppText variant="bodySmall" muted center>
-          No seasons available.
+          {t('details.sections.seasonsEmpty')}
         </AppText>
       </View>
     );
@@ -277,7 +283,9 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
     <View style={styles.section}>
       <View style={styles.headerBlock}>
         <AppText variant="subtitle" style={styles.sectionTitle}>
-          {seasons.length > 1 ? `Seasons (${seasons.length})` : 'Seasons'}
+          {seasons.length > 1
+            ? t('details.sections.seasonsWithCount', { count: seasons.length })
+            : t('details.sections.seasons')}
         </AppText>
         {tvSummary ? (
           <AppText variant="caption" muted testID="tv-show-watched-summary">
@@ -316,8 +324,8 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
             accessibilityRole="button"
             accessibilityLabel={
               seasonsExpanded
-                ? 'Show fewer seasons'
-                : `Show all ${seasons.length} seasons`
+                ? t('common.showFewer')
+                : t('common.showAllSeasons', { count: seasons.length })
             }
             onPress={() => setSeasonsExpanded((current) => !current)}
             style={({ pressed }) => [styles.expandRow, pressed && styles.pressed]}
@@ -325,12 +333,12 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
           >
             <AppText variant="bodySmall" style={styles.expandLabel}>
               {seasonsExpanded
-                ? 'Show fewer seasons'
-                : `Show all ${seasons.length} seasons`}
+                ? t('common.showFewer')
+                : t('common.showAllSeasons', { count: seasons.length })}
             </AppText>
             {!seasonsExpanded && hiddenSeasonCount > 0 ? (
               <AppText variant="caption" muted>
-                +{hiddenSeasonCount} more
+                {t('common.moreCount', { count: hiddenSeasonCount })}
               </AppText>
             ) : null}
             <Ionicons

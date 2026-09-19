@@ -1,4 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  translateAdvancedDiscoverMediaType,
+  translateAdvancedDiscoverRuntimePreset,
+  translateAdvancedDiscoverSort,
+} from '@/i18n/catalog-labels';
 import {
   ActivityIndicator,
   Modal,
@@ -49,15 +55,19 @@ function GenreSelector({
   genres,
   selectedIds,
   onToggle,
+  noGenresLabel,
+  genreAccessibilityLabel,
 }: {
   genres: Genre[];
   selectedIds: string[];
   onToggle: (genreId: string) => void;
+  noGenresLabel: string;
+  genreAccessibilityLabel: (name: string) => string;
 }) {
   if (genres.length === 0) {
     return (
       <AppText variant="bodySmall" muted>
-        No genres available.
+        {noGenresLabel}
       </AppText>
     );
   }
@@ -72,7 +82,7 @@ function GenreSelector({
             key={genre.id}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Genre ${genre.name}`}
+            accessibilityLabel={genreAccessibilityLabel(genre.name)}
             onPress={() => onToggle(genre.id)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
@@ -92,29 +102,32 @@ function GenreSelector({
 function MediaTypeSelector({
   value,
   onChange,
+  mediaTypeAccessibilityLabel,
 }: {
   value: AdvancedDiscoverMediaType;
   onChange: (value: AdvancedDiscoverMediaType) => void;
+  mediaTypeAccessibilityLabel: (label: string) => string;
 }) {
   return (
     <View style={styles.chipGrid}>
-      {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((option) => {
-        const selected = option.value === value;
+      {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaOption) => {
+        const selected = mediaOption === value;
+        const label = translateAdvancedDiscoverMediaType(mediaOption);
 
         return (
           <Pressable
-            key={option.value}
+            key={mediaOption}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Media type ${option.label}`}
-            onPress={() => onChange(option.value)}
+            accessibilityLabel={mediaTypeAccessibilityLabel(label)}
+            onPress={() => onChange(mediaOption)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
             <AppText
               variant="caption"
               style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
             >
-              {option.label}
+              {label}
             </AppText>
           </Pressable>
         );
@@ -126,29 +139,32 @@ function MediaTypeSelector({
 function SortSelector({
   value,
   onChange,
+  sortAccessibilityLabel,
 }: {
   value: AdvancedDiscoverSort;
   onChange: (value: AdvancedDiscoverSort) => void;
+  sortAccessibilityLabel: (label: string) => string;
 }) {
   return (
     <View style={styles.chipGrid}>
-      {ADVANCED_DISCOVER_SORT_OPTIONS.map((option) => {
-        const selected = option.value === value;
+      {ADVANCED_DISCOVER_SORT_OPTIONS.map((sortOption) => {
+        const selected = sortOption === value;
+        const label = translateAdvancedDiscoverSort(sortOption);
 
         return (
           <Pressable
-            key={option.value}
+            key={sortOption}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Sort ${option.label}`}
-            onPress={() => onChange(option.value)}
+            accessibilityLabel={sortAccessibilityLabel(label)}
+            onPress={() => onChange(sortOption)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
             <AppText
               variant="caption"
               style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
             >
-              {option.label}
+              {label}
             </AppText>
           </Pressable>
         );
@@ -161,10 +177,12 @@ function RuntimeSelector({
   minRuntimeMinutes,
   maxRuntimeMinutes,
   onChange,
+  runtimeAccessibilityLabel,
 }: {
   minRuntimeMinutes: number | null;
   maxRuntimeMinutes: number | null;
   onChange: (min: number | null, max: number | null) => void;
+  runtimeAccessibilityLabel: (label: string) => string;
 }) {
   return (
     <View style={styles.chipGrid}>
@@ -172,13 +190,14 @@ function RuntimeSelector({
         const selected =
           preset.minRuntimeMinutes === minRuntimeMinutes &&
           preset.maxRuntimeMinutes === maxRuntimeMinutes;
+        const label = translateAdvancedDiscoverRuntimePreset(preset.key);
 
         return (
           <Pressable
-            key={preset.label}
+            key={preset.key}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Runtime ${preset.label}`}
+            accessibilityLabel={runtimeAccessibilityLabel(label)}
             onPress={() => onChange(preset.minRuntimeMinutes, preset.maxRuntimeMinutes)}
             style={[styles.filterChip, selected && styles.filterChipSelected]}
           >
@@ -186,7 +205,7 @@ function RuntimeSelector({
               variant="caption"
               style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
             >
-              {preset.label}
+              {label}
             </AppText>
           </Pressable>
         );
@@ -203,6 +222,7 @@ export function AdvancedDiscoverFilterSheet({
   onApply,
   onClear,
 }: AdvancedDiscoverFilterSheetProps) {
+  const { t } = useTranslation();
   const genresQuery = useGenres();
   const wasVisibleRef = useRef(false);
   const [draftMediaType, setDraftMediaType] = useState<AdvancedDiscoverMediaType>(mediaType);
@@ -243,8 +263,8 @@ export function AdvancedDiscoverFilterSheet({
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
           <View style={styles.sheetInner}>
             <View style={styles.header}>
-              <AppText variant="subtitle">Advanced Discover</AppText>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose}>
+              <AppText variant="subtitle">{t('discovery.advancedDiscover.sheetTitle')}</AppText>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={onClose}>
                 <Ionicons name="close" size={24} color={colors.textPrimary} />
               </Pressable>
             </View>
@@ -256,9 +276,10 @@ export function AdvancedDiscoverFilterSheet({
               showsVerticalScrollIndicator
             >
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Media Type</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.mediaTypeSection')}</AppText>
               <MediaTypeSelector
                 value={draftMediaType}
+                mediaTypeAccessibilityLabel={(label) => t('common.mediaTypeLabel', { label })}
                 onChange={(nextType) => {
                   setDraftMediaType(nextType);
                   setDraft((current) => ({
@@ -271,13 +292,15 @@ export function AdvancedDiscoverFilterSheet({
             </View>
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Genres</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.genresSection')}</AppText>
               {genresQuery.isLoading ? (
                 <ActivityIndicator color={colors.accent} />
               ) : (
                 <GenreSelector
                   genres={genresQuery.data ?? []}
                   selectedIds={draft.genreIds}
+                  noGenresLabel={t('common.noGenresAvailable')}
+                  genreAccessibilityLabel={(name) => t('common.genreLabel', { name })}
                   onToggle={(genreId) =>
                     setDraft((current) => ({
                       ...current,
@@ -289,31 +312,31 @@ export function AdvancedDiscoverFilterSheet({
             </View>
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Year</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.yearSection')}</AppText>
               <View style={styles.chipGrid}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ selected: !useYearRange }}
-                  accessibilityLabel="Single year"
+                  accessibilityLabel={t('common.singleYear')}
                   onPress={() => {
                     setUseYearRange(false);
                     setDraft((current) => ({ ...current, yearFrom: null, yearTo: null }));
                   }}
                   style={[styles.filterChip, !useYearRange && styles.filterChipSelected]}
                 >
-                  <AppText variant="caption">Single year</AppText>
+                  <AppText variant="caption">{t('common.singleYear')}</AppText>
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ selected: useYearRange }}
-                  accessibilityLabel="Year range"
+                  accessibilityLabel={t('common.yearRange')}
                   onPress={() => {
                     setUseYearRange(true);
                     setDraft((current) => ({ ...current, year: null }));
                   }}
                   style={[styles.filterChip, useYearRange && styles.filterChipSelected]}
                 >
-                  <AppText variant="caption">Year range</AppText>
+                  <AppText variant="caption">{t('common.yearRange')}</AppText>
                 </Pressable>
               </View>
             </View>
@@ -322,7 +345,7 @@ export function AdvancedDiscoverFilterSheet({
               <View style={styles.row}>
                 <View style={styles.halfInput}>
                   <AppInput
-                    label="From"
+                    label={t('common.from')}
                     value={draft.yearFrom != null ? String(draft.yearFrom) : ''}
                     onChangeText={(text) => {
                       const trimmed = text.trim();
@@ -332,14 +355,14 @@ export function AdvancedDiscoverFilterSheet({
                           trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
                       }));
                     }}
-                    placeholder="e.g. 2010"
+                    placeholder={t('common.placeholderYearFromExample')}
                     keyboardType="number-pad"
                     maxLength={4}
                   />
                 </View>
                 <View style={styles.halfInput}>
                   <AppInput
-                    label="To"
+                    label={t('common.to')}
                     value={draft.yearTo != null ? String(draft.yearTo) : ''}
                     onChangeText={(text) => {
                       const trimmed = text.trim();
@@ -348,7 +371,7 @@ export function AdvancedDiscoverFilterSheet({
                         yearTo: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
                       }));
                     }}
-                    placeholder="e.g. 2024"
+                    placeholder={t('common.placeholderYearToExample')}
                     keyboardType="number-pad"
                     maxLength={4}
                   />
@@ -356,7 +379,7 @@ export function AdvancedDiscoverFilterSheet({
               </View>
             ) : (
               <AppInput
-                label="Year"
+                label={t('common.year')}
                 value={draft.year != null ? String(draft.year) : ''}
                 onChangeText={(text) => {
                   const trimmed = text.trim();
@@ -365,14 +388,14 @@ export function AdvancedDiscoverFilterSheet({
                     year: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
                   }));
                 }}
-                placeholder="e.g. 2020"
+                placeholder={t('common.placeholderYearExample')}
                 keyboardType="number-pad"
                 maxLength={4}
               />
             )}
 
             <AppInput
-              label="Minimum rating"
+              label={t('common.minimumRating')}
               value={draft.minRating != null ? String(draft.minRating) : ''}
               onChangeText={(text) => {
                 const trimmed = text.trim();
@@ -381,16 +404,17 @@ export function AdvancedDiscoverFilterSheet({
                   minRating: trimmed.length === 0 ? null : Number.parseFloat(trimmed) || null,
                 }));
               }}
-              placeholder="0–10"
+              placeholder={t('common.placeholderRatingRange')}
               keyboardType="decimal-pad"
               maxLength={4}
             />
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Runtime</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.runtimeSection')}</AppText>
               <RuntimeSelector
                 minRuntimeMinutes={draft.minRuntimeMinutes}
                 maxRuntimeMinutes={draft.maxRuntimeMinutes}
+                runtimeAccessibilityLabel={(label) => t('common.runtimeLabel', { label })}
                 onChange={(min, max) =>
                   setDraft((current) => ({
                     ...current,
@@ -402,7 +426,7 @@ export function AdvancedDiscoverFilterSheet({
             </View>
 
             <AppInput
-              label="Original language"
+              label={t('common.originalLanguage')}
               value={draft.originalLanguage ?? ''}
               onChangeText={(text) =>
                 setDraft((current) => ({
@@ -410,14 +434,14 @@ export function AdvancedDiscoverFilterSheet({
                   originalLanguage: text.trim().length > 0 ? text.trim().toLowerCase() : null,
                 }))
               }
-              placeholder="e.g. en"
+              placeholder={t('common.placeholderLanguageExample')}
               autoCapitalize="none"
               autoCorrect={false}
               maxLength={8}
             />
 
             <AppInput
-              label="Origin country"
+              label={t('common.originCountry')}
               value={draft.originCountry ?? ''}
               onChangeText={(text) =>
                 setDraft((current) => ({
@@ -426,14 +450,14 @@ export function AdvancedDiscoverFilterSheet({
                     text.trim().length === 2 ? text.trim().toUpperCase() : text.trim() || null,
                 }))
               }
-              placeholder="e.g. US"
+              placeholder={t('common.placeholderCountryExample')}
               autoCapitalize="characters"
               autoCorrect={false}
               maxLength={2}
             />
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Streaming</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.streamingSection')}</AppText>
               <WatchProviderSelector
                 providers={providersQuery.data?.providers ?? []}
                 selectedProviderIds={draft.watchProviderIds}
@@ -463,17 +487,18 @@ export function AdvancedDiscoverFilterSheet({
             </View>
 
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>Sort by</AppText>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.sortSection')}</AppText>
               <SortSelector
                 value={draft.sort ?? 'popularity_desc'}
+                sortAccessibilityLabel={(label) => t('common.sortByLabel', { label })}
                 onChange={(sort) => setDraft((current) => ({ ...current, sort }))}
               />
             </View>
             </ScrollView>
 
             <View style={styles.footer}>
-              <AppButton title="Reset" variant="secondary" onPress={handleClear} />
-              <AppButton title="Show Results" onPress={handleApply} />
+              <AppButton title={t('discovery.filterSheet.reset')} variant="secondary" onPress={handleClear} />
+              <AppButton title={t('discovery.filterSheet.showResults')} onPress={handleApply} />
             </View>
           </View>
         </SafeAreaView>

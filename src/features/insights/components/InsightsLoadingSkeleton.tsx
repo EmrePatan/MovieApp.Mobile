@@ -1,14 +1,17 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { InsightsSectionSkeleton } from './InsightsSectionSkeleton';
 import { spacing } from '@/theme/spacing';
 
 export function InsightsLoadingSkeleton() {
+  const { t } = useTranslation();
+
   return (
     <View
       style={styles.container}
       accessibilityRole="progressbar"
-      accessibilityLabel="Loading insights"
+      accessibilityLabel={t('common.loadingInsights')}
     >
       <SkeletonBlock width="100%" height={220} />
       <InsightsSectionSkeleton height={160} />

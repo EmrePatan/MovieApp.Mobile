@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3Records } from '../types';
 import { formatAverageStarRating, formatWeekdayName } from '../utils/insights-format';
@@ -16,14 +17,16 @@ export function InsightsRecordsSection({
   records,
   favoriteWeekday,
 }: InsightsRecordsSectionProps) {
+  const { t } = useTranslation();
+
   const cards = [
     records.longestStreakDays != null
       ? {
           key: 'streak',
           icon: 'flame-outline' as const,
           value: String(records.longestStreakDays),
-          caption: 'days',
-          label: 'Longest watching streak',
+          caption: t('insights.records.daysCaption'),
+          label: t('insights.records.longestStreak'),
         }
       : null,
     records.bestMovieWeek
@@ -31,8 +34,8 @@ export function InsightsRecordsSection({
           key: 'movie-week',
           icon: 'film-outline' as const,
           value: String(records.bestMovieWeek.count),
-          caption: 'movies',
-          label: 'Most in one week',
+          caption: t('insights.records.moviesCaption'),
+          label: t('insights.records.mostInOneWeek'),
         }
       : null,
     records.bestEpisodeWeek
@@ -40,8 +43,8 @@ export function InsightsRecordsSection({
           key: 'episode-week',
           icon: 'tv-outline' as const,
           value: String(records.bestEpisodeWeek.count),
-          caption: 'episodes',
-          label: 'Biggest series week',
+          caption: t('insights.records.episodesCaption'),
+          label: t('insights.records.biggestSeriesWeek'),
         }
       : null,
     records.highestRatingStars != null
@@ -49,8 +52,8 @@ export function InsightsRecordsSection({
           key: 'rating',
           icon: 'star-outline' as const,
           value: formatAverageStarRating(records.highestRatingStars),
-          caption: '/ 5',
-          label: 'Highest rating',
+          caption: t('insights.records.perFiveCaption'),
+          label: t('insights.records.highestRating'),
         }
       : null,
   ].filter(Boolean);
@@ -63,7 +66,10 @@ export function InsightsRecordsSection({
 
   return (
     <View style={styles.section}>
-      <InsightsSectionHeader title="Your Records" subtitle="All-time personal bests" />
+      <InsightsSectionHeader
+        title={t('insights.records.title')}
+        subtitle={t('insights.records.subtitle')}
+      />
       <View style={styles.grid}>
         {cards.map((card) => (
           <View key={card!.key} style={styles.card} accessibilityRole="text">
@@ -82,7 +88,7 @@ export function InsightsRecordsSection({
         <View style={styles.funFact}>
           <Ionicons name="bulb-outline" size={16} color={colors.accentMuted} />
           <AppText variant="bodySmall" muted style={styles.funFactText}>
-            You&apos;re most active on {weekdayName}s.
+            {t('insights.records.funFact', { weekday: weekdayName })}
           </AppText>
         </View>
       ) : null}

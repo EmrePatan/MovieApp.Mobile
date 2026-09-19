@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { TextInput } from 'react-native';
 import SearchScreen from '../../../app/search';
+import { t } from '../../i18n/i18n-test-utils';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
 import {
@@ -315,7 +316,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    expect(screen.getByText('Try Again')).toBeTruthy();
+    expect(screen.getByText(t('common.tryAgain'))).toBeTruthy();
   });
 
   it('shows zero-results state distinct from API failure', () => {
@@ -347,8 +348,8 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'zzzz');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    expect(screen.getByText('No results for “zzzz”')).toBeTruthy();
-    expect(screen.queryByText('Try Again')).toBeNull();
+    expect(screen.getByText(t('search.results.noResultsTitle', { query: 'zzzz' }))).toBeTruthy();
+    expect(screen.queryByText(t('common.tryAgain'))).toBeNull();
   });
 
   it('navigates to movie detail from result card', () => {

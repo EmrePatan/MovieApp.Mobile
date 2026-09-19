@@ -1,4 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  translateDiscoverySort,
+  translateDiscoveryTypeFilter,
+} from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -54,10 +59,11 @@ function getTypeLabel(type: DiscoveryTypeFilter): string | null {
     return null;
   }
 
-  return DISCOVERY_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? null;
+  return translateDiscoveryTypeFilter(type);
 }
 
 export default function DiscoverScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
@@ -146,7 +152,7 @@ export default function DiscoverScreen() {
       return null;
     }
 
-    return DISCOVERY_SORT_OPTIONS.find((option) => option.value === filters.sort)?.label ?? null;
+    return translateDiscoverySort(filters.sort);
   }, [filters.sort, mode]);
 
   const activeFilterChips = useMemo(
@@ -214,15 +220,15 @@ export default function DiscoverScreen() {
             accessibilityRole="button"
             accessibilityLabel={
               activeFilterCount > 0
-                ? `Filters, ${activeFilterCount} active`
-                : 'Filters'
+                ? t('common.filtersActive', { count: activeFilterCount })
+                : t('discovery.browseScreen.filters')
             }
             onPress={() => setFilterSheetVisible(true)}
             style={({ pressed }) => [styles.filtersButton, pressed && styles.pressed]}
           >
             <Ionicons name="options-outline" size={18} color={colors.textPrimary} />
             <AppText variant="bodySmall" style={styles.filtersButtonText}>
-              Filters
+              {t('discovery.browseScreen.filters')}
             </AppText>
             {activeFilterCount > 0 ? (
               <View style={styles.filterBadge}>
@@ -236,7 +242,7 @@ export default function DiscoverScreen() {
         <ActiveFilterChips chips={activeFilterChips} />
       </View>
     ),
-    [activeFilterChips, activeFilterCount, mode],
+    [activeFilterChips, activeFilterCount, mode, t],
   );
 
   const emptyState = useMemo(() => {
@@ -244,16 +250,16 @@ export default function DiscoverScreen() {
       return (
         <View style={styles.emptyWithAction}>
           <SearchEmptyState
-            title="No titles match your filters"
-            message="Try adjusting or clearing your filters."
+            title={t('discovery.browseScreen.noTitlesMatchFiltersTitle')}
+            message={t('discovery.browseScreen.noTitlesMatchFiltersMessage')}
           />
-          <AppButton title="Clear filters" variant="secondary" onPress={clearFilters} />
+          <AppButton title={t('common.clearFilters')} variant="secondary" onPress={clearFilters} />
         </View>
       );
     }
 
-    return <SearchEmptyState title="No titles found for this browse mode." />;
-  }, [clearFilters, filters, mode, typeFilter]);
+    return <SearchEmptyState title={t('discovery.browseScreen.noTitlesForMode')} />;
+  }, [clearFilters, filters, mode, t, typeFilter]);
 
   const filterSheet = (
     <DiscoverFilterSheet
@@ -280,13 +286,13 @@ export default function DiscoverScreen() {
   if (browseQuery.isError && items.length === 0) {
     const message = isApiError(browseQuery.error)
       ? browseQuery.error.userMessage
-      : 'Unable to load discovery content. Please try again.';
+      : t('discovery.browseScreen.loadError');
 
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
         <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={handleRefresh} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
         {filterSheet}
       </SafeAreaView>

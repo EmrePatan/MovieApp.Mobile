@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
@@ -25,6 +26,8 @@ export function WatchProviderSelector({
   onToggle,
   onRetry,
 }: WatchProviderSelectorProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.listContent}>
@@ -41,9 +44,9 @@ export function WatchProviderSelector({
   if (isError) {
     return (
       <ErrorView
-        message="Unable to load streaming providers."
+        message={t('discovery.streamingDiscover.providersLoadError')}
         onRetry={onRetry}
-        retryLabel="Try Again"
+        retryLabel={t('common.tryAgain')}
       />
     );
   }
@@ -51,7 +54,7 @@ export function WatchProviderSelector({
   if (providers.length === 0) {
     return (
       <AppText variant="bodySmall" muted>
-        No streaming providers are available right now.
+        {t('discovery.streamingDiscover.providersLoadError')}
       </AppText>
     );
   }

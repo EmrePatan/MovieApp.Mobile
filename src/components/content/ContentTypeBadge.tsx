@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { formatContentType } from '@/utils/format';
+import { translateContentType } from '@/i18n/catalog-labels';
 import type { ContentType } from '@/models/api/pagination';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -11,9 +11,9 @@ interface ContentTypeBadgeProps {
 
 export function ContentTypeBadge({ type }: ContentTypeBadgeProps) {
   return (
-    <View style={styles.badge} accessibilityLabel={formatContentType(type)}>
+    <View style={styles.badge} accessibilityLabel={translateContentType(type)}>
       <AppText variant="caption" style={styles.badgeText}>
-        {formatContentType(type)}
+        {translateContentType(type)}
       </AppText>
     </View>
   );

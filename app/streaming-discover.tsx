@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -46,6 +48,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function StreamingDiscoverScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
@@ -155,12 +158,12 @@ export default function StreamingDiscoverScreen() {
     () => (
       <View style={styles.headerContent}>
         <AppText variant="title" accessibilityRole="header">
-          Streaming Services
+          {t('discovery.streamingDiscover.title')}
         </AppText>
 
         <View style={styles.section}>
           <AppText variant="bodySmall" muted style={styles.sectionLabel}>
-            Where do you watch?
+            {t('discovery.streamingDiscover.whereDoYouWatch')}
           </AppText>
           <WatchProviderSelector
             providers={providersQuery.data?.providers ?? []}
@@ -173,28 +176,29 @@ export default function StreamingDiscoverScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="bodySmall" muted style={styles.sectionLabel}>Content</AppText>
+          <AppText variant="bodySmall" muted style={styles.sectionLabel}>{t('discovery.streamingDiscover.contentSection')}</AppText>
           <View style={styles.mediaRow}>
-            {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((option) => {
-              const selected = discoverState.mediaType === option.value;
+            {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
+              const selected = discoverState.mediaType === mediaType;
+              const label = translateAdvancedDiscoverMediaType(mediaType);
 
               return (
                 <Pressable
-                  key={option.value}
+                  key={mediaType}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  accessibilityLabel={option.label}
+                  accessibilityLabel={label}
                   onPress={() =>
                     replaceState({
                       ...discoverState,
-                      mediaType: option.value,
+                      mediaType,
                       watchProviderIds: [],
                     })
                   }
                   style={[styles.mediaChip, selected && styles.mediaChipSelected]}
                 >
                   <AppText variant="bodySmall" style={selected ? styles.mediaChipSelectedText : undefined}>
-                    {option.label}
+                    {label}
                   </AppText>
                 </Pressable>
               );
@@ -203,7 +207,7 @@ export default function StreamingDiscoverScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="bodySmall" muted style={styles.sectionLabel}>Availability</AppText>
+          <AppText variant="bodySmall" muted style={styles.sectionLabel}>{t('discovery.streamingDiscover.availabilitySection')}</AppText>
           <WatchMonetizationSelector
             selectedTypes={discoverState.watchMonetizationTypes}
             onToggle={toggleMonetization}
@@ -221,6 +225,7 @@ export default function StreamingDiscoverScreen() {
       replaceState,
       toggleMonetization,
       toggleProvider,
+      t,
     ],
   );
 
@@ -228,8 +233,8 @@ export default function StreamingDiscoverScreen() {
     if (discoverState.watchProviderIds.length === 0) {
       return (
         <SearchEmptyState
-          title="Choose a streaming service"
-          message="Select one or more providers to see what you can watch."
+          title={t('discovery.streamingDiscover.chooseProviderTitle')}
+          message={t('discovery.streamingDiscover.chooseProviderMessage')}
         />
       );
     }
@@ -241,11 +246,11 @@ export default function StreamingDiscoverScreen() {
     if (resultsQuery.isError) {
       const message = isApiError(resultsQuery.error)
         ? resultsQuery.error.userMessage
-        : 'Unable to load streaming results right now.';
+        : t('discovery.streamingDiscover.resultsLoadError');
 
       return (
         <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
     }
@@ -253,8 +258,8 @@ export default function StreamingDiscoverScreen() {
     if (items.length === 0) {
       return (
         <SearchEmptyState
-          title="No matches found"
-          message="Try another provider or availability type."
+          title={t('discovery.streamingDiscover.noMatchesTitle')}
+          message={t('discovery.streamingDiscover.noMatchesMessage')}
         />
       );
     }
@@ -264,6 +269,7 @@ export default function StreamingDiscoverScreen() {
     discoverState.watchProviderIds.length,
     items.length,
     resultsQuery,
+    t,
   ]);
 
   return (

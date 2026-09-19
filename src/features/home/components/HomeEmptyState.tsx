@@ -1,6 +1,7 @@
 import { EmptyView } from '@/components/common/EmptyView';
 import { spacing } from '@/theme/spacing';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface HomeEmptyStateProps {
   title?: string;
@@ -8,12 +9,18 @@ interface HomeEmptyStateProps {
 }
 
 export function HomeEmptyState({
-  title = 'Nothing to watch yet',
-  message = 'Explore movies and TV shows to build your personalized home feed.',
+  title,
+  message,
 }: HomeEmptyStateProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
-      <EmptyView title={title} message={message} bordered />
+      <EmptyView
+        title={title ?? t('home.empty.title')}
+        message={message ?? t('home.empty.message')}
+        bordered
+      />
     </View>
   );
 }

@@ -1,4 +1,5 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { HomeItem } from '@/features/home/types';
@@ -6,6 +7,8 @@ import { LibraryStatusIndicator } from './LibraryStatusIndicator';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+
+import { i18n } from '@/i18n';
 
 interface LibraryContinueWatchingSectionProps {
   items: HomeItem[];
@@ -18,17 +21,25 @@ function formatEpisodeDetail(item: HomeItem): string | null {
   }
 
   if (item.seasonNumber != null && item.episodeNumber != null) {
-    const episodeLabel = item.episodeName ? ` · ${item.episodeName}` : '';
-    return `S${item.seasonNumber} · E${item.episodeNumber}${episodeLabel}`;
+    const titleSuffix = item.episodeName
+      ? i18n.t('common.seasonEpisodeTitleSuffix', { title: item.episodeName })
+      : '';
+    return i18n.t('common.seasonEpisodeWithTitle', {
+      season: item.seasonNumber,
+      episode: item.episodeNumber,
+      titleSuffix,
+    });
   }
 
-  return 'In progress';
+  return i18n.t('common.inProgress');
 }
 
 export function LibraryContinueWatchingSection({
   items,
   onItemPress,
 }: LibraryContinueWatchingSectionProps) {
+  const { t } = useTranslation();
+
   if (items.length === 0) {
     return null;
   }
@@ -59,7 +70,7 @@ export function LibraryContinueWatchingSection({
                   path={item.posterUrl}
                   width={layout.posterCarousel.width}
                   height={layout.posterCarousel.height}
-                  accessibilityLabel={`${item.title} poster`}
+                  accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
                 />
               </View>
               <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
@@ -67,7 +78,7 @@ export function LibraryContinueWatchingSection({
               </AppText>
               <LibraryStatusIndicator
                 status="watching"
-                label="Watching"
+                label={t('library.categories.watching')}
                 detail={episodeDetail}
               />
             </Pressable>

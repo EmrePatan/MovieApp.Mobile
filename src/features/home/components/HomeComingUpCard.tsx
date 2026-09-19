@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
@@ -28,6 +29,7 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
   item,
   onPress,
 }: HomeComingUpCardProps) {
+  const { t } = useTranslation();
   const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const releaseDate = formatIsoDate(item.releaseDate);
   const relativeAirDate = formatRelativeAirDate(item.releaseDate);
@@ -45,7 +47,7 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
         uri={item.posterUrl}
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
-        accessibilityLabel={`${item.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         elevated
       />
       <View style={styles.meta}>
@@ -62,7 +64,9 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
           <View style={styles.row}>
             <ContentTypeBadge type={item.contentType} />
             <AppText variant="caption" muted>
-              {item.upcomingKind === 'TvShowPremiere' ? 'Premiere' : 'Release'}
+              {item.upcomingKind === 'TvShowPremiere'
+                ? t('home.comingUpBadge.premiere')
+                : t('home.comingUpBadge.release')}
             </AppText>
           </View>
         ) : null}

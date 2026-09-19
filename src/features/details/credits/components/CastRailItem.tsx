@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -13,13 +14,16 @@ interface CastRailItemProps {
 }
 
 export function CastRailItem({ member, size, onPress }: CastRailItemProps) {
+  const { t } = useTranslation();
   const isPressable = Boolean(onPress && member.providerPersonId != null);
 
   return (
     <Pressable
       style={[styles.item, { width: size + spacing.sm }]}
       accessibilityRole={isPressable ? 'button' : 'text'}
-      accessibilityLabel={isPressable ? `View ${member.name}` : undefined}
+      accessibilityLabel={
+        isPressable ? t('common.openProfileNamed', { name: member.name }) : undefined
+      }
       disabled={!isPressable}
       onPress={() => onPress?.(member)}
     >
@@ -30,7 +34,7 @@ export function CastRailItem({ member, size, onPress }: CastRailItemProps) {
             width={size}
             height={size}
             rounded
-            accessibilityLabel={`${member.name} portrait`}
+            accessibilityLabel={t('details.sections.personPortrait', { name: member.name })}
           />
         ) : (
           <View style={[styles.fallback, { width: size, height: size, borderRadius: size / 2 }]}>

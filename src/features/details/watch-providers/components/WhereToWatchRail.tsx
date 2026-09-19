@@ -1,4 +1,5 @@
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
@@ -23,6 +24,7 @@ export function WhereToWatchRail({
   contentId,
   region,
 }: WhereToWatchRailProps) {
+  const { t } = useTranslation();
   const { region: userRegion, isHydrated } = useRegionalPreference();
   const contextualRegion = getCatalogDetailWatchRegion();
   const effectiveRegion = region ?? contextualRegion ?? userRegion;
@@ -43,7 +45,7 @@ export function WhereToWatchRail({
   if (query.isLoading) {
     return (
       <View style={styles.container} testID="where-to-watch-loading">
-        <HomeSectionHeader title="Where to Watch" />
+        <HomeSectionHeader title={t('details.sections.whereToWatch')} />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -68,7 +70,7 @@ export function WhereToWatchRail({
 
   return (
     <View style={styles.container} testID="where-to-watch-rail">
-      <HomeSectionHeader title="Where to Watch" />
+      <HomeSectionHeader title={t('details.sections.whereToWatch')} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -108,7 +110,7 @@ export function WhereToWatchRail({
         })}
       </ScrollView>
       <AppText variant="caption" style={styles.attribution} testID="where-to-watch-attribution">
-        Data provided by JustWatch
+        {t('common.dataProvidedByJustWatch')}
       </AppText>
     </View>
   );

@@ -1,15 +1,13 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { translateLibraryCategory } from '@/i18n/catalog-labels';
 import type { LibraryCategory } from '../types/library';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-const CATEGORIES: { label: string; value: LibraryCategory }[] = [
-  { label: 'Watching', value: 'watching' },
-  { label: 'Watched', value: 'watched' },
-  { label: 'Favorites', value: 'liked' },
-  { label: 'Watchlists', value: 'watchlist' },
-];
+const CATEGORY_VALUES: LibraryCategory[] = ['watching', 'watched', 'liked', 'watchlist'];
 
 interface LibraryCategoryControlProps {
   value: LibraryCategory;
@@ -17,9 +15,19 @@ interface LibraryCategoryControlProps {
 }
 
 export function LibraryCategoryControl({ value, onChange }: LibraryCategoryControlProps) {
+  const { t } = useTranslation();
+  const categories = useMemo(
+    () =>
+      CATEGORY_VALUES.map((categoryValue) => ({
+        value: categoryValue,
+        label: translateLibraryCategory(categoryValue),
+      })),
+    [t],
+  );
+
   return (
     <View style={styles.container} accessibilityRole="tablist">
-      {CATEGORIES.map((category) => {
+      {categories.map((category) => {
         const selected = value === category.value;
 
         return (
@@ -27,7 +35,9 @@ export function LibraryCategoryControl({ value, onChange }: LibraryCategoryContr
             key={category.value}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={`${category.label} category`}
+            accessibilityLabel={t('library.categories.categoryAccessibility', {
+              label: category.label,
+            })}
             onPress={() => onChange(category.value)}
             style={[styles.chip, selected && styles.chipSelected]}
           >

@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import type { InsightsV3Taste } from '../types';
 import { formatDominantGenreHeadline } from '../utils/insights-format';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
@@ -14,17 +15,18 @@ interface InsightsTasteSectionProps {
 }
 
 export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
+  const { t } = useTranslation();
   const genres = taste.genres.slice(0, 4);
   const dominantGenre = genres[0]?.name ?? null;
 
   return (
     <View style={styles.section}>
       <InsightsSectionHeader
-        title="Your Taste"
+        title={t('insights.taste.title')}
         subtitle={dominantGenre ? formatDominantGenreHeadline(dominantGenre) : undefined}
       />
       {genres.length === 0 ? (
-        <InsightsEmptyState message="Not enough history yet to map your taste." />
+        <InsightsEmptyState message={t('insights.taste.empty')} />
       ) : (
         <View style={styles.card}>
           {genres.map((genre, index) => (
@@ -34,7 +36,10 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
               percent={genre.sharePercent}
               compact
               emphasize={index === 0}
-              accessibilityLabel={`${genre.name}, ${Math.round(genre.sharePercent)} percent`}
+              accessibilityLabel={t('insights.taste.affinityAccessibility', {
+                genre: genre.name,
+                percent: Math.round(genre.sharePercent),
+              })}
             />
           ))}
           {taste.risingGenre ? (
@@ -44,13 +49,15 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
               </View>
               <View style={styles.risingCopy}>
                 <AppText variant="caption" muted style={styles.risingLabel}>
-                  Rising taste
+                  {t('insights.taste.risingTaste')}
                 </AppText>
                 <AppText variant="bodySmall" style={styles.risingTitle}>
                   {taste.risingGenre.name}
                 </AppText>
                 <AppText variant="caption" muted>
-                  +{Math.round(taste.risingGenre.shareDeltaPercent)} pts since last year
+                  {t('insights.taste.risingDelta', {
+                    points: Math.round(taste.risingGenre.shareDeltaPercent),
+                  })}
                 </AppText>
               </View>
             </View>

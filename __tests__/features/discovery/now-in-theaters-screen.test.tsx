@@ -55,7 +55,7 @@ describe('NowInTheatersScreen', () => {
   it('renders without a release region selector', () => {
     render(<NowInTheatersScreen />);
 
-    expect(screen.getByText('Now in Theaters')).toBeTruthy();
+    expect(screen.getAllByText('Now in Theaters').length).toBeGreaterThan(0);
     expect(screen.queryByTestId('release-region-selector')).toBeNull();
     expect(screen.queryByText('Release region')).toBeNull();
   });

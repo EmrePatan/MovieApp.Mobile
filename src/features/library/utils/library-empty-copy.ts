@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type { CatalogMediaFilter } from '../types';
 import type { LibraryCategory } from '../types/library';
 
@@ -7,43 +8,54 @@ interface LibraryEmptyCopy {
   message: string;
 }
 
+function resolveMediaLabel(mediaType: CatalogMediaFilter): string {
+  if (mediaType === 'movie') {
+    return i18n.t('library.empty.mediaLabels.movies');
+  }
+
+  if (mediaType === 'tv') {
+    return i18n.t('library.empty.mediaLabels.tv');
+  }
+
+  return i18n.t('library.empty.mediaLabels.titles');
+}
+
 export function resolveLibraryEmptyCopy(
   category: LibraryCategory,
   mediaType: CatalogMediaFilter,
 ): LibraryEmptyCopy {
-  const mediaLabel =
-    mediaType === 'movie' ? 'movies' : mediaType === 'tv' ? 'TV shows' : 'titles';
+  const mediaLabel = resolveMediaLabel(mediaType);
 
   switch (category) {
     case 'watching':
       return {
         icon: 'library',
-        title: 'Nothing in progress',
-        message: 'Start a TV show and your in-progress series will appear here.',
+        title: i18n.t('library.empty.watchingTitle'),
+        message: i18n.t('library.empty.watchingMessage'),
       };
     case 'watched':
       return {
         icon: 'library',
-        title: `No watched ${mediaLabel} yet`,
-        message: 'Titles you finish watching will show up here.',
+        title: i18n.t('library.empty.watchedTitle', { mediaLabel }),
+        message: i18n.t('library.empty.watchedMessage'),
       };
     case 'liked':
       return {
         icon: 'heart',
-        title: `No favorite ${mediaLabel} yet`,
-        message: 'Save movies and shows you love to build your favorites collection.',
+        title: i18n.t('library.empty.likedTitle', { mediaLabel }),
+        message: i18n.t('library.empty.likedMessage'),
       };
     case 'watchlist':
       return {
         icon: 'bookmark',
-        title: 'No watchlists yet',
-        message: 'Create a list to save movies and TV shows you want to watch.',
+        title: i18n.t('library.empty.watchlistTitle'),
+        message: i18n.t('library.empty.watchlistMessage'),
       };
     default:
       return {
         icon: 'library',
-        title: 'Your library is empty',
-        message: 'Browse Discover to find something to watch.',
+        title: i18n.t('library.empty.defaultTitle'),
+        message: i18n.t('library.empty.defaultMessage'),
       };
   }
 }

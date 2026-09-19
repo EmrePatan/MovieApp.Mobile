@@ -3,8 +3,8 @@ import {
 } from '@/features/discovery/world-cinema-types';
 import {
   getOriginCountryLabel,
-  ORIGIN_COUNTRY_OPTIONS,
-  WORLD_CINEMA_COUNTRY_LABELS,
+  getOriginCountryOptions,
+  getWorldCinemaCollectionLabel,
   WORLD_CINEMA_CURATED_COLLECTIONS,
 } from '@/features/discovery/world-cinema-collections';
 
@@ -39,7 +39,7 @@ describe('world-cinema-collections', () => {
   });
 
   it('exposes IR, HK, TW, and AR in the full origin-country selector', () => {
-    const optionCodes = ORIGIN_COUNTRY_OPTIONS.map((option) => option.code);
+    const optionCodes = getOriginCountryOptions().map((option) => option.code);
 
     expect(optionCodes).toEqual(expect.arrayContaining(['IR', 'HK', 'TW', 'AR']));
     expect(getOriginCountryLabel('IR')).toBe('Iran');
@@ -49,12 +49,15 @@ describe('world-cinema-collections', () => {
   });
 
   it('uses Türkiye for Turkey in curated country labels', () => {
-    expect(WORLD_CINEMA_COUNTRY_LABELS.TR).toBe('Türkiye');
     expect(getOriginCountryLabel('TR')).toBe('Türkiye');
   });
 
   it('uses concise demonym labels for curated World Cinema tabs', () => {
-    expect(WORLD_CINEMA_CURATED_COLLECTIONS.map((collection) => collection.label)).toEqual([
+    expect(
+      WORLD_CINEMA_CURATED_COLLECTIONS.map((collection) =>
+        getWorldCinemaCollectionLabel(collection.originCountry),
+      ),
+    ).toEqual([
       'Korean',
       'Japanese',
       'Iranian',

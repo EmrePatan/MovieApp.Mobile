@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { colors } from '@/theme/colors';
@@ -25,13 +26,15 @@ interface DetailGenresProps {
 }
 
 export function DetailGenres({ genres }: DetailGenresProps) {
+  const { t } = useTranslation();
+
   if (genres.length === 0) {
     return null;
   }
 
   return (
     <View style={styles.section}>
-      <HomeSectionHeader title="Genres" />
+      <HomeSectionHeader title={t('details.sections.genres')} />
       <View style={[styles.body, styles.genreRow]}>
         {genres.map((genre) => (
           <View key={genre} style={styles.genreChip}>
@@ -48,13 +51,15 @@ interface DetailOverviewProps {
 }
 
 export function DetailOverview({ overview }: DetailOverviewProps) {
+  const { t } = useTranslation();
+
   if (!overview) {
     return null;
   }
 
   return (
     <View style={styles.section}>
-      <HomeSectionHeader title="Overview" />
+      <HomeSectionHeader title={t('details.sections.overview')} />
       <AppText variant="body" muted style={styles.body}>
         {overview}
       </AppText>

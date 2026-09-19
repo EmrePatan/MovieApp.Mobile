@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n';
+
 export function clampProgressPercentage(progressPercentage: number): number {
   if (!Number.isFinite(progressPercentage)) {
     return 0;
@@ -10,12 +12,16 @@ export function formatWatchProgressEpisodeSummary(
   watchedEpisodes: number,
   totalEpisodes: number,
 ): string {
-  const episodeLabel = totalEpisodes === 1 ? 'episode' : 'episodes';
-  return `${watchedEpisodes} of ${totalEpisodes} ${episodeLabel}`;
+  return i18n.t('common.episodesWatchedSummary', {
+    watched: watchedEpisodes,
+    total: totalEpisodes,
+  });
 }
 
 export function formatProgressPercentDisplay(progressPercentage: number): string {
-  return `${Math.round(clampProgressPercentage(progressPercentage))}%`;
+  return i18n.t('common.percentComplete', {
+    percent: Math.round(clampProgressPercentage(progressPercentage)),
+  });
 }
 
 /** @deprecated Use formatWatchProgressEpisodeSummary for detail UI. */
@@ -28,7 +34,7 @@ export function formatWatchProgressLabel(
 
 /** @deprecated Use formatProgressPercentDisplay for detail UI. */
 export function formatProgressPercentage(progressPercentage: number): string {
-  return `${formatProgressPercentDisplay(progressPercentage)} complete`;
+  return formatProgressPercentDisplay(progressPercentage);
 }
 
 interface NextEpisodeLike {
@@ -41,16 +47,23 @@ export function formatNextEpisodeLine(
   nextEpisode: NextEpisodeLike,
   includeSeasonNumber = true,
 ): string {
-  const identifier =
-    includeSeasonNumber && nextEpisode.seasonNumber != null
-      ? `S${nextEpisode.seasonNumber} E${nextEpisode.episodeNumber}`
-      : `E${nextEpisode.episodeNumber}`;
+  if (includeSeasonNumber && nextEpisode.seasonNumber != null) {
+    const titleSuffix = nextEpisode.title?.trim()
+      ? i18n.t('common.seasonEpisodeTitleSuffix', { title: nextEpisode.title.trim() })
+      : '';
 
-  if (nextEpisode.title?.trim()) {
-    return `${identifier} · ${nextEpisode.title.trim()}`;
+    return i18n.t('common.seasonEpisodeWithTitle', {
+      season: nextEpisode.seasonNumber,
+      episode: nextEpisode.episodeNumber,
+      titleSuffix,
+    });
   }
 
-  return identifier;
+  if (nextEpisode.title?.trim()) {
+    return `${i18n.t('common.episode')} ${nextEpisode.episodeNumber} · ${nextEpisode.title.trim()}`;
+  }
+
+  return `${i18n.t('common.episode')} ${nextEpisode.episodeNumber}`;
 }
 
 export function getWatchProgressCompletionLabel(
@@ -63,7 +76,7 @@ export function getWatchProgressCompletionLabel(
   }
 
   if (totalEpisodes > 0 && watchedEpisodes >= totalEpisodes) {
-    return 'All episodes watched';
+    return i18n.t('common.allEpisodesWatched');
   }
 
   return null;

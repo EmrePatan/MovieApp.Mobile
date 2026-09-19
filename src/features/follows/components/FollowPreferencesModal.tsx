@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,6 +59,7 @@ function FollowPreferencesSheet({
   onClose,
   onFollowSuccess,
 }: Omit<FollowPreferencesModalProps, 'visible'>) {
+  const { t } = useTranslation();
   const createFollow = useCreateTvShowFollow(tvShowId);
   const updateFollow = useUpdateTvShowFollow(tvShowId);
   const removeFollow = useRemoveTvShowFollow(tvShowId);
@@ -82,7 +84,7 @@ function FollowPreferencesSheet({
             onClose();
           },
           onError: () => {
-            setErrorMessage('Could not unfollow this show. Please try again.');
+            setErrorMessage(t('details.followPreferences.unfollowError'));
           },
         });
         return;
@@ -103,7 +105,7 @@ function FollowPreferencesSheet({
           onClose();
         },
         onError: () => {
-          setErrorMessage('Could not update follow preferences. Please try again.');
+          setErrorMessage(t('details.followPreferences.updateError'));
         },
       });
       return;
@@ -116,20 +118,24 @@ function FollowPreferencesSheet({
       },
       onError: (error) => {
         if (isApiError(error) && error.status === 503) {
-          setErrorMessage('Could not finish follow setup right now. Please try again.');
+          setErrorMessage(t('details.followPreferences.setupError'));
           return;
         }
 
-        setErrorMessage('Could not follow this show. Please try again.');
+        setErrorMessage(t('details.followPreferences.followError'));
       },
     });
   };
 
-  const title = isFollowing ? 'Follow preferences' : 'Follow this show';
+  const title = isFollowing
+    ? t('details.followPreferences.titleFollowing')
+    : t('details.followPreferences.titleNew');
   const subtitle = isFollowing
-    ? 'Choose which release updates you want to hear about.'
-    : 'Choose what you want notifications for before following.';
-  const confirmLabel = isFollowing ? 'Save preferences' : 'Follow show';
+    ? t('details.followPreferences.subtitleFollowing')
+    : t('details.followPreferences.subtitleNew');
+  const confirmLabel = isFollowing
+    ? t('details.followPreferences.savePreferences')
+    : t('details.followPreferences.followShow');
 
   return (
       <View style={styles.backdrop}>
@@ -145,7 +151,7 @@ function FollowPreferencesSheet({
                   {subtitle}
                 </AppText>
               </View>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={onClose}>
                 <Ionicons name="close" size={22} color={colors.textPrimary} />
               </Pressable>
             </View>
@@ -157,20 +163,20 @@ function FollowPreferencesSheet({
             />
 
             <AppText variant="body" style={styles.sectionLabel}>
-              Notifications
+              {t('details.followPreferences.notificationsSection')}
             </AppText>
 
             <PreferenceRow
-              label="New seasons"
-              description="When a new season is announced or released"
+              label={t('details.followPreferences.newSeasons')}
+              description={t('details.followPreferences.newSeasonsDescription')}
               icon="albums-outline"
               selected={notifyNewSeasons}
               disabled={isBusy}
               onPress={() => setNotifyNewSeasons((value) => !value)}
             />
             <PreferenceRow
-              label="New episodes"
-              description="When new episodes become available"
+              label={t('details.followPreferences.newEpisodes')}
+              description={t('details.followPreferences.newEpisodesDescription')}
               icon="play-circle-outline"
               selected={notifyNewEpisodes}
               disabled={isBusy}
@@ -180,8 +186,8 @@ function FollowPreferencesSheet({
             {bothPreferencesOff ? (
               <AppText variant="caption" muted style={styles.bothOffHint}>
                 {isFollowing
-                  ? 'Saving with all notifications turned off will unfollow this show.'
-                  : 'Following with all notifications turned off will not follow this show.'}
+                  ? t('details.followPreferences.bothOffFollowing')
+                  : t('details.followPreferences.bothOffNew')}
               </AppText>
             ) : null}
 

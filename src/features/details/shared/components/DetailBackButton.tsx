@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet } from 'react-native';
 import { useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,10 +26,12 @@ export function DetailBackButton({
   variant = 'inline',
   contentInset = true,
 }: DetailBackButtonProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const segments = useSegments();
-  const accessibilityLabel = label ?? (variant === 'overlay' ? 'Go back' : 'Back');
-  const displayLabel = label ?? 'Back';
+  const accessibilityLabel =
+    label ?? (variant === 'overlay' ? t('common.goBack') : t('common.back'));
+  const displayLabel = label ?? t('common.back');
 
   const handleBack = useCallback(() => {
     if (isLibraryStackRoute(segments)) {

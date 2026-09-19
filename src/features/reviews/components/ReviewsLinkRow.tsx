@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +28,7 @@ export function ReviewsLinkRow({
   contentId,
   contentTitle,
 }: ReviewsLinkRowProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const reviewsQuery = useReviewsQuery(contentType, contentId, {
     page: 1,
@@ -36,12 +38,11 @@ export function ReviewsLinkRow({
   const isCountLoading = reviewsQuery.isLoading && totalCount == null;
   const hasReviews = totalCount != null && totalCount > 0;
   const countLabel = totalCount == null ? null : String(totalCount);
-  const trailingAccessibilityLabel =
-    isCountLoading
-      ? 'Reviews count loading'
-      : hasReviews
-        ? `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`
-        : 'No reviews yet';
+  const trailingAccessibilityLabel = isCountLoading
+    ? t('details.reviewsLink.countLoading')
+    : hasReviews
+      ? t(totalCount === 1 ? 'common.reviewCount' : 'common.reviewsCount', { count: totalCount })
+      : t('details.reviewsLink.noReviewsYet');
 
   const handlePress = useCallback(() => {
     const reviewsRoute =
@@ -56,13 +57,15 @@ export function ReviewsLinkRow({
     <View style={styles.section} testID="reviews-link-row">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Reviews, ${trailingAccessibilityLabel}`}
+        accessibilityLabel={t('details.reviewsLink.accessibility', {
+          status: trailingAccessibilityLabel,
+        })}
         onPress={handlePress}
         style={({ pressed }) => [styles.headerRow, pressed && styles.pressed]}
         testID="reviews-link-row-button"
       >
         <AppText variant="subtitle" style={styles.headerTitle}>
-          Reviews
+          {t('details.reviewsLink.title')}
         </AppText>
         <View style={styles.trailing}>
           {isCountLoading ? (
@@ -73,7 +76,7 @@ export function ReviewsLinkRow({
             </AppText>
           ) : (
             <AppText variant="caption" muted style={styles.emptyLabel} testID="reviews-empty-label">
-              No reviews yet
+              {t('details.reviewsLink.noReviewsYet')}
             </AppText>
           )}
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />

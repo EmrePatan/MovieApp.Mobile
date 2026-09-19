@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -38,6 +39,7 @@ import { typography } from '@/theme/typography';
 const RETURN_ROUTE = '/ai-recommendations';
 
 export function AiRecommendationsContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
@@ -160,7 +162,7 @@ export function AiRecommendationsContent() {
               'Unable to generate AI recommendations right now.',
             )}
             onRetry={handleRetry}
-            retryLabel="Try Again"
+            retryLabel={t('common.retry')}
           />
         </View>
       );
@@ -244,7 +246,7 @@ export function AiRecommendationsContent() {
             <View style={styles.titleRow}>
               <Ionicons name="sparkles" size={22} color={colors.accent} />
               <AppText variant="title" accessibilityRole="header">
-                AI Recommendations
+                {t('discover.hub.aiRecommendations.title')}
               </AppText>
             </View>
             <AppText variant="bodySmall" muted>

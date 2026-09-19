@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -39,6 +40,7 @@ const WATCHLIST_SORT_OPTIONS = getAvailableSortOptions(true);
 const DEFAULT_WATCHLIST_SORT: LibrarySortOption = 'recentlyAdded';
 
 export default function WatchlistScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [userSelectedWatchlistId, setUserSelectedWatchlistId] = useState<string | null>(null);
@@ -113,12 +115,12 @@ export default function WatchlistScreen() {
     }
 
     Alert.alert(
-      'Delete watchlist',
-      `Delete "${selectedWatchlist.name}"? This cannot be undone.`,
+      t('watchlists.optionsSheet.confirmTitle'),
+      t('watchlists.optionsSheet.confirmMessage', { name: selectedWatchlist.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             deleteWatchlist.mutate(selectedWatchlist.id, {
@@ -180,7 +182,7 @@ export default function WatchlistScreen() {
         item={item}
         isRemoving={removingItemKey === getLibraryItemKey(item)}
         removeIcon="bookmark"
-        removeAccessibilityLabel="watchlist"
+        removeAccessibilityLabel={t('common.watchlist')}
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />
@@ -201,7 +203,7 @@ export default function WatchlistScreen() {
 
   const listHeader = (
     <View style={styles.header}>
-      <AppText variant="title">Watchlist</AppText>
+      <AppText variant="title">{t('common.watchlist')}</AppText>
       <WatchlistSelector
         watchlists={watchlists}
         selectedWatchlistId={selectedWatchlistId}
@@ -220,7 +222,7 @@ export default function WatchlistScreen() {
             </AppText>
           </View>
           <AppButton
-            title="Delete"
+            title={t('common.delete')}
             variant="ghost"
             loading={deleteWatchlist.isPending}
             disabled={deleteWatchlist.isPending}
@@ -244,13 +246,13 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
-          <AppText variant="title">Watchlist</AppText>
+          <AppText variant="title">{t('common.watchlist')}</AppText>
         </View>
         <LibraryEmptyState
           icon="bookmark"
-          title="Sign in to manage your watchlists"
-          message="Your personal lists will appear here after you sign in."
-          actionLabel="Sign In"
+          title={t('library.hub.title')}
+          message={t('library.hub.signInCopy')}
+          actionLabel={t('common.signInTitleCase')}
           onAction={handleSignIn}
         />
       </SafeAreaView>
@@ -261,7 +263,7 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading watchlists" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingWatchlists')} />
         {createModal}
       </SafeAreaView>
     );
@@ -273,9 +275,8 @@ export default function WatchlistScreen() {
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message="Unable to load watchlists. Please try again."
+            message={t('library.watchlistsOverview.loadError')}
             onRetry={() => void watchlistsQuery.refetch()}
-            retryLabel="Try Again"
           />
         </View>
         {createModal}
@@ -289,9 +290,9 @@ export default function WatchlistScreen() {
         {listHeader}
         <LibraryEmptyState
           icon="bookmark"
-          title="You don't have any watchlists yet"
-          message="Create a list to save movies and TV shows you want to watch."
-          actionLabel="Create Watchlist"
+          title={t('library.watchlistsOverview.emptyTitle')}
+          message={t('library.watchlistsOverview.emptyMessage')}
+          actionLabel={t('common.createWatchlist')}
           onAction={() => setCreateModalVisible(true)}
         />
         {createModal}
@@ -303,7 +304,7 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading watchlist items" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingWatchlistItems')} />
         {createModal}
       </SafeAreaView>
     );
@@ -315,9 +316,8 @@ export default function WatchlistScreen() {
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message="Unable to load watchlist items. Please try again."
+            message={t('library.watchlistDetail.loadError')}
             onRetry={() => void itemsQuery.refetch()}
-            retryLabel="Try Again"
           />
         </View>
         {createModal}
@@ -327,25 +327,25 @@ export default function WatchlistScreen() {
 
   const filteredEmptyTitle =
     typeFilter === 'movie'
-      ? 'No movies match this filter'
+      ? t('library.watchlistDetail.filteredEmpty.movies')
       : typeFilter === 'tv'
-        ? 'No TV shows match this filter'
-        : 'No items match this filter';
+        ? t('library.watchlistDetail.filteredEmpty.tvShows')
+        : t('library.watchlistDetail.filteredEmpty.all');
 
   const emptyComponent =
     displayItems.length === 0 ? (
       <LibraryEmptyState
         icon="bookmark"
-        title="Your watchlist is empty"
-        message="Add movies and TV shows from their detail pages, or browse to discover something new."
-        actionLabel="Browse"
+        title={t('library.watchlistDetail.emptyTitle')}
+        message={t('library.watchlistDetail.emptyMessage')}
+        actionLabel={t('common.explore')}
         onAction={handleBrowse}
       />
     ) : (
       <LibraryEmptyState
         icon="bookmark"
         title={filteredEmptyTitle}
-        message="Try a different filter or sort option."
+        message={t('library.watchlistDetail.filteredEmpty.message')}
       />
     );
 

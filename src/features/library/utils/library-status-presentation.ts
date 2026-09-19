@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n';
+import { translateLibraryStatus } from '@/i18n/catalog-labels';
 import type { LibraryCategory, LibraryItem } from '../types/library';
 import type { LibraryStatusPresentation } from '../types/library-status';
 
@@ -6,8 +8,15 @@ function formatNextEpisodeDetail(item: LibraryItem): string | null {
     return null;
   }
 
-  const episodeLabel = item.nextEpisode.title ? ` · ${item.nextEpisode.title}` : '';
-  return `S${item.nextEpisode.seasonNumber} · E${item.nextEpisode.episodeNumber}${episodeLabel}`;
+  const titleSuffix = item.nextEpisode.title
+    ? i18n.t('common.seasonEpisodeTitleSuffix', { title: item.nextEpisode.title })
+    : '';
+
+  return i18n.t('common.seasonEpisodeWithTitle', {
+    season: item.nextEpisode.seasonNumber,
+    episode: item.nextEpisode.episodeNumber,
+    titleSuffix,
+  });
 }
 
 export function resolveLibraryStatusPresentation(item: LibraryItem): LibraryStatusPresentation {
@@ -15,29 +24,29 @@ export function resolveLibraryStatusPresentation(item: LibraryItem): LibraryStat
     case 'watching':
       return {
         status: 'watching',
-        label: 'Watching',
+        label: translateLibraryStatus('watching'),
         detail: formatNextEpisodeDetail(item),
         progressPercentage: item.progressPercentage,
       };
     case 'watched':
       return {
         status: 'watched',
-        label: 'Watched',
+        label: translateLibraryStatus('watched'),
       };
     case 'liked':
       return {
         status: 'liked',
-        label: 'Favorite',
+        label: translateLibraryStatus('favorite'),
       };
     case 'watchlist':
       return {
         status: 'saved',
-        label: 'Watchlist',
+        label: translateLibraryStatus('watchlist'),
       };
     default:
       return {
         status: 'saved',
-        label: 'Watchlist',
+        label: translateLibraryStatus('saved'),
       };
   }
 }
@@ -59,20 +68,24 @@ export function buildLibraryGridAccessibilityLabel(
       presentation.progressPercentage > 0 &&
       presentation.progressPercentage < 100
     ) {
-      parts.push(`${Math.round(presentation.progressPercentage)}% watched`);
+      parts.push(
+        i18n.t('common.percentWatched', {
+          percent: Math.round(presentation.progressPercentage),
+        }),
+      );
     } else {
-      parts.push('Watching');
+      parts.push(translateLibraryStatus('watching'));
     }
 
     return parts.join(', ');
   }
 
   if (category === 'watched') {
-    parts.push('Watched');
+    parts.push(translateLibraryStatus('watched'));
   } else if (category === 'liked') {
-    parts.push('Favorite');
+    parts.push(translateLibraryStatus('favorite'));
   } else if (category === 'watchlist') {
-    parts.push('Watchlist');
+    parts.push(translateLibraryStatus('watchlist'));
   } else {
     parts.push(presentation.label);
   }

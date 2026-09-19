@@ -39,33 +39,24 @@ export type { WatchMonetizationType };
 
 export const DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE = 20;
 
-export const ADVANCED_DISCOVER_MEDIA_OPTIONS: {
-  value: AdvancedDiscoverMediaType;
-  label: string;
-}[] = [
-  { value: 'movie', label: 'Movies' },
-  { value: 'tv', label: 'TV Shows' },
-];
+export const ADVANCED_DISCOVER_MEDIA_OPTIONS: AdvancedDiscoverMediaType[] = ['movie', 'tv'];
 
-export const ADVANCED_DISCOVER_SORT_OPTIONS: {
-  value: AdvancedDiscoverSort;
-  label: string;
-}[] = [
-  { value: 'popularity_desc', label: 'Popular' },
-  { value: 'rating_desc', label: 'Top Rated' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'oldest', label: 'Oldest' },
+export const ADVANCED_DISCOVER_SORT_OPTIONS: AdvancedDiscoverSort[] = [
+  'popularity_desc',
+  'rating_desc',
+  'newest',
+  'oldest',
 ];
 
 export const ADVANCED_DISCOVER_RUNTIME_PRESETS: {
-  label: string;
+  key: string;
   minRuntimeMinutes: number | null;
   maxRuntimeMinutes: number | null;
 }[] = [
-  { label: 'Any', minRuntimeMinutes: null, maxRuntimeMinutes: null },
-  { label: 'Under 90 min', minRuntimeMinutes: null, maxRuntimeMinutes: 89 },
-  { label: '90–120 min', minRuntimeMinutes: 90, maxRuntimeMinutes: 120 },
-  { label: 'Over 120 min', minRuntimeMinutes: 121, maxRuntimeMinutes: null },
+  { key: 'any', minRuntimeMinutes: null, maxRuntimeMinutes: null },
+  { key: 'under90', minRuntimeMinutes: null, maxRuntimeMinutes: 89 },
+  { key: 'range90to120', minRuntimeMinutes: 90, maxRuntimeMinutes: 120 },
+  { key: 'over120', minRuntimeMinutes: 121, maxRuntimeMinutes: null },
 ];
 
 export function createDefaultAdvancedDiscoverFilters(): AdvancedDiscoverFilters {

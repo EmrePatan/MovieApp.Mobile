@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useWorldCinemaPreview } from '@/features/discovery/hooks/useWorldCinemaPreview';
@@ -10,6 +11,7 @@ import {
   DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY,
 } from '@/features/discovery/world-cinema-types';
 import {
+  getWorldCinemaCollectionLabel,
   getWorldCinemaTabFlag,
   WORLD_CINEMA_CURATED_COLLECTIONS,
 } from '@/features/discovery/world-cinema-collections';
@@ -21,6 +23,7 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 export function WorldCinemaHubSection() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedOriginCountry, setSelectedOriginCountry] = useState(
@@ -61,17 +64,17 @@ export function WorldCinemaHubSection() {
         <View style={styles.titleRow}>
           <Ionicons name="earth-outline" size={18} color={colors.accent} />
           <AppText variant="subtitle" accessibilityRole="header">
-            World Cinema
+            {t('discover.worldCinemaHub.title')}
           </AppText>
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="See All World Cinema"
+          accessibilityLabel={t('discover.worldCinemaHub.seeAllAccessibility')}
           onPress={openWorldCinema}
           style={({ pressed }) => [styles.exploreButton, pressed && styles.pressed]}
         >
           <AppText variant="bodySmall" style={styles.exploreLabel}>
-            See All
+            {t('discover.worldCinemaHub.seeAll')}
           </AppText>
           <Ionicons name="chevron-forward" size={16} color={colors.accent} />
         </Pressable>
@@ -86,12 +89,13 @@ export function WorldCinemaHubSection() {
         renderItem={({ item }) => {
           const selected = item.originCountry === selectedOriginCountry;
           const flag = getWorldCinemaTabFlag(item.originCountry);
+          const label = getWorldCinemaCollectionLabel(item.originCountry);
 
           return (
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ selected }}
-              accessibilityLabel={item.label}
+              accessibilityLabel={label}
               onPress={() => setSelectedOriginCountry(item.originCountry)}
               style={({ pressed }) => [
                 styles.chip,
@@ -107,7 +111,7 @@ export function WorldCinemaHubSection() {
                   </AppText>
                 ) : null}
                 <AppText variant="bodySmall" style={selected ? styles.chipLabelSelected : undefined}>
-                  {item.label}
+                  {label}
                 </AppText>
               </View>
             </Pressable>
@@ -122,7 +126,7 @@ export function WorldCinemaHubSection() {
         isError={previewQuery.isError}
         onRetry={() => void previewQuery.refetch()}
         onItemPress={handlePreviewItemPress}
-        emptyMessage="No titles found for this cinema collection right now."
+        emptyMessage={t('discover.worldCinemaHub.empty')}
         testID="world-cinema-preview"
       />
     </View>

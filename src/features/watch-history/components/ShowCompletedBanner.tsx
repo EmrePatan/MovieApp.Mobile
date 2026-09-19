@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -9,6 +10,8 @@ interface ShowCompletedBannerProps {
 }
 
 export function ShowCompletedBanner({ showTitle }: ShowCompletedBannerProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container} testID="show-completed-banner">
       <View style={styles.iconBadge}>
@@ -16,10 +19,10 @@ export function ShowCompletedBanner({ showTitle }: ShowCompletedBannerProps) {
       </View>
       <View style={styles.copy}>
         <AppText variant="bodySmall" style={styles.title}>
-          Show completed!
+          {t('details.showCompleted.title')}
         </AppText>
         <AppText variant="caption" muted numberOfLines={2}>
-          You watched every episode of {showTitle}
+          {t('details.showCompleted.message', { showTitle })}
         </AppText>
       </View>
     </View>

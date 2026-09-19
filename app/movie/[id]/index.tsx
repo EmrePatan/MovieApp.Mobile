@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { useMovieDetails } from '@/features/details/movie/hooks/useMovieDetails';
 import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatalogRouteId';
 
 export default function MovieDetailScreen() {
+  const { t } = useTranslation();
   const { resolvedId: movieId, isInvalid } = useCatalogRouteIdState('movie');
   const query = useMovieDetails(movieId);
 
@@ -15,9 +17,9 @@ export default function MovieDetailScreen() {
     <DetailQueryState
       query={query}
       enableRatingNavigationGestureLock
-      invalidParamsMessage={isInvalid ? 'The movie link is invalid.' : undefined}
-      notFoundTitle="Movie not found"
-      notFoundMessage="This movie could not be found."
+      invalidParamsMessage={isInvalid ? t('details.queryState.invalidRequestMessage') : undefined}
+      notFoundTitle={t('details.queryState.invalidRequestTitle')}
+      notFoundMessage={t('details.queryState.invalidRequestMessage')}
     >
       {(movie) => <MovieDetailContent movie={movie} />}
     </DetailQueryState>

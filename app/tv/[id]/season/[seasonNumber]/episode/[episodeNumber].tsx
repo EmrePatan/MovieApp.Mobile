@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams } from 'expo-router';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 import { EpisodeDetailContent } from '@/features/details/episode/components/EpisodeDetailContent';
@@ -5,6 +6,7 @@ import { useEpisode } from '@/features/details/episode/hooks/useEpisode';
 import { isValidGuid, parsePositiveInt } from '@/features/details/shared/routes';
 
 export default function EpisodeDetailScreen() {
+  const { t } = useTranslation();
   const { id, seasonNumber: seasonNumberParam, episodeNumber: episodeNumberParam } =
     useLocalSearchParams<{
       id: string;
@@ -23,16 +25,16 @@ export default function EpisodeDetailScreen() {
 
   const invalidParamsMessage =
     !isValidGuid(tvShowId) || seasonNumber == null || episodeNumber == null
-      ? 'The episode link is invalid.'
+      ? t('details.queryState.invalidRequestMessage')
       : undefined;
 
   return (
     <DetailQueryState
       query={query}
       invalidParamsMessage={invalidParamsMessage}
-      notFoundTitle="Episode not found"
-      notFoundMessage="This episode could not be found."
-      invalidRequestMessage="The episode request is invalid."
+      notFoundTitle={t('details.queryState.invalidRequestTitle')}
+      notFoundMessage={t('details.queryState.invalidRequestMessage')}
+      invalidRequestMessage={t('details.queryState.invalidRequestMessage')}
     >
       {(episode) => <EpisodeDetailContent episode={episode} />}
     </DetailQueryState>

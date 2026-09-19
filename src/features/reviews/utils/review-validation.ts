@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { MAX_REVIEW_CONTENT_LENGTH } from '../types';
 import { getReviewContentLength, hasReviewContent } from './review-content-length';
 
@@ -9,12 +10,14 @@ export function validateReviewContent(content: string): ReviewFormErrors {
   const trimmed = content.trim();
 
   if (!hasReviewContent(trimmed)) {
-    return { content: 'Review content is required.' };
+    return { content: i18n.t('reviews.validation.contentRequired') };
   }
 
   if (getReviewContentLength(trimmed) > MAX_REVIEW_CONTENT_LENGTH) {
     return {
-      content: `Review must be at most ${MAX_REVIEW_CONTENT_LENGTH} characters.`,
+      content: i18n.t('reviews.validation.contentTooLong', {
+        max: MAX_REVIEW_CONTENT_LENGTH,
+      }),
     };
   }
 

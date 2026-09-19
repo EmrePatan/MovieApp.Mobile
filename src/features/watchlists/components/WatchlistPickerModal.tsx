@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Keyboard,
@@ -66,6 +67,7 @@ function WatchlistPickerBody({
   contentId,
   onClose,
 }: Omit<WatchlistPickerModalProps, 'visible'>) {
+  const { t } = useTranslation();
   const { data: watchlists = [], isLoading, isError, refetch } = useWatchlists(true);
   const {
     data: membership = {},
@@ -105,7 +107,7 @@ function WatchlistPickerBody({
           void refetchMembership();
         },
         onError: () => {
-          setErrorMessage('Could not update this watchlist.');
+          setErrorMessage(t('watchlists.picker.updateError'));
         },
         onSettled: () => {
           setPendingWatchlistId(null);
@@ -130,7 +132,7 @@ function WatchlistPickerBody({
 
   const handleCreateWatchlist = () => {
     if (trimmedWatchlistName.length === 0) {
-      setErrorMessage('Enter a watchlist name.');
+      setErrorMessage(t('watchlists.picker.enterName'));
       return;
     }
 
@@ -149,7 +151,7 @@ function WatchlistPickerBody({
               void refetchMembership();
             },
             onError: () => {
-              setErrorMessage('Could not add this item to the watchlist.');
+              setErrorMessage(t('watchlists.picker.updateError'));
             },
           },
         );
@@ -157,8 +159,8 @@ function WatchlistPickerBody({
       onError: (error) => {
         setErrorMessage(
           isApiError(error) && error.kind === 'conflict'
-            ? 'A watchlist with this name already exists.'
-            : 'Could not create watchlist. Please try again.',
+            ? t('watchlists.picker.createConflict')
+            : t('watchlists.picker.createError'),
         );
       },
     });
@@ -178,8 +180,8 @@ function WatchlistPickerBody({
               accessibilityRole="button"
               accessibilityLabel={
                 isInWatchlist
-                  ? `Remove from ${watchlist.name}`
-                  : `Add to ${watchlist.name}`
+                  ? t('common.removeFromNamedWatchlist', { name: watchlist.name })
+                  : t('common.addToNamedWatchlist', { name: watchlist.name })
               }
               accessibilityState={{ selected: isInWatchlist, disabled: isBusy }}
               disabled={isBusy}
@@ -228,10 +230,10 @@ function WatchlistPickerBody({
     </View>
   ) : isError ? (
     <View style={styles.stateBlock}>
-      <AppText variant="bodySmall" muted center>
-        Could not load watchlists.
+      <AppText variant="caption" muted center>
+        {t('library.watchlistsOverview.loadError')}
       </AppText>
-      <AppButton title="Retry" variant="ghost" onPress={() => void refetch()} />
+      <AppButton title={t('common.retry')} variant="ghost" onPress={() => void refetch()} />
     </View>
   ) : sortedWatchlists.length === 0 ? (
     <View style={styles.stateBlock} accessibilityRole="text">
@@ -239,10 +241,10 @@ function WatchlistPickerBody({
         <Ionicons name="albums-outline" size={22} color={colors.textMuted} />
       </View>
       <AppText variant="bodySmall" style={styles.emptyTitle}>
-        No watchlists yet
+        {t('library.watchlistsOverview.emptyTitle')}
       </AppText>
       <AppText variant="caption" muted center>
-        Start a new list below.
+        {t('library.watchlistsOverview.emptyMessage')}
       </AppText>
     </View>
   ) : listsExpanded ? (
@@ -262,7 +264,7 @@ function WatchlistPickerBody({
       <View style={styles.overlay}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close watchlist picker"
+          accessibilityLabel={t('common.closeWatchlistPicker')}
           onPress={handleClose}
           style={styles.dismissArea}
         />
@@ -277,7 +279,7 @@ function WatchlistPickerBody({
               </View>
               <View style={styles.headerCopy}>
                 <AppText variant="bodySmall" style={styles.headerTitle}>
-                  Add to Watchlist
+                  {t('common.addToWatchlist')}
                 </AppText>
                 <AppText variant="caption" muted>
                   Save to one or more lists
@@ -285,7 +287,7 @@ function WatchlistPickerBody({
               </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Close"
+                accessibilityLabel={t('common.close')}
                 hitSlop={8}
                 onPress={handleClose}
                 style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
@@ -304,7 +306,7 @@ function WatchlistPickerBody({
 
             <View style={styles.listsSection}>
               <AppText variant="caption" style={styles.sectionLabel}>
-                Your lists
+                {t('watchlists.selector.yourWatchlists')}
               </AppText>
               {listContent}
               {canCollapseLists ? (
@@ -312,16 +314,16 @@ function WatchlistPickerBody({
                   accessibilityRole="button"
                   accessibilityLabel={
                     listsExpanded
-                      ? 'Show fewer lists'
-                      : `Show all ${sortedWatchlists.length} lists`
+                      ? t('common.showFewerLists')
+                      : t('common.showAllLists', { count: sortedWatchlists.length })
                   }
                   onPress={() => setListsExpanded((expanded) => !expanded)}
                   style={({ pressed }) => [styles.expandListsButton, pressed && styles.pressed]}
                 >
                   <AppText variant="caption" style={styles.expandListsLabel}>
                     {listsExpanded
-                      ? 'Show fewer lists'
-                      : `Show all ${sortedWatchlists.length} lists`}
+                      ? t('common.showFewerLists')
+                      : t('common.showAllLists', { count: sortedWatchlists.length })}
                   </AppText>
                   <Ionicons
                     name={listsExpanded ? 'chevron-up' : 'chevron-down'}
@@ -334,7 +336,7 @@ function WatchlistPickerBody({
 
             <View style={styles.createFooter}>
               <AppText variant="caption" style={styles.sectionLabel}>
-                New list
+                {t('common.newList')}
               </AppText>
               <View
                 style={[
@@ -345,10 +347,10 @@ function WatchlistPickerBody({
                 <Ionicons name="add" size={16} color={colors.accent} />
                 <TextInput
                   ref={createInputRef}
-                  accessibilityLabel="New watchlist"
+                  accessibilityLabel={t('common.newWatchlist')}
                   value={newWatchlistName}
                   onChangeText={setNewWatchlistName}
-                  placeholder="List name"
+                  placeholder={t('watchlists.picker.listNamePlaceholder')}
                   placeholderTextColor={colors.textMuted}
                   style={styles.createInput}
                   maxLength={100}
@@ -364,7 +366,7 @@ function WatchlistPickerBody({
                 />
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Create and add"
+                  accessibilityLabel={t('common.createAndAdd')}
                   accessibilityState={{
                     disabled: !canCreateWatchlist,
                     busy: createWatchlistMutation.isPending,
@@ -387,7 +389,7 @@ function WatchlistPickerBody({
                         canCreateWatchlist && styles.createActionLabelReady,
                       ]}
                     >
-                      Add
+                      {t('common.create')}
                     </AppText>
                   )}
                 </Pressable>

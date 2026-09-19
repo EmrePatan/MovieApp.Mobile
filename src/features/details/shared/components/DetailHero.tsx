@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
@@ -41,6 +42,7 @@ export const DetailHero = memo(function DetailHero({
   useStillAsHero = false,
   identityAccessory,
 }: DetailHeroProps) {
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -68,7 +70,8 @@ export const DetailHero = memo(function DetailHero({
     setIsPosterViewerOpen(false);
   }, []);
 
-  const posterLabel = posterAccessibilityLabel ?? `${title} poster`;
+  const posterLabel =
+    posterAccessibilityLabel ?? t('common.posterAccessibility', { title });
 
   return (
     <View style={styles.container}>
@@ -91,7 +94,7 @@ export const DetailHero = memo(function DetailHero({
               onPress={openPosterViewer}
               accessibilityRole="button"
               accessibilityLabel={posterLabel}
-              accessibilityHint="Opens full screen poster"
+              accessibilityHint={t('details.sections.opensPortraitFullscreen')}
               style={({ pressed }) => [pressed && styles.posterPressed]}
               testID="detail-hero-poster"
             >

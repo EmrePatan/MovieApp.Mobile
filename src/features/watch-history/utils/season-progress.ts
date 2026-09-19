@@ -1,4 +1,5 @@
 import { clampProgressPercentage } from './progress-format';
+import { i18n } from '@/i18n';
 
 export type SeasonProgressState = 'not-started' | 'in-progress' | 'completed';
 
@@ -77,6 +78,8 @@ export function formatTvShowWatchedSummary(
     return null;
   }
 
-  const episodeLabel = total === 1 ? 'episode' : 'episodes';
-  return `${watched} of ${total} ${episodeLabel} watched`;
+  return i18n.t('common.episodesWatchedSummary', {
+    watched,
+    total,
+  });
 }

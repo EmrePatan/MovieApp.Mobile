@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -31,6 +32,7 @@ export function CreateWatchlistModal({
   onClose,
   onCreated,
 }: CreateWatchlistModalProps) {
+  const { t } = useTranslation();
   const createWatchlist = useCreateWatchlistForLibrary();
   const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState('');
@@ -65,7 +67,7 @@ export function CreateWatchlistModal({
   const handleCreate = () => {
     const trimmed = name.trim();
     if (trimmed.length === 0) {
-      setFeedback('Enter a watchlist name.');
+      setFeedback(t('watchlists.createModal.enterName'));
       return;
     }
 
@@ -81,8 +83,8 @@ export function CreateWatchlistModal({
       onError: (error) => {
         setFeedback(
           isApiError(error) && error.kind === 'conflict'
-            ? 'A watchlist with this name already exists.'
-            : 'Could not create watchlist. Please try again.',
+            ? t('watchlists.createModal.nameConflict')
+            : t('watchlists.createModal.createError'),
         );
       },
     });
@@ -97,8 +99,8 @@ export function CreateWatchlistModal({
         >
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
             <View style={styles.header}>
-              <AppText variant="subtitle">Create Watchlist</AppText>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={handleClose}>
+              <AppText variant="subtitle">{t('watchlists.createModal.title')}</AppText>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
                 <Ionicons name="close" size={24} color={colors.textPrimary} />
               </Pressable>
             </View>
@@ -111,10 +113,10 @@ export function CreateWatchlistModal({
 
             <AppInput
               ref={nameInputRef}
-              label="Watchlist name"
+              label={t('common.watchlistName')}
               value={name}
               onChangeText={setName}
-              placeholder="My Watchlist"
+              placeholder={t('common.myWatchlist')}
               maxLength={100}
               autoCorrect={false}
               returnKeyType="done"
@@ -122,7 +124,7 @@ export function CreateWatchlistModal({
             />
 
             <AppButton
-              title="Create Watchlist"
+              title={t('common.createWatchlist')}
               loading={createWatchlist.isPending}
               disabled={createWatchlist.isPending}
               onPress={handleCreate}

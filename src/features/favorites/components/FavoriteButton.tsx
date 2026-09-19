@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -34,6 +35,7 @@ export function FavoriteButton({
   favoriteStatusResolved = false,
   favoriteStatusPending = false,
 }: FavoriteButtonProps) {
+  const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const shouldQueryStatus = !favoriteStatusResolved && !favoriteStatusPending;
   const { data: queriedIsFavorited, isLoading: isStatusLoading } = useFavoriteStatus(
@@ -54,7 +56,7 @@ export function FavoriteButton({
 
   const handlePress = () => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to use favorites.');
+      setFeedback(t('details.actions.signInFavorites'));
       return;
     }
 
@@ -66,21 +68,21 @@ export function FavoriteButton({
       onError: (error) => {
         setFeedback(
           isApiError(error)
-            ? 'Could not update your favorite. Please try again.'
-            : 'Could not update your favorite. Please try again.',
+            ? t('details.actions.favoriteUpdateError')
+            : t('details.actions.favoriteUpdateError'),
         );
       },
     });
   };
 
-  const label = active ? 'Remove from favorites' : 'Add to favorites';
+  const label = active ? t('details.actions.removeFavorite') : t('details.actions.addFavorite');
 
   if (variant === 'detail') {
     return (
       <>
         <FeedbackMessage message={feedback} tone="error" onDismiss={() => setFeedback(null)} />
         <DetailCircularAction
-          label="Favorite"
+          label={t('details.actions.favoriteLabel')}
           accessibilityLabel={label}
           active={active}
           busy={isInitialLoading}

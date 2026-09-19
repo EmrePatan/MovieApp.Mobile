@@ -1,15 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export type FilmographyFilter = 'all' | 'movies' | 'tv';
-
-const FILTERS: { id: FilmographyFilter; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'movies', label: 'Movies' },
-  { id: 'tv', label: 'TV' },
-];
 
 interface FilmographyFilterTabsProps {
   activeFilter: FilmographyFilter;
@@ -20,9 +15,16 @@ export function FilmographyFilterTabs({
   activeFilter,
   onFilterChange,
 }: FilmographyFilterTabsProps) {
+  const { t } = useTranslation();
+  const filters: { id: FilmographyFilter; label: string }[] = [
+    { id: 'all', label: t('details.filmographyFilter.all') },
+    { id: 'movies', label: t('details.filmographyFilter.movie') },
+    { id: 'tv', label: t('details.filmographyFilter.tv') },
+  ];
+
   return (
     <View style={styles.container} testID="filmography-filter-tabs">
-      {FILTERS.map((filter) => {
+      {filters.map((filter) => {
         const active = filter.id === activeFilter;
 
         return (

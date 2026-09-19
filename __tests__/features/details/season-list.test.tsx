@@ -107,7 +107,7 @@ describe('SeasonList progress UI', () => {
 
     expect(screen.getByText('Seasons (2)')).toBeTruthy();
     expect(screen.getByTestId('tv-show-watched-summary')).toHaveTextContent(
-      '14 of 35 episodes watched',
+      '14 of 35 episodes',
     );
     expect(screen.getAllByTestId('season-list-progress-bar').length).toBe(2);
     expect(screen.getByText('14 / 22')).toBeTruthy();

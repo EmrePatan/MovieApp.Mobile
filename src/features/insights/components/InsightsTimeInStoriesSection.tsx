@@ -1,5 +1,6 @@
 import { Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3TimeInStories } from '../types';
@@ -22,14 +23,16 @@ export function InsightsTimeInStoriesSection({
   year,
   backdropImagePath,
 }: InsightsTimeInStoriesSectionProps) {
+  const { t } = useTranslation();
+
   if (timeInStories.totalMinutes <= 0) {
     return (
       <View style={styles.section}>
         <InsightsSectionHeader
-          title="Time in Stories"
-          subtitle="The hours you've spent in other worlds"
+          title={t('insights.timeInStories.title')}
+          subtitle={t('insights.timeInStories.subtitle')}
         />
-        <InsightsEmptyState message="Runtime data will appear as you build your watch history." />
+        <InsightsEmptyState message={t('insights.timeInStories.empty')} />
       </View>
     );
   }
@@ -43,8 +46,8 @@ export function InsightsTimeInStoriesSection({
   return (
     <View style={styles.section}>
       <InsightsSectionHeader
-        title="Time in Stories"
-        subtitle="The hours you've spent in other worlds"
+        title={t('insights.timeInStories.title')}
+        subtitle={t('insights.timeInStories.subtitle')}
       />
       <View style={styles.hero}>
         <View style={styles.donutWrap}>
@@ -62,7 +65,9 @@ export function InsightsTimeInStoriesSection({
             <AppText variant="hero" center style={styles.duration} numberOfLines={2}>
               {totalBreakdown}
             </AppText>
-            <AppText variant="caption" style={styles.durationLabel}>watch time</AppText>
+            <AppText variant="caption" style={styles.durationLabel}>
+              {t('insights.timeInStories.watchTimeLabel')}
+            </AppText>
           </View>
         </View>
       </View>
@@ -70,12 +75,12 @@ export function InsightsTimeInStoriesSection({
       <View style={styles.breakdownRow}>
         <BreakdownCard
           icon="film-outline"
-          label="Movies"
+          label={t('insights.timeInStories.movies')}
           value={formatWatchTimeBreakdown(timeInStories.movieMinutes)}
         />
         <BreakdownCard
           icon="tv-outline"
-          label="Series"
+          label={t('insights.timeInStories.series')}
           value={formatWatchTimeBreakdown(timeInStories.episodeMinutes)}
         />
       </View>
@@ -84,10 +89,10 @@ export function InsightsTimeInStoriesSection({
         <View style={styles.yearLine}>
           <Ionicons name="time-outline" size={14} color={colors.accentMuted} />
           <AppText variant="caption" muted>
-            In {year}, you&apos;ve watched{' '}
-            <AppText variant="caption" style={styles.yearHighlight}>
-              {formatWatchTimeBreakdown(timeInStories.yearMinutes)}
-            </AppText>
+            {t('insights.timeInStories.yearLine', {
+              year,
+              duration: formatWatchTimeBreakdown(timeInStories.yearMinutes),
+            })}
           </AppText>
         </View>
       ) : null}

@@ -1,37 +1,4 @@
-/**
- * Playful Movie DNA hero titles for every TMDB genre name used in MovieApp.
- * Keys are normalized with trim + lowercase.
- */
-export const MOVIE_DNA_GENRE_DISPLAY_TITLES: Record<string, string> = {
-  action: 'Action Aficionado',
-  adventure: 'Adventure Addict',
-  'action & adventure': 'Epic Escapist',
-  animation: 'Animation Devotee',
-  comedy: 'Comedy Connoisseur',
-  crime: 'Crime Sleuth',
-  documentary: 'Truth Seeker',
-  drama: 'Drama Queen',
-  family: 'Family Night Regular',
-  fantasy: 'Fantasy Wanderer',
-  history: 'History Buff',
-  horror: 'Horror Hunter',
-  kids: 'Kids Corner Captain',
-  music: 'Music Lover',
-  mystery: 'Mystery Solver',
-  news: 'Headline Hunter',
-  reality: 'Reality Regular',
-  romance: 'Hopeless Romantic',
-  'science fiction': 'Sci-Fi Explorer',
-  'sci-fi': 'Sci-Fi Explorer',
-  'sci-fi & fantasy': 'Realm Wanderer',
-  soap: 'Soap Saga Fan',
-  talk: 'Talk Show Devotee',
-  'tv movie': 'Couch Cinema Fan',
-  thriller: 'Thriller Chaser',
-  war: 'War Story Buff',
-  'war & politics': 'Power Play Watcher',
-  western: 'Western Wanderer',
-};
+import { translateMovieDnaGenreTitle } from '@/i18n/catalog-labels';
 
 /** Canonical genre names from MovieApp TMDB maps (movie + TV). */
 export const MOVIE_DNA_KNOWN_GENRE_NAMES = [
@@ -70,10 +37,5 @@ export function normalizeMovieDnaGenreName(name: string): string {
 }
 
 export function resolveMovieDnaGenreDisplayTitle(genreName: string): string {
-  const mappedTitle = MOVIE_DNA_GENRE_DISPLAY_TITLES[normalizeMovieDnaGenreName(genreName)];
-  if (mappedTitle) {
-    return mappedTitle;
-  }
-
-  return `${genreName.trim()} Explorer`;
+  return translateMovieDnaGenreTitle(genreName);
 }

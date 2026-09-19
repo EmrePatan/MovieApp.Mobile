@@ -1,6 +1,7 @@
 import type { ReactNode, RefObject } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SearchBar } from './SearchBar';
 import { colors } from '@/theme/colors';
@@ -29,18 +30,20 @@ export function SearchScreenHeader({
   autoFocus = false,
   children,
 }: SearchScreenHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.titleRow}>
         {onBack ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('search.header.back')}
             onPress={onBack}
             style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
           >
             <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-            <AppText variant="body">Back</AppText>
+            <AppText variant="body">{t('search.header.back')}</AppText>
           </Pressable>
         ) : (
           <AppText variant="bodySmall" muted style={styles.eyebrow} accessibilityRole="header">

@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { PersonGallerySection } from '@/features/gallery/components/PersonGallerySection';
@@ -15,6 +16,7 @@ interface PersonDetailContentProps {
 }
 
 export function PersonDetailContent({ person }: PersonDetailContentProps) {
+  const { t } = useTranslation();
   const biography = person.biography?.trim();
   const galleryQuery = usePersonGallery(person.tmdbId);
 
@@ -30,12 +32,12 @@ export function PersonDetailContent({ person }: PersonDetailContentProps) {
       />
 
       <View style={styles.section}>
-        <HomeSectionHeader title="Biography" />
+        <HomeSectionHeader title={t('details.sections.biography')} />
         {biography ? (
           <CollapsibleBiography biography={biography} />
         ) : (
           <AppText variant="bodySmall" muted style={styles.emptyBiography} testID="person-biography-empty">
-            Biography is not available for this person yet.
+            {t('details.sections.biographyEmpty')}
           </AppText>
         )}
       </View>

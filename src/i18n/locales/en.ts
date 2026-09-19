@@ -1,4 +1,6 @@
-export const en = {
+import { stage2En } from './stage2-en';
+
+const stage1En = {
   common: {
     loading: 'Loading...',
     startingApp: 'Starting MovieApp...',
@@ -197,5 +199,14 @@ export const en = {
     authCredentialsValidation: 'Please check your email and password.',
     authNetwork:
       'Unable to reach the server. Check your connection and try again.',
+  },
+};
+
+export const en = {
+  ...stage1En,
+  ...stage2En,
+  common: {
+    ...stage1En.common,
+    ...stage2En.common,
   },
 } as const;

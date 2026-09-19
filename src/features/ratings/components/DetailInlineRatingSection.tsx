@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
@@ -28,6 +29,7 @@ export function DetailInlineRatingSection({
   contentType,
   contentId,
 }: DetailInlineRatingSectionProps) {
+  const { t } = useTranslation();
   const { requireAuth } = useRequireAuth();
   const scrollLock = useDetailScrollLock();
   const myRatingQuery = useMyRating(contentType, contentId);
@@ -71,7 +73,7 @@ export function DetailInlineRatingSection({
     rateContent.mutate(backendScore, {
       onError: () => {
         setPreviewRating(null);
-        setFeedback('Unable to save rating. Please try again.');
+        setFeedback(t('ratings.saveError'));
       },
       onSuccess: () => {
         setPreviewRating(null);
@@ -89,7 +91,7 @@ export function DetailInlineRatingSection({
 
     deleteRating.mutate(undefined, {
       onError: () => {
-        setFeedback('Unable to remove rating. Please try again.');
+        setFeedback(t('ratings.removeError'));
       },
     });
   };
@@ -98,7 +100,7 @@ export function DetailInlineRatingSection({
     <View style={styles.section} testID="detail-inline-rating-section">
       <View style={styles.header} accessibilityRole="header">
         <AppText variant="subtitle" style={styles.headerTitle}>
-          Your Rating
+          {t('ratings.yourRating')}
         </AppText>
       </View>
 
@@ -122,10 +124,10 @@ export function DetailInlineRatingSection({
           testID="community-rating-row"
         >
           <AppText variant="caption" style={styles.communityPrefix}>
-            Community
+            {t('ratings.community')}
           </AppText>
           <AppText variant="caption" style={styles.communityValue}>
-            ★ {communityMeta.stars} / 5
+            {t('ratings.communityAverageDisplay', { stars: communityMeta.stars })}
           </AppText>
           <AppText variant="caption" style={styles.communitySeparator}>
             ·

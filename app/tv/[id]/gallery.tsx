@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCatalogChildDestinationGestureGuard } from '@/features/details/shared/navigation/useCatalogChildDestinationGestureGuard';
 import { GalleryDetailContent } from '@/features/gallery/components/GalleryDetailContent';
 import { useTvShowGallery } from '@/features/gallery/hooks/useGallery';
@@ -6,6 +7,7 @@ import { isValidGuid, normalizeRouteIdParam } from '@/features/details/shared/ro
 import { useLocalSearchParams } from 'expo-router';
 
 export default function TvGalleryScreen() {
+  const { t } = useTranslation();
   useCatalogChildDestinationGestureGuard();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const resolvedId = normalizeRouteIdParam(id);
@@ -16,9 +18,9 @@ export default function TvGalleryScreen() {
     <DetailQueryState
       query={query}
       contentLayout="list"
-      invalidParamsMessage={isInvalid ? 'The gallery link is invalid.' : undefined}
-      notFoundTitle="Gallery not found"
-      notFoundMessage="Photos could not be found for this TV show."
+      invalidParamsMessage={isInvalid ? t('details.queryState.invalidRequestMessage') : undefined}
+      notFoundTitle={t('details.queryState.invalidRequestTitle')}
+      notFoundMessage={t('details.queryState.invalidRequestMessage')}
     >
       {(gallery) => <GalleryDetailContent gallery={gallery} mode="catalog" />}
     </DetailQueryState>

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -36,6 +37,7 @@ const FAVORITES_SORT_OPTIONS = getAvailableSortOptions(false);
 const DEFAULT_FAVORITES_SORT: LibrarySortOption = 'titleAsc';
 
 export default function FavoritesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const favoritesQuery = useFavoritesItems();
@@ -83,7 +85,7 @@ export default function FavoritesScreen() {
         { contentType: item.type, contentId: item.id },
         {
           onError: () => {
-            setRemoveFeedback('Could not remove this favorite. Please try again.');
+            setRemoveFeedback(t('details.actions.favoriteUpdateError'));
           },
           onSettled: () => {
             setRemovingItemKey(null);
@@ -120,7 +122,7 @@ export default function FavoritesScreen() {
         item={item}
         isRemoving={removingItemKey === getLibraryItemKey(item)}
         removeIcon="heart"
-        removeAccessibilityLabel="favorites"
+        removeAccessibilityLabel={t('common.favorites')}
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />
@@ -142,9 +144,9 @@ export default function FavoritesScreen() {
   const listHeader = (
     <View style={styles.header}>
       <DetailBackButton />
-      <AppText variant="title">Favorites</AppText>
+      <AppText variant="title">{t('common.favorites')}</AppText>
       <AppText variant="bodySmall" muted>
-        Your saved movies and TV shows
+        {t('library.hub.subtitle')}
       </AppText>
       {items.length > 0 ? listControls : null}
       <FeedbackMessage
@@ -161,9 +163,9 @@ export default function FavoritesScreen() {
         {listHeader}
         <LibraryEmptyState
           icon="heart"
-          title="Sign in to view your favorites"
-          message="Movies and TV shows you favorite will appear here after you sign in."
-          actionLabel="Sign In"
+          title={t('library.hub.title')}
+          message={t('library.hub.signInCopy')}
+          actionLabel={t('common.signInTitleCase')}
           onAction={handleSignIn}
         />
       </SafeAreaView>
@@ -174,7 +176,7 @@ export default function FavoritesScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading favorites" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingYourLibrary')} />
       </SafeAreaView>
     );
   }
@@ -185,9 +187,8 @@ export default function FavoritesScreen() {
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message="Unable to load favorites. Please try again."
+            message={t('library.hub.loadError')}
             onRetry={() => void favoritesQuery.refetch()}
-            retryLabel="Retry"
           />
         </View>
       </SafeAreaView>
@@ -195,30 +196,30 @@ export default function FavoritesScreen() {
   }
 
   const paginationErrorMessage = favoritesQuery.isFetchNextPageError
-    ? 'Unable to load more favorites. Please try again.'
+    ? t('common.unableToLoadMore')
     : null;
 
   const filteredEmptyTitle =
     typeFilter === 'movie'
-      ? 'No movie favorites match this filter'
+      ? t('library.watchlistDetail.filteredEmpty.movies')
       : typeFilter === 'tv'
-        ? 'No TV favorites match this filter'
-        : 'No favorites match this filter';
+        ? t('library.watchlistDetail.filteredEmpty.tvShows')
+        : t('library.watchlistDetail.filteredEmpty.all');
 
   const emptyComponent =
     items.length === 0 ? (
       <LibraryEmptyState
         icon="heart"
-        title="You haven't added any favorites yet"
-        message="Save movies and TV shows you love — they'll show up here."
-        actionLabel="Browse"
+        title={t('library.empty.likedTitle', { mediaLabel: t('library.empty.mediaLabels.titles') })}
+        message={t('library.empty.likedMessage')}
+        actionLabel={t('common.explore')}
         onAction={handleBrowse}
       />
     ) : (
       <LibraryEmptyState
         icon="heart"
         title={filteredEmptyTitle}
-        message="Try a different filter or sort option."
+        message={t('library.watchlistDetail.filteredEmpty.message')}
       />
     );
 
@@ -240,7 +241,7 @@ export default function FavoritesScreen() {
               <AppText variant="bodySmall" muted center>
                 {paginationErrorMessage}
               </AppText>
-              <AppButton title="Retry" variant="secondary" onPress={handleRetryNextPage} />
+              <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
             </View>
           ) : null
         }

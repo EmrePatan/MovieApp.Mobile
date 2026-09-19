@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -8,6 +9,7 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
+import { i18n } from '@/i18n';
 
 interface CreditCastRowProps {
   member: CastMember;
@@ -39,7 +41,7 @@ function getEpisodeCountLabel(member: CastMember, contentType: 'movie' | 'tv'): 
   }
 
   const count = member.totalEpisodeCount;
-  return count === 1 ? '1 episode' : `${count} episodes`;
+  return i18n.t(count === 1 ? 'common.episodeCount' : 'common.episodesCount', { count });
 }
 
 export const CreditCastRow = memo(function CreditCastRow({
@@ -47,6 +49,7 @@ export const CreditCastRow = memo(function CreditCastRow({
   contentType,
   onPress,
 }: CreditCastRowProps) {
+  const { t } = useTranslation();
   const isPressable = Boolean(onPress && member.providerPersonId != null);
   const subtitle = getCastSubtitle(member, contentType);
   const episodeCountLabel = getEpisodeCountLabel(member, contentType);
@@ -54,7 +57,9 @@ export const CreditCastRow = memo(function CreditCastRow({
   return (
     <Pressable
       accessibilityRole={isPressable ? 'button' : 'text'}
-      accessibilityLabel={isPressable ? `View ${member.name}` : member.name}
+      accessibilityLabel={
+        isPressable ? t('common.openProfileNamed', { name: member.name }) : member.name
+      }
       disabled={!isPressable}
       onPress={() => onPress?.(member)}
       style={({ pressed }) => [styles.row, pressed && isPressable && styles.pressed]}
@@ -67,7 +72,7 @@ export const CreditCastRow = memo(function CreditCastRow({
             width={PORTRAIT_SIZE}
             height={PORTRAIT_SIZE}
             rounded
-            accessibilityLabel={`${member.name} portrait`}
+            accessibilityLabel={t('details.sections.personPortrait', { name: member.name })}
           />
         ) : (
           <View style={styles.fallback}>

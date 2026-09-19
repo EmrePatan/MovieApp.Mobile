@@ -1,14 +1,11 @@
 import type { HomeTypeFilter } from '../types';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-const FILTERS: { label: string; value: HomeTypeFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Movies', value: 'movie' },
-  { label: 'TV Shows', value: 'tv' },
-];
+const FILTERS: HomeTypeFilter[] = ['all', 'movie', 'tv'];
 
 interface HomeTypeFilterControlProps {
   value: HomeTypeFilter;
@@ -16,26 +13,44 @@ interface HomeTypeFilterControlProps {
   overlay?: boolean;
 }
 
+function getFilterLabel(
+  filter: HomeTypeFilter,
+  t: (key: string) => string,
+): string {
+  if (filter === 'all') {
+    return t('home.typeFilter.all');
+  }
+
+  if (filter === 'movie') {
+    return t('home.typeFilter.movies');
+  }
+
+  return t('home.typeFilter.tvShows');
+}
+
 export function HomeTypeFilterControl({
   value,
   onChange,
   overlay = false,
 }: HomeTypeFilterControlProps) {
+  const { t } = useTranslation();
+
   return (
     <View
       style={[styles.container, overlay && styles.containerOverlay]}
       accessibilityRole="tablist"
     >
       {FILTERS.map((filter) => {
-        const selected = value === filter.value;
+        const selected = value === filter;
+        const label = getFilterLabel(filter, t);
 
         return (
           <Pressable
-            key={filter.value}
+            key={filter}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Show ${filter.label}`}
-            onPress={() => onChange(filter.value)}
+            accessibilityLabel={t('home.typeFilter.showFilter', { label })}
+            onPress={() => onChange(filter)}
             style={[
               styles.chip,
               overlay && styles.chipOverlay,
@@ -51,7 +66,7 @@ export function HomeTypeFilterControl({
                 selected && styles.labelSelected,
               ]}
             >
-              {filter.label}
+              {label}
             </AppText>
           </Pressable>
         );

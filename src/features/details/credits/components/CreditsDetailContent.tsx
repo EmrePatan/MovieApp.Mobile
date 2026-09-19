@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, SectionList, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +27,7 @@ export function CreditsDetailContent({
   credits,
   title,
 }: CreditsDetailContentProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<CreditsTab>(
     credits.cast.length > 0 ? 'cast' : 'crew',
@@ -64,7 +66,7 @@ export function CreditsDetailContent({
         <DetailBackButton contentInset={false} />
         <View style={styles.header}>
           <AppText variant="title" style={styles.headerTitle}>
-            Cast & Crew
+            {t('details.credits.title')}
           </AppText>
           {title ? (
             <AppText variant="bodySmall" muted numberOfLines={2}>

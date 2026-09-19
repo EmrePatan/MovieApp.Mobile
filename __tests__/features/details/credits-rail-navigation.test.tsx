@@ -49,7 +49,7 @@ describe('CastRail navigation', () => {
     });
 
     render(<CastRail contentType="movie" contentId={movieId} />);
-    fireEvent.press(screen.getByLabelText('View Matthew McConaughey'));
+    fireEvent.press(screen.getByLabelText('Open Matthew McConaughey profile'));
 
     expect(mockPush).toHaveBeenCalledWith('/person/1001');
   });

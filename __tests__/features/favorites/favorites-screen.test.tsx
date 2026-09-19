@@ -7,6 +7,7 @@ import { useAuth } from '@/auth/useAuth';
 import { useFavoritesItems } from '@/features/favorites/hooks/useFavoritesItems';
 import { useRemoveFavoriteMutation } from '@/features/favorites/hooks/useFavoriteMutations';
 import FavoritesScreen from '../../../app/favorites';
+import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();
 
@@ -83,8 +84,8 @@ describe('FavoritesScreen', () => {
     });
 
     render(<FavoritesScreen />);
-    expect(screen.getByText('Sign in to view your favorites')).toBeTruthy();
-    fireEvent.press(screen.getByText('Sign In'));
+    expect(screen.getByText(t('library.hub.signInCopy'))).toBeTruthy();
+    fireEvent.press(screen.getByText(t('common.signInTitleCase')));
     expect(mockPush).toHaveBeenCalledWith('/(auth)/login');
   });
 
@@ -92,7 +93,7 @@ describe('FavoritesScreen', () => {
     mockAuthenticatedQuery({ isLoading: true });
 
     render(<FavoritesScreen />);
-    expect(screen.getByLabelText('Loading favorites')).toBeTruthy();
+    expect(screen.getByLabelText(t('common.loadingYourLibrary'))).toBeTruthy();
   });
 
   it('renders movie favorite and navigates to movie detail', () => {
@@ -314,13 +315,21 @@ describe('FavoritesScreen', () => {
 
     render(<FavoritesScreen />);
 
-    fireEvent.press(screen.getByLabelText('Remove Inception from favorites'));
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.removeFromList', { title: 'Inception', listName: t('common.favorites') }),
+      ),
+    );
     expect(removeMutate).toHaveBeenCalledWith(
       { contentType: 'movie', contentId: 'movie-id' },
       expect.any(Object),
     );
 
-    fireEvent.press(screen.getByLabelText('Remove Breaking Bad from favorites'));
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.removeFromList', { title: 'Breaking Bad', listName: t('common.favorites') }),
+      ),
+    );
     expect(removeMutate).toHaveBeenCalledWith(
       { contentType: 'tv', contentId: 'tv-id' },
       expect.any(Object),
@@ -354,8 +363,12 @@ describe('FavoritesScreen', () => {
     });
 
     render(<FavoritesScreen />);
-    fireEvent.press(screen.getByLabelText('Remove Inception from favorites'));
-    expect(screen.getByText('Could not remove this favorite. Please try again.')).toBeTruthy();
+    fireEvent.press(
+      screen.getByLabelText(
+        t('common.removeFromList', { title: 'Inception', listName: t('common.favorites') }),
+      ),
+    );
+    expect(screen.getByText(t('details.actions.favoriteUpdateError'))).toBeTruthy();
   });
 
   it('renders empty state with browse action', () => {
@@ -364,8 +377,12 @@ describe('FavoritesScreen', () => {
     });
 
     render(<FavoritesScreen />);
-    expect(screen.getByText("You haven't added any favorites yet")).toBeTruthy();
-    fireEvent.press(screen.getByText('Browse'));
+    expect(
+      screen.getByText(
+        t('library.empty.likedTitle', { mediaLabel: t('library.empty.mediaLabels.titles') }),
+      ),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByText(t('common.explore')));
     expect(mockPush).toHaveBeenCalledWith('/search');
   });
 
@@ -378,9 +395,9 @@ describe('FavoritesScreen', () => {
     });
 
     render(<FavoritesScreen />);
-    expect(screen.getByText('Unable to load favorites. Please try again.')).toBeTruthy();
+    expect(screen.getByText(t('library.hub.loadError'))).toBeTruthy();
     expect(screen.queryByText('Server error.')).toBeNull();
-    fireEvent.press(screen.getByText('Retry'));
+    fireEvent.press(screen.getByText(t('common.tryAgain')));
     expect(refetch).toHaveBeenCalled();
   });
 

@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +13,7 @@ import { formatIsoDate } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { i18n } from '@/i18n';
 
 interface PersonHeroProps {
   name: string;
@@ -30,6 +32,7 @@ export const PersonHero = memo(function PersonHero({
   deathday,
   placeOfBirth,
 }: PersonHeroProps) {
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const heroHeight = Math.round(Math.min(360, Math.max(260, width * 0.62)));
@@ -54,7 +57,7 @@ export const PersonHero = memo(function PersonHero({
     setIsPortraitViewerOpen(false);
   }, []);
 
-  const portraitLabel = `${name} portrait`;
+  const portraitLabel = t('details.sections.personPortrait', { name });
 
   return (
     <View style={styles.container}>
@@ -64,7 +67,7 @@ export const PersonHero = memo(function PersonHero({
             path={profileImagePath}
             width={width}
             height={heroHeight}
-            accessibilityLabel={`${name} portrait backdrop`}
+            accessibilityLabel={t('details.sections.personPortraitBackdrop', { name })}
           />
         ) : (
           <View style={[styles.fallbackBackdrop, { height: heroHeight }]} />
@@ -80,7 +83,7 @@ export const PersonHero = memo(function PersonHero({
               onPress={openPortraitViewer}
               accessibilityRole="button"
               accessibilityLabel={portraitLabel}
-              accessibilityHint="Opens full screen portrait"
+              accessibilityHint={t('details.sections.opensPortraitFullscreen')}
               style={({ pressed }) => [pressed && styles.portraitPressed]}
               testID="person-hero-portrait"
             >
@@ -134,7 +137,9 @@ function formatLifeDates(birthday: string | null, deathday: string | null): stri
   }
 
   const death = formatIsoDate(deathday);
-  return death ? `${birth} – ${death}` : `Born ${birth}`;
+  return death
+    ? i18n.t('common.lifeDates', { birth, death })
+    : i18n.t('common.bornDate', { date: birth });
 }
 
 const styles = StyleSheet.create({

@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { getSortLabel } from '../utils/library-sort';
 import type { LibrarySortOption } from '../types';
@@ -21,6 +22,8 @@ export function LibrarySortControl({
   appearance = 'filled',
   showLabel = false,
 }: LibrarySortControlProps) {
+  const { t } = useTranslation();
+
   if (options.length <= 1) {
     return null;
   }
@@ -33,7 +36,7 @@ export function LibrarySortControl({
         <View style={styles.labelRow}>
           <Ionicons name="swap-vertical-outline" size={14} color={colors.textMuted} />
           <AppText variant="caption" muted>
-            Sort
+            {t('common.sortBy')}
           </AppText>
         </View>
       ) : null}
@@ -46,7 +49,7 @@ export function LibrarySortControl({
               key={option}
               accessibilityRole="tab"
               accessibilityState={{ selected }}
-              accessibilityLabel={`Sort by ${getSortLabel(option)}`}
+              accessibilityLabel={t('common.sortByLabel', { label: getSortLabel(option) })}
               onPress={() => onChange(option)}
               style={[
                 styles.chip,

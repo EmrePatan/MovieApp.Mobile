@@ -75,7 +75,7 @@ describe('half-star optimistic rating transitions', () => {
       <DetailInlineRatingSection contentType="movie" contentId="movie-id" />,
     );
 
-    fireEvent(screen.getByLabelText('Your rating'), 'onAccessibilityAction', {
+    fireEvent(screen.getByLabelText('Your Rating'), 'onAccessibilityAction', {
       nativeEvent: { actionName: 'increment' },
     });
 
@@ -99,7 +99,7 @@ describe('half-star optimistic rating transitions', () => {
 
     render(<DetailInlineRatingSection contentType="movie" contentId="movie-id" />);
 
-    fireEvent(screen.getByLabelText('Your rating'), 'onAccessibilityAction', {
+    fireEvent(screen.getByLabelText('Your Rating'), 'onAccessibilityAction', {
       nativeEvent: { actionName: 'increment' },
     });
 

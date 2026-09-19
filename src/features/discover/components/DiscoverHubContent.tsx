@@ -1,4 +1,6 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/common/AppText';
@@ -22,6 +24,7 @@ import { DiscoverPreviewSection } from './DiscoverPreviewSection';
 import { spacing } from '@/theme/spacing';
 
 export function DiscoverHubContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { region: userRegion, isHydrated } = useRegionalPreference();
@@ -102,50 +105,50 @@ export function DiscoverHubContent() {
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
-          Discover
+          {t('discover.hub.title')}
         </AppText>
         <GlobalSearchEntry origin="discover" variant="discover" />
       </View>
 
       <View style={styles.featureSection}>
         <AppText variant="bodySmall" muted style={styles.sectionEyebrow}>
-          Find something new
+          {t('discover.hub.eyebrow')}
         </AppText>
         <DiscoverFeatureEntry
-          title="Advanced Discover"
-          subtitle="Genre · Year · Rating · Runtime · Country"
+          title={t('discover.hub.advancedDiscover.title')}
+          subtitle={t('discover.hub.advancedDiscover.subtitle')}
           icon="options-outline"
           onPress={openAdvancedDiscover}
-          accessibilityLabel="Advanced Discover"
+          accessibilityLabel={t('discover.hub.advancedDiscover.accessibility')}
         />
         <DiscoverFeatureEntry
-          title="Streaming Services"
-          subtitle="Find where to watch across providers"
+          title={t('discover.hub.streamingServices.title')}
+          subtitle={t('discover.hub.streamingServices.subtitle')}
           icon="tv-outline"
           onPress={openStreamingDiscover}
-          accessibilityLabel="Streaming Services"
+          accessibilityLabel={t('discover.hub.streamingServices.accessibility')}
         />
         <DiscoverFeatureEntry
-          title="Pick Something For Me"
-          subtitle="Let MovieApp choose your next title"
+          title={t('discover.hub.pickSomething.title')}
+          subtitle={t('discover.hub.pickSomething.subtitle')}
           icon="shuffle-outline"
           onPress={openPickSomething}
-          accessibilityLabel="Pick Something For Me"
+          accessibilityLabel={t('discover.hub.pickSomething.accessibility')}
         />
         <DiscoverFeatureEntry
-          title="AI Recommendations"
-          subtitle="Describe your mood and get personalized picks"
+          title={t('discover.hub.aiRecommendations.title')}
+          subtitle={t('discover.hub.aiRecommendations.subtitle')}
           icon="sparkles-outline"
           onPress={openAiRecommendations}
-          accessibilityLabel="AI Recommendations"
+          accessibilityLabel={t('discover.hub.aiRecommendations.accessibility')}
         />
       </View>
 
       <WorldCinemaHubSection />
 
       <DiscoverPreviewSection
-        title="Now in Theaters"
-        subtitle="Currently playing in theaters"
+        title={t('discover.hub.nowInTheaters.title')}
+        subtitle={t('discover.hub.nowInTheaters.subtitle')}
         icon="film-outline"
         items={nowInTheatersItems}
         isLoading={nowInTheatersPreviewQuery.isLoading}
@@ -153,13 +156,13 @@ export function DiscoverHubContent() {
         onRetry={() => void nowInTheatersPreviewQuery.refetch()}
         onItemPress={handlePreviewItemPress}
         onSeeAll={openNowInTheaters}
-        emptyMessage="No movies are currently playing in theaters right now."
+        emptyMessage={t('discover.hub.nowInTheaters.empty')}
         testID="now-in-theaters-preview"
       />
 
       <DiscoverPreviewSection
-        title="On TV This Week"
-        subtitle="Episodes airing in the next 7 days"
+        title={t('discover.hub.onTvThisWeek.title')}
+        subtitle={t('discover.hub.onTvThisWeek.subtitle')}
         icon="calendar-outline"
         items={onTvThisWeekItems}
         isLoading={onTvThisWeekPreviewQuery.isLoading}
@@ -167,24 +170,24 @@ export function DiscoverHubContent() {
         onRetry={() => void onTvThisWeekPreviewQuery.refetch()}
         onItemPress={handlePreviewItemPress}
         onSeeAll={openOnTvThisWeek}
-        emptyMessage="No TV shows are airing this week right now."
+        emptyMessage={t('discover.hub.onTvThisWeek.empty')}
         testID="on-tv-this-week-preview"
       />
 
       <DiscoverPreviewCarousel
-        title="Trending"
+        title={translateDiscoveryBrowseMode('trending')}
         items={trendingItems}
         onItemPress={handlePreviewItemPress}
         onSeeAll={openTrendingBrowse}
       />
       <DiscoverPreviewCarousel
-        title="Top Rated"
+        title={translateDiscoveryBrowseMode('top_rated')}
         items={topRatedItems}
         onItemPress={handlePreviewItemPress}
         onSeeAll={openTopRatedBrowse}
       />
       <DiscoverPreviewCarousel
-        title="New Releases"
+        title={translateDiscoveryBrowseMode('new_releases')}
         items={newReleasesItems}
         onItemPress={handlePreviewItemPress}
         onSeeAll={openNewReleasesBrowse}

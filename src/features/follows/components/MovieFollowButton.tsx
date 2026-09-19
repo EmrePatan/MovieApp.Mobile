@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
@@ -13,6 +14,7 @@ interface MovieFollowButtonProps {
 }
 
 export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
+  const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { data: status, isLoading } = useMovieFollowStatus(movieId);
   const createFollow = useCreateMovieFollow(movieId);
@@ -27,15 +29,13 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
   const handleFollowSuccess = async () => {
     const registrationResult = await ensurePushDeviceRegisteredAsync();
     if (registrationResult === 'permission_denied') {
-      setPermissionHint(
-        'Enable notifications in device settings to receive release alerts.',
-      );
+      setPermissionHint(t('details.actions.enableNotificationsSettings'));
     }
   };
 
   const handlePress = () => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to get release alerts.');
+      setFeedback(t('details.actions.signInReleaseAlerts'));
       return;
     }
 
@@ -58,8 +58,10 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
     });
   };
 
-  const accessibilityLabel = isFollowing ? 'Release alert on' : 'Notify me when released';
-  const label = isFollowing ? 'Alert on' : 'Notify';
+  const accessibilityLabel = isFollowing
+    ? t('details.actions.releaseAlertOn')
+    : t('details.actions.notifyWhenReleased');
+  const label = isFollowing ? t('details.actions.alertOn') : t('details.actions.notifyLabel');
 
   return (
     <>

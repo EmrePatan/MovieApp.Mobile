@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -10,19 +11,21 @@ interface ReviewsWritePromptProps {
 }
 
 export function ReviewsWritePrompt({ onPress }: ReviewsWritePromptProps) {
+  const { t } = useTranslation();
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Write a review"
+      accessibilityLabel={t('reviews.writeAccessibility')}
       onPress={onPress}
       style={({ pressed }) => [styles.container, pressed && styles.pressed]}
       testID="reviews-write-section"
     >
       <AppText variant="bodySmall" muted style={styles.prompt}>
-        Share your thoughts
+        {t('reviews.writePrompt')}
       </AppText>
       <AppText variant="caption" style={styles.action}>
-        Write
+        {t('reviews.writeAction')}
       </AppText>
     </Pressable>
   );

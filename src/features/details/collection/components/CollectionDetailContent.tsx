@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -17,6 +18,7 @@ interface CollectionDetailContentProps {
 }
 
 export function CollectionDetailContent({ collection }: CollectionDetailContentProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -35,14 +37,14 @@ export function CollectionDetailContent({ collection }: CollectionDetailContentP
         posterPath={collection.posterPath}
         backdropPath={collection.backdropPath}
         metadataLine=""
-        posterAccessibilityLabel={`${collection.name} poster`}
+        posterAccessibilityLabel={t('details.sections.collectionPoster', { name: collection.name })}
       />
       <DetailOverview overview={collection.overview} />
       <View style={styles.section} testID="collection-parts">
-        <HomeSectionHeader title="Movies in this collection" />
+        <HomeSectionHeader title={t('details.sections.collectionParts')} />
         {collection.parts.length === 0 ? (
           <AppText variant="bodySmall" muted style={styles.empty} testID="collection-parts-empty">
-            No movies are available in this collection yet.
+            {t('details.sections.collectionEmpty')}
           </AppText>
         ) : (
           <View style={styles.list}>

@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -16,6 +17,8 @@ export function InsightsYearSelector({
   onSelectYear,
   compact = false,
 }: InsightsYearSelectorProps) {
+  const { t } = useTranslation();
+
   if (years.length <= 1) {
     return null;
   }
@@ -34,7 +37,7 @@ export function InsightsYearSelector({
             key={year}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Show insights for ${year}`}
+            accessibilityLabel={t('insights.yourYear.yearSelectorAccessibility', { year })}
             onPress={() => onSelectYear(year)}
             style={({ pressed }) => [
               styles.chip,

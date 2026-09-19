@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -32,6 +33,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function FollowingScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const followingQuery = useFollowingCatalog();
@@ -98,9 +100,9 @@ export default function FollowingScreen() {
   const listHeader = (
     <View style={styles.header}>
       <DetailBackButton />
-      <AppText variant="title">Following</AppText>
+      <AppText variant="title">{t('following.title')}</AppText>
       <AppText variant="bodySmall" muted>
-        Movies and TV shows you follow for release updates
+        {t('following.subtitle')}
       </AppText>
       {items.length > 0 ? listControls : null}
     </View>
@@ -112,12 +114,12 @@ export default function FollowingScreen() {
         {listHeader}
         <View style={styles.filteredEmpty}>
           <AppText variant="subtitle" center>
-            Sign in to view your following list
+            {t('following.guestTitle')}
           </AppText>
           <AppText variant="bodySmall" muted center>
-            Movies and TV shows you follow will appear here after you sign in.
+            {t('following.guestMessage')}
           </AppText>
-          <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />
+          <AppButton title={t('common.signInTitleCase')} variant="secondary" onPress={handleSignIn} />
         </View>
       </SafeAreaView>
     );
@@ -127,7 +129,7 @@ export default function FollowingScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading following" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingFollowing')} />
       </SafeAreaView>
     );
   }
@@ -138,9 +140,9 @@ export default function FollowingScreen() {
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message="Unable to load following. Please try again."
+            message={t('following.loadError')}
             onRetry={() => void followingQuery.refetch()}
-            retryLabel="Retry"
+            retryLabel={t('common.retry')}
           />
         </View>
       </SafeAreaView>
@@ -148,15 +150,15 @@ export default function FollowingScreen() {
   }
 
   const paginationErrorMessage = followingQuery.isFetchNextPageError
-    ? 'Unable to load more followed titles. Please try again.'
+    ? t('common.unableToLoadMoreFollowing')
     : null;
 
   const filteredEmptyTitle =
     typeFilter === 'movie'
-      ? 'No followed movies match this filter'
+      ? t('following.filteredEmpty.movies')
       : typeFilter === 'tv'
-        ? 'No followed TV shows match this filter'
-        : 'No followed titles match this filter';
+        ? t('following.filteredEmpty.tvShows')
+        : t('following.filteredEmpty.all');
 
   const emptyComponent =
     items.length === 0 ? (
@@ -167,9 +169,9 @@ export default function FollowingScreen() {
           {filteredEmptyTitle}
         </AppText>
         <AppText variant="bodySmall" muted center>
-          Try a different filter or keep browsing to load more titles.
+          {t('following.filteredEmpty.message')}
         </AppText>
-        <AppButton title="Browse Discover" variant="secondary" onPress={handleBrowse} />
+        <AppButton title={t('common.browseDiscover')} variant="secondary" onPress={handleBrowse} />
       </View>
     );
 
@@ -191,7 +193,7 @@ export default function FollowingScreen() {
               <AppText variant="bodySmall" muted center>
                 {paginationErrorMessage}
               </AppText>
-              <AppButton title="Retry" variant="secondary" onPress={handleRetryNextPage} />
+              <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
             </View>
           ) : null
         }

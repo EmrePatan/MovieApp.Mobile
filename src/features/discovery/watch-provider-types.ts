@@ -13,15 +13,12 @@ export interface DiscoveryWatchProvidersResponse {
   providers: DiscoveryWatchProvider[];
 }
 
-export const WATCH_MONETIZATION_OPTIONS: {
-  value: WatchMonetizationType;
-  label: string;
-}[] = [
-  { value: 'stream', label: 'Stream' },
-  { value: 'free', label: 'Free' },
-  { value: 'ads', label: 'With Ads' },
-  { value: 'rent', label: 'Rent' },
-  { value: 'buy', label: 'Buy' },
+export const WATCH_MONETIZATION_OPTIONS: WatchMonetizationType[] = [
+  'stream',
+  'free',
+  'ads',
+  'rent',
+  'buy',
 ];
 
 import {

@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -9,6 +10,8 @@ interface ColdHomeWelcomeProps {
 }
 
 export function ColdHomeWelcome({ onExplorePress }: ColdHomeWelcomeProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -16,19 +19,19 @@ export function ColdHomeWelcome({ onExplorePress }: ColdHomeWelcomeProps) {
           <Ionicons name="sparkles-outline" size={28} color={colors.accent} />
         </View>
         <AppText variant="title" style={styles.title}>
-          Find your next favorite
+          {t('home.coldWelcome.title')}
         </AppText>
         <AppText variant="bodySmall" muted style={styles.message}>
-          Explore movies and shows to start building your recommendations.
+          {t('home.coldWelcome.message')}
         </AppText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Explore movies and shows"
+          accessibilityLabel={t('home.coldWelcome.accessibility')}
           onPress={onExplorePress}
           style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
         >
           <AppText variant="bodySmall" style={styles.ctaText}>
-            Explore
+            {t('home.coldWelcome.cta')}
           </AppText>
           <Ionicons name="arrow-forward" size={16} color={colors.accent} />
         </Pressable>

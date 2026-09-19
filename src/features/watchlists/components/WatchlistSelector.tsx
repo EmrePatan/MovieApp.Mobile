@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Modal,
@@ -34,6 +35,7 @@ export function WatchlistSelector({
   onCreatePress,
   onRetry,
 }: WatchlistSelectorProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   const selectedWatchlist = useMemo(
@@ -53,8 +55,8 @@ export function WatchlistSelector({
           accessibilityRole="button"
           accessibilityLabel={
             selectedWatchlist
-              ? `Selected watchlist ${selectedWatchlist.name}. Change watchlist.`
-              : 'Select watchlist'
+              ? t('common.selectedWatchlistChange', { name: selectedWatchlist.name })
+              : t('common.selectWatchlist')
           }
           disabled={isLoading || watchlists.length === 0}
           onPress={() => setVisible(true)}
@@ -65,14 +67,14 @@ export function WatchlistSelector({
               Selected list
             </AppText>
             <AppText variant="body">
-              {selectedWatchlist?.name ?? 'Choose a watchlist'}
+              {selectedWatchlist?.name ?? t('common.chooseWatchlist')}
             </AppText>
           </View>
           <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Create watchlist"
+          accessibilityLabel={t('watchlists.selector.createWatchlist')}
           onPress={onCreatePress}
           style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}
         >
@@ -84,10 +86,10 @@ export function WatchlistSelector({
         <View style={styles.overlay}>
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
             <View style={styles.sheetHeader}>
-              <AppText variant="subtitle">Your Watchlists</AppText>
+              <AppText variant="subtitle">{t('watchlists.selector.yourWatchlists')}</AppText>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Close watchlist selector"
+                accessibilityLabel={t('common.closeWatchlistSelector')}
                 onPress={() => setVisible(false)}
               >
                 <Ionicons name="close" size={24} color={colors.textPrimary} />
@@ -101,17 +103,17 @@ export function WatchlistSelector({
             ) : isError ? (
               <View style={styles.centered}>
                 <AppText variant="bodySmall" muted center>
-                  Could not load watchlists.
+                  {t('library.watchlistsOverview.loadError')}
                 </AppText>
-                <AppButton title="Retry" variant="ghost" onPress={onRetry} />
+                <AppButton title={t('common.retry')} variant="ghost" onPress={onRetry} />
               </View>
             ) : sortedWatchlists.length === 0 ? (
               <View style={styles.centered}>
                 <AppText variant="bodySmall" muted center>
-                  You do not have any watchlists yet.
+                  {t('library.watchlistsOverview.emptyTitle')}
                 </AppText>
                 <AppButton
-                  title="Create Watchlist"
+                  title={t('common.createWatchlist')}
                   variant="secondary"
                   onPress={() => {
                     setVisible(false);
@@ -128,7 +130,7 @@ export function WatchlistSelector({
                     <Pressable
                       key={watchlist.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`Select ${watchlist.name}`}
+                      accessibilityLabel={t('watchlists.selector.selectNamed', { name: watchlist.name })}
                       accessibilityState={{ selected }}
                       onPress={() => {
                         onSelect(watchlist.id);
@@ -143,7 +145,7 @@ export function WatchlistSelector({
                       <View style={styles.rowMeta}>
                         <AppText variant="body">{watchlist.name}</AppText>
                         <AppText variant="caption" muted>
-                          {watchlist.itemCount} items
+                          {`${watchlist.itemCount} ${t('common.titles')}`}
                         </AppText>
                       </View>
                       {selected ? (

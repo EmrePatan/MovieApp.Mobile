@@ -1,4 +1,5 @@
 import { memo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   type AccessibilityActionEvent,
   Pressable,
@@ -29,10 +30,16 @@ export const NotificationRow = memo(function NotificationRow({
   onPress,
   onDelete,
 }: NotificationRowProps) {
+  const { t } = useTranslation();
   const swipeableRef = useRef<Swipeable>(null);
   const isUnread = item.readAtUtc == null;
   const relativeTime = formatNotificationRelativeTime(item.createdAtUtc);
-  const accessibilityLabel = `${isUnread ? 'Unread, ' : ''}${item.title}. ${item.body}. ${relativeTime}`;
+  const accessibilityLabel = t('notifications.row.accessibility', {
+    unreadPrefix: isUnread ? t('notifications.row.unreadPrefix') : '',
+    title: item.title,
+    body: item.body,
+    relativeTime,
+  });
 
   const handleDelete = useCallback(() => {
     swipeableRef.current?.close();
@@ -56,22 +63,22 @@ export const NotificationRow = memo(function NotificationRow({
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Delete notification"
+        accessibilityLabel={t('notifications.row.delete')}
         onPress={handleDelete}
         style={({ pressed }) => [styles.deleteAction, pressed && styles.pressed]}
       >
         <AppText variant="bodySmall" style={styles.deleteActionLabel}>
-          Delete
+          {t('common.delete')}
         </AppText>
       </Pressable>
     );
-  }, [handleDelete, onDelete]);
+  }, [handleDelete, onDelete, t]);
 
   const rowContent = (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      accessibilityActions={onDelete ? [{ name: 'delete', label: 'Delete notification' }] : undefined}
+      accessibilityActions={onDelete ? [{ name: 'delete', label: t('notifications.row.delete') }] : undefined}
       onAccessibilityAction={onDelete ? handleAccessibilityAction : undefined}
       onPress={() => onPress?.(item)}
       style={({ pressed }) => [styles.mainPressable, pressed && styles.pressed]}
@@ -81,9 +88,9 @@ export const NotificationRow = memo(function NotificationRow({
           path={item.posterPath}
           width={POSTER_WIDTH}
           height={POSTER_HEIGHT}
-          accessibilityLabel={`${item.title} poster`}
+          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         />
-        {isUnread ? <View style={styles.unreadDot} accessibilityLabel="Unread" /> : null}
+        {isUnread ? <View style={styles.unreadDot} accessibilityLabel={t('notifications.row.unreadDot')} /> : null}
       </View>
       <View style={styles.content}>
         <View style={styles.titleRow}>

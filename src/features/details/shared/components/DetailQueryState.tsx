@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ScrollView, StyleSheet, View } from 'react-native';
 
@@ -83,9 +84,9 @@ export function DetailQueryState<TData>({
 
   notFoundMessage,
 
-  invalidRequestTitle = 'Invalid request',
+  invalidRequestTitle,
 
-  invalidRequestMessage = 'The requested item could not be loaded.',
+  invalidRequestMessage,
 
   contentLayout = 'scroll',
 
@@ -94,7 +95,11 @@ export function DetailQueryState<TData>({
   children,
 
 }: DetailQueryStateProps<TData>) {
-
+  const { t } = useTranslation();
+  const resolvedInvalidRequestTitle =
+    invalidRequestTitle ?? t('details.queryState.invalidRequestTitle');
+  const resolvedInvalidRequestMessage =
+    invalidRequestMessage ?? t('details.queryState.invalidRequestMessage');
   const { data, error, isLoading, isError, refetch } = query;
   const navigation = useNavigation();
 
@@ -128,7 +133,7 @@ export function DetailQueryState<TData>({
 
           <View style={styles.centered}>
 
-            <DetailNotFound title={invalidRequestTitle} message={invalidParamsMessage} />
+            <DetailNotFound title={resolvedInvalidRequestTitle} message={invalidParamsMessage} />
 
           </View>
 
@@ -198,7 +203,10 @@ export function DetailQueryState<TData>({
 
             <View style={styles.centered}>
 
-              <DetailNotFound title={invalidRequestTitle} message={invalidRequestMessage} />
+              <DetailNotFound
+                title={resolvedInvalidRequestTitle}
+                message={resolvedInvalidRequestMessage}
+              />
 
             </View>
 
@@ -216,7 +224,7 @@ export function DetailQueryState<TData>({
 
       ? error.userMessage
 
-      : 'Unable to load details. Please try again.';
+      : t('details.queryState.loadError');
 
 
 
@@ -230,7 +238,7 @@ export function DetailQueryState<TData>({
 
           <View style={styles.centered}>
 
-            <ErrorView message={message} onRetry={() => void refetch()} retryLabel="Try Again" />
+            <ErrorView message={message} onRetry={() => void refetch()} />
 
           </View>
 

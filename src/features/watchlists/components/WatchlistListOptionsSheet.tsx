@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -69,6 +70,7 @@ function WatchlistListOptionsSheetContent({
   onRename,
   onConfirmDelete,
 }: WatchlistListOptionsSheetContentProps) {
+  const { t } = useTranslation();
   const [view, setView] = useState<SheetView>('options');
 
   const handleRename = () => {
@@ -90,7 +92,7 @@ function WatchlistListOptionsSheetContent({
     <View style={styles.overlay} testID="watchlist-list-options-sheet">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close list options"
+        accessibilityLabel={t('common.closeListOptions')}
         style={styles.backdrop}
         onPress={onClose}
       />
@@ -103,15 +105,15 @@ function WatchlistListOptionsSheetContent({
               <Ionicons name="trash-outline" size={28} color={colors.error} />
             </View>
             <AppText variant="subtitle" style={styles.confirmTitle}>
-              Delete list
+              {t('watchlists.optionsSheet.confirmTitle')}
             </AppText>
             <AppText variant="bodySmall" muted style={styles.confirmMessage}>
-              Delete "{listName}"? This cannot be undone.
+              {t('watchlists.optionsSheet.confirmMessage', { name: listName })}
             </AppText>
 
             <View style={styles.confirmActions}>
               <AppButton
-                title="Delete List"
+                title={t('common.deleteList')}
                 variant="destructive"
                 loading={deleteLoading}
                 disabled={deleteLoading}
@@ -119,7 +121,7 @@ function WatchlistListOptionsSheetContent({
                 testID="watchlist-delete-confirm-button"
               />
               <AppButton
-                title="Cancel"
+                title={t('common.cancel')}
                 variant="ghost"
                 disabled={deleteLoading}
                 onPress={handleBackToOptions}
@@ -130,14 +132,14 @@ function WatchlistListOptionsSheetContent({
           <>
             <View style={styles.header}>
               <View style={styles.headerText}>
-                <AppText variant="subtitle">List options</AppText>
+                <AppText variant="subtitle">{t('watchlists.optionsSheet.listOptions')}</AppText>
                 <AppText variant="bodySmall" muted numberOfLines={1}>
                   {listName}
                 </AppText>
               </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Close"
+                accessibilityLabel={t('common.close')}
                 onPress={onClose}
                 hitSlop={8}
                 style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
@@ -149,14 +151,14 @@ function WatchlistListOptionsSheetContent({
             <View style={styles.optionsGroup}>
               <OptionRow
                 icon="pencil-outline"
-                label="Rename List"
+                label={t('watchlists.optionsSheet.renameList')}
                 onPress={handleRename}
                 testID="watchlist-rename-option"
               />
               <View style={styles.optionDivider} />
               <OptionRow
                 icon="trash-outline"
-                label="Delete List"
+                label={t('watchlists.optionsSheet.deleteList')}
                 destructive
                 onPress={handleDeletePress}
                 testID="watchlist-delete-option"

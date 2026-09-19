@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
@@ -22,8 +23,10 @@ interface SimilarContentSectionProps {
 export function SimilarContentSection({
   contentType,
   contentId,
-  title = 'You May Also Like',
+  title,
 }: SimilarContentSectionProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('details.sections.similar');
   const router = useRouter();
   const movieQuery = useSimilarMovies(contentType === 'movie' ? contentId : '');
   const tvQuery = useSimilarTvShows(contentType === 'tv' ? contentId : '');
@@ -39,7 +42,7 @@ export function SimilarContentSection({
   if (query.isLoading) {
     return (
       <View style={styles.container}>
-        <HomeSectionHeader title={title} />
+        <HomeSectionHeader title={resolvedTitle} />
         <View style={styles.loading}>
           <ActivityIndicator color={colors.accent} />
         </View>
@@ -50,15 +53,14 @@ export function SimilarContentSection({
   if (query.isError) {
     return (
       <View style={styles.container}>
-        <HomeSectionHeader title={title} />
+        <HomeSectionHeader title={resolvedTitle} />
         <ErrorView
           message={
             isApiError(query.error)
               ? query.error.userMessage
-              : 'Unable to load similar titles. Please try again.'
+              : t('details.similar.loadError')
           }
           onRetry={() => void query.refetch()}
-          retryLabel="Try Again"
         />
       </View>
     );
@@ -67,9 +69,9 @@ export function SimilarContentSection({
   if (!query.data || query.data.items.length === 0) {
     return (
       <View style={styles.container}>
-        <HomeSectionHeader title={title} />
+        <HomeSectionHeader title={resolvedTitle} />
         <AppText variant="bodySmall" muted style={styles.empty}>
-          No similar titles available right now.
+          {t('details.similar.empty')}
         </AppText>
       </View>
     );
@@ -79,7 +81,7 @@ export function SimilarContentSection({
 
   return (
     <View style={styles.container}>
-      <HomeSectionHeader title={title} />
+      <HomeSectionHeader title={resolvedTitle} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

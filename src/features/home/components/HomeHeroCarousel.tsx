@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AppState,
   FlatList,
@@ -88,6 +89,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   onItemPress,
   isScreenFocused = true,
 }: HomeHeroCarouselProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const heroHeight = useMemo(() => getHomeHeroHeight(width), [width]);
@@ -313,12 +315,12 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         maxToRenderPerBatch={2}
         windowSize={3}
         accessibilityRole="adjustable"
-        accessibilityLabel="Featured discovery carousel"
+        accessibilityLabel={t('home.featuredCarousel')}
       />
       <View
         style={styles.indicatorRow}
         accessibilityRole="text"
-        accessibilityLabel={`Slide ${activeIndex + 1} of ${items.length}`}
+        accessibilityLabel={t('home.slideOf', { current: activeIndex + 1, total: items.length })}
       >
         {items.map((item, index) => (
           <View

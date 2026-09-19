@@ -1,14 +1,17 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export function HomePersonalizedLoadingSlot() {
+  const { t } = useTranslation();
+
   return (
     <View
       style={styles.container}
       accessibilityRole="progressbar"
-      accessibilityLabel="Loading personalized home content"
+      accessibilityLabel={t('common.loadingPersonalizedHome')}
     >
       <SkeletonBlock width="48%" height={18} />
       <View style={styles.row}>

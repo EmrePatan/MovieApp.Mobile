@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -43,6 +44,7 @@ interface LibraryWatchlistDetailContentProps {
 export function LibraryWatchlistDetailContent({
   watchlistId,
 }: LibraryWatchlistDetailContentProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
@@ -145,7 +147,7 @@ export function LibraryWatchlistDetailContent({
         width={itemWidth}
         height={itemHeight}
         isRemoving={removingItemKey === getLibraryGridItemKey(item)}
-        removeAccessibilityLabel="this list"
+        removeAccessibilityLabel={t('library.watchlistDetail.removeFromThisList')}
         onPress={handleItemPress}
         onRemove={handleRemoveItem}
       />
@@ -171,7 +173,7 @@ export function LibraryWatchlistDetailContent({
 
   const listHeader = (
     <LibraryWatchlistDetailHeader
-      title={watchlist?.name ?? 'Watchlist'}
+      title={watchlist?.name ?? t('library.watchlistDetail.defaultTitle')}
       onOverflowPress={watchlist ? handleOverflowPress : undefined}
     >
       {listControls}
@@ -201,7 +203,7 @@ export function LibraryWatchlistDetailContent({
     return (
       <View style={styles.screen}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading watchlist items" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingWatchlistItems')} />
         {watchlistModals}
       </View>
     );
@@ -213,9 +215,8 @@ export function LibraryWatchlistDetailContent({
         {listHeader}
         <View style={styles.centered}>
           <ErrorView
-            message="Unable to load watchlist items. Please try again."
+            message={t('library.watchlistDetail.loadError')}
             onRetry={() => void itemsQuery.refetch()}
-            retryLabel="Try Again"
           />
         </View>
         {watchlistModals}
@@ -225,25 +226,25 @@ export function LibraryWatchlistDetailContent({
 
   const filteredEmptyTitle =
     typeFilter === 'movie'
-      ? 'No movies match this filter'
+      ? t('library.watchlistDetail.filteredEmpty.movies')
       : typeFilter === 'tv'
-        ? 'No TV shows match this filter'
-        : 'No items match this filter';
+        ? t('library.watchlistDetail.filteredEmpty.tvShows')
+        : t('library.watchlistDetail.filteredEmpty.all');
 
   const emptyComponent =
     stableItems.length === 0 ? (
       <LibraryEmptyState
         icon="bookmark"
-        title="This watchlist is empty"
-        message="Add movies and TV shows from their detail pages."
-        actionLabel="Browse Discover"
+        title={t('library.watchlistDetail.emptyTitle')}
+        message={t('library.watchlistDetail.emptyMessage')}
+        actionLabel={t('library.hub.browseDiscoverAction')}
         onAction={() => router.push('/(tabs)/discover')}
       />
     ) : (
       <LibraryEmptyState
         icon="bookmark"
         title={filteredEmptyTitle}
-        message="Try a different filter or sort option."
+        message={t('library.watchlistDetail.filteredEmpty.message')}
       />
     );
 

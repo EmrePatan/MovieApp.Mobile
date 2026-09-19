@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -54,6 +55,7 @@ export function ReviewsDetailContent({
   contentId,
   contentTitle,
 }: ReviewsDetailContentProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { requireAuth } = useRequireAuth();
   const [page, setPage] = useState(1);
@@ -134,13 +136,13 @@ export function ReviewsDetailContent({
 
   const handleWriteReview = useCallback(() => {
     if (!requireAuth()) {
-      setAuthFeedback('Please sign in to write a review.');
+      setAuthFeedback(t('reviews.signInRequired'));
       return;
     }
 
     setMutationError(null);
     setComposerMode('create');
-  }, [requireAuth]);
+  }, [requireAuth, t]);
 
   const handleEditReview = useCallback(() => {
     setMutationError(null);
@@ -165,15 +167,15 @@ export function ReviewsDetailContent({
             setMutationError(
               isApiError(error)
                 ? error.kind === 'conflict'
-                  ? 'You already reviewed this title.'
+                  ? t('reviews.alreadyReviewed')
                   : error.userMessage
-                : 'Could not submit review. Please try again.',
+                : t('reviews.submitError'),
             );
           },
         },
       );
     },
-    [createReview],
+    [createReview, t],
   );
 
   const handleUpdate = useCallback(
@@ -189,23 +191,23 @@ export function ReviewsDetailContent({
             setMutationError(
               isApiError(error)
                 ? error.userMessage
-                : 'Could not update review. Please try again.',
+                : t('reviews.updateError'),
             );
           },
         },
       );
     },
-    [updateReview],
+    [updateReview, t],
   );
 
   const handleDelete = useCallback(() => {
     Alert.alert(
-      'Delete review',
-      'Delete your review? This cannot be undone.',
+      t('common.deleteReviewTitle'),
+      t('common.deleteReviewMessage'),
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             deleteReview.mutate(undefined, {
@@ -217,7 +219,7 @@ export function ReviewsDetailContent({
                 setMutationError(
                   isApiError(error)
                     ? error.userMessage
-                    : 'Could not delete review. Please try again.',
+                    : t('reviews.deleteError'),
                 );
               },
             });
@@ -225,7 +227,7 @@ export function ReviewsDetailContent({
         },
       ],
     );
-  }, [deleteReview]);
+  }, [deleteReview, t]);
 
   const isInitialLoading =
     (reviewsQuery.isLoading && !reviewsQuery.data) &&
@@ -240,7 +242,7 @@ export function ReviewsDetailContent({
         <DetailBackButton contentInset={false} />
         <View style={styles.header}>
           <AppText variant="title" style={styles.headerTitle}>
-            Reviews
+            {t('reviews.title')}
           </AppText>
           {showMeta ? (
             <ReviewsHeaderMeta
@@ -268,7 +270,7 @@ export function ReviewsDetailContent({
       {composerMode === 'create' ? (
         <View testID="review-composer-anchor">
           <ReviewComposer
-            submitLabel="Post review"
+            submitLabel={t('common.postReview')}
             isSubmitting={createReview.isPending}
             errorMessage={mutationError}
             autoFocus
@@ -282,7 +284,7 @@ export function ReviewsDetailContent({
         <View style={styles.editComposerBlock} testID="review-composer-anchor">
           <ReviewComposer
             initialContent={myReview.content}
-            submitLabel="Save review"
+            submitLabel={t('common.saveReview')}
             isSubmitting={updateReview.isPending}
             errorMessage={mutationError}
             autoFocus
@@ -291,13 +293,13 @@ export function ReviewsDetailContent({
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Delete review"
+            accessibilityLabel={t('common.deleteReview')}
             disabled={deleteReview.isPending}
             onPress={handleDelete}
             style={({ pressed }) => [styles.deleteReviewButton, pressed && styles.pressed]}
           >
             <AppText variant="caption" style={styles.deleteReviewLabel}>
-              Delete review
+              {t('common.deleteReview')}
             </AppText>
           </Pressable>
         </View>
@@ -347,15 +349,15 @@ export function ReviewsDetailContent({
         <AppText variant="bodySmall" muted style={styles.emptyTitle}>
           {ratingStars !== null
             ? ownReviewMatchesRatingFilter
-              ? 'Your review matches this rating. See it above.'
-              : `No ${ratingStars}-star reviews yet.`
+              ? t('reviews.empty.starFilterOwnMatch')
+              : t('reviews.empty.starFilterEmpty', { stars: ratingStars })
             : myReview
-              ? 'No other reviews yet.'
-              : 'No reviews yet.'}
+              ? t('reviews.empty.noneOther')
+              : t('reviews.empty.none')}
         </AppText>
         {!myReview && ratingStars === null ? (
           <AppText variant="caption" muted>
-            Be the first to share your thoughts.
+            {t('reviews.empty.firstPrompt')}
           </AppText>
         ) : null}
       </View>
@@ -381,10 +383,10 @@ export function ReviewsDetailContent({
             message={
               isApiError(reviewsQuery.error)
                 ? reviewsQuery.error.userMessage
-                : 'Unable to load reviews. Please try again.'
+                : t('reviews.loadError')
             }
             onRetry={() => void reviewsQuery.refetch()}
-            retryLabel="Try Again"
+            retryLabel={t('common.retry')}
           />
         </View>
       </View>

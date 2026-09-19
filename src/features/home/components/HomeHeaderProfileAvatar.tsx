@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
 import { HomeHeaderIconButton } from './HomeHeaderIconButton';
@@ -31,10 +32,13 @@ export function HomeHeaderProfileAvatar({
   compact = false,
   onPress,
 }: HomeHeaderProfileAvatarProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const displayName = user?.displayName ?? 'MovieApp';
   const initials = getInitials(displayName);
-  const accessibilityLabel = user ? `Open ${displayName} profile` : 'Open profile';
+  const accessibilityLabel = user
+    ? t('common.openProfileNamed', { name: displayName })
+    : t('common.openProfile');
 
   return (
     <HomeHeaderIconButton

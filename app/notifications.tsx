@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -29,6 +30,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function NotificationsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const notificationsQuery = useNotificationsInbox();
@@ -118,11 +120,11 @@ export default function NotificationsScreen() {
     <View style={styles.header}>
       <DetailBackButton />
       <View style={styles.titleRow}>
-        <AppText variant="title">Notifications</AppText>
+        <AppText variant="title">{t('notifications.title')}</AppText>
         {isAuthenticated ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Mark all as read"
+            accessibilityLabel={t('notifications.markAllRead')}
             accessibilityState={{ disabled: !hasUnread || markAllNotificationsRead.isPending }}
             disabled={!hasUnread || markAllNotificationsRead.isPending}
             onPress={handleMarkAllRead}
@@ -132,13 +134,13 @@ export default function NotificationsScreen() {
               variant="bodySmall"
               style={!hasUnread ? styles.markAllDisabled : styles.markAllEnabled}
             >
-              Mark all as read
+              {t('notifications.markAllRead')}
             </AppText>
           </Pressable>
         ) : null}
       </View>
       <AppText variant="bodySmall" muted>
-        Release alerts for movies and shows you follow
+        {t('notifications.subtitle')}
       </AppText>
     </View>
   );
@@ -149,12 +151,12 @@ export default function NotificationsScreen() {
         {listHeader}
         <View style={styles.filteredEmpty}>
           <AppText variant="subtitle" center>
-            Sign in to view your notifications
+            {t('notifications.guestTitle')}
           </AppText>
           <AppText variant="bodySmall" muted center>
-            Release alerts for followed titles will appear here after you sign in.
+            {t('notifications.guestMessage')}
           </AppText>
-          <AppButton title="Sign In" variant="secondary" onPress={handleSignIn} />
+          <AppButton title={t('common.signInTitleCase')} variant="secondary" onPress={handleSignIn} />
         </View>
       </SafeAreaView>
     );
@@ -164,7 +166,7 @@ export default function NotificationsScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         {listHeader}
-        <LibraryLoadingState accessibilityLabel="Loading notifications" />
+        <LibraryLoadingState accessibilityLabel={t('common.loadingNotifications')} />
       </SafeAreaView>
     );
   }
@@ -175,9 +177,9 @@ export default function NotificationsScreen() {
         {listHeader}
         <View style={styles.errorContainer}>
           <ErrorView
-            message="Unable to load notifications. Please try again."
+            message={t('notifications.loadError')}
             onRetry={() => void notificationsQuery.refetch()}
-            retryLabel="Retry"
+            retryLabel={t('common.retry')}
           />
         </View>
       </SafeAreaView>
@@ -185,7 +187,7 @@ export default function NotificationsScreen() {
   }
 
   const paginationErrorMessage = notificationsQuery.isFetchNextPageError
-    ? 'Unable to load more notifications. Please try again.'
+    ? t('common.unableToLoadMoreNotifications')
     : null;
 
   return (
@@ -206,7 +208,7 @@ export default function NotificationsScreen() {
               <AppText variant="bodySmall" muted center>
                 {paginationErrorMessage}
               </AppText>
-              <AppButton title="Retry" variant="secondary" onPress={handleRetryNextPage} />
+              <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
             </View>
           ) : null
         }

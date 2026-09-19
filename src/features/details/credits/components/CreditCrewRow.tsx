@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -17,12 +18,15 @@ interface CreditCrewRowProps {
 const PORTRAIT_SIZE = 52;
 
 export const CreditCrewRow = memo(function CreditCrewRow({ member, onPress }: CreditCrewRowProps) {
+  const { t } = useTranslation();
   const isPressable = Boolean(onPress && member.providerPersonId != null);
 
   return (
     <Pressable
       accessibilityRole={isPressable ? 'button' : 'text'}
-      accessibilityLabel={isPressable ? `View ${member.name}` : member.name}
+      accessibilityLabel={
+        isPressable ? t('common.openProfileNamed', { name: member.name }) : member.name
+      }
       disabled={!isPressable}
       onPress={() => onPress?.(member)}
       style={({ pressed }) => [styles.row, pressed && isPressable && styles.pressed]}
@@ -35,7 +39,7 @@ export const CreditCrewRow = memo(function CreditCrewRow({ member, onPress }: Cr
             width={PORTRAIT_SIZE}
             height={PORTRAIT_SIZE}
             rounded
-            accessibilityLabel={`${member.name} portrait`}
+            accessibilityLabel={t('details.sections.personPortrait', { name: member.name })}
           />
         ) : (
           <View style={styles.fallback}>

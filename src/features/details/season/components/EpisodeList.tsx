@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,10 +43,11 @@ function EpisodeListItem({
   showWatchedControl,
   onMarkThrough,
 }: EpisodeListItemProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { requireAuth } = useRequireAuth();
   const toggleWatched = useToggleEpisodeWatched(episode.id, tvShowId, seasonNumber);
-  const title = episode.name ?? `Episode ${episode.episodeNumber}`;
+  const title = episode.name ?? `${t('common.episode')} ${episode.episodeNumber}`;
   const airDate = formatIsoDate(episode.airDate);
   const runtime = formatRuntimeMinutes(episode.runtimeMinutes);
 
@@ -53,7 +55,7 @@ function EpisodeListItem({
     airDate,
     runtime,
     episode.voteAverage > 0 ? `★ ${formatRating(episode.voteAverage)}` : null,
-    isWatched ? 'Watched' : null,
+    isWatched ? t('common.watched') : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -92,7 +94,7 @@ function EpisodeListItem({
       {showWatchedControl ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={isWatched ? 'Mark episode as unwatched' : 'Mark episode as watched'}
+          accessibilityLabel={isWatched ? t('common.markAsUnwatched') : t('common.markAsWatched')}
           accessibilityState={{ selected: isWatched, busy: toggleWatched.isPending }}
           disabled={toggleWatched.isPending}
           onPress={handleToggleWatched}
@@ -117,7 +119,7 @@ function EpisodeListItem({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Open ${title}`}
+        accessibilityLabel={t('common.openTitle', { title })}
         onPress={handleOpenEpisode}
         onLongPress={handleLongPress}
         delayLongPress={400}
@@ -160,6 +162,7 @@ export function EpisodeList({
   episodes,
   listHeader,
 }: EpisodeListProps) {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const { requireAuth } = useRequireAuth();
   const watchedQuery = useSeasonWatchedEpisodes(tvShowId, seasonNumber);
@@ -226,7 +229,7 @@ export function EpisodeList({
         {listHeader}
         <View style={styles.sectionHeader}>
           <AppText variant="subtitle" style={styles.sectionTitle}>
-            Episodes
+            {t('common.episodes')}
           </AppText>
         </View>
       </View>

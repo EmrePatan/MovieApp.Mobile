@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Platform, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
@@ -15,6 +16,7 @@ interface PlayTrailerButtonProps {
 }
 
 export function PlayTrailerButton({ contentType, contentId }: PlayTrailerButtonProps) {
+  const { t } = useTranslation();
   const movieQuery = useMovieVideos(contentType === 'movie' ? contentId : '');
   const tvQuery = useTvShowVideos(contentType === 'tv' ? contentId : '');
   const query = contentType === 'movie' ? movieQuery : tvQuery;
@@ -29,14 +31,14 @@ export function PlayTrailerButton({ contentType, contentId }: PlayTrailerButtonP
       if (Platform.OS === 'ios') {
         const canOpen = await Linking.canOpenURL(watchUrl);
         if (!canOpen) {
-          Alert.alert('Unable to open trailer', 'Please try again later.');
+          Alert.alert(t('details.actions.trailerOpenError'), t('details.actions.trailerOpenErrorMessage'));
           return;
         }
       }
 
       await Linking.openURL(watchUrl);
     } catch {
-      Alert.alert('Unable to open trailer', 'Please try again later.');
+      Alert.alert(t('details.actions.trailerOpenError'), t('details.actions.trailerOpenErrorMessage'));
     }
   }, [query.data?.primary?.watchUrl]);
 
@@ -55,7 +57,7 @@ export function PlayTrailerButton({ contentType, contentId }: PlayTrailerButtonP
     <Pressable
       testID="play-trailer-button"
       accessibilityRole="button"
-      accessibilityLabel="Play Trailer"
+      accessibilityLabel={t('details.actions.playTrailer')}
       onPress={handlePress}
       style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
     >

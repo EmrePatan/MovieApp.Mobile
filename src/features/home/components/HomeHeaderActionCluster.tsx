@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { homeHeaderStyles } from './home-header-styles';
@@ -26,14 +27,15 @@ function formatUnreadBadgeCount(unreadCount: number): string | null {
 }
 
 export function HomeHeaderActionCluster({ overlay = false }: HomeHeaderActionClusterProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const unreadCountQuery = useUnreadNotificationCount();
   const unreadCount = unreadCountQuery.data?.unreadCount ?? 0;
   const badgeLabel = formatUnreadBadgeCount(unreadCount);
   const notificationsAccessibilityLabel =
     badgeLabel == null
-      ? 'Open notifications'
-      : `Open notifications, ${badgeLabel} unread`;
+      ? t('common.openNotifications')
+      : t('common.openNotificationsUnread', { count: badgeLabel });
   const iconSize = overlay ? 20 : 22;
 
   return (

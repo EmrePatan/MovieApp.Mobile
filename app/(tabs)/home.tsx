@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
@@ -32,6 +33,7 @@ import { spacing } from '@/theme/spacing';
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<HomeSectionModel>);
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isHomeFocused, setIsHomeFocused] = useState(true);
@@ -276,13 +278,13 @@ export default function HomeScreen() {
 
     const message = isApiError(error)
       ? error.userMessage
-      : 'Unable to load your home feed. Please try again.';
+      : t('common.unableToLoadSection');
 
     return (
       <HomeScreenShell>
         {topChrome}
         <View style={styles.centered}>
-          <ErrorView message={message} onRetry={handleRetryBrowse} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={handleRetryBrowse} retryLabel={t('common.tryAgain')} />
         </View>
       </HomeScreenShell>
     );

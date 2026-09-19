@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
@@ -13,7 +14,6 @@ import { spacing } from '@/theme/spacing';
 
 const MAX_CAST_ITEMS = 8;
 const PORTRAIT_SIZE = 72;
-const SECTION_TITLE = 'Cast & Crew';
 
 interface CastRailProps {
   contentType: 'movie' | 'tv';
@@ -22,6 +22,7 @@ interface CastRailProps {
 }
 
 export function CastRail({ contentType, contentId, title }: CastRailProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const movieQuery = useMovieCredits(contentType === 'movie' ? contentId : '');
   const tvQuery = useTvShowCredits(contentType === 'tv' ? contentId : '');
@@ -45,7 +46,7 @@ export function CastRail({ contentType, contentId, title }: CastRailProps) {
   if (query.isLoading) {
     return (
       <View style={styles.container} testID="cast-rail-loading">
-        <HomeSectionHeader title={SECTION_TITLE} />
+        <HomeSectionHeader title={t('details.credits.title')} />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -85,7 +86,7 @@ export function CastRail({ contentType, contentId, title }: CastRailProps) {
       testID={hasCast ? 'cast-rail' : 'cast-rail-crew-only'}
     >
       <HomeSectionHeader
-        title={SECTION_TITLE}
+        title={t('details.credits.title')}
         onSeeAllPress={showSeeAll ? handleSeeAllPress : undefined}
       />
       {hasCast ? (

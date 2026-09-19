@@ -8,7 +8,6 @@ export const DEFAULT_WORLD_CINEMA_SORT: AdvancedDiscoverSort = 'popularity_desc'
 
 export interface WorldCinemaCollection {
   originCountry: string;
-  label: string;
 }
 
 export interface WorldCinemaState {
@@ -22,13 +21,10 @@ export interface WorldCinemaRequest extends WorldCinemaState {
   pageSize?: number;
 }
 
-export const WORLD_CINEMA_SORT_OPTIONS: {
-  value: AdvancedDiscoverSort;
-  label: string;
-}[] = [
-  { value: 'popularity_desc', label: 'Popular' },
-  { value: 'rating_desc', label: 'Top Rated' },
-  { value: 'newest', label: 'Newest' },
+export const WORLD_CINEMA_SORT_OPTIONS: AdvancedDiscoverSort[] = [
+  'popularity_desc',
+  'rating_desc',
+  'newest',
 ];
 
 export function createDefaultWorldCinemaState(): WorldCinemaState {

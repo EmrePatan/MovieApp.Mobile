@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n';
+
 export const MIN_BACKEND_SCORE = 1;
 export const MAX_BACKEND_SCORE = 10;
 export const MIN_STAR_RATING = 0.5;
@@ -49,7 +51,7 @@ export function formatStarRatingDisplay(stars: number): string {
 }
 
 export function formatStarRatingAccessibilityLabel(stars: number): string {
-  return `Your rating: ${formatStarRatingDisplay(stars)} out of 5 stars`;
+  return `${i18n.t('ratings.yourRating')}: ${formatStarRatingDisplay(stars)} ${i18n.t('common.perFive')}`;
 }
 
 export function formatCommunityStarRatingDisplay(averageScore: number): string {
@@ -61,10 +63,10 @@ export function formatCommunityStarRatingDisplay(averageScore: number): string {
 
 export function formatCommunityRatingCountLabel(ratingCount: number): string {
   if (ratingCount === 1) {
-    return '1 rating';
+    return i18n.t('common.ratingSingular');
   }
 
-  return `${ratingCount.toLocaleString()} ratings`;
+  return i18n.t('common.ratingsCount', { count: ratingCount });
 }
 
 export function formatCommunityRatingAccessibilityLabel(
@@ -72,9 +74,11 @@ export function formatCommunityRatingAccessibilityLabel(
   ratingCount: number,
 ): string {
   const stars = formatCommunityStarRatingDisplay(averageScore);
-  const countLabel = formatCommunityRatingCountLabel(ratingCount);
 
-  return `Community average ${stars} out of 5 stars, ${countLabel}`;
+  return i18n.t('ratings.communityAverageLine', {
+    average: stars,
+    count: ratingCount,
+  });
 }
 
 export function getStarFillState(starIndex: number, starRating: number): StarFillState {
@@ -142,10 +146,10 @@ export function positionToStarRating(
 
 export function formatStarRatingAccessibilityValue(stars: number | null): string {
   if (stars == null) {
-    return 'Not rated';
+    return i18n.t('common.notRated');
   }
 
-  return `${formatStarRatingDisplay(stars)} out of 5 stars`;
+  return `${formatStarRatingDisplay(stars)} ${i18n.t('common.perFive')}`;
 }
 
 export function stepStarRating(stars: number | null, delta: number): number {

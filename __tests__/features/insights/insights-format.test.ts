@@ -22,9 +22,7 @@ import {
 } from '@/features/insights/utils/insights-fixtures';
 import type { InsightsV3MovieDna } from '@/features/insights/types';
 import {
-  MOVIE_DNA_GENRE_DISPLAY_TITLES,
   MOVIE_DNA_KNOWN_GENRE_NAMES,
-  normalizeMovieDnaGenreName,
   resolveMovieDnaGenreDisplayTitle,
 } from '@/features/insights/utils/movie-dna-genre-titles';
 
@@ -84,7 +82,7 @@ describe('insights format helpers', () => {
     expect(resolveMovieDnaGenreDisplayTitle('TV Movie')).toBe('Couch Cinema Fan');
 
     for (const genreName of MOVIE_DNA_KNOWN_GENRE_NAMES) {
-      expect(MOVIE_DNA_GENRE_DISPLAY_TITLES[normalizeMovieDnaGenreName(genreName)]).toBeTruthy();
+      expect(resolveMovieDnaGenreDisplayTitle(genreName)).toBeTruthy();
     }
 
     const bespokeGenre: InsightsV3MovieDna = {

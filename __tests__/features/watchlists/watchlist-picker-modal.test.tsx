@@ -57,8 +57,8 @@ describe('WatchlistPickerModal', () => {
       />,
     );
 
-    expect(screen.getByText('No watchlists yet')).toBeTruthy();
-    expect(screen.getByText('Start a new list below.')).toBeTruthy();
+    expect(screen.getByText("You don't have any watchlists yet")).toBeTruthy();
+    expect(screen.getByText('Create a list to save movies and TV shows you want to watch.')).toBeTruthy();
   });
 
   it('adds item to selected watchlist', () => {
@@ -143,6 +143,6 @@ describe('WatchlistPickerModal', () => {
       />,
     );
 
-    expect(screen.getByText('Could not load watchlists.')).toBeTruthy();
+    expect(screen.getByText('Unable to load watchlists. Please try again.')).toBeTruthy();
   });
 });

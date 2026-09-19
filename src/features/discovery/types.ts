@@ -1,5 +1,6 @@
 import type { SearchContentType } from '@/models/api/pagination';
 import type { SearchResponse } from '@/features/search/types';
+import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 
 export type DiscoveryTypeFilter = SearchContentType;
 
@@ -49,30 +50,26 @@ export interface DiscoveryBrowseRequest extends DiscoveryBrowseFilters {
 
 export const DEFAULT_DISCOVERY_PAGE_SIZE = 20;
 
-export const DISCOVERY_BROWSE_MODES: { value: DiscoveryBrowseMode; label: string }[] = [
-  { value: 'trending', label: 'Trending' },
-  { value: 'top_rated', label: 'Top Rated' },
-  { value: 'new_releases', label: 'New Releases' },
+export const DISCOVERY_BROWSE_MODES: DiscoveryBrowseMode[] = [
+  'trending',
+  'top_rated',
+  'new_releases',
 ];
 
-export const DISCOVERY_TYPE_OPTIONS: { value: DiscoveryTypeFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'movie', label: 'Movies' },
-  { value: 'tv', label: 'TV Shows' },
+export const DISCOVERY_TYPE_OPTIONS: DiscoveryTypeFilter[] = ['all', 'movie', 'tv'];
+
+export const DISCOVERY_SORT_OPTIONS: DiscoverySort[] = [
+  'popularity_desc',
+  'popularity_asc',
+  'rating_desc',
+  'rating_asc',
+  'release_desc',
+  'release_asc',
+  'title_asc',
+  'title_desc',
 ];
 
-export const DISCOVERY_SORT_OPTIONS: { value: DiscoverySort; label: string }[] = [
-  { value: 'popularity_desc', label: 'Most Popular' },
-  { value: 'popularity_asc', label: 'Least Popular' },
-  { value: 'rating_desc', label: 'Highest Rated' },
-  { value: 'rating_asc', label: 'Lowest Rated' },
-  { value: 'release_desc', label: 'Newest First' },
-  { value: 'release_asc', label: 'Oldest First' },
-  { value: 'title_asc', label: 'Title A–Z' },
-  { value: 'title_desc', label: 'Title Z–A' },
-];
-
-export const DISCOVERY_SORT_VALUES = DISCOVERY_SORT_OPTIONS.map((option) => option.value);
+export const DISCOVERY_SORT_VALUES = DISCOVERY_SORT_OPTIONS;
 
 export function getDefaultSortForMode(mode: DiscoveryBrowseMode): DiscoverySort {
   switch (mode) {
@@ -87,15 +84,7 @@ export function getDefaultSortForMode(mode: DiscoveryBrowseMode): DiscoverySort 
 }
 
 export function getDiscoverTitle(mode: DiscoveryBrowseMode): string {
-  switch (mode) {
-    case 'top_rated':
-      return 'Top Rated';
-    case 'new_releases':
-      return 'New Releases';
-    case 'trending':
-    default:
-      return 'Trending';
-  }
+  return translateDiscoveryBrowseMode(mode);
 }
 
 export function createDefaultDiscoveryFilters(

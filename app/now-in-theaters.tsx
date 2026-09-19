@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -32,6 +33,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function NowInTheatersScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
@@ -77,14 +79,14 @@ export default function NowInTheatersScreen() {
     () => (
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
-          Now in Theaters
+          {t('discover.hub.nowInTheaters.title')}
         </AppText>
         <AppText variant="bodySmall" muted>
-          Movies currently playing in theaters
+          {t('discover.hub.nowInTheaters.subtitle')}
         </AppText>
       </View>
     ),
-    [],
+    [t],
   );
 
   const listEmpty = useMemo(() => {
@@ -95,11 +97,11 @@ export default function NowInTheatersScreen() {
     if (resultsQuery.isError) {
       const message = isApiError(resultsQuery.error)
         ? resultsQuery.error.userMessage
-        : 'Unable to load theatrical listings right now.';
+        : t('discovery.browseScreen.loadError');
 
       return (
         <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel="Try Again" />
+          <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
     }
@@ -107,14 +109,14 @@ export default function NowInTheatersScreen() {
     if (items.length === 0) {
       return (
         <SearchEmptyState
-          title="No theatrical releases"
-          message="There are no movies currently playing in theaters right now."
+          title={t('discover.hub.nowInTheaters.title')}
+          message={t('discover.hub.nowInTheaters.empty')}
         />
       );
     }
 
     return null;
-  }, [items.length, resultsQuery]);
+  }, [items.length, resultsQuery, t]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>

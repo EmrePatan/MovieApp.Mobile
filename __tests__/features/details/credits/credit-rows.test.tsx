@@ -24,7 +24,7 @@ describe('credit rows', () => {
     );
 
     expect(screen.getByText('Cooper')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('View Matthew McConaughey'));
+    fireEvent.press(screen.getByLabelText('Open Matthew McConaughey profile'));
     expect(onPress).toHaveBeenCalled();
   });
 
@@ -48,7 +48,7 @@ describe('credit rows', () => {
     );
 
     expect(screen.getByText('Walter White · Multiple roles')).toBeTruthy();
-    expect(screen.getByText('62 episodes')).toBeTruthy();
+    expect(screen.getByText('62 Episodes')).toBeTruthy();
   });
 
   it('does not navigate crew rows without providerPersonId', () => {

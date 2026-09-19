@@ -1,4 +1,5 @@
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
@@ -87,6 +88,7 @@ export function InsightsMovieDnaHero({
   movieDna,
   backdropImagePath,
 }: InsightsMovieDnaHeroProps) {
+  const { t } = useTranslation();
   const visibleGenres = movieDna.topGenres.slice(0, 3);
   const displayTitle = formatMovieDnaDisplayTitle(movieDna);
   const gravitation = formatGenreGravitation(visibleGenres.map((genre) => genre.name));
@@ -101,7 +103,7 @@ export function InsightsMovieDnaHero({
       <View style={styles.content}>
         <View style={styles.copyBlock}>
           <AppText variant="caption" center style={styles.kicker}>
-            Your Movie DNA
+            {t('insights.movieDna.kicker')}
           </AppText>
           <AppText variant="hero" center style={styles.headline}>
             {displayTitle}
@@ -112,7 +114,7 @@ export function InsightsMovieDnaHero({
             </AppText>
           ) : (
             <AppText variant="bodySmall" center style={styles.description}>
-              Keep watching and rating to shape your Movie DNA.
+              {t('insights.movieDna.emptyDescription')}
             </AppText>
           )}
         </View>
@@ -142,16 +144,19 @@ export function InsightsMovieDnaHero({
           <View
             style={styles.mixRow}
             accessibilityRole="text"
-            accessibilityLabel={`Movies ${movieDna.watchingMix.movieTitleCount}, series ${movieDna.watchingMix.seriesTitleCount}`}
+            accessibilityLabel={t('insights.movieDna.mixAccessibility', {
+              movieCount: movieDna.watchingMix.movieTitleCount,
+              seriesCount: movieDna.watchingMix.seriesTitleCount,
+            })}
           >
             <MixCard
               icon="tv-outline"
-              label="Series"
+              label={t('insights.movieDna.mixLabels.series')}
               percent={movieDna.watchingMix.seriesSharePercent}
             />
             <MixCard
               icon="film-outline"
-              label="Movies"
+              label={t('insights.movieDna.mixLabels.movies')}
               percent={movieDna.watchingMix.movieSharePercent}
             />
           </View>

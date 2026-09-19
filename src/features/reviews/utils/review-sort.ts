@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type { ReviewSortOption } from '../types';
 
 export const REVIEW_SORT_OPTIONS: ReviewSortOption[] = [
@@ -8,16 +9,5 @@ export const REVIEW_SORT_OPTIONS: ReviewSortOption[] = [
 ];
 
 export function getReviewSortLabel(option: ReviewSortOption): string {
-  switch (option) {
-    case 'newest':
-      return 'Newest';
-    case 'oldest':
-      return 'Oldest';
-    case 'ratingDesc':
-      return 'Highest rated';
-    case 'ratingAsc':
-      return 'Lowest rated';
-    default:
-      return option;
-  }
+  return i18n.t(`reviews.sort.${option}`);
 }

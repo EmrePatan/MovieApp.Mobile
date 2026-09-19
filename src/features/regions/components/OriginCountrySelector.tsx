@@ -1,9 +1,10 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import {
   getOriginCountryLabel,
-  ORIGIN_COUNTRY_OPTIONS,
+  getOriginCountryOptions,
 } from '@/features/discovery/world-cinema-collections';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -23,16 +24,18 @@ export function OriginCountrySelector({
   onSelect,
   testID,
 }: OriginCountrySelectorProps) {
+  const { t } = useTranslation();
   const countryLabel = getOriginCountryLabel(value);
+  const originCountryOptions = getOriginCountryOptions();
 
   return (
     <View style={styles.container}>
       <AppText variant="bodySmall" muted>
-        Origin country
+        {t('common.originCountry')}
       </AppText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Origin country ${countryLabel}`}
+        accessibilityLabel={`${t('common.originCountry')} ${countryLabel}`}
         onPress={onToggleExpanded}
         style={({ pressed }) => [styles.selector, pressed && styles.pressed]}
         testID={testID}
@@ -46,7 +49,7 @@ export function OriginCountrySelector({
       </Pressable>
       {expanded ? (
         <View style={styles.options}>
-          {ORIGIN_COUNTRY_OPTIONS.map((option) => {
+          {originCountryOptions.map((option) => {
             const selected = option.code === value;
 
             return (

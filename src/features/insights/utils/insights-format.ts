@@ -1,30 +1,12 @@
+import {
+  translateAchievementCategory,
+  translateMovieDnaEditorialByCode,
+  translateMovieDnaEditorialFallback,
+  translateMovieDnaGenreTitle,
+  type MovieDnaEditorialCode,
+} from '@/i18n/catalog-labels';
+import { getUiFormatLocaleTag, i18n } from '@/i18n';
 import type { InsightsV3MovieDna } from '../types';
-import { resolveMovieDnaGenreDisplayTitle } from './movie-dna-genre-titles';
-
-const WEEKDAY_NAMES = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-];
-
-const MONTH_NAMES = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
 
 export function formatWeekdayName(dayOfWeek: number | string | null | undefined): string {
   if (dayOfWeek == null) {
@@ -35,15 +17,28 @@ export function formatWeekdayName(dayOfWeek: number | string | null | undefined)
     return dayOfWeek;
   }
 
-  return WEEKDAY_NAMES[dayOfWeek] ?? 'Unknown';
+  const key = `insights.format.weekdays.${dayOfWeek}`;
+  if (i18n.exists(key)) {
+    return i18n.t(key);
+  }
+
+  return i18n.t('common.unknown');
 }
 
 export function formatMonthName(month: number): string {
-  return MONTH_NAMES[month - 1] ?? String(month);
+  const key = `insights.format.monthsShort.${month}`;
+  if (i18n.exists(key)) {
+    return i18n.t(key);
+  }
+
+  return String(month);
 }
 
 export function formatMonthYear(month: number, year: number): string {
-  return `${formatMonthName(month)} ${year}`;
+  return i18n.t('insights.format.monthYear', {
+    month: formatMonthName(month),
+    year,
+  });
 }
 
 export function formatEstimatedDuration(totalMinutes: number): string {
@@ -78,16 +73,20 @@ export function formatHoursFromMinutes(totalMinutes: number): string {
 
 export function formatEquivalentDays(totalMinutes: number): string {
   if (totalMinutes <= 0) {
-    return '0 days';
+    return i18n.t('insights.format.equivalentDays.zero');
   }
 
   const days = totalMinutes / (60 * 24);
   if (days < 1) {
-    return '< 1 day';
+    return i18n.t('insights.format.equivalentDays.underOne');
   }
 
   const rounded = Math.round(days);
-  return `${rounded} ${rounded === 1 ? 'day' : 'days'}`;
+  if (rounded === 1) {
+    return i18n.t('insights.format.equivalentDays.one');
+  }
+
+  return i18n.t('insights.format.equivalentDays.many', { count: rounded });
 }
 
 export function formatAverageStarRating(value: number | null | undefined): string {
@@ -99,7 +98,7 @@ export function formatAverageStarRating(value: number | null | undefined): strin
 }
 
 export function formatAchievedDate(achievedAt: string): string {
-  return new Date(achievedAt).toLocaleDateString(undefined, {
+  return new Date(achievedAt).toLocaleDateString(getUiFormatLocaleTag(), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -107,7 +106,7 @@ export function formatAchievedDate(achievedAt: string): string {
 }
 
 export function formatIsoWeekLabel(year: number, week: number): string {
-  return `Week ${week}, ${year}`;
+  return i18n.t('insights.format.weekLabel', { week, year });
 }
 
 export function getMemberSinceYear(memberSinceUtc: string): number {
@@ -160,8 +159,6 @@ export function formatActiveYearDayPercent(
   return Math.min(100, Math.round((activeDays / elapsedDays) * 100));
 }
 
-const MOVIE_DNA_DEFAULT_DISPLAY_TITLE = 'Screen Explorer';
-
 function getTopGenreName(movieDna: InsightsV3MovieDna): string | null {
   const fromGenres = movieDna.topGenres[0]?.name;
   if (fromGenres) {
@@ -175,32 +172,25 @@ function getTopGenreName(movieDna: InsightsV3MovieDna): string | null {
 export function formatMovieDnaDisplayTitle(movieDna: InsightsV3MovieDna): string {
   const genreName = getTopGenreName(movieDna);
   if (!genreName) {
-    return MOVIE_DNA_DEFAULT_DISPLAY_TITLE;
+    return i18n.t('insights.movieDna.defaultTitle');
   }
 
-  return resolveMovieDnaGenreDisplayTitle(genreName);
+  return translateMovieDnaGenreTitle(genreName);
 }
-
-const MOVIE_DNA_EDITORIAL_BY_CODE: Record<string, string> = {
-  recent_releases: 'You keep one eye on what is still unfolding on screen.',
-  series_first: 'The long arc is where your story keeps returning.',
-  movie_first: 'You chase complete stories in a single sitting.',
-  top_genre: 'One current runs strong beneath everything you watch.',
-};
 
 const MOVIE_DNA_EDITORIAL_CODE_PRIORITY = [
   'recent_releases',
   'series_first',
   'movie_first',
   'top_genre',
-] as const;
+] as const satisfies readonly MovieDnaEditorialCode[];
 
 const MIN_TITLES_FOR_EDITORIAL = 5;
 
 export function formatMovieDnaEditorialLine(movieDna: InsightsV3MovieDna): string {
   for (const code of MOVIE_DNA_EDITORIAL_CODE_PRIORITY) {
     if (movieDna.identityCodes.includes(code)) {
-      return MOVIE_DNA_EDITORIAL_BY_CODE[code];
+      return translateMovieDnaEditorialByCode(code);
     }
   }
 
@@ -209,33 +199,34 @@ export function formatMovieDnaEditorialLine(movieDna: InsightsV3MovieDna): strin
   const totalTitles = movieTitleCount + seriesTitleCount;
 
   if (totalTitles < MIN_TITLES_FOR_EDITORIAL) {
-    return 'Your reel is still finding its signature.';
+    return translateMovieDnaEditorialFallback('findingSignature');
   }
 
   if (movieSharePercent >= 35 && seriesSharePercent >= 35) {
-    return 'You move freely between the epic and the episode.';
+    return translateMovieDnaEditorialFallback('balancedMix');
   }
 
   if (seriesSharePercent >= 60) {
-    return 'You follow worlds that deepen with every chapter.';
+    return translateMovieDnaEditorialFallback('seriesHeavy');
   }
 
   if (movieSharePercent >= 60) {
-    return 'A single sitting still holds your full attention.';
+    return translateMovieDnaEditorialFallback('movieHeavy');
   }
 
   const topShare = movieDna.topGenres[0]?.sharePercent ?? 0;
   if (topShare >= 25) {
-    return 'Your instincts keep circling the same kind of magic.';
+    return translateMovieDnaEditorialFallback('genreCircle');
   }
 
-  return 'Every watch leaves another clue on the reel.';
+  return translateMovieDnaEditorialFallback('default');
 }
 
 export function formatWatchingMixLine(movieSharePercent: number, seriesSharePercent: number): string {
-  const movies = Math.round(movieSharePercent);
-  const series = Math.round(seriesSharePercent);
-  return `${movies}% films · ${series}% series`;
+  return i18n.t('insights.movieDna.watchingMixLine', {
+    movies: Math.round(movieSharePercent),
+    series: Math.round(seriesSharePercent),
+  });
 }
 
 export function formatGenreGravitation(genreNames: string[]): string | null {
@@ -244,20 +235,23 @@ export function formatGenreGravitation(genreNames: string[]): string | null {
   }
 
   if (genreNames.length === 1) {
-    return `You gravitate toward ${genreNames[0]}.`;
+    return i18n.t('insights.movieDna.gravitation.one', { genre: genreNames[0] });
   }
 
   if (genreNames.length === 2) {
-    return `You gravitate toward ${genreNames[0]} and ${genreNames[1]}.`;
+    return i18n.t('insights.movieDna.gravitation.two', {
+      first: genreNames[0],
+      second: genreNames[1],
+    });
   }
 
   const last = genreNames[genreNames.length - 1];
   const rest = genreNames.slice(0, -1).join(', ');
-  return `You gravitate toward ${rest} and ${last}.`;
+  return i18n.t('insights.movieDna.gravitation.many', { list: rest, last });
 }
 
 export function formatDominantGenreHeadline(genreName: string): string {
-  return `${genreName} dominates your library`;
+  return i18n.t('insights.movieDna.dominantGenreHeadline', { genreName });
 }
 
 export function formatDecadeLabel(bucket: string): string {
@@ -312,24 +306,11 @@ export function formatHoursShort(totalMinutes: number): string {
 }
 
 export function formatAchievementBadgeNumber(value: number): string {
-  return value.toLocaleString('en-US');
+  return value.toLocaleString(getUiFormatLocaleTag());
 }
 
 export function formatAchievementCategoryLabel(category: string): string {
-  switch (category) {
-    case 'movies':
-      return 'Movies';
-    case 'episodes':
-      return 'Episodes';
-    case 'ratings':
-      return 'Ratings';
-    case 'shows':
-      return 'Series';
-    case 'genres':
-      return 'Genres';
-    default:
-      return category.charAt(0).toUpperCase() + category.slice(1);
-  }
+  return translateAchievementCategory(category);
 }
 
 export type AchievementIconName =

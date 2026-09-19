@@ -12,11 +12,8 @@ export interface PickSomethingResponse {
   item: RecommendationItem | null;
 }
 
-export const PICK_SOMETHING_MEDIA_OPTIONS: ReadonlyArray<{
-  value: PickSomethingMediaType;
-  label: string;
-}> = [
-  { value: 'all', label: 'Either' },
-  { value: 'movie', label: 'Movie' },
-  { value: 'tv', label: 'TV' },
+export const PICK_SOMETHING_MEDIA_OPTIONS: ReadonlyArray<PickSomethingMediaType> = [
+  'all',
+  'movie',
+  'tv',
 ];

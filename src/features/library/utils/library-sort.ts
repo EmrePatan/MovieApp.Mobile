@@ -1,3 +1,4 @@
+import { translateLibrarySort } from '@/i18n/catalog-labels';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 import type { LibrarySortOption } from '../types';
 
@@ -43,14 +44,5 @@ export function getAvailableSortOptions(
 }
 
 export function getSortLabel(sort: LibrarySortOption): string {
-  switch (sort) {
-    case 'recentlyAdded':
-      return 'Recently Added';
-    case 'titleAsc':
-      return 'Title A–Z';
-    case 'ratingDesc':
-      return 'Rating';
-    default:
-      return sort;
-  }
+  return translateLibrarySort(sort);
 }

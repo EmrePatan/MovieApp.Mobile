@@ -1,18 +1,19 @@
+import { translateCrewDepartment } from '@/i18n/catalog-labels';
 import type { CrewMember } from '../types';
 
-export const CREW_DEPARTMENT_ORDER = [
-  'Directing',
-  'Creator',
-  'Writing',
-  'Production',
-  'Camera',
-  'Sound',
-  'Editing',
-  'Art',
-  'Costume & Make-Up',
-  'Visual Effects',
-  'Crew',
-  'Other',
+const CREW_DEPARTMENT_KEYS = [
+  'directing',
+  'creator',
+  'writing',
+  'production',
+  'camera',
+  'sound',
+  'editing',
+  'art',
+  'costume & make-up',
+  'visual effects',
+  'crew',
+  'other',
 ] as const;
 
 export type CrewDepartmentGroup = {
@@ -20,37 +21,49 @@ export type CrewDepartmentGroup = {
   data: CrewMember[];
 };
 
-function resolveDepartmentSectionTitle(department: string | null | undefined): string {
-  const normalized = department?.trim();
+function normalizeDepartmentKey(department: string | null | undefined): string {
+  const normalized = department?.trim().toLowerCase();
   if (!normalized) {
-    return 'Other';
+    return 'other';
   }
 
-  const match = CREW_DEPARTMENT_ORDER.find(
-    (entry) => entry.toLowerCase() === normalized.toLowerCase(),
-  );
+  if (CREW_DEPARTMENT_KEYS.includes(normalized as (typeof CREW_DEPARTMENT_KEYS)[number])) {
+    return normalized;
+  }
 
-  return match ?? 'Other';
+  return 'other';
+}
+
+function resolveDepartmentSectionTitle(department: string | null | undefined): string {
+  const translated = translateCrewDepartment(department);
+  if (translated) {
+    return translated;
+  }
+
+  const normalized = department?.trim();
+  if (!normalized) {
+    return translateCrewDepartment(null) ?? 'Other';
+  }
+
+  return normalized;
 }
 
 export function groupCrewByDepartment(crew: CrewMember[]): CrewDepartmentGroup[] {
   const grouped = new Map<string, CrewMember[]>();
 
   for (const member of crew) {
-    const sectionTitle = resolveDepartmentSectionTitle(member.department);
-    const existing = grouped.get(sectionTitle);
+    const sectionKey = normalizeDepartmentKey(member.department);
+    const existing = grouped.get(sectionKey);
     if (existing) {
       existing.push(member);
       continue;
     }
 
-    grouped.set(sectionTitle, [member]);
+    grouped.set(sectionKey, [member]);
   }
 
-  return CREW_DEPARTMENT_ORDER
-    .filter((title) => grouped.has(title))
-    .map((title) => ({
-      title,
-      data: grouped.get(title) ?? [],
-    }));
+  return CREW_DEPARTMENT_KEYS.filter((key) => grouped.has(key)).map((key) => ({
+    title: resolveDepartmentSectionTitle(key === 'other' ? null : key),
+    data: grouped.get(key) ?? [],
+  }));
 }

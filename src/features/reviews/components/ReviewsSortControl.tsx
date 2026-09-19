@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { ReviewSortOption } from '../types';
@@ -12,6 +13,8 @@ interface ReviewsSortControlProps {
 }
 
 export function ReviewsSortControl({ value, onChange }: ReviewsSortControlProps) {
+  const { t } = useTranslation();
+
   return (
     <ScrollView
       horizontal
@@ -29,7 +32,7 @@ export function ReviewsSortControl({ value, onChange }: ReviewsSortControlProps)
             key={option}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Sort by ${getReviewSortLabel(option)}`}
+            accessibilityLabel={t('common.sortByLabel', { label: getReviewSortLabel(option) })}
             onPress={() => onChange(option)}
             style={[styles.chip, selected && styles.chipSelected]}
           >

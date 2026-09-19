@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
@@ -13,6 +14,7 @@ interface FollowButtonProps {
 }
 
 export function FollowButton({ tvShowId }: FollowButtonProps) {
+  const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { data: status, isLoading } = useTvShowFollowStatus(tvShowId);
   const [preferencesVisible, setPreferencesVisible] = useState(false);
@@ -24,7 +26,7 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
 
   const handlePress = () => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to follow TV shows.');
+      setFeedback(t('details.actions.signInFollowTv'));
       return;
     }
 
@@ -37,12 +39,12 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
     const registrationResult = await ensurePushDeviceRegisteredAsync();
     if (registrationResult === 'permission_denied') {
       setPermissionHint(
-        'Followed. Enable notifications in device settings to receive release alerts.',
+        t('details.actions.followedEnableNotifications'),
       );
     }
   };
 
-  const label = isFollowing ? 'Manage follow' : 'Follow this show';
+  const label = isFollowing ? t('details.actions.manageFollow') : t('details.actions.followShow');
 
   return (
     <>
@@ -53,7 +55,7 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
         onDismiss={() => setPermissionHint(null)}
       />
       <DetailCircularAction
-        label="Follow"
+        label={t('details.actions.followLabel')}
         accessibilityLabel={label}
         active={isAuthenticated && isFollowing}
         busy={isBusy}

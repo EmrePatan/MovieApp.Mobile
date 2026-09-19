@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useAuth } from '@/auth/useAuth';
 import { useRecentWatchHistory } from '@/features/watch-history/hooks/useRecentWatchHistory';
 import WatchHistoryScreen from '../../../app/watch-history';
+import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();
 
@@ -37,8 +38,8 @@ describe('WatchHistoryScreen', () => {
     });
 
     render(<WatchHistoryScreen />);
-    expect(screen.getByText('Sign in to view your watch history')).toBeTruthy();
-    fireEvent.press(screen.getByText('Sign In'));
+    expect(screen.getByText(t('details.actions.signInWatchHistory'))).toBeTruthy();
+    fireEvent.press(screen.getByText(t('common.signInTitleCase')));
     expect(mockPush).toHaveBeenCalledWith('/(auth)/login');
   });
 
@@ -111,6 +112,10 @@ describe('WatchHistoryScreen', () => {
     });
 
     render(<WatchHistoryScreen />);
-    expect(screen.getByText('No watch history yet')).toBeTruthy();
+    expect(
+      screen.getByText(
+        t('library.empty.watchedTitle', { mediaLabel: t('library.empty.mediaLabels.titles') }),
+      ),
+    ).toBeTruthy();
   });
 });

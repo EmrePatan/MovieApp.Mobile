@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
@@ -16,7 +17,8 @@ export function EpisodeWatchedToggle({
   isPending = false,
   onPress,
 }: EpisodeWatchedToggleProps) {
-  const label = isWatched ? 'Mark episode as unwatched' : 'Mark episode as watched';
+  const { t } = useTranslation();
+  const label = isWatched ? t('common.markAsUnwatched') : t('common.markAsWatched');
 
   return (
     <Pressable

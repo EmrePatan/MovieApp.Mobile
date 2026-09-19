@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -41,6 +42,7 @@ interface WatchedButtonProps {
 }
 
 export function WatchedButton({ target, size = 48, variant = 'default' }: WatchedButtonProps) {
+  const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const movieStatus = useMovieWatchStatus(target.type === 'movie' ? target.contentId : '');
   const tvProgress = useTvShowProgress(target.type === 'tvshow' ? target.contentId : '');
@@ -77,7 +79,7 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
 
   const handlePress = () => {
     if (!requireAuth()) {
-      setFeedback('Please sign in to track watch history.');
+      setFeedback(t('details.actions.signInWatchHistory'));
       return;
     }
 
@@ -89,21 +91,21 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
       onError: (error) => {
         setFeedback(
           isApiError(error)
-            ? 'Could not update watched status. Please try again.'
-            : 'Could not update watched status. Please try again.',
+            ? t('details.actions.watchedUpdateError')
+            : t('details.actions.watchedUpdateError'),
         );
       },
     });
   };
 
-  const label = active ? 'Mark as unwatched' : 'Mark as watched';
+  const label = active ? t('common.markAsUnwatched') : t('common.markAsWatched');
 
   if (variant === 'detail') {
     return (
       <>
         <FeedbackMessage message={feedback} tone="error" onDismiss={() => setFeedback(null)} />
         <DetailCircularAction
-          label="Watched"
+          label={t('details.actions.watchedLabel')}
           accessibilityLabel={label}
           active={active}
           busy={isInitialLoading}

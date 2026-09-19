@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCatalogChildDestinationGestureGuard } from '@/features/details/shared/navigation/useCatalogChildDestinationGestureGuard';
 import { CreditsDetailContent } from '@/features/details/credits/components/CreditsDetailContent';
 import { useCreditsRouteState } from '@/features/details/credits/hooks/useCreditsRouteState';
@@ -5,6 +6,7 @@ import { useTvShowCredits } from '@/features/details/credits/hooks/useCredits';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 
 export default function TvCreditsScreen() {
+  const { t } = useTranslation();
   useCatalogChildDestinationGestureGuard();
   const { resolvedId, isActive, isInvalid, title } = useCreditsRouteState('tv');
   const query = useTvShowCredits(isActive && resolvedId ? resolvedId : '');
@@ -17,9 +19,9 @@ export default function TvCreditsScreen() {
     <DetailQueryState
       query={query}
       contentLayout="list"
-      invalidParamsMessage={isInvalid ? 'The credits link is invalid.' : undefined}
-      notFoundTitle="Credits not found"
-      notFoundMessage="Cast and crew could not be found for this title."
+      invalidParamsMessage={isInvalid ? t('details.queryState.invalidRequestMessage') : undefined}
+      notFoundTitle={t('details.credits.title')}
+      notFoundMessage={t('details.queryState.invalidRequestMessage')}
     >
       {(credits) => (
         <CreditsDetailContent
