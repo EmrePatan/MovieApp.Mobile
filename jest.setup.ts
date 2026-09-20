@@ -2,8 +2,6 @@ jest.mock('@/auth/social-auth-service', () => ({
   requestSocialIdentityToken: jest.fn(),
   SocialAuthCancelledError: class SocialAuthCancelledError extends Error {},
   SocialAuthConfigurationError: class SocialAuthConfigurationError extends Error {},
-  formatGoogleSignInDevelopmentErrorMessage: jest.fn((error: unknown) => String(error)),
-  isGoogleSocialAuthDebugDiagnosticsEnabled: jest.fn(() => false),
 }));
 
 jest.mock('expo-apple-authentication', () => {

@@ -6,8 +6,6 @@ import { SocialAuthProviderIcon } from './SocialAuthProviderIcon';
 import { useAuth } from '@/auth/useAuth';
 import { getUserMessageForAuthError, isApiError } from '@/api/errors';
 import {
-  formatGoogleSignInDevelopmentErrorMessage,
-  isGoogleSocialAuthDebugDiagnosticsEnabled,
   SocialAuthCancelledError,
   SocialAuthConfigurationError,
 } from '@/auth/social-auth-service';
@@ -79,14 +77,6 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
           onError?.(
             error.detail ?? getUserMessageForAuthError(error.kind, 'social'),
           );
-          return;
-        }
-
-        if (
-          provider === 'google' &&
-          isGoogleSocialAuthDebugDiagnosticsEnabled()
-        ) {
-          onError?.(formatGoogleSignInDevelopmentErrorMessage(error));
           return;
         }
 
