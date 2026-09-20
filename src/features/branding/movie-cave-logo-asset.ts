@@ -1,1 +1,1 @@
-export const MOVIE_CAVE_HEADER_LOGO = require('../../../assets/branding/movie-cave-header.png');
+export const MOVIE_CAVE_HEADER_LOGO = require('../../../assets/images/branding/movie-cave-horizontal-logo.png');

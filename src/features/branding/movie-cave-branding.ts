@@ -1,4 +1,4 @@
-/** Native asset dimensions for `assets/branding/movie-cave-header.png`. */
+/** Native asset dimensions for `assets/images/branding/movie-cave-horizontal-logo.png`. */
 export const MOVIE_CAVE_LOGO_ASPECT_RATIO = 724 / 2172;
 
 export function getMovieCaveLogoHeight(width: number): number {
