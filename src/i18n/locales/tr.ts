@@ -110,6 +110,8 @@ const stage1Tr = {
     profileUpdated: 'Profil başarıyla güncellendi.',
     profileUpdateFailed: 'Profil güncellenemedi. Lütfen tekrar dene.',
     changeEmailTitle: 'E-postayı Değiştir',
+    changeEmailVerificationHint:
+      'Güncellemeden sonra yeni e-posta adresinizi doğrulayın; aksi halde bu adresle tekrar giriş yapamazsınız.',
     currentEmail: 'Geçerli e-posta: {{email}}',
     newEmail: 'Yeni e-posta',
     currentPassword: 'Geçerli şifre',

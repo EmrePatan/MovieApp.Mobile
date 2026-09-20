@@ -109,6 +109,8 @@ const stage1En = {
     profileUpdated: 'Profile updated successfully.',
     profileUpdateFailed: 'Could not update profile. Please try again.',
     changeEmailTitle: 'Change Email',
+    changeEmailVerificationHint:
+      'After updating, verify your new email address before signing in with it again.',
     currentEmail: 'Current email: {{email}}',
     newEmail: 'New email',
     currentPassword: 'Current password',

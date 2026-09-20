@@ -4,6 +4,11 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { registerPushDevice, unregisterPushDevice } from '../api/push-devices-api';
 import type { PushRegistrationResult } from '../types';
+import {
+  clearStoredExpoPushToken,
+  getStoredExpoPushToken,
+  saveRegisteredExpoPushToken,
+} from './push-device-storage';
 
 let lastRegisteredExpoPushToken: string | null = null;
 let permissionRequestAttempted = false;
@@ -14,9 +19,56 @@ export function getLastRegisteredExpoPushToken(): string | null {
 
 export function resetPushPermissionRequestState(): void {
   permissionRequestAttempted = false;
+  lastRegisteredExpoPushToken = null;
 }
 
-export async function ensurePushDeviceRegisteredAsync(): Promise<PushRegistrationResult> {
+interface EnsurePushDeviceRegisteredOptions {
+  allowPermissionRequest?: boolean;
+}
+
+function getExpoProjectId(): string | undefined {
+  return Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+}
+
+async function fetchExpoPushTokenAsync(): Promise<string> {
+  const projectId = getExpoProjectId();
+  const tokenResponse = await Notifications.getExpoPushTokenAsync(
+    projectId ? { projectId } : undefined,
+  );
+  return tokenResponse.data;
+}
+
+async function resolveExpoPushTokenForUnregister(): Promise<string | null> {
+  if (lastRegisteredExpoPushToken) {
+    return lastRegisteredExpoPushToken;
+  }
+
+  const storedToken = await getStoredExpoPushToken();
+  if (storedToken) {
+    return storedToken;
+  }
+
+  if (!Device.isDevice) {
+    return null;
+  }
+
+  const permission = await Notifications.getPermissionsAsync();
+  if (permission.status !== 'granted') {
+    return null;
+  }
+
+  try {
+    return await fetchExpoPushTokenAsync();
+  } catch {
+    return null;
+  }
+}
+
+export async function ensurePushDeviceRegisteredAsync(
+  options: EnsurePushDeviceRegisteredOptions = {},
+): Promise<PushRegistrationResult> {
+  const allowPermissionRequest = options.allowPermissionRequest ?? true;
+
   if (!Device.isDevice) {
     return 'unavailable';
   }
@@ -24,7 +76,7 @@ export async function ensurePushDeviceRegisteredAsync(): Promise<PushRegistratio
   const permission = await Notifications.getPermissionsAsync();
   let finalStatus = permission.status;
 
-  if (finalStatus === 'undetermined' && !permissionRequestAttempted) {
+  if (finalStatus === 'undetermined' && allowPermissionRequest && !permissionRequestAttempted) {
     permissionRequestAttempted = true;
     const requested = await Notifications.requestPermissionsAsync();
     finalStatus = requested.status;
@@ -41,33 +93,30 @@ export async function ensurePushDeviceRegisteredAsync(): Promise<PushRegistratio
     });
   }
 
-  const projectId =
-    Constants.expoConfig?.extra?.eas?.projectId ??
-    Constants.easConfig?.projectId;
-
-  const tokenResponse = await Notifications.getExpoPushTokenAsync(
-    projectId ? { projectId } : undefined,
-  );
+  const expoPushToken = await fetchExpoPushTokenAsync();
 
   await registerPushDevice({
-    expoPushToken: tokenResponse.data,
+    expoPushToken,
     platform: Platform.OS === 'ios' ? 'ios' : 'android',
   });
 
-  lastRegisteredExpoPushToken = tokenResponse.data;
+  lastRegisteredExpoPushToken = expoPushToken;
+  await saveRegisteredExpoPushToken(expoPushToken);
   return 'registered';
 }
 
 export async function unregisterKnownPushDeviceAsync(): Promise<void> {
-  if (!lastRegisteredExpoPushToken) {
+  const token = await resolveExpoPushTokenForUnregister();
+  if (!token) {
     return;
   }
 
   try {
-    await unregisterPushDevice(lastRegisteredExpoPushToken);
+    await unregisterPushDevice(token);
   } catch {
     // Logout must not fail when unregister is unavailable.
   } finally {
     lastRegisteredExpoPushToken = null;
+    await clearStoredExpoPushToken();
   }
 }

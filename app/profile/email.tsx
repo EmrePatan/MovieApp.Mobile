@@ -42,10 +42,12 @@ export default function ChangeEmailScreen() {
     changeEmail.mutate(
       { email: email.trim(), currentPassword },
       {
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
           setCurrentPassword('');
-          setFeedback({ message: t('profile.emailUpdated'), tone: 'success' });
-          setTimeout(() => router.back(), 800);
+          router.push({
+            pathname: '/(auth)/check-email',
+            params: { email: variables.email.trim() },
+          });
         },
         onError: (error) => {
           setFeedback({
@@ -71,6 +73,9 @@ export default function ChangeEmailScreen() {
         <AppText variant="title">{t('profile.changeEmailTitle')}</AppText>
         <AppText variant="bodySmall" muted>
           {t('profile.currentEmail', { email: profileQuery.data?.email ?? '—' })}
+        </AppText>
+        <AppText variant="bodySmall" muted>
+          {t('profile.changeEmailVerificationHint')}
         </AppText>
 
         <FeedbackMessage

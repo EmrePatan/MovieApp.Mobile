@@ -31,9 +31,12 @@ jest.mock('@/api/client', () => ({
 }));
 
 jest.mock('@/features/follows/services/push-device-service', () => ({
+  ensurePushDeviceRegisteredAsync: jest.fn(),
   resetPushPermissionRequestState: jest.fn(),
   unregisterKnownPushDeviceAsync: jest.fn(),
 }));
+
+import { unregisterKnownPushDeviceAsync } from '@/features/follows/services/push-device-service';
 
 function AuthProbe() {
   const auth = useAuth();
@@ -110,6 +113,8 @@ describe('AuthProvider bootstrap', () => {
       expect(screen.getByTestId('authenticated').props.children).toBe('no');
       expect(screen.getByTestId('user').props.children).toBe('none');
     });
+
+    expect(unregisterKnownPushDeviceAsync).toHaveBeenCalled();
   });
 
   it('keeps a stored token when /api/auth/me fails for non-auth reasons', async () => {

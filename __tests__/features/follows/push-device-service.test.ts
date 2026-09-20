@@ -27,14 +27,27 @@ jest.mock('expo-notifications', () => ({
 
 jest.mock('@/features/follows/api/push-devices-api', () => ({
   registerPushDevice: jest.fn(),
+  unregisterPushDevice: jest.fn(),
+}));
+
+jest.mock('@/features/follows/services/push-device-storage', () => ({
+  saveRegisteredExpoPushToken: jest.fn(),
+  getStoredExpoPushToken: jest.fn(),
+  clearStoredExpoPushToken: jest.fn(),
 }));
 
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { registerPushDevice } from '@/features/follows/api/push-devices-api';
+import { registerPushDevice, unregisterPushDevice } from '@/features/follows/api/push-devices-api';
+import {
+  clearStoredExpoPushToken,
+  getStoredExpoPushToken,
+  saveRegisteredExpoPushToken,
+} from '@/features/follows/services/push-device-storage';
 import {
   ensurePushDeviceRegisteredAsync,
   resetPushPermissionRequestState,
+  unregisterKnownPushDeviceAsync,
 } from '@/features/follows/services/push-device-service';
 
 describe('ensurePushDeviceRegisteredAsync', () => {
@@ -56,6 +69,19 @@ describe('ensurePushDeviceRegisteredAsync', () => {
       expoPushToken: 'ExponentPushToken[abcdefghijklmnopqrstuvwxyz123456]',
       platform: 'ios',
     });
+    expect(saveRegisteredExpoPushToken).toHaveBeenCalledWith(
+      'ExponentPushToken[abcdefghijklmnopqrstuvwxyz123456]',
+    );
+  });
+
+  it('does not request permission when allowPermissionRequest is false', async () => {
+    (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'undetermined' });
+
+    const result = await ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false });
+
+    expect(result).toBe('permission_denied');
+    expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled();
+    expect(registerPushDevice).not.toHaveBeenCalled();
   });
 
   it('returns permission_denied without registering when permission is denied', async () => {
@@ -78,5 +104,31 @@ describe('ensurePushDeviceRegisteredAsync', () => {
     expect(first).toBe('permission_denied');
     expect(second).toBe('permission_denied');
     expect(Notifications.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('unregisterKnownPushDeviceAsync', () => {
+  const token = 'ExponentPushToken[abcdefghijklmnopqrstuvwxyz123456]';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetPushPermissionRequestState();
+    (getStoredExpoPushToken as jest.Mock).mockResolvedValue(null);
+  });
+
+  it('unregisters using a persisted token and clears storage', async () => {
+    (getStoredExpoPushToken as jest.Mock).mockResolvedValue(token);
+
+    await unregisterKnownPushDeviceAsync();
+
+    expect(unregisterPushDevice).toHaveBeenCalledWith(token);
+    expect(clearStoredExpoPushToken).toHaveBeenCalled();
+  });
+
+  it('no-ops when no token is known', async () => {
+    await unregisterKnownPushDeviceAsync();
+
+    expect(unregisterPushDevice).not.toHaveBeenCalled();
+    expect(clearStoredExpoPushToken).not.toHaveBeenCalled();
   });
 });

@@ -25,6 +25,7 @@ import type { UserProfile } from '@/models/api/auth';
 import { queryClient } from '@/api/query-client';
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
 import {
+  ensurePushDeviceRegisteredAsync,
   resetPushPermissionRequestState,
   unregisterKnownPushDeviceAsync,
 } from '@/features/follows/services/push-device-service';
@@ -37,7 +38,7 @@ interface AuthProviderProps {
 }
 
 async function hydrateCurrentUser(
-  clearSession: () => Promise<void>,
+  endAuthenticatedSession: () => Promise<void>,
   setUser: (profile: UserProfile | null) => void,
   isMounted: () => boolean,
 ) {
@@ -48,7 +49,7 @@ async function hydrateCurrentUser(
     }
   } catch (error) {
     if (isApiError(error) && error.kind === 'unauthorized') {
-      await clearSession();
+      await endAuthenticatedSession();
       return;
     }
 
@@ -82,13 +83,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
       syncToken(accessToken);
       setUser(profile);
       markHomePerfEvent('session_established');
+      void ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false });
     },
     [syncToken],
   );
 
+  const endAuthenticatedSession = useCallback(
+    async (options?: { resetPushPermission?: boolean }) => {
+      try {
+        await unregisterKnownPushDeviceAsync();
+      } catch {
+        // Session teardown should continue even if push unregister fails.
+      }
+
+      if (options?.resetPushPermission) {
+        resetPushPermissionRequestState();
+      }
+
+      await clearSession();
+    },
+    [clearSession],
+  );
+
   const handleUnauthorized = useCallback(async () => {
-    await clearSession();
-  }, [clearSession]);
+    await endAuthenticatedSession();
+  }, [endAuthenticatedSession]);
 
   useEffect(() => {
     api.setTokenGetter(() => tokenRef.current);
@@ -126,7 +145,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       await hydrateCurrentUser(
-        clearSession,
+        () => endAuthenticatedSession(),
         (profile) => {
           if (isMounted) {
             setUser(profile);
@@ -141,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted = false;
     };
-  }, [clearSession, syncToken]);
+  }, [clearSession, endAuthenticatedSession, syncToken]);
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -183,16 +202,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const logout = useCallback(async () => {
-    try {
-      await unregisterKnownPushDeviceAsync();
-    } catch {
-      // Logout should continue even if push unregister fails.
-    }
-
     clearUserQueryCache(queryClient);
-    resetPushPermissionRequestState();
-    await clearSession();
-  }, [clearSession]);
+    await endAuthenticatedSession({ resetPushPermission: true });
+  }, [endAuthenticatedSession]);
 
   const updateSession = useCallback(
     async (accessToken: string, profile: UserProfile) => {
