@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Constants from 'expo-constants';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
@@ -7,14 +7,21 @@ import { MovieCaveLogo } from '@/features/branding/components/MovieCaveLogo';
 import { getMovieCaveLogoHeight } from '@/features/branding/movie-cave-branding';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { layout } from '@/theme/layout';
+import { spacing } from '@/theme/spacing';
 
-const ABOUT_LOGO_WIDTH = 184;
+function getAboutLogoWidth(screenWidth: number): number {
+  const contentWidth = screenWidth - layout.screenPaddingHorizontal * 2;
+
+  return Math.min(296, Math.max(248, Math.round(contentWidth * 0.82)));
+}
 
 export default function AboutScreen() {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const version = Constants.expoConfig?.version ?? '1.0.0';
-  const logoHeight = getMovieCaveLogoHeight(ABOUT_LOGO_WIDTH);
+  const logoWidth = getAboutLogoWidth(width);
+  const logoHeight = getMovieCaveLogoHeight(logoWidth);
 
   return (
     <Screen scrollable>
@@ -26,19 +33,14 @@ export default function AboutScreen() {
       </View>
 
       <View style={styles.content}>
-        <View style={styles.brandCard}>
-          <MovieCaveLogo width={ABOUT_LOGO_WIDTH} height={logoHeight} />
-          <AppText variant="subtitle" style={styles.brandName}>
-            {t('profile.aboutBrandName')}
-          </AppText>
-          <AppText variant="bodySmall" muted style={styles.description}>
+        <View style={styles.brandBlock}>
+          <MovieCaveLogo width={logoWidth} height={logoHeight} style={styles.logo} />
+          <AppText variant="bodySmall" style={styles.description}>
             {t('profile.aboutDescription')}
           </AppText>
-          <View style={styles.versionPill}>
-            <AppText variant="caption" style={styles.versionText}>
-              {t('profile.aboutVersion', { version })}
-            </AppText>
-          </View>
+          <AppText variant="caption" style={styles.version}>
+            {t('profile.aboutVersion', { version })}
+          </AppText>
         </View>
       </View>
     </Screen>
@@ -48,41 +50,36 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   header: {
     gap: spacing.md,
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   content: {
-    gap: spacing.lg,
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
-  brandCard: {
+  brandBlock: {
     alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xl,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    gap: spacing.lg,
+    paddingHorizontal: spacing.sm,
   },
-  brandName: {
-    color: colors.textPrimary,
-    textAlign: 'center',
+  logo: {
+    alignSelf: 'center',
   },
   description: {
+    color: 'rgba(245, 245, 247, 0.78)',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
+    fontSize: 15,
     maxWidth: 320,
+    letterSpacing: 0.15,
   },
-  versionPill: {
+  version: {
     marginTop: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
-  },
-  versionText: {
-    color: colors.accent,
-    fontWeight: '600',
+    color: colors.accentMuted,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    fontSize: 11,
+    fontWeight: '500',
   },
 });
