@@ -1,35 +1,55 @@
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
+import {
+  requestSocialIdentityToken,
+  SocialAuthCancelledError,
+  SocialAuthConfigurationError,
+} from '@/auth/social-auth-service';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { PasswordInput } from '@/components/inputs/PasswordInput';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { Screen } from '@/components/common/Screen';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
+import { SocialAuthProviderIcon } from '@/features/auth/components/SocialAuthProviderIcon';
+import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useDeleteAccountMutation } from '@/features/profile/hooks/useProfileMutations';
+import {
+  getDeleteAccountConfirmationMethod,
+  getDeleteAccountSocialProviders,
+} from '@/features/profile/utils/delete-account-confirmation';
 import {
   hasProfileValidationErrors,
   validateDeleteAccount,
   type DeleteAccountFormErrors,
 } from '@/features/profile/utils/profile-validation';
+import type { SocialAuthProvider } from '@/models/api/auth';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 
 export default function DeleteAccountScreen() {
   const { t } = useTranslation();
+  const profileQuery = useCurrentProfile();
   const deleteAccount = useDeleteAccountMutation();
-  const [step, setStep] = useState<'confirm' | 'password'>('confirm');
+  const [step, setStep] = useState<'confirm' | 'verify'>('confirm');
   const [currentPassword, setCurrentPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<DeleteAccountFormErrors>({});
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [activeProvider, setActiveProvider] = useState<SocialAuthProvider | null>(null);
+
+  const profile = profileQuery.data;
+  const confirmationMethod = profile ? getDeleteAccountConfirmationMethod(profile) : null;
+  const socialProviders = profile ? getDeleteAccountSocialProviders(profile) : [];
 
   const handleContinue = () => {
-    setStep('password');
+    setFeedback(null);
+    setStep('verify');
   };
 
-  const handleDelete = () => {
+  const handleDeleteWithPassword = () => {
     const errors = validateDeleteAccount(currentPassword);
     setFieldErrors(errors);
 
@@ -50,6 +70,50 @@ export default function DeleteAccountScreen() {
       },
     );
   };
+
+  const handleDeleteWithSocial = useCallback(
+    async (provider: SocialAuthProvider) => {
+      if (activeProvider || deleteAccount.isPending) {
+        return;
+      }
+
+      setFeedback(null);
+      setActiveProvider(provider);
+
+      try {
+        const identityToken = await requestSocialIdentityToken(provider);
+        deleteAccount.mutate(
+          { provider, identityToken },
+          {
+            onError: (error) => {
+              setFeedback(
+                isApiError(error)
+                  ? error.userMessage
+                  : t('profile.deleteAccountFailed'),
+              );
+            },
+          },
+        );
+      } catch (error) {
+        if (error instanceof SocialAuthCancelledError) {
+          return;
+        }
+
+        if (error instanceof SocialAuthConfigurationError) {
+          setFeedback(error.message);
+          return;
+        }
+
+        setFeedback(t('profile.deleteAccountFailed'));
+      } finally {
+        setActiveProvider(null);
+      }
+    },
+    [activeProvider, deleteAccount, t],
+  );
+
+  const getSocialProviderLabel = (provider: SocialAuthProvider) =>
+    provider === 'google' ? t('profile.deleteAccountWithGoogle') : t('profile.deleteAccountWithApple');
 
   return (
     <Screen scrollable>
@@ -72,9 +136,14 @@ export default function DeleteAccountScreen() {
             <AppText variant="bodySmall" muted>
               {t('profile.deleteAccountIrreversible')}
             </AppText>
-            <AppButton title={t('common.continue')} variant="secondary" onPress={handleContinue} />
+            <AppButton
+              title={t('common.continue')}
+              variant="secondary"
+              onPress={handleContinue}
+              disabled={!profile}
+            />
           </View>
-        ) : (
+        ) : confirmationMethod === 'password' ? (
           <View style={styles.content}>
             <AppText variant="bodySmall" muted>
               {t('profile.deleteAccountPasswordHint')}
@@ -91,9 +160,48 @@ export default function DeleteAccountScreen() {
               title={t('profile.deleteMyAccount')}
               loading={deleteAccount.isPending}
               disabled={deleteAccount.isPending}
-              onPress={handleDelete}
+              onPress={handleDeleteWithPassword}
               style={styles.deleteButton}
             />
+          </View>
+        ) : (
+          <View style={styles.content}>
+            <AppText variant="bodySmall" muted>
+              {t('profile.deleteAccountSocialHint')}
+            </AppText>
+            {socialProviders.map((provider) => {
+              const isLoading = activeProvider === provider;
+              const isDisabled =
+                deleteAccount.isPending && activeProvider !== null && activeProvider !== provider;
+
+              return (
+                <Pressable
+                  key={provider}
+                  accessibilityRole="button"
+                  accessibilityLabel={getSocialProviderLabel(provider)}
+                  accessibilityState={{ disabled: isDisabled, busy: isLoading }}
+                  disabled={isDisabled || deleteAccount.isPending}
+                  onPress={() => void handleDeleteWithSocial(provider)}
+                  style={({ pressed }) => [
+                    styles.providerButton,
+                    pressed && !isDisabled && styles.providerButtonPressed,
+                    isDisabled && styles.providerButtonDisabled,
+                  ]}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.textPrimary} />
+                  ) : (
+                    <View style={styles.providerContent}>
+                      <SocialAuthProviderIcon provider={provider} size={22} />
+                      <AppText variant="body" style={styles.providerLabel}>
+                        {getSocialProviderLabel(provider)}
+                      </AppText>
+                      <View style={styles.providerIconSpacer} />
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
           </View>
         )}
       </KeyboardAvoidingView>
@@ -112,5 +220,38 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: colors.error,
+  },
+  providerButton: {
+    minHeight: 56,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(12, 12, 18, 0.38)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  providerButtonPressed: {
+    opacity: interaction.pressedOpacity,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    backgroundColor: 'rgba(18, 18, 26, 0.52)',
+  },
+  providerButtonDisabled: {
+    opacity: interaction.disabledOpacity,
+  },
+  providerContent: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  providerLabel: {
+    flex: 1,
+    color: colors.textPrimary,
+    fontWeight: '500',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  providerIconSpacer: {
+    width: 22,
   },
 });

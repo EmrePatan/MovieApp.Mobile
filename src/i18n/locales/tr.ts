@@ -130,6 +130,10 @@ const stage1Tr = {
       'Bu işlem hesabını ve favoriler, izleme listeleri, puanlar, incelemeler ve izleme geçmişi dahil tüm kişisel verilerini kalıcı olarak siler.',
     deleteAccountIrreversible: 'Bu işlem geri alınamaz.',
     deleteAccountPasswordHint: 'Hesabını kalıcı olarak silmek için geçerli şifreni gir.',
+    deleteAccountSocialHint:
+      'Hesap silme işlemini onaylamak için bağlı bir sağlayıcıyla yeniden giriş yap.',
+    deleteAccountWithGoogle: 'Google ile onayla',
+    deleteAccountWithApple: 'Apple ile onayla',
     deleteMyAccount: 'Hesabımı sil',
     deleteAccountFailed: 'Hesap silinemedi. Lütfen tekrar dene.',
     regionTitle: 'Bölge',

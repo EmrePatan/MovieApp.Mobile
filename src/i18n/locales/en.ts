@@ -129,6 +129,10 @@ const stage1En = {
       'This permanently deletes your account and all personal data including favorites, watchlists, ratings, reviews, and watch history.',
     deleteAccountIrreversible: 'This action cannot be undone.',
     deleteAccountPasswordHint: 'Enter your current password to permanently delete your account.',
+    deleteAccountSocialHint:
+      'Sign in again with a linked provider to confirm account deletion.',
+    deleteAccountWithGoogle: 'Confirm with Google',
+    deleteAccountWithApple: 'Confirm with Apple',
     deleteMyAccount: 'Delete my account',
     deleteAccountFailed: 'Could not delete account. Please try again.',
     regionTitle: 'Region',

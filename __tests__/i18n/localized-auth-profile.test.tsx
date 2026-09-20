@@ -17,6 +17,8 @@ jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
       displayName: 'Emre',
       email: 'emre@example.com',
       createdAt: '2024-01-15T00:00:00Z',
+      hasPassword: true,
+      linkedProviders: [],
     },
     isLoading: false,
     isError: false,

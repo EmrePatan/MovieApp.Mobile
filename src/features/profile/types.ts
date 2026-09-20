@@ -1,9 +1,13 @@
+import type { SocialAuthProvider } from '@/models/api/auth';
+
 export interface UserProfileResponse {
   id: string;
   email: string;
   userName: string;
   displayName: string;
   createdAt: string;
+  hasPassword: boolean;
+  linkedProviders: SocialAuthProvider[];
 }
 
 export interface UpdateProfileRequest {
@@ -21,7 +25,9 @@ export interface ChangePasswordRequest {
 }
 
 export interface DeleteAccountRequest {
-  currentPassword: string;
+  currentPassword?: string;
+  provider?: SocialAuthProvider;
+  identityToken?: string;
 }
 
 export interface UserProfileAuthResponse {

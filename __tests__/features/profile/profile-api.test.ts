@@ -79,4 +79,13 @@ describe('profile api client', () => {
     await deleteAccount({ currentPassword: 'password' });
     expect(api.delete).toHaveBeenCalledWith('/api/users/me', { currentPassword: 'password' });
   });
+
+  it('deletes account with social re-authentication', async () => {
+    (api.delete as jest.Mock).mockResolvedValue(undefined);
+    await deleteAccount({ provider: 'google', identityToken: 'google-id-token' });
+    expect(api.delete).toHaveBeenCalledWith('/api/users/me', {
+      provider: 'google',
+      identityToken: 'google-id-token',
+    });
+  });
 });
