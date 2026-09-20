@@ -1,6 +1,7 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
+  Keyboard,
+  type KeyboardEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -25,6 +26,29 @@ interface AuthScreenLayoutProps {
   footer?: ReactNode;
 }
 
+function useKeyboardEndCoordinates(): KeyboardEvent['endCoordinates'] | null {
+  const [endCoordinates, setEndCoordinates] = useState<KeyboardEvent['endCoordinates'] | null>(null);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, (event) => {
+      setEndCoordinates(event.endCoordinates);
+    });
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setEndCoordinates(null);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  return endCoordinates;
+}
+
 export function AuthScreenLayout({
   taglineLines,
   headlineLines,
@@ -33,34 +57,48 @@ export function AuthScreenLayout({
   children,
   footer,
 }: AuthScreenLayoutProps) {
-  const { width } = useWindowDimensions();
+  const { width, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const keyboardEndCoordinates = useKeyboardEndCoordinates();
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const headlineSize = width < 360 ? 38 : width < 390 ? 44 : 48;
   const headlineLineHeight = Math.round(headlineSize * 1.02);
-  const keyboardVerticalOffset = Platform.OS === 'ios' ? insets.top + spacing.sm : 0;
   const bottomPadding = Math.max(spacing.xl, insets.bottom + spacing.md);
+  const isKeyboardVisible = keyboardEndCoordinates != null;
+  const viewportShrunk =
+    viewportHeight != null && windowHeight > 0 && viewportHeight < windowHeight * 0.85;
+  const formStageMinHeight =
+    isKeyboardVisible && viewportHeight != null
+      ? Platform.OS === 'android' && viewportShrunk
+        ? Math.max(0, viewportHeight - bottomPadding - spacing.md)
+        : Math.max(
+            0,
+            viewportHeight -
+              (keyboardEndCoordinates?.height ?? 0) -
+              bottomPadding -
+              spacing.md,
+          )
+      : undefined;
 
   return (
     <View style={styles.root}>
       <AuthAtmosphere />
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboard}
-          keyboardVerticalOffset={keyboardVerticalOffset}
+        <View
+          testID="auth-screen-viewport"
+          style={styles.viewport}
+          onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
         >
-          <View
-            testID="auth-screen-viewport"
-            style={styles.viewport}
-            onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
-          >
           <ScrollView
             testID="auth-screen-scroll"
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding }]}
+            contentContainerStyle={[
+              styles.scrollContent,
+              viewportHeight != null ? { minHeight: viewportHeight } : null,
+              { paddingBottom: bottomPadding },
+            ]}
             keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
+            keyboardDismissMode="none"
             automaticallyAdjustKeyboardInsets
             showsVerticalScrollIndicator={false}
           >
@@ -69,9 +107,14 @@ export function AuthScreenLayout({
               style={[
                 styles.content,
                 viewportHeight != null ? { minHeight: viewportHeight - bottomPadding } : null,
+                isKeyboardVisible ? styles.contentKeyboardVisible : styles.contentKeyboardHidden,
               ]}
             >
-              <View style={styles.hero}>
+              <View
+                testID="auth-screen-hero"
+                style={[styles.hero, isKeyboardVisible ? styles.detachedChrome : null]}
+                pointerEvents={isKeyboardVisible ? 'none' : 'auto'}
+              >
                 <AuthBrandMark />
 
                 <View style={styles.taglineBlock}>
@@ -114,13 +157,29 @@ export function AuthScreenLayout({
                 ) : null}
               </View>
 
-              <View style={styles.formSection}>{children}</View>
+              <View
+                testID="auth-screen-form-stage"
+                style={[
+                  styles.formStage,
+                  isKeyboardVisible ? styles.formStageKeyboardVisible : null,
+                  formStageMinHeight != null ? { minHeight: formStageMinHeight } : null,
+                ]}
+              >
+                <View style={styles.formSection}>{children}</View>
+              </View>
 
-              {footer ? <View style={styles.footer}>{footer}</View> : null}
+              {footer ? (
+                <View
+                  testID="auth-screen-footer"
+                  style={[styles.footer, isKeyboardVisible ? styles.detachedChrome : null]}
+                  pointerEvents={isKeyboardVisible ? 'none' : 'auto'}
+                >
+                  {footer}
+                </View>
+              ) : null}
             </View>
           </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -132,9 +191,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   safeArea: {
-    flex: 1,
-  },
-  keyboard: {
     flex: 1,
   },
   viewport: {
@@ -151,10 +207,29 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxContentWidth,
     width: '100%',
     alignSelf: 'center',
+  },
+  contentKeyboardHidden: {
     justifyContent: 'center',
+  },
+  contentKeyboardVisible: {
+    justifyContent: 'flex-start',
+  },
+  detachedChrome: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    overflow: 'hidden',
+    opacity: 0,
   },
   hero: {
     gap: spacing.sm + 2,
+  },
+  formStage: {
+    width: '100%',
+  },
+  formStageKeyboardVisible: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   taglineBlock: {
     marginTop: spacing.xs,

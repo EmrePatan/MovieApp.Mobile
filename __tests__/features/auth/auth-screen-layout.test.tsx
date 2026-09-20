@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Platform, Text } from 'react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, Text } from 'react-native';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 
 jest.mock('@/features/auth/components/AuthAtmosphere', () => ({
@@ -12,17 +12,50 @@ jest.mock('@/features/auth/components/AuthBrandMark', () => ({
 
 describe('AuthScreenLayout keyboard layout', () => {
   const originalPlatform = Platform.OS;
+  let keyboardShowCallback: ((event: { endCoordinates: { height: number } }) => void) | null =
+    null;
+  let keyboardHideCallback: (() => void) | null = null;
 
   beforeEach(() => {
     jest.clearAllMocks();
     Platform.OS = originalPlatform;
+    keyboardShowCallback = null;
+    keyboardHideCallback = null;
+
+    jest.spyOn(Keyboard, 'addListener').mockImplementation((event, callback) => {
+      if (event === 'keyboardWillShow' || event === 'keyboardDidShow') {
+        keyboardShowCallback = callback as (event: { endCoordinates: { height: number } }) => void;
+      }
+
+      if (event === 'keyboardWillHide' || event === 'keyboardDidHide') {
+        keyboardHideCallback = callback as () => void;
+      }
+
+      return { remove: jest.fn() };
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   afterAll(() => {
     Platform.OS = originalPlatform;
   });
 
-  it('keeps a stable content tree when the viewport shrinks', () => {
+  function showKeyboard(height = 280) {
+    act(() => {
+      keyboardShowCallback?.({ endCoordinates: { height } });
+    });
+  }
+
+  function hideKeyboard() {
+    act(() => {
+      keyboardHideCallback?.();
+    });
+  }
+
+  it('keeps a stable content tree when the keyboard opens', () => {
     render(
       <AuthScreenLayout taglineLines={['Tag']} headlineLines={['Headline']}>
         <Text>Form field</Text>
@@ -30,14 +63,15 @@ describe('AuthScreenLayout keyboard layout', () => {
     );
 
     expect(screen.getByTestId('auth-screen-layout-content')).toBeTruthy();
-    expect(screen.queryByTestId('auth-screen-layout-keyboard-open')).toBeNull();
-    expect(screen.queryByTestId('auth-screen-layout-keyboard-closed')).toBeNull();
+    expect(screen.getByTestId('auth-screen-hero')).toBeTruthy();
+    expect(screen.getByTestId('auth-screen-form-stage')).toBeTruthy();
+    expect(screen.getByText('Form field')).toBeTruthy();
 
-    fireEvent(screen.getByTestId('auth-screen-viewport'), 'layout', {
-      nativeEvent: { layout: { height: 420, width: 360, x: 0, y: 0 } },
-    });
+    showKeyboard();
 
     expect(screen.getByTestId('auth-screen-layout-content')).toBeTruthy();
+    expect(screen.getByTestId('auth-screen-hero')).toBeTruthy();
+    expect(screen.getByTestId('auth-screen-form-stage')).toBeTruthy();
     expect(screen.getByText('Form field')).toBeTruthy();
   });
 
@@ -54,11 +88,13 @@ describe('AuthScreenLayout keyboard layout', () => {
       : [content.props.style];
 
     expect(
-      contentStyles.some((style: { justifyContent?: string } | null) => style?.justifyContent === 'center'),
+      contentStyles.some(
+        (style: { justifyContent?: string } | null) => style?.justifyContent === 'center',
+      ),
     ).toBe(true);
   });
 
-  it('uses viewport layout height to keep the form scrollable above the keyboard', () => {
+  it('centers the form stage when the keyboard is open', () => {
     render(
       <AuthScreenLayout taglineLines={['Tag']} headlineLines={['Headline']}>
         <Text>Form field</Text>
@@ -69,6 +105,8 @@ describe('AuthScreenLayout keyboard layout', () => {
       nativeEvent: { layout: { height: 500, width: 360, x: 0, y: 0 } },
     });
 
+    showKeyboard(280);
+
     const content = screen.getByTestId('auth-screen-layout-content');
     const contentStyles = Array.isArray(content.props.style)
       ? content.props.style
@@ -76,14 +114,38 @@ describe('AuthScreenLayout keyboard layout', () => {
 
     expect(
       contentStyles.some(
+        (style: { justifyContent?: string } | null) => style?.justifyContent === 'flex-start',
+      ),
+    ).toBe(true);
+
+    const formStage = screen.getByTestId('auth-screen-form-stage');
+    const formStageStyles = Array.isArray(formStage.props.style)
+      ? formStage.props.style
+      : [formStage.props.style];
+
+    expect(
+      formStageStyles.some(
+        (style: { justifyContent?: string } | null) => style?.justifyContent === 'center',
+      ),
+    ).toBe(true);
+    expect(
+      formStageStyles.some(
         (style: { minHeight?: number } | null) => typeof style?.minHeight === 'number' && style.minHeight > 0,
       ),
     ).toBe(true);
   });
 
-  it('does not toggle scroll justification when the viewport shrinks', () => {
-    Platform.OS = 'android';
+  it('does not mount competing keyboard avoidance wrappers', () => {
+    const view = render(
+      <AuthScreenLayout taglineLines={['Tag']} headlineLines={['Headline']}>
+        <Text>Form field</Text>
+      </AuthScreenLayout>,
+    );
 
+    expect(view.UNSAFE_queryAllByType(KeyboardAvoidingView)).toHaveLength(0);
+  });
+
+  it('uses native keyboard inset adjustment and keeps the keyboard open while scrolling', () => {
     render(
       <AuthScreenLayout taglineLines={['Tag']} headlineLines={['Headline']}>
         <Text>Form field</Text>
@@ -91,38 +153,29 @@ describe('AuthScreenLayout keyboard layout', () => {
     );
 
     const scrollView = screen.getByTestId('auth-screen-scroll');
-    const initialStyles = Array.isArray(scrollView.props.contentContainerStyle)
-      ? scrollView.props.contentContainerStyle
-      : [scrollView.props.contentContainerStyle];
-
-    expect(
-      initialStyles.some(
-        (style: { justifyContent?: string } | null) => style?.justifyContent === 'flex-start',
-      ),
-    ).toBe(false);
-
-    fireEvent(screen.getByTestId('auth-screen-viewport'), 'layout', {
-      nativeEvent: { layout: { height: 320, width: 360, x: 0, y: 0 } },
-    });
-
-    const updatedStyles = Array.isArray(scrollView.props.contentContainerStyle)
-      ? scrollView.props.contentContainerStyle
-      : [scrollView.props.contentContainerStyle];
-
-    expect(
-      updatedStyles.some(
-        (style: { justifyContent?: string } | null) => style?.justifyContent === 'flex-start',
-      ),
-    ).toBe(false);
+    expect(scrollView.props.automaticallyAdjustKeyboardInsets).toBe(true);
+    expect(scrollView.props.keyboardDismissMode).toBe('none');
   });
 
-  it('enables native keyboard inset adjustment for focused fields', () => {
+  it('restores the closed layout after the keyboard hides', () => {
     render(
       <AuthScreenLayout taglineLines={['Tag']} headlineLines={['Headline']}>
         <Text>Form field</Text>
       </AuthScreenLayout>,
     );
 
-    expect(screen.getByTestId('auth-screen-scroll').props.automaticallyAdjustKeyboardInsets).toBe(true);
+    showKeyboard();
+    hideKeyboard();
+
+    const content = screen.getByTestId('auth-screen-layout-content');
+    const contentStyles = Array.isArray(content.props.style)
+      ? content.props.style
+      : [content.props.style];
+
+    expect(
+      contentStyles.some(
+        (style: { justifyContent?: string } | null) => style?.justifyContent === 'center',
+      ),
+    ).toBe(true);
   });
 });

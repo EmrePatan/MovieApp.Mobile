@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
@@ -29,6 +29,8 @@ export default function RegisterScreen() {
   const [fieldErrors, setFieldErrors] = useState<RegisterFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
 
   async function handleRegister() {
     const errors = validateRegisterForm(email, password, displayName);
@@ -84,8 +86,11 @@ export default function RegisterScreen() {
           autoComplete="name"
           textContentType="name"
           returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => emailRef.current?.focus()}
         />
         <AuthInput
+          ref={emailRef}
           placeholder={t('auth.email')}
           leadingIcon="email"
           value={email}
@@ -96,8 +101,11 @@ export default function RegisterScreen() {
           keyboardType="email-address"
           textContentType="emailAddress"
           returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => passwordRef.current?.focus()}
         />
         <AuthInput
+          ref={passwordRef}
           placeholder={t('auth.password')}
           leadingIcon="lock"
           showPasswordToggle

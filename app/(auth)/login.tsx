@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
@@ -34,6 +34,7 @@ export default function LoginScreen() {
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
 
   async function handleResendVerification() {
     if (!pendingVerificationEmail) {
@@ -121,8 +122,11 @@ export default function LoginScreen() {
           keyboardType="email-address"
           textContentType="emailAddress"
           returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => passwordRef.current?.focus()}
         />
         <AuthInput
+          ref={passwordRef}
           placeholder={t('auth.password')}
           leadingIcon="lock"
           showPasswordToggle
