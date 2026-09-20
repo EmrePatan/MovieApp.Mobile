@@ -151,6 +151,14 @@ const stage1En = {
     identityTagline: 'Your movie and TV identity',
     memberSince: 'Member since {{date}}',
     avatarAccessibility: '{{name}} avatar',
+    app: 'App',
+    about: 'About',
+    aboutMenuSubtitle: 'Movie Cave version and details',
+    aboutTitle: 'About',
+    aboutBrandName: 'Movie Cave',
+    aboutDescription:
+      'Your curated cinema companion for discovering movies, tracking TV, and building your watchlists.',
+    aboutVersion: 'Version {{version}}',
   },
   validation: {
     emailRequired: 'Email is required.',

@@ -24,6 +24,7 @@ export const homeHeaderStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
+    minHeight: HOME_HEADER_COMPACT_TARGET,
     paddingRight: spacing.md,
   },
   actionCluster: {

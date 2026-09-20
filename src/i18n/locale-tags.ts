@@ -1,3 +1,4 @@
+import { countryCodeToFlagEmoji } from '@/features/discovery/utils/country-flag';
 import type { UiLanguage } from './types';
 
 export function toFormatLocaleTag(language: UiLanguage): string {
@@ -11,6 +12,14 @@ export function normalizeDeviceLanguageCode(languageCode: string | null | undefi
   }
 
   return 'en';
+}
+
+export function getLanguageCountryCode(language: UiLanguage): string {
+  return language === 'tr' ? 'TR' : 'US';
+}
+
+export function getLanguageFlagEmoji(language: UiLanguage): string {
+  return countryCodeToFlagEmoji(getLanguageCountryCode(language));
 }
 
 export function getLanguageLabel(language: UiLanguage, inLanguage?: UiLanguage): string {

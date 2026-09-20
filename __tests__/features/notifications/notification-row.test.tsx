@@ -78,7 +78,6 @@ describe('NotificationRow swipe delete', () => {
     );
 
     expect(screen.queryByLabelText('Delete notification')).toBeNull();
-    expect(screen.queryByText('Delete')).toBeNull();
   });
 
   it('reveals Delete after a left swipe', () => {
@@ -89,7 +88,6 @@ describe('NotificationRow swipe delete', () => {
     fireEvent.press(screen.getByLabelText('Reveal delete action'));
 
     expect(screen.getByLabelText('Delete notification')).toBeTruthy();
-    expect(screen.getByText('Delete')).toBeTruthy();
   });
 
   it('does not delete when the row is swiped open', () => {

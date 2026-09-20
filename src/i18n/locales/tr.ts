@@ -152,6 +152,14 @@ const stage1Tr = {
     identityTagline: 'Film ve dizi kimliğin',
     memberSince: '{{date}} tarihinden üye',
     avatarAccessibility: '{{name}} avatarı',
+    app: 'Uygulama',
+    about: 'Hakkında',
+    aboutMenuSubtitle: 'Movie Cave sürümü ve bilgiler',
+    aboutTitle: 'Hakkında',
+    aboutBrandName: 'Movie Cave',
+    aboutDescription:
+      'Film keşfetmek, dizileri takip etmek ve izleme listelerini oluşturmak için seçilmiş sinema arkadaşın.',
+    aboutVersion: 'Sürüm {{version}}',
   },
   validation: {
     emailRequired: 'E-posta gerekli.',

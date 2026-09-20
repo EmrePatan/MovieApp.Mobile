@@ -1,5 +1,6 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { MovieCaveLogo } from '@/features/branding/components/MovieCaveLogo';
 
 interface HomeBrandMarkProps {
   overlay?: boolean;
@@ -7,22 +8,16 @@ interface HomeBrandMarkProps {
   logoHeight: number;
 }
 
-const MOVIE_CAVE_HEADER_LOGO = require('../../../../assets/branding/movie-cave-header.png');
-
 export function HomeBrandMark({ overlay = false, logoWidth, logoHeight }: HomeBrandMarkProps) {
   const { t } = useTranslation();
 
   return (
     <View style={styles.container} accessibilityRole="header" accessibilityLabel={t('home.brandMark')}>
-      <Image
-        source={MOVIE_CAVE_HEADER_LOGO}
-        style={[
-          styles.logo,
-          { width: logoWidth, height: logoHeight },
-          overlay && styles.logoOverlay,
-        ]}
-        resizeMode="contain"
-        accessibilityIgnoresInvertColors
+      <MovieCaveLogo
+        width={logoWidth}
+        height={logoHeight}
+        overlay={overlay}
+        style={styles.logo}
       />
     </View>
   );
@@ -32,11 +27,9 @@ const styles = StyleSheet.create({
   container: {
     flexShrink: 1,
     justifyContent: 'center',
+    minHeight: 44,
   },
   logo: {
-    alignSelf: 'flex-start',
-  },
-  logoOverlay: {
-    opacity: 0.96,
+    marginTop: 1,
   },
 });

@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
@@ -17,7 +18,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 
 const POSTER_WIDTH = 48;
 const POSTER_HEIGHT = 72;
-const DELETE_ACTION_WIDTH = 88;
+const DELETE_ACTION_SIZE = 40;
 
 interface NotificationRowProps {
   item: NotificationItem;
@@ -67,9 +68,7 @@ export const NotificationRow = memo(function NotificationRow({
         onPress={handleDelete}
         style={({ pressed }) => [styles.deleteAction, pressed && styles.pressed]}
       >
-        <AppText variant="bodySmall" style={styles.deleteActionLabel}>
-          {t('common.delete')}
-        </AppText>
+        <Ionicons name="trash-outline" size={18} color={colors.accent} />
       </Pressable>
     );
   }, [handleDelete, onDelete, t]);
@@ -123,7 +122,7 @@ export const NotificationRow = memo(function NotificationRow({
       ref={swipeableRef}
       friction={2}
       overshootRight={false}
-      rightThreshold={DELETE_ACTION_WIDTH / 2}
+      rightThreshold={DELETE_ACTION_SIZE / 2}
       activeOffsetX={[-24, 24]}
       failOffsetY={[-12, 12]}
       renderRightActions={renderRightActions}
@@ -186,16 +185,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deleteAction: {
-    width: DELETE_ACTION_WIDTH,
+    width: DELETE_ACTION_SIZE,
+    height: DELETE_ACTION_SIZE,
+    alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.dangerMuted,
-    marginVertical: spacing.sm,
+    backgroundColor: colors.accentTint12,
+    borderWidth: 1,
+    borderColor: colors.borderAccent,
     marginRight: layout.screenPaddingHorizontal,
-    borderRadius: borderRadius.md,
-  },
-  deleteActionLabel: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+    borderRadius: borderRadius.full,
   },
 });

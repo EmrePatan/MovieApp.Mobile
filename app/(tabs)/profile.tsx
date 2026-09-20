@@ -89,6 +89,14 @@ export default function ProfileScreen() {
           />
         </ProfileSection>
 
+        <ProfileSection title={t('profile.app')}>
+          <ProfileMenuRow
+            label={t('profile.about')}
+            subtitle={t('profile.aboutMenuSubtitle')}
+            onPress={() => router.push('/profile/about')}
+          />
+        </ProfileSection>
+
         <ProfileSection title={t('profile.account')}>
           <ProfileMenuRow
             label={t('profile.editProfile')}

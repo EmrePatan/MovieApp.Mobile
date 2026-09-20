@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm + 2,
   },
   taglineBlock: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
     gap: spacing.xs,
   },
   taglineLine: {

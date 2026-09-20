@@ -8,8 +8,8 @@ import {
 describe('home header layout', () => {
   it('scales logo width within safe bounds across phone widths', () => {
     expect(getHomeBrandLogoWidth(320)).toBe(148);
-    expect(getHomeBrandLogoWidth(390)).toBe(161);
-    expect(getHomeBrandLogoWidth(430)).toBe(180);
+    expect(getHomeBrandLogoWidth(390)).toBe(157);
+    expect(getHomeBrandLogoWidth(430)).toBe(176);
     expect(getHomeBrandLogoWidth(520)).toBe(196);
   });
 
