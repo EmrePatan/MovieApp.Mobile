@@ -5,6 +5,7 @@ import { useDeleteAccountMutation } from '@/features/profile/hooks/useProfileMut
 import { requestSocialIdentityToken } from '@/auth/social-auth-service';
 
 const mockMutate = jest.fn();
+const mockMutateAsync = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: jest.fn(), push: jest.fn(), navigate: jest.fn() }),
@@ -54,8 +55,10 @@ const socialProfile = {
 describe('DeleteAccountScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMutateAsync.mockResolvedValue(undefined);
     (useDeleteAccountMutation as jest.Mock).mockReturnValue({
       mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false,
     });
     (useCurrentProfile as jest.Mock).mockReturnValue({
@@ -107,10 +110,36 @@ describe('DeleteAccountScreen', () => {
 
     await waitFor(() => {
       expect(requestSocialIdentityToken).toHaveBeenCalledWith('google');
-      expect(mockMutate).toHaveBeenCalledWith(
-        { provider: 'google', identityToken: 'google-id-token' },
-        expect.any(Object),
-      );
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        provider: 'google',
+        identityToken: 'google-id-token',
+      });
+    });
+  });
+
+  it('does not submit delete account twice while social re-auth is in progress', async () => {
+    let resolveToken: ((value: string) => void) | undefined;
+    (useCurrentProfile as jest.Mock).mockReturnValue({
+      data: { ...socialProfile, linkedProviders: ['google'] },
+    });
+    (requestSocialIdentityToken as jest.Mock).mockImplementation(
+      () =>
+        new Promise<string>((resolve) => {
+          resolveToken = resolve;
+        }),
+    );
+
+    render(<DeleteAccountScreen />);
+    fireEvent.press(screen.getByText('Continue'));
+    fireEvent.press(screen.getByLabelText('Confirm with Google'));
+    fireEvent.press(screen.getByLabelText('Confirm with Google'));
+
+    expect(requestSocialIdentityToken).toHaveBeenCalledTimes(1);
+
+    resolveToken?.('google-id-token');
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -39,8 +39,10 @@ export default function DeleteAccountScreen() {
   const [fieldErrors, setFieldErrors] = useState<DeleteAccountFormErrors>({});
   const [feedback, setFeedback] = useState<string | null>(null);
   const [activeProvider, setActiveProvider] = useState<SocialAuthProvider | null>(null);
+  const [isDeleteInProgress, setIsDeleteInProgress] = useState(false);
 
   const profile = profileQuery.data;
+  const isDeleting = isDeleteInProgress || deleteAccount.isPending;
   const confirmationMethod = profile ? getDeleteAccountConfirmationMethod(profile) : null;
   const socialProviders = profile ? getDeleteAccountSocialProviders(profile) : [];
 
@@ -50,6 +52,10 @@ export default function DeleteAccountScreen() {
   };
 
   const handleDeleteWithPassword = () => {
+    if (isDeleting) {
+      return;
+    }
+
     const errors = validateDeleteAccount(currentPassword);
     setFieldErrors(errors);
 
@@ -57,6 +63,7 @@ export default function DeleteAccountScreen() {
       return;
     }
 
+    setIsDeleteInProgress(true);
     deleteAccount.mutate(
       { currentPassword },
       {
@@ -67,33 +74,26 @@ export default function DeleteAccountScreen() {
               : t('profile.deleteAccountFailed'),
           );
         },
+        onSettled: () => {
+          setIsDeleteInProgress(false);
+        },
       },
     );
   };
 
   const handleDeleteWithSocial = useCallback(
     async (provider: SocialAuthProvider) => {
-      if (activeProvider || deleteAccount.isPending) {
+      if (isDeleting) {
         return;
       }
 
       setFeedback(null);
+      setIsDeleteInProgress(true);
       setActiveProvider(provider);
 
       try {
         const identityToken = await requestSocialIdentityToken(provider);
-        deleteAccount.mutate(
-          { provider, identityToken },
-          {
-            onError: (error) => {
-              setFeedback(
-                isApiError(error)
-                  ? error.userMessage
-                  : t('profile.deleteAccountFailed'),
-              );
-            },
-          },
-        );
+        await deleteAccount.mutateAsync({ provider, identityToken });
       } catch (error) {
         if (error instanceof SocialAuthCancelledError) {
           return;
@@ -104,12 +104,17 @@ export default function DeleteAccountScreen() {
           return;
         }
 
-        setFeedback(t('profile.deleteAccountFailed'));
+        setFeedback(
+          isApiError(error)
+            ? error.userMessage
+            : t('profile.deleteAccountFailed'),
+        );
       } finally {
         setActiveProvider(null);
+        setIsDeleteInProgress(false);
       }
     },
-    [activeProvider, deleteAccount, t],
+    [deleteAccount, isDeleting, t],
   );
 
   const getSocialProviderLabel = (provider: SocialAuthProvider) =>
@@ -158,8 +163,8 @@ export default function DeleteAccountScreen() {
             />
             <AppButton
               title={t('profile.deleteMyAccount')}
-              loading={deleteAccount.isPending}
-              disabled={deleteAccount.isPending}
+              loading={isDeleting}
+              disabled={isDeleting}
               onPress={handleDeleteWithPassword}
               style={styles.deleteButton}
             />
@@ -171,8 +176,7 @@ export default function DeleteAccountScreen() {
             </AppText>
             {socialProviders.map((provider) => {
               const isLoading = activeProvider === provider;
-              const isDisabled =
-                deleteAccount.isPending && activeProvider !== null && activeProvider !== provider;
+              const isDisabled = isDeleting && activeProvider !== provider;
 
               return (
                 <Pressable
@@ -180,7 +184,7 @@ export default function DeleteAccountScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={getSocialProviderLabel(provider)}
                   accessibilityState={{ disabled: isDisabled, busy: isLoading }}
-                  disabled={isDisabled || deleteAccount.isPending}
+                  disabled={isDisabled || isDeleting}
                   onPress={() => void handleDeleteWithSocial(provider)}
                   style={({ pressed }) => [
                     styles.providerButton,
