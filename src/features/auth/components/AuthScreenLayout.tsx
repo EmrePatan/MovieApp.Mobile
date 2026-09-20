@@ -1,5 +1,6 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -25,6 +26,30 @@ interface AuthScreenLayoutProps {
   footer?: ReactNode;
 }
 
+function useAndroidKeyboardVisible(): boolean {
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setIsKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  return isKeyboardVisible;
+}
+
 export function AuthScreenLayout({
   taglineLines,
   headlineLines,
@@ -35,9 +60,57 @@ export function AuthScreenLayout({
 }: AuthScreenLayoutProps) {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const isAndroidKeyboardOpen = useAndroidKeyboardVisible();
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const headlineSize = width < 360 ? 38 : width < 390 ? 44 : 48;
   const headlineLineHeight = Math.round(headlineSize * 1.02);
   const keyboardVerticalOffset = Platform.OS === 'ios' ? insets.top + spacing.sm : 0;
+
+  const hero = (
+    <View style={styles.hero}>
+      <AuthBrandMark />
+
+      <View style={styles.taglineBlock}>
+        {taglineLines.map((line, index) => (
+          <Text key={`${line}-${index}`} style={styles.taglineLine} maxFontSizeMultiplier={1.2}>
+            {line}
+          </Text>
+        ))}
+      </View>
+
+      <View style={styles.headlineBlock}>
+        {headlineLines.map((line, index) => (
+          <Text
+            key={`${line}-${index}`}
+            style={[
+              styles.headlineLine,
+              {
+                fontSize: headlineSize,
+                lineHeight: headlineLineHeight,
+              },
+              index === headlineAccentLineIndex ? styles.headlineAccent : styles.headlineLead,
+            ]}
+            maxFontSizeMultiplier={1.2}
+          >
+            {line}
+          </Text>
+        ))}
+      </View>
+
+      {supportingCopy ? (
+        <Text style={styles.supportingCopy} maxFontSizeMultiplier={1.2}>
+          {supportingCopy}
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  const formBlock = (
+    <>
+      <View style={styles.formSection}>{children}</View>
+      {footer ? <View style={styles.footer}>{footer}</View> : null}
+    </>
+  );
 
   return (
     <View style={styles.root}>
@@ -48,10 +121,14 @@ export function AuthScreenLayout({
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboard}
           keyboardVerticalOffset={keyboardVerticalOffset}
+          onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
         >
           <ScrollView
+            testID="auth-screen-scroll"
             contentContainerStyle={[
               styles.scrollContent,
+              isAndroidKeyboardOpen && styles.scrollContentKeyboardOpen,
+              viewportHeight != null ? { minHeight: viewportHeight } : null,
               { paddingBottom: Math.max(spacing.xl, insets.bottom + spacing.md) },
             ]}
             keyboardShouldPersistTaps="handled"
@@ -59,53 +136,23 @@ export function AuthScreenLayout({
             automaticallyAdjustKeyboardInsets
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.content}>
-              <View style={styles.hero}>
-                <AuthBrandMark />
-
-                <View style={styles.taglineBlock}>
-                  {taglineLines.map((line, index) => (
-                    <Text
-                      key={`${line}-${index}`}
-                      style={styles.taglineLine}
-                      maxFontSizeMultiplier={1.2}
-                    >
-                      {line}
-                    </Text>
-                  ))}
-                </View>
-
-                <View style={styles.headlineBlock}>
-                  {headlineLines.map((line, index) => (
-                    <Text
-                      key={`${line}-${index}`}
-                      style={[
-                        styles.headlineLine,
-                        {
-                          fontSize: headlineSize,
-                          lineHeight: headlineLineHeight,
-                        },
-                        index === headlineAccentLineIndex
-                          ? styles.headlineAccent
-                          : styles.headlineLead,
-                      ]}
-                      maxFontSizeMultiplier={1.2}
-                    >
-                      {line}
-                    </Text>
-                  ))}
-                </View>
-
-                {supportingCopy ? (
-                  <Text style={styles.supportingCopy} maxFontSizeMultiplier={1.2}>
-                    {supportingCopy}
-                  </Text>
-                ) : null}
-              </View>
-
-              <View style={styles.formSection}>{children}</View>
-
-              {footer ? <View style={styles.footer}>{footer}</View> : null}
+            <View
+              testID={
+                isAndroidKeyboardOpen
+                  ? 'auth-screen-layout-keyboard-open'
+                  : 'auth-screen-layout-keyboard-closed'
+              }
+              style={[
+                styles.content,
+                isAndroidKeyboardOpen && styles.contentKeyboardOpen,
+              ]}
+            >
+              {hero}
+              {isAndroidKeyboardOpen ? (
+                <View style={styles.androidFormViewport}>{formBlock}</View>
+              ) : (
+                formBlock
+              )}
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -129,6 +176,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
   },
+  scrollContentKeyboardOpen: {
+    justifyContent: 'flex-start',
+  },
   content: {
     flexGrow: 1,
     gap: spacing.md + spacing.xs,
@@ -138,6 +188,14 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     justifyContent: 'center',
+  },
+  contentKeyboardOpen: {
+    justifyContent: 'flex-start',
+  },
+  androidFormViewport: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    width: '100%',
   },
   hero: {
     gap: spacing.sm + 2,
