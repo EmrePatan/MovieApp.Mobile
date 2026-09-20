@@ -80,6 +80,29 @@ export async function requestSocialIdentityToken(provider: SocialAuthProvider): 
   return requestAppleIdentityToken();
 }
 
+type GoogleSignInClient = {
+  hasPlayServices: (options: { showPlayServicesUpdateDialog: boolean }) => Promise<boolean>;
+  signOut: () => Promise<null>;
+  signIn: () => Promise<import('@react-native-google-signin/google-signin').SignInResponse>;
+};
+
+export async function prepareGoogleSignInForAccountSelection(
+  platform: typeof Platform.OS,
+  googleSignin: GoogleSignInClient,
+): Promise<void> {
+  if (platform !== 'android') {
+    return;
+  }
+
+  await googleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+  try {
+    await googleSignin.signOut();
+  } catch {
+    // Best-effort: still attempt sign-in if clearing the cached account fails.
+  }
+}
+
 async function requestGoogleIdentityToken(): Promise<string> {
   if (!isGoogleSocialAuthAvailable()) {
     throw new SocialAuthConfigurationError('Google sign-in is not available on this platform.');
@@ -88,9 +111,7 @@ async function requestGoogleIdentityToken(): Promise<string> {
   const { GoogleSignin, isCancelledResponse, isErrorWithCode, statusCodes } =
     await ensureGoogleConfigured();
 
-  if (Platform.OS === 'android') {
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-  }
+  await prepareGoogleSignInForAccountSelection(Platform.OS, GoogleSignin);
 
   try {
     const response = await GoogleSignin.signIn();
