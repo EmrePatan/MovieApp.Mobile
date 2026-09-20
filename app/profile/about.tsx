@@ -16,9 +16,18 @@ function getAboutLogoWidth(screenWidth: number): number {
   return Math.min(296, Math.max(248, Math.round(contentWidth * 0.82)));
 }
 
+function getAboutContentOpticalInsets(screenHeight: number) {
+  const opticalBias = Math.round(Math.min(spacing.xxl * 2, screenHeight * 0.07));
+
+  return {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl + opticalBias,
+  };
+}
+
 export default function AboutScreen() {
   const { t } = useTranslation();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const version = Constants.expoConfig?.version ?? '1.0.0';
   const logoWidth = getAboutLogoWidth(width);
   const logoHeight = getMovieCaveLogoHeight(logoWidth);
@@ -32,7 +41,7 @@ export default function AboutScreen() {
         </AppText>
       </View>
 
-      <View style={styles.content}>
+      <View style={[styles.content, getAboutContentOpticalInsets(height)]}>
         <View style={styles.brandBlock}>
           <MovieCaveLogo width={logoWidth} height={logoHeight} style={styles.logo} />
           <AppText variant="bodySmall" style={styles.description}>
@@ -55,8 +64,6 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
   },
   brandBlock: {
     alignItems: 'center',
