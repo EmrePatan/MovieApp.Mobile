@@ -16,6 +16,22 @@ describe('RegionSelector', () => {
 
     expect(screen.getByText('Watch region')).toBeTruthy();
     expect(screen.getByLabelText('Watch region Turkey')).toBeTruthy();
+    expect(screen.queryByLabelText('United States')).toBeNull();
+  });
+
+  it('lists region options with flags when expanded', () => {
+    render(
+      <RegionSelector
+        label="Release region"
+        value="TR"
+        expanded={true}
+        onToggleExpanded={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('United States')).toBeTruthy();
+    expect(screen.getByLabelText('United Kingdom')).toBeTruthy();
   });
 
   it('calls onSelect when a region is chosen', () => {

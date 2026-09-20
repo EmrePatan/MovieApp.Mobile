@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
+import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
 import { getLanguageFlagEmoji, getLanguageLabel } from '@/i18n/locale-tags';
 import type { UiLanguage } from '@/i18n/types';
 import { SUPPORTED_UI_LANGUAGES } from '@/i18n/types';
@@ -15,14 +16,6 @@ interface LanguageSelectorProps {
   onToggleExpanded: () => void;
   onSelect: (language: UiLanguage) => void;
   testID?: string;
-}
-
-function LanguageFlagBadge({ language }: { language: UiLanguage }) {
-  return (
-    <View style={styles.flagBadge} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <AppText style={styles.flagEmoji}>{getLanguageFlagEmoji(language)}</AppText>
-    </View>
-  );
 }
 
 export function LanguageSelector({
@@ -49,7 +42,7 @@ export function LanguageSelector({
         style={({ pressed }) => [styles.selector, pressed && styles.pressed]}
       >
         <View style={styles.selectorContent}>
-          <LanguageFlagBadge language={value} />
+          <CircularFlagBadge emoji={getLanguageFlagEmoji(value)} />
           <AppText variant="body">{selectedLabel}</AppText>
         </View>
         <Ionicons
@@ -79,7 +72,7 @@ export function LanguageSelector({
                 ]}
               >
                 <View style={styles.optionContent}>
-                  <LanguageFlagBadge language={language} />
+                  <CircularFlagBadge emoji={getLanguageFlagEmoji(language)} />
                   <AppText
                     variant="bodySmall"
                     style={selected ? styles.optionLabelSelected : undefined}
@@ -145,21 +138,6 @@ const styles = StyleSheet.create({
   optionLabelSelected: {
     color: colors.accent,
     fontWeight: '600',
-  },
-  flagBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  flagEmoji: {
-    fontSize: 16,
-    lineHeight: 18,
   },
   pressed: {
     opacity: 0.85,

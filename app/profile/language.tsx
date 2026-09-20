@@ -14,7 +14,7 @@ export default function LanguagePreferenceScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { language, source, setLanguage, resetToDeviceDefault } = useLocalePreference();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const sourceLabel =
     source === 'saved'

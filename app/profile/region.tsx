@@ -14,7 +14,7 @@ export default function RegionPreferenceScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { region, source, setRegion, resetToDeviceDefault } = useRegionalPreference();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const handleSelect = async (regionCode: string) => {
     await setRegion(regionCode);

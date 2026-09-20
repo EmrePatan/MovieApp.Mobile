@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { getRegionLabel, REGION_OPTIONS } from '../region-options';
+import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
+import { getRegionFlagEmoji, getRegionLabel, REGION_OPTIONS } from '../region-options';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -31,12 +32,16 @@ export function RegionSelector({
       </AppText>
       <Pressable
         accessibilityRole="button"
+        accessibilityState={{ expanded }}
         accessibilityLabel={`${label} ${regionLabel}`}
         onPress={onToggleExpanded}
         style={({ pressed }) => [styles.selector, pressed && styles.pressed]}
         testID={testID}
       >
-        <AppText variant="body">{regionLabel}</AppText>
+        <View style={styles.selectorContent}>
+          <CircularFlagBadge emoji={getRegionFlagEmoji(value)} />
+          <AppText variant="body">{regionLabel}</AppText>
+        </View>
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={18}
@@ -61,9 +66,12 @@ export function RegionSelector({
                   pressed && styles.pressed,
                 ]}
               >
-                <AppText variant="bodySmall" style={selected ? styles.optionLabelSelected : undefined}>
-                  {option.label}
-                </AppText>
+                <View style={styles.optionContent}>
+                  <CircularFlagBadge emoji={getRegionFlagEmoji(option.code)} />
+                  <AppText variant="bodySmall" style={selected ? styles.optionLabelSelected : undefined}>
+                    {option.label}
+                  </AppText>
+                </View>
                 {selected ? (
                   <Ionicons name="checkmark" size={16} color={colors.accent} />
                 ) : null}
@@ -91,6 +99,12 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
+  selectorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
+  },
   options: {
     gap: spacing.xs,
   },
@@ -108,6 +122,12 @@ const styles = StyleSheet.create({
   optionSelected: {
     borderColor: colors.borderAccent,
     backgroundColor: colors.accentTint12,
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
   },
   optionLabelSelected: {
     color: colors.accent,

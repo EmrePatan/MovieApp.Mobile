@@ -1,3 +1,5 @@
+import { countryCodeToFlagEmoji } from '@/features/discovery/utils/country-flag';
+
 export const DEFAULT_RELEASE_REGION = 'TR';
 export const FALLBACK_USER_REGION = DEFAULT_RELEASE_REGION;
 
@@ -28,4 +30,8 @@ export function normalizeRegionCode(code: string | undefined | null): string {
 
   const normalized = code.trim().toUpperCase();
   return normalized.length === 2 ? normalized : DEFAULT_RELEASE_REGION;
+}
+
+export function getRegionFlagEmoji(code: string): string {
+  return countryCodeToFlagEmoji(normalizeRegionCode(code));
 }
