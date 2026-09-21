@@ -16,7 +16,9 @@ Current baseline:
 |-------|----------|---------------|
 | Marketing version | `app.config.ts` → `version` | `1.0.0` |
 | Android versionCode | `app.config.ts` → `android.versionCode` | `1` |
-| iOS buildNumber | `app.config.ts` → `ios.buildNumber` | `1` |
+| iOS buildNumber | `app.config.ts` → `ios.buildNumber` | `4` (TestFlight Build 4) |
+
+**Next Final RC:** bump `ios.buildNumber` to **`5`** immediately before the production EAS iOS build (do not reuse Build 4).
 
 ---
 
@@ -128,10 +130,10 @@ Universal links / associated domains are **not configured** (requires owned doma
 | Upload keystore / EAS credentials | **Remote** — `credentialsSource: "remote"` in `eas.json`; verify in EAS dashboard |
 | Store listing (title, description) | **TODO** |
 | Screenshots | **TODO** |
-| Privacy policy URL | **TODO** |
+| Privacy policy URL | **TODO in Play Console** — live site: `https://moviecaveapp.com/privacy/` |
 | Data safety form | **TODO** |
 | Content rating questionnaire | **TODO** |
-| Support email/URL | **TODO** |
+| Support email/URL | **TODO in Play Console** — `support@moviecaveapp.com` |
 | Account deletion compliance | Client flow ready; document in store listing |
 
 ### Suggested production build command
@@ -154,13 +156,15 @@ Set `EXPO_PUBLIC_API_URL` (HTTPS) in EAS production environment variables first.
 | Splash / launch screen | Configured |
 | Permissions audit | Complete |
 | Production build profile | Ready in `eas.json` |
-| Apple Developer account | **TODO** |
-| App Store Connect app record | **TODO** |
+| Apple Developer account | Operator-owned (verify active membership) |
+| App Store Connect app record | `ascAppId` `6814454427` in `eas.json` submit profile |
 | Distribution certificate / provisioning | **Remote** — `credentialsSource: "remote"` in `eas.json`; verify Sign in with Apple capability |
 | Store listing | **TODO** |
 | Screenshots | **TODO** |
-| App Privacy details | **TODO** |
-| Support URL | **TODO** |
+| App Privacy details | **TODO in App Store Connect** |
+| Support URL | **TODO in App Store Connect** — `https://moviecaveapp.com/` / `support@moviecaveapp.com` |
+| Terms of service URL | Live site: `https://moviecaveapp.com/terms/` |
+| Account deletion URL | Live site: `https://moviecaveapp.com/delete-account/` |
 | Account deletion behavior documented | Client flow ready |
 
 ### Suggested production build command
