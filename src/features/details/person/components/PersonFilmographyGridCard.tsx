@@ -42,7 +42,7 @@ export function PersonFilmographyGridCard({
       testID={`person-filmography-grid-${entry.mediaType}-${entry.tmdbId}`}
     >
       <PosterImage
-        key={`${entry.mediaType}-${entry.tmdbId}`}
+        imageStateKey={`${entry.mediaType}-${entry.tmdbId}`}
         uri={entry.posterPath}
         width={width}
         height={posterHeight}

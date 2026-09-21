@@ -54,12 +54,33 @@ describe('PosterImage loading lifecycle', () => {
     const image = screen.UNSAFE_getByType(Image);
 
     act(() => {
-      image.props.onLoadStart?.();
       image.props.onLoadEnd?.();
     });
 
     expect(screen.UNSAFE_getByType(Image)).toBeTruthy();
     expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+  });
+
+  it('keeps the poster visible when onError fires after a successful load', () => {
+    render(
+      <PosterImage
+        uri="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Interstellar poster"
+      />,
+    );
+
+    const image = screen.UNSAFE_getByType(Image);
+
+    act(() => {
+      image.props.onLoad?.();
+      image.props.onError?.();
+    });
+
+    expect(screen.UNSAFE_getByType(Image)).toBeTruthy();
+    expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+    expect(screen.queryByLabelText('film-outline')).toBeNull();
   });
 
   it('retries once on transient onError before showing fallback', () => {

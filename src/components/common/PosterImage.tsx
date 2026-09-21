@@ -13,6 +13,8 @@ interface PosterImageProps {
   height: number;
   accessibilityLabel?: string;
   elevated?: boolean;
+  /** Stable identity for recycled list cells; defaults to resolved URI. */
+  imageStateKey?: string;
 }
 
 export const PosterImage = memo(function PosterImage({
@@ -21,9 +23,11 @@ export const PosterImage = memo(function PosterImage({
   height,
   accessibilityLabel,
   elevated = false,
+  imageStateKey,
 }: PosterImageProps) {
   const resolvedUri = resolveImageUri(uri);
-  const { hasError, imageKey, onImageError } = useRemoteImageLoadState(resolvedUri);
+  const stateKey = imageStateKey ?? resolvedUri;
+  const { hasError, imageKey, onImageError, onImageLoad } = useRemoteImageLoadState(stateKey);
   const showFallback = !resolvedUri || hasError;
   const [trackedUri, setTrackedUri] = useState(resolvedUri);
   const [isLoading, setIsLoading] = useState(Boolean(resolvedUri));
@@ -32,6 +36,16 @@ export const PosterImage = memo(function PosterImage({
     setTrackedUri(resolvedUri);
     setIsLoading(Boolean(resolvedUri));
   }
+
+  const handleLoad = () => {
+    onImageLoad();
+    setIsLoading(false);
+  };
+
+  const handleError = () => {
+    onImageError();
+    setIsLoading(false);
+  };
 
   return (
     <View
@@ -54,13 +68,9 @@ export const PosterImage = memo(function PosterImage({
             source={{ uri: resolvedUri }}
             style={[styles.image, { width, height }]}
             resizeMode="cover"
-            onLoadStart={() => setIsLoading(true)}
-            onLoad={() => setIsLoading(false)}
-            onLoadEnd={() => setIsLoading(false)}
-            onError={() => {
-              onImageError();
-              setIsLoading(false);
-            }}
+            onLoad={handleLoad}
+            onLoadEnd={handleLoad}
+            onError={handleError}
           />
           {isLoading ? (
             <View style={styles.loadingOverlay}>

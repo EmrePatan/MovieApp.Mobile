@@ -17,19 +17,30 @@ const INITIAL_LOAD_STATE: RemoteImageLoadState = {
  */
 export function useRemoteImageLoadState(sourceKey: string | null | undefined) {
   const generationRef = useRef(0);
-  const [trackedKey, setTrackedKey] = useState(sourceKey);
+  const loadedRef = useRef(false);
+  const normalizedKey = sourceKey ?? '';
+  const [trackedKey, setTrackedKey] = useState(normalizedKey);
   const [loadState, setLoadState] = useState<RemoteImageLoadState>(INITIAL_LOAD_STATE);
 
-  if (trackedKey !== sourceKey) {
-    setTrackedKey(sourceKey);
+  if (trackedKey !== normalizedKey) {
+    setTrackedKey(normalizedKey);
     setLoadState(INITIAL_LOAD_STATE);
+    loadedRef.current = false;
     generationRef.current += 1;
   }
 
   const generation = generationRef.current;
   const { hasError, retryVersion } = loadState;
 
+  const onImageLoad = useCallback(() => {
+    loadedRef.current = true;
+  }, []);
+
   const onImageError = useCallback(() => {
+    if (loadedRef.current) {
+      return;
+    }
+
     const generationAtError = generation;
     const retryAtError = retryVersion;
 
@@ -43,6 +54,7 @@ export function useRemoteImageLoadState(sourceKey: string | null | undefined) {
       }
 
       if (current.retryVersion < 1) {
+        loadedRef.current = false;
         return { ...current, retryVersion: current.retryVersion + 1 };
       }
 
@@ -52,7 +64,8 @@ export function useRemoteImageLoadState(sourceKey: string | null | undefined) {
 
   return {
     hasError,
-    imageKey: `${sourceKey ?? ''}:${retryVersion}`,
+    imageKey: `${normalizedKey}:${retryVersion}`,
     onImageError,
+    onImageLoad,
   };
 }
