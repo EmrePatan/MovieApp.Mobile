@@ -7,12 +7,12 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  FlatList,
   Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import {
   DISCOVER_CHROME_PROBE_STAGE,
   DISCOVER_USE_CHROME_PROBE,
@@ -342,8 +342,10 @@ export default function DiscoverScreen() {
 
   const productionScreen = (
     <View style={commonStyles.screen} testID="discover-browse-screen">
-      <FlatList
+      <PlatformRefreshFlatList
         testID="discover-browse-list"
+        refreshing={isRefetching && !isFetchingNextPage}
+        onRefresh={handleRefresh}
         data={items}
         keyExtractor={searchResultKeyExtractor}
         renderItem={renderItem}
@@ -351,12 +353,6 @@ export default function DiscoverScreen() {
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooter}
         contentContainerStyle={items.length === 0 ? styles.emptyListContent : styles.listContent}
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={isRefetching && !isFetchingNextPage}
-            onRefresh={handleRefresh}
-          />
-        }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
         showsVerticalScrollIndicator={false}

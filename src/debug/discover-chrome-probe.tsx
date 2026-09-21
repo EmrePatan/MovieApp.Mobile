@@ -21,9 +21,9 @@ import { logNavigationDiagnostic } from './navigation-diagnostics';
 import { commonStyles } from '@/theme/theme';
 
 /** When true, DEV Android uses chrome ladder instead of route probe stages 0–4. */
-export const DISCOVER_USE_CHROME_PROBE = true;
+export const DISCOVER_USE_CHROME_PROBE = false;
 
-/** One-line switch for chrome isolation on DEV Android. First 4D sub-stage test: 4D1. */
+/** One-line switch for chrome isolation on DEV Android. Re-enable only for further diagnosis. */
 export const DISCOVER_CHROME_PROBE_STAGE: DiscoverChromeProbeStage = '4D1';
 
 interface DiscoverChromeProbeProps {

@@ -100,5 +100,7 @@ describe('MovieAppRefreshControl', () => {
     expect(native.props.colors).toEqual([colors.accent]);
     expect(native.props.progressBackgroundColor).toBe(colors.surfaceElevated);
     expect(native.props.title).toBeUndefined();
+    expect(native.props.titleColor).toBeUndefined();
+    expect(native.props.tintColor).toBeUndefined();
   });
 });

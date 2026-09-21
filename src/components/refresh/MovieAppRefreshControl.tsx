@@ -27,7 +27,7 @@ export function MovieAppRefreshControl({
       accessibilityHint={refreshing ? undefined : t('common.refreshHint')}
       refreshing={refreshing}
       onRefresh={onRefresh}
-      tintColor={colors.accent}
+      tintColor={Platform.OS === 'ios' ? colors.accent : undefined}
       title={
         Platform.OS === 'ios'
           ? refreshing
@@ -35,12 +35,12 @@ export function MovieAppRefreshControl({
             : t('common.refreshPulling')
           : undefined
       }
-      titleColor={colors.textSecondary}
+      titleColor={Platform.OS === 'ios' ? colors.textSecondary : undefined}
       colors={Platform.OS === 'android' ? [colors.accent] : undefined}
       progressBackgroundColor={
         Platform.OS === 'android' ? colors.surfaceElevated : undefined
       }
-      progressViewOffset={progressViewOffset}
+      {...(progressViewOffset != null ? { progressViewOffset } : {})}
     />
   );
 }

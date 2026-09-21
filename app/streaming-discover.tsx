@@ -4,13 +4,12 @@ import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -304,8 +303,10 @@ export default function StreamingDiscoverScreen() {
 
   return (
     <View style={commonStyles.screen} testID="streaming-discover-screen">
-      <FlatList
+      <PlatformRefreshFlatList
         testID="streaming-discover-list"
+        refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
+        onRefresh={() => void resultsQuery.refetch()}
         data={resultsData}
         keyExtractor={searchResultKeyExtractor}
         renderItem={renderItem}
@@ -313,12 +314,6 @@ export default function StreamingDiscoverScreen() {
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooter}
         contentContainerStyle={resultsData.length === 0 ? styles.emptyListContent : styles.listContent}
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
-            onRefresh={() => void resultsQuery.refetch()}
-          />
-        }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
         showsVerticalScrollIndicator={false}

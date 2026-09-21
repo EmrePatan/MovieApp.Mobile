@@ -3,14 +3,13 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   BackHandler,
-  FlatList,
   Keyboard,
   ScrollView,
   StyleSheet,
   TextInput,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { useQueryClient } from '@tanstack/react-query';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -269,16 +268,6 @@ export default function SearchScreen() {
     void refetch();
   }, [refetch]);
 
-  const refreshControl = useMemo(
-    () => (
-      <MovieAppRefreshControl
-        refreshing={isRefetching && !isFetchingNextPage}
-        onRefresh={handleRefresh}
-      />
-    ),
-    [handleRefresh, isFetchingNextPage, isRefetching],
-  );
-
   const searchErrorMessage = searchQuery.isError
     ? isApiError(searchQuery.error)
       ? searchQuery.error.userMessage
@@ -361,8 +350,10 @@ export default function SearchScreen() {
   if (hasActiveSearch) {
     return (
       <View style={commonStyles.screen} testID="search-screen">
-        <FlatList
+        <PlatformRefreshFlatList
           testID="search-results-list"
+          refreshing={isRefetching && !isFetchingNextPage}
+          onRefresh={handleRefresh}
           data={results}
           keyExtractor={searchResultKeyExtractor}
           renderItem={renderResultItem}
@@ -370,7 +361,6 @@ export default function SearchScreen() {
           ListEmptyComponent={listEmptyComponent}
           ListFooterComponent={resultsFooter}
           contentContainerStyle={results.length === 0 ? styles.emptyListContent : styles.listContent}
-          refreshControl={refreshControl}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
           showsVerticalScrollIndicator={false}

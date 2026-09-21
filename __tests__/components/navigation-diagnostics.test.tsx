@@ -16,8 +16,8 @@ describe('navigation diagnostics', () => {
     mockLog.mockRestore();
   });
 
-  it('uses the v15 4d isolation diagnostic build marker', () => {
-    expect(NAV_DIAGNOSTIC_BUILD_ID).toBe('MA-45-2026-09-21-v15-4d-isolation');
+  it('uses the v15 refresh-fix diagnostic build marker', () => {
+    expect(NAV_DIAGNOSTIC_BUILD_ID).toBe('MA-45-2026-09-21-v15-refresh-fix');
   });
 
   it('logs platform and render counters from useScreenRenderTrace', () => {
@@ -35,7 +35,7 @@ describe('navigation diagnostics', () => {
     );
 
     expect(mockLog).toHaveBeenCalledWith(
-      expect.stringContaining('[NAV_DIAG:MA-45-2026-09-21-v15-4d-isolation] trace:search'),
+      expect.stringContaining('[NAV_DIAG:MA-45-2026-09-21-v15-refresh-fix] trace:search'),
       expect.objectContaining({
         platform: 'android',
         pathname: '/search',

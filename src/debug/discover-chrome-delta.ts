@@ -47,6 +47,18 @@ export const DISCOVER_STAGE4_TO_PRODUCTION_DELTA = [
   'DiscoverFilterSheet overlay: none → modal when visible',
 ];
 
+/** Device-proven refresh boundary: 4D5 PASS, 4D6 (MovieAppRefreshControl) FAIL on Android. */
+export const DISCOVER_4D5_TO_4D6_DELTA = [
+  'refreshControl: none → MovieAppRefreshControl on FlatList',
+];
+
+/** Controlled confirmation ladder for refresh root-cause isolation (re-enable chrome probe). */
+export const DISCOVER_REFRESH_CONFIRMATION_LADDER = {
+  R1: '4D5 + bare React Native RefreshControl (refreshing=false, noop onRefresh)',
+  R2: 'R1 + production refreshing/onRefresh values',
+  R3: 'R2 + MovieAppRefreshControl styling/props one group at a time',
+};
+
 /** Device-proven failure boundary: bundled 4C→4D delta introduced on Android v15-chrome. */
 export const DISCOVER_OLD_4C_TO_4D_DELTA = [
   'Outer root: probeRoot → commonStyles.screen',
@@ -171,4 +183,15 @@ export const DISCOVER_4D8_RECONSTRUCTS_OLD_4D = [
   'testID discover-browse-list',
   'full production ListHeaderComponent (from 4C)',
   'NO DiscoverFilterSheet (that is 4E only)',
+];
+
+/**
+ * Production fix: Android list surfaces that previously attached MovieAppRefreshControl
+ * directly to FlatList.refreshControl now use PlatformRefreshFlatList, matching Home/Insights.
+ * iOS keeps MovieAppRefreshControl via createIosRefreshControl.
+ */
+export const DISCOVER_REFRESH_ROOT_CAUSE = [
+  'Android FlatList.refreshControl with native RefreshControl blacked out discover-browse at 4D6.',
+  'Home/Insights already avoid Android refreshControl and use useAndroidPullToRefresh instead.',
+  'Fix: PlatformRefreshFlatList — iOS refreshControl + Android custom pull header/gesture.',
 ];

@@ -1,8 +1,10 @@
 import {
+  DISCOVER_4D5_TO_4D6_DELTA,
   DISCOVER_4D8_RECONSTRUCTS_OLD_4D,
   DISCOVER_CHROME_STAGE_DEFINITIONS,
   DISCOVER_CHROME_STAGE_ORDER,
   DISCOVER_OLD_4C_TO_4D_DELTA,
+  DISCOVER_REFRESH_ROOT_CAUSE,
   DISCOVER_STAGE4_TO_PRODUCTION_DELTA,
   isDiscoverChromeStageAtLeast,
 } from '@/debug/discover-chrome-delta';
@@ -41,5 +43,10 @@ describe('discover chrome delta', () => {
     expect(DISCOVER_OLD_4C_TO_4D_DELTA.length).toBeGreaterThan(0);
     expect(DISCOVER_4D8_RECONSTRUCTS_OLD_4D).toContain('refreshControl');
     expect(DISCOVER_4D8_RECONSTRUCTS_OLD_4D).not.toContain('DiscoverFilterSheet');
+  });
+
+  it('documents the device-proven 4D5 to 4D6 refresh boundary', () => {
+    expect(DISCOVER_4D5_TO_4D6_DELTA[0]).toContain('MovieAppRefreshControl');
+    expect(DISCOVER_REFRESH_ROOT_CAUSE.join(' ')).toContain('PlatformRefreshFlatList');
   });
 });
