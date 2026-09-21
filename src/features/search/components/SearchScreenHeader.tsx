@@ -12,7 +12,7 @@ import { spacing } from '@/theme/spacing';
 interface SearchScreenHeaderProps {
   value: string;
   onChangeText: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (submittedText?: string) => void;
   onClear: () => void;
   onBack?: () => void;
   inputRef?: RefObject<TextInput | null>;

@@ -17,8 +17,16 @@ import { NotificationBootstrapProvider } from '@/features/notifications/services
 import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
+import {
+  logNavigationDiagnostic,
+  NAV_DIAGNOSTIC_BUILD_ID,
+} from '@/debug/navigation-diagnostics';
 
 void SplashScreen.preventAutoHideAsync();
+
+if (__DEV__) {
+  logNavigationDiagnostic('bundle:active', { buildId: NAV_DIAGNOSTIC_BUILD_ID });
+}
 
 function RootNavigator() {
   const { t } = useTranslation();

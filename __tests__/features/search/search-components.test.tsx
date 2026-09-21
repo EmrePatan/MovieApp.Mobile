@@ -47,8 +47,10 @@ describe('search UI components', () => {
       />,
     );
 
-    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
-    expect(onSubmit).toHaveBeenCalled();
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing', {
+      nativeEvent: { text: 'interstellar' },
+    });
+    expect(onSubmit).toHaveBeenCalledWith('interstellar');
 
     fireEvent.press(screen.getByLabelText('Clear search'));
     expect(onClear).toHaveBeenCalled();

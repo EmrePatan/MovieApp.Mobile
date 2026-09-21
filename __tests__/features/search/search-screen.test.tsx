@@ -288,6 +288,42 @@ describe('SearchScreen', () => {
     );
   });
 
+  it('enters results mode when Android submit editing reports fresher native text', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [mockSearchResult],
+            page: 1,
+            pageSize: 20,
+            totalCount: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+    const input = screen.getByLabelText('Search movies, TV shows, and people');
+
+    fireEvent.changeText(input, 'interste');
+    fireEvent(input, 'submitEditing', { nativeEvent: { text: 'interstellar' } });
+
+    expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all');
+    expect(screen.getByTestId('search-results-list')).toBeTruthy();
+    expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
+  });
+
   it('keeps the search input mounted while submitted search is loading', () => {
     (useSearchResults as jest.Mock).mockReturnValue({
       data: undefined,

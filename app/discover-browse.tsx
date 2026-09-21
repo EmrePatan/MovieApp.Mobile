@@ -52,6 +52,10 @@ import { SearchEmptyState } from '@/features/search/components/SearchEmptyState'
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
+import {
+  createLayoutDiagnosticHandler,
+  useNavigationDiagnostics,
+} from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -80,6 +84,15 @@ export default function DiscoverScreen() {
     () => browseQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [browseQuery.data?.pages],
   );
+
+  useNavigationDiagnostics('discover-browse', {
+    mode,
+    typeFilter,
+    itemCount: items.length,
+    isLoading: browseQuery.isLoading,
+    isError: browseQuery.isError,
+    isFetching: browseQuery.isFetching,
+  });
 
   const activeFilterCount = useMemo(
     () => countActiveDiscoveryFilters(filters, mode, typeFilter),
@@ -276,7 +289,7 @@ export default function DiscoverScreen() {
 
   if (browseQuery.isLoading && items.length === 0) {
     return (
-      <StackListScreen header={listHeader}>
+      <StackListScreen testID="discover-browse-screen" header={listHeader}>
         <SearchLoadingState />
         {filterSheet}
       </StackListScreen>
@@ -289,7 +302,7 @@ export default function DiscoverScreen() {
       : t('discovery.browseScreen.loadError');
 
     return (
-      <StackListScreen header={listHeader}>
+      <StackListScreen testID="discover-browse-screen" header={listHeader}>
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
@@ -299,8 +312,10 @@ export default function DiscoverScreen() {
   }
 
   return (
-    <StackListScreen>
+    <StackListScreen testID="discover-browse-screen">
       <FlatList
+        testID="discover-browse-list"
+        onLayout={createLayoutDiagnosticHandler('discover-browse-flatlist')}
         data={items}
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}

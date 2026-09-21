@@ -10,7 +10,7 @@ import { interaction } from '@/theme/interaction';
 interface SearchBarProps {
   value: string;
   onChangeText: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (submittedText?: string) => void;
   onClear: () => void;
   placeholder?: string;
   inputRef?: RefObject<TextInput | null>;
@@ -62,7 +62,7 @@ export function SearchBar({
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
-        onSubmitEditing={onSubmit}
+        onSubmitEditing={(event) => onSubmit(event?.nativeEvent?.text ?? value)}
       />
       {showClear ? (
         <Pressable

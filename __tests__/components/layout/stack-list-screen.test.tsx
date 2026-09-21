@@ -17,6 +17,18 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 describe('StackListScreen', () => {
+  it('uses a full-height root wrapper before SafeAreaView', () => {
+    const { getByTestId } = render(
+      <StackListScreen testID="stack-list-screen" topBar={<Text>Top</Text>}>
+        <Text testID="list-content">Body</Text>
+      </StackListScreen>,
+    );
+
+    const root = getByTestId('stack-list-screen');
+    expect(root.props.style).toMatchObject({ flex: 1 });
+    expect(getByTestId('list-content')).toBeTruthy();
+  });
+
   it('wraps list content in a flex body container', () => {
     const { getByTestId } = render(
       <StackListScreen testID="stack-list-screen" topBar={<Text>Top</Text>}>
@@ -26,7 +38,6 @@ describe('StackListScreen', () => {
 
     const body = getByTestId('stack-list-screen-body');
     expect(body.props.style).toMatchObject({ flex: 1, minHeight: 0 });
-    expect(getByTestId('list-content')).toBeTruthy();
   });
 });
 

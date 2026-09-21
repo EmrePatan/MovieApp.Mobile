@@ -51,7 +51,13 @@ import {
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
 import { getSearchResultItemLayout } from '@/features/search/utils/search-list-layout';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
+import {
+  createLayoutDiagnosticHandler,
+  logNavigationDiagnostic,
+  useNavigationDiagnostics,
+} from '@/debug/navigation-diagnostics';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -91,13 +97,15 @@ export default function SearchScreen() {
   const debouncedInput = useDebouncedValue(inputText, AUTOCOMPLETE_DEBOUNCE_MS);
   const normalizedInput = normalizeSearchQuery(inputText);
   const normalizedSubmittedQuery = normalizeSearchQuery(submittedQuery);
-  const hasActiveSearch =
-    isValidSearchQuery(normalizedSubmittedQuery) &&
-    normalizedInput === normalizedSubmittedQuery;
+  const displayMode = resolveSearchDisplayMode({
+    inputText,
+    submittedQuery,
+    debouncedInput,
+  });
+  const hasActiveSearch = displayMode === 'results';
 
   const searchQuery = useSearchResults(submittedQuery, typeFilter);
-  const showAutocomplete =
-    !hasActiveSearch && isValidSearchQuery(normalizeSearchQuery(debouncedInput));
+  const showAutocomplete = displayMode === 'autocomplete';
   const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
   const historyQuery = useSearchHistory({ enabled: !hasActiveSearch });
   const deleteHistoryItem = useDeleteSearchHistoryItem();
@@ -114,17 +122,28 @@ export default function SearchScreen() {
   const submitSearch = useCallback((query: string) => {
     const normalized = normalizeSearchQuery(query);
     if (!isValidSearchQuery(normalized)) {
+      logNavigationDiagnostic('search:submit:ignored', {
+        query,
+        normalized,
+      });
       return;
     }
 
     Keyboard.dismiss();
     setInputText(normalized);
     setSubmittedQuery(normalized);
+    logNavigationDiagnostic('search:submit', {
+      normalized,
+      displayMode: 'results',
+    });
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    submitSearch(inputText);
-  }, [inputText, submitSearch]);
+  const handleSubmit = useCallback(
+    (submittedText?: string) => {
+      submitSearch(submittedText ?? inputText);
+    },
+    [inputText, submitSearch],
+  );
 
   const handleClear = useCallback(() => {
     setInputText('');
@@ -281,6 +300,18 @@ export default function SearchScreen() {
       : t('search.results.error')
     : null;
 
+  useNavigationDiagnostics('search', {
+    displayMode,
+    hasActiveSearch,
+    normalizedInput,
+    normalizedSubmittedQuery,
+    resultCount: results.length,
+    queryEnabled: isValidSearchQuery(normalizedSubmittedQuery),
+    isLoading: searchQuery.isLoading,
+    isError: searchQuery.isError,
+    isFetching: searchQuery.isFetching,
+  });
+
   const listEmptyComponent = useMemo(() => {
     if (!hasActiveSearch) {
       return null;
@@ -325,6 +356,7 @@ export default function SearchScreen() {
 
   return (
     <StackListScreen
+      testID="search-screen"
       header={
         <SearchScreenHeader
           value={inputText}
@@ -350,6 +382,8 @@ export default function SearchScreen() {
     >
       {hasActiveSearch ? (
         <FlatList
+          testID="search-results-list"
+          onLayout={createLayoutDiagnosticHandler('search-results-flatlist')}
           data={results}
           keyExtractor={searchResultKeyExtractor}
           renderItem={renderResult}

@@ -44,6 +44,10 @@ import { SearchLoadingState } from '@/features/search/components/SearchLoadingSt
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
+import {
+  createLayoutDiagnosticHandler,
+  useNavigationDiagnostics,
+} from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -73,6 +77,19 @@ export default function StreamingDiscoverScreen() {
     () => resultsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [resultsQuery.data?.pages],
   );
+
+  useNavigationDiagnostics('streaming-discover', {
+    mediaType: discoverState.mediaType,
+    watchRegion: discoverState.watchRegion,
+    providerCount: providersQuery.data?.providers?.length ?? 0,
+    selectedProviderCount: discoverState.watchProviderIds.length,
+    itemCount: items.length,
+    providersLoading: providersQuery.isLoading,
+    providersError: providersQuery.isError,
+    resultsLoading: resultsQuery.isLoading,
+    resultsError: resultsQuery.isError,
+    isHydrated,
+  });
 
   const currentRoute = useMemo(
     () => serializeStreamingDiscoverRoute(discoverState),
@@ -275,6 +292,7 @@ export default function StreamingDiscoverScreen() {
 
   return (
     <StackListScreen
+      testID="streaming-discover-screen"
       topBar={
         <View style={styles.topBar}>
           <DetailBackButton />
@@ -282,6 +300,8 @@ export default function StreamingDiscoverScreen() {
       }
     >
       <FlatList
+        testID="streaming-discover-list"
+        onLayout={createLayoutDiagnosticHandler('streaming-discover-flatlist')}
         data={discoverState.watchProviderIds.length > 0 ? items : []}
         keyExtractor={searchResultKeyExtractor}
         renderItem={({ item }) => (

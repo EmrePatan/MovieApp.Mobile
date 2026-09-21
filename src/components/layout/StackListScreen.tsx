@@ -24,16 +24,21 @@ export function StackListScreen({
   testID,
 }: StackListScreenProps) {
   return (
-    <SafeAreaView style={commonStyles.screen} edges={edges} testID={testID}>
-      {topBar ?? null}
-      {header ?? null}
-      <View style={styles.body} testID={testID ? `${testID}-body` : undefined}>
-        {children}
-      </View>
-    </SafeAreaView>
+    <View style={commonStyles.screen} testID={testID}>
+      <SafeAreaView style={styles.safeArea} edges={edges}>
+        {topBar ?? null}
+        {header ?? null}
+        <View style={styles.body} testID={testID ? `${testID}-body` : undefined}>
+          {children}
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   body: LIST_SCREEN_BODY_STYLE,
 });
