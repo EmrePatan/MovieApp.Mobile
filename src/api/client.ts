@@ -27,18 +27,19 @@ async function readJsonResponseBody(response: Response): Promise<unknown | null>
 export interface RequestOptions {
   signal?: AbortSignal;
   authenticated?: boolean;
+  suppressUnauthorizedHandler?: boolean;
   headers?: Record<string, string>;
 }
 
 type TokenGetter = () => string | null;
-type UnauthorizedHandler = () => void;
+type UnauthorizedHandler = () => void | Promise<void>;
 type AcceptLanguageGetter = () => string;
 
 class ApiClient {
   private tokenGetter: TokenGetter | null = null;
   private acceptLanguageGetter: AcceptLanguageGetter | null = null;
   private unauthorizedHandler: UnauthorizedHandler | null = null;
-  private isHandlingUnauthorized = false;
+  private unauthorizedTeardownPromise: Promise<void> | null = null;
 
   setTokenGetter(getter: TokenGetter): void {
     this.tokenGetter = getter;
@@ -50,6 +51,10 @@ class ApiClient {
 
   setUnauthorizedHandler(handler: UnauthorizedHandler): void {
     this.unauthorizedHandler = handler;
+  }
+
+  resetUnauthorizedHandlingForTests(): void {
+    this.unauthorizedTeardownPromise = null;
   }
 
   get<T>(path: string, options?: RequestOptions): Promise<T> {
@@ -126,7 +131,7 @@ class ApiClient {
         const problem = (payload ?? {}) as ProblemDetails;
         const kind = mapStatusToErrorKind(response.status);
 
-        if (kind === 'unauthorized' && authenticated) {
+        if (kind === 'unauthorized' && authenticated && !options.suppressUnauthorizedHandler) {
           this.handleUnauthorized();
         }
 
@@ -161,17 +166,17 @@ class ApiClient {
   }
 
   private handleUnauthorized(): void {
-    if (this.isHandlingUnauthorized || !this.unauthorizedHandler) {
+    if (!this.unauthorizedHandler || this.unauthorizedTeardownPromise) {
       return;
     }
 
-    this.isHandlingUnauthorized = true;
-
-    try {
-      this.unauthorizedHandler();
-    } finally {
-      this.isHandlingUnauthorized = false;
-    }
+    this.unauthorizedTeardownPromise = Promise.resolve(this.unauthorizedHandler())
+      .catch(() => {
+        // Session teardown is best-effort; callers still receive the original 401.
+      })
+      .finally(() => {
+        this.unauthorizedTeardownPromise = null;
+      });
   }
 }
 

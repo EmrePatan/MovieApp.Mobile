@@ -111,9 +111,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     api.setTokenGetter(() => tokenRef.current);
-    api.setUnauthorizedHandler(() => {
-      void handleUnauthorized();
-    });
+    api.setUnauthorizedHandler(() => handleUnauthorized());
   }, [handleUnauthorized]);
 
   useEffect(() => {

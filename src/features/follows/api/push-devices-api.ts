@@ -8,5 +8,7 @@ export async function registerPushDevice(request: RegisterPushDeviceRequest): Pr
 
 export async function unregisterPushDevice(expoPushToken: string): Promise<void> {
   const request: UnregisterPushDeviceRequest = { expoPushToken };
-  await api.delete<void>(buildPushDevicesPath(), request);
+  await api.delete<void>(buildPushDevicesPath(), request, {
+    suppressUnauthorizedHandler: true,
+  });
 }

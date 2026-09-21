@@ -6,6 +6,7 @@ describe('api client', () => {
 
   beforeEach(() => {
     process.env.EXPO_PUBLIC_API_URL = 'http://localhost:5027';
+    api.resetUnauthorizedHandlingForTests();
     api.setTokenGetter(() => 'test-token');
     api.setAcceptLanguageGetter(() => 'en-US');
     api.setUnauthorizedHandler(jest.fn());
@@ -80,6 +81,51 @@ describe('api client', () => {
       status: 400,
       title: 'Invalid login request.',
     });
+  });
+
+  it('invokes unauthorized handler only once for concurrent 401 responses', async () => {
+    const unauthorizedHandler = jest.fn(
+      () => new Promise<void>((resolve) => setTimeout(resolve, 25)),
+    );
+    api.setUnauthorizedHandler(unauthorizedHandler);
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      headers: { get: () => 'application/json' },
+      json: async () => ({
+        status: 401,
+        title: 'Authentication failed.',
+      }),
+    }) as unknown as typeof fetch;
+
+    await Promise.allSettled([api.get('/api/auth/me'), api.get('/api/auth/me')]);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(unauthorizedHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not invoke unauthorized handler when suppression is requested', async () => {
+    const unauthorizedHandler = jest.fn();
+    api.setUnauthorizedHandler(unauthorizedHandler);
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      headers: { get: () => 'application/json' },
+      json: async () => ({
+        status: 401,
+        title: 'Authentication failed.',
+      }),
+    }) as unknown as typeof fetch;
+
+    await expect(
+      api.delete('/api/push-devices', { expoPushToken: 'token' }, {
+        suppressUnauthorizedHandler: true,
+      }),
+    ).rejects.toBeInstanceOf(ApiError);
+
+    expect(unauthorizedHandler).not.toHaveBeenCalled();
   });
 
   it('invokes unauthorized handler on 401 responses', async () => {

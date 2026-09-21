@@ -180,10 +180,15 @@ describe('FollowButton', () => {
       fireEvent.press(screen.getByText('Follow show'));
     });
 
-    expect(await screen.findByText('Enable notifications', {}, { timeout: 3000 })).toBeTruthy();
     expect(
-      screen.getByText('Allow notifications so we can alert you about new episodes and releases.'),
+      await screen.findByText(
+        'Allow notifications so we can alert you about new episodes and releases.',
+        {},
+        { timeout: 3000 },
+      ),
     ).toBeTruthy();
+    expect(screen.getByText('Not now')).toBeTruthy();
+    expect(screen.getByLabelText('Enable notifications')).toBeTruthy();
   });
 
   it('does not reopen permission guidance after it was dismissed', async () => {

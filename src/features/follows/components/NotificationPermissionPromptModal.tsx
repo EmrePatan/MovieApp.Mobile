@@ -36,13 +36,13 @@ export function NotificationPermissionPromptModal({
           </AppText>
           <View style={styles.actions}>
             <AppButton
-              label={t('details.notificationsPermission.notNow')}
+              title={t('details.notificationsPermission.notNow')}
               variant="secondary"
               onPress={onDismiss}
               disabled={busy}
             />
             <AppButton
-              label={
+              title={
                 requiresSettings
                   ? t('details.notificationsPermission.openSettings')
                   : t('details.notificationsPermission.enable')
