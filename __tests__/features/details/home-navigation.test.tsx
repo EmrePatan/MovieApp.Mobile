@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
-import HomeScreen from '../../../app/(tabs)/home';
+import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
 
 const mockReplace = jest.fn();
 const mockPush = jest.fn();

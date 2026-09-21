@@ -8,6 +8,8 @@ import {
 } from '@/features/details/shared/routes';
 import { detailChildStackScreenOptions } from '@/features/details/shared/navigation/detail-child-stack-options';
 
+const APP_SHELL = 'app/(tabs)/(app-shell)';
+
 describe('catalog child destination navigation', () => {
   const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 
@@ -26,15 +28,15 @@ describe('catalog child destination navigation', () => {
 
   it('registers catalog child screens in nested movie and tv detail stacks', () => {
     const movieLayout = readFileSync(
-      path.join(process.cwd(), 'app/movie/_layout.tsx'),
+      path.join(process.cwd(), `${APP_SHELL}/movie/_layout.tsx`),
       'utf8',
     );
     const movieDetailLayout = readFileSync(
-      path.join(process.cwd(), 'app/movie/[id]/_layout.tsx'),
+      path.join(process.cwd(), `${APP_SHELL}/movie/[id]/_layout.tsx`),
       'utf8',
     );
     const tvDetailLayout = readFileSync(
-      path.join(process.cwd(), 'app/tv/[id]/_layout.tsx'),
+      path.join(process.cwd(), `${APP_SHELL}/tv/[id]/_layout.tsx`),
       'utf8',
     );
 

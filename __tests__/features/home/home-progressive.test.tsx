@@ -4,7 +4,7 @@ import { ApiError } from '@/api/errors';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 import { createHomeFeedMockReturnValue } from './home-feed-test-utils';
-import HomeScreen from '../../../app/(tabs)/home';
+import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
 
 const mockRefetch = jest.fn();
 const mockUseHomeFeed = useHomeFeed as jest.Mock;

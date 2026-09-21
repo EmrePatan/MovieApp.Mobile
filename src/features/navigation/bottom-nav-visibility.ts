@@ -8,11 +8,6 @@ export type BottomNavRouteCategory =
   | 'profile-settings'
   | 'special-fullscreen';
 
-const HIDDEN_BOTTOM_NAV_SEGMENTS = new Set([
-  '(auth)',
-  'profile',
-]);
-
 const HIDDEN_BOTTOM_NAV_ROUTE_NAMES = new Set([
   'login',
   'register',
@@ -26,17 +21,19 @@ const HIDDEN_BOTTOM_NAV_ROUTE_NAMES = new Set([
 const MAIN_TAB_ROUTE_NAMES = new Set(['home', 'discover', 'library', 'insights']);
 
 export function resolveBottomNavVisibility(segments: readonly string[]): BottomNavVisibility {
-  const normalizedSegments = segments.filter((segment) => !segment.startsWith('(') || segment === '(auth)');
-
   if (segments.includes('(auth)')) {
     return 'hide';
   }
 
-  if (segments.includes('profile')) {
+  if (segments.includes('profile') && !segments.includes('(tabs)')) {
     return 'hide';
   }
 
-  const leafRoute = normalizedSegments.at(-1) ?? segments.at(-1);
+  if (segments.includes('(tabs)') && segments.includes('profile')) {
+    return 'hide';
+  }
+
+  const leafRoute = segments.at(-1);
   if (leafRoute && HIDDEN_BOTTOM_NAV_ROUTE_NAMES.has(leafRoute)) {
     return 'hide';
   }
@@ -45,7 +42,12 @@ export function resolveBottomNavVisibility(segments: readonly string[]): BottomN
     return 'show';
   }
 
-  if (HIDDEN_BOTTOM_NAV_SEGMENTS.has(segments[0] ?? '')) {
+  if (
+    segments[0] === 'movie' ||
+    segments[0] === 'tv' ||
+    segments[0] === 'person' ||
+    segments[0] === 'collection'
+  ) {
     return 'hide';
   }
 

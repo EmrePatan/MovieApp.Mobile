@@ -14,7 +14,6 @@ import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
-import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
 
@@ -47,10 +46,6 @@ function RootNavigator() {
             Platform.OS === 'android' ? { animationTypeForReplace: 'push' } : undefined
           }
         />
-        <Stack.Screen name="movie" options={ratedDetailStackScreenOptions} />
-        <Stack.Screen name="tv" options={ratedDetailStackScreenOptions} />
-        <Stack.Screen name="person" />
-        <Stack.Screen name="collection" />
         <Stack.Screen name="profile" options={{ gestureEnabled: true }} />
       </Stack>
     </>

@@ -4,7 +4,7 @@ import { ApiError } from '@/api/errors';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { createHomeFeedMockReturnValue } from './home-feed-test-utils';
-import HomeScreen from '../../../app/(tabs)/home';
+import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
 
 const mockRefetch = jest.fn();
 const mockInvalidateQueries = jest.fn();

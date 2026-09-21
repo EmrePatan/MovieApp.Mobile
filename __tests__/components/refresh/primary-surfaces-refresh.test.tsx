@@ -4,8 +4,8 @@ import React from 'react';
 import { FlatList, Platform, ScrollView } from 'react-native';
 import { act, render } from '@testing-library/react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import HomeScreen from '../../../app/(tabs)/home';
-import NotificationsScreen from '../../../app/notifications';
+import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
+import NotificationsScreen from '../../../app/(tabs)/(app-shell)/notifications';
 import ProfileScreen from '../../../app/(tabs)/profile';
 import { InsightsHubContent } from '@/features/insights/components/InsightsHubContent';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
@@ -22,11 +22,11 @@ const iosOnlyRefreshSurfaceFiles = [
 ];
 
 const androidPullRefreshSurfaceFiles = [
-  'app/(tabs)/home.tsx',
+  'app/(tabs)/(app-shell)/home.tsx',
   'src/features/insights/components/InsightsHubContent.tsx',
 ];
 
-const sharedRefreshSurfaceFiles = ['app/notifications.tsx'];
+const sharedRefreshSurfaceFiles = ['app/(tabs)/(app-shell)/notifications.tsx'];
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({

@@ -13,6 +13,8 @@ import {
   buildTvDetailRoute,
 } from '@/features/details/shared/routes';
 
+const APP_SHELL = 'app/(tabs)/(app-shell)';
+
 const MOVIE_A = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 const MOVIE_B = '4fa85f64-5717-4562-b3fc-2c963f66afa7';
 const TV_A = '5fa85f64-5717-4562-b3fc-2c963f66afa8';
@@ -49,21 +51,39 @@ describe('catalog detail route identity', () => {
     jest.useRealTimers();
   });
 
-  it('registers dynamic detail stacks on the root navigator, not as tab siblings', () => {
+  it('registers dynamic detail stacks in the authenticated app-shell stack, not as tab siblings or root screens', () => {
     const rootLayout = readFileSync(path.join(process.cwd(), 'app/_layout.tsx'), 'utf8');
     const tabsLayout = readFileSync(path.join(process.cwd(), 'app/(tabs)/_layout.tsx'), 'utf8');
+    const appShellLayout = readFileSync(
+      path.join(process.cwd(), `${APP_SHELL}/_layout.tsx`),
+      'utf8',
+    );
 
-    expect(rootLayout).toContain('name="movie" options={ratedDetailStackScreenOptions}');
-    expect(rootLayout).toContain('name="tv" options={ratedDetailStackScreenOptions}');
-    expect(rootLayout).toContain('name="person"');
-    expect(rootLayout).toContain('name="collection"');
+    expect(rootLayout).not.toContain('name="movie"');
+    expect(rootLayout).not.toContain('name="tv"');
+    expect(rootLayout).not.toContain('name="person"');
+    expect(rootLayout).not.toContain('name="collection"');
     expect(tabsLayout).not.toContain('name="movie"');
     expect(tabsLayout).not.toContain('name="tv"');
     expect(tabsLayout).not.toContain('name="person"');
     expect(tabsLayout).not.toContain('name="collection"');
+    expect(appShellLayout).toContain('name="movie" options={ratedDetailStackScreenOptions}');
+    expect(appShellLayout).toContain('name="tv" options={ratedDetailStackScreenOptions}');
+    expect(appShellLayout).toContain('name="person"');
+    expect(appShellLayout).toContain('name="collection"');
   });
 
-  it('Search → movie A → Back → movie B pushes distinct root-stack hrefs', () => {
+  it('uses a navigator-owned custom tab bar instead of registering detail routes as tab screens', () => {
+    const tabsLayout = readFileSync(path.join(process.cwd(), 'app/(tabs)/_layout.tsx'), 'utf8');
+
+    expect(tabsLayout).toContain('tabBar={() => <PrimaryTabBar />}');
+    expect(tabsLayout).toContain('name="(app-shell)"');
+    expect(tabsLayout).not.toContain('name="home"');
+    expect(tabsLayout).not.toContain('name="discover"');
+    expect(tabsLayout).not.toContain('name="search" options={hiddenTabScreenOptions}');
+  });
+
+  it('Search → movie A → Back → movie B pushes distinct stack hrefs', () => {
     const { pushes, stack, router } = createNavigationRecorder();
 
     openCatalogDetailFromTab(router as never, MOVIE_A, 'movie', 'search');
