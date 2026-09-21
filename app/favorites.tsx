@@ -29,6 +29,7 @@ import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
 import type { LibrarySortOption, LibraryTypeFilter } from '@/features/library/types';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
+import { VisibilityCanary } from '@/debug/visibility-canary';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -224,8 +225,10 @@ export default function FavoritesScreen() {
     );
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <FlatList
+    <>
+      <VisibilityCanary label="ROOT_CANARY" />
+      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+        <FlatList
         data={displayItems}
         keyExtractor={getLibraryItemKey}
         renderItem={renderItem}
@@ -258,7 +261,8 @@ export default function FavoritesScreen() {
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }
 

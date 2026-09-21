@@ -13,6 +13,7 @@ import {
   canRevealApplicationUi,
   preloadStartupIconFonts,
 } from './startup-readiness';
+import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
 
 interface AppStartupGateProps {
   children: ReactNode;
@@ -105,6 +106,18 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!__DEV__) {
+      return;
+    }
+
+    logNavigationDiagnostic('overlay:startup-splash', {
+      visible: showBrandedSplash,
+      shouldReveal,
+      pointerEvents: shouldReveal ? 'none' : 'auto',
+    });
+  }, [shouldReveal, showBrandedSplash]);
 
   return (
     <View style={styles.root}>

@@ -46,8 +46,10 @@ import type { SearchResultItem } from '@/features/search/types';
 import {
   logNavigationDiagnostic,
   useNavigationDiagnostics,
+  useRouteLifecycleDiagnostics,
   useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
+import { VisibilityCanary } from '@/debug/visibility-canary';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -92,12 +94,19 @@ export default function StreamingDiscoverScreen() {
     isHydrated,
   });
 
-  useScreenRenderTrace('streaming-discover', {
-    pathname: `/${segments.join('/')}`,
+  const pathname = `/${segments.join('/')}`;
+  const instanceId = useScreenRenderTrace('streaming-discover', {
+    pathname,
     providerCount: providersQuery.data?.providers?.length ?? 0,
     itemCount: items.length,
     bodyKind: 'flat-list',
     listMounted: true,
+  });
+
+  useRouteLifecycleDiagnostics('streaming-discover', {
+    pathname,
+    segments,
+    instanceId,
   });
 
   const currentRoute = useMemo(
@@ -310,6 +319,7 @@ export default function StreamingDiscoverScreen() {
   const streamingListHeader = useMemo(
     () => (
       <>
+        <VisibilityCanary label="LIST_HEADER_CANARY" />
         <View style={styles.topBar}>
           <DetailBackButton />
         </View>
@@ -320,8 +330,11 @@ export default function StreamingDiscoverScreen() {
   );
 
   return (
-    <StackListScreen testID="streaming-discover-screen">
-      <FlatList
+    <>
+      <VisibilityCanary label="ROOT_CANARY" />
+      <StackListScreen testID="streaming-discover-screen">
+        <VisibilityCanary label="STACK_CANARY" />
+        <FlatList
         testID="streaming-discover-list"
         data={discoverState.watchProviderIds.length > 0 ? items : []}
         keyExtractor={searchResultKeyExtractor}
@@ -361,7 +374,8 @@ export default function StreamingDiscoverScreen() {
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
-    </StackListScreen>
+      </StackListScreen>
+    </>
   );
 }
 
