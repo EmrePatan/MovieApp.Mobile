@@ -7,7 +7,7 @@ import {
   resendVerificationRequest,
   verifyEmailRequest,
 } from '@/auth/auth-api';
-import { saveAccessToken } from '@/auth/auth-storage';
+import { removeAccessToken, saveAccessToken } from '@/auth/auth-storage';
 
 jest.mock('@/auth/auth-storage', () => ({
   getAccessToken: jest.fn().mockResolvedValue(null),
@@ -36,6 +36,7 @@ jest.mock('@/api/client', () => ({
 }));
 
 jest.mock('@/features/follows/services/push-device-service', () => ({
+  ensurePushDeviceRegisteredAsync: jest.fn().mockResolvedValue('unavailable'),
   resetPushPermissionRequestState: jest.fn(),
   unregisterKnownPushDeviceAsync: jest.fn(),
 }));
@@ -99,6 +100,7 @@ describe('AuthProvider verification flows', () => {
     });
 
     expect(registerRequest).toHaveBeenCalled();
+    expect(removeAccessToken).toHaveBeenCalled();
     expect(saveAccessToken).not.toHaveBeenCalled();
     expect(screen.getByTestId('authenticated').props.children).toBe('no');
   });

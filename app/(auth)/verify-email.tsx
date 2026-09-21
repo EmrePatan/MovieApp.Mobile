@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
@@ -15,6 +15,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function VerifyEmailScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { verifyEmail } = useAuth();
   const params = useLocalSearchParams<{ token?: string | string[] }>();
   const deepLinkToken = useMemo(() => parseVerifyEmailTokenParam(params.token), [params.token]);
@@ -40,7 +41,7 @@ export default function VerifyEmailScreen() {
 
     try {
       await verifyEmail(activeToken);
-      setSuccessMessage(t('auth.emailVerifiedWelcome'));
+      router.replace('/(tabs)/home');
     } catch (error) {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'verify-email'));
@@ -66,7 +67,7 @@ export default function VerifyEmailScreen() {
 
       try {
         await verifyEmail(deepLinkToken);
-        setSuccessMessage(t('auth.emailVerifiedWelcome'));
+        router.replace('/(tabs)/home');
       } catch (error) {
         if (isApiError(error)) {
           setFormError(getUserMessageForAuthError(error.kind, 'verify-email'));

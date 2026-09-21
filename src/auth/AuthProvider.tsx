@@ -29,7 +29,10 @@ import {
   resetPushPermissionRequestState,
   unregisterKnownPushDeviceAsync,
 } from '@/features/follows/services/push-device-service';
+import { ensureAuthDeepLinkListener } from '@/auth/pending-auth-deep-link';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
+
+ensureAuthDeepLinkListener();
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -169,13 +172,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [establishSession],
   );
 
-  const register = useCallback(async (email: string, password: string, displayName: string) => {
-    const response = await registerRequest({ email, password, displayName });
-    return {
-      email: response.email,
-      message: response.message,
-    };
-  }, []);
+  const register = useCallback(
+    async (email: string, password: string, displayName: string) => {
+      await clearSession();
+      const response = await registerRequest({ email, password, displayName });
+      return {
+        email: response.email,
+        message: response.message,
+      };
+    },
+    [clearSession],
+  );
 
   const verifyEmail = useCallback(
     async (token: string) => {

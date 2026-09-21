@@ -68,6 +68,12 @@ beforeAll(async () => {
   await ensureI18nInitialized('en');
 });
 
+jest.mock('expo-linking', () => ({
+  getInitialURL: jest.fn().mockResolvedValue(null),
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  parse: jest.fn(),
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({ replace: jest.fn() })),
   useNavigation: jest.fn(() => ({ setOptions: jest.fn() })),
@@ -91,12 +97,15 @@ jest.mock('@/features/follows/services/push-device-service', () => ({
 
 jest.mock('react', () => {
   const actual = jest.requireActual<typeof import('react')>('react');
+  const runHookImmediately = (callback: () => void | (() => void)) => {
+    callback();
+    return undefined;
+  };
+
   return {
     ...actual,
-    useEffect: jest.fn((callback: () => void | (() => void)) => {
-      callback();
-      return undefined;
-    }),
+    useEffect: jest.fn(runHookImmediately),
+    useLayoutEffect: jest.fn(runHookImmediately),
   };
 });
 

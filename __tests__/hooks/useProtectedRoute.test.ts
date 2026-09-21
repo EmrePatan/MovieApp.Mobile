@@ -1,5 +1,6 @@
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { useAuth } from '@/auth/useAuth';
+import { resetPendingAuthDeepLinkForTests } from '@/auth/pending-auth-deep-link';
 
 jest.mock('@/auth/useAuth');
 
@@ -8,6 +9,7 @@ describe('useProtectedRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetPendingAuthDeepLinkForTests();
     const expoRouter = jest.requireMock('expo-router');
     expoRouter.useRouter.mockReturnValue({ replace });
   });
@@ -38,6 +40,20 @@ describe('useProtectedRoute', () => {
     useProtectedRoute();
 
     expect(replace).toHaveBeenCalledWith('/(tabs)/home');
+  });
+
+  it('allows authenticated users to stay on verify-email', () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
+    const expoRouter = jest.requireMock('expo-router');
+    expoRouter.useSegments.mockReturnValue(['(auth)', 'verify-email']);
+
+    useProtectedRoute();
+
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it('does nothing while auth is loading', () => {

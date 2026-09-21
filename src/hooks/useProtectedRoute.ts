@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
+import { isAuthEntryScreen } from '@/auth/auth-route-policy';
+import { hasPendingAuthDeepLink } from '@/auth/pending-auth-deep-link';
 import { useAuth } from '@/auth/useAuth';
 
 /**
@@ -11,18 +13,20 @@ export function useProtectedRoute(): void {
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading || hasPendingAuthDeepLink()) {
       return;
     }
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const segmentList = segments as string[];
+    const inAuthGroup = segmentList[0] === '(auth)';
+    const authScreen = segmentList[1];
 
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
       return;
     }
 
-    if (isAuthenticated && inAuthGroup) {
+    if (isAuthenticated && inAuthGroup && isAuthEntryScreen(authScreen)) {
       router.replace('/(tabs)/home');
     }
   }, [isAuthenticated, isLoading, router, segments]);
