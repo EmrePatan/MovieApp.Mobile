@@ -383,6 +383,7 @@ export default function DiscoverScreen() {
           listFooter={listFooter}
           contentContainerStyle={styles.listContent}
           emptyContentContainerStyle={styles.emptyListContent}
+          refreshing={isRefetching && !isFetchingNextPage}
           refreshControl={
             <MovieAppRefreshControl
               refreshing={isRefetching && !isFetchingNextPage}

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
 /** Bump when #45 diagnostics/fixes change so Metro logs prove the active bundle. */
-export const NAV_DIAGNOSTIC_BUILD_ID = 'MA-45-2026-09-21-v15-chrome';
+export const NAV_DIAGNOSTIC_BUILD_ID = 'MA-45-2026-09-21-v15-4d-isolation';
 
 const PREFIX = `[NAV_DIAG:${NAV_DIAGNOSTIC_BUILD_ID}]`;
 

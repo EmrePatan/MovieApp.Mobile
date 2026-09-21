@@ -47,7 +47,58 @@ export const DISCOVER_STAGE4_TO_PRODUCTION_DELTA = [
   'DiscoverFilterSheet overlay: none → modal when visible',
 ];
 
-export type DiscoverChromeProbeStage = '4A' | '4B' | '4C' | '4D' | '4E';
+/** Device-proven failure boundary: bundled 4C→4D delta introduced on Android v15-chrome. */
+export const DISCOVER_OLD_4C_TO_4D_DELTA = [
+  'Outer root: probeRoot → commonStyles.screen',
+  'FlatList style: flex:1 → undefined (production: no explicit style)',
+  'contentContainerStyle: fixed probe padding → conditional listContent | emptyListContent',
+  'ListEmptyComponent: none → conditional loading/error/empty',
+  'ListFooterComponent: none → pagination ActivityIndicator',
+  'refreshControl: none → MovieAppRefreshControl',
+  'onEndReached + onEndReachedThreshold: none → production pagination handler',
+  'FlatList tuning: none → showsVerticalScrollIndicator, keyboardShouldPersistTaps, virtualization props',
+  'FlatList testID: discover-route-probe-list → discover-browse-list',
+];
+
+export type DiscoverChromeProbeStage =
+  | '4A'
+  | '4B'
+  | '4C'
+  | '4D1'
+  | '4D2'
+  | '4D3'
+  | '4D4'
+  | '4D5'
+  | '4D6'
+  | '4D7'
+  | '4D8'
+  | '4E';
+
+export const DISCOVER_CHROME_STAGE_ORDER: DiscoverChromeProbeStage[] = [
+  '4A',
+  '4B',
+  '4C',
+  '4D1',
+  '4D2',
+  '4D3',
+  '4D4',
+  '4D5',
+  '4D6',
+  '4D7',
+  '4D8',
+  '4E',
+];
+
+export function discoverChromeStageIndex(stage: DiscoverChromeProbeStage): number {
+  return DISCOVER_CHROME_STAGE_ORDER.indexOf(stage);
+}
+
+export function isDiscoverChromeStageAtLeast(
+  stage: DiscoverChromeProbeStage,
+  minimum: DiscoverChromeProbeStage,
+): boolean {
+  return discoverChromeStageIndex(stage) >= discoverChromeStageIndex(minimum);
+}
 
 export const DISCOVER_CHROME_STAGE_DEFINITIONS: Record<
   DiscoverChromeProbeStage,
@@ -65,13 +116,59 @@ export const DISCOVER_CHROME_STAGE_DEFINITIONS: Record<
     label: 'DISCOVER 4C',
     newDelta: 'ListHeaderComponent += filters button + ActiveFilterChips (full production header)',
   },
-  '4D': {
-    label: 'DISCOVER 4D',
+  '4D1': {
+    label: 'DISCOVER 4D1',
+    newDelta: 'Outer root only: probeRoot → commonStyles.screen (FlatList props unchanged from 4C)',
+  },
+  '4D2': {
+    label: 'DISCOVER 4D2',
+    newDelta: 'FlatList style only: flex:1 probeList → undefined (production FlatList style contract)',
+  },
+  '4D3': {
+    label: 'DISCOVER 4D3',
     newDelta:
-      'FlatList += ListEmptyComponent, ListFooterComponent, refreshControl, onEndReached, virtualization props, conditional contentContainerStyle; outer root → commonStyles.screen',
+      'contentContainerStyle only: fixed probe padding → production conditional listContent | emptyListContent',
+  },
+  '4D4': {
+    label: 'DISCOVER 4D4',
+    newDelta: 'ListEmptyComponent only: production conditional loading/error/empty',
+  },
+  '4D5': {
+    label: 'DISCOVER 4D5',
+    newDelta: 'ListFooterComponent only: production pagination ActivityIndicator',
+  },
+  '4D6': {
+    label: 'DISCOVER 4D6',
+    newDelta: 'refreshControl only: MovieAppRefreshControl',
+  },
+  '4D7': {
+    label: 'DISCOVER 4D7',
+    newDelta: 'onEndReached + onEndReachedThreshold only',
+  },
+  '4D8': {
+    label: 'DISCOVER 4D8',
+    newDelta:
+      'FlatList tuning only: showsVerticalScrollIndicator, keyboardShouldPersistTaps, virtualization props, production testID (reconstructs old failing 4D)',
   },
   '4E': {
     label: 'DISCOVER 4E',
-    newDelta: 'Full production discover-browse including DiscoverFilterSheet overlay',
+    newDelta: 'DiscoverFilterSheet overlay only (full production discover-browse)',
   },
 };
+
+/** 4D8 cumulative props match the old monolithic 4D probe (pre-4D1 split). */
+export const DISCOVER_4D8_RECONSTRUCTS_OLD_4D = [
+  'commonStyles.screen root',
+  'FlatList with no flex:1 style',
+  'conditional contentContainerStyle',
+  'ListEmptyComponent',
+  'ListFooterComponent',
+  'refreshControl',
+  'onEndReached + onEndReachedThreshold=0.4',
+  'showsVerticalScrollIndicator=false',
+  'keyboardShouldPersistTaps=handled',
+  'initialNumToRender / maxToRenderPerBatch / windowSize',
+  'testID discover-browse-list',
+  'full production ListHeaderComponent (from 4C)',
+  'NO DiscoverFilterSheet (that is 4E only)',
+];

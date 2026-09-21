@@ -39,6 +39,7 @@ describe('DiscoverChromeProbe', () => {
     listFooter: <Text testID="footer">footer</Text>,
     contentContainerStyle: { paddingBottom: 32 },
     emptyContentContainerStyle: { flexGrow: 1 },
+    refreshing: false,
     refreshControl: undefined,
     onEndReached: jest.fn(),
     initialNumToRender: 3,
@@ -53,6 +54,22 @@ describe('DiscoverChromeProbe', () => {
     expect(screen.getByText('DISCOVER 4A')).toBeTruthy();
     expect(screen.getByTestId('header-shell')).toBeTruthy();
     expect(screen.getByLabelText('Alpha, Movie · 2020 · ★ 7.0')).toBeTruthy();
+  });
+
+  it('renders stage 4D1 with production root and probe FlatList style', () => {
+    render(<DiscoverChromeProbe stage="4D1" {...baseProps} />);
+
+    expect(screen.getByText('DISCOVER 4D1')).toBeTruthy();
+    expect(screen.getByTestId('discover-route-probe-list')).toBeTruthy();
+    expect(screen.getByTestId('header-full')).toBeTruthy();
+    expect(screen.getByLabelText('Alpha, Movie · 2020 · ★ 7.0')).toBeTruthy();
+  });
+
+  it('renders stage 4D8 with production list testID', () => {
+    render(<DiscoverChromeProbe stage="4D8" {...baseProps} />);
+
+    expect(screen.getByText('DISCOVER 4D8')).toBeTruthy();
+    expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
   });
 
   it('passes through full production at stage 4E', () => {
