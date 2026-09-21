@@ -39,7 +39,7 @@ Production API URL is **not configured in-repo**. Set it in EAS project environm
 
 | Item | Value |
 |------|-------|
-| App name | MovieApp |
+| App name | Movie Cave |
 | Slug | movieapp-mobile |
 | URL scheme | `movieapp` |
 | Android package | `com.movieapp.mobile` |
@@ -54,9 +54,9 @@ These are development-safe placeholders. Confirm final commercial identifiers be
 | Asset | File | Status |
 |-------|------|--------|
 | App icon | `assets/icon.png` | Present |
-| Android adaptive foreground | `assets/android-icon-foreground.png` | Present |
+| Android adaptive foreground | `assets/branding/adaptive-icon-foreground.png` | Present |
 | Android adaptive background | `assets/android-icon-background.png` | Present |
-| Android monochrome icon | `assets/android-icon-monochrome.png` | Present |
+| Android monochrome icon | `assets/branding/monochrome-icon.png` | Present |
 | Splash image | `assets/splash-icon.png` | Present |
 | Web favicon | `assets/favicon.png` | Present |
 | Store screenshots | — | **TODO** — create before submission |
@@ -77,7 +77,7 @@ The app currently requests **no optional native permissions** beyond what Expo R
 | Microphone | No | Not requested |
 | Location | No | Not requested |
 | Contacts | No | Not requested |
-| Notifications | No | Not requested |
+| Notifications | Yes (push) | `expo-notifications`; user permission requested on follow flows |
 | Photos/media | No | Not requested |
 | Storage | No | Not requested |
 
@@ -125,7 +125,7 @@ Universal links / associated domains are **not configured** (requires owned doma
 | Permissions audit | Complete |
 | AAB production build profile | Ready in `eas.json` |
 | Play App Signing | **TODO** — configure in Play Console |
-| Upload keystore / EAS credentials | **TODO** — run `eas credentials` |
+| Upload keystore / EAS credentials | **Remote** — `credentialsSource: "remote"` in `eas.json`; verify in EAS dashboard |
 | Store listing (title, description) | **TODO** |
 | Screenshots | **TODO** |
 | Privacy policy URL | **TODO** |
@@ -156,7 +156,7 @@ Set `EXPO_PUBLIC_API_URL` (HTTPS) in EAS production environment variables first.
 | Production build profile | Ready in `eas.json` |
 | Apple Developer account | **TODO** |
 | App Store Connect app record | **TODO** |
-| Distribution certificate / provisioning | **TODO** — run `eas credentials` |
+| Distribution certificate / provisioning | **Remote** — `credentialsSource: "remote"` in `eas.json`; verify Sign in with Apple capability |
 | Store listing | **TODO** |
 | Screenshots | **TODO** |
 | App Privacy details | **TODO** |
@@ -182,7 +182,10 @@ npm test -- --runInBand
 npm run lint
 npm run typecheck
 npm run config:validate
+npm run validate:production
 ```
+
+See [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) for EAS dashboard and store-console manual steps.
 
 ---
 

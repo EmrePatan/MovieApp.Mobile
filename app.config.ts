@@ -2,13 +2,21 @@ import type { ExpoConfig } from 'expo/config';
 
 const VERSION = '1.0.0';
 
+/** Keep in sync with config/app-identity.ts (validated by validate:production). */
+const APP_IDENTITY = {
+  androidPackage: 'com.movieapp.mobile',
+  iosBundleIdentifier: 'com.movieapp.mobile',
+  urlScheme: 'movieapp',
+  easProjectId: '87854bea-c475-4d4d-85f2-dfc1ecb52997',
+};
+
 const config: ExpoConfig = {
   name: 'Movie Cave',
   slug: 'movieapp-mobile',
   version: VERSION,
   orientation: 'portrait',
   icon: './assets/icon.png',
-  scheme: 'movieapp',
+  scheme: APP_IDENTITY.urlScheme,
   userInterfaceStyle: 'dark',
   newArchEnabled: true,
   splash: {
@@ -22,7 +30,7 @@ const config: ExpoConfig = {
   },
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'com.movieapp.mobile',
+    bundleIdentifier: APP_IDENTITY.iosBundleIdentifier,
     buildNumber: '1',
     usesAppleSignIn: true,
     infoPlist: {
@@ -35,7 +43,7 @@ const config: ExpoConfig = {
       foregroundImage: './assets/branding/adaptive-icon-foreground.png',
       monochromeImage: './assets/branding/monochrome-icon.png',
     },
-    package: 'com.movieapp.mobile',
+    package: APP_IDENTITY.androidPackage,
     versionCode: 1,
     predictiveBackGestureEnabled: false,
     softwareKeyboardLayoutMode: 'resize',
@@ -63,7 +71,7 @@ const config: ExpoConfig = {
     projectId:
       process.env.EAS_PROJECT_ID ??
       process.env.EXPO_PUBLIC_EAS_PROJECT_ID ??
-      '87854bea-c475-4d4d-85f2-dfc1ecb52997',
+      APP_IDENTITY.easProjectId,
   },
     router: {
       origin: false,

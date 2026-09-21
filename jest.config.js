@@ -14,6 +14,7 @@ module.exports = {
         '<rootDir>/__tests__/perf/**/*.test.ts',
         '<rootDir>/__tests__/bootstrap/**/*.test.ts',
         '<rootDir>/__tests__/i18n/**/*.test.ts',
+        '<rootDir>/__tests__/config/**/*.test.ts',
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {

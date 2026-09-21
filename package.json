@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "config:validate": "expo config --type public"
+    "config:validate": "expo config --type public",
+    "validate:production": "node scripts/validate-production-readiness.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/cormorant-garamond": "^0.4.1",
