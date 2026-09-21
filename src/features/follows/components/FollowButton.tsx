@@ -47,8 +47,6 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
   };
 
   const handleFollowSuccess = async (notifyNewSeasons: boolean, notifyNewEpisodes: boolean) => {
-    setFeedback(t('details.actions.followed'));
-
     const notificationsRequested = notifyNewSeasons || notifyNewEpisodes;
     if (!notificationsRequested) {
       return;

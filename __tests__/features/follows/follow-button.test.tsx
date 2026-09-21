@@ -106,33 +106,39 @@ describe('FollowButton', () => {
     expect(screen.getByLabelText('Manage follow').props.accessibilityState?.selected).toBe(true);
   });
 
-  it('shows compact success feedback after follow confirmation', async () => {
-    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
-      data: {
-        isFollowing: false,
-        notifyNewSeasons: true,
-        notifyNewEpisodes: true,
-        baselineEstablished: false,
-      },
+  it('updates follow button to selected state without a success notification', async () => {
+    const status = {
+      isFollowing: false,
+      notifyNewSeasons: true,
+      notifyNewEpisodes: true,
+      baselineEstablished: false,
+    };
+
+    (useTvShowFollowStatus as jest.Mock).mockImplementation(() => ({
+      data: status,
       isLoading: false,
-    });
+    }));
 
     mockCreateMutate.mockImplementation((_variables, options) => {
+      status.isFollowing = true;
+      status.baselineEstablished = true;
       options?.onSuccess?.();
     });
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    const { rerender } = render(<FollowButton tvShowId={tvShowId} />);
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
+    rerender(<FollowButton tvShowId={tvShowId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Following')).toBeTruthy();
-      expect(
-        screen.queryByText(
-          'Followed. Enable notifications in device settings to receive release alerts.',
-        ),
-      ).toBeNull();
+      expect(screen.getByLabelText('Manage follow').props.accessibilityState?.selected).toBe(true);
     });
+    expect(screen.queryByText('Following')).toBeNull();
+    expect(
+      screen.queryByText(
+        'Followed. Enable notifications in device settings to receive release alerts.',
+      ),
+    ).toBeNull();
   });
 
   it('registers push device when permission is already granted', async () => {
@@ -212,9 +218,9 @@ describe('FollowButton', () => {
     fireEvent.press(screen.getByText('Follow show'));
 
     await waitFor(() => {
-      expect(screen.getByText('Following')).toBeTruthy();
       expect(screen.queryByText('Enable notifications')).toBeNull();
     });
+    expect(screen.queryByText('Following')).toBeNull();
   });
 
   it('does not register push when follow is confirmed with both options off', async () => {
@@ -239,6 +245,29 @@ describe('FollowButton', () => {
       expect(mockRemoveMutate).not.toHaveBeenCalled();
       expect(ensurePushDeviceRegisteredAsync).not.toHaveBeenCalled();
     });
+  });
+
+  it('shows error feedback in the preferences modal when follow fails', async () => {
+    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
+      data: {
+        isFollowing: false,
+        notifyNewSeasons: true,
+        notifyNewEpisodes: true,
+        baselineEstablished: false,
+      },
+      isLoading: false,
+    });
+
+    mockCreateMutate.mockImplementation((_variables, options) => {
+      options?.onError?.();
+    });
+
+    render(<FollowButton tvShowId={tvShowId} />);
+    fireEvent.press(screen.getByLabelText('Follow this show'));
+    fireEvent.press(screen.getByText('Follow show'));
+
+    expect(screen.getByText('Could not follow this show. Please try again.')).toBeTruthy();
+    expect(screen.queryByText('Following')).toBeNull();
   });
 
   it('does not call create while follow status is loading', () => {
