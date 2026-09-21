@@ -27,6 +27,7 @@ import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
+import { performHomeSilentReselectRefresh } from '@/features/navigation/home-tab-reselect';
 import { scrollFlatListToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { layout } from '@/theme/layout';
@@ -117,9 +118,13 @@ export default function HomeScreen() {
     scrollFlatListToTop(listRef);
   }, []);
 
+  const handleSilentReselectRefresh = useCallback(() => {
+    performHomeSilentReselectRefresh(refetch, isFetching);
+  }, [isFetching, refetch]);
+
   usePrimaryTabReselectHandler('home', {
     scrollToTop: scrollHomeToTop,
-    refresh: handleRefresh,
+    refresh: handleSilentReselectRefresh,
   });
 
   const handleRetryBrowse = useCallback(() => {

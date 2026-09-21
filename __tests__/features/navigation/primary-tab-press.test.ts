@@ -16,7 +16,7 @@ describe('primary tab press handling', () => {
     const action = handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/home',
-      activeTab: 'home',
+      highlightedTab: 'home',
       router: router as never,
       emitReselect,
     });
@@ -35,14 +35,14 @@ describe('primary tab press handling', () => {
     handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/home',
-      activeTab: 'home',
+      highlightedTab: 'home',
       router: router as never,
       emitReselect,
     });
     handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/home',
-      activeTab: 'home',
+      highlightedTab: 'home',
       router: router as never,
       emitReselect,
     });
@@ -52,14 +52,14 @@ describe('primary tab press handling', () => {
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
-  it('returns to Home root from nested detail without forcing reselect refresh', () => {
+  it('returns to Home root from neutral detail without forcing reselect refresh', () => {
     const router = createRouter();
     const emitReselect = jest.fn();
 
     const action = handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/movie/movie-a',
-      activeTab: 'home',
+      highlightedTab: null,
       router: router as never,
       emitReselect,
     });
@@ -70,20 +70,37 @@ describe('primary tab press handling', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns to Home root from nested Home flow without refresh emit', () => {
+  it('returns to Home root from nested person detail without refresh emit', () => {
     const router = createRouter();
     const emitReselect = jest.fn();
 
     handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/person/42',
-      activeTab: 'home',
+      highlightedTab: null,
       router: router as never,
       emitReselect,
     });
 
     expect(router.dismissTo).toHaveBeenCalledWith('/home');
     expect(emitReselect).not.toHaveBeenCalled();
+  });
+
+  it('resets to Discover root from neutral movie detail without refresh emit', () => {
+    const router = createRouter();
+    const emitReselect = jest.fn();
+
+    handlePrimaryTabPress({
+      tabId: 'discover',
+      pathname: '/movie/movie-a',
+      highlightedTab: null,
+      router: router as never,
+      emitReselect,
+    });
+
+    expect(router.dismissTo).toHaveBeenCalledWith('/discover');
+    expect(emitReselect).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('navigates when switching to a different primary tab', () => {
@@ -93,7 +110,7 @@ describe('primary tab press handling', () => {
     const action = handlePrimaryTabPress({
       tabId: 'discover',
       pathname: '/home',
-      activeTab: 'home',
+      highlightedTab: 'home',
       router: router as never,
       emitReselect,
     });
@@ -110,7 +127,7 @@ describe('primary tab press handling', () => {
     handlePrimaryTabPress({
       tabId: 'discover',
       pathname: '/discover-browse',
-      activeTab: 'discover',
+      highlightedTab: 'discover',
       router: router as never,
       emitReselect,
     });
@@ -126,7 +143,7 @@ describe('primary tab press handling', () => {
     handlePrimaryTabPress({
       tabId: 'discover',
       pathname: '/discover',
-      activeTab: 'discover',
+      highlightedTab: 'discover',
       router: router as never,
       emitReselect,
     });
@@ -143,7 +160,7 @@ describe('primary tab press handling', () => {
     handlePrimaryTabPress({
       tabId: 'library',
       pathname: '/upcoming',
-      activeTab: 'library',
+      highlightedTab: 'library',
       router: router as never,
       emitReselect,
     });
@@ -159,7 +176,7 @@ describe('primary tab press handling', () => {
     handlePrimaryTabPress({
       tabId: 'insights',
       pathname: '/insights',
-      activeTab: 'insights',
+      highlightedTab: 'insights',
       router: router as never,
       emitReselect,
     });

@@ -25,6 +25,22 @@ describe('primary tab reselect screen wiring', () => {
     expect(insights).toContain("usePrimaryTabReselectHandler('insights'");
   });
 
+  it('returns no highlighted primary tab on catalog detail routes', () => {
+    const tabBar = readFileSync(
+      path.join(process.cwd(), 'src/features/navigation/PrimaryTabBar.tsx'),
+      'utf8',
+    );
+    const routes = readFileSync(
+      path.join(process.cwd(), 'src/features/navigation/primary-tab-routes.ts'),
+      'utf8',
+    );
+
+    expect(routes).toContain('resolveActivePrimaryTab(pathname: string): HighlightedPrimaryTab');
+    expect(routes).toContain('isCatalogDetailRoute');
+    expect(tabBar).toContain('const highlightedTab = resolveActivePrimaryTab(pathname)');
+    expect(tabBar).toContain('highlightedTab === tab.id');
+  });
+
   it('routes primary tab presses through the shared press handler', () => {
     const tabBar = readFileSync(
       path.join(process.cwd(), 'src/features/navigation/PrimaryTabBar.tsx'),

@@ -3,6 +3,7 @@ import { emitPrimaryTabReselect } from '@/features/navigation/primary-tab-resele
 import {
   isPrimaryTabRootPath,
   PRIMARY_TAB_HREFS,
+  type HighlightedPrimaryTab,
   type PrimaryTabId,
 } from '@/features/navigation/primary-tab-routes';
 
@@ -13,24 +14,29 @@ export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'navigate' | 'dismiss
 export function handlePrimaryTabPress(params: {
   tabId: PrimaryTabId;
   pathname: string;
-  activeTab: PrimaryTabId;
+  highlightedTab: HighlightedPrimaryTab;
   router: PrimaryTabPressRouter;
   emitReselect?: (tabId: PrimaryTabId) => void;
 }): PrimaryTabPressAction {
-  const { tabId, pathname, activeTab, router } = params;
+  const { tabId, pathname, highlightedTab, router } = params;
   const emitReselect = params.emitReselect ?? emitPrimaryTabReselect;
   const targetHref = PRIMARY_TAB_HREFS[tabId];
 
-  if (activeTab !== tabId) {
-    router.navigate(targetHref);
-    return 'navigate';
+  if (highlightedTab === tabId && isPrimaryTabRootPath(tabId, pathname)) {
+    emitReselect(tabId);
+    return 'reselect';
   }
 
-  if (!isPrimaryTabRootPath(tabId, pathname)) {
+  if (highlightedTab === tabId && !isPrimaryTabRootPath(tabId, pathname)) {
     router.dismissTo(targetHref);
     return 'dismiss';
   }
 
-  emitReselect(tabId);
-  return 'reselect';
+  if (highlightedTab === null) {
+    router.dismissTo(targetHref);
+    return 'dismiss';
+  }
+
+  router.navigate(targetHref);
+  return 'navigate';
 }

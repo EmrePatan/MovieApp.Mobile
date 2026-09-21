@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { emitPrimaryTabReselect } from '@/features/navigation/primary-tab-reselect';
 import { handlePrimaryTabPress } from '@/features/navigation/primary-tab-press';
-import { registerPrimaryTabReselectHandler, resetPrimaryTabReselectHandlersForTests } from '@/features/navigation/primary-tab-reselect';
+import {
+  registerPrimaryTabReselectHandler,
+  resetPrimaryTabReselectHandlersForTests,
+} from '@/features/navigation/primary-tab-reselect';
 
 describe('home primary tab reselect integration', () => {
   beforeEach(() => {
@@ -17,7 +22,7 @@ describe('home primary tab reselect integration', () => {
     handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/home',
-      activeTab: 'home',
+      highlightedTab: 'home',
       router: router as never,
       emitReselect: emitPrimaryTabReselect,
     });
@@ -36,5 +41,20 @@ describe('home primary tab reselect integration', () => {
 
     expect(scrollToTop).not.toHaveBeenCalled();
     expect(refresh).not.toHaveBeenCalled();
+  });
+});
+
+describe('home silent reselect wiring', () => {
+  it('uses silent reselect refresh while preserving manual pull-to-refresh', () => {
+    const homeSource = readFileSync(
+      path.join(process.cwd(), 'app/(tabs)/(app-shell)/home.tsx'),
+      'utf8',
+    );
+
+    expect(homeSource).toContain('handleSilentReselectRefresh');
+    expect(homeSource).toContain('refresh: handleSilentReselectRefresh');
+    expect(homeSource).toContain('onRefresh: handleRefresh');
+    expect(homeSource).toContain('setIsManualRefreshing(true)');
+    expect(homeSource).not.toContain('refresh: handleRefresh');
   });
 });

@@ -1,11 +1,20 @@
 export type PrimaryTabId = 'home' | 'discover' | 'library' | 'insights';
 
+export type HighlightedPrimaryTab = PrimaryTabId | null;
+
 export const PRIMARY_TAB_HREFS: Record<PrimaryTabId, `/${string}`> = {
   home: '/home',
   discover: '/discover',
   library: '/library',
   insights: '/insights',
 };
+
+const CATALOG_DETAIL_ROUTE_PREFIXES = [
+  '/movie/',
+  '/tv/',
+  '/person/',
+  '/collection/',
+] as const;
 
 const DISCOVER_ROUTE_PREFIXES = [
   '/discover',
@@ -33,11 +42,19 @@ function matchesRoutePrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+export function isCatalogDetailRoute(pathname: string): boolean {
+  return CATALOG_DETAIL_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export function isPrimaryTabRootPath(tabId: PrimaryTabId, pathname: string): boolean {
   return pathname === PRIMARY_TAB_HREFS[tabId];
 }
 
-export function resolveActivePrimaryTab(pathname: string): PrimaryTabId {
+export function resolveActivePrimaryTab(pathname: string): HighlightedPrimaryTab {
+  if (isCatalogDetailRoute(pathname)) {
+    return null;
+  }
+
   if (DISCOVER_ROUTE_PREFIXES.some((prefix) => matchesRoutePrefix(pathname, prefix))) {
     return 'discover';
   }

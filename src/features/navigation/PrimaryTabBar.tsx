@@ -38,13 +38,13 @@ export function PrimaryTabBar() {
     return null;
   }
 
-  const activeTab = resolveActivePrimaryTab(pathname);
+  const highlightedTab = resolveActivePrimaryTab(pathname);
 
   const handleTabPress = (tabId: PrimaryTabId) => {
     handlePrimaryTabPress({
       tabId,
       pathname,
-      activeTab,
+      highlightedTab,
       router,
     });
   };
@@ -52,7 +52,7 @@ export function PrimaryTabBar() {
   return (
     <View style={[styles.container, getTabBarStyle(insets)]}>
       {PRIMARY_TABS.map((tab) => {
-        const isActive = activeTab === tab.id;
+        const isActive = highlightedTab === tab.id;
         const color = isActive ? colors.accent : colors.textMuted;
 
         return (

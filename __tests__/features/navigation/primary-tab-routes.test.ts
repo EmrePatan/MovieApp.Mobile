@@ -1,4 +1,5 @@
 import {
+  isCatalogDetailRoute,
   isPrimaryTabRootPath,
   resolveActivePrimaryTab,
 } from '@/features/navigation/primary-tab-routes';
@@ -12,12 +13,27 @@ describe('primary tab routes', () => {
     expect(resolveActivePrimaryTab('/upcoming')).toBe('library');
     expect(resolveActivePrimaryTab('/watchlist/123')).toBe('library');
     expect(resolveActivePrimaryTab('/pick-something')).toBe('insights');
+    expect(resolveActivePrimaryTab('/discover')).toBe('discover');
+    expect(resolveActivePrimaryTab('/library')).toBe('library');
+    expect(resolveActivePrimaryTab('/insights')).toBe('insights');
   });
 
-  it('defaults catalog detail routes to the home tab highlight', () => {
-    expect(resolveActivePrimaryTab('/movie/abc')).toBe('home');
-    expect(resolveActivePrimaryTab('/tv/abc')).toBe('home');
-    expect(resolveActivePrimaryTab('/person/42')).toBe('home');
+  it('returns no highlighted primary tab on catalog detail routes and children', () => {
+    expect(resolveActivePrimaryTab('/movie/abc')).toBeNull();
+    expect(resolveActivePrimaryTab('/tv/abc')).toBeNull();
+    expect(resolveActivePrimaryTab('/person/42')).toBeNull();
+    expect(resolveActivePrimaryTab('/collection/99')).toBeNull();
+    expect(resolveActivePrimaryTab('/movie/abc/reviews')).toBeNull();
+    expect(resolveActivePrimaryTab('/movie/abc/credits')).toBeNull();
+    expect(resolveActivePrimaryTab('/tv/abc/season/1')).toBeNull();
+    expect(resolveActivePrimaryTab('/tv/abc/season/1/episode/2')).toBeNull();
+  });
+
+  it('identifies catalog detail routes', () => {
+    expect(isCatalogDetailRoute('/movie/abc')).toBe(true);
+    expect(isCatalogDetailRoute('/tv/abc/reviews')).toBe(true);
+    expect(isCatalogDetailRoute('/home')).toBe(false);
+    expect(isCatalogDetailRoute('/discover-browse')).toBe(false);
   });
 
   it('identifies primary tab root paths', () => {

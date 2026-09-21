@@ -69,7 +69,8 @@ export function useHomeFeed(type: HomeTypeFilter = 'all', sectionSize = DEFAULT_
   }, [browse, comingUpCatalogFallback, personalized]);
 
   const isInitialBrowseLoading = browse.isLoading && !browse.data;
-  const isFetching = browse.isFetching || personalized.isFetching;
+  const isFetching =
+    browse.isFetching || personalized.isFetching || comingUpCatalogFallback.isFetching;
 
   return {
     browse,
