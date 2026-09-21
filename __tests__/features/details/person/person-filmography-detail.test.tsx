@@ -8,6 +8,10 @@ jest.mock('expo-router', () => ({
     back: jest.fn(),
   }),
   useSegments: jest.fn(() => ['(tabs)', 'person', '42']),
+  useFocusEffect: jest.fn((callback: () => void | (() => void)) => {
+    callback();
+    return undefined;
+  }),
 }));
 
 jest.mock('@tanstack/react-query', () => ({

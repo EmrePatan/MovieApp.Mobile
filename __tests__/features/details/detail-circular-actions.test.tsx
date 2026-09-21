@@ -101,13 +101,13 @@ describe('DetailActionBar premium circular actions', () => {
     expect(mockFavoriteMutate).toHaveBeenCalledWith(false, expect.any(Object));
   });
 
-  it('disables favorite without spinner while mutation is pending', () => {
+  it('disables favorite with spinner while mutation is pending', () => {
     (useToggleFavorite as jest.Mock).mockReturnValue({ mutate: mockFavoriteMutate, isPending: true });
 
     render(<DetailActionBar contentType="movie" contentId="movie-id" showWatched />);
 
     const button = screen.getByLabelText('Add to favorites');
-    expect(button.props.accessibilityState.busy).toBe(false);
+    expect(button.props.accessibilityState.busy).toBe(true);
     expect(button.props.accessibilityState.disabled).toBe(true);
   });
 

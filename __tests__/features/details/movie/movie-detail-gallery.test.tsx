@@ -28,6 +28,16 @@ jest.mock('@/features/gallery/api/gallery-api', () => ({
   getPersonGallery: jest.fn(),
 }));
 
+jest.mock('@/features/gallery/components/ImageViewerModal', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+
+  return {
+    ImageViewerModal: ({ visible }: { visible: boolean }) =>
+      visible ? React.createElement(View, { testID: 'gallery-image-viewer' }) : null,
+  };
+});
+
 jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
   DetailActionBar: () => null,
 }));

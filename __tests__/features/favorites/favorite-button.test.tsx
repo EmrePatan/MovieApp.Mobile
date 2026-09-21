@@ -63,7 +63,7 @@ describe('FavoriteButton', () => {
   });
 
   describe('detail optimistic UX', () => {
-    it('shows spinner only while initial status is unresolved', () => {
+    it('disables detail action while initial status is unresolved', () => {
       (useFavoriteStatus as jest.Mock).mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -72,11 +72,11 @@ describe('FavoriteButton', () => {
       render(<FavoriteButton contentType="movie" contentId="movie-id" variant="detail" />);
 
       const button = screen.getByLabelText('Add to favorites');
-      expect(button.props.accessibilityState.busy).toBe(true);
+      expect(button.props.accessibilityState.busy).toBe(false);
       expect(button.props.accessibilityState.disabled).toBe(true);
     });
 
-    it('keeps icon visible while mutation is pending', () => {
+    it('shows spinner while mutation is pending', () => {
       (useToggleFavorite as jest.Mock).mockReturnValue({
         mutate: mockMutate,
         isPending: true,
@@ -85,7 +85,7 @@ describe('FavoriteButton', () => {
       render(<FavoriteButton contentType="movie" contentId="movie-id" variant="detail" />);
 
       const button = screen.getByLabelText('Add to favorites');
-      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.busy).toBe(true);
       expect(button.props.accessibilityState.disabled).toBe(true);
     });
 

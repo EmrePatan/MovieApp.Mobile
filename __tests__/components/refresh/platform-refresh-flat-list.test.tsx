@@ -8,14 +8,14 @@ import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFla
 const repoRoot = path.resolve(__dirname, '../../..');
 
 const platformRefreshSurfaceFiles = [
-  'app/discover-browse.tsx',
-  'app/search.tsx',
-  'app/streaming-discover.tsx',
-  'app/world-cinema.tsx',
-  'app/upcoming.tsx',
-  'app/on-tv-this-week.tsx',
-  'app/now-in-theaters.tsx',
-  'app/advanced-discover.tsx',
+  'app/(tabs)/(app-shell)/discover-browse.tsx',
+  'app/(tabs)/(app-shell)/search.tsx',
+  'app/(tabs)/(app-shell)/streaming-discover.tsx',
+  'app/(tabs)/(app-shell)/world-cinema.tsx',
+  'app/(tabs)/(app-shell)/upcoming.tsx',
+  'app/(tabs)/(app-shell)/on-tv-this-week.tsx',
+  'app/(tabs)/(app-shell)/now-in-theaters.tsx',
+  'app/(tabs)/(app-shell)/advanced-discover.tsx',
 ];
 
 describe('PlatformRefreshFlatList', () => {
@@ -75,7 +75,10 @@ describe('platform refresh surface wiring', () => {
   });
 
   it('does not import temporary #45 debug probes into discover-browse', () => {
-    const source = fs.readFileSync(path.join(repoRoot, 'app/discover-browse.tsx'), 'utf8');
+    const source = fs.readFileSync(
+      path.join(repoRoot, 'app/(tabs)/(app-shell)/discover-browse.tsx'),
+      'utf8',
+    );
     expect(source).not.toContain('@/debug/');
     expect(source).not.toContain('DISCOVER CONTROL');
   });

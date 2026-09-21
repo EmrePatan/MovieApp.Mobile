@@ -3,7 +3,7 @@ import { FlatList } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
-import DiscoverScreen from '../../../app/discover-browse';
+import DiscoverScreen from '../../../app/(tabs)/(app-shell)/discover-browse';
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();

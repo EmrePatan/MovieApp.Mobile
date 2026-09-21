@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import StreamingDiscoverScreen from '../../../app/streaming-discover';
+import StreamingDiscoverScreen from '../../../app/(tabs)/(app-shell)/streaming-discover';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';

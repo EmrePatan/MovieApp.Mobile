@@ -5,7 +5,7 @@ import { useDeleteNotification } from '@/features/notifications/hooks/useDeleteN
 import { useMarkAllNotificationsRead } from '@/features/notifications/hooks/useMarkAllNotificationsRead';
 import { useMarkNotificationRead } from '@/features/notifications/hooks/useMarkNotificationRead';
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
-import NotificationsScreen from '../../../app/notifications';
+import NotificationsScreen from '../../../app/(tabs)/(app-shell)/notifications';
 
 const mockPush = jest.fn();
 

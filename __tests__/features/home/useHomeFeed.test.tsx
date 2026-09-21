@@ -5,6 +5,16 @@ import { getHomeBrowse, getHomePersonalized } from '@/features/home/api/home-api
 import { getUpcomingCatalog } from '@/features/upcoming/api/upcoming-api';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    isSessionRestored: true,
+    isLoading: false,
+    user: { id: 'user-id' },
+    token: 'token',
+  }),
+}));
+
 jest.mock('@/features/home/api/home-api', () => ({
   getHomeBrowse: jest.fn(),
   getHomePersonalized: jest.fn(),

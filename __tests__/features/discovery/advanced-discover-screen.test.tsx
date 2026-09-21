@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { useAdvancedDiscover } from '@/features/discovery/hooks/useAdvancedDiscover';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
-import AdvancedDiscoverScreen from '../../../app/advanced-discover';
+import AdvancedDiscoverScreen from '../../../app/(tabs)/(app-shell)/advanced-discover';
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();

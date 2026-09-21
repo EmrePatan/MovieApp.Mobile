@@ -2,7 +2,7 @@ import { FlatList } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useAuth } from '@/auth/useAuth';
 import { useFollowingCatalog } from '@/features/following/hooks/useFollowingCatalog';
-import FollowingScreen from '../../../app/following';
+import FollowingScreen from '../../../app/(tabs)/(app-shell)/following';
 
 const mockPush = jest.fn();
 

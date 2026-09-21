@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import NowInTheatersScreen from '../../../app/now-in-theaters';
+import NowInTheatersScreen from '../../../app/(tabs)/(app-shell)/now-in-theaters';
 import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 
 jest.mock('expo-router', () => ({

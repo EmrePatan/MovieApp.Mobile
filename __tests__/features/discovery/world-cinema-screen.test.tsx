@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import WorldCinemaScreen from '../../../app/world-cinema';
+import WorldCinemaScreen from '../../../app/(tabs)/(app-shell)/world-cinema';
 import { t } from '../../i18n/i18n-test-utils';
 import { useWorldCinema } from '@/features/discovery/hooks/useWorldCinema';
 

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { FlatList } from 'react-native';
 import { NotificationRow } from '@/features/notifications/components/NotificationRow';
-import NotificationsScreen from '../../../app/notifications';
+import NotificationsScreen from '../../../app/(tabs)/(app-shell)/notifications';
 import { useAuth } from '@/auth/useAuth';
 import { useDeleteNotification } from '@/features/notifications/hooks/useDeleteNotification';
 import { useMarkAllNotificationsRead } from '@/features/notifications/hooks/useMarkAllNotificationsRead';

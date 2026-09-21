@@ -118,7 +118,7 @@ describe('WatchedButton', () => {
   });
 
   describe('detail optimistic UX', () => {
-    it('shows spinner only while initial status is unresolved', () => {
+    it('disables detail action while initial status is unresolved', () => {
       (useMovieWatchStatus as jest.Mock).mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -129,11 +129,11 @@ describe('WatchedButton', () => {
       );
 
       const button = screen.getByLabelText('Mark as watched');
-      expect(button.props.accessibilityState.busy).toBe(true);
+      expect(button.props.accessibilityState.busy).toBe(false);
       expect(button.props.accessibilityState.disabled).toBe(true);
     });
 
-    it('keeps icon visible while mutation is pending', () => {
+    it('shows spinner while mutation is pending', () => {
       (useToggleMovieWatched as jest.Mock).mockReturnValue({
         mutate: mockMutate,
         isPending: true,
@@ -144,7 +144,7 @@ describe('WatchedButton', () => {
       );
 
       const button = screen.getByLabelText('Mark as watched');
-      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.busy).toBe(true);
       expect(button.props.accessibilityState.disabled).toBe(true);
     });
 

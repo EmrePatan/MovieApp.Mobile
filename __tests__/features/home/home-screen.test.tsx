@@ -605,7 +605,7 @@ describe('HomeScreen', () => {
 
     fireEvent.press(screen.getByLabelText('See all Coming Up'));
 
-    expect(mockPush).toHaveBeenCalledWith('/upcoming?tab=for-you');
+    expect(mockPush).toHaveBeenCalledWith('/upcoming');
   });
 
   it('keeps the full Recommended rail when hero comes from Hot This Week', () => {

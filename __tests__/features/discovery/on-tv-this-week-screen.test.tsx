@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import OnTvThisWeekScreen from '../../../app/on-tv-this-week';
+import OnTvThisWeekScreen from '../../../app/(tabs)/(app-shell)/on-tv-this-week';
 import { useOnTvThisWeek } from '@/features/discovery/hooks/useOnTvThisWeek';
 
 jest.mock('expo-router', () => ({

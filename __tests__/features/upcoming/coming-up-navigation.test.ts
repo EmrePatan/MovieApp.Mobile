@@ -11,8 +11,9 @@ describe('coming-up-navigation', () => {
     expect(parseComingUpTab(undefined)).toBe('for-you');
   });
 
-  it('builds href with default For You tab', () => {
-    expect(buildComingUpHref()).toBe('/upcoming?tab=for-you');
+  it('builds href with default Coming Up route', () => {
+    expect(buildComingUpHref()).toBe('/upcoming');
+    expect(buildComingUpHref('for-you')).toBe('/upcoming?tab=for-you');
     expect(buildComingUpHref('upcoming')).toBe('/upcoming?tab=upcoming');
   });
 

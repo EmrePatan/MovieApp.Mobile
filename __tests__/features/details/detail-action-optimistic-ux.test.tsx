@@ -119,7 +119,7 @@ describe('detail action optimistic UX integration', () => {
       expect(screen.getByLabelText('Remove from favorites')).toBeTruthy();
     });
     expect(screen.getByLabelText('Remove from favorites').props.accessibilityState.busy).toBe(
-      false,
+      true,
     );
 
     resolveCreate();
@@ -175,7 +175,7 @@ describe('detail action optimistic UX integration', () => {
     await waitFor(() => {
       expect(screen.getByLabelText('Mark as unwatched')).toBeTruthy();
     });
-    expect(screen.getByLabelText('Mark as unwatched').props.accessibilityState.busy).toBe(false);
+    expect(screen.getByLabelText('Mark as unwatched').props.accessibilityState.busy).toBe(true);
 
     resolveWatched();
     await waitFor(() => expect(markMovieWatched).toHaveBeenCalledWith(movieId));

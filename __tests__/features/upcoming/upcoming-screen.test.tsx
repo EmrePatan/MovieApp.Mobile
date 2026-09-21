@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import UpcomingScreen from '../../../app/upcoming';
+import UpcomingScreen from '../../../app/(tabs)/(app-shell)/upcoming';
 import { useAuth } from '@/auth/useAuth';
 import { useUpcomingCatalog } from '@/features/upcoming/hooks/useUpcomingCatalog';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';

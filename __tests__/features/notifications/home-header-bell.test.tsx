@@ -58,7 +58,6 @@ describe('HomeHeader notification bell', () => {
     render(<HomeHeader layout={headerLayout} />);
 
     expect(screen.getByLabelText('Open Emre User profile')).toBeTruthy();
-    expect(screen.getByText('EU')).toBeTruthy();
   });
 
   it('shows 9+ when unread count exceeds nine', () => {

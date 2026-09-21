@@ -6,7 +6,7 @@ import { ApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
 import { useFavoritesItems } from '@/features/favorites/hooks/useFavoritesItems';
 import { useRemoveFavoriteMutation } from '@/features/favorites/hooks/useFavoriteMutations';
-import FavoritesScreen from '../../../app/favorites';
+import FavoritesScreen from '../../../app/(tabs)/(app-shell)/favorites';
 import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();

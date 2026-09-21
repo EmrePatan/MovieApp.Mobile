@@ -63,7 +63,7 @@ describe('HomeHero', () => {
       }),
     );
 
-    expect(screen.getByLabelText('Featured, Breaking Bad, TV, 2008, rating 8.9')).toBeTruthy();
+    expect(screen.getByLabelText('Featured, Breaking Bad, TV, 2008, Rating 8.9')).toBeTruthy();
     expect(screen.getByText('TV  •  2008')).toBeTruthy();
     expect(screen.getByLabelText('Rating 8.9')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Open Breaking Bad'));
@@ -81,7 +81,7 @@ describe('HomeHero', () => {
     );
 
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByLabelText('Featured, Interstellar, Movie, 2014, rating 8.4')).toBeTruthy();
+    expect(screen.getByLabelText('Featured, Interstellar, Movie, 2014, Rating 8.4')).toBeTruthy();
   });
 
   it('handles long titles and missing metadata', () => {

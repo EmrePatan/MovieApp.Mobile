@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useAuth } from '@/auth/useAuth';
 import { useRecentWatchHistory } from '@/features/watch-history/hooks/useRecentWatchHistory';
-import WatchHistoryScreen from '../../../app/watch-history';
+import WatchHistoryScreen from '../../../app/(tabs)/(app-shell)/watch-history';
 import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();

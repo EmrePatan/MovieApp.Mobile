@@ -44,7 +44,7 @@ describe('Home UI components', () => {
 
     render(<HomeSection section={section} onSeeAllPress={jest.fn()} />);
 
-    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.getByText('See All')).toBeTruthy();
     expect(screen.getByText('Interstellar')).toBeTruthy();
     expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
@@ -72,7 +72,7 @@ describe('Home UI components', () => {
 
     render(<HomeSection section={section} onSeeAllPress={jest.fn()} />);
 
-    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.getByText('See All')).toBeTruthy();
     expect(screen.queryByText('Interstellar')).toBeNull();
   });
