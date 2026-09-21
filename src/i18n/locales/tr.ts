@@ -64,7 +64,9 @@ const stage1Tr = {
     forgotPasswordHeadline1: 'Şifreni',
     forgotPasswordHeadline2: 'unuttun mu?',
     forgotPasswordSupporting:
-      'E-postanı gir; hesap varsa sıfırlama talimatlarını göndeririz.',
+      'Bu e-posta parola ile girişe uygunsa sıfırlama bağlantısı göndeririz. Google veya Apple ile kaydolduysan, giriş için o yöntemi kullan.',
+    forgotPasswordSuccess:
+      'Bu e-posta parola ile girişe uygunsa kısa süre içinde sıfırlama talimatları gönderilir. Google veya Apple ile kaydolduysan, giriş için o yöntemi kullan.',
     newHere: 'Yeni misin?',
     createAnAccount: 'Hesap oluştur',
     alreadyHaveAccount: 'Zaten hesabın var mı?',

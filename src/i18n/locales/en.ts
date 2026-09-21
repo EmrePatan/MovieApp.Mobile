@@ -64,7 +64,9 @@ const stage1En = {
     forgotPasswordHeadline1: 'Forgot your',
     forgotPasswordHeadline2: 'password?',
     forgotPasswordSupporting:
-      'Enter your email and we will send reset instructions if an account exists.',
+      'If this email supports password sign-in, we’ll send a reset link. Signed up with Google or Apple? Use that sign-in method instead.',
+    forgotPasswordSuccess:
+      'If this email supports password sign-in, we’ll send reset instructions shortly. Signed up with Google or Apple? Use that sign-in method instead.',
     newHere: 'New here?',
     createAnAccount: 'Create an account',
     alreadyHaveAccount: 'Already have an account?',

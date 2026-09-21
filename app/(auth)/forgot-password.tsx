@@ -37,8 +37,8 @@ export default function ForgotPasswordScreen() {
     setIsSubmitting(true);
 
     try {
-      const response = await forgotPasswordRequest({ email: email.trim() });
-      setSuccessMessage(response.message);
+      await forgotPasswordRequest({ email: email.trim() });
+      setSuccessMessage(t('auth.forgotPasswordSuccess'));
     } catch (error) {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'forgot-password'));
