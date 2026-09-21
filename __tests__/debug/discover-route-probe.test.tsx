@@ -59,6 +59,21 @@ describe('DiscoverRouteProbe', () => {
     expect(screen.getByText('ROW 1')).toBeTruthy();
   });
 
+  it('renders real-data primitive FlatList rows at stage 3', () => {
+    render(
+      <DiscoverRouteProbe
+        stage={3}
+        production={<Text>production</Text>}
+        items={items}
+        listHeader={<Text>header</Text>}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('DISCOVER CONTROL 3')).toBeTruthy();
+    expect(screen.getByText('0: Alpha (movie / movie-1)')).toBeTruthy();
+  });
+
   it('passes through production at stage 5', () => {
     render(
       <DiscoverRouteProbe

@@ -11,7 +11,7 @@ import { logRouteScreenMount, useRouteScreenProbe } from './route-screen-probe';
 import { logNavigationDiagnostic } from './navigation-diagnostics';
 
 /** Bump on device to progress isolation stages (0–5). DEV Android only. */
-export const DISCOVER_ROUTE_PROBE_STAGE = 0 as 0 | 1 | 2 | 3 | 4 | 5;
+export const DISCOVER_ROUTE_PROBE_STAGE = 3 as 0 | 1 | 2 | 3 | 4 | 5;
 
 interface DiscoverRouteProbeProps {
   stage: 0 | 1 | 2 | 3 | 4 | 5;
@@ -82,6 +82,8 @@ export function DiscoverRouteProbe({
   }
 
   if (stage === 3) {
+    const firstItem = items[0];
+
     return (
       <View
         testID="discover-route-probe-stage-3"
@@ -92,16 +94,66 @@ export function DiscoverRouteProbe({
         <Text style={styles.probeLabel}>DISCOVER CONTROL 3</Text>
         <FlatList
           testID="discover-route-probe-list"
+          style={styles.probeList}
           data={items}
           keyExtractor={searchResultKeyExtractor}
-          ListHeaderComponent={<Text style={styles.probeSubLabel}>real data primitive rows</Text>}
-          renderItem={({ item }) => (
-            <View style={styles.primitiveRow}>
-              <Text style={styles.rowText}>{item.title}</Text>
-            </View>
-          )}
+          onLayout={(event) => {
+            const { x, y, width, height } = event.nativeEvent.layout;
+            logNavigationDiagnostic('discover-route-probe:stage3:flatlist-layout', {
+              pathname,
+              itemCount: items.length,
+              x,
+              y,
+              width,
+              height,
+            });
+          }}
+          renderItem={({ item, index }) => {
+            if (index === 0) {
+              logNavigationDiagnostic('discover-route-probe:stage3:render-item-index0', {
+                pathname,
+                itemCount: items.length,
+                id: item.id,
+                type: item.type,
+                title: item.title,
+              });
+            }
+
+            return (
+              <View
+                style={styles.primitiveRow}
+                collapsable={false}
+                onLayout={
+                  index === 0
+                    ? (event) => {
+                        const { x, y, width, height } = event.nativeEvent.layout;
+                        logNavigationDiagnostic('discover-route-probe:stage3:row-layout-index0', {
+                          pathname,
+                          id: item.id,
+                          type: item.type,
+                          title: item.title,
+                          x,
+                          y,
+                          width,
+                          height,
+                        });
+                      }
+                    : undefined
+                }
+              >
+                <Text style={styles.rowText}>
+                  {index}: {item.title} ({item.type} / {item.id})
+                </Text>
+              </View>
+            );
+          }}
           contentContainerStyle={styles.listContent}
         />
+        {firstItem ? (
+          <Text style={styles.hiddenMeta} testID="discover-route-probe-first-item">
+            {firstItem.id}
+          </Text>
+        ) : null}
       </View>
     );
   }
@@ -117,13 +169,50 @@ export function DiscoverRouteProbe({
         <Text style={styles.probeLabel}>DISCOVER CONTROL 2</Text>
         <FlatList
           testID="discover-route-probe-list"
+          style={styles.probeList}
           data={PRIMITIVE_ROWS}
           keyExtractor={(item) => String(item)}
-          renderItem={({ item }) => (
-            <View style={styles.primitiveRow}>
-              <Text style={styles.rowText}>ROW {item}</Text>
-            </View>
-          )}
+          onLayout={(event) => {
+            const { x, y, width, height } = event.nativeEvent.layout;
+            logNavigationDiagnostic('discover-route-probe:stage2:flatlist-layout', {
+              pathname,
+              x,
+              y,
+              width,
+              height,
+            });
+          }}
+          renderItem={({ item, index }) => {
+            if (index === 0) {
+              logNavigationDiagnostic('discover-route-probe:stage2:render-item-index0', {
+                pathname,
+                item,
+              });
+            }
+
+            return (
+              <View
+                style={styles.primitiveRow}
+                collapsable={false}
+                onLayout={
+                  index === 0
+                    ? (event) => {
+                        const { x, y, width, height } = event.nativeEvent.layout;
+                        logNavigationDiagnostic('discover-route-probe:stage2:row-layout-index0', {
+                          pathname,
+                          x,
+                          y,
+                          width,
+                          height,
+                        });
+                      }
+                    : undefined
+                }
+              >
+                <Text style={styles.rowText}>ROW {item}</Text>
+              </View>
+            );
+          }}
           contentContainerStyle={styles.listContent}
         />
       </View>
@@ -181,6 +270,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1A0033',
   },
+  probeList: {
+    flex: 1,
+  },
   probeLabel: {
     color: '#00FFFF',
     fontSize: 20,
@@ -212,5 +304,13 @@ const styles = StyleSheet.create({
   rowText: {
     color: '#000000',
     fontWeight: '700',
+    textAlign: 'center',
+    paddingHorizontal: 8,
+  },
+  hiddenMeta: {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    opacity: 0,
   },
 });
