@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   FlatList,
@@ -17,6 +18,10 @@ import { openCatalogDetailFromFilmography } from '@/features/details/shared/navi
 import type { PersonDetailResponse, PersonFilmographyEntry } from '../types';
 import { FilmographyFilterTabs, type FilmographyFilter } from './FilmographyFilterTabs';
 import { PersonFilmographyGridCard } from './PersonFilmographyGridCard';
+import {
+  getPersonFilmographyScrollOffset,
+  setPersonFilmographyScrollOffset,
+} from '../utils/person-filmography-scroll-state';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -48,6 +53,7 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const resolvingKeyRef = useRef<string | null>(null);
+  const listRef = useRef<FlatList<PersonFilmographyEntry>>(null);
   const [activeFilter, setActiveFilter] = useState<FilmographyFilter>('all');
   const [resolvingKey, setResolvingKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -56,6 +62,26 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
   const filteredFilmography = useMemo(
     () => filterFilmography(person.filmography, activeFilter),
     [activeFilter, person.filmography],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const offset = getPersonFilmographyScrollOffset(person.tmdbId);
+      if (offset <= 0) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToOffset({ offset, animated: false });
+      });
+    }, [person.tmdbId]),
+  );
+
+  const handleScroll = useCallback(
+    (offset: number) => {
+      setPersonFilmographyScrollOffset(person.tmdbId, offset);
+    },
+    [person.tmdbId],
   );
 
   const handlePress = useCallback(
@@ -120,6 +146,7 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
 
   return (
     <FlatList
+      ref={listRef}
       data={filteredFilmography}
       keyExtractor={(entry) => `${entry.mediaType}-${entry.tmdbId}`}
       numColumns={GRID_COLUMNS}
@@ -127,6 +154,8 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
       contentContainerStyle={styles.content}
       ListHeaderComponent={listHeader}
       testID="person-filmography-grid"
+      onScroll={(event) => handleScroll(event.nativeEvent.contentOffset.y)}
+      scrollEventThrottle={16}
       renderItem={({ item }) => {
         const entryKey = `${item.mediaType}-${item.tmdbId}`;
 

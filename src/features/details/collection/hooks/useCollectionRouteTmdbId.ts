@@ -1,15 +1,19 @@
-import { useLocalSearchParams, usePathname } from 'expo-router';
-import { normalizeRouteIdParam, parsePositiveInt } from '../../shared/routes';
+import { usePathname } from 'expo-router';
+import {
+  parseCollectionStackSegment,
+  parseCollectionTmdbIdFromPathname,
+  parsePositiveInt,
+} from '../../shared/routes';
 
 export function useCollectionRouteTmdbId() {
   const pathname = usePathname();
-  const { tmdbId: rawTmdbId } = useLocalSearchParams<{ tmdbId?: string }>();
-  const isActive = /\/collection\/[^/]+/.test(pathname);
-  const tmdbId = isActive ? parsePositiveInt(normalizeRouteIdParam(rawTmdbId)) : null;
+  const pathnameTmdbId = parseCollectionTmdbIdFromPathname(pathname);
+  const rawSegment = parseCollectionStackSegment(pathname);
+  const isActive = pathnameTmdbId != null;
 
   return {
-    tmdbId,
+    tmdbId: pathnameTmdbId,
     isActive,
-    isInvalid: isActive && tmdbId == null,
+    isInvalid: Boolean(rawSegment) && pathnameTmdbId == null,
   };
 }

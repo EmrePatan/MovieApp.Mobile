@@ -1,47 +1,26 @@
-import { useRef } from 'react';
-import { useLocalSearchParams, usePathname, useSegments } from 'expo-router';
+import { usePathname } from 'expo-router';
 import {
-  isValidGuid,
-  normalizeRouteIdParam,
+  isCatalogChildDestinationPathname,
   parseCatalogIdFromPathname,
-  parseCatalogStackCatalogId,
-  resolveCatalogRouteId,
+  parseCatalogStackSegment,
 } from '../routes';
 
+/**
+ * Catalog detail index routes must resolve their id from the active pathname only.
+ * Expo Router can keep stale `params.id` values during stack transitions; using them
+ * causes brief or stuck "invalid request" states and wrong detail queries.
+ */
 export function useCatalogRouteIdState(contentType: 'movie' | 'tv') {
-  const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const segments = useSegments();
   const pathname = usePathname();
-  const rawId = normalizeRouteIdParam(params.id);
-  const resolvedId =
-    resolveCatalogRouteId(params.id, segments, pathname, contentType)
-    ?? parseCatalogStackCatalogId(pathname, contentType);
   const pathnameId = parseCatalogIdFromPathname(pathname, contentType);
-  const isDetailPathActive = Boolean(pathnameId);
-
-  const stableIdRef = useRef<string | undefined>(undefined);
-  const routeKeyRef = useRef<string | undefined>(undefined);
-  const routeKey = `${pathname}:${rawId ?? ''}`;
-
-  if (routeKeyRef.current !== routeKey) {
-    routeKeyRef.current = routeKey;
-    stableIdRef.current = isValidGuid(rawId) ? rawId : undefined;
-  }
-
-  if (resolvedId) {
-    stableIdRef.current = resolvedId;
-  }
-
-  const stableResolvedId = resolvedId ?? stableIdRef.current;
-  const hasResolvableRouteTarget = Boolean(
-    isValidGuid(rawId) || pathnameId || parseCatalogStackCatalogId(pathname, contentType),
-  );
+  const isDetailPathActive = pathnameId != null;
+  const rawSegment = parseCatalogStackSegment(pathname, contentType);
+  const isChildDestination = isCatalogChildDestinationPathname(pathname, contentType);
 
   return {
-    rawId,
     pathname,
-    resolvedId: stableResolvedId,
+    resolvedId: isDetailPathActive ? pathnameId : undefined,
     isDetailPathActive,
-    isInvalid: hasResolvableRouteTarget && !stableResolvedId,
+    isInvalid: Boolean(rawSegment) && !isChildDestination && !pathnameId,
   };
 }

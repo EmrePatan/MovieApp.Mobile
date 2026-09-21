@@ -7,7 +7,11 @@ import { DetailQueryState } from '@/features/details/shared/components/DetailQue
 export default function CollectionDetailScreen() {
   const { t } = useTranslation();
   const { tmdbId, isActive, isInvalid } = useCollectionRouteTmdbId();
-  const query = useCollectionDetail(isActive ? tmdbId : null);
+  const query = useCollectionDetail(tmdbId);
+
+  if (!isActive || !tmdbId) {
+    return null;
+  }
 
   return (
     <DetailQueryState

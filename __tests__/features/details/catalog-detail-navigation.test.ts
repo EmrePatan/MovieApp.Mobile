@@ -34,4 +34,13 @@ describe('catalog-detail-navigation watchRegion context', () => {
 
     expect(router.push).toHaveBeenCalledTimes(1);
   });
+
+  it('dedupes library stack catalog detail pushes', () => {
+    const router = { push: jest.fn() };
+
+    openCatalogDetailFromLibraryStack(router, 'movie-1', 'movie', 'upcoming');
+    openCatalogDetailFromLibraryStack(router, 'movie-1', 'movie', 'upcoming');
+
+    expect(router.push).toHaveBeenCalledTimes(1);
+  });
 });

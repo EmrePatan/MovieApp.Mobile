@@ -117,7 +117,7 @@ export function openCatalogDetailFromLibraryStack(
     prefetchCatalogDetail(options.queryClient, id, type);
   }
 
-  router.push(href);
+  pushCatalogDetailRoute(router, href, `${type}:${id}`);
 }
 
 export function openDetailFromLibraryStack(

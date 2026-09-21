@@ -32,7 +32,10 @@ import { spacing } from '@/theme/spacing';
 
 interface DetailQueryStateProps<TData> {
 
-  query: Pick<UseQueryResult<TData>, 'data' | 'error' | 'isLoading' | 'isError' | 'refetch'>;
+  query: Pick<
+    UseQueryResult<TData>,
+    'data' | 'error' | 'isLoading' | 'isError' | 'isFetching' | 'refetch'
+  >;
 
   invalidParamsMessage?: string;
 
@@ -100,7 +103,7 @@ export function DetailQueryState<TData>({
     invalidRequestTitle ?? t('details.queryState.invalidRequestTitle');
   const resolvedInvalidRequestMessage =
     invalidRequestMessage ?? t('details.queryState.invalidRequestMessage');
-  const { data, error, isLoading, isError, refetch } = query;
+  const { data, error, isLoading, isError, isFetching, refetch } = query;
   const navigation = useNavigation();
 
   const scrollRef = useRef<ScrollView>(null);
@@ -147,7 +150,7 @@ export function DetailQueryState<TData>({
 
 
 
-  if (isLoading && !data) {
+  if ((isLoading || isFetching) && !data) {
 
     return (
 

@@ -7,8 +7,7 @@ import { AppText } from '@/components/common/AppText';
 import { DetailHero } from '@/features/details/shared/components/DetailHero';
 import { DetailOverview } from '@/features/details/shared/components/DetailSections';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
-import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import type { CollectionDetailResponse, CollectionPart } from '../types';
 import { CollectionPartRow } from './CollectionPartRow';
 import { spacing } from '@/theme/spacing';
@@ -24,8 +23,7 @@ export function CollectionDetailContent({ collection }: CollectionDetailContentP
 
   const handlePartPress = useCallback(
     (part: CollectionPart) => {
-      prefetchCatalogDetail(queryClient, part.id, 'movie');
-      router.push(buildCatalogDetailRoute(part.id, 'movie'));
+      openCatalogDetailFromTab(router, part.id, 'movie', 'home', { queryClient });
     },
     [queryClient, router],
   );

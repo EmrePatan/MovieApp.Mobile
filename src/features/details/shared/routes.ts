@@ -187,7 +187,7 @@ export function normalizeRouteIdParam(
   return value;
 }
 
-function isCatalogChildDestinationPathname(
+export function isCatalogChildDestinationPathname(
   pathname: string,
   contentType: 'movie' | 'tv',
 ): boolean {
@@ -210,19 +210,35 @@ export function parseCatalogIdFromPathname(
   return parseCatalogStackCatalogId(pathname, contentType);
 }
 
-export function parseCatalogStackCatalogId(
+export function parseCatalogStackSegment(
   pathname: string,
   contentType: 'movie' | 'tv',
 ): string | undefined {
   const mediaSegment = contentType === 'movie' ? 'movie' : 'tv';
-  const pattern = new RegExp(`/${mediaSegment}/([^/]+)(?:/|$|\\?)`);
+  const pattern = new RegExp(`(?:^|/)${mediaSegment}/([^/]+)(?:/|$|\\?)`);
   const match = pathname.match(pattern);
   if (!match?.[1]) {
     return undefined;
   }
 
-  const id = decodeURIComponent(match[1]);
+  return decodeURIComponent(match[1]);
+}
+
+export function parseCatalogStackCatalogId(
+  pathname: string,
+  contentType: 'movie' | 'tv',
+): string | undefined {
+  const id = parseCatalogStackSegment(pathname, contentType);
   return isValidGuid(id) ? id : undefined;
+}
+
+export function parseCollectionStackSegment(pathname: string): string | undefined {
+  const match = pathname.match(/(?:^|\/)collection\/([^/]+)(?:\/|$|\?)/);
+  if (!match?.[1]) {
+    return undefined;
+  }
+
+  return decodeURIComponent(match[1]);
 }
 
 export function resolveCatalogRouteId(
@@ -273,4 +289,13 @@ export function parsePersonTmdbIdFromPathname(pathname: string): number | null {
   }
 
   return parsePositiveInt(decodeURIComponent(match[1]));
+}
+
+export function parseCollectionTmdbIdFromPathname(pathname: string): number | null {
+  const segment = parseCollectionStackSegment(pathname);
+  return segment ? parsePositiveInt(segment) : null;
+}
+
+export function isCollectionDetailPathname(pathname: string): boolean {
+  return parseCollectionTmdbIdFromPathname(pathname) != null;
 }

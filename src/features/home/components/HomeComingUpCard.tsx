@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   title: {
-    minHeight: 40,
+    flexShrink: 1,
     color: colors.textPrimary,
   },
   row: {

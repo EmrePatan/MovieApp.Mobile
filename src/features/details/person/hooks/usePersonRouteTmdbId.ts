@@ -11,13 +11,22 @@ export function usePersonRouteTmdbId() {
   const { tmdbId: rawTmdbId } = useLocalSearchParams<{ tmdbId?: string }>();
   const paramTmdbId = parsePositiveInt(normalizeRouteIdParam(rawTmdbId));
   const pathnameTmdbId = parsePersonTmdbIdFromPathname(pathname);
-  const resolvedTmdbId = paramTmdbId ?? pathnameTmdbId;
+  const resolvedTmdbId = pathnameTmdbId ?? paramTmdbId;
   const isPersonPathActive = pathnameTmdbId != null;
 
   const stableIdRef = useRef<number | null>(null);
-  if (resolvedTmdbId != null) {
+  const routeKeyRef = useRef<string | undefined>(undefined);
+  const routeKey = `${pathname}:${pathnameTmdbId ?? normalizeRouteIdParam(rawTmdbId) ?? ''}`;
+
+  if (routeKeyRef.current !== routeKey) {
+    routeKeyRef.current = routeKey;
+    if (resolvedTmdbId != null) {
+      stableIdRef.current = resolvedTmdbId;
+    }
+  } else if (resolvedTmdbId != null) {
     stableIdRef.current = resolvedTmdbId;
   }
+
   const stableTmdbId = resolvedTmdbId ?? stableIdRef.current;
 
   return {

@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   title: {
-    minHeight: 40,
+    flexShrink: 1,
   },
   metadata: {
     letterSpacing: 0.1,

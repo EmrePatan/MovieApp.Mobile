@@ -43,6 +43,16 @@ describe('usePersonRouteTmdbId', () => {
     expect(result.current.isInvalid).toBe(false);
   });
 
+  it('prefers the pathname person id when route params are stale', () => {
+    (usePathname as jest.Mock).mockReturnValue('/person/2002');
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ tmdbId: '1001' });
+
+    const { result } = renderHook(() => usePersonRouteTmdbId());
+
+    expect(result.current.tmdbId).toBe(2002);
+    expect(result.current.isInvalid).toBe(false);
+  });
+
   it('restores the person id when returning from a catalog detail screen', () => {
     (usePathname as jest.Mock).mockReturnValue('/person/1001');
     (useLocalSearchParams as jest.Mock).mockReturnValue({ tmdbId: '1001' });
