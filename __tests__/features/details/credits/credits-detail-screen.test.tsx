@@ -11,7 +11,8 @@ jest.mock('expo-router', () => ({
     navigate: jest.fn(),
     canGoBack: jest.fn(() => false),
   }),
-  useSegments: () => ['credits', 'movie', '3fa85f64-5717-4562-b3fc-2c963f66afa6'],
+  useSegments: () => ['movie', '3fa85f64-5717-4562-b3fc-2c963f66afa6', 'credits'],
+  usePathname: () => '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/credits',
 }));
 
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';

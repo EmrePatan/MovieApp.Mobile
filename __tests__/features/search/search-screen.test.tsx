@@ -30,6 +30,7 @@ jest.mock('expo-router', () => ({
     return cleanup;
   },
   useSegments: jest.fn(() => ['search']),
+  usePathname: jest.fn(() => '/search'),
 }));
 
 jest.mock('@/auth/useAuth', () => ({

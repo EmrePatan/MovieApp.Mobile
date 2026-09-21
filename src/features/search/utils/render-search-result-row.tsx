@@ -1,65 +1,60 @@
 import { View } from 'react-native';
-import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
+import {
+  logRouteLayoutMeta,
+  routeLayoutHandler,
+  type RouteLayoutContext,
+} from '@/debug/route-layout-probe';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
 
 interface RenderSearchResultRowOptions {
-  scope: string;
+  layoutScope: string;
+  route: RouteLayoutContext;
   item: SearchResultItem;
   index: number;
   onPress: (item: SearchResultItem) => void;
 }
 
 export function renderSearchResultRow({
-  scope,
+  layoutScope,
+  route,
   item,
   index,
   onPress,
 }: RenderSearchResultRowOptions) {
   if (__DEV__ && index === 0) {
-    logNavigationDiagnostic(`${scope}:row:index0`, { itemId: item.id });
-    logNavigationDiagnostic(`${scope}:card:index0`, { itemId: item.id });
+    logRouteLayoutMeta(layoutScope, route, {
+      renderItemIndex0: true,
+      itemComponent: 'SearchResultCard',
+      itemId: item.id,
+    });
   }
 
-  const row = (
+  return (
     <View
       collapsable={false}
-      onLayout={(event) => {
-        if (!__DEV__ || index !== 0) {
-          return;
-        }
-
-        const { width, height, x, y } = event.nativeEvent.layout;
-        logNavigationDiagnostic(`${scope}:row:layout:index0`, {
-          itemId: item.id,
-          width,
-          height,
-          x,
-          y,
-        });
-      }}
+      onLayout={
+        index === 0
+          ? routeLayoutHandler(layoutScope, 'item:index0', route, {
+              itemComponent: 'SearchResultCard',
+              itemId: item.id,
+            })
+          : undefined
+      }
     >
       <View
         collapsable={false}
-        onLayout={(event) => {
-          if (!__DEV__ || index !== 0) {
-            return;
-          }
-
-          const { width, height, x, y } = event.nativeEvent.layout;
-          logNavigationDiagnostic(`${scope}:card:layout:index0`, {
-            itemId: item.id,
-            width,
-            height,
-            x,
-            y,
-          });
-        }}
+        onLayout={
+          index === 0
+            ? routeLayoutHandler(layoutScope, 'card:index0', route, {
+                itemComponent: 'SearchResultCard',
+                itemId: item.id,
+              })
+            : undefined
+        }
       >
         <SearchResultCard item={item} onPress={onPress} />
       </View>
     </View>
   );
-
-  return row;
 }

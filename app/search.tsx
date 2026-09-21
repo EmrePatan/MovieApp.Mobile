@@ -346,7 +346,7 @@ export default function SearchScreen() {
 
     return (
       <SearchMappedResultsScroll
-        scope="search-scroll"
+        layoutScope="search-results"
         testID="search-results-scroll"
         items={results}
         keyExtractor={searchResultKeyExtractor}

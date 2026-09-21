@@ -12,7 +12,8 @@ const mockSetParams = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, setParams: mockSetParams }),
   useLocalSearchParams: jest.fn(() => ({})),
-  useSegments: jest.fn(() => []),
+  useSegments: jest.fn(() => ['advanced-discover']),
+  usePathname: jest.fn(() => '/advanced-discover'),
 }));
 
 jest.mock('@/features/discovery/hooks/useAdvancedDiscover', () => ({

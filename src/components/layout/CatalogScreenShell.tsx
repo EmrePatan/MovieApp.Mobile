@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
-import { describeViewStyle, logStackLayout } from '@/debug/stack-layout-probe';
+import { describeViewStyle } from '@/debug/stack-layout-probe';
+import {
+  routeLayoutHandler,
+  useRouteLayoutContext,
+} from '@/debug/route-layout-probe';
 import { commonStyles } from '@/theme/theme';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 interface CatalogScreenShellProps {
-  shellScope: string;
+  layoutScope: string;
   header?: ReactNode;
   children: ReactNode;
   edges?: Edge[];
@@ -15,53 +19,51 @@ interface CatalogScreenShellProps {
 }
 
 /**
- * Favorites-aligned screen shell for #45: SafeAreaView → header sibling → flex:1 body.
- * Bypasses StackListScreen on routes where header-visible + body-invisible was observed.
+ * Root-stack shell with header sibling + flex:1 body. Used by discover-browse and streaming.
  */
 export function CatalogScreenShell({
-  shellScope,
+  layoutScope,
   header,
   children,
   edges = ['top', 'left', 'right'],
   testID,
 }: CatalogScreenShellProps) {
+  const route = useRouteLayoutContext();
+
   return (
     <SafeAreaView
       style={commonStyles.screen}
       edges={edges}
       testID={testID}
-      onLayout={(event) =>
-        logStackLayout(`${shellScope}:root:layout`, event, {
-          testID,
-          style: describeViewStyle(commonStyles.screen),
-        })
-      }
+      onLayout={routeLayoutHandler(layoutScope, 'root', route, {
+        testID,
+        shell: 'CatalogScreenShell',
+        style: describeViewStyle(commonStyles.screen),
+      })}
     >
       {header ? (
         <View
           collapsable={false}
-          onLayout={(event) => logStackLayout(`${shellScope}:header:layout`, event, { testID })}
+          onLayout={routeLayoutHandler(layoutScope, 'header', route, { testID })}
         >
           {header}
         </View>
       ) : null}
       <View
-        testID={`${shellScope}-body`}
+        testID={`${layoutScope}-body`}
         style={styles.body}
         collapsable={false}
-        onLayout={(event) =>
-          logStackLayout(`${shellScope}:body:layout`, event, {
-            testID,
-            style: describeViewStyle(styles.body),
-          })
-        }
+        onLayout={routeLayoutHandler(layoutScope, 'body', route, {
+          testID,
+          style: describeViewStyle(styles.body),
+        })}
       >
         {__DEV__ && Platform.OS === 'android' ? (
           <View
-            testID={`${shellScope}-body-canary`}
+            testID={`${layoutScope}-body-canary`}
             collapsable={false}
             style={styles.bodyCanary}
-            onLayout={(event) => logStackLayout(`${shellScope}:body-canary:layout`, event, { testID })}
+            onLayout={routeLayoutHandler(layoutScope, 'body-canary', route, { testID })}
           >
             <Text style={styles.bodyCanaryText}>BODY CANARY</Text>
           </View>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateDiscoverySort,
@@ -54,6 +54,7 @@ import {
   useNavigationDiagnostics,
   useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
+import { logRouteLayoutMeta, useRouteLayoutContext } from '@/debug/route-layout-probe';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -75,6 +76,8 @@ export default function DiscoverScreen() {
 
   const browseState = useMemo(() => parseDiscoverParams(rawParams), [rawParams]);
   const { mode, type: typeFilter, filters } = browseState;
+  const route = useRouteLayoutContext();
+  const layoutScope = mode === 'trending' ? 'trending-see-all' : `discover-browse-${mode}`;
 
   const genresQuery = useGenres();
   const browseQuery = useDiscoveryBrowse(mode, typeFilter, filters);
@@ -98,11 +101,24 @@ export default function DiscoverScreen() {
   useScreenRenderTrace('discover-browse', {
     pathname: `/${segments.join('/')}`,
     mode,
+    layoutScope,
     itemCount: items.length,
     bodyKind: listMounted ? 'scroll-view' : 'placeholder',
     shellKind: 'catalog-screen-shell',
     listMounted,
   });
+
+  useEffect(() => {
+    logRouteLayoutMeta(layoutScope, route, {
+      shell: 'CatalogScreenShell',
+      renderer: 'ScrollView',
+      itemComponent: 'SearchResultCard',
+      dataCount: items.length,
+      headerPlacement: 'sibling-above-body',
+      nestedInStackListScreen: false,
+      navigation: 'openLibraryStackScreen -> router.push(/discover-browse)',
+    });
+  }, [items.length, layoutScope, mode, route]);
 
   const activeFilterCount = useMemo(
     () => countActiveDiscoveryFilters(filters, mode, typeFilter),
@@ -292,7 +308,7 @@ export default function DiscoverScreen() {
 
   if (browseQuery.isLoading && items.length === 0) {
     return (
-      <CatalogScreenShell shellScope="discover-shell" testID="discover-browse-screen" header={listHeader}>
+      <CatalogScreenShell layoutScope={layoutScope} testID="discover-browse-screen" header={listHeader}>
         <SearchLoadingState />
         {filterSheetVisible ? filterSheet : null}
       </CatalogScreenShell>
@@ -305,7 +321,7 @@ export default function DiscoverScreen() {
       : t('discovery.browseScreen.loadError');
 
     return (
-      <CatalogScreenShell shellScope="discover-shell" testID="discover-browse-screen" header={listHeader}>
+      <CatalogScreenShell layoutScope={layoutScope} testID="discover-browse-screen" header={listHeader}>
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
@@ -325,7 +341,7 @@ export default function DiscoverScreen() {
       emptyState
     ) : (
       <SearchMappedResultsScroll
-        scope="discover-scroll"
+        layoutScope={layoutScope}
         testID="discover-browse-scroll"
         style={styles.resultsScroll}
         items={items}
@@ -344,7 +360,7 @@ export default function DiscoverScreen() {
     );
 
   return (
-    <CatalogScreenShell shellScope="discover-shell" testID="discover-browse-screen" header={listHeader}>
+    <CatalogScreenShell layoutScope={layoutScope} testID="discover-browse-screen" header={listHeader}>
       {resultsBody}
       {filterSheetVisible ? filterSheet : null}
     </CatalogScreenShell>

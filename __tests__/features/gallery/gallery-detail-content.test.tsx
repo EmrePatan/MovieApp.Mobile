@@ -2,6 +2,12 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { GalleryDetailContent } from '@/features/gallery/components/GalleryDetailContent';
 import type { GalleryResponse } from '@/features/gallery/types';
 
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ back: jest.fn(), canGoBack: jest.fn(() => true) }),
+  usePathname: () => '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/gallery',
+  useSegments: () => ['movie', '3fa85f64-5717-4562-b3fc-2c963f66afa6', 'gallery'],
+}));
+
 const gallery: GalleryResponse = {
   backdrops: [
     {

@@ -11,7 +11,8 @@ const mockReplace = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
   useLocalSearchParams: jest.fn(() => ({})),
-  useSegments: jest.fn(() => []),
+  useSegments: jest.fn(() => ['discover-browse']),
+  usePathname: jest.fn(() => '/discover-browse'),
 }));
 
 jest.mock('@/features/discovery/hooks/useDiscoveryBrowse', () => ({

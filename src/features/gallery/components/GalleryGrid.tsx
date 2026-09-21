@@ -12,6 +12,11 @@ import { AppText } from '@/components/common/AppText';
 import { resolveThumbnailImageUri } from '@/utils/image-url';
 import type { GalleryImage } from '../types';
 import { galleryImageKey } from '../utils/gallery-images';
+import {
+  logRouteLayoutMeta,
+  routeLayoutHandler,
+  type RouteLayoutContext,
+} from '@/debug/route-layout-probe';
 import { ImageViewerModal } from './ImageViewerModal';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -22,11 +27,15 @@ const GRID_GAP = spacing.sm;
 interface GalleryGridProps {
   images: GalleryImage[];
   emptyMessage?: string;
+  layoutScope?: string;
+  route?: RouteLayoutContext;
 }
 
 export function GalleryGrid({
   images,
   emptyMessage,
+  layoutScope,
+  route,
 }: GalleryGridProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -64,10 +73,26 @@ export function GalleryGrid({
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.content}
         testID="gallery-grid"
+        onLayout={
+          layoutScope && route
+            ? routeLayoutHandler(layoutScope, 'list', route, {
+                renderer: 'FlatList',
+                dataCount: images.length,
+                numColumns: GRID_COLUMNS,
+              })
+            : undefined
+        }
         renderItem={({ item, index }) => {
           const uri = resolveThumbnailImageUri(item.filePath);
           const aspectRatio = item.aspectRatio && item.aspectRatio > 0 ? item.aspectRatio : 0.67;
           const height = itemSize / aspectRatio;
+
+          if (__DEV__ && index === 0 && layoutScope && route) {
+            logRouteLayoutMeta(layoutScope, route, {
+              renderItemIndex0: true,
+              itemComponent: 'Pressable+Image',
+            });
+          }
 
           return (
             <Pressable
@@ -76,6 +101,13 @@ export function GalleryGrid({
               onPress={() => handlePress(index)}
               style={[styles.item, { width: itemSize, height }]}
               testID={`gallery-grid-item-${index}`}
+              onLayout={
+                index === 0 && layoutScope && route
+                  ? routeLayoutHandler(layoutScope, 'item:index0', route, {
+                      itemComponent: 'Pressable+Image',
+                    })
+                  : undefined
+              }
             >
               {uri ? (
                 <Image source={{ uri }} style={styles.image} resizeMode="cover" />

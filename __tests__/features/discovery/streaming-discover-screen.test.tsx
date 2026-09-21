@@ -12,6 +12,7 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ setParams: mockSetParams, push: mockPush, replace: mockReplace, back: jest.fn() }),
   useLocalSearchParams: jest.fn(() => ({})),
   useSegments: jest.fn(() => ['streaming-discover']),
+  usePathname: jest.fn(() => '/streaming-discover'),
   useFocusEffect: (callback: () => void | (() => void)) => {
     const cleanup = callback();
     return cleanup;

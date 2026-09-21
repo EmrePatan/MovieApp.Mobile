@@ -306,7 +306,7 @@ export default function StreamingDiscoverScreen() {
 
     return (
       <SearchMappedResultsScroll
-        scope="streaming-scroll"
+        layoutScope="streaming-discover"
         testID="streaming-discover-scroll"
         style={styles.resultsScroll}
         items={resultsData}
@@ -339,7 +339,7 @@ export default function StreamingDiscoverScreen() {
 
   return (
     <CatalogScreenShell
-      shellScope="streaming-shell"
+      layoutScope="streaming-discover"
       testID="streaming-discover-screen"
       header={providerHeader}
     >

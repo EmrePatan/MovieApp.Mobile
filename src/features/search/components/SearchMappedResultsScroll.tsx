@@ -8,13 +8,17 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { logStackLayout } from '@/debug/stack-layout-probe';
+import { describeViewStyle } from '@/debug/stack-layout-probe';
 import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
+import {
+  routeLayoutHandler,
+  useRouteLayoutContext,
+} from '@/debug/route-layout-probe';
 import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
 
 interface SearchMappedResultsScrollProps {
-  scope: string;
+  layoutScope: string;
   testID: string;
   items: SearchResultItem[];
   keyExtractor: (item: SearchResultItem) => string;
@@ -28,13 +32,8 @@ interface SearchMappedResultsScrollProps {
   keyboardDismissMode?: ScrollViewProps['keyboardDismissMode'];
 }
 
-/**
- * Non-virtualized result list for #45 Android routes where FlatList receives
- * data but never invokes renderItem. Page size is 20; accumulated pages grow
- * with infinite scroll — revisit virtualization if session lists become large.
- */
 export function SearchMappedResultsScroll({
-  scope,
+  layoutScope,
   testID,
   items,
   keyExtractor,
@@ -47,11 +46,19 @@ export function SearchMappedResultsScroll({
   keyboardShouldPersistTaps,
   keyboardDismissMode,
 }: SearchMappedResultsScrollProps) {
+  const route = useRouteLayoutContext();
+
   useEffect(() => {
     if (__DEV__) {
-      logNavigationDiagnostic(`${scope}:created`, { itemCount: items.length });
+      logNavigationDiagnostic(`layout:${layoutScope}:scroll:created`, {
+        pathname: route.pathname,
+        segments: route.segments,
+        itemCount: items.length,
+        renderer: 'ScrollView',
+        itemComponent: 'SearchResultCard',
+      });
     }
-  }, [items.length, scope]);
+  }, [items.length, layoutScope, route.pathname, route.segments]);
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -80,15 +87,17 @@ export function SearchMappedResultsScroll({
       keyboardDismissMode={keyboardDismissMode}
       onScroll={onEndReached ? handleScroll : undefined}
       scrollEventThrottle={400}
-      onLayout={(event) => {
-        if (__DEV__) {
-          logStackLayout(`${scope}:layout`, event, { testID });
-        }
-      }}
+      onLayout={routeLayoutHandler(layoutScope, 'scroll', route, {
+        testID,
+        renderer: 'ScrollView',
+        dataCount: items.length,
+        style: describeViewStyle(style),
+        contentContainerStyle: describeViewStyle(contentContainerStyle),
+      })}
     >
       {items.map((item, index) => (
         <View key={keyExtractor(item)}>
-          {renderSearchResultRow({ scope, item, index, onPress })}
+          {renderSearchResultRow({ layoutScope, route, item, index, onPress })}
         </View>
       ))}
       {footer}
