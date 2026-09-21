@@ -14,7 +14,8 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackListScreen } from '@/components/layout/StackListScreen';
+import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -266,14 +267,13 @@ export default function AdvancedDiscoverScreen() {
 
   if (shouldFetchResults && discoverQuery.isLoading && items.length === 0) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {topBar}
+      <StackListScreen topBar={topBar}>
         <View style={styles.listContent}>
           {pageHeader}
           <SearchLoadingState />
         </View>
         {filterSheet}
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
@@ -283,8 +283,7 @@ export default function AdvancedDiscoverScreen() {
       : t('discovery.advancedDiscover.loadError');
 
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {topBar}
+      <StackListScreen topBar={topBar}>
         <View style={styles.listContent}>
           {pageHeader}
           <View style={styles.errorContainer}>
@@ -292,13 +291,12 @@ export default function AdvancedDiscoverScreen() {
           </View>
         </View>
         {filterSheet}
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      {topBar}
+    <StackListScreen topBar={topBar}>
       <FlatList
         data={items}
         keyExtractor={catalogItemKeyExtractor}
@@ -318,20 +316,17 @@ export default function AdvancedDiscoverScreen() {
             onRefresh={handleRefresh}
           />
         }
+        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
       />
       {filterSheet}
-    </SafeAreaView>
+    </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   topBar: {
     paddingHorizontal: spacing.lg,
   },

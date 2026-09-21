@@ -12,7 +12,11 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useQueryClient } from '@tanstack/react-query';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackListScreen } from '@/components/layout/StackListScreen';
+import {
+  getFlatListClippingProps,
+  mergeFlatListStyle,
+} from '@/components/layout/flat-list-layout';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   parseSearchReturnOrigin,
@@ -320,28 +324,30 @@ export default function SearchScreen() {
   ]);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <SearchScreenHeader
-        value={inputText}
-        onChangeText={setInputText}
-        onSubmit={handleSubmit}
-        onClear={handleClear}
-        onBack={canNavigateBack ? handleBack : undefined}
-        inputRef={searchInputRef}
-        autoFocus
-      >
-        {showAutocomplete ? (
-          <SearchSuggestionList
-            suggestions={autocompleteQuery.data?.items ?? []}
-            isLoading={autocompleteQuery.isLoading}
-            onSelect={handleSuggestionSelect}
-          />
-        ) : null}
-        {hasActiveSearch ? (
-          <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
-        ) : null}
-      </SearchScreenHeader>
-
+    <StackListScreen
+      header={
+        <SearchScreenHeader
+          value={inputText}
+          onChangeText={setInputText}
+          onSubmit={handleSubmit}
+          onClear={handleClear}
+          onBack={canNavigateBack ? handleBack : undefined}
+          inputRef={searchInputRef}
+          autoFocus
+        >
+          {showAutocomplete ? (
+            <SearchSuggestionList
+              suggestions={autocompleteQuery.data?.items ?? []}
+              isLoading={autocompleteQuery.isLoading}
+              onSelect={handleSuggestionSelect}
+            />
+          ) : null}
+          {hasActiveSearch ? (
+            <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+          ) : null}
+        </SearchScreenHeader>
+      }
+    >
       {hasActiveSearch ? (
         <FlatList
           data={results}
@@ -357,7 +363,7 @@ export default function SearchScreen() {
             ) : null
           }
           refreshControl={refreshControl}
-          style={styles.resultsList}
+          style={mergeFlatListStyle(styles.resultsList)}
           contentContainerStyle={styles.listContent}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -366,7 +372,7 @@ export default function SearchScreen() {
           initialNumToRender={layout.verticalList.initialNumToRender}
           maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
           windowSize={layout.verticalList.windowSize}
-          removeClippedSubviews
+          {...getFlatListClippingProps(true)}
         />
       ) : (
         <ScrollView
@@ -391,15 +397,11 @@ export default function SearchScreen() {
           {showExplore ? <SearchExploreLanding /> : null}
         </ScrollView>
       )}
-    </SafeAreaView>
+    </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   resultsList: {
     flex: 1,
   },

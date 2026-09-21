@@ -7,7 +7,8 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackListScreen } from '@/components/layout/StackListScreen';
+import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -159,16 +160,15 @@ export default function UpcomingScreen() {
 
   if (isResolvingInitialTab) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+      <StackListScreen header={listHeader}>
         <LibraryLoadingState accessibilityLabel={t('common.loadingUpcoming')} />
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
   if (activeTab === 'for-you' && !isAuthenticated) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <StackListScreen>
         <FlatList
           data={[]}
           renderItem={() => null}
@@ -184,25 +184,24 @@ export default function UpcomingScreen() {
               <AppButton title={t('common.signInTitleCase')} variant="secondary" onPress={handleSignIn} />
             </View>
           }
+          style={mergeFlatListStyle()}
           contentContainerStyle={styles.listContent}
         />
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
   if (activeQuery.isLoading && items.length === 0) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+      <StackListScreen header={listHeader}>
         <LibraryLoadingState accessibilityLabel={t('common.loadingUpcoming')} />
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
   if (activeQuery.isError && items.length === 0) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+      <StackListScreen header={listHeader}>
         <View style={styles.errorContainer}>
           <ErrorView
             message={t('upcoming.loadError')}
@@ -210,7 +209,7 @@ export default function UpcomingScreen() {
             retryLabel={t('common.retry')}
           />
         </View>
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
@@ -236,7 +235,7 @@ export default function UpcomingScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+    <StackListScreen>
       <FlatList
         data={displayItems}
         keyExtractor={upcomingItemKey}
@@ -264,6 +263,7 @@ export default function UpcomingScreen() {
             onRefresh={handleRefresh}
           />
         }
+        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
@@ -271,7 +271,7 @@ export default function UpcomingScreen() {
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
-    </SafeAreaView>
+    </StackListScreen>
   );
 }
 
@@ -280,10 +280,6 @@ function ListSeparator() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   controls: {
     gap: spacing.sm,
     paddingTop: spacing.xs,

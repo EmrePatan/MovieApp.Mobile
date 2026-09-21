@@ -10,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackListScreen } from '@/components/layout/StackListScreen';
+import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -273,10 +274,13 @@ export default function StreamingDiscoverScreen() {
   ]);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <View style={styles.topBar}>
-        <DetailBackButton />
-      </View>
+    <StackListScreen
+      topBar={
+        <View style={styles.topBar}>
+          <DetailBackButton />
+        </View>
+      }
+    >
       <FlatList
         data={discoverState.watchProviderIds.length > 0 ? items : []}
         keyExtractor={searchResultKeyExtractor}
@@ -298,6 +302,7 @@ export default function StreamingDiscoverScreen() {
             onRefresh={() => void resultsQuery.refetch()}
           />
         }
+        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
         onEndReached={() => {
           if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {
@@ -309,15 +314,11 @@ export default function StreamingDiscoverScreen() {
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
-    </SafeAreaView>
+    </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   topBar: {
     paddingHorizontal: spacing.lg,
   },

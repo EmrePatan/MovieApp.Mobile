@@ -13,7 +13,8 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackListScreen } from '@/components/layout/StackListScreen';
+import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -275,11 +276,10 @@ export default function DiscoverScreen() {
 
   if (browseQuery.isLoading && items.length === 0) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+      <StackListScreen header={listHeader}>
         <SearchLoadingState />
         {filterSheet}
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
@@ -289,18 +289,17 @@ export default function DiscoverScreen() {
       : t('discovery.browseScreen.loadError');
 
     return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+      <StackListScreen header={listHeader}>
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
         {filterSheet}
-      </SafeAreaView>
+      </StackListScreen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+    <StackListScreen>
       <FlatList
         data={items}
         keyExtractor={catalogItemKeyExtractor}
@@ -320,20 +319,17 @@ export default function DiscoverScreen() {
             onRefresh={handleRefresh}
           />
         }
+        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
       />
       {filterSheet}
-    </SafeAreaView>
+    </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   header: {
     gap: spacing.md,
     paddingHorizontal: spacing.lg,

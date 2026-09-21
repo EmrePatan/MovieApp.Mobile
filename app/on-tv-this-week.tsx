@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackListScreen } from '@/components/layout/StackListScreen';
+import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -103,10 +104,13 @@ export default function OnTvThisWeekScreen() {
   }, [items.length, resultsQuery, t]);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <View style={styles.topBar}>
-        <DetailBackButton />
-      </View>
+    <StackListScreen
+      topBar={
+        <View style={styles.topBar}>
+          <DetailBackButton />
+        </View>
+      }
+    >
       <FlatList
         data={items}
         keyExtractor={searchResultKeyExtractor}
@@ -132,17 +136,14 @@ export default function OnTvThisWeekScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
+        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
       />
-    </SafeAreaView>
+    </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   topBar: {
     paddingHorizontal: spacing.lg,
   },
