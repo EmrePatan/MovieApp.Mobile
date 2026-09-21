@@ -121,6 +121,8 @@ describe('DiscoverScreen', () => {
     render(<DiscoverScreen />);
 
     expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
+    expect(screen.getByTestId('discover-browse-list').props.ListHeaderComponent).toBeUndefined();
+    expect(screen.getByText('Trending')).toBeTruthy();
   });
 
   it('renders dynamic browse title and results without top-level mode/type controls', () => {

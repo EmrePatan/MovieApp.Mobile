@@ -100,6 +100,7 @@ export default function DiscoverScreen() {
     mode,
     itemCount: items.length,
     bodyKind: 'flat-list',
+    headerPlacement: 'stack-screen',
     listMounted: items.length > 0 || !browseQuery.isLoading,
   });
 
@@ -328,13 +329,13 @@ export default function DiscoverScreen() {
   }
 
   return (
-    <StackListScreen testID="discover-browse-screen">
+    <StackListScreen testID="discover-browse-screen" header={listHeader}>
       <FlatList
         testID="discover-browse-list"
+        style={styles.resultsList}
         data={items}
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}
-        ListHeaderComponent={listHeader}
         ListEmptyComponent={emptyState}
         ListFooterComponent={
           browseQuery.isFetchingNextPage ? (
@@ -359,6 +360,9 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
+  resultsList: {
+    flex: 1,
+  },
   header: {
     gap: spacing.md,
     paddingHorizontal: spacing.lg,

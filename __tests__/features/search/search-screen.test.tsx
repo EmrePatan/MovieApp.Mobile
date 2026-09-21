@@ -322,6 +322,41 @@ describe('SearchScreen', () => {
 
     expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all');
     expect(screen.getByTestId('search-results-list')).toBeTruthy();
+    expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
+    expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
+  });
+
+  it('renders submitted results with the search header outside the FlatList', () => {
+    (useSearchResults as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [mockSearchResult],
+            page: 1,
+            pageSize: 20,
+            totalCount: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
+
+    expect(screen.getByTestId('search-results-list').props.ListHeaderComponent).toBeUndefined();
+    expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
     expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
   });
 

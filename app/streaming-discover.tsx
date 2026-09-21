@@ -44,12 +44,9 @@ import { SearchResultCard } from '@/features/search/components/SearchResultCard'
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import {
-  logNavigationDiagnostic,
   useNavigationDiagnostics,
-  useRouteLifecycleDiagnostics,
   useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
-import { VisibilityCanary } from '@/debug/visibility-canary';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -81,10 +78,14 @@ export default function StreamingDiscoverScreen() {
     [resultsQuery.data?.pages],
   );
 
+  const providerCount = providersQuery.data?.providers?.length ?? 0;
+  const hasSelectedProviders = discoverState.watchProviderIds.length > 0;
+  const resultsData = hasSelectedProviders ? items : [];
+
   useNavigationDiagnostics('streaming-discover', {
     mediaType: discoverState.mediaType,
     watchRegion: discoverState.watchRegion,
-    providerCount: providersQuery.data?.providers?.length ?? 0,
+    providerCount,
     selectedProviderCount: discoverState.watchProviderIds.length,
     itemCount: items.length,
     providersLoading: providersQuery.isLoading,
@@ -94,19 +95,13 @@ export default function StreamingDiscoverScreen() {
     isHydrated,
   });
 
-  const pathname = `/${segments.join('/')}`;
-  const instanceId = useScreenRenderTrace('streaming-discover', {
-    pathname,
-    providerCount: providersQuery.data?.providers?.length ?? 0,
+  useScreenRenderTrace('streaming-discover', {
+    pathname: `/${segments.join('/')}`,
+    providerCount,
     itemCount: items.length,
-    bodyKind: 'flat-list',
+    resultsDataCount: resultsData.length,
+    headerPlacement: 'stack-screen',
     listMounted: true,
-  });
-
-  useRouteLifecycleDiagnostics('streaming-discover', {
-    pathname,
-    segments,
-    instanceId,
   });
 
   const currentRoute = useMemo(
@@ -190,77 +185,78 @@ export default function StreamingDiscoverScreen() {
     [currentRoute, discoverState.watchRegion, queryClient, router],
   );
 
-  const listHeader = useMemo(
-    () => {
-      if (__DEV__) {
-        logNavigationDiagnostic('render:streaming-discover-header', {
-          providerCount: providersQuery.data?.providers?.length ?? 0,
-        });
-      }
-
-      return (
-      <View style={styles.headerContent}>
-        <AppText variant="title" accessibilityRole="header">
-          {t('discovery.streamingDiscover.title')}
-        </AppText>
-
-        <View style={styles.section}>
-          <AppText variant="bodySmall" muted style={styles.sectionLabel}>
-            {t('discovery.streamingDiscover.whereDoYouWatch')}
+  const providerHeader = useMemo(
+    () => (
+      <View testID="streaming-discover-provider-header" style={styles.screenHeader}>
+        <View style={styles.topBar}>
+          <DetailBackButton />
+        </View>
+        <View style={styles.headerContent}>
+          <AppText variant="title" accessibilityRole="header">
+            {t('discovery.streamingDiscover.title')}
           </AppText>
-          <WatchProviderSelector
-            providers={providersQuery.data?.providers ?? []}
-            selectedProviderIds={discoverState.watchProviderIds}
-            isLoading={providersQuery.isLoading}
-            isError={providersQuery.isError}
-            onRetry={() => void providersQuery.refetch()}
-            onToggle={toggleProvider}
-          />
-        </View>
 
-        <View style={styles.section}>
-          <AppText variant="bodySmall" muted style={styles.sectionLabel}>{t('discovery.streamingDiscover.contentSection')}</AppText>
-          <View style={styles.mediaRow}>
-            {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
-              const selected = discoverState.mediaType === mediaType;
-              const label = translateAdvancedDiscoverMediaType(mediaType);
-
-              return (
-                <Pressable
-                  key={mediaType}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={label}
-                  onPress={() =>
-                    replaceState({
-                      ...discoverState,
-                      mediaType,
-                      watchProviderIds: [],
-                    })
-                  }
-                  style={[styles.mediaChip, selected && styles.mediaChipSelected]}
-                >
-                  <AppText variant="bodySmall" style={selected ? styles.mediaChipSelectedText : undefined}>
-                    {label}
-                  </AppText>
-                </Pressable>
-              );
-            })}
+          <View style={styles.section}>
+            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+              {t('discovery.streamingDiscover.whereDoYouWatch')}
+            </AppText>
+            <WatchProviderSelector
+              providers={providersQuery.data?.providers ?? []}
+              selectedProviderIds={discoverState.watchProviderIds}
+              isLoading={providersQuery.isLoading}
+              isError={providersQuery.isError}
+              onRetry={() => void providersQuery.refetch()}
+              onToggle={toggleProvider}
+            />
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <AppText variant="bodySmall" muted style={styles.sectionLabel}>{t('discovery.streamingDiscover.availabilitySection')}</AppText>
-          <WatchMonetizationSelector
-            selectedTypes={discoverState.watchMonetizationTypes}
-            onToggle={toggleMonetization}
-          />
-        </View>
+          <View style={styles.section}>
+            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+              {t('discovery.streamingDiscover.contentSection')}
+            </AppText>
+            <View style={styles.mediaRow}>
+              {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
+                const selected = discoverState.mediaType === mediaType;
+                const label = translateAdvancedDiscoverMediaType(mediaType);
 
-        <JustWatchAttribution />
+                return (
+                  <Pressable
+                    key={mediaType}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={label}
+                    onPress={() =>
+                      replaceState({
+                        ...discoverState,
+                        mediaType,
+                        watchProviderIds: [],
+                      })
+                    }
+                    style={[styles.mediaChip, selected && styles.mediaChipSelected]}
+                  >
+                    <AppText variant="bodySmall" style={selected ? styles.mediaChipSelectedText : undefined}>
+                      {label}
+                    </AppText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+              {t('discovery.streamingDiscover.availabilitySection')}
+            </AppText>
+            <WatchMonetizationSelector
+              selectedTypes={discoverState.watchMonetizationTypes}
+              onToggle={toggleMonetization}
+            />
+          </View>
+
+          <JustWatchAttribution />
+        </View>
       </View>
-      );
-    },
+    ),
     [
       discoverState,
       providersQuery.data?.providers,
@@ -274,13 +270,8 @@ export default function StreamingDiscoverScreen() {
   );
 
   const listEmpty = useMemo(() => {
-    if (discoverState.watchProviderIds.length === 0) {
-      return (
-        <SearchEmptyState
-          title={t('discovery.streamingDiscover.chooseProviderTitle')}
-          message={t('discovery.streamingDiscover.chooseProviderMessage')}
-        />
-      );
+    if (!hasSelectedProviders) {
+      return null;
     }
 
     if (resultsQuery.isLoading) {
@@ -310,45 +301,22 @@ export default function StreamingDiscoverScreen() {
 
     return null;
   }, [
-    discoverState.watchProviderIds.length,
+    hasSelectedProviders,
     items.length,
     resultsQuery,
     t,
   ]);
 
-  const streamingListHeader = useMemo(
-    () => (
-      <>
-        <VisibilityCanary label="LIST_HEADER_CANARY" />
-        <View style={styles.topBar}>
-          <DetailBackButton />
-        </View>
-        {listHeader}
-      </>
-    ),
-    [listHeader],
-  );
-
   return (
-    <>
-      <VisibilityCanary label="ROOT_CANARY" />
-      <StackListScreen testID="streaming-discover-screen">
-        <VisibilityCanary label="STACK_CANARY" />
-        <FlatList
+    <StackListScreen testID="streaming-discover-screen" header={providerHeader}>
+      <FlatList
         testID="streaming-discover-list"
-        data={discoverState.watchProviderIds.length > 0 ? items : []}
+        style={styles.resultsList}
+        data={resultsData}
         keyExtractor={searchResultKeyExtractor}
-        renderItem={({ item, index }) => {
-          if (__DEV__ && index === 0) {
-            logNavigationDiagnostic('render:streaming-discover-result-item', {
-              itemId: item.id,
-              itemType: item.type,
-            });
-          }
-
-          return <SearchResultCard item={item} onPress={handleResultPress} />;
-        }}
-        ListHeaderComponent={streamingListHeader}
+        renderItem={({ item }) => (
+          <SearchResultCard item={item} onPress={handleResultPress} />
+        )}
         ListEmptyComponent={listEmpty}
         ListFooterComponent={
           resultsQuery.isFetchingNextPage ? (
@@ -374,14 +342,20 @@ export default function StreamingDiscoverScreen() {
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
-      </StackListScreen>
-    </>
+    </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  topBar: {
+  screenHeader: {
     paddingHorizontal: spacing.lg,
+  },
+  topBar: {
+    marginHorizontal: -spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  resultsList: {
+    flex: 1,
   },
   listContent: {
     paddingHorizontal: spacing.lg,

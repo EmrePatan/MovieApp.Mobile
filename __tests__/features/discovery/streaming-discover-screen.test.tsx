@@ -104,6 +104,32 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
   });
 
+  it('renders provider selector outside FlatList when results data is empty and no provider is selected', () => {
+    (useStreamingDiscover as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [],
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetchingNextPage: false,
+      isRefetching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    render(<StreamingDiscoverScreen />);
+
+    expect(screen.getByTestId('streaming-discover-provider-header')).toBeTruthy();
+    expect(screen.getByLabelText('Netflix')).toBeTruthy();
+    expect(screen.getByLabelText('Disney Plus')).toBeTruthy();
+    expect(screen.getByTestId('streaming-discover-list').props.data).toEqual([]);
+  });
+
   it('renders streaming discover controls without a region selector', () => {
     render(<StreamingDiscoverScreen />);
 

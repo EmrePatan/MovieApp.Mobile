@@ -321,6 +321,7 @@ export default function SearchScreen() {
     displayMode,
     resultCount: results.length,
     bodyKind: hasActiveSearch ? 'flat-list' : 'scroll-view',
+    headerPlacement: 'stack-screen',
     listMounted: hasActiveSearch,
   });
 
@@ -390,18 +391,15 @@ export default function SearchScreen() {
   );
 
   return (
-    <StackListScreen
-      testID="search-screen"
-      header={hasActiveSearch ? undefined : searchScreenHeader}
-    >
+    <StackListScreen testID="search-screen" header={searchScreenHeader}>
       {hasActiveSearch ? (
         <FlatList
           testID="search-results-list"
+          style={styles.resultsList}
           data={results}
           keyExtractor={searchResultKeyExtractor}
           renderItem={renderResult}
           getItemLayout={getSearchResultItemLayout}
-          ListHeaderComponent={searchScreenHeader}
           ListEmptyComponent={listEmptyComponent}
           ListFooterComponent={
             searchQuery.isFetchingNextPage ? (
@@ -448,6 +446,9 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  resultsList: {
+    flex: 1,
+  },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,
