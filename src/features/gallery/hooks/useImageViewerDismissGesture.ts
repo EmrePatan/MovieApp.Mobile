@@ -32,20 +32,32 @@ export function useImageViewerDismissGesture({
   const translateY = useRef(new Animated.Value(0)).current;
   const backdropOpacity = useRef(new Animated.Value(1)).current;
   const dragOffsetRef = useRef(0);
+  const isDismissingRef = useRef(false);
+  const hasClosedRef = useRef(false);
 
   const resetDismissState = useCallback(() => {
     dragOffsetRef.current = 0;
+    isDismissingRef.current = false;
+    hasClosedRef.current = false;
     translateY.setValue(0);
     backdropOpacity.setValue(1);
   }, [backdropOpacity, translateY]);
 
   const finishClose = useCallback(() => {
-    resetDismissState();
+    if (hasClosedRef.current) {
+      return;
+    }
+
+    hasClosedRef.current = true;
     onClose();
-  }, [onClose, resetDismissState]);
+  }, [onClose]);
 
   const updateDrag = useCallback(
     (offsetY: number) => {
+      if (isDismissingRef.current || hasClosedRef.current) {
+        return;
+      }
+
       dragOffsetRef.current = offsetY;
 
       if (offsetY <= 0) {
@@ -59,6 +71,10 @@ export function useImageViewerDismissGesture({
   );
 
   const snapBack = useCallback(() => {
+    if (isDismissingRef.current || hasClosedRef.current) {
+      return;
+    }
+
     Animated.parallel([
       Animated.spring(translateY, {
         toValue: 0,
@@ -79,6 +95,12 @@ export function useImageViewerDismissGesture({
 
   const dismissWithAnimation = useCallback(
     (offsetY = 0, velocityY = 0) => {
+      if (isDismissingRef.current || hasClosedRef.current) {
+        return;
+      }
+
+      isDismissingRef.current = true;
+
       const remainingDistance = Math.max(height - offsetY, 1);
       const velocityMagnitude = Math.max(Math.abs(velocityY), 900);
       const duration = Math.min(
@@ -102,7 +124,10 @@ export function useImageViewerDismissGesture({
       ]).start(({ finished }) => {
         if (finished) {
           finishClose();
+          return;
         }
+
+        isDismissingRef.current = false;
       });
     },
     [backdropOpacity, finishClose, height, translateY],
@@ -110,6 +135,10 @@ export function useImageViewerDismissGesture({
 
   const handleRelease = useCallback(
     (offsetY: number, velocityY: number) => {
+      if (isDismissingRef.current || hasClosedRef.current) {
+        return;
+      }
+
       if (shouldDismissImageViewerOnRelease(offsetY, velocityY)) {
         dismissWithAnimation(offsetY, velocityY);
         return;
