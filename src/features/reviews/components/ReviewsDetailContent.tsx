@@ -24,6 +24,7 @@ import { ReviewsPaginationControl } from './ReviewsPaginationControl';
 import { ReviewsHeaderMeta } from './ReviewsHeaderMeta';
 import { ReviewsRatingDistribution } from './ReviewsRatingDistribution';
 import { ReviewsSortControl } from './ReviewsSortControl';
+import { ReviewsEmptyState } from './ReviewsEmptyState';
 import { ReviewsWritePrompt } from './ReviewsWritePrompt';
 import { useMyReview } from '../hooks/useMyReview';
 import {
@@ -40,7 +41,7 @@ import {
 } from '../utils/rating-star-buckets';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 type ComposerMode = 'hidden' | 'create' | 'edit';
 
@@ -243,6 +244,14 @@ export function ReviewsDetailContent({
     publicReviews.length === 0 &&
     !myReview;
 
+  const showEmptyStateWithWriteAction =
+    totalCount === 0 &&
+    publicReviews.length === 0 &&
+    ratingStars === null &&
+    !myReview &&
+    !isInitialLoading &&
+    !reviewsQuery.isError;
+
   const showMeta = !isInitialLoading && !reviewsQuery.isError;
 
   const listHeader = (
@@ -268,7 +277,7 @@ export function ReviewsDetailContent({
         onDismiss={() => setAuthFeedback(null)}
       />
 
-      {!myReview && composerMode !== 'create' ? (
+      {!myReview && composerMode !== 'create' && !showEmptyStateWithWriteAction ? (
         <ReviewsWritePrompt onPress={handleWriteReview} />
       ) : null}
 
@@ -354,29 +363,30 @@ export function ReviewsDetailContent({
 
   const listEmpty =
     !isInitialLoading && !reviewsQuery.isError && publicReviews.length === 0 ? (
-      <View style={styles.emptyState} accessibilityRole="text">
-        <AppText variant="bodySmall" muted style={styles.emptyTitle}>
-          {ratingStars !== null
-            ? ownReviewMatchesRatingFilter
+      ratingStars !== null ? (
+        <ReviewsEmptyState
+          title={
+            ownReviewMatchesRatingFilter
               ? t('reviews.empty.starFilterOwnMatch')
               : t('reviews.empty.starFilterEmpty', { stars: ratingStars })
-            : myReview
-              ? t('reviews.empty.noneOther')
-              : t('reviews.empty.none')}
-        </AppText>
-        {!myReview && ratingStars === null ? (
-          <AppText variant="caption" muted>
-            {t('reviews.empty.firstPrompt')}
-          </AppText>
-        ) : null}
-      </View>
+          }
+        />
+      ) : myReview ? null : (
+        <ReviewsEmptyState
+          title={t('reviews.empty.title')}
+          message={t('reviews.empty.message')}
+          actionLabel={t('reviews.empty.writeFirst')}
+          actionAccessibilityLabel={t('reviews.empty.writeFirstAccessibility')}
+          onAction={handleWriteReview}
+        />
+      )
     ) : null;
 
   if (isInitialLoading) {
     return (
       <View style={styles.container} testID="reviews-detail-content">
         {listHeader}
-        <View style={styles.loading}>
+        <View style={styles.loading} testID="reviews-loading">
           <ActivityIndicator color={colors.accent} />
         </View>
       </View>
@@ -459,20 +469,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  emptyState: {
-    gap: spacing.xs,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
-  },
-  emptyTitle: {
-    color: colors.textPrimary,
-    fontWeight: '500',
   },
   listFooter: {
     gap: spacing.sm,

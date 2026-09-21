@@ -150,6 +150,20 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
 
+  it('shows loading instead of empty state during the initial fetch', () => {
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: undefined,
+        isLoading: true,
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.getByTestId('reviews-loading')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
+  });
+
   it('shows empty state when there are no reviews', () => {
     (useMovieReviews as jest.Mock).mockReturnValue(
       mockReviewsQuery({
@@ -166,8 +180,11 @@ describe('ReviewsDetailContent', () => {
     );
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    expect(screen.getByText('No reviews yet.')).toBeTruthy();
-    expect(screen.getByText('Be the first to share your thoughts.')).toBeTruthy();
+    expect(screen.getByTestId('reviews-empty-state')).toBeTruthy();
+    expect(screen.getByText('No reviews yet')).toBeTruthy();
+    expect(screen.getByText('No one has shared their thoughts on this title yet.')).toBeTruthy();
+    expect(screen.getByTestId('reviews-empty-state-action')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-write-section')).toBeNull();
     expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
   });
 
@@ -182,6 +199,7 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByText('Server error.')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
     fireEvent.press(screen.getByText('Retry'));
     expect(mockRefetch).toHaveBeenCalled();
   });
@@ -189,17 +207,45 @@ describe('ReviewsDetailContent', () => {
   it('prompts login when writing a review while logged out', () => {
     mockRequireAuth.mockReturnValue(false);
 
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    fireEvent.press(screen.getByText('Write'));
+    fireEvent.press(screen.getByTestId('reviews-empty-state-action'));
 
     expect(mockCreateMutate).not.toHaveBeenCalled();
     expect(screen.getByText('Please sign in to write a review.')).toBeTruthy();
   });
 
   it('opens composer and submits a new review', async () => {
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
-    fireEvent.press(screen.getByText('Write'));
+    fireEvent.press(screen.getByTestId('reviews-empty-state-action'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText('Review'), 'Great film.');
     fireEvent.press(screen.getByText('Post review'));
@@ -381,7 +427,7 @@ describe('ReviewsDetailContent', () => {
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
     expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
     expect(screen.queryByTestId('reviews-header-rating')).toBeNull();
-    expect(screen.getByText('No reviews yet.')).toBeTruthy();
+    expect(screen.getByText('No reviews yet')).toBeTruthy();
   });
 
   it('hides community histogram when there are no community ratings', () => {
@@ -419,7 +465,38 @@ describe('ReviewsDetailContent', () => {
 
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
     expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
-    expect(screen.getByText('No other reviews yet.')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
+    expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
+  });
+
+  it('replaces the empty state with the own review bar after posting the first review', () => {
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    const { rerender } = render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.getByTestId('reviews-empty-state')).toBeTruthy();
+
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: myReview,
+      isLoading: false,
+    });
+
+    rerender(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
+    expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
   });
 
   it('does not flash community distribution when only the current user has rated', () => {
