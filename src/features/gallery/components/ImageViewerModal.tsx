@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
@@ -8,6 +8,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSharedValue } from 'react-native-reanimated';
@@ -16,6 +18,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { resolveOriginalImageUri } from '@/utils/image-url';
 import { useImageViewerDismissGesture } from '../hooks/useImageViewerDismissGesture';
+import {
+  clampGalleryIndex,
+  resolveGalleryActiveIndex,
+} from '../utils/image-viewer-navigation';
 import { ZoomableGalleryImage } from './ZoomableGalleryImage';
 import type { GalleryImage } from '../types';
 import { galleryImageKey } from '../utils/gallery-images';
@@ -39,13 +45,19 @@ export function ImageViewerModal({
   const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const listRef = useRef<FlatList<GalleryImage>>(null);
+  const isInitializingRef = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(() =>
+    clampGalleryIndex(initialIndex, images.length),
+  );
+  const [pagingEnabled, setPagingEnabled] = useState(true);
   const dismissEnabled = useSharedValue(true);
 
   const {
     dismissGesture,
     animatedStyle,
     closeViewer,
+    resetDismissState,
   } = useImageViewerDismissGesture({
     height,
     onClose,
@@ -57,20 +69,68 @@ export function ImageViewerModal({
     [images],
   );
 
-  const handleMomentumEnd = useCallback(
+  const syncActiveIndex = useCallback(
     (offsetX: number) => {
-      const nextIndex = Math.round(offsetX / width);
-      setActiveIndex(Math.max(0, Math.min(nextIndex, images.length - 1)));
+      const nextIndex = resolveGalleryActiveIndex(offsetX, width, images.length);
+      setActiveIndex(nextIndex);
       dismissEnabled.value = true;
+      setPagingEnabled(true);
     },
     [dismissEnabled, images.length, width],
+  );
+
+  const handleScrollEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isInitializingRef.current) {
+        return;
+      }
+
+      syncActiveIndex(event.nativeEvent.contentOffset.x);
+    },
+    [syncActiveIndex],
   );
 
   const handleZoomChange = useCallback(
     (isZoomed: boolean) => {
       dismissEnabled.value = !isZoomed;
+      setPagingEnabled(!isZoomed);
     },
     [dismissEnabled],
+  );
+
+  useEffect(() => {
+    if (!visible || images.length === 0) {
+      return;
+    }
+
+    const nextIndex = clampGalleryIndex(initialIndex, images.length);
+    isInitializingRef.current = true;
+    setActiveIndex(nextIndex);
+    setPagingEnabled(true);
+    dismissEnabled.value = true;
+    resetDismissState();
+
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: false,
+      });
+
+      requestAnimationFrame(() => {
+        isInitializingRef.current = false;
+      });
+    });
+  }, [images.length, initialIndex, visible]);
+
+  const handleScrollToIndexFailed = useCallback(
+    (info: { index: number }) => {
+      listRef.current?.scrollToOffset({
+        offset: width * info.index,
+        animated: false,
+      });
+      setActiveIndex(clampGalleryIndex(info.index, images.length));
+    },
+    [images.length, width],
   );
 
   if (!visible || images.length === 0) {
@@ -92,19 +152,27 @@ export function ImageViewerModal({
         <GestureDetector gesture={dismissGesture}>
           <Animated.View style={[styles.overlay, animatedStyle]}>
             <FlatList
+              ref={listRef}
               horizontal
               pagingEnabled
+              scrollEnabled={pagingEnabled}
               data={images}
               style={styles.list}
               keyExtractor={(image, index) => galleryImageKey(image, index)}
-              initialScrollIndex={Math.min(initialIndex, images.length - 1)}
+              initialScrollIndex={clampGalleryIndex(initialIndex, images.length)}
               getItemLayout={(_, index) => ({
                 length: width,
                 offset: width * index,
                 index,
               })}
               showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={(event) => handleMomentumEnd(event.nativeEvent.contentOffset.x)}
+              initialNumToRender={1}
+              maxToRenderPerBatch={2}
+              windowSize={3}
+              removeClippedSubviews
+              onMomentumScrollEnd={handleScrollEnd}
+              onScrollEndDrag={handleScrollEnd}
+              onScrollToIndexFailed={handleScrollToIndexFailed}
               renderItem={({ item, index }) => {
                 const uri = imageUris[index];
 
@@ -146,7 +214,11 @@ export function ImageViewerModal({
               pointerEvents="none"
               style={[styles.counterContainer, { bottom: insets.bottom + spacing.lg }]}
             >
-              <AppText variant="caption" style={styles.counter}>
+              <AppText
+                variant="caption"
+                style={styles.counter}
+                testID="gallery-image-viewer-counter"
+              >
                 {activeIndex + 1} / {images.length}
               </AppText>
             </View>
@@ -202,9 +274,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
   },
 });

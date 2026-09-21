@@ -87,12 +87,14 @@ export function GalleryGrid({
         }}
       />
 
-      <ImageViewerModal
-        visible={viewerIndex !== null}
-        images={images}
-        initialIndex={viewerIndex ?? 0}
-        onClose={handleCloseViewer}
-      />
+      {viewerIndex !== null ? (
+        <ImageViewerModal
+          visible
+          images={images}
+          initialIndex={viewerIndex}
+          onClose={handleCloseViewer}
+        />
+      ) : null}
     </>
   );
 }

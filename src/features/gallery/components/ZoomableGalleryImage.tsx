@@ -39,30 +39,38 @@ export function ZoomableGalleryImage({
     [onZoomChange],
   );
 
-  const resetTransform = useCallback(() => {
-    scale.value = withTiming(1);
-    savedScale.value = 1;
-    translateX.value = withTiming(0);
-    translateY.value = withTiming(0);
-    savedTranslateX.value = 0;
-    savedTranslateY.value = 0;
-    setZoomed(false);
-  }, [savedScale, savedTranslateX, savedTranslateY, scale, setZoomed, translateX, translateY]);
+  const resetTransform = useCallback(
+    (notifyParent = true) => {
+      scale.value = withTiming(1);
+      savedScale.value = 1;
+      translateX.value = withTiming(0);
+      translateY.value = withTiming(0);
+      savedTranslateX.value = 0;
+      savedTranslateY.value = 0;
+
+      if (notifyParent) {
+        setZoomed(false);
+      }
+    },
+    [savedScale, savedTranslateX, savedTranslateY, scale, setZoomed, translateX, translateY],
+  );
 
   useEffect(() => {
     if (!isActive) {
-      resetTransform();
+      resetTransform(false);
     }
   }, [isActive, resetTransform]);
 
   const pinchGesture = Gesture.Pinch()
     .onStart(() => {
       savedScale.value = scale.value;
+      if (scale.value > 1.01) {
+        runOnJS(setZoomed)(true);
+      }
     })
     .onUpdate((event) => {
       const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, savedScale.value * event.scale));
       scale.value = nextScale;
-      runOnJS(setZoomed)(nextScale > 1.01);
     })
     .onEnd(() => {
       if (scale.value <= 1.01) {
@@ -75,15 +83,20 @@ export function ZoomableGalleryImage({
     });
 
   const panGesture = Gesture.Pan()
+    .manualActivation(true)
+    .onTouchesMove((event, state) => {
+      if (scale.value > 1.01) {
+        state.activate();
+        return;
+      }
+
+      state.fail();
+    })
     .onStart(() => {
       savedTranslateX.value = translateX.value;
       savedTranslateY.value = translateY.value;
     })
     .onUpdate((event) => {
-      if (scale.value <= 1.01) {
-        return;
-      }
-
       const maxTranslateX = ((scale.value - 1) * width) / 2;
       const maxTranslateY = ((scale.value - 1) * height) / 2;
       const nextX = savedTranslateX.value + event.translationX;

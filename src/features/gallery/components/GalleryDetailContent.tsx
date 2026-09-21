@@ -49,7 +49,7 @@ export function GalleryDetailContent({ gallery, mode, subtitle }: GalleryDetailC
         <GalleryFilterTabs activeFilter={activeFilter} onFilterChange={setActiveFilter} />
       ) : null}
 
-      <GalleryGrid images={images} />
+      <GalleryGrid key={mode === 'catalog' ? activeFilter : 'person'} images={images} />
     </View>
   );
 }

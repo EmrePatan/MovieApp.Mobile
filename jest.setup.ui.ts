@@ -4,10 +4,13 @@ jest.mock('react-native-gesture-handler', () => {
   const mockReact = require('react');
   const { View, Pressable } = require('react-native');
 
-  const createMockPanGesture = () => {
+  const createMockGesture = () => {
     const gesture = {
       activeOffsetY: jest.fn(() => gesture),
       failOffsetX: jest.fn(() => gesture),
+      manualActivation: jest.fn(() => gesture),
+      onTouchesMove: jest.fn(() => gesture),
+      onStart: jest.fn(() => gesture),
       onUpdate: jest.fn(() => gesture),
       onEnd: jest.fn(() => gesture),
       onFinalize: jest.fn(() => gesture),
@@ -57,9 +60,10 @@ jest.mock('react-native-gesture-handler', () => {
     GestureHandlerRootView: View,
     GestureDetector: View,
     Gesture: {
-      Pan: jest.fn(() => createMockPanGesture()),
-      Native: jest.fn(() => createMockPanGesture()),
-      Simultaneous: jest.fn((...gestures: unknown[]) => gestures[0] ?? createMockPanGesture()),
+      Pan: jest.fn(() => createMockGesture()),
+      Pinch: jest.fn(() => createMockGesture()),
+      Native: jest.fn(() => createMockGesture()),
+      Simultaneous: jest.fn((...gestures: unknown[]) => gestures[0] ?? createMockGesture()),
     },
     Swipeable,
   };
