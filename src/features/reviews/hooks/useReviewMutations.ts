@@ -13,6 +13,8 @@ import {
   tvMyReviewQueryKey,
 } from './review-query-keys';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import type { CreateReviewRequest, ReviewContentType, UpdateReviewRequest } from '../types';
 
 export function invalidateReviewQueries(
@@ -39,6 +41,7 @@ export function useCreateReviewMutation(contentType: ReviewContentType, contentI
         ? createMovieReview(contentId, payload)
         : createTvReview(contentId, payload),
     onSuccess: () => {
+      trackProductMetric(PRODUCT_METRICS.reviewCreated);
       invalidateReviewQueries(queryClient, contentType, contentId);
       invalidateProfileStatistics(queryClient);
       invalidateRecommendationQueries(queryClient);

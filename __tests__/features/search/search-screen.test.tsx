@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { TextInput } from 'react-native';
-import SearchScreen from '../../../app/search';
+import SearchScreen from '../../../app/(tabs)/(app-shell)/search';
 import { t } from '../../i18n/i18n-test-utils';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
@@ -9,6 +9,7 @@ import {
   useDeleteSearchHistoryItem,
   useSearchHistory,
 } from '@/features/search/hooks/useSearchHistory';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -77,6 +78,10 @@ jest.mock('@tanstack/react-query', () => {
     }),
   };
 });
+
+jest.mock('@/features/metrics/track-product-metric', () => ({
+  trackProductMetric: jest.fn(),
+}));
 
 const mockSearchResult = {
   id: 'movie-id',
@@ -150,6 +155,17 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), '   ');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
     expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+    expect(trackProductMetric).not.toHaveBeenCalled();
+  });
+
+  it('tracks search_submitted only for valid submitted searches', () => {
+    render(<SearchScreen />);
+
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
+
+    expect(trackProductMetric).toHaveBeenCalledTimes(1);
+    expect(trackProductMetric).toHaveBeenCalledWith('search_submitted');
   });
 
   it('renders autocomplete suggestions while typing', () => {

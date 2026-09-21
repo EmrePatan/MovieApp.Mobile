@@ -29,6 +29,7 @@ import {
 } from '@/features/discovery/pick-something-types';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
+import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { formatCatalogYear, formatRating } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
@@ -96,17 +97,19 @@ export default function PickSomethingScreen() {
   const { width } = useWindowDimensions();
   const [mediaType, setMediaType] = useState<PickSomethingMediaType>('all');
   const [sessionExcludedIds, setSessionExcludedIds] = useState<string[]>([]);
-  const hasTrackedMetricRef = useRef(false);
+  const lastTrackedPickIdRef = useRef<string | null>(null);
+
+  useTrackProductMetricOnFocus(PRODUCT_METRICS.pickSomethingOpened);
 
   const pickQuery = usePickSomething(mediaType, sessionExcludedIds);
   const pick = pickQuery.data?.item ?? null;
 
   useEffect(() => {
-    if (pick && !hasTrackedMetricRef.current) {
-      trackProductMetric(PRODUCT_METRICS.pickSomethingUsed);
-      hasTrackedMetricRef.current = true;
+    if (pick?.id && pickQuery.isSuccess && lastTrackedPickIdRef.current !== pick.id) {
+      trackProductMetric(PRODUCT_METRICS.pickSomethingGenerated);
+      lastTrackedPickIdRef.current = pick.id;
     }
-  }, [pick]);
+  }, [pick?.id, pickQuery.isSuccess]);
 
   const handleMediaTypeChange = useCallback((nextMediaType: PickSomethingMediaType) => {
     setMediaType(nextMediaType);

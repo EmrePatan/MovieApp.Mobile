@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -55,7 +55,6 @@ export function AiRecommendationsContent() {
   const quotaRemaining = quotaOverride ?? quotaQuery.data?.remaining ?? null;
 
   const trimmedMessage = message.trim();
-  const hasTrackedMetricRef = useRef(false);
 
   const handleSubmit = useCallback(() => {
     const error = validateAiRecommendationMessage(message);
@@ -75,9 +74,8 @@ export function AiRecommendationsContent() {
           setSessionId(response.sessionId);
           setQuotaOverride(response.quotaRemaining);
           void queryClient.invalidateQueries({ queryKey: ['ai-recommendations', 'quota'] });
-          if (!hasTrackedMetricRef.current && response.returnedCount > 0) {
-            trackProductMetric(PRODUCT_METRICS.aiRecommendationsUsed);
-            hasTrackedMetricRef.current = true;
+          if (response.returnedCount > 0) {
+            trackProductMetric(PRODUCT_METRICS.aiRecommendationsGenerated);
           }
         },
         onError: (error) => {
@@ -87,7 +85,7 @@ export function AiRecommendationsContent() {
         },
       },
     );
-  }, [hasTrackedMetricRef, message, queryClient, recommendationsMutation, sessionId, trimmedMessage]);
+  }, [message, queryClient, recommendationsMutation, sessionId, trimmedMessage]);
 
   const handlePromptPress = useCallback((prompt: string) => {
     setMessage(prompt);

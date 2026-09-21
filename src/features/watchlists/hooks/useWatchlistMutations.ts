@@ -17,6 +17,8 @@ import {
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import { removeWatchlistItemFromCache } from '@/features/library/utils/optimistic-watchlist-cache';
 import type { WatchlistContentType } from '../types';
 import { DEFAULT_WATCHLIST_PAGE_SIZE } from '../types';
@@ -65,6 +67,7 @@ export function useCreateWatchlist(
   return useMutation({
     mutationFn: (name: string) => createWatchlist(name),
     onSuccess: () => {
+      trackProductMetric(PRODUCT_METRICS.watchlistCreated);
       invalidateWatchlistQueries(queryClient, contentType, contentId);
     },
   });
@@ -76,6 +79,7 @@ export function useCreateWatchlistForLibrary() {
   return useMutation({
     mutationFn: (name: string) => createWatchlist(name),
     onSuccess: () => {
+      trackProductMetric(PRODUCT_METRICS.watchlistCreated);
       invalidateAllWatchlistItemQueries(queryClient);
       invalidateLibraryQueries(queryClient);
       invalidateProfileStatistics(queryClient);

@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { ApiError } from '@/api/errors';
 import { usePickSomething } from '@/features/discovery/hooks/usePickSomething';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
-import PickSomethingScreen from '../../../app/pick-something';
+import PickSomethingScreen from '../../../app/(tabs)/(app-shell)/pick-something';
 
 const mockPush = jest.fn();
 const mockOpenCatalogDetailFromTab = jest.fn();
@@ -19,6 +19,10 @@ jest.mock('@/features/discovery/hooks/usePickSomething', () => ({
 
 jest.mock('@/features/metrics/track-product-metric', () => ({
   trackProductMetric: jest.fn(),
+}));
+
+jest.mock('@/features/metrics/use-track-product-metric-on-focus', () => ({
+  useTrackProductMetricOnFocus: jest.fn(),
 }));
 
 jest.mock('@/features/details/shared/navigation/open-catalog-detail-from-tab', () => ({
@@ -52,6 +56,7 @@ describe('PickSomethingScreen', () => {
       data: { item: pickItem },
       isLoading: false,
       isFetching: false,
+      isSuccess: true,
       isError: false,
       refetch: jest.fn(),
     });
@@ -82,6 +87,7 @@ describe('PickSomethingScreen', () => {
       },
       isLoading: false,
       isFetching: false,
+      isSuccess: true,
       isError: false,
       refetch: jest.fn(),
     });
@@ -105,6 +111,7 @@ describe('PickSomethingScreen', () => {
       },
       isLoading: false,
       isFetching: false,
+      isSuccess: true,
       isError: false,
       refetch: jest.fn(),
     });
@@ -117,17 +124,32 @@ describe('PickSomethingScreen', () => {
     expect(screen.queryByLabelText('Inception poster')).toBeNull();
   });
 
-  it('tracks pick_something_used exactly once per screen visit', async () => {
+  it('tracks pick_something_generated once per successful pick id', async () => {
     const { rerender } = render(<PickSomethingScreen />);
 
     await waitFor(() => {
       expect(trackProductMetric).toHaveBeenCalledTimes(1);
-      expect(trackProductMetric).toHaveBeenCalledWith('pick_something_used');
+      expect(trackProductMetric).toHaveBeenCalledWith('pick_something_generated');
     });
 
     rerender(<PickSomethingScreen />);
 
     expect(trackProductMetric).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not track pick_something_generated when pick query fails', () => {
+    (usePickSomething as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isSuccess: false,
+      isError: true,
+      refetch: jest.fn(),
+    });
+
+    render(<PickSomethingScreen />);
+
+    expect(trackProductMetric).not.toHaveBeenCalled();
   });
 
   it('requests another pick with session exclusions when Try Another is pressed', () => {

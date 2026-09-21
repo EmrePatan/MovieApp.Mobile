@@ -13,6 +13,8 @@ import {
 } from './rating-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import type { RatingContentType, RatingResponse } from '../types';
 
 function getMyRatingQueryKey(contentType: RatingContentType, contentId: string) {
@@ -82,6 +84,7 @@ export function useRateContent(contentType: RatingContentType, contentId: string
       }
     },
     onSuccess: (data) => {
+      trackProductMetric(PRODUCT_METRICS.ratingCreated);
       queryClient.setQueryData(myRatingKey, data);
       invalidateAggregateQueries(queryClient, contentType, contentId);
     },

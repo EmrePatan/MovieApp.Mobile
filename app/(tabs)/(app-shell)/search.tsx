@@ -47,6 +47,8 @@ import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
+import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -118,6 +120,7 @@ export default function SearchScreen() {
     Keyboard.dismiss();
     setInputText(normalized);
     setSubmittedQuery(normalized);
+    trackProductMetric(PRODUCT_METRICS.searchSubmitted);
   }, []);
 
   const handleSubmit = useCallback(

@@ -4,6 +4,7 @@ import { ApiError } from '@/api/errors';
 import { AiRecommendationsContent } from '@/features/ai-recommendations/components/AiRecommendationsContent';
 import { postAiRecommendations } from '@/features/ai-recommendations/api/ai-recommendations-api';
 import { useAiRecommendationQuota } from '@/features/ai-recommendations/hooks/useAiRecommendationQuota';
+import { trackProductMetric } from '@/features/metrics/track-product-metric';
 
 const mockPush = jest.fn();
 
@@ -160,6 +161,7 @@ describe('AiRecommendationsContent', () => {
       message: 'mind-bending sci-fi with emotional stakes',
       sessionId: null,
     });
+    expect(trackProductMetric).toHaveBeenCalledWith('ai_recommendations_generated');
   });
 
   it('requests more picks in the same session from results actions', async () => {
@@ -298,5 +300,28 @@ describe('AiRecommendationsContent', () => {
         ),
       ).toBeTruthy();
     });
+  });
+
+  it('does not track ai_recommendations_generated when generation returns no picks', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue({
+      ...successResponse,
+      returnedCount: 0,
+      recommendations: [],
+    });
+
+    renderScreen();
+    await waitForQuotaHydration();
+
+    fireEvent.changeText(
+      screen.getByLabelText('AI recommendation prompt'),
+      'mind-bending sci-fi with emotional stakes',
+    );
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(postAiRecommendations).toHaveBeenCalled();
+    });
+
+    expect(trackProductMetric).not.toHaveBeenCalled();
   });
 });
