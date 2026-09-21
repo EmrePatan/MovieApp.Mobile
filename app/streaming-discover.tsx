@@ -4,10 +4,12 @@ import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import { StreamingBodyMountProbe } from '@/debug/streaming-body-mount-probe';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
 import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
@@ -40,7 +42,6 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
-import { renderStreamingResultRow } from '@/features/search/utils/render-streaming-result-row';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import {
@@ -269,6 +270,9 @@ export default function StreamingDiscoverScreen() {
     ],
   );
 
+  const useStreamingBodyMountProbe =
+    __DEV__ && Platform.OS === 'android' && hasSelectedProviders && items.length > 0;
+
   const resultsFooter = resultsQuery.isFetchingNextPage ? (
     <View style={styles.footerLoading}>
       <ActivityIndicator color={colors.accent} />
@@ -305,6 +309,15 @@ export default function StreamingDiscoverScreen() {
       );
     }
 
+    if (useStreamingBodyMountProbe) {
+      return (
+        <StreamingBodyMountProbe
+          firstItem={items[0]}
+          onResultPress={handleResultPress}
+        />
+      );
+    }
+
     return (
       <SearchMappedResultsScroll
         layoutScope="streaming-discover"
@@ -313,7 +326,6 @@ export default function StreamingDiscoverScreen() {
         items={resultsData}
         keyExtractor={searchResultKeyExtractor}
         onPress={handleResultPress}
-        renderRow={renderStreamingResultRow}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <MovieAppRefreshControl
@@ -332,11 +344,12 @@ export default function StreamingDiscoverScreen() {
   }, [
     handleResultPress,
     hasSelectedProviders,
-    items.length,
+    items,
     resultsData,
     resultsFooter,
     resultsQuery,
     t,
+    useStreamingBodyMountProbe,
   ]);
 
   return (

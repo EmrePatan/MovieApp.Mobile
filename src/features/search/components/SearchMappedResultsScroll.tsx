@@ -73,6 +73,8 @@ export function SearchMappedResultsScroll({
         itemCount: items.length,
         renderer: 'ScrollView',
         itemComponent: 'SearchResultCard',
+        renderRowContract: 'items.map((item,index)=>(<View>{rowRenderer(...)}</View>))',
+        rowRendererReturnsInserted: true,
       });
     }
   }, [items.length, layoutScope, route.pathname, route.segments]);

@@ -56,6 +56,10 @@ export function CatalogScreenShell({
         onLayout={routeLayoutHandler(layoutScope, 'body', route, {
           testID,
           style: describeViewStyle(styles.body),
+          childrenHost: 'direct-sibling-after-canary',
+          childrenWrapper: 'none',
+          usesFragment: false,
+          usesCloneElement: false,
         })}
       >
         {__DEV__ && Platform.OS === 'android' ? (
@@ -63,7 +67,10 @@ export function CatalogScreenShell({
             testID={`${layoutScope}-body-canary`}
             collapsable={false}
             style={styles.bodyCanary}
-            onLayout={routeLayoutHandler(layoutScope, 'body-canary', route, { testID })}
+            onLayout={routeLayoutHandler(layoutScope, 'body-canary', route, {
+              testID,
+              siblingOf: 'children',
+            })}
           >
             <Text style={styles.bodyCanaryText}>BODY CANARY</Text>
           </View>
