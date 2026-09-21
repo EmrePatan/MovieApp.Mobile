@@ -21,6 +21,17 @@ describe('pending-auth-deep-link', () => {
     expect(hasPendingAuthDeepLink()).toBe(false);
   });
 
+  it('captures and consumes reset-password deep links', () => {
+    captureAuthDeepLink('movieapp://reset-password?token=reset-token');
+
+    expect(hasPendingAuthDeepLink()).toBe(true);
+    expect(consumePendingAuthDeepLink()).toEqual({
+      kind: 'reset-password',
+      token: 'reset-token',
+    });
+    expect(hasPendingAuthDeepLink()).toBe(false);
+  });
+
   it('ignores unrelated URLs', () => {
     captureAuthDeepLink('movieapp://movie/123');
 

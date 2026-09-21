@@ -23,4 +23,15 @@ describe('auth-deep-link', () => {
     expect(parseAuthDeepLink('movieapp://movie/123')).toBeNull();
     expect(parseAuthDeepLink(null)).toBeNull();
   });
+
+  it('returns null when reset-password deep link is missing a token', () => {
+    expect(parseAuthDeepLink('movieapp://reset-password')).toBeNull();
+  });
+
+  it('still routes malformed-looking reset tokens to the reset flow', () => {
+    expect(parseAuthDeepLink('movieapp://reset-password?token=expired-or-invalid')).toEqual({
+      kind: 'reset-password',
+      token: 'expired-or-invalid',
+    });
+  });
 });

@@ -1,6 +1,9 @@
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { useAuth } from '@/auth/useAuth';
-import { resetPendingAuthDeepLinkForTests } from '@/auth/pending-auth-deep-link';
+import {
+  captureAuthDeepLink,
+  resetPendingAuthDeepLinkForTests,
+} from '@/auth/pending-auth-deep-link';
 
 jest.mock('@/auth/useAuth');
 
@@ -50,6 +53,35 @@ describe('useProtectedRoute', () => {
 
     const expoRouter = jest.requireMock('expo-router');
     expoRouter.useSegments.mockReturnValue(['(auth)', 'verify-email']);
+
+    useProtectedRoute();
+
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('allows authenticated users to stay on reset-password', () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
+    const expoRouter = jest.requireMock('expo-router');
+    expoRouter.useSegments.mockReturnValue(['(auth)', 'reset-password']);
+
+    useProtectedRoute();
+
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('does not redirect away while a pending auth deep link is waiting to restore', () => {
+    captureAuthDeepLink('movieapp://reset-password?token=stale-session-token');
+    (useAuth as jest.Mock).mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
+    const expoRouter = jest.requireMock('expo-router');
+    expoRouter.useSegments.mockReturnValue(['(tabs)', 'home']);
 
     useProtectedRoute();
 
