@@ -67,7 +67,11 @@ describe('ProviderLogoImage', () => {
 
     act(() => {
       screen.getByTestId('provider-logo').props.onError?.();
+    });
+    act(() => {
       screen.getByTestId('provider-logo').props.onError?.();
+    });
+    act(() => {
       screen.getByTestId('provider-logo').props.onError?.();
     });
 

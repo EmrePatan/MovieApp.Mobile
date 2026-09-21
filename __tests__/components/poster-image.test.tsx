@@ -82,12 +82,41 @@ describe('PosterImage loading lifecycle', () => {
     expect(retriedImage.props.source.uri).toBe(firstUri);
 
     act(() => {
-      retriedImage.props.onError?.();
+      screen.UNSAFE_getByType(Image).props.onError?.();
     });
 
     expect(screen.UNSAFE_queryByType(Image)).toBeNull();
     expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
     expect(screen.getByLabelText('film-outline')).toBeTruthy();
+  });
+
+  it('ignores stale onError callbacks after the URI changes during recycling', () => {
+    const { rerender } = render(
+      <PosterImage
+        uri="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Interstellar poster"
+      />,
+    );
+
+    const staleOnError = screen.UNSAFE_getByType(Image).props.onError;
+
+    rerender(
+      <PosterImage
+        uri="/7Fdh7gUq3plvQqxRbNYhWvDABXA.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Dallas Buyers Club poster"
+      />,
+    );
+
+    act(() => {
+      staleOnError?.();
+    });
+
+    expect(screen.UNSAFE_getByType(Image)).toBeTruthy();
+    expect(screen.queryByLabelText('film-outline')).toBeNull();
   });
 
   it('resets loading and error state when the source URI changes', () => {
@@ -101,8 +130,9 @@ describe('PosterImage loading lifecycle', () => {
     );
 
     act(() => {
-      const image = screen.UNSAFE_getByType(Image);
-      image.props.onError?.();
+      screen.UNSAFE_getByType(Image).props.onError?.();
+    });
+    act(() => {
       screen.UNSAFE_getByType(Image).props.onError?.();
     });
 

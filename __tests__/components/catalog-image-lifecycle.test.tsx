@@ -35,6 +35,8 @@ describe('CatalogImage lifecycle', () => {
 
     act(() => {
       image.props.onError?.();
+    });
+    act(() => {
       screen.UNSAFE_getByType(Image).props.onError?.();
     });
 
@@ -54,8 +56,9 @@ describe('CatalogImage lifecycle', () => {
     );
 
     act(() => {
-      const image = screen.UNSAFE_getByType(Image);
-      image.props.onError?.();
+      screen.UNSAFE_getByType(Image).props.onError?.();
+    });
+    act(() => {
       screen.UNSAFE_getByType(Image).props.onError?.();
     });
 

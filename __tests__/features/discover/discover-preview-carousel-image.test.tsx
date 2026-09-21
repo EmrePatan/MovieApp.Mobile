@@ -53,6 +53,8 @@ describe('DiscoverPreviewCarousel images', () => {
 
     act(() => {
       images[1].props.onError?.();
+    });
+    act(() => {
       screen.UNSAFE_getAllByType(Image)[1]?.props.onError?.();
     });
 

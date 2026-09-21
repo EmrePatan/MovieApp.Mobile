@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { resolveImageUri, type ImageSize } from '@/utils/image-url';
@@ -34,6 +34,7 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
   imageInset = 0,
   testID,
 }: ProviderLogoImageProps) {
+  const generationRef = useRef(0);
   const [trackedLogoPath, setTrackedLogoPath] = useState(logoPath);
   const [loadState, setLoadState] = useState<ProviderLogoLoadState>(INITIAL_LOAD_STATE);
   const logoSize = PROVIDER_LOGO_SIZES[loadState.sizeIndex];
@@ -45,10 +46,23 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
   if (trackedLogoPath !== logoPath) {
     setTrackedLogoPath(logoPath);
     setLoadState(INITIAL_LOAD_STATE);
+    generationRef.current += 1;
   }
 
   const handleImageError = useCallback(() => {
+    const generationAtError = generationRef.current;
+    const sizeAtError = loadState.sizeIndex;
+    const retryAtError = loadState.retryVersion;
+
     setLoadState((current) => {
+      if (generationRef.current !== generationAtError) {
+        return current;
+      }
+
+      if (current.sizeIndex !== sizeAtError || current.retryVersion !== retryAtError) {
+        return current;
+      }
+
       if (current.sizeIndex < PROVIDER_LOGO_SIZES.length - 1) {
         return {
           sizeIndex: current.sizeIndex + 1,
@@ -63,7 +77,7 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
 
       return { ...current, hasError: true };
     });
-  }, []);
+  }, [loadState.retryVersion, loadState.sizeIndex]);
 
   if (showFallback) {
     return (

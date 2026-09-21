@@ -16,7 +16,7 @@ export const BackdropImage = memo(function BackdropImage({
   height = 220,
 }: BackdropImageProps) {
   const uri = resolveImageUri(path);
-  const { hasError, imageKey, handleError } = useRemoteImageLoadState(uri);
+  const { hasError, imageKey, onImageError } = useRemoteImageLoadState(uri);
 
   if (!uri || hasError) {
     return (
@@ -33,7 +33,7 @@ export const BackdropImage = memo(function BackdropImage({
       style={[styles.image, { height }]}
       resizeMode="cover"
       accessibilityRole="image"
-      onError={handleError}
+      onError={onImageError}
     />
   );
 });
@@ -54,7 +54,7 @@ export const CatalogImage = memo(function CatalogImage({
   rounded = true,
 }: CatalogImageProps) {
   const uri = resolveImageUri(path);
-  const { hasError, imageKey, handleError } = useRemoteImageLoadState(uri);
+  const { hasError, imageKey, onImageError } = useRemoteImageLoadState(uri);
   const showFallback = !uri || hasError;
 
   return (
@@ -77,7 +77,7 @@ export const CatalogImage = memo(function CatalogImage({
           source={{ uri }}
           style={[styles.image, rounded && styles.rounded, { width, height }]}
           resizeMode="cover"
-          onError={handleError}
+          onError={onImageError}
         />
       )}
     </View>

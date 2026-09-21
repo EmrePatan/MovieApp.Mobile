@@ -23,7 +23,7 @@ export const PosterImage = memo(function PosterImage({
   elevated = false,
 }: PosterImageProps) {
   const resolvedUri = resolveImageUri(uri);
-  const { hasError, imageKey, handleError } = useRemoteImageLoadState(resolvedUri);
+  const { hasError, imageKey, onImageError } = useRemoteImageLoadState(resolvedUri);
   const showFallback = !resolvedUri || hasError;
   const [trackedUri, setTrackedUri] = useState(resolvedUri);
   const [isLoading, setIsLoading] = useState(Boolean(resolvedUri));
@@ -58,7 +58,7 @@ export const PosterImage = memo(function PosterImage({
             onLoad={() => setIsLoading(false)}
             onLoadEnd={() => setIsLoading(false)}
             onError={() => {
-              handleError();
+              onImageError();
               setIsLoading(false);
             }}
           />
