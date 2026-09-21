@@ -1,6 +1,7 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
@@ -14,14 +15,8 @@ export const BackdropImage = memo(function BackdropImage({
   path,
   height = 220,
 }: BackdropImageProps) {
-  const [hasError, setHasError] = useState(false);
-  const [trackedPath, setTrackedPath] = useState(path);
   const uri = resolveImageUri(path);
-
-  if (trackedPath !== path) {
-    setTrackedPath(path);
-    setHasError(false);
-  }
+  const { hasError, imageKey, handleError } = useRemoteImageLoadState(uri);
 
   if (!uri || hasError) {
     return (
@@ -33,11 +28,12 @@ export const BackdropImage = memo(function BackdropImage({
 
   return (
     <Image
+      key={imageKey}
       source={{ uri }}
       style={[styles.image, { height }]}
       resizeMode="cover"
       accessibilityRole="image"
-      onError={() => setHasError(true)}
+      onError={handleError}
     />
   );
 });
@@ -57,15 +53,9 @@ export const CatalogImage = memo(function CatalogImage({
   accessibilityLabel,
   rounded = true,
 }: CatalogImageProps) {
-  const [hasError, setHasError] = useState(false);
-  const [trackedPath, setTrackedPath] = useState(path);
   const uri = resolveImageUri(path);
+  const { hasError, imageKey, handleError } = useRemoteImageLoadState(uri);
   const showFallback = !uri || hasError;
-
-  if (trackedPath !== path) {
-    setTrackedPath(path);
-    setHasError(false);
-  }
 
   return (
     <View
@@ -83,10 +73,11 @@ export const CatalogImage = memo(function CatalogImage({
         </View>
       ) : (
         <Image
+          key={imageKey}
           source={{ uri }}
           style={[styles.image, rounded && styles.rounded, { width, height }]}
           resizeMode="cover"
-          onError={() => setHasError(true)}
+          onError={handleError}
         />
       )}
     </View>

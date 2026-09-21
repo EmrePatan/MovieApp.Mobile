@@ -62,7 +62,7 @@ describe('PosterImage loading lifecycle', () => {
     expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
   });
 
-  it('clears the spinner and shows fallback on onError', () => {
+  it('retries once on transient onError before showing fallback', () => {
     render(
       <PosterImage
         uri="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
@@ -72,10 +72,17 @@ describe('PosterImage loading lifecycle', () => {
       />,
     );
 
-    const image = screen.UNSAFE_getByType(Image);
+    const firstUri = screen.UNSAFE_getByType(Image).props.source.uri;
 
     act(() => {
-      image.props.onError?.();
+      screen.UNSAFE_getByType(Image).props.onError?.();
+    });
+
+    const retriedImage = screen.UNSAFE_getByType(Image);
+    expect(retriedImage.props.source.uri).toBe(firstUri);
+
+    act(() => {
+      retriedImage.props.onError?.();
     });
 
     expect(screen.UNSAFE_queryByType(Image)).toBeNull();
@@ -94,6 +101,8 @@ describe('PosterImage loading lifecycle', () => {
     );
 
     act(() => {
+      const image = screen.UNSAFE_getByType(Image);
+      image.props.onError?.();
       screen.UNSAFE_getByType(Image).props.onError?.();
     });
 

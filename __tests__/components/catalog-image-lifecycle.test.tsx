@@ -21,7 +21,7 @@ describe('CatalogImage lifecycle', () => {
     expect(screen.queryByLabelText('film-outline')).toBeNull();
   });
 
-  it('shows fallback only after onError', () => {
+  it('shows fallback only after retryable onError is exhausted', () => {
     render(
       <CatalogImage
         path="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
@@ -35,6 +35,7 @@ describe('CatalogImage lifecycle', () => {
 
     act(() => {
       image.props.onError?.();
+      screen.UNSAFE_getByType(Image).props.onError?.();
     });
 
     expect(screen.UNSAFE_queryByType(Image)).toBeNull();
@@ -53,6 +54,8 @@ describe('CatalogImage lifecycle', () => {
     );
 
     act(() => {
+      const image = screen.UNSAFE_getByType(Image);
+      image.props.onError?.();
       screen.UNSAFE_getByType(Image).props.onError?.();
     });
 

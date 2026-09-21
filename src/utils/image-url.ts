@@ -18,6 +18,20 @@ function getEffectiveImageBase(): string {
 
 export type ImageSize = 'w92' | 'w300' | 'w500' | 'original';
 
+/**
+ * Normalizes raw catalog image paths before URL resolution.
+ * Supports protocol-relative TMDB URLs (`//image.tmdb.org/...`).
+ */
+export function normalizeImagePathInput(path: string): string {
+  const trimmed = path.trim();
+
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`;
+  }
+
+  return trimmed;
+}
+
 const TMDB_IMAGE_HOST = 'image.tmdb.org';
 
 function tryParseUrl(value: string): URL | null {
@@ -129,7 +143,7 @@ export function resolveImageUri(
     return null;
   }
 
-  const trimmed = path.trim();
+  const trimmed = normalizeImagePathInput(path);
 
   if (/^https?:\/\//i.test(trimmed)) {
     const resolved = isTmdbUrl(trimmed)

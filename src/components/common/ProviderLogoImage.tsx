@@ -1,9 +1,23 @@
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { resolveProviderLogoUri } from '@/utils/image-url';
+import { resolveImageUri, type ImageSize } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
+
+const PROVIDER_LOGO_SIZES: ImageSize[] = ['w92', 'w500'];
+
+type ProviderLogoLoadState = {
+  sizeIndex: number;
+  retryVersion: number;
+  hasError: boolean;
+};
+
+const INITIAL_LOAD_STATE: ProviderLogoLoadState = {
+  sizeIndex: 0,
+  retryVersion: 0,
+  hasError: false,
+};
 
 interface ProviderLogoImageProps {
   name: string;
@@ -20,16 +34,36 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
   imageInset = 0,
   testID,
 }: ProviderLogoImageProps) {
-  const [hasError, setHasError] = useState(false);
-  const [trackedPath, setTrackedPath] = useState(logoPath);
-  const logoUri = resolveProviderLogoUri(logoPath);
+  const [trackedLogoPath, setTrackedLogoPath] = useState(logoPath);
+  const [loadState, setLoadState] = useState<ProviderLogoLoadState>(INITIAL_LOAD_STATE);
+  const logoSize = PROVIDER_LOGO_SIZES[loadState.sizeIndex];
+  const logoUri = resolveImageUri(logoPath, logoSize);
   const imageSize = size - imageInset * 2;
-  const showFallback = !logoUri || hasError;
+  const showFallback = !logoUri || loadState.hasError;
+  const imageKey = `${logoPath ?? ''}:${loadState.sizeIndex}:${loadState.retryVersion}`;
 
-  if (trackedPath !== logoPath) {
-    setTrackedPath(logoPath);
-    setHasError(false);
+  if (trackedLogoPath !== logoPath) {
+    setTrackedLogoPath(logoPath);
+    setLoadState(INITIAL_LOAD_STATE);
   }
+
+  const handleImageError = useCallback(() => {
+    setLoadState((current) => {
+      if (current.sizeIndex < PROVIDER_LOGO_SIZES.length - 1) {
+        return {
+          sizeIndex: current.sizeIndex + 1,
+          retryVersion: 0,
+          hasError: false,
+        };
+      }
+
+      if (current.retryVersion < 1) {
+        return { ...current, retryVersion: current.retryVersion + 1 };
+      }
+
+      return { ...current, hasError: true };
+    });
+  }, []);
 
   if (showFallback) {
     return (
@@ -46,6 +80,7 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
 
   return (
     <Image
+      key={imageKey}
       source={{ uri: logoUri }}
       style={[
         styles.image,
@@ -57,7 +92,7 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
       ]}
       resizeMode="contain"
       testID={testID}
-      onError={() => setHasError(true)}
+      onError={handleImageError}
     />
   );
 });

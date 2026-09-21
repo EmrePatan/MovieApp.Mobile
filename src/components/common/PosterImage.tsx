@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
@@ -21,16 +22,15 @@ export const PosterImage = memo(function PosterImage({
   accessibilityLabel,
   elevated = false,
 }: PosterImageProps) {
-  const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(Boolean(uri));
-  const [trackedUri, setTrackedUri] = useState(uri);
   const resolvedUri = resolveImageUri(uri);
+  const { hasError, imageKey, handleError } = useRemoteImageLoadState(resolvedUri);
   const showFallback = !resolvedUri || hasError;
+  const [trackedUri, setTrackedUri] = useState(resolvedUri);
+  const [isLoading, setIsLoading] = useState(Boolean(resolvedUri));
 
-  if (trackedUri !== uri) {
-    setTrackedUri(uri);
-    setHasError(false);
-    setIsLoading(Boolean(uri));
+  if (trackedUri !== resolvedUri) {
+    setTrackedUri(resolvedUri);
+    setIsLoading(Boolean(resolvedUri));
   }
 
   return (
@@ -50,6 +50,7 @@ export const PosterImage = memo(function PosterImage({
       ) : (
         <>
           <Image
+            key={imageKey}
             source={{ uri: resolvedUri }}
             style={[styles.image, { width, height }]}
             resizeMode="cover"
@@ -57,7 +58,7 @@ export const PosterImage = memo(function PosterImage({
             onLoad={() => setIsLoading(false)}
             onLoadEnd={() => setIsLoading(false)}
             onError={() => {
-              setHasError(true);
+              handleError();
               setIsLoading(false);
             }}
           />

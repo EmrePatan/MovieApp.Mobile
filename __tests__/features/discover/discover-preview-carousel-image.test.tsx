@@ -53,6 +53,7 @@ describe('DiscoverPreviewCarousel images', () => {
 
     act(() => {
       images[1].props.onError?.();
+      screen.UNSAFE_getAllByType(Image)[1]?.props.onError?.();
     });
 
     expect(screen.getByLabelText('Inception poster')).toBeTruthy();

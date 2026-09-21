@@ -58,6 +58,7 @@ describe('CatalogImage grid isolation', () => {
 
     act(() => {
       images[1].props.onError?.();
+      screen.UNSAFE_getAllByType(Image)[1]?.props.onError?.();
     });
 
     const remainingImages = screen.UNSAFE_getAllByType(Image);
@@ -79,6 +80,8 @@ describe('CatalogImage grid isolation', () => {
     );
 
     act(() => {
+      const image = screen.UNSAFE_getByType(Image);
+      image.props.onError?.();
       screen.UNSAFE_getByType(Image).props.onError?.();
     });
 

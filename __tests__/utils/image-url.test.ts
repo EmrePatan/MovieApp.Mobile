@@ -1,11 +1,20 @@
 import {
   buildTmdbImageUrl,
   getImageBaseUrl,
+  normalizeImagePathInput,
   normalizeTmdbAbsoluteUrl,
   normalizeTmdbFilePath,
   resolveImageUri,
   resolveProviderLogoUri,
 } from '@/utils/image-url';
+
+describe('normalizeImagePathInput', () => {
+  it('converts protocol-relative TMDB URLs to https', () => {
+    expect(
+      normalizeImagePathInput('//image.tmdb.org/t/p/w500/abc.jpg'),
+    ).toBe('https://image.tmdb.org/t/p/w500/abc.jpg');
+  });
+});
 
 describe('normalizeTmdbFilePath', () => {
   it('keeps plain TMDB file paths unchanged', () => {
@@ -155,6 +164,13 @@ describe('resolveImageUri', () => {
 
   it('deduplicates double-sized absolute TMDB URLs', () => {
     expect(resolveImageUri('https://image.tmdb.org/t/p/w500/w500/abc.jpg')).toBe(
+      'https://image.tmdb.org/t/p/w500/abc.jpg',
+    );
+  });
+
+  it('resolves protocol-relative TMDB URLs', () => {
+    delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+    expect(resolveImageUri('//image.tmdb.org/t/p/w500/abc.jpg')).toBe(
       'https://image.tmdb.org/t/p/w500/abc.jpg',
     );
   });
