@@ -9,21 +9,24 @@
       "distribution": "internal",
       "credentialsSource": "remote",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "development"
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://image.tmdb.org/t/p"
       }
     },
     "preview": {
       "distribution": "internal",
       "credentialsSource": "remote",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "preview"
+        "EXPO_PUBLIC_APP_ENV": "preview",
+        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://image.tmdb.org/t/p"
       }
     },
     "production": {
       "distribution": "store",
       "credentialsSource": "remote",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "production"
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://image.tmdb.org/t/p"
       },
       "android": {
         "buildType": "app-bundle"

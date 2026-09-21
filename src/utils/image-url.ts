@@ -1,7 +1,6 @@
 /**
- * Optional image base URL for backend-relative poster/backdrop/still paths.
- * The backend contract does not define a CDN base URL.
- * When unset, relative paths resolve to null and UI shows placeholders.
+ * Optional override for backend-relative TMDB image paths.
+ * When unset, relative paths default to the public TMDB image CDN.
  */
 export function getImageBaseUrl(): string | null {
   const base = process.env.EXPO_PUBLIC_IMAGE_BASE_URL?.trim();
@@ -11,7 +10,13 @@ export function getImageBaseUrl(): string | null {
   return base.replace(/\/+$/, '');
 }
 
-export type ImageSize = 'w300' | 'w500' | 'original';
+const DEFAULT_TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
+
+function getEffectiveImageBase(): string {
+  return getImageBaseUrl() ?? DEFAULT_TMDB_IMAGE_BASE;
+}
+
+export type ImageSize = 'w92' | 'w300' | 'w500' | 'original';
 
 const TMDB_IMAGE_HOST = 'image.tmdb.org';
 
@@ -113,7 +118,7 @@ export function logImageResolutionInDev(
 /**
  * Resolves catalog image paths from the backend into a loadable URI.
  * Absolute URLs are returned unchanged unless they are TMDB URLs, which are normalized.
- * Relative paths require EXPO_PUBLIC_IMAGE_BASE_URL to be configured.
+ * Relative paths use EXPO_PUBLIC_IMAGE_BASE_URL when set, otherwise the TMDB CDN.
  * TMDB paths always receive exactly one size segment regardless of base URL shape.
  */
 export function resolveImageUri(
@@ -134,10 +139,7 @@ export function resolveImageUri(
     return resolved;
   }
 
-  const base = getImageBaseUrl();
-  if (!base) {
-    return null;
-  }
+  const base = getEffectiveImageBase();
 
   let resolved: string;
   if (isTmdbBase(base)) {
@@ -157,4 +159,9 @@ export function resolveThumbnailImageUri(path: string | null | undefined): strin
 
 export function resolveOriginalImageUri(path: string | null | undefined): string | null {
   return resolveImageUri(path, 'original');
+}
+
+/** TMDB provider logos are small; w92 matches TMDB's provider logo profile. */
+export function resolveProviderLogoUri(path: string | null | undefined): string | null {
+  return resolveImageUri(path, 'w92');
 }

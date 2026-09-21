@@ -4,6 +4,7 @@ import {
   normalizeTmdbAbsoluteUrl,
   normalizeTmdbFilePath,
   resolveImageUri,
+  resolveProviderLogoUri,
 } from '@/utils/image-url';
 
 describe('normalizeTmdbFilePath', () => {
@@ -54,10 +55,15 @@ describe('resolveImageUri', () => {
     expect(resolveImageUri('')).toBeNull();
   });
 
-  it('returns null for relative paths when no base URL is configured', () => {
+  it('uses the TMDB CDN for relative paths when no base URL is configured', () => {
     delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
-    expect(resolveImageUri('/path.jpg')).toBeNull();
     expect(getImageBaseUrl()).toBeNull();
+    expect(resolveImageUri('/path.jpg')).toBe(
+      'https://image.tmdb.org/t/p/w500/path.jpg',
+    );
+    expect(resolveProviderLogoUri('/netflix.png')).toBe(
+      'https://image.tmdb.org/t/p/w92/netflix.png',
+    );
   });
 
   it('returns non-TMDB absolute URLs unchanged', () => {

@@ -1,9 +1,8 @@
-import { Image, StyleSheet, View } from 'react-native';
-import { AppText } from '@/components/common/AppText';
+import { StyleSheet, View } from 'react-native';
+import { ProviderLogoImage } from '@/components/common/ProviderLogoImage';
 import type { DiscoveryWatchProvider } from '../watch-provider-types';
-import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 const PROVIDER_LOGO_SIZE = 54;
 
@@ -13,19 +12,15 @@ interface WatchProviderLogoProps {
 }
 
 export function WatchProviderLogo({ provider, selected = false }: WatchProviderLogoProps) {
-  const logoUri = resolveImageUri(provider.logoPath);
-
   return (
     <View style={[styles.logoCircle, selected && styles.logoCircleSelected]}>
-      {logoUri ? (
-        <Image source={{ uri: logoUri }} style={styles.logoImage} resizeMode="contain" />
-      ) : (
-        <View style={styles.logoFallback}>
-          <AppText variant="caption" style={styles.logoFallbackText}>
-            {provider.name.charAt(0)}
-          </AppText>
-        </View>
-      )}
+      <ProviderLogoImage
+        name={provider.name}
+        logoPath={provider.logoPath}
+        size={PROVIDER_LOGO_SIZE}
+        imageInset={5}
+        testID={`watch-provider-logo-${provider.providerId}`}
+      />
     </View>
   );
 }
@@ -45,22 +40,5 @@ const styles = StyleSheet.create({
   },
   logoCircleSelected: {
     borderColor: colors.accent,
-  },
-  logoImage: {
-    width: PROVIDER_LOGO_SIZE - 10,
-    height: PROVIDER_LOGO_SIZE - 10,
-    borderRadius: borderRadius.md,
-  },
-  logoFallback: {
-    width: PROVIDER_LOGO_SIZE - 10,
-    height: PROVIDER_LOGO_SIZE - 10,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-  },
-  logoFallbackText: {
-    color: colors.textSecondary,
-    fontWeight: '700',
   },
 });

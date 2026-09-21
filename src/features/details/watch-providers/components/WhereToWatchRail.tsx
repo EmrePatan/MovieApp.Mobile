@@ -1,11 +1,11 @@
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { ProviderLogoImage } from '@/components/common/ProviderLogoImage';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { getCatalogDetailWatchRegion } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
-import { resolveImageUri } from '@/utils/image-url';
 import { useMovieWatchProviders, useTvShowWatchProviders } from '../hooks/useWatchProviders';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -76,10 +76,7 @@ export function WhereToWatchRail({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       >
-        {providers.map((provider) => {
-          const logoUri = resolveImageUri(provider.logoPath);
-
-          return (
+        {providers.map((provider) => (
           <View
             key={provider.providerId}
             style={styles.providerItem}
@@ -88,26 +85,18 @@ export function WhereToWatchRail({
             testID={`watch-provider-${provider.providerId}`}
           >
             <View style={styles.logoCircle}>
-              {logoUri ? (
-                <Image
-                  source={{ uri: logoUri }}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
-              ) : (
-                <View style={styles.logoFallback}>
-                  <AppText variant="caption" style={styles.logoFallbackText}>
-                    {provider.name.charAt(0)}
-                  </AppText>
-                </View>
-              )}
+              <ProviderLogoImage
+                name={provider.name}
+                logoPath={provider.logoPath}
+                size={PROVIDER_LOGO_SIZE}
+                testID={`watch-provider-logo-${provider.providerId}`}
+              />
             </View>
             <AppText variant="caption" style={styles.providerName} numberOfLines={2}>
               {provider.name}
             </AppText>
           </View>
-          );
-        })}
+        ))}
       </ScrollView>
       <AppText variant="caption" style={styles.attribution} testID="where-to-watch-attribution">
         {t('common.dataProvidedByJustWatch')}
@@ -142,20 +131,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoImage: {
-    width: PROVIDER_LOGO_SIZE,
-    height: PROVIDER_LOGO_SIZE,
-  },
-  logoFallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  logoFallbackText: {
-    color: colors.textMuted,
-    fontWeight: '600',
   },
   providerName: {
     color: colors.textSecondary,
