@@ -30,6 +30,7 @@ describe('useAuthDeepLinkNavigation', () => {
 
     const expoRouter = jest.requireMock('expo-router');
     expoRouter.useRouter.mockReturnValue({ replace });
+    expoRouter.useSegments.mockReturnValue([]);
   });
 
   it('navigates to verify-email when a pending deep link exists on cold start', () => {

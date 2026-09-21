@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
-import { isAuthEntryScreen } from '@/auth/auth-route-policy';
-import { hasPendingAuthDeepLink } from '@/auth/pending-auth-deep-link';
+import { isAuthEntryScreen, isTokenAuthFlowScreen } from '@/auth/auth-route-policy';
+import { isAuthDeepLinkRestorePending } from '@/auth/pending-auth-deep-link';
+import { traceAuthDeepLink } from '@/auth/auth-deep-link-trace';
 import { useAuth } from '@/auth/useAuth';
 
 /**
@@ -13,13 +14,22 @@ export function useProtectedRoute(): void {
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading || hasPendingAuthDeepLink()) {
+    if (isLoading || isAuthDeepLinkRestorePending()) {
+      if (isAuthDeepLinkRestorePending()) {
+        traceAuthDeepLink('guard_blocked', {
+          segment: (segments as string[]).join('/'),
+        });
+      }
       return;
     }
 
     const segmentList = segments as string[];
     const inAuthGroup = segmentList[0] === '(auth)';
     const authScreen = segmentList[1];
+
+    if (!isAuthenticated && inAuthGroup && isTokenAuthFlowScreen(authScreen)) {
+      return;
+    }
 
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');

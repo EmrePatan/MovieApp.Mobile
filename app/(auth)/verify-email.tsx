@@ -12,6 +12,7 @@ import { AuthLink } from '@/features/auth/components/AuthLink';
 import { AuthPrimaryButton } from '@/features/auth/components/AuthPrimaryButton';
 import { AuthScreenLayout } from '@/features/auth/components/AuthScreenLayout';
 import { spacing } from '@/theme/spacing';
+import { traceAuthDeepLink } from '@/auth/auth-deep-link-trace';
 
 export default function VerifyEmailScreen() {
   const { t } = useTranslation();
@@ -54,6 +55,13 @@ export default function VerifyEmailScreen() {
   }
 
   useEffect(() => {
+    traceAuthDeepLink('verify_screen_mount', {
+      flow: 'verify-email',
+      hasUrl: tokenFromDeepLink,
+    });
+  }, [tokenFromDeepLink]);
+
+  useEffect(() => {
     if (!tokenFromDeepLink || hasAutoSubmitted) {
       return;
     }
@@ -61,6 +69,7 @@ export default function VerifyEmailScreen() {
     setHasAutoSubmitted(true);
 
     void (async () => {
+      traceAuthDeepLink('verify_request_start', { flow: 'verify-email', hasUrl: true });
       setFormError(null);
       setSuccessMessage(null);
       setIsSubmitting(true);

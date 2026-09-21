@@ -70,6 +70,7 @@ beforeAll(async () => {
 
 jest.mock('expo-linking', () => ({
   getInitialURL: jest.fn().mockResolvedValue(null),
+  getLinkingURL: jest.fn().mockReturnValue(null),
   addEventListener: jest.fn(() => ({ remove: jest.fn() })),
   parse: jest.fn(),
 }));

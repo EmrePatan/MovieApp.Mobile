@@ -88,6 +88,20 @@ describe('useProtectedRoute', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
+  it('allows unauthenticated users to remain on verify-email during token flow', () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+    });
+
+    const expoRouter = jest.requireMock('expo-router');
+    expoRouter.useSegments.mockReturnValue(['(auth)', 'verify-email']);
+
+    useProtectedRoute();
+
+    expect(replace).not.toHaveBeenCalled();
+  });
+
   it('does nothing while auth is loading', () => {
     (useAuth as jest.Mock).mockReturnValue({
       isAuthenticated: false,
