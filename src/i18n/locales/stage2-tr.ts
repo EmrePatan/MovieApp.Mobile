@@ -764,8 +764,6 @@ export const stage2Tr = {
       notifyWhenReleased: 'Yayınlandığında bildir',
       releaseAlertOn: 'Yayın uyarısı açık',
       signInReleaseAlerts: 'Yayın uyarıları almak için giriş yap.',
-      followed: 'Takip edildi',
-      followedEnableNotifications: 'Takip edildi. Yayın uyarıları almak için cihaz ayarlarından bildirimleri etkinleştir.',
       enableNotificationsSettings: 'Yayın uyarıları almak için cihaz ayarından bildirimleri etkinleştir.',
       playTrailer: 'Fragmanı Oynat',
       trailerButton: 'Fragman',

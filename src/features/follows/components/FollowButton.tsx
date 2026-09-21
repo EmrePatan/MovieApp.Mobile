@@ -28,7 +28,7 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { data: status, isLoading } = useTvShowFollowStatus(tvShowId);
   const [preferencesVisible, setPreferencesVisible] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [signInFeedback, setSignInFeedback] = useState<string | null>(null);
   const [permissionPromptVisible, setPermissionPromptVisible] = useState(false);
   const [permissionRequiresSettings, setPermissionRequiresSettings] = useState(false);
   const [permissionActionBusy, setPermissionActionBusy] = useState(false);
@@ -38,11 +38,11 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
 
   const handlePress = () => {
     if (!requireAuth()) {
-      setFeedback(t('details.actions.signInFollowTv'));
+      setSignInFeedback(t('details.actions.signInFollowTv'));
       return;
     }
 
-    setFeedback(null);
+    setSignInFeedback(null);
     setPreferencesVisible(true);
   };
 
@@ -99,7 +99,11 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
 
   return (
     <>
-      <FeedbackMessage message={feedback} tone="success" onDismiss={() => setFeedback(null)} />
+      <FeedbackMessage
+        message={signInFeedback}
+        tone="info"
+        onDismiss={() => setSignInFeedback(null)}
+      />
       <DetailCircularAction
         label={t('details.actions.followLabel')}
         accessibilityLabel={label}

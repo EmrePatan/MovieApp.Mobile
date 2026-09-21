@@ -714,9 +714,6 @@ export const stage2En = {
       notifyWhenReleased: 'Notify me when released',
       releaseAlertOn: 'Release alert on',
       signInReleaseAlerts: 'Please sign in to get release alerts.',
-      followed: 'Following',
-      followedEnableNotifications:
-        'Followed. Enable notifications in device settings to receive release alerts.',
       enableNotificationsSettings:
         'Enable notifications in device settings to receive release alerts.',
       playTrailer: 'Play Trailer',
