@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateDiscoverySort,
@@ -7,13 +7,14 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
-import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -32,8 +33,6 @@ import { useGenres } from '@/features/discovery/hooks/useGenres';
 import {
   countActiveDiscoveryFilters,
   createDefaultDiscoveryFilters,
-  DISCOVERY_SORT_OPTIONS,
-  DISCOVERY_TYPE_OPTIONS,
   getDefaultSortForMode,
   getDiscoverTitle,
   hasActiveDiscoveryFilters,
@@ -47,16 +46,13 @@ import {
 } from '@/features/discovery/utils/discover-params';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
+import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
-import {
-  useNavigationDiagnostics,
-  useScreenRenderTrace,
-} from '@/debug/navigation-diagnostics';
-import { logRouteLayoutMeta, useRouteLayoutContext } from '@/debug/route-layout-probe';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { layout } from '@/theme/layout';
+import { commonStyles } from '@/theme/theme';
 
 function getTypeLabel(type: DiscoveryTypeFilter): string | null {
   if (type === 'all') {
@@ -71,13 +67,10 @@ export default function DiscoverScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
-  const segments = useSegments();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
 
   const browseState = useMemo(() => parseDiscoverParams(rawParams), [rawParams]);
   const { mode, type: typeFilter, filters } = browseState;
-  const route = useRouteLayoutContext();
-  const layoutScope = mode === 'trending' ? 'trending-see-all' : `discover-browse-${mode}`;
 
   const genresQuery = useGenres();
   const browseQuery = useDiscoveryBrowse(mode, typeFilter, filters);
@@ -86,39 +79,6 @@ export default function DiscoverScreen() {
     () => browseQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [browseQuery.data?.pages],
   );
-
-  useNavigationDiagnostics('discover-browse', {
-    mode,
-    typeFilter,
-    itemCount: items.length,
-    isLoading: browseQuery.isLoading,
-    isError: browseQuery.isError,
-    isFetching: browseQuery.isFetching,
-  });
-
-  const listMounted = items.length > 0 || !browseQuery.isLoading;
-
-  useScreenRenderTrace('discover-browse', {
-    pathname: `/${segments.join('/')}`,
-    mode,
-    layoutScope,
-    itemCount: items.length,
-    bodyKind: listMounted ? 'scroll-view' : 'placeholder',
-    shellKind: 'catalog-screen-shell',
-    listMounted,
-  });
-
-  useEffect(() => {
-    logRouteLayoutMeta(layoutScope, route, {
-      shell: 'CatalogScreenShell',
-      renderer: 'ScrollView',
-      itemComponent: 'SearchResultCard',
-      dataCount: items.length,
-      headerPlacement: 'sibling-above-body',
-      nestedInStackListScreen: false,
-      navigation: 'openLibraryStackScreen -> router.push(/discover-browse)',
-    });
-  }, [items.length, layoutScope, mode, route]);
 
   const activeFilterCount = useMemo(
     () => countActiveDiscoveryFilters(filters, mode, typeFilter),
@@ -245,34 +205,38 @@ export default function DiscoverScreen() {
 
   const listHeader = useMemo(
     () => (
-      <View style={styles.header}>
-        <DetailBackButton />
-        <AppText variant="title">{getDiscoverTitle(mode)}</AppText>
-        <View style={styles.filtersRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              activeFilterCount > 0
-                ? t('common.filtersActive', { count: activeFilterCount })
-                : t('discovery.browseScreen.filters')
-            }
-            onPress={() => setFilterSheetVisible(true)}
-            style={({ pressed }) => [styles.filtersButton, pressed && styles.pressed]}
-          >
-            <Ionicons name="options-outline" size={18} color={colors.textPrimary} />
-            <AppText variant="bodySmall" style={styles.filtersButtonText}>
-              {t('discovery.browseScreen.filters')}
-            </AppText>
-            {activeFilterCount > 0 ? (
-              <View style={styles.filterBadge}>
-                <AppText variant="caption" style={styles.filterBadgeText}>
-                  {activeFilterCount}
+      <View>
+        <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
+          <DetailBackButton contentInset={false} />
+          <View style={styles.header}>
+            <AppText variant="title">{getDiscoverTitle(mode)}</AppText>
+            <View style={styles.filtersRow}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  activeFilterCount > 0
+                    ? t('common.filtersActive', { count: activeFilterCount })
+                    : t('discovery.browseScreen.filters')
+                }
+                onPress={() => setFilterSheetVisible(true)}
+                style={({ pressed }) => [styles.filtersButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="options-outline" size={18} color={colors.textPrimary} />
+                <AppText variant="bodySmall" style={styles.filtersButtonText}>
+                  {t('discovery.browseScreen.filters')}
                 </AppText>
-              </View>
-            ) : null}
-          </Pressable>
-        </View>
-        <ActiveFilterChips chips={activeFilterChips} />
+                {activeFilterCount > 0 ? (
+                  <View style={styles.filterBadge}>
+                    <AppText variant="caption" style={styles.filterBadgeText}>
+                      {activeFilterCount}
+                    </AppText>
+                  </View>
+                ) : null}
+              </Pressable>
+            </View>
+            <ActiveFilterChips chips={activeFilterChips} />
+          </View>
+        </SafeAreaView>
       </View>
     ),
     [activeFilterChips, activeFilterCount, mode, t],
@@ -294,6 +258,36 @@ export default function DiscoverScreen() {
     return <SearchEmptyState title={t('discovery.browseScreen.noTitlesForMode')} />;
   }, [clearFilters, filters, mode, t, typeFilter]);
 
+  const listEmptyComponent = useMemo(() => {
+    if (browseQuery.isLoading && items.length === 0) {
+      return <SearchLoadingState />;
+    }
+
+    if (browseQuery.isError && items.length === 0) {
+      const message = isApiError(browseQuery.error)
+        ? browseQuery.error.userMessage
+        : t('discovery.browseScreen.loadError');
+
+      return (
+        <View style={styles.errorContainer}>
+          <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
+        </View>
+      );
+    }
+
+    if (items.length === 0) {
+      return emptyState;
+    }
+
+    return null;
+  }, [browseQuery.error, browseQuery.isError, browseQuery.isLoading, emptyState, handleRefresh, items.length, t]);
+
+  const listFooter = browseQuery.isFetchingNextPage ? (
+    <View style={styles.footerLoading}>
+      <ActivityIndicator color={colors.accent} />
+    </View>
+  ) : null;
+
   const filterSheet = (
     <DiscoverFilterSheet
       visible={filterSheetVisible}
@@ -306,72 +300,50 @@ export default function DiscoverScreen() {
     />
   );
 
-  if (browseQuery.isLoading && items.length === 0) {
-    return (
-      <CatalogScreenShell layoutScope={layoutScope} testID="discover-browse-screen" header={listHeader}>
-        <SearchLoadingState />
-        {filterSheetVisible ? filterSheet : null}
-      </CatalogScreenShell>
-    );
-  }
+  const renderItem = useCallback(
+    ({ item }: { item: SearchResultItem }) => (
+      <SearchResultCard item={item} onPress={handleResultPress} />
+    ),
+    [handleResultPress],
+  );
 
-  if (browseQuery.isError && items.length === 0) {
-    const message = isApiError(browseQuery.error)
-      ? browseQuery.error.userMessage
-      : t('discovery.browseScreen.loadError');
-
-    return (
-      <CatalogScreenShell layoutScope={layoutScope} testID="discover-browse-screen" header={listHeader}>
-        <View style={styles.errorContainer}>
-          <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
-        </View>
-        {filterSheetVisible ? filterSheet : null}
-      </CatalogScreenShell>
-    );
-  }
-
-  const resultsFooter = browseQuery.isFetchingNextPage ? (
-    <View style={styles.footerLoading}>
-      <ActivityIndicator color={colors.accent} />
-    </View>
-  ) : null;
-
-  const resultsBody =
-    items.length === 0 ? (
-      emptyState
-    ) : (
-      <SearchMappedResultsScroll
-        layoutScope={layoutScope}
-        testID="discover-browse-scroll"
-        style={styles.resultsScroll}
-        items={items}
+  return (
+    <View style={commonStyles.screen} testID="discover-browse-screen">
+      <FlatList
+        testID="discover-browse-list"
+        data={items}
         keyExtractor={searchResultKeyExtractor}
-        onPress={handleResultPress}
-        contentContainerStyle={styles.listContent}
+        renderItem={renderItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmptyComponent}
+        ListFooterComponent={listFooter}
+        contentContainerStyle={items.length === 0 ? styles.emptyListContent : styles.listContent}
         refreshControl={
           <MovieAppRefreshControl
             refreshing={isRefetching && !isFetchingNextPage}
             onRefresh={handleRefresh}
           />
         }
-        footer={resultsFooter}
         onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.4}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
       />
-    );
-
-  return (
-    <CatalogScreenShell layoutScope={layoutScope} testID="discover-browse-screen" header={listHeader}>
-      {resultsBody}
       {filterSheetVisible ? filterSheet : null}
-    </CatalogScreenShell>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  headerSafeArea: {
+    backgroundColor: colors.background,
+  },
   header: {
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
   filtersRow: {
@@ -408,12 +380,12 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.85,
   },
-  resultsScroll: {
-    flex: 1,
-  },
   listContent: {
     paddingBottom: spacing.xxl,
+  },
+  emptyListContent: {
     flexGrow: 1,
+    paddingBottom: spacing.xxl,
   },
   emptyWithAction: {
     gap: spacing.md,
@@ -424,6 +396,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
   },
   footerLoading: {
     paddingVertical: spacing.lg,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { FlatList } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
@@ -121,8 +121,7 @@ describe('DiscoverScreen', () => {
   it('mounts the browse FlatList when items are available', () => {
     render(<DiscoverScreen />);
 
-    expect(screen.getByTestId('discover-browse-scroll-host')).toBeTruthy();
-    expect(screen.getByTestId('discover-browse-scroll')).toBeTruthy();
+    expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
     expect(screen.getByText('Trending')).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
   });
@@ -171,11 +170,12 @@ describe('DiscoverScreen', () => {
     expect(screen.queryByText('Popular')).toBeNull();
   });
 
-  it('uses a single vertical results ScrollView without nested horizontal FlatLists', () => {
+  it('uses a root FlatList with the browse header in ListHeaderComponent', () => {
     const { UNSAFE_getAllByType } = render(<DiscoverScreen />);
 
-    expect(screen.getByTestId('discover-browse-scroll')).toBeTruthy();
-    expect(UNSAFE_getAllByType(ScrollView).length).toBeGreaterThan(0);
+    expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
+    expect(UNSAFE_getAllByType(FlatList).length).toBeGreaterThan(0);
+    expect(screen.getByText('Trending')).toBeTruthy();
   });
 
   it('opens filter sheet with content type and applies filters', () => {
@@ -213,15 +213,9 @@ describe('DiscoverScreen', () => {
     );
 
     render(<DiscoverScreen />);
-    const scroll = screen.getByTestId('discover-browse-scroll');
+    const list = screen.getByTestId('discover-browse-list');
 
-    fireEvent.scroll(scroll, {
-      nativeEvent: {
-        contentOffset: { y: 500 },
-        contentSize: { height: 1000, width: 400 },
-        layoutMeasurement: { height: 400, width: 400 },
-      },
-    });
+    list.props.onEndReached?.({ distanceFromEnd: 0 });
 
     expect(fetchNextPage).toHaveBeenCalled();
   });

@@ -4,13 +4,14 @@ import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
-import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
@@ -39,22 +40,19 @@ import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-produ
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
+import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
-import {
-  useNavigationDiagnostics,
-  useScreenRenderTrace,
-} from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { layout } from '@/theme/layout';
+import { commonStyles } from '@/theme/theme';
 
 export default function StreamingDiscoverScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
-  const segments = useSegments();
   const { region: userRegion, isHydrated } = useRegionalPreference();
   useTrackProductMetricOnFocus(PRODUCT_METRICS.streamingServicesOpened, isHydrated);
 
@@ -76,32 +74,8 @@ export default function StreamingDiscoverScreen() {
     [resultsQuery.data?.pages],
   );
 
-  const providerCount = providersQuery.data?.providers?.length ?? 0;
   const hasSelectedProviders = discoverState.watchProviderIds.length > 0;
   const resultsData = hasSelectedProviders ? items : [];
-
-  useNavigationDiagnostics('streaming-discover', {
-    mediaType: discoverState.mediaType,
-    watchRegion: discoverState.watchRegion,
-    providerCount,
-    selectedProviderCount: discoverState.watchProviderIds.length,
-    itemCount: items.length,
-    providersLoading: providersQuery.isLoading,
-    providersError: providersQuery.isError,
-    resultsLoading: resultsQuery.isLoading,
-    resultsError: resultsQuery.isError,
-    isHydrated,
-  });
-
-  useScreenRenderTrace('streaming-discover', {
-    pathname: `/${segments.join('/')}`,
-    providerCount,
-    itemCount: items.length,
-    resultsDataCount: resultsData.length,
-    bodyKind: hasSelectedProviders ? 'scroll-view' : 'placeholder',
-    shellKind: 'catalog-screen-shell',
-    listMounted: hasSelectedProviders,
-  });
 
   const currentRoute = useMemo(
     () => serializeStreamingDiscoverRoute(discoverState),
@@ -186,74 +160,74 @@ export default function StreamingDiscoverScreen() {
 
   const providerHeader = useMemo(
     () => (
-      <View testID="streaming-discover-provider-header" style={styles.screenHeader}>
-        <View style={styles.topBar}>
-          <DetailBackButton />
-        </View>
-        <View style={styles.headerContent}>
-          <AppText variant="title" accessibilityRole="header">
-            {t('discovery.streamingDiscover.title')}
-          </AppText>
-
-          <View style={styles.section}>
-            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
-              {t('discovery.streamingDiscover.whereDoYouWatch')}
+      <View testID="streaming-discover-provider-header">
+        <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
+          <DetailBackButton contentInset={false} />
+          <View style={styles.headerContent}>
+            <AppText variant="title" accessibilityRole="header">
+              {t('discovery.streamingDiscover.title')}
             </AppText>
-            <WatchProviderSelector
-              providers={providersQuery.data?.providers ?? []}
-              selectedProviderIds={discoverState.watchProviderIds}
-              isLoading={providersQuery.isLoading}
-              isError={providersQuery.isError}
-              onRetry={() => void providersQuery.refetch()}
-              onToggle={toggleProvider}
-            />
-          </View>
 
-          <View style={styles.section}>
-            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
-              {t('discovery.streamingDiscover.contentSection')}
-            </AppText>
-            <View style={styles.mediaRow}>
-              {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
-                const selected = discoverState.mediaType === mediaType;
-                const label = translateAdvancedDiscoverMediaType(mediaType);
-
-                return (
-                  <Pressable
-                    key={mediaType}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={label}
-                    onPress={() =>
-                      replaceState({
-                        ...discoverState,
-                        mediaType,
-                        watchProviderIds: [],
-                      })
-                    }
-                    style={[styles.mediaChip, selected && styles.mediaChipSelected]}
-                  >
-                    <AppText variant="bodySmall" style={selected ? styles.mediaChipSelectedText : undefined}>
-                      {label}
-                    </AppText>
-                  </Pressable>
-                );
-              })}
+            <View style={styles.section}>
+              <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+                {t('discovery.streamingDiscover.whereDoYouWatch')}
+              </AppText>
+              <WatchProviderSelector
+                providers={providersQuery.data?.providers ?? []}
+                selectedProviderIds={discoverState.watchProviderIds}
+                isLoading={providersQuery.isLoading}
+                isError={providersQuery.isError}
+                onRetry={() => void providersQuery.refetch()}
+                onToggle={toggleProvider}
+              />
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
-              {t('discovery.streamingDiscover.availabilitySection')}
-            </AppText>
-            <WatchMonetizationSelector
-              selectedTypes={discoverState.watchMonetizationTypes}
-              onToggle={toggleMonetization}
-            />
-          </View>
+            <View style={styles.section}>
+              <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+                {t('discovery.streamingDiscover.contentSection')}
+              </AppText>
+              <View style={styles.mediaRow}>
+                {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
+                  const selected = discoverState.mediaType === mediaType;
+                  const label = translateAdvancedDiscoverMediaType(mediaType);
 
-          <JustWatchAttribution />
-        </View>
+                  return (
+                    <Pressable
+                      key={mediaType}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      accessibilityLabel={label}
+                      onPress={() =>
+                        replaceState({
+                          ...discoverState,
+                          mediaType,
+                          watchProviderIds: [],
+                        })
+                      }
+                      style={[styles.mediaChip, selected && styles.mediaChipSelected]}
+                    >
+                      <AppText variant="bodySmall" style={selected ? styles.mediaChipSelectedText : undefined}>
+                        {label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+                {t('discovery.streamingDiscover.availabilitySection')}
+              </AppText>
+              <WatchMonetizationSelector
+                selectedTypes={discoverState.watchMonetizationTypes}
+                onToggle={toggleMonetization}
+              />
+            </View>
+
+            <JustWatchAttribution />
+          </View>
+        </SafeAreaView>
       </View>
     ),
     [
@@ -268,15 +242,9 @@ export default function StreamingDiscoverScreen() {
     ],
   );
 
-  const resultsFooter = resultsQuery.isFetchingNextPage ? (
-    <View style={styles.footerLoading}>
-      <ActivityIndicator color={colors.accent} />
-    </View>
-  ) : null;
-
-  const resultsBody = useMemo(() => {
+  const listEmptyComponent = useMemo(() => {
     if (!hasSelectedProviders) {
-      return <View style={styles.resultsPlaceholder} />;
+      return null;
     }
 
     if (resultsQuery.isLoading && items.length === 0) {
@@ -304,71 +272,72 @@ export default function StreamingDiscoverScreen() {
       );
     }
 
+    return null;
+  }, [hasSelectedProviders, items.length, resultsQuery, t]);
+
+  const listFooter = resultsQuery.isFetchingNextPage ? (
+    <View style={styles.footerLoading}>
+      <ActivityIndicator color={colors.accent} />
+    </View>
+  ) : null;
+
+  const renderItem = useCallback(
+    ({ item }: { item: SearchResultItem }) => (
+      <SearchResultCard item={item} onPress={handleResultPress} />
+    ),
+    [handleResultPress],
+  );
+
+  const handleLoadMore = useCallback(() => {
+    if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {
+      void resultsQuery.fetchNextPage();
+    }
+  }, [resultsQuery]);
+
+  if (!hasSelectedProviders) {
     return (
-      <SearchMappedResultsScroll
-        layoutScope="streaming-discover"
-        testID="streaming-discover-scroll"
-        style={styles.resultsScroll}
-        items={resultsData}
+      <View style={commonStyles.screen} testID="streaming-discover-screen">
+        {providerHeader}
+      </View>
+    );
+  }
+
+  return (
+    <View style={commonStyles.screen} testID="streaming-discover-screen">
+      <FlatList
+        testID="streaming-discover-list"
+        data={resultsData}
         keyExtractor={searchResultKeyExtractor}
-        onPress={handleResultPress}
-        contentContainerStyle={styles.listContent}
+        renderItem={renderItem}
+        ListHeaderComponent={providerHeader}
+        ListEmptyComponent={listEmptyComponent}
+        ListFooterComponent={listFooter}
+        contentContainerStyle={resultsData.length === 0 ? styles.emptyListContent : styles.listContent}
         refreshControl={
           <MovieAppRefreshControl
             refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
             onRefresh={() => void resultsQuery.refetch()}
           />
         }
-        footer={resultsFooter}
-        onEndReached={() => {
-          if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {
-            void resultsQuery.fetchNextPage();
-          }
-        }}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.4}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
       />
-    );
-  }, [
-    handleResultPress,
-    hasSelectedProviders,
-    items.length,
-    resultsData,
-    resultsFooter,
-    resultsQuery,
-    t,
-  ]);
-
-  return (
-    <CatalogScreenShell
-      layoutScope="streaming-discover"
-      testID="streaming-discover-screen"
-      header={providerHeader}
-    >
-      {resultsBody}
-    </CatalogScreenShell>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screenHeader: {
-    paddingHorizontal: spacing.lg,
-  },
-  topBar: {
-    marginHorizontal: -spacing.lg,
-    paddingHorizontal: spacing.lg,
-  },
-  resultsPlaceholder: {
-    flex: 1,
-  },
-  resultsScroll: {
-    flex: 1,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    flexGrow: 1,
+  headerSafeArea: {
+    backgroundColor: colors.background,
   },
   headerContent: {
     gap: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
   section: {
@@ -399,8 +368,16 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: '600',
   },
+  listContent: {
+    paddingBottom: spacing.xxl,
+  },
+  emptyListContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xxl,
+  },
   errorContainer: {
     paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
   },
   footerLoading: {
     paddingVertical: spacing.lg,

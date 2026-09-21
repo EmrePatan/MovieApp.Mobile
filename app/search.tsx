@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   BackHandler,
+  FlatList,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -12,7 +13,7 @@ import {
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useQueryClient } from '@tanstack/react-query';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { useFocusEffect, useLocalSearchParams, useRouter, useSegments } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   parseSearchReturnOrigin,
   returnFromSearch,
@@ -27,7 +28,7 @@ import { SearchEmptyState } from '@/features/search/components/SearchEmptyState'
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchHistorySection } from '@/features/search/components/SearchHistorySection';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
+import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import { SearchScreenHeader } from '@/features/search/components/SearchScreenHeader';
 import { SearchSuggestionList } from '@/features/search/components/SearchSuggestionList';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
@@ -47,21 +48,18 @@ import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
-import {
-  logNavigationDiagnostic,
-  useNavigationDiagnostics,
-  useScreenRenderTrace,
-} from '@/debug/navigation-diagnostics';
+import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { commonStyles } from '@/theme/theme';
 
 export default function SearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { explore, from } = useLocalSearchParams<{ explore?: string; from?: string }>();
-  const segments = useSegments();
   const searchReturnOrigin = parseSearchReturnOrigin(from);
   const { isAuthenticated } = useAuth();
   const [inputText, setInputText] = useState('');
@@ -287,38 +285,13 @@ export default function SearchScreen() {
       : t('search.results.error')
     : null;
 
-  useNavigationDiagnostics('search', {
-    displayMode,
-    hasActiveSearch,
-    normalizedInput,
-    normalizedSubmittedQuery,
-    resultCount: results.length,
-    queryEnabled: isValidSearchQuery(normalizedSubmittedQuery),
-    isLoading: searchQuery.isLoading,
-    isError: searchQuery.isError,
-    isFetching: searchQuery.isFetching,
-  });
-
-  useScreenRenderTrace('search', {
-    pathname: `/${segments.join('/')}`,
-    displayMode,
-    resultCount: results.length,
-    bodyKind: hasActiveSearch ? 'scroll-view' : 'scroll-view',
-    headerPlacement: 'stack-screen',
-    listMounted: hasActiveSearch,
-  });
-
   const resultsFooter = searchQuery.isFetchingNextPage ? (
     <View style={styles.footerLoading}>
       <ActivityIndicator color={colors.accent} />
     </View>
   ) : null;
 
-  const resultsBody = useMemo(() => {
-    if (!hasActiveSearch) {
-      return null;
-    }
-
+  const listEmptyComponent = useMemo(() => {
     if (searchQuery.isLoading && results.length === 0) {
       return <SearchLoadingState />;
     }
@@ -344,36 +317,23 @@ export default function SearchScreen() {
       );
     }
 
-    return (
-      <SearchMappedResultsScroll
-        layoutScope="search-results"
-        testID="search-results-scroll"
-        style={styles.resultsScroll}
-        items={results}
-        keyExtractor={searchResultKeyExtractor}
-        onPress={handleResultPress}
-        contentContainerStyle={styles.listContent}
-        refreshControl={refreshControl}
-        footer={resultsFooter}
-        onEndReached={handleLoadMore}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-      />
-    );
+    return null;
   }, [
-    handleLoadMore,
     handleRefresh,
-    handleResultPress,
-    hasActiveSearch,
     normalizedSubmittedQuery,
-    refreshControl,
-    results,
-    resultsFooter,
+    results.length,
     searchErrorMessage,
     searchQuery.isError,
     searchQuery.isLoading,
     t,
   ]);
+
+  const renderResultItem = useCallback(
+    ({ item }: { item: SearchResultItem }) => (
+      <SearchResultCard item={item} onPress={handleResultPress} />
+    ),
+    [handleResultPress],
+  );
 
   const searchScreenHeader = (
     <SearchScreenHeader
@@ -398,44 +358,66 @@ export default function SearchScreen() {
     </SearchScreenHeader>
   );
 
-  return (
-    <StackListScreen testID="search-screen" header={searchScreenHeader}>
-      {hasActiveSearch ? (
-        resultsBody
-      ) : (
-        <ScrollView
-          style={styles.idleScroll}
-          contentContainerStyle={styles.idleScrollContent}
+  if (hasActiveSearch) {
+    return (
+      <View style={commonStyles.screen} testID="search-screen">
+        <FlatList
+          testID="search-results-list"
+          data={results}
+          keyExtractor={searchResultKeyExtractor}
+          renderItem={renderResultItem}
+          ListHeaderComponent={searchScreenHeader}
+          ListEmptyComponent={listEmptyComponent}
+          ListFooterComponent={resultsFooter}
+          contentContainerStyle={results.length === 0 ? styles.emptyListContent : styles.listContent}
+          refreshControl={refreshControl}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.4}
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
-        >
-          {isAuthenticated && showExplore ? (
-            <SearchHistorySection
-              items={historyItems}
-              isLoading={historyQuery.isLoading}
-              isError={historyQuery.isError}
-              isClearing={clearHistory.isPending}
-              deletingId={deletingHistoryId}
-              onSelect={handleHistorySelect}
-              onDelete={handleDeleteHistoryItem}
-              onClearAll={handleClearHistory}
-              onRetry={() => void historyQuery.refetch()}
-            />
-          ) : null}
-          {showExplore ? <SearchExploreLanding /> : null}
-        </ScrollView>
-      )}
+          initialNumToRender={layout.verticalList.initialNumToRender}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+          windowSize={layout.verticalList.windowSize}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <StackListScreen testID="search-screen" header={searchScreenHeader}>
+      <ScrollView
+        style={styles.idleScroll}
+        contentContainerStyle={styles.idleScrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        {isAuthenticated && showExplore ? (
+          <SearchHistorySection
+            items={historyItems}
+            isLoading={historyQuery.isLoading}
+            isError={historyQuery.isError}
+            isClearing={clearHistory.isPending}
+            deletingId={deletingHistoryId}
+            onSelect={handleHistorySelect}
+            onDelete={handleDeleteHistoryItem}
+            onClearAll={handleClearHistory}
+            onRetry={() => void historyQuery.refetch()}
+          />
+        ) : null}
+        {showExplore ? <SearchExploreLanding /> : null}
+      </ScrollView>
     </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  resultsScroll: {
-    flex: 1,
-  },
   listContent: {
     paddingBottom: spacing.xxl,
+  },
+  emptyListContent: {
     flexGrow: 1,
+    paddingBottom: spacing.xxl,
   },
   idleScroll: {
     flex: 1,

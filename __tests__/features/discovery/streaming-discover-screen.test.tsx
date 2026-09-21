@@ -109,8 +109,7 @@ describe('StreamingDiscoverScreen', () => {
 
     render(<StreamingDiscoverScreen />);
 
-    expect(screen.getByTestId('streaming-discover-scroll-host')).toBeTruthy();
-    expect(screen.getByTestId('streaming-discover-scroll')).toBeTruthy();
+    expect(screen.getByTestId('streaming-discover-list')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
   });
@@ -138,7 +137,7 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByTestId('streaming-discover-provider-header')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
     expect(screen.getByLabelText('Disney Plus')).toBeTruthy();
-    expect(screen.queryByTestId('streaming-discover-scroll')).toBeNull();
+    expect(screen.queryByTestId('streaming-discover-list')).toBeNull();
   });
 
   it('renders streaming discover controls without a region selector', () => {
