@@ -34,7 +34,7 @@ describe('PrimaryTabBar presentation semantics', () => {
     expect(tabBar).toContain('const isActive = highlightedTab === tab.id');
     expect(tabBar).toContain('highlightedTab,');
 
-    const router = { navigate: jest.fn(), dismissTo: jest.fn() };
+    const router = { dismissAll: jest.fn(), dismissTo: jest.fn() };
     handlePrimaryTabPress({
       tabId: 'home',
       pathname: '/movie/123',
@@ -43,7 +43,7 @@ describe('PrimaryTabBar presentation semantics', () => {
       emitReselect: jest.fn(),
     });
 
+    expect(router.dismissAll).toHaveBeenCalledTimes(1);
     expect(router.dismissTo).toHaveBeenCalledWith('/home');
-    expect(router.navigate).not.toHaveBeenCalled();
   });
 });

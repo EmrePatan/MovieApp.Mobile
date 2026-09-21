@@ -1,9 +1,9 @@
-import { handlePrimaryTabPress } from '@/features/navigation/primary-tab-press';
+import { handlePrimaryTabPress, resolvePrimaryTabPressPlan } from '@/features/navigation/primary-tab-press';
 import { PRIMARY_TAB_HREFS } from '@/features/navigation/primary-tab-routes';
 
 function createRouter() {
   return {
-    navigate: jest.fn(),
+    dismissAll: jest.fn(),
     dismissTo: jest.fn(),
   };
 }
@@ -24,7 +24,7 @@ describe('primary tab press handling', () => {
     expect(action).toBe('reselect');
     expect(emitReselect).toHaveBeenCalledTimes(1);
     expect(emitReselect).toHaveBeenCalledWith('home');
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
@@ -48,7 +48,7 @@ describe('primary tab press handling', () => {
     });
 
     expect(emitReselect).toHaveBeenCalledTimes(2);
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
@@ -65,28 +65,12 @@ describe('primary tab press handling', () => {
     });
 
     expect(action).toBe('dismiss');
+    expect(router.dismissAll).toHaveBeenCalledTimes(1);
     expect(router.dismissTo).toHaveBeenCalledWith(PRIMARY_TAB_HREFS.home);
     expect(emitReselect).not.toHaveBeenCalled();
-    expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns to Home root from nested person detail without refresh emit', () => {
-    const router = createRouter();
-    const emitReselect = jest.fn();
-
-    handlePrimaryTabPress({
-      tabId: 'home',
-      pathname: '/person/42',
-      highlightedTab: null,
-      router: router as never,
-      emitReselect,
-    });
-
-    expect(router.dismissTo).toHaveBeenCalledWith('/home');
-    expect(emitReselect).not.toHaveBeenCalled();
-  });
-
-  it('resets to Discover root from neutral movie detail without refresh emit', () => {
+  it('establishes Discover root from neutral movie detail without refresh emit', () => {
     const router = createRouter();
     const emitReselect = jest.fn();
 
@@ -98,14 +82,26 @@ describe('primary tab press handling', () => {
       emitReselect,
     });
 
+    expect(router.dismissAll).toHaveBeenCalledTimes(1);
     expect(router.dismissTo).toHaveBeenCalledWith('/discover');
     expect(emitReselect).not.toHaveBeenCalled();
-    expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('navigates when switching to a different primary tab', () => {
+  it('uses dismissTo instead of navigate when switching between primary tab roots', () => {
     const router = createRouter();
     const emitReselect = jest.fn();
+
+    const plan = resolvePrimaryTabPressPlan({
+      tabId: 'discover',
+      pathname: '/home',
+      highlightedTab: 'home',
+    });
+
+    expect(plan).toEqual({
+      kind: 'establish-root',
+      href: '/discover',
+      resetStackFirst: false,
+    });
 
     const action = handlePrimaryTabPress({
       tabId: 'discover',
@@ -115,8 +111,9 @@ describe('primary tab press handling', () => {
       emitReselect,
     });
 
-    expect(action).toBe('navigate');
-    expect(router.navigate).toHaveBeenCalledWith('/discover');
+    expect(action).toBe('dismiss');
+    expect(router.dismissAll).not.toHaveBeenCalled();
+    expect(router.dismissTo).toHaveBeenCalledWith('/discover');
     expect(emitReselect).not.toHaveBeenCalled();
   });
 
@@ -132,6 +129,7 @@ describe('primary tab press handling', () => {
       emitReselect,
     });
 
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).toHaveBeenCalledWith('/discover');
     expect(emitReselect).not.toHaveBeenCalled();
   });
@@ -149,7 +147,7 @@ describe('primary tab press handling', () => {
     });
 
     expect(emitReselect).toHaveBeenCalledWith('discover');
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
@@ -182,7 +180,7 @@ describe('primary tab press handling', () => {
     });
 
     expect(emitReselect).toHaveBeenCalledWith('insights');
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 });

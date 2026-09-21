@@ -15,7 +15,7 @@ describe('home primary tab reselect integration', () => {
   it('Home root reselect requests scroll-to-top and refresh exactly once with no navigation', () => {
     const scrollToTop = jest.fn();
     const refresh = jest.fn();
-    const router = { navigate: jest.fn(), dismissTo: jest.fn() };
+    const router = { navigate: jest.fn(), dismissAll: jest.fn(), dismissTo: jest.fn() };
 
     registerPrimaryTabReselectHandler('home', { scrollToTop, refresh });
 

@@ -7,9 +7,36 @@ import {
   type PrimaryTabId,
 } from '@/features/navigation/primary-tab-routes';
 
-export type PrimaryTabPressAction = 'navigate' | 'dismiss' | 'reselect';
+export type PrimaryTabPressAction = 'dismiss' | 'reselect';
 
-export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'navigate' | 'dismissTo'>;
+export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissAll' | 'dismissTo'>;
+
+export type PrimaryTabPressPlan =
+  | { kind: 'reselect' }
+  | { kind: 'establish-root'; href: `/${string}`; resetStackFirst: boolean };
+
+export function resolvePrimaryTabPressPlan(params: {
+  tabId: PrimaryTabId;
+  pathname: string;
+  highlightedTab: HighlightedPrimaryTab;
+}): PrimaryTabPressPlan {
+  const { tabId, pathname, highlightedTab } = params;
+  const targetHref = PRIMARY_TAB_HREFS[tabId];
+
+  if (highlightedTab === tabId && isPrimaryTabRootPath(tabId, pathname)) {
+    return { kind: 'reselect' };
+  }
+
+  if (highlightedTab === tabId && !isPrimaryTabRootPath(tabId, pathname)) {
+    return { kind: 'establish-root', href: targetHref, resetStackFirst: false };
+  }
+
+  if (highlightedTab === null) {
+    return { kind: 'establish-root', href: targetHref, resetStackFirst: true };
+  }
+
+  return { kind: 'establish-root', href: targetHref, resetStackFirst: false };
+}
 
 export function handlePrimaryTabPress(params: {
   tabId: PrimaryTabId;
@@ -18,25 +45,19 @@ export function handlePrimaryTabPress(params: {
   router: PrimaryTabPressRouter;
   emitReselect?: (tabId: PrimaryTabId) => void;
 }): PrimaryTabPressAction {
-  const { tabId, pathname, highlightedTab, router } = params;
+  const { tabId, router } = params;
   const emitReselect = params.emitReselect ?? emitPrimaryTabReselect;
-  const targetHref = PRIMARY_TAB_HREFS[tabId];
+  const plan = resolvePrimaryTabPressPlan(params);
 
-  if (highlightedTab === tabId && isPrimaryTabRootPath(tabId, pathname)) {
+  if (plan.kind === 'reselect') {
     emitReselect(tabId);
     return 'reselect';
   }
 
-  if (highlightedTab === tabId && !isPrimaryTabRootPath(tabId, pathname)) {
-    router.dismissTo(targetHref);
-    return 'dismiss';
+  if (plan.resetStackFirst) {
+    router.dismissAll();
   }
 
-  if (highlightedTab === null) {
-    router.dismissTo(targetHref);
-    return 'dismiss';
-  }
-
-  router.navigate(targetHref);
-  return 'navigate';
+  router.dismissTo(plan.href);
+  return 'dismiss';
 }
