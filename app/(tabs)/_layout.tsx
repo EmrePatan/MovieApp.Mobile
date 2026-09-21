@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTabBarStyle, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 import { colors } from '@/theme/colors';
 
+const hiddenTabScreenOptions = { href: null } as const;
+
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -53,8 +55,26 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen name="profile" options={{ href: null }} />
-      <Tabs.Screen name="watchlist" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="watchlist" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="search" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="discover-browse" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="advanced-discover" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="streaming-discover" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="now-in-theaters" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="on-tv-this-week" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="world-cinema" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="favorites" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="following" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="upcoming" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="watch-history" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="notifications" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="pick-something" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="ai-recommendations" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="movie" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="tv" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="person" options={hiddenTabScreenOptions} />
+      <Tabs.Screen name="collection" options={hiddenTabScreenOptions} />
     </Tabs>
   );
 }

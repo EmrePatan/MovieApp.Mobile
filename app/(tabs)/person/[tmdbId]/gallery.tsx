@@ -3,9 +3,11 @@ import { GalleryDetailContent } from '@/features/gallery/components/GalleryDetai
 import { usePersonGallery } from '@/features/gallery/hooks/useGallery';
 import { usePersonRouteTmdbId } from '@/features/details/person/hooks/usePersonRouteTmdbId';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
+import { useHideBottomNavigationBar } from '@/features/navigation/useHideBottomNavigationBar';
 
 export default function PersonGalleryScreen() {
   const { t } = useTranslation();
+  useHideBottomNavigationBar();
   const { tmdbId, isInvalid } = usePersonRouteTmdbId();
   const query = usePersonGallery(tmdbId ?? 0);
 

@@ -4,11 +4,13 @@ import { GalleryDetailContent } from '@/features/gallery/components/GalleryDetai
 import { useMovieGallery } from '@/features/gallery/hooks/useGallery';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
 import { isValidGuid, normalizeRouteIdParam } from '@/features/details/shared/routes';
+import { useHideBottomNavigationBar } from '@/features/navigation/useHideBottomNavigationBar';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function MovieGalleryScreen() {
   const { t } = useTranslation();
   useCatalogChildDestinationGestureGuard();
+  useHideBottomNavigationBar();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const resolvedId = normalizeRouteIdParam(id);
   const isInvalid = !isValidGuid(resolvedId);

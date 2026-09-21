@@ -14,7 +14,6 @@ import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
-import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
 
@@ -47,25 +46,6 @@ function RootNavigator() {
             Platform.OS === 'android' ? { animationTypeForReplace: 'push' } : undefined
           }
         />
-        <Stack.Screen name="movie" options={ratedDetailStackScreenOptions} />
-        <Stack.Screen name="tv" options={ratedDetailStackScreenOptions} />
-        <Stack.Screen name="person" />
-        <Stack.Screen name="collection" />
-        <Stack.Screen name="watch-history" />
-        <Stack.Screen name="favorites" />
-        <Stack.Screen name="watchlist/[id]" />
-        <Stack.Screen name="following" />
-        <Stack.Screen name="upcoming" />
-        <Stack.Screen name="notifications" />
-        <Stack.Screen name="search" options={{ gestureEnabled: true }} />
-        <Stack.Screen name="discover-browse" />
-        <Stack.Screen name="advanced-discover" />
-        <Stack.Screen name="streaming-discover" />
-        <Stack.Screen name="now-in-theaters" />
-        <Stack.Screen name="on-tv-this-week" />
-        <Stack.Screen name="world-cinema" />
-        <Stack.Screen name="pick-something" />
-        <Stack.Screen name="ai-recommendations" />
         <Stack.Screen name="profile" options={{ gestureEnabled: true }} />
       </Stack>
     </>
