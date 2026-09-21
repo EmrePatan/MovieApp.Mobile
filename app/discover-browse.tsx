@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateDiscoverySort,
@@ -7,7 +7,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   StyleSheet,
   View,
@@ -23,7 +22,6 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
-import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import {
   ActiveFilterChips,
   buildActiveFilterChips,
@@ -49,10 +47,10 @@ import {
 } from '@/features/discovery/utils/discover-params';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
+import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
+import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import {
-  logNavigationDiagnostic,
   useNavigationDiagnostics,
   useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
@@ -101,18 +99,10 @@ export default function DiscoverScreen() {
     pathname: `/${segments.join('/')}`,
     mode,
     itemCount: items.length,
-    bodyKind: 'flat-list',
-    headerPlacement: listMounted ? 'flat-list' : 'stack-screen',
+    bodyKind: listMounted ? 'scroll-view' : 'placeholder',
+    headerPlacement: 'stack-screen',
     listMounted,
   });
-
-  useEffect(() => {
-    if (__DEV__ && listMounted && items.length > 0) {
-      logNavigationDiagnostic('discover-browse:flatlist:created', {
-        itemCount: items.length,
-      });
-    }
-  }, [items.length, listMounted]);
 
   const activeFilterCount = useMemo(
     () => countActiveDiscoveryFilters(filters, mode, typeFilter),
@@ -237,17 +227,6 @@ export default function DiscoverScreen() {
     [filters, genresQuery.data, mode, replaceBrowseState, sortLabel, typeFilter],
   );
 
-  const renderResult = useCallback(
-    ({ item, index }: { item: SearchResultItem; index: number }) =>
-      renderSearchResultRow({
-        scope: 'discover-browse',
-        item,
-        index,
-        onPress: handleResultPress,
-      }),
-    [handleResultPress],
-  );
-
   const listHeader = useMemo(
     () => (
       <View style={styles.header}>
@@ -335,32 +314,37 @@ export default function DiscoverScreen() {
     );
   }
 
-  return (
-    <StackListScreen testID="discover-browse-screen">
-      <FlatList
-        testID="discover-browse-list"
-        data={items}
-        keyExtractor={catalogItemKeyExtractor}
-        renderItem={renderResult}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={emptyState}
-        ListFooterComponent={
-          browseQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : null
-        }
+  const resultsFooter = browseQuery.isFetchingNextPage ? (
+    <View style={styles.footerLoading}>
+      <ActivityIndicator color={colors.accent} />
+    </View>
+  ) : null;
+
+  const resultsBody =
+    items.length === 0 ? (
+      emptyState
+    ) : (
+      <SearchMappedResultsScroll
+        scope="discover-scroll"
+        testID="discover-browse-scroll"
+        items={items}
+        keyExtractor={searchResultKeyExtractor}
+        onPress={handleResultPress}
+        contentContainerStyle={styles.listContent}
         refreshControl={
           <MovieAppRefreshControl
             refreshing={isRefetching && !isFetchingNextPage}
             onRefresh={handleRefresh}
           />
         }
-        contentContainerStyle={styles.listContent}
+        footer={resultsFooter}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.4}
       />
+    );
+
+  return (
+    <StackListScreen testID="discover-browse-screen" header={listHeader}>
+      {resultsBody}
       {filterSheetVisible ? filterSheet : null}
     </StackListScreen>
   );

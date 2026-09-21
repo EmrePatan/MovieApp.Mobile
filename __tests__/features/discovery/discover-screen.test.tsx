@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, ScrollView } from 'react-native';
+import { ScrollView } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
@@ -120,8 +120,7 @@ describe('DiscoverScreen', () => {
   it('mounts the browse FlatList when items are available', () => {
     render(<DiscoverScreen />);
 
-    expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
-    expect(screen.getByTestId('discover-browse-list').props.ListHeaderComponent).toBeTruthy();
+    expect(screen.getByTestId('discover-browse-scroll')).toBeTruthy();
     expect(screen.getByText('Trending')).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
   });
@@ -170,10 +169,10 @@ describe('DiscoverScreen', () => {
     expect(screen.queryByText('Popular')).toBeNull();
   });
 
-  it('uses a single vertical FlatList without nested horizontal FlatLists', () => {
+  it('uses a single vertical results ScrollView without nested horizontal FlatLists', () => {
     const { UNSAFE_getAllByType } = render(<DiscoverScreen />);
 
-    expect(UNSAFE_getAllByType(FlatList)).toHaveLength(1);
+    expect(screen.getByTestId('discover-browse-scroll')).toBeTruthy();
     expect(UNSAFE_getAllByType(ScrollView).length).toBeGreaterThan(0);
   });
 
@@ -211,10 +210,16 @@ describe('DiscoverScreen', () => {
       }),
     );
 
-    const { UNSAFE_getByType } = render(<DiscoverScreen />);
-    const list = UNSAFE_getByType(FlatList);
+    render(<DiscoverScreen />);
+    const scroll = screen.getByTestId('discover-browse-scroll');
 
-    list.props.onEndReached?.();
+    fireEvent.scroll(scroll, {
+      nativeEvent: {
+        contentOffset: { y: 500 },
+        contentSize: { height: 1000, width: 400 },
+        layoutMeasurement: { height: 400, width: 400 },
+      },
+    });
 
     expect(fetchNextPage).toHaveBeenCalled();
   });

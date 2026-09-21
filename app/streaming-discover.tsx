@@ -4,7 +4,6 @@ import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   StyleSheet,
   View,
@@ -40,16 +39,14 @@ import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-produ
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
+import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
-import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
 import {
-  logNavigationDiagnostic,
   useNavigationDiagnostics,
   useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function StreamingDiscoverScreen() {
@@ -101,17 +98,10 @@ export default function StreamingDiscoverScreen() {
     providerCount,
     itemCount: items.length,
     resultsDataCount: resultsData.length,
-    headerPlacement: hasSelectedProviders ? 'flat-list' : 'stack-screen',
+    bodyKind: hasSelectedProviders ? 'scroll-view' : 'placeholder',
+    headerPlacement: 'stack-screen',
     listMounted: hasSelectedProviders,
   });
-
-  useEffect(() => {
-    if (__DEV__ && hasSelectedProviders) {
-      logNavigationDiagnostic('streaming-discover:flatlist:created', {
-        resultsDataCount: resultsData.length,
-      });
-    }
-  }, [hasSelectedProviders, resultsData.length]);
 
   const currentRoute = useMemo(
     () => serializeStreamingDiscoverRoute(discoverState),
@@ -278,27 +268,22 @@ export default function StreamingDiscoverScreen() {
     ],
   );
 
-  const renderStreamingResult = useCallback(
-    ({ item, index }: { item: SearchResultItem; index: number }) =>
-      renderSearchResultRow({
-        scope: 'streaming-discover',
-        item,
-        index,
-        onPress: handleResultPress,
-      }),
-    [handleResultPress],
-  );
+  const resultsFooter = resultsQuery.isFetchingNextPage ? (
+    <View style={styles.footerLoading}>
+      <ActivityIndicator color={colors.accent} />
+    </View>
+  ) : null;
 
-  const listEmpty = useMemo(() => {
+  const resultsBody = useMemo(() => {
     if (!hasSelectedProviders) {
-      return null;
+      return <View style={styles.resultsPlaceholder} />;
     }
 
-    if (resultsQuery.isLoading) {
+    if (resultsQuery.isLoading && items.length === 0) {
       return <SearchLoadingState />;
     }
 
-    if (resultsQuery.isError) {
+    if (resultsQuery.isError && items.length === 0) {
       const message = isApiError(resultsQuery.error)
         ? resultsQuery.error.userMessage
         : t('discovery.streamingDiscover.resultsLoadError');
@@ -319,55 +304,41 @@ export default function StreamingDiscoverScreen() {
       );
     }
 
-    return null;
-  }, [
-    hasSelectedProviders,
-    items.length,
-    resultsQuery,
-    t,
-  ]);
-
-  if (!hasSelectedProviders) {
     return (
-      <StackListScreen testID="streaming-discover-screen" header={providerHeader}>
-        <View style={styles.resultsPlaceholder} />
-      </StackListScreen>
-    );
-  }
-
-  return (
-    <StackListScreen testID="streaming-discover-screen">
-      <FlatList
-        testID="streaming-discover-list"
-        data={resultsData}
+      <SearchMappedResultsScroll
+        scope="streaming-scroll"
+        testID="streaming-discover-scroll"
+        items={resultsData}
         keyExtractor={searchResultKeyExtractor}
-        renderItem={renderStreamingResult}
-        ListHeaderComponent={providerHeader}
-        ListEmptyComponent={listEmpty}
-        ListFooterComponent={
-          resultsQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : null
-        }
+        onPress={handleResultPress}
+        contentContainerStyle={styles.listContent}
         refreshControl={
           <MovieAppRefreshControl
             refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
             onRefresh={() => void resultsQuery.refetch()}
           />
         }
-        contentContainerStyle={styles.listContent}
+        footer={resultsFooter}
         onEndReached={() => {
           if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {
             void resultsQuery.fetchNextPage();
           }
         }}
-        onEndReachedThreshold={0.4}
-        initialNumToRender={layout.verticalList.initialNumToRender}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-        windowSize={layout.verticalList.windowSize}
       />
+    );
+  }, [
+    handleResultPress,
+    hasSelectedProviders,
+    items.length,
+    resultsData,
+    resultsFooter,
+    resultsQuery,
+    t,
+  ]);
+
+  return (
+    <StackListScreen testID="streaming-discover-screen" header={providerHeader}>
+      {resultsBody}
     </StackListScreen>
   );
 }

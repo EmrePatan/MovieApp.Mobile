@@ -105,8 +105,7 @@ describe('StreamingDiscoverScreen', () => {
 
     render(<StreamingDiscoverScreen />);
 
-    expect(screen.getByTestId('streaming-discover-list')).toBeTruthy();
-    expect(screen.getByTestId('streaming-discover-list').props.ListHeaderComponent).toBeTruthy();
+    expect(screen.getByTestId('streaming-discover-scroll')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
     expect(screen.getByText('Inception')).toBeTruthy();
   });
@@ -134,7 +133,7 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByTestId('streaming-discover-provider-header')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
     expect(screen.getByLabelText('Disney Plus')).toBeTruthy();
-    expect(screen.queryByTestId('streaming-discover-list')).toBeNull();
+    expect(screen.queryByTestId('streaming-discover-scroll')).toBeNull();
   });
 
   it('renders streaming discover controls without a region selector', () => {

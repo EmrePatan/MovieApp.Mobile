@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   BackHandler,
-  FlatList,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -28,6 +27,7 @@ import { SearchEmptyState } from '@/features/search/components/SearchEmptyState'
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchHistorySection } from '@/features/search/components/SearchHistorySection';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
+import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
 import { SearchScreenHeader } from '@/features/search/components/SearchScreenHeader';
 import { SearchSuggestionList } from '@/features/search/components/SearchSuggestionList';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
@@ -45,7 +45,6 @@ import {
 } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
-import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import {
@@ -55,7 +54,6 @@ import {
 } from '@/debug/navigation-diagnostics';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function SearchScreen() {
@@ -273,17 +271,6 @@ export default function SearchScreen() {
     void refetch();
   }, [refetch]);
 
-  const renderResult = useCallback(
-    ({ item, index }: { item: SearchResultItem; index: number }) =>
-      renderSearchResultRow({
-        scope: 'search',
-        item,
-        index,
-        onPress: handleResultPress,
-      }),
-    [handleResultPress],
-  );
-
   const refreshControl = useMemo(
     () => (
       <MovieAppRefreshControl
@@ -316,20 +303,18 @@ export default function SearchScreen() {
     pathname: `/${segments.join('/')}`,
     displayMode,
     resultCount: results.length,
-    bodyKind: hasActiveSearch ? 'flat-list' : 'scroll-view',
-    headerPlacement: hasActiveSearch ? 'flat-list' : 'stack-screen',
+    bodyKind: hasActiveSearch ? 'scroll-view' : 'scroll-view',
+    headerPlacement: 'stack-screen',
     listMounted: hasActiveSearch,
   });
 
-  useEffect(() => {
-    if (__DEV__ && hasActiveSearch && results.length > 0) {
-      logNavigationDiagnostic('search:flatlist:created', {
-        resultCount: results.length,
-      });
-    }
-  }, [hasActiveSearch, results.length]);
+  const resultsFooter = searchQuery.isFetchingNextPage ? (
+    <View style={styles.footerLoading}>
+      <ActivityIndicator color={colors.accent} />
+    </View>
+  ) : null;
 
-  const listEmptyComponent = useMemo(() => {
+  const resultsBody = useMemo(() => {
     if (!hasActiveSearch) {
       return null;
     }
@@ -359,12 +344,30 @@ export default function SearchScreen() {
       );
     }
 
-    return null;
+    return (
+      <SearchMappedResultsScroll
+        scope="search-scroll"
+        testID="search-results-scroll"
+        items={results}
+        keyExtractor={searchResultKeyExtractor}
+        onPress={handleResultPress}
+        contentContainerStyle={styles.listContent}
+        refreshControl={refreshControl}
+        footer={resultsFooter}
+        onEndReached={handleLoadMore}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      />
+    );
   }, [
+    handleLoadMore,
     handleRefresh,
+    handleResultPress,
     hasActiveSearch,
     normalizedSubmittedQuery,
-    results.length,
+    refreshControl,
+    results,
+    resultsFooter,
     searchErrorMessage,
     searchQuery.isError,
     searchQuery.isLoading,
@@ -395,35 +398,9 @@ export default function SearchScreen() {
   );
 
   return (
-    <StackListScreen
-      testID="search-screen"
-      header={hasActiveSearch ? undefined : searchScreenHeader}
-    >
+    <StackListScreen testID="search-screen" header={searchScreenHeader}>
       {hasActiveSearch ? (
-        <FlatList
-          testID="search-results-list"
-          data={results}
-          keyExtractor={searchResultKeyExtractor}
-          renderItem={renderResult}
-          ListHeaderComponent={searchScreenHeader}
-          ListEmptyComponent={listEmptyComponent}
-          ListFooterComponent={
-            searchQuery.isFetchingNextPage ? (
-              <View style={styles.footerLoading}>
-                <ActivityIndicator color={colors.accent} />
-              </View>
-            ) : null
-          }
-          refreshControl={refreshControl}
-          contentContainerStyle={styles.listContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.4}
-          initialNumToRender={layout.verticalList.initialNumToRender}
-          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-          windowSize={layout.verticalList.windowSize}
-        />
+        resultsBody
       ) : (
         <ScrollView
           style={styles.idleScroll}
