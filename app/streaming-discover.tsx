@@ -4,12 +4,10 @@ import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
-import { StreamingBodyMountProbe } from '@/debug/streaming-body-mount-probe';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
 import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
@@ -270,9 +268,6 @@ export default function StreamingDiscoverScreen() {
     ],
   );
 
-  const useStreamingBodyMountProbe =
-    __DEV__ && Platform.OS === 'android' && hasSelectedProviders && items.length > 0;
-
   const resultsFooter = resultsQuery.isFetchingNextPage ? (
     <View style={styles.footerLoading}>
       <ActivityIndicator color={colors.accent} />
@@ -309,15 +304,6 @@ export default function StreamingDiscoverScreen() {
       );
     }
 
-    if (useStreamingBodyMountProbe) {
-      return (
-        <StreamingBodyMountProbe
-          firstItem={items[0]}
-          onResultPress={handleResultPress}
-        />
-      );
-    }
-
     return (
       <SearchMappedResultsScroll
         layoutScope="streaming-discover"
@@ -344,12 +330,11 @@ export default function StreamingDiscoverScreen() {
   }, [
     handleResultPress,
     hasSelectedProviders,
-    items,
+    items.length,
     resultsData,
     resultsFooter,
     resultsQuery,
     t,
-    useStreamingBodyMountProbe,
   ]);
 
   return (

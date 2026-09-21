@@ -348,6 +348,7 @@ export default function SearchScreen() {
       <SearchMappedResultsScroll
         layoutScope="search-results"
         testID="search-results-scroll"
+        style={styles.resultsScroll}
         items={results}
         keyExtractor={searchResultKeyExtractor}
         onPress={handleResultPress}
@@ -429,6 +430,9 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  resultsScroll: {
+    flex: 1,
+  },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,

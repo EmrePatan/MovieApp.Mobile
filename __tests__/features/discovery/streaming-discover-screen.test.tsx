@@ -109,6 +109,7 @@ describe('StreamingDiscoverScreen', () => {
 
     render(<StreamingDiscoverScreen />);
 
+    expect(screen.getByTestId('streaming-discover-scroll-host')).toBeTruthy();
     expect(screen.getByTestId('streaming-discover-scroll')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();

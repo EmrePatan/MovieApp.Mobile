@@ -121,6 +121,7 @@ describe('DiscoverScreen', () => {
   it('mounts the browse FlatList when items are available', () => {
     render(<DiscoverScreen />);
 
+    expect(screen.getByTestId('discover-browse-scroll-host')).toBeTruthy();
     expect(screen.getByTestId('discover-browse-scroll')).toBeTruthy();
     expect(screen.getByText('Trending')).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();

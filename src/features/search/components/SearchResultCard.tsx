@@ -5,10 +5,6 @@ import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import {
-  logSearchResultCardEnter,
-  searchResultCardLayoutHandler,
-} from '@/debug/search-result-card-layout-probe';
-import {
   isPersonSearchResult,
   type CatalogSearchResultItem,
   type PersonSearchResultItem,
@@ -28,7 +24,6 @@ import { spacing } from '@/theme/spacing';
 interface SearchResultCardProps {
   item: SearchResultItem;
   onPress?: (item: SearchResultItem) => void;
-  layoutProbe?: boolean;
 }
 
 const PERSON_PORTRAIT_SIZE = layout.posterList.height;
@@ -36,11 +31,9 @@ const PERSON_PORTRAIT_SIZE = layout.posterList.height;
 const PersonSearchResultCard = memo(function PersonSearchResultCard({
   item,
   onPress,
-  layoutProbe = false,
 }: {
   item: PersonSearchResultItem;
   onPress?: (item: SearchResultItem) => void;
-  layoutProbe?: boolean;
 }) {
   const department = formatKnownForDepartment(item.knownForDepartment);
   const metadataLine = [formatContentType('person'), department].filter(Boolean).join(' · ');
@@ -51,14 +44,6 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(item)}
-      onLayout={
-        layoutProbe
-          ? (event) => {
-              searchResultCardLayoutHandler('pressable-layout', { branch: 'person' })(event);
-              searchResultCardLayoutHandler('container-layout', { branch: 'person' })(event);
-            }
-          : undefined
-      }
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View
@@ -70,15 +55,6 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
             borderRadius: PERSON_PORTRAIT_SIZE / 2,
           },
         ]}
-        onLayout={
-          layoutProbe
-            ? searchResultCardLayoutHandler('image-wrapper-layout', {
-                branch: 'person',
-                width: PERSON_PORTRAIT_SIZE,
-                height: PERSON_PORTRAIT_SIZE,
-              })
-            : undefined
-        }
       >
         {item.posterUrl ? (
           <CatalogImage
@@ -103,10 +79,7 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
           </View>
         )}
       </View>
-      <View
-        style={styles.meta}
-        onLayout={layoutProbe ? searchResultCardLayoutHandler('content-layout', { branch: 'person' }) : undefined}
-      >
+      <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
@@ -128,15 +101,11 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
 const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
   item,
   onPress,
-  layoutProbe = false,
 }: {
   item: CatalogSearchResultItem;
   onPress?: (item: SearchResultItem) => void;
-  layoutProbe?: boolean;
 }) {
   const year = formatCatalogYear(item.releaseDate, item.year);
-  const posterWidth = layout.posterList.width;
-  const posterHeight = layout.posterList.height;
 
   const metadataLine = useMemo(() => {
     const parts = [
@@ -155,38 +124,15 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(item)}
-      onLayout={
-        layoutProbe
-          ? (event) => {
-              searchResultCardLayoutHandler('pressable-layout', { branch: 'catalog' })(event);
-              searchResultCardLayoutHandler('container-layout', { branch: 'catalog' })(event);
-            }
-          : undefined
-      }
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <View
-        onLayout={
-          layoutProbe
-            ? searchResultCardLayoutHandler('image-wrapper-layout', {
-                branch: 'catalog',
-                width: posterWidth,
-                height: posterHeight,
-              })
-            : undefined
-        }
-      >
-        <PosterImage
-          uri={item.posterUrl}
-          width={posterWidth}
-          height={posterHeight}
-          accessibilityLabel={`${item.title} poster`}
-        />
-      </View>
-      <View
-        style={styles.meta}
-        onLayout={layoutProbe ? searchResultCardLayoutHandler('content-layout', { branch: 'catalog' }) : undefined}
-      >
+      <PosterImage
+        uri={item.posterUrl}
+        width={layout.posterList.width}
+        height={layout.posterList.height}
+        accessibilityLabel={`${item.title} poster`}
+      />
+      <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
@@ -208,30 +154,12 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
 export const SearchResultCard = memo(function SearchResultCard({
   item,
   onPress,
-  layoutProbe = false,
 }: SearchResultCardProps) {
-  if (layoutProbe) {
-    logSearchResultCardEnter({
-      itemId: item.id,
-      itemType: item.type,
-      branch: isPersonSearchResult(item) ? 'person' : 'catalog',
-      returnsNull: false,
-    });
+  if (isPersonSearchResult(item)) {
+    return <PersonSearchResultCard item={item} onPress={onPress} />;
   }
 
-  const card = isPersonSearchResult(item)
-    ? <PersonSearchResultCard item={item} onPress={onPress} layoutProbe={layoutProbe} />
-    : <CatalogSearchResultCard item={item} onPress={onPress} layoutProbe={layoutProbe} />;
-
-  if (!layoutProbe) {
-    return card;
-  }
-
-  return (
-    <View onLayout={searchResultCardLayoutHandler('root-layout')} collapsable={false}>
-      {card}
-    </View>
-  );
+  return <CatalogSearchResultCard item={item} onPress={onPress} />;
 });
 
 const styles = StyleSheet.create({

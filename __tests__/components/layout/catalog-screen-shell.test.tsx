@@ -18,7 +18,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 describe('CatalogScreenShell', () => {
-  it('uses a flex:1 body host below the header', () => {
+  it('uses a flex:1 body host with minHeight:0 below the header', () => {
     const { getByTestId } = render(
       <CatalogScreenShell layoutScope="trending-see-all" testID="discover-browse-screen" header={<Text>Header</Text>}>
         <Text testID="results-body">Results</Text>
@@ -26,7 +26,7 @@ describe('CatalogScreenShell', () => {
     );
 
     const body = getByTestId('trending-see-all-body');
-    expect(body.props.style).toMatchObject({ flex: 1 });
+    expect(body.props.style).toMatchObject({ flex: 1, minHeight: 0 });
     expect(getByTestId('results-body')).toBeTruthy();
   });
 });

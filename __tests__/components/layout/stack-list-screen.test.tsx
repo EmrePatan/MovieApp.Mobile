@@ -30,7 +30,7 @@ describe('StackListScreen', () => {
     expect(getByTestId('list-content')).toBeTruthy();
   });
 
-  it('wraps children in a diagnostic body host without flex:1', () => {
+  it('wraps children in a flex:1 body host with minHeight:0', () => {
     const { getByTestId } = render(
       <StackListScreen testID="stack-list-screen">
         <FlatList
@@ -44,7 +44,7 @@ describe('StackListScreen', () => {
 
     const body = getByTestId('stack-list-screen-body');
     expect(body).toBeTruthy();
-    expect(body.props.style).toEqual({});
+    expect(body.props.style).toMatchObject({ flex: 1, minHeight: 0 });
     expect(getByTestId('stack-list-flatlist')).toBeTruthy();
   });
 });

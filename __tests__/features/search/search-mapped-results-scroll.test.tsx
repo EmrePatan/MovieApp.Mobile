@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
-import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
+import {
+  SearchMappedResultsScroll,
+  searchMappedResultsHostStyle,
+  searchMappedResultsScrollStyle,
+} from '@/features/search/components/SearchMappedResultsScroll';
 import type { SearchResultItem } from '@/features/search/types';
 
 jest.mock('expo-router', () => ({
@@ -38,6 +42,28 @@ const items: SearchResultItem[] = [
 ];
 
 describe('SearchMappedResultsScroll', () => {
+  it('uses a flex host with minHeight:0 and a flex ScrollView viewport', () => {
+    render(
+      <SearchMappedResultsScroll
+        layoutScope="search"
+        testID="search-results-scroll"
+        items={items}
+        keyExtractor={(item) => item.id}
+        onPress={jest.fn()}
+      />,
+    );
+
+    const host = screen.getByTestId('search-results-scroll-host');
+    const scroll = screen.getByTestId('search-results-scroll');
+
+    expect(host.props.style).toEqual(
+      expect.arrayContaining([
+        searchMappedResultsHostStyle,
+      ]),
+    );
+    expect(scroll.props.style).toMatchObject(searchMappedResultsScrollStyle);
+  });
+
   it('inserts renderRow return values into the committed tree for every item', () => {
     const renderRow = jest.fn(({ item }: { item: SearchResultItem }) => (
       <Text testID={`row-${item.id}`}>{item.title}</Text>
@@ -74,20 +100,5 @@ describe('SearchMappedResultsScroll', () => {
 
     expect(screen.getByLabelText('Alpha, Movie · 2020 · ★ 7.5')).toBeTruthy();
     expect(screen.getByLabelText('Beta, Movie · 2021 · ★ 8.1')).toBeTruthy();
-  });
-
-  it('keeps the ScrollView host in the tree when rows are mapped', () => {
-    render(
-      <SearchMappedResultsScroll
-        layoutScope="search"
-        testID="search-results-scroll"
-        items={items}
-        keyExtractor={(item) => item.id}
-        onPress={jest.fn()}
-        renderRow={({ item }) => <Text testID={`row-${item.id}`}>{item.title}</Text>}
-      />,
-    );
-
-    expect(screen.getByTestId('search-results-scroll')).toBeTruthy();
   });
 });

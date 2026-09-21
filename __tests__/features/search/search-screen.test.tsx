@@ -322,6 +322,7 @@ describe('SearchScreen', () => {
     fireEvent(input, 'submitEditing', { nativeEvent: { text: 'interstellar' } });
 
     expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all');
+    expect(screen.getByTestId('search-results-scroll-host')).toBeTruthy();
     expect(screen.getByTestId('search-results-scroll')).toBeTruthy();
     expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
     expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
@@ -356,6 +357,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
+    expect(screen.getByTestId('search-results-scroll-host')).toBeTruthy();
     expect(screen.getByTestId('search-results-scroll')).toBeTruthy();
     expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
     expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();

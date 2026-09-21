@@ -1,20 +1,15 @@
-import { useCallback, useEffect, type ReactNode } from 'react';
+import { useCallback, type ReactNode } from 'react';
 import {
-  LayoutChangeEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
+  StyleSheet,
   View,
   type ScrollViewProps,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { describeViewStyle } from '@/debug/stack-layout-probe';
-import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
-import {
-  routeLayoutHandler,
-  useRouteLayoutContext,
-} from '@/debug/route-layout-probe';
+import { useRouteLayoutContext } from '@/debug/route-layout-probe';
 import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
 
@@ -65,20 +60,6 @@ export function SearchMappedResultsScroll({
     onPress: options.onPress,
   }));
 
-  useEffect(() => {
-    if (__DEV__) {
-      logNavigationDiagnostic(`layout:${layoutScope}:scroll:created`, {
-        pathname: route.pathname,
-        segments: route.segments,
-        itemCount: items.length,
-        renderer: 'ScrollView',
-        itemComponent: 'SearchResultCard',
-        renderRowContract: 'items.map((item,index)=>(<View>{rowRenderer(...)}</View>))',
-        rowRendererReturnsInserted: true,
-      });
-    }
-  }, [items.length, layoutScope, route.pathname, route.segments]);
-
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (!onEndReached) {
@@ -96,66 +77,42 @@ export function SearchMappedResultsScroll({
     [onEndReached],
   );
 
-  const scrollViewportHandler = (event: LayoutChangeEvent) => {
-    if (__DEV__ && layoutScope === 'streaming-discover') {
-      const { x, y, width, height } = event.nativeEvent.layout;
-      logNavigationDiagnostic('streaming-scroll:viewport-layout', {
-        pathname: route.pathname,
-        x,
-        y,
-        width,
-        height,
-      });
-    }
-
-    routeLayoutHandler(layoutScope, 'scroll', route, {
-      testID,
-      renderer: 'ScrollView',
-      dataCount: items.length,
-      style: describeViewStyle(style),
-      contentContainerStyle: describeViewStyle(contentContainerStyle),
-    })(event);
-  };
-
   return (
-    <ScrollView
-      testID={testID}
-      style={style}
-      contentContainerStyle={contentContainerStyle}
-      refreshControl={refreshControl}
-      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-      keyboardDismissMode={keyboardDismissMode}
-      onScroll={onEndReached ? handleScroll : undefined}
-      scrollEventThrottle={400}
-      onLayout={scrollViewportHandler}
+    <View
+      testID={`${testID}-host`}
+      style={[styles.host, style]}
+      collapsable={false}
     >
-      <View
-        collapsable={false}
-        onLayout={
-          layoutScope === 'streaming-discover'
-            ? (event) => {
-                const { x, y, width, height } = event.nativeEvent.layout;
-                logNavigationDiagnostic('streaming-scroll:content-layout', {
-                  pathname: route.pathname,
-                  itemCount: items.length,
-                  x,
-                  y,
-                  width,
-                  height,
-                });
-              }
-            : routeLayoutHandler(layoutScope, 'scroll-content', route, {
-                itemCount: items.length,
-              })
-        }
+      <ScrollView
+        testID={testID}
+        style={styles.scroll}
+        contentContainerStyle={contentContainerStyle}
+        refreshControl={refreshControl}
+        keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+        keyboardDismissMode={keyboardDismissMode}
+        onScroll={onEndReached ? handleScroll : undefined}
+        scrollEventThrottle={400}
       >
         {items.map((item, index) => (
           <View key={keyExtractor(item)} collapsable={false}>
             {rowRenderer({ route, item, index, onPress })}
           </View>
         ))}
-      </View>
-      {footer}
-    </ScrollView>
+        {footer}
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  host: {
+    flex: 1,
+    minHeight: 0,
+  },
+  scroll: {
+    flex: 1,
+  },
+});
+
+export const searchMappedResultsHostStyle = styles.host;
+export const searchMappedResultsScrollStyle = styles.scroll;
