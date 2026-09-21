@@ -44,6 +44,7 @@ function AuthProbe() {
   return (
     <>
       <Text testID="loading">{auth.isLoading ? 'loading' : 'ready'}</Text>
+      <Text testID="session-restored">{auth.isSessionRestored ? 'yes' : 'no'}</Text>
       <Text testID="authenticated">{auth.isAuthenticated ? 'yes' : 'no'}</Text>
       <Text testID="user">{auth.user?.displayName ?? 'none'}</Text>
     </>
@@ -55,7 +56,7 @@ describe('AuthProvider bootstrap', () => {
     jest.clearAllMocks();
   });
 
-  it('unblocks startup before /api/auth/me resolves and hydrates user afterward', async () => {
+  it('waits for /api/auth/me before unblocking startup when a stored token exists', async () => {
     (getAccessToken as jest.Mock).mockResolvedValue('stored-token');
     let resolveMe: ((value: { displayName: string }) => void) | undefined;
     (getCurrentUser as jest.Mock).mockImplementation(
@@ -71,13 +72,12 @@ describe('AuthProvider bootstrap', () => {
       </AuthProvider>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('loading').props.children).toBe('ready');
-    });
+    expect(screen.getByTestId('loading').props.children).toBe('loading');
+    expect(screen.getByTestId('session-restored').props.children).toBe('no');
 
-    expect(screen.getByTestId('authenticated').props.children).toBe('yes');
-    expect(screen.getByTestId('user').props.children).toBe('none');
-    expect(getCurrentUser).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(getCurrentUser).toHaveBeenCalled();
+    });
 
     await act(async () => {
       resolveMe?.({ displayName: 'Emre' });
@@ -85,6 +85,9 @@ describe('AuthProvider bootstrap', () => {
     });
 
     await waitFor(() => {
+      expect(screen.getByTestId('loading').props.children).toBe('ready');
+      expect(screen.getByTestId('session-restored').props.children).toBe('yes');
+      expect(screen.getByTestId('authenticated').props.children).toBe('yes');
       expect(screen.getByTestId('user').props.children).toBe('Emre');
     });
   });

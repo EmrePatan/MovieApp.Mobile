@@ -67,6 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSessionRestored, setIsSessionRestored] = useState(false);
   const tokenRef = useRef<string | null>(null);
 
   const syncToken = useCallback((nextToken: string | null) => {
@@ -130,30 +131,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (isMounted) {
             syncToken(null);
             setUser(null);
+            setIsSessionRestored(true);
           }
           return;
         }
 
         syncToken(storedToken);
+
+        await hydrateCurrentUser(
+          () => endAuthenticatedSession(),
+          (profile) => {
+            if (isMounted) {
+              setUser(profile);
+            }
+          },
+          () => isMounted,
+        );
       } finally {
         if (isMounted) {
+          setIsSessionRestored(true);
           setIsLoading(false);
         }
       }
-
-      if (!storedToken) {
-        return;
-      }
-
-      await hydrateCurrentUser(
-        () => endAuthenticatedSession(),
-        (profile) => {
-          if (isMounted) {
-            setUser(profile);
-          }
-        },
-        () => isMounted,
-      );
     }
 
     void bootstrapAuth();
@@ -233,6 +232,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       token,
       isLoading,
       isAuthenticated: Boolean(token),
+      isSessionRestored,
       login,
       register,
       verifyEmail,
@@ -246,6 +246,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       user,
       token,
       isLoading,
+      isSessionRestored,
       login,
       register,
       verifyEmail,

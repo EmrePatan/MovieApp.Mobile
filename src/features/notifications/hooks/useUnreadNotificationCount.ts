@@ -4,12 +4,12 @@ import { getUnreadNotificationCount } from '../api/notifications-api';
 import { unreadNotificationCountQueryKey } from './notification-query-keys';
 
 export function useUnreadNotificationCount() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isSessionRestored } = useAuth();
 
   return useQuery({
     queryKey: unreadNotificationCountQueryKey(),
     queryFn: ({ signal }) => getUnreadNotificationCount(signal),
-    enabled: isAuthenticated,
+    enabled: isSessionRestored && isAuthenticated,
     staleTime: 30_000,
   });
 }

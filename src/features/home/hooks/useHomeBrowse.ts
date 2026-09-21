@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/auth/useAuth';
 import { getHomeBrowse } from '../api/home-api';
 import type { HomeTypeFilter } from '../types';
 import { DEFAULT_HOME_SECTION_SIZE } from '../types';
@@ -9,9 +10,12 @@ export function homeBrowseQueryKey(type: HomeTypeFilter, sectionSize: number) {
 }
 
 export function useHomeBrowse(type: HomeTypeFilter, sectionSize = DEFAULT_HOME_SECTION_SIZE) {
+  const { isAuthenticated, isSessionRestored } = useAuth();
+
   return useQuery({
     queryKey: homeBrowseQueryKey(type, sectionSize),
     queryFn: ({ signal }) => getHomeBrowse({ type, sectionSize }, signal),
     staleTime: 60_000,
+    enabled: isSessionRestored && isAuthenticated,
   });
 }

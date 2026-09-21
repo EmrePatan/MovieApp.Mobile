@@ -11,6 +11,7 @@ export interface AuthState {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isSessionRestored: boolean;
 }
 
 export interface RegisterResult {
