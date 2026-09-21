@@ -8,6 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { logStackLayout } from '@/debug/stack-layout-probe';
 import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
 import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
@@ -79,6 +80,11 @@ export function SearchMappedResultsScroll({
       keyboardDismissMode={keyboardDismissMode}
       onScroll={onEndReached ? handleScroll : undefined}
       scrollEventThrottle={400}
+      onLayout={(event) => {
+        if (__DEV__) {
+          logStackLayout(`${scope}:layout`, event, { testID });
+        }
+      }}
     >
       {items.map((item, index) => (
         <View key={keyExtractor(item)}>

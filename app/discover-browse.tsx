@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { StackListScreen } from '@/components/layout/StackListScreen';
+import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
 import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -100,7 +100,7 @@ export default function DiscoverScreen() {
     mode,
     itemCount: items.length,
     bodyKind: listMounted ? 'scroll-view' : 'placeholder',
-    headerPlacement: 'stack-screen',
+    shellKind: 'catalog-screen-shell',
     listMounted,
   });
 
@@ -292,10 +292,10 @@ export default function DiscoverScreen() {
 
   if (browseQuery.isLoading && items.length === 0) {
     return (
-      <StackListScreen testID="discover-browse-screen" header={listHeader}>
+      <CatalogScreenShell shellScope="discover-shell" testID="discover-browse-screen" header={listHeader}>
         <SearchLoadingState />
         {filterSheetVisible ? filterSheet : null}
-      </StackListScreen>
+      </CatalogScreenShell>
     );
   }
 
@@ -305,12 +305,12 @@ export default function DiscoverScreen() {
       : t('discovery.browseScreen.loadError');
 
     return (
-      <StackListScreen testID="discover-browse-screen" header={listHeader}>
+      <CatalogScreenShell shellScope="discover-shell" testID="discover-browse-screen" header={listHeader}>
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
         {filterSheetVisible ? filterSheet : null}
-      </StackListScreen>
+      </CatalogScreenShell>
     );
   }
 
@@ -327,6 +327,7 @@ export default function DiscoverScreen() {
       <SearchMappedResultsScroll
         scope="discover-scroll"
         testID="discover-browse-scroll"
+        style={styles.resultsScroll}
         items={items}
         keyExtractor={searchResultKeyExtractor}
         onPress={handleResultPress}
@@ -343,10 +344,10 @@ export default function DiscoverScreen() {
     );
 
   return (
-    <StackListScreen testID="discover-browse-screen" header={listHeader}>
+    <CatalogScreenShell shellScope="discover-shell" testID="discover-browse-screen" header={listHeader}>
       {resultsBody}
       {filterSheetVisible ? filterSheet : null}
-    </StackListScreen>
+    </CatalogScreenShell>
   );
 }
 
@@ -390,6 +391,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.85,
+  },
+  resultsScroll: {
+    flex: 1,
   },
   listContent: {
     paddingBottom: spacing.xxl,

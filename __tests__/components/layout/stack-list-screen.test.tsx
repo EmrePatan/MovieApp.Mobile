@@ -25,8 +25,8 @@ describe('StackListScreen', () => {
     expect(getByTestId('list-content')).toBeTruthy();
   });
 
-  it('does not wrap children in an intermediate flex body container', () => {
-    const { queryByTestId } = render(
+  it('wraps children in a diagnostic body host without flex:1', () => {
+    const { getByTestId } = render(
       <StackListScreen testID="stack-list-screen">
         <FlatList
           testID="stack-list-flatlist"
@@ -37,8 +37,9 @@ describe('StackListScreen', () => {
       </StackListScreen>,
     );
 
-    expect(queryByTestId('stack-list-screen-body')).toBeNull();
-    expect(queryByTestId('render-boundary-stack-list-body')).toBeNull();
-    expect(queryByTestId('stack-list-flatlist')).toBeTruthy();
+    const body = getByTestId('stack-list-screen-body');
+    expect(body).toBeTruthy();
+    expect(body.props.style).toEqual({});
+    expect(getByTestId('stack-list-flatlist')).toBeTruthy();
   });
 });

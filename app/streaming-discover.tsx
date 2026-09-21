@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
-import { StackListScreen } from '@/components/layout/StackListScreen';
+import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
 import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -99,7 +99,7 @@ export default function StreamingDiscoverScreen() {
     itemCount: items.length,
     resultsDataCount: resultsData.length,
     bodyKind: hasSelectedProviders ? 'scroll-view' : 'placeholder',
-    headerPlacement: 'stack-screen',
+    shellKind: 'catalog-screen-shell',
     listMounted: hasSelectedProviders,
   });
 
@@ -308,6 +308,7 @@ export default function StreamingDiscoverScreen() {
       <SearchMappedResultsScroll
         scope="streaming-scroll"
         testID="streaming-discover-scroll"
+        style={styles.resultsScroll}
         items={resultsData}
         keyExtractor={searchResultKeyExtractor}
         onPress={handleResultPress}
@@ -337,9 +338,13 @@ export default function StreamingDiscoverScreen() {
   ]);
 
   return (
-    <StackListScreen testID="streaming-discover-screen" header={providerHeader}>
+    <CatalogScreenShell
+      shellScope="streaming-shell"
+      testID="streaming-discover-screen"
+      header={providerHeader}
+    >
       {resultsBody}
-    </StackListScreen>
+    </CatalogScreenShell>
   );
 }
 
@@ -352,7 +357,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   resultsPlaceholder: {
-    flexGrow: 1,
+    flex: 1,
+  },
+  resultsScroll: {
+    flex: 1,
   },
   listContent: {
     paddingHorizontal: spacing.lg,

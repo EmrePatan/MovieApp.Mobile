@@ -2,13 +2,12 @@ import type { ReactNode } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { describeViewStyle, logStackLayout } from '@/debug/stack-layout-probe';
-import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
 import { commonStyles } from '@/theme/theme';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-interface StackListScreenProps {
-  topBar?: ReactNode;
+interface CatalogScreenShellProps {
+  shellScope: string;
   header?: ReactNode;
   children: ReactNode;
   edges?: Edge[];
@@ -16,70 +15,53 @@ interface StackListScreenProps {
 }
 
 /**
- * Root-stack list shell. Children render inside a diagnostic body host without flex:1
- * so #45 can compare against CatalogScreenShell (Favorites-aligned flex body).
+ * Favorites-aligned screen shell for #45: SafeAreaView → header sibling → flex:1 body.
+ * Bypasses StackListScreen on routes where header-visible + body-invisible was observed.
  */
-export function StackListScreen({
-  topBar,
+export function CatalogScreenShell({
+  shellScope,
   header,
   children,
   edges = ['top', 'left', 'right'],
   testID,
-}: StackListScreenProps) {
-  if (__DEV__) {
-    logNavigationDiagnostic('trace:stack-list-screen', {
-      testID,
-      hasTopBar: Boolean(topBar),
-      hasHeader: Boolean(header),
-      bodyHostStyle: describeViewStyle(styles.bodyHost),
-    });
-  }
-
+}: CatalogScreenShellProps) {
   return (
     <SafeAreaView
       style={commonStyles.screen}
       edges={edges}
       testID={testID}
       onLayout={(event) =>
-        logStackLayout('stack:root:layout', event, {
+        logStackLayout(`${shellScope}:root:layout`, event, {
           testID,
           style: describeViewStyle(commonStyles.screen),
         })
       }
     >
-      {topBar ? (
-        <View
-          collapsable={false}
-          onLayout={(event) => logStackLayout('stack:topbar:layout', event, { testID })}
-        >
-          {topBar}
-        </View>
-      ) : null}
       {header ? (
         <View
           collapsable={false}
-          onLayout={(event) => logStackLayout('stack:header:layout', event, { testID })}
+          onLayout={(event) => logStackLayout(`${shellScope}:header:layout`, event, { testID })}
         >
           {header}
         </View>
       ) : null}
       <View
-        testID="stack-list-screen-body"
-        style={styles.bodyHost}
+        testID={`${shellScope}-body`}
+        style={styles.body}
         collapsable={false}
         onLayout={(event) =>
-          logStackLayout('stack:body:layout', event, {
+          logStackLayout(`${shellScope}:body:layout`, event, {
             testID,
-            style: describeViewStyle(styles.bodyHost),
+            style: describeViewStyle(styles.body),
           })
         }
       >
         {__DEV__ && Platform.OS === 'android' ? (
           <View
-            testID="stack-body-canary"
+            testID={`${shellScope}-body-canary`}
             collapsable={false}
             style={styles.bodyCanary}
-            onLayout={(event) => logStackLayout('stack:body-canary:layout', event, { testID })}
+            onLayout={(event) => logStackLayout(`${shellScope}:body-canary:layout`, event, { testID })}
           >
             <Text style={styles.bodyCanaryText}>BODY CANARY</Text>
           </View>
@@ -91,8 +73,8 @@ export function StackListScreen({
 }
 
 const styles = StyleSheet.create({
-  bodyHost: {
-    // Intentionally no flex:1 — documents the pre-fix StackListScreen body host.
+  body: {
+    flex: 1,
   },
   bodyCanary: {
     marginHorizontal: spacing.lg,
