@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
-import type { LayoutChangeEvent } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 
 /** Bump when #45 diagnostics/fixes change so Metro logs prove the active bundle. */
-export const NAV_DIAGNOSTIC_BUILD_ID = 'MA-45-2026-09-21-v3';
+export const NAV_DIAGNOSTIC_BUILD_ID = 'MA-45-2026-09-21-v4';
 
 const PREFIX = `[NAV_DIAG:${NAV_DIAGNOSTIC_BUILD_ID}]`;
+
+let screenInstanceCounter = 0;
 
 export function logNavigationDiagnostic(
   scope: string,
@@ -17,19 +19,6 @@ export function logNavigationDiagnostic(
   console.log(`${PREFIX} ${scope}`, payload);
 }
 
-export function createLayoutDiagnosticHandler(
-  scope: string,
-): (event: LayoutChangeEvent) => void {
-  return (event) => {
-    if (!__DEV__) {
-      return;
-    }
-
-    const { width, height, x, y } = event.nativeEvent.layout;
-    console.log(`${PREFIX} layout:${scope}`, { width, height, x, y });
-  };
-}
-
 export function useNavigationDiagnostics(
   screen: string,
   payload: Record<string, unknown>,
@@ -39,4 +28,32 @@ export function useNavigationDiagnostics(
   useEffect(() => {
     logNavigationDiagnostic(`state:${screen}`, payload);
   }, [payloadKey, screen]);
+}
+
+/**
+ * Per-render trace with route + platform context.
+ * Prefer this over FlatList onLayout, which is unreliable even when lists paint (iOS).
+ */
+export function useScreenRenderTrace(
+  screen: string,
+  payload: Record<string, unknown>,
+): void {
+  const instanceIdRef = useRef<string | null>(null);
+
+  if (instanceIdRef.current === null) {
+    screenInstanceCounter += 1;
+    instanceIdRef.current = `${screen}-${screenInstanceCounter}`;
+  }
+
+  const renderCountRef = useRef(0);
+  renderCountRef.current += 1;
+
+  if (__DEV__) {
+    logNavigationDiagnostic(`trace:${screen}`, {
+      platform: Platform.OS,
+      instanceId: instanceIdRef.current,
+      renderCount: renderCountRef.current,
+      ...payload,
+    });
+  }
 }

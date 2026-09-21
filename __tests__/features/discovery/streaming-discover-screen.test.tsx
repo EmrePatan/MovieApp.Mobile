@@ -11,6 +11,7 @@ const mockReplace = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ setParams: mockSetParams, push: mockPush, replace: mockReplace, back: jest.fn() }),
   useLocalSearchParams: jest.fn(() => ({})),
+  useSegments: jest.fn(() => ['streaming-discover']),
 }));
 
 jest.mock('@/features/discovery/hooks/useDiscoveryWatchProviders', () => ({

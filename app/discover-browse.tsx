@@ -14,8 +14,7 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -53,9 +52,9 @@ import { SearchLoadingState } from '@/features/search/components/SearchLoadingSt
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
 import {
-  createLayoutDiagnosticHandler,
   logNavigationDiagnostic,
   useNavigationDiagnostics,
+  useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -73,6 +72,7 @@ export default function DiscoverScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
+  const segments = useSegments();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
 
   const browseState = useMemo(() => parseDiscoverParams(rawParams), [rawParams]);
@@ -93,6 +93,14 @@ export default function DiscoverScreen() {
     isLoading: browseQuery.isLoading,
     isError: browseQuery.isError,
     isFetching: browseQuery.isFetching,
+  });
+
+  useScreenRenderTrace('discover-browse', {
+    pathname: `/${segments.join('/')}`,
+    mode,
+    itemCount: items.length,
+    bodyKind: 'flat-list',
+    listMounted: items.length > 0 || !browseQuery.isLoading,
   });
 
   const activeFilterCount = useMemo(
@@ -319,17 +327,10 @@ export default function DiscoverScreen() {
     );
   }
 
-  if (__DEV__) {
-    logNavigationDiagnostic('render:discover-browse-success-branch', {
-      itemCount: items.length,
-    });
-  }
-
   return (
     <StackListScreen testID="discover-browse-screen">
       <FlatList
         testID="discover-browse-list"
-        onLayout={createLayoutDiagnosticHandler('discover-browse-flatlist')}
         data={items}
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}
@@ -351,7 +352,6 @@ export default function DiscoverScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
-        {...getFlatListClippingProps(true)}
       />
       {filterSheetVisible ? filterSheet : null}
     </StackListScreen>

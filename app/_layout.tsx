@@ -2,7 +2,6 @@ import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SplashScreen, Stack } from 'expo-router';
 import { Platform } from 'react-native';
-import { enableFreeze } from 'react-native-screens';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
@@ -25,16 +24,9 @@ import {
 
 void SplashScreen.preventAutoHideAsync();
 
-if (Platform.OS === 'android') {
-  enableFreeze(false);
-}
-
 if (__DEV__) {
   logNavigationDiagnostic('bundle:active', { buildId: NAV_DIAGNOSTIC_BUILD_ID });
 }
-
-const androidStackScreenOptions =
-  Platform.OS === 'android' ? { freezeOnBlur: false as const } : undefined;
 
 function RootNavigator() {
   const { t } = useTranslation();
@@ -53,7 +45,6 @@ function RootNavigator() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
-          ...androidStackScreenOptions,
         }}
       >
         <Stack.Screen name="index" />

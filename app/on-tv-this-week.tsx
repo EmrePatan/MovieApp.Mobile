@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -136,7 +135,6 @@ export default function OnTvThisWeekScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
-        {...getFlatListClippingProps(true)}
         contentContainerStyle={styles.listContent}
       />
     </StackListScreen>

@@ -11,8 +11,7 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
@@ -45,9 +44,9 @@ import { SearchResultCard } from '@/features/search/components/SearchResultCard'
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import {
-  createLayoutDiagnosticHandler,
   logNavigationDiagnostic,
   useNavigationDiagnostics,
+  useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -58,6 +57,7 @@ export default function StreamingDiscoverScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
+  const segments = useSegments();
   const { region: userRegion, isHydrated } = useRegionalPreference();
   useTrackProductMetricOnFocus(PRODUCT_METRICS.streamingServicesOpened, isHydrated);
 
@@ -90,6 +90,14 @@ export default function StreamingDiscoverScreen() {
     resultsLoading: resultsQuery.isLoading,
     resultsError: resultsQuery.isError,
     isHydrated,
+  });
+
+  useScreenRenderTrace('streaming-discover', {
+    pathname: `/${segments.join('/')}`,
+    providerCount: providersQuery.data?.providers?.length ?? 0,
+    itemCount: items.length,
+    bodyKind: 'flat-list',
+    listMounted: true,
   });
 
   const currentRoute = useMemo(
@@ -299,13 +307,6 @@ export default function StreamingDiscoverScreen() {
     t,
   ]);
 
-  if (__DEV__) {
-    logNavigationDiagnostic('render:streaming-discover-success-branch', {
-      providerCount: providersQuery.data?.providers?.length ?? 0,
-      itemCount: items.length,
-    });
-  }
-
   const streamingListHeader = useMemo(
     () => (
       <>
@@ -322,7 +323,6 @@ export default function StreamingDiscoverScreen() {
     <StackListScreen testID="streaming-discover-screen">
       <FlatList
         testID="streaming-discover-list"
-        onLayout={createLayoutDiagnosticHandler('streaming-discover-flatlist')}
         data={discoverState.watchProviderIds.length > 0 ? items : []}
         keyExtractor={searchResultKeyExtractor}
         renderItem={({ item, index }) => {
@@ -360,7 +360,6 @@ export default function StreamingDiscoverScreen() {
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
-        {...getFlatListClippingProps(true)}
       />
     </StackListScreen>
   );

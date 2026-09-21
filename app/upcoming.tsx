@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -184,7 +183,6 @@ export default function UpcomingScreen() {
               <AppButton title={t('common.signInTitleCase')} variant="secondary" onPress={handleSignIn} />
             </View>
           }
-          {...getFlatListClippingProps(true)}
           contentContainerStyle={styles.listContent}
         />
       </StackListScreen>
@@ -263,7 +261,6 @@ export default function UpcomingScreen() {
             onRefresh={handleRefresh}
           />
         }
-        {...getFlatListClippingProps(true)}
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}

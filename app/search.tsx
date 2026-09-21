@@ -13,8 +13,7 @@ import {
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useQueryClient } from '@tanstack/react-query';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import {
   parseSearchReturnOrigin,
   returnFromSearch,
@@ -51,9 +50,9 @@ import { searchResultKeyExtractor } from '@/features/search/utils/search-list-ke
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import {
-  createLayoutDiagnosticHandler,
   logNavigationDiagnostic,
   useNavigationDiagnostics,
+  useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
@@ -65,6 +64,7 @@ export default function SearchScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { explore, from } = useLocalSearchParams<{ explore?: string; from?: string }>();
+  const segments = useSegments();
   const searchReturnOrigin = parseSearchReturnOrigin(from);
   const { isAuthenticated } = useAuth();
   const [inputText, setInputText] = useState('');
@@ -316,6 +316,14 @@ export default function SearchScreen() {
     isFetching: searchQuery.isFetching,
   });
 
+  useScreenRenderTrace('search', {
+    pathname: `/${segments.join('/')}`,
+    displayMode,
+    resultCount: results.length,
+    bodyKind: hasActiveSearch ? 'flat-list' : 'scroll-view',
+    listMounted: hasActiveSearch,
+  });
+
   const listEmptyComponent = useMemo(() => {
     if (!hasActiveSearch) {
       return null;
@@ -381,12 +389,6 @@ export default function SearchScreen() {
     </SearchScreenHeader>
   );
 
-  if (__DEV__ && hasActiveSearch) {
-    logNavigationDiagnostic('render:search-results-branch', {
-      resultCount: results.length,
-    });
-  }
-
   return (
     <StackListScreen
       testID="search-screen"
@@ -395,7 +397,6 @@ export default function SearchScreen() {
       {hasActiveSearch ? (
         <FlatList
           testID="search-results-list"
-          onLayout={createLayoutDiagnosticHandler('search-results-flatlist')}
           data={results}
           keyExtractor={searchResultKeyExtractor}
           renderItem={renderResult}
@@ -418,7 +419,6 @@ export default function SearchScreen() {
           initialNumToRender={layout.verticalList.initialNumToRender}
           maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
           windowSize={layout.verticalList.windowSize}
-          {...getFlatListClippingProps(true)}
         />
       ) : (
         <ScrollView
