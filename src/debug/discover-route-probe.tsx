@@ -11,7 +11,7 @@ import { logRouteScreenMount, useRouteScreenProbe } from './route-screen-probe';
 import { logNavigationDiagnostic } from './navigation-diagnostics';
 
 /** Bump on device to progress isolation stages (0–5). DEV Android only. */
-export const DISCOVER_ROUTE_PROBE_STAGE = 3 as 0 | 1 | 2 | 3 | 4 | 5;
+export const DISCOVER_ROUTE_PROBE_STAGE = 4 as 0 | 1 | 2 | 3 | 4 | 5;
 
 interface DiscoverRouteProbeProps {
   stage: 0 | 1 | 2 | 3 | 4 | 5;
@@ -56,6 +56,8 @@ export function DiscoverRouteProbe({
   }
 
   if (stage === 4) {
+    const firstItem = items[0];
+
     return (
       <View
         testID="discover-route-probe-stage-4"
@@ -66,17 +68,90 @@ export function DiscoverRouteProbe({
         <Text style={styles.probeLabel}>DISCOVER CONTROL 4</Text>
         <FlatList
           testID="discover-route-probe-list"
+          style={styles.probeList}
           data={items}
           keyExtractor={searchResultKeyExtractor}
-          ListHeaderComponent={
-            <View>
-              <Text style={styles.probeSubLabel}>real data + SearchResultCard</Text>
-              {listHeader}
-            </View>
-          }
-          renderItem={({ item }) => <SearchResultCard item={item} onPress={onPress} />}
+          onLayout={(event) => {
+            const { x, y, width, height } = event.nativeEvent.layout;
+            logNavigationDiagnostic('discover-route-probe:stage4:flatlist-layout', {
+              pathname,
+              itemCount: items.length,
+              x,
+              y,
+              width,
+              height,
+            });
+          }}
+          renderItem={({ item, index }) => {
+            if (index === 0) {
+              logNavigationDiagnostic('discover-route-probe:stage4:render-item-index0', {
+                pathname,
+                itemCount: items.length,
+                id: item.id,
+                type: item.type,
+                title: item.title,
+              });
+              logNavigationDiagnostic('discover-route-probe:stage4:search-card-enter-index0', {
+                pathname,
+                id: item.id,
+                type: item.type,
+                title: item.title,
+              });
+            }
+
+            return (
+              <View
+                collapsable={false}
+                onLayout={
+                  index === 0
+                    ? (event) => {
+                        const { x, y, width, height } = event.nativeEvent.layout;
+                        logNavigationDiagnostic('discover-route-probe:stage4:wrapper-layout-index0', {
+                          pathname,
+                          id: item.id,
+                          type: item.type,
+                          title: item.title,
+                          x,
+                          y,
+                          width,
+                          height,
+                        });
+                      }
+                    : undefined
+                }
+              >
+                <View
+                  collapsable={false}
+                  onLayout={
+                    index === 0
+                      ? (event) => {
+                          const { x, y, width, height } = event.nativeEvent.layout;
+                          logNavigationDiagnostic('discover-route-probe:stage4:card-root-layout-index0', {
+                            pathname,
+                            id: item.id,
+                            type: item.type,
+                            title: item.title,
+                            x,
+                            y,
+                            width,
+                            height,
+                          });
+                        }
+                      : undefined
+                  }
+                >
+                  <SearchResultCard item={item} onPress={onPress} />
+                </View>
+              </View>
+            );
+          }}
           contentContainerStyle={styles.listContent}
         />
+        {firstItem ? (
+          <Text style={styles.hiddenMeta} testID="discover-route-probe-first-item">
+            {firstItem.id}
+          </Text>
+        ) : null}
       </View>
     );
   }

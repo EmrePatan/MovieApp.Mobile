@@ -74,6 +74,22 @@ describe('DiscoverRouteProbe', () => {
     expect(screen.getByText('0: Alpha (movie / movie-1)')).toBeTruthy();
   });
 
+  it('renders SearchResultCard rows at stage 4 with the same FlatList host as stage 3', () => {
+    render(
+      <DiscoverRouteProbe
+        stage={4}
+        production={<Text>production</Text>}
+        items={items}
+        listHeader={<Text>header</Text>}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('DISCOVER CONTROL 4')).toBeTruthy();
+    expect(screen.getByLabelText('Alpha, Movie · 2020 · ★ 7.0')).toBeTruthy();
+    expect(screen.queryByText('header')).toBeNull();
+  });
+
   it('passes through production at stage 5', () => {
     render(
       <DiscoverRouteProbe
