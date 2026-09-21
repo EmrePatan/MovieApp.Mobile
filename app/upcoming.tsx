@@ -2,11 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
@@ -168,7 +167,9 @@ export default function UpcomingScreen() {
   if (activeTab === 'for-you' && !isAuthenticated) {
     return (
       <StackListScreen>
-        <FlatList
+        <PlatformRefreshFlatList
+          refreshing={false}
+          onRefresh={() => {}}
           data={[]}
           renderItem={() => null}
           ListHeaderComponent={listHeader}
@@ -234,7 +235,9 @@ export default function UpcomingScreen() {
 
   return (
     <StackListScreen>
-      <FlatList
+      <PlatformRefreshFlatList
+        refreshing={activeQuery.isRefetching && !activeQuery.isFetchingNextPage}
+        onRefresh={handleRefresh}
         data={displayItems}
         keyExtractor={upcomingItemKey}
         renderItem={renderItem}
@@ -254,12 +257,6 @@ export default function UpcomingScreen() {
               <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
             </View>
           ) : null
-        }
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={activeQuery.isRefetching && !activeQuery.isFetchingNextPage}
-            onRefresh={handleRefresh}
-          />
         }
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}

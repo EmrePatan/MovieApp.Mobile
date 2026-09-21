@@ -25,6 +25,7 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, setParams: mockSetParams }),
   useLocalSearchParams: jest.fn(() => ({ tab: mockTabParam })),
   useSegments: jest.fn(() => ['upcoming']),
+  usePathname: jest.fn(() => '/upcoming'),
 }));
 
 const movieItem = {

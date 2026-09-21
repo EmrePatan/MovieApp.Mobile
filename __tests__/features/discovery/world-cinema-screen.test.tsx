@@ -14,6 +14,8 @@ jest.mock('expo-router', () => ({
     originCountry: 'KR',
     sort: 'popularity_desc',
   }),
+  usePathname: jest.fn(() => '/world-cinema'),
+  useSegments: jest.fn(() => ['world-cinema']),
 }));
 
 jest.mock('@/features/discovery/hooks/useWorldCinema', () => ({

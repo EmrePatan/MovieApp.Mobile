@@ -7,12 +7,11 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
@@ -215,7 +214,9 @@ export default function WorldCinemaScreen() {
         </View>
       }
     >
-      <FlatList
+      <PlatformRefreshFlatList
+        refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
+        onRefresh={() => void resultsQuery.refetch()}
         data={items}
         keyExtractor={searchResultKeyExtractor}
         renderItem={({ item }) => (
@@ -227,12 +228,6 @@ export default function WorldCinemaScreen() {
           resultsQuery.isFetchingNextPage ? (
             <ActivityIndicator color={colors.accent} style={styles.footerLoader} />
           ) : null
-        }
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
-            onRefresh={() => void resultsQuery.refetch()}
-          />
         }
         onEndReached={() => {
           if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {

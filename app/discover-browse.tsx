@@ -7,23 +7,12 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
 import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
-import {
-  DISCOVER_CHROME_PROBE_STAGE,
-  DISCOVER_USE_CHROME_PROBE,
-  DiscoverChromeProbe,
-} from '@/debug/discover-chrome-probe';
-import {
-  DISCOVER_ROUTE_PROBE_STAGE,
-  DiscoverRouteProbe,
-} from '@/debug/discover-route-probe';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -213,29 +202,6 @@ export default function DiscoverScreen() {
     [filters, genresQuery.data, mode, replaceBrowseState, sortLabel, typeFilter],
   );
 
-  const headerShell = useMemo(
-    () => (
-      <View>
-        <SafeAreaView edges={['top']} style={styles.headerSafeArea} />
-      </View>
-    ),
-    [],
-  );
-
-  const headerWithTitle = useMemo(
-    () => (
-      <View>
-        <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-          <DetailBackButton contentInset={false} />
-          <View style={styles.header}>
-            <AppText variant="title">{getDiscoverTitle(mode)}</AppText>
-          </View>
-        </SafeAreaView>
-      </View>
-    ),
-    [mode],
-  );
-
   const listHeader = useMemo(
     () => (
       <View>
@@ -364,47 +330,6 @@ export default function DiscoverScreen() {
       {filterSheetVisible ? filterSheet : null}
     </View>
   );
-
-  if (__DEV__ && Platform.OS === 'android') {
-    if (DISCOVER_USE_CHROME_PROBE) {
-      return (
-        <DiscoverChromeProbe
-          stage={DISCOVER_CHROME_PROBE_STAGE}
-          items={items}
-          onPress={handleResultPress}
-          headerShell={headerShell}
-          headerWithTitle={headerWithTitle}
-          headerFull={listHeader}
-          listEmptyComponent={listEmptyComponent}
-          listFooter={listFooter}
-          contentContainerStyle={styles.listContent}
-          emptyContentContainerStyle={styles.emptyListContent}
-          refreshing={isRefetching && !isFetchingNextPage}
-          refreshControl={
-            <MovieAppRefreshControl
-              refreshing={isRefetching && !isFetchingNextPage}
-              onRefresh={handleRefresh}
-            />
-          }
-          onEndReached={handleLoadMore}
-          initialNumToRender={layout.verticalList.initialNumToRender}
-          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-          windowSize={layout.verticalList.windowSize}
-          productionScreen={productionScreen}
-        />
-      );
-    }
-
-    return (
-      <DiscoverRouteProbe
-        stage={DISCOVER_ROUTE_PROBE_STAGE}
-        production={productionScreen}
-        items={items}
-        listHeader={listHeader}
-        onPress={handleResultPress}
-      />
-    );
-  }
 
   return productionScreen;
 }

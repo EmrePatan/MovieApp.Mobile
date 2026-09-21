@@ -11,6 +11,11 @@ const platformRefreshSurfaceFiles = [
   'app/discover-browse.tsx',
   'app/search.tsx',
   'app/streaming-discover.tsx',
+  'app/world-cinema.tsx',
+  'app/upcoming.tsx',
+  'app/on-tv-this-week.tsx',
+  'app/now-in-theaters.tsx',
+  'app/advanced-discover.tsx',
 ];
 
 describe('PlatformRefreshFlatList', () => {
@@ -59,24 +64,20 @@ describe('PlatformRefreshFlatList', () => {
 });
 
 describe('platform refresh surface wiring', () => {
-  it('uses PlatformRefreshFlatList in discover, search, and streaming sources', () => {
+  it('uses PlatformRefreshFlatList in migrated stack result-list sources', () => {
     for (const relativePath of platformRefreshSurfaceFiles) {
       const source = fs.readFileSync(path.join(repoRoot, relativePath), 'utf8');
       expect(source).toContain('PlatformRefreshFlatList');
-
-      const productionStart = source.indexOf('const productionScreen');
-      const productionEnd =
-        productionStart >= 0
-          ? source.indexOf('if (__DEV__ && Platform.OS ===', productionStart)
-          : -1;
-      const productionSection =
-        productionStart >= 0 && productionEnd > productionStart
-          ? source.slice(productionStart, productionEnd)
-          : source;
-
-      expect(productionSection).not.toMatch(
+      expect(source).not.toMatch(
         /refreshControl\s*=\s*\{[\s\S]*?<MovieAppRefreshControl/,
       );
     }
+  });
+
+  it('does not wire visual discover probes into discover-browse', () => {
+    const source = fs.readFileSync(path.join(repoRoot, 'app/discover-browse.tsx'), 'utf8');
+    expect(source).not.toContain('DiscoverRouteProbe');
+    expect(source).not.toContain('DiscoverChromeProbe');
+    expect(source).not.toContain('DISCOVER CONTROL');
   });
 });

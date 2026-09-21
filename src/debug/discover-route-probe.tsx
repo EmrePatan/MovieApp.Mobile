@@ -11,6 +11,7 @@ import { logRouteScreenMount, useRouteScreenProbe } from './route-screen-probe';
 import { logNavigationDiagnostic } from './navigation-diagnostics';
 
 /** Bump on device to progress isolation stages (0–5). DEV Android only. */
+/** Opt-in only: import DiscoverRouteProbe manually for future #45 diagnosis. */
 export const DISCOVER_ROUTE_PROBE_STAGE = 4 as 0 | 1 | 2 | 3 | 4 | 5;
 
 interface DiscoverRouteProbeProps {

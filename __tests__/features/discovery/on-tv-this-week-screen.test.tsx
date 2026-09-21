@@ -4,6 +4,8 @@ import { useOnTvThisWeek } from '@/features/discovery/hooks/useOnTvThisWeek';
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: jest.fn(), back: jest.fn() }),
+  usePathname: jest.fn(() => '/on-tv-this-week'),
+  useSegments: jest.fn(() => ['on-tv-this-week']),
 }));
 
 jest.mock('@/features/discovery/hooks/useOnTvThisWeek', () => ({

@@ -8,12 +8,11 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -296,7 +295,9 @@ export default function AdvancedDiscoverScreen() {
 
   return (
     <StackListScreen topBar={topBar}>
-      <FlatList
+      <PlatformRefreshFlatList
+        refreshing={isRefetching && !isFetchingNextPage}
+        onRefresh={handleRefresh}
         data={items}
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}
@@ -308,12 +309,6 @@ export default function AdvancedDiscoverScreen() {
               <ActivityIndicator color={colors.accent} />
             </View>
           ) : null
-        }
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={isRefetching && !isFetchingNextPage}
-            onRefresh={handleRefresh}
-          />
         }
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}

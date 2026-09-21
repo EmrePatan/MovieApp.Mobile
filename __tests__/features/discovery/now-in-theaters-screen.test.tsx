@@ -5,6 +5,8 @@ import { useNowInTheaters } from '@/features/discovery/hooks/useNowInTheaters';
 jest.mock('expo-router', () => ({
   useRouter: () => ({ setParams: jest.fn(), push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
   useLocalSearchParams: jest.fn(() => ({})),
+  usePathname: jest.fn(() => '/now-in-theaters'),
+  useSegments: jest.fn(() => ['now-in-theaters']),
 }));
 
 jest.mock('@/features/discovery/hooks/useNowInTheaters', () => ({
