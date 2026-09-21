@@ -7,40 +7,58 @@ import {
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 
 describe('root detail navigation architecture', () => {
-  it('registers movie, tv, person, and collection inside the tabs navigator', () => {
+  it('does not register movie, tv, person, or collection as tab screens', () => {
     const tabsLayout = readFileSync(
       path.join(process.cwd(), 'app/(tabs)/_layout.tsx'),
       'utf8',
     );
 
-    expect(tabsLayout).toContain('name="movie" options={hiddenTabScreenOptions}');
-    expect(tabsLayout).toContain('name="tv" options={hiddenTabScreenOptions}');
-    expect(tabsLayout).toContain('name="person" options={hiddenTabScreenOptions}');
-    expect(tabsLayout).toContain('name="collection" options={hiddenTabScreenOptions}');
+    expect(tabsLayout).not.toContain('name="movie"');
+    expect(tabsLayout).not.toContain('name="tv"');
+    expect(tabsLayout).not.toContain('name="person"');
+    expect(tabsLayout).not.toContain('name="collection"');
     expect(tabsLayout).not.toContain('name="reviews"');
     expect(tabsLayout).not.toContain('name="credits"');
     expect(tabsLayout).not.toContain('name="gallery"');
   });
 
-  it('keeps only auth, tabs, and profile settings on the root navigator', () => {
+  it('registers global detail stacks on the root navigator', () => {
     const rootLayout = readFileSync(path.join(process.cwd(), 'app/_layout.tsx'), 'utf8');
+    const movieLayout = readFileSync(path.join(process.cwd(), 'app/movie/_layout.tsx'), 'utf8');
+    const tvLayout = readFileSync(path.join(process.cwd(), 'app/tv/_layout.tsx'), 'utf8');
+    const personLayout = readFileSync(path.join(process.cwd(), 'app/person/_layout.tsx'), 'utf8');
 
-    expect(rootLayout).toContain('name="(auth)"');
-    expect(rootLayout).toContain('name="(tabs)"');
-    expect(rootLayout).toContain('name="profile"');
-    expect(rootLayout).not.toContain('name="movie"');
-    expect(rootLayout).not.toContain('name="search"');
-    expect(rootLayout).not.toContain('name="notifications"');
+    expect(rootLayout).toContain('name="movie" options={ratedDetailStackScreenOptions}');
+    expect(rootLayout).toContain('name="tv" options={ratedDetailStackScreenOptions}');
+    expect(rootLayout).toContain('name="person"');
+    expect(rootLayout).toContain('name="collection"');
+    expect(movieLayout).toContain('ratedDetailStackScreenOptions');
+    expect(tvLayout).toContain('name="[id]"');
+    expect(tvLayout).toContain('ratedDetailStackScreenOptions');
+    expect(personLayout).toContain('name="[tmdbId]"');
+  });
+
+  it('keeps browse and result routes under the tabs navigator for persistent bottom navigation', () => {
+    const tabsLayout = readFileSync(
+      path.join(process.cwd(), 'app/(tabs)/_layout.tsx'),
+      'utf8',
+    );
+
+    expect(tabsLayout).toContain('name="search" options={hiddenTabScreenOptions}');
+    expect(tabsLayout).toContain('name="discover-browse" options={hiddenTabScreenOptions}');
+    expect(tabsLayout).toContain('name="upcoming" options={hiddenTabScreenOptions}');
+    expect(tabsLayout).toContain('name="now-in-theaters" options={hiddenTabScreenOptions}');
+    expect(tabsLayout).toContain('name="world-cinema" options={hiddenTabScreenOptions}');
   });
 
   it('keeps reviews, credits, and gallery nested inside catalog detail stacks', () => {
-    const movieLayout = readFileSync(path.join(process.cwd(), 'app/(tabs)/movie/_layout.tsx'), 'utf8');
+    const movieLayout = readFileSync(path.join(process.cwd(), 'app/movie/_layout.tsx'), 'utf8');
     const movieDetailLayout = readFileSync(
-      path.join(process.cwd(), 'app/(tabs)/movie/[id]/_layout.tsx'),
+      path.join(process.cwd(), 'app/movie/[id]/_layout.tsx'),
       'utf8',
     );
-    const tvLayout = readFileSync(path.join(process.cwd(), 'app/(tabs)/tv/_layout.tsx'), 'utf8');
-    const tvDetailLayout = readFileSync(path.join(process.cwd(), 'app/(tabs)/tv/[id]/_layout.tsx'), 'utf8');
+    const tvLayout = readFileSync(path.join(process.cwd(), 'app/tv/_layout.tsx'), 'utf8');
+    const tvDetailLayout = readFileSync(path.join(process.cwd(), 'app/tv/[id]/_layout.tsx'), 'utf8');
 
     expect(movieLayout).toContain('name="[id]"');
     expect(movieDetailLayout).toContain('name="reviews"');
@@ -53,10 +71,10 @@ describe('root detail navigation architecture', () => {
   });
 
   it('only enables rating navigation gesture lock on catalog detail index screens', () => {
-    const movieIndex = readFileSync(path.join(process.cwd(), 'app/(tabs)/movie/[id]/index.tsx'), 'utf8');
-    const tvIndex = readFileSync(path.join(process.cwd(), 'app/(tabs)/tv/[id]/index.tsx'), 'utf8');
+    const movieIndex = readFileSync(path.join(process.cwd(), 'app/movie/[id]/index.tsx'), 'utf8');
+    const tvIndex = readFileSync(path.join(process.cwd(), 'app/tv/[id]/index.tsx'), 'utf8');
     const movieReviews = readFileSync(
-      path.join(process.cwd(), 'app/(tabs)/movie/[id]/reviews.tsx'),
+      path.join(process.cwd(), 'app/movie/[id]/reviews.tsx'),
       'utf8',
     );
 

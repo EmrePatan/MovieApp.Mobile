@@ -71,10 +71,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="notifications" options={hiddenTabScreenOptions} />
       <Tabs.Screen name="pick-something" options={hiddenTabScreenOptions} />
       <Tabs.Screen name="ai-recommendations" options={hiddenTabScreenOptions} />
-      <Tabs.Screen name="movie" options={hiddenTabScreenOptions} />
-      <Tabs.Screen name="tv" options={hiddenTabScreenOptions} />
-      <Tabs.Screen name="person" options={hiddenTabScreenOptions} />
-      <Tabs.Screen name="collection" options={hiddenTabScreenOptions} />
     </Tabs>
   );
 }
