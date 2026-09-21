@@ -29,7 +29,6 @@ import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
 import type { LibrarySortOption, LibraryTypeFilter } from '@/features/library/types';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
-import { describeViewStyle, logStackLayout } from '@/debug/stack-layout-probe';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -225,18 +224,9 @@ export default function FavoritesScreen() {
     );
 
   return (
-    <SafeAreaView
-      style={styles.screen}
-      edges={['top', 'left', 'right']}
-      onLayout={(event) =>
-        logStackLayout('favorites:root:layout', event, {
-          style: describeViewStyle(styles.screen),
-        })
-      }
-    >
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
         data={displayItems}
-        onLayout={(event) => logStackLayout('favorites:list:layout', event)}
         keyExtractor={getLibraryItemKey}
         renderItem={renderItem}
         ListHeaderComponent={listHeader}

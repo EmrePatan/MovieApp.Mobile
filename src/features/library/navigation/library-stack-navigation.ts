@@ -1,5 +1,4 @@
 import type { ImperativeRouter } from 'expo-router';
-import { logRouteNavigationOpen } from '@/debug/route-navigation-probe';
 
 const DEFAULT_LIBRARY_RETURN_HREF = '/(tabs)/library';
 
@@ -24,13 +23,6 @@ export function openLibraryStackScreen(
   returnHref: string = DEFAULT_LIBRARY_RETURN_HREF,
 ): void {
   lastLibraryStackEntryReturnHref = returnHref;
-  logRouteNavigationOpen('library-stack', {
-    href,
-    returnHref,
-    api: 'router.push',
-    withAnchor: false,
-    navigator: 'root-stack',
-  });
   router.push(href);
 }
 

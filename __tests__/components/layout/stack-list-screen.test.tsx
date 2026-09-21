@@ -3,11 +3,6 @@ import { FlatList, Text, View } from 'react-native';
 import { render } from '@testing-library/react-native';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 
-jest.mock('expo-router', () => ({
-  usePathname: () => '/search',
-  useSegments: () => ['search'],
-}));
-
 jest.mock('react-native-safe-area-context', () => {
   const { View } = require('react-native');
   return {

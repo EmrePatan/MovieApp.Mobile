@@ -47,7 +47,6 @@ import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
-import { logNavigationDiagnostic } from '@/debug/navigation-diagnostics';
 import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -113,20 +112,12 @@ export default function SearchScreen() {
   const submitSearch = useCallback((query: string) => {
     const normalized = normalizeSearchQuery(query);
     if (!isValidSearchQuery(normalized)) {
-      logNavigationDiagnostic('search:submit:ignored', {
-        query,
-        normalized,
-      });
       return;
     }
 
     Keyboard.dismiss();
     setInputText(normalized);
     setSubmittedQuery(normalized);
-    logNavigationDiagnostic('search:submit', {
-      normalized,
-      displayMode: 'results',
-    });
   }, []);
 
   const handleSubmit = useCallback(

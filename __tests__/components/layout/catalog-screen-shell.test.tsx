@@ -3,11 +3,6 @@ import { Text } from 'react-native';
 import { render } from '@testing-library/react-native';
 import { CatalogScreenShell } from '@/components/layout/CatalogScreenShell';
 
-jest.mock('expo-router', () => ({
-  usePathname: () => '/discover-browse',
-  useSegments: () => ['discover-browse'],
-}));
-
 jest.mock('react-native-safe-area-context', () => {
   const { View } = require('react-native');
   return {

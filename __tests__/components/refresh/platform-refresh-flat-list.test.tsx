@@ -74,10 +74,9 @@ describe('platform refresh surface wiring', () => {
     }
   });
 
-  it('does not wire visual discover probes into discover-browse', () => {
+  it('does not import temporary #45 debug probes into discover-browse', () => {
     const source = fs.readFileSync(path.join(repoRoot, 'app/discover-browse.tsx'), 'utf8');
-    expect(source).not.toContain('DiscoverRouteProbe');
-    expect(source).not.toContain('DiscoverChromeProbe');
+    expect(source).not.toContain('@/debug/');
     expect(source).not.toContain('DISCOVER CONTROL');
   });
 });
