@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -13,6 +14,10 @@ import {
   useUpdateTvShowFollow,
 } from '../hooks/useTvShowFollowMutations';
 import type { TvShowFollowStatusResponse } from '../types';
+import {
+  verifyTvShowFollowPreferences,
+  verifyTvShowUnfollowed,
+} from '../utils/verify-follow-mutation-outcome';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -37,13 +42,28 @@ export function FollowPreferencesModal({
   onClose,
   onFollowSuccess,
 }: FollowPreferencesModalProps) {
-  const sheetKey = `${tvShowId}:${isFollowing}:${status?.notifyNewSeasons ?? 'n'}:${status?.notifyNewEpisodes ?? 'n'}`;
+  const [sheetInstance, setSheetInstance] = useState(0);
+  const openedSessionRef = useRef<{ tvShowId: string } | null>(null);
+
+  useEffect(() => {
+    if (!visible) {
+      openedSessionRef.current = null;
+      return;
+    }
+
+    if (openedSessionRef.current?.tvShowId === tvShowId) {
+      return;
+    }
+
+    openedSessionRef.current = { tvShowId };
+    setSheetInstance((value) => value + 1);
+  }, [visible, tvShowId]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       {visible ? (
         <FollowPreferencesSheet
-          key={sheetKey}
+          key={`${tvShowId}:${sheetInstance}`}
           tvShowId={tvShowId}
           isFollowing={isFollowing}
           status={status}
@@ -55,6 +75,17 @@ export function FollowPreferencesModal({
   );
 }
 
+function resolveInitialNotifyPreference(
+  isFollowing: boolean,
+  value?: boolean,
+): boolean {
+  if (!isFollowing) {
+    return true;
+  }
+
+  return value ?? true;
+}
+
 function FollowPreferencesSheet({
   tvShowId,
   isFollowing,
@@ -63,33 +94,42 @@ function FollowPreferencesSheet({
   onFollowSuccess,
 }: Omit<FollowPreferencesModalProps, 'visible'>) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const createFollow = useCreateTvShowFollow(tvShowId);
   const updateFollow = useUpdateTvShowFollow(tvShowId);
   const removeFollow = useRemoveTvShowFollow(tvShowId);
-  const [notifyNewSeasons, setNotifyNewSeasons] = useState(
-    isFollowing && status ? status.notifyNewSeasons : true,
+  const wasFollowingWhenOpenedRef = useRef(isFollowing);
+  const [notifyNewSeasons, setNotifyNewSeasons] = useState(() =>
+    resolveInitialNotifyPreference(isFollowing, status?.notifyNewSeasons),
   );
-  const [notifyNewEpisodes, setNotifyNewEpisodes] = useState(
-    isFollowing && status ? status.notifyNewEpisodes : true,
+  const [notifyNewEpisodes, setNotifyNewEpisodes] = useState(() =>
+    resolveInitialNotifyPreference(isFollowing, status?.notifyNewEpisodes),
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const bothPreferencesOff = !notifyNewSeasons && !notifyNewEpisodes;
   const isBusy = createFollow.isPending || updateFollow.isPending || removeFollow.isPending;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (isBusy) {
+      return;
+    }
+
     setErrorMessage(null);
 
     if (bothPreferencesOff) {
-      if (isFollowing) {
-        removeFollow.mutate(undefined, {
-          onSuccess: () => {
-            onClose();
-          },
-          onError: () => {
+      if (wasFollowingWhenOpenedRef.current) {
+        try {
+          await removeFollow.mutateAsync();
+        } catch {
+          if (!(await verifyTvShowUnfollowed(queryClient, tvShowId))) {
             setErrorMessage(t('details.followPreferences.unfollowError'));
-          },
-        });
+            return;
+          }
+        }
+
+        wasFollowingWhenOpenedRef.current = false;
+        onClose();
         return;
       }
 
@@ -102,41 +142,48 @@ function FollowPreferencesSheet({
       notifyNewEpisodes,
     };
 
-    if (isFollowing) {
-      updateFollow.mutate(request, {
-        onSuccess: () => {
-          onClose();
-        },
-        onError: () => {
+    if (wasFollowingWhenOpenedRef.current) {
+      try {
+        await updateFollow.mutateAsync(request);
+      } catch {
+        if (!(await verifyTvShowFollowPreferences(queryClient, tvShowId, request))) {
           setErrorMessage(t('details.followPreferences.updateError'));
-        },
-      });
+          return;
+        }
+      }
+
+      onClose();
       return;
     }
 
-    createFollow.mutate(request, {
-      onSuccess: async () => {
+    try {
+      await createFollow.mutateAsync(request);
+      onClose();
+      await onFollowSuccess?.(notifyNewSeasons, notifyNewEpisodes);
+    } catch (error) {
+      if (isApiError(error) && error.status === 503) {
+        setErrorMessage(t('details.followPreferences.setupError'));
+        return;
+      }
+
+      if (await verifyTvShowFollowPreferences(queryClient, tvShowId, request)) {
         onClose();
         await onFollowSuccess?.(notifyNewSeasons, notifyNewEpisodes);
-      },
-      onError: (error) => {
-        if (isApiError(error) && error.status === 503) {
-          setErrorMessage(t('details.followPreferences.setupError'));
-          return;
-        }
+        return;
+      }
 
-        setErrorMessage(t('details.followPreferences.followError'));
-      },
-    });
+      setErrorMessage(t('details.followPreferences.followError'));
+    }
   };
 
-  const title = isFollowing
+  const isEditingExistingFollow = wasFollowingWhenOpenedRef.current;
+  const title = isEditingExistingFollow
     ? t('details.followPreferences.titleFollowing')
     : t('details.followPreferences.titleNew');
-  const subtitle = isFollowing
+  const subtitle = isEditingExistingFollow
     ? t('details.followPreferences.subtitleFollowing')
     : t('details.followPreferences.subtitleNew');
-  const confirmLabel = isFollowing
+  const confirmLabel = isEditingExistingFollow
     ? t('details.followPreferences.savePreferences')
     : t('details.followPreferences.followShow');
 
@@ -188,7 +235,7 @@ function FollowPreferencesSheet({
 
             {bothPreferencesOff ? (
               <AppText variant="caption" muted style={styles.bothOffHint}>
-                {isFollowing
+                {isEditingExistingFollow
                   ? t('details.followPreferences.bothOffFollowing')
                   : t('details.followPreferences.bothOffNew')}
               </AppText>

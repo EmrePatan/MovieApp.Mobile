@@ -1,5 +1,6 @@
 import React from 'react';
 import { Platform } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { I18nextProvider } from 'react-i18next';
 import { FollowButton } from '@/features/follows/components/FollowButton';
@@ -56,15 +57,26 @@ jest.mock('@/features/follows/services/notification-permission-prompt-storage', 
   markNotificationPermissionPromptDismissed: jest.fn(),
 }));
 
+jest.mock('@/features/follows/utils/verify-follow-mutation-outcome', () => ({
+  verifyTvShowUnfollowed: jest.fn().mockResolvedValue(false),
+  verifyTvShowFollowPreferences: jest.fn().mockResolvedValue(false),
+}));
+
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 function renderFollowButton() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
   return render(
-    <I18nextProvider i18n={i18n}>
-      <FollowButton tvShowId={tvShowId} />
-    </I18nextProvider>,
+    <QueryClientProvider client={queryClient}>
+      <I18nextProvider i18n={i18n}>
+        <FollowButton tvShowId={tvShowId} />
+      </I18nextProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -89,14 +101,17 @@ describe.each(['android', 'ios'] as const)('FollowButton platform parity (%s)', 
     await changeUiLanguage('en');
     (useCreateTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockCreateMutate,
+      mutateAsync: mockCreateMutate,
       isPending: false,
     });
     (useUpdateTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockUpdateMutate,
+      mutateAsync: mockUpdateMutate,
       isPending: false,
     });
     (useRemoveTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockRemoveMutate,
+      mutateAsync: mockRemoveMutate,
       isPending: false,
     });
     (ensurePushDeviceRegisteredAsync as jest.Mock).mockResolvedValue('registered');
@@ -122,19 +137,26 @@ describe.each(['android', 'ios'] as const)('FollowButton platform parity (%s)', 
       isLoading: false,
     }));
 
-    mockCreateMutate.mockImplementation((_variables, options) => {
+    mockCreateMutate.mockImplementation(async () => {
       status.isFollowing = true;
       status.baselineEstablished = true;
-      options?.onSuccess?.();
     });
 
     const { rerender } = renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
     rerender(
-      <I18nextProvider i18n={i18n}>
-        <FollowButton tvShowId={tvShowId} />
-      </I18nextProvider>,
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+          })
+        }
+      >
+        <I18nextProvider i18n={i18n}>
+          <FollowButton tvShowId={tvShowId} />
+        </I18nextProvider>
+      </QueryClientProvider>,
     );
 
     await waitFor(() => {
@@ -150,9 +172,7 @@ describe.each(['android', 'ios'] as const)('FollowButton platform parity (%s)', 
 
   it('opens the notification permission prompt when permission is requestable', async () => {
     (getNotificationPermissionState as jest.Mock).mockResolvedValue('requestable');
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      void Promise.resolve(options?.onSuccess?.());
-    });
+    mockCreateMutate.mockResolvedValue(undefined);
 
     renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
@@ -173,9 +193,7 @@ describe.each(['android', 'ios'] as const)('FollowButton platform parity (%s)', 
 
   it('routes settings-required permission flow through open settings', async () => {
     (getNotificationPermissionState as jest.Mock).mockResolvedValue('settings_required');
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      void Promise.resolve(options?.onSuccess?.());
-    });
+    mockCreateMutate.mockResolvedValue(undefined);
 
     renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
@@ -191,15 +209,15 @@ describe.each(['android', 'ios'] as const)('FollowButton platform parity (%s)', 
   });
 
   it('keeps follow failure feedback in the preferences modal', async () => {
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onError?.();
-    });
+    mockCreateMutate.mockRejectedValue(new Error('Network error'));
 
     renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
 
-    expect(screen.getByText('Could not follow this show. Please try again.')).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByText('Could not follow this show. Please try again.')).toBeTruthy(),
+    );
     expect(screen.queryByText('Following')).toBeNull();
   });
 });
@@ -215,14 +233,17 @@ describe.each(['android', 'ios'] as const)(
       await changeUiLanguage('tr');
       (useCreateTvShowFollow as jest.Mock).mockReturnValue({
         mutate: mockCreateMutate,
+        mutateAsync: mockCreateMutate,
         isPending: false,
       });
       (useUpdateTvShowFollow as jest.Mock).mockReturnValue({
         mutate: mockUpdateMutate,
+        mutateAsync: mockUpdateMutate,
         isPending: false,
       });
       (useRemoveTvShowFollow as jest.Mock).mockReturnValue({
         mutate: mockRemoveMutate,
+        mutateAsync: mockRemoveMutate,
         isPending: false,
       });
       (getNotificationPermissionState as jest.Mock).mockResolvedValue('requestable');
@@ -234,9 +255,7 @@ describe.each(['android', 'ios'] as const)(
     });
 
     it('does not render Takip edildi success feedback after follow', async () => {
-      mockCreateMutate.mockImplementation((_variables, options) => {
-        options?.onSuccess?.();
-      });
+      mockCreateMutate.mockResolvedValue(undefined);
 
       renderFollowButton();
       fireEvent.press(screen.getByLabelText('Bu diziyi takip et'));

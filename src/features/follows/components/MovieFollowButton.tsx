@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
@@ -8,6 +9,10 @@ import { colors } from '@/theme/colors';
 import { useCreateMovieFollow, useRemoveMovieFollow } from '../hooks/useMovieFollowMutations';
 import { useMovieFollowStatus } from '../hooks/useMovieFollowStatus';
 import { ensurePushDeviceRegisteredAsync } from '../services/push-device-service';
+import {
+  verifyMovieFollowed,
+  verifyMovieUnfollowed,
+} from '../utils/verify-follow-mutation-outcome';
 
 interface MovieFollowButtonProps {
   movieId: string;
@@ -15,6 +20,7 @@ interface MovieFollowButtonProps {
 
 export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { data: status, isLoading } = useMovieFollowStatus(movieId);
   const createFollow = useCreateMovieFollow(movieId);
@@ -33,7 +39,7 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
     }
   };
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (!requireAuth()) {
       setFeedback(t('details.actions.signInReleaseAlerts'));
       return;
@@ -47,15 +53,27 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
     }
 
     if (isFollowing) {
-      removeFollow.mutate();
+      try {
+        await removeFollow.mutateAsync();
+      } catch {
+        if (!(await verifyMovieUnfollowed(queryClient, movieId))) {
+          setFeedback(t('details.followPreferences.unfollowError'));
+        }
+      }
       return;
     }
 
-    createFollow.mutate(undefined, {
-      onSuccess: () => {
-        void handleFollowSuccess();
-      },
-    });
+    try {
+      await createFollow.mutateAsync();
+      await handleFollowSuccess();
+    } catch {
+      if (await verifyMovieFollowed(queryClient, movieId)) {
+        await handleFollowSuccess();
+        return;
+      }
+
+      setFeedback(t('details.followPreferences.followError'));
+    }
   };
 
   const accessibilityLabel = isFollowing

@@ -1,4 +1,5 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { MovieFollowButton } from '@/features/follows/components/MovieFollowButton';
 import { useMovieFollowStatus } from '@/features/follows/hooks/useMovieFollowStatus';
@@ -29,19 +30,34 @@ jest.mock('@/features/follows/hooks/useMovieFollowMutations', () => ({
   useRemoveMovieFollow: jest.fn(),
 }));
 
+jest.mock('@/features/follows/utils/verify-follow-mutation-outcome', () => ({
+  verifyMovieUnfollowed: jest.fn().mockResolvedValue(false),
+  verifyMovieFollowed: jest.fn().mockResolvedValue(false),
+}));
+
 jest.mock('@/features/follows/services/push-device-service', () => ({
   ensurePushDeviceRegisteredAsync: jest.fn(),
 }));
+
+function renderButton(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 describe('MovieFollowButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useCreateMovieFollow as jest.Mock).mockReturnValue({
       mutate: mockCreateMutate,
+      mutateAsync: mockCreateMutate,
       isPending: false,
     });
     (useRemoveMovieFollow as jest.Mock).mockReturnValue({
       mutate: mockRemoveMutate,
+      mutateAsync: mockRemoveMutate,
       isPending: false,
     });
     (ensurePushDeviceRegisteredAsync as jest.Mock).mockResolvedValue('registered');
@@ -52,16 +68,14 @@ describe('MovieFollowButton', () => {
   });
 
   it('renders when mounted by parent eligibility gate', () => {
-    render(<MovieFollowButton movieId={movieId} />);
+    renderButton(<MovieFollowButton movieId={movieId} />);
     expect(screen.getByLabelText('Notify me when released')).toBeTruthy();
   });
 
   it('registers push device after successful new follow only', async () => {
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onSuccess?.();
-    });
+    mockCreateMutate.mockResolvedValue(undefined);
 
-    render(<MovieFollowButton movieId={movieId} />);
+    renderButton(<MovieFollowButton movieId={movieId} />);
     fireEvent.press(screen.getByLabelText('Notify me when released'));
 
     await waitFor(() => {
@@ -70,16 +84,17 @@ describe('MovieFollowButton', () => {
     });
   });
 
-  it('does not register push when unfollowing', () => {
+  it('does not register push when unfollowing', async () => {
+    mockRemoveMutate.mockResolvedValue(undefined);
     (useMovieFollowStatus as jest.Mock).mockReturnValue({
       data: { isFollowing: true },
       isLoading: false,
     });
 
-    render(<MovieFollowButton movieId={movieId} />);
+    renderButton(<MovieFollowButton movieId={movieId} />);
     fireEvent.press(screen.getByLabelText('Release alert on'));
 
-    expect(mockRemoveMutate).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockRemoveMutate).toHaveBeenCalledTimes(1));
     expect(mockCreateMutate).not.toHaveBeenCalled();
     expect(ensurePushDeviceRegisteredAsync).not.toHaveBeenCalled();
   });
@@ -90,7 +105,7 @@ describe('MovieFollowButton', () => {
       isLoading: false,
     });
 
-    render(<MovieFollowButton movieId={movieId} />);
+    renderButton(<MovieFollowButton movieId={movieId} />);
     expect(screen.getByLabelText('Release alert on').props.accessibilityState?.selected).toBe(true);
   });
 
@@ -101,7 +116,7 @@ describe('MovieFollowButton', () => {
         isLoading: true,
       });
 
-      render(<MovieFollowButton movieId={movieId} />);
+      renderButton(<MovieFollowButton movieId={movieId} />);
 
       const button = screen.getByLabelText('Notify me when released');
       expect(button.props.accessibilityState.busy).toBe(true);
@@ -111,10 +126,11 @@ describe('MovieFollowButton', () => {
     it('keeps icon visible while mutation is pending', () => {
       (useCreateMovieFollow as jest.Mock).mockReturnValue({
         mutate: mockCreateMutate,
+        mutateAsync: mockCreateMutate,
         isPending: true,
       });
 
-      render(<MovieFollowButton movieId={movieId} />);
+      renderButton(<MovieFollowButton movieId={movieId} />);
 
       const button = screen.getByLabelText('Notify me when released');
       expect(button.props.accessibilityState.busy).toBe(false);
@@ -124,10 +140,11 @@ describe('MovieFollowButton', () => {
     it('prevents duplicate mutation while pending', () => {
       (useCreateMovieFollow as jest.Mock).mockReturnValue({
         mutate: mockCreateMutate,
+        mutateAsync: mockCreateMutate,
         isPending: true,
       });
 
-      render(<MovieFollowButton movieId={movieId} />);
+      renderButton(<MovieFollowButton movieId={movieId} />);
       fireEvent.press(screen.getByLabelText('Notify me when released'));
 
       expect(mockCreateMutate).not.toHaveBeenCalled();

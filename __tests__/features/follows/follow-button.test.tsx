@@ -1,4 +1,5 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { FollowButton } from '@/features/follows/components/FollowButton';
 import { useTvShowFollowStatus } from '@/features/follows/hooks/useTvShowFollowStatus';
@@ -49,23 +50,39 @@ jest.mock('@/features/follows/services/notification-permission-prompt-storage', 
   markNotificationPermissionPromptDismissed: jest.fn(),
 }));
 
+jest.mock('@/features/follows/utils/verify-follow-mutation-outcome', () => ({
+  verifyTvShowUnfollowed: jest.fn().mockResolvedValue(false),
+  verifyTvShowFollowPreferences: jest.fn().mockResolvedValue(false),
+}));
+
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }));
+
+function renderFollowButton(ui: React.ReactElement = <FollowButton tvShowId={tvShowId} />) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 describe('FollowButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useCreateTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockCreateMutate,
+      mutateAsync: mockCreateMutate,
       isPending: false,
     });
     (useUpdateTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockUpdateMutate,
+      mutateAsync: mockUpdateMutate,
       isPending: false,
     });
     (useRemoveTvShowFollow as jest.Mock).mockReturnValue({
       mutate: mockRemoveMutate,
+      mutateAsync: mockRemoveMutate,
       isPending: false,
     });
     (ensurePushDeviceRegisteredAsync as jest.Mock).mockResolvedValue('registered');
@@ -84,7 +101,7 @@ describe('FollowButton', () => {
       isLoading: false,
     });
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
 
     expect(screen.getByText('Follow this show')).toBeTruthy();
@@ -102,7 +119,7 @@ describe('FollowButton', () => {
       isLoading: false,
     });
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     expect(screen.getByLabelText('Manage follow').props.accessibilityState?.selected).toBe(true);
   });
 
@@ -119,16 +136,25 @@ describe('FollowButton', () => {
       isLoading: false,
     }));
 
-    mockCreateMutate.mockImplementation((_variables, options) => {
+    mockCreateMutate.mockImplementation(async () => {
       status.isFollowing = true;
       status.baselineEstablished = true;
-      options?.onSuccess?.();
     });
 
-    const { rerender } = render(<FollowButton tvShowId={tvShowId} />);
+    const { rerender } = renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
-    rerender(<FollowButton tvShowId={tvShowId} />);
+    rerender(
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+          })
+        }
+      >
+        <FollowButton tvShowId={tvShowId} />
+      </QueryClientProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByLabelText('Manage follow').props.accessibilityState?.selected).toBe(true);
@@ -152,11 +178,9 @@ describe('FollowButton', () => {
       isLoading: false,
     });
 
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onSuccess?.();
-    });
+    mockCreateMutate.mockResolvedValue(undefined);
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
 
@@ -176,11 +200,9 @@ describe('FollowButton', () => {
       isLoading: false,
     });
     (getNotificationPermissionState as jest.Mock).mockResolvedValue('requestable');
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      void Promise.resolve(options?.onSuccess?.());
-    });
+    mockCreateMutate.mockResolvedValue(undefined);
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     await act(async () => {
       fireEvent.press(screen.getByText('Follow show'));
@@ -209,11 +231,9 @@ describe('FollowButton', () => {
     });
     (getNotificationPermissionState as jest.Mock).mockResolvedValue('requestable');
     (isNotificationPermissionPromptDismissed as jest.Mock).mockResolvedValue(true);
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onSuccess?.();
-    });
+    mockCreateMutate.mockResolvedValue(undefined);
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
 
@@ -234,7 +254,7 @@ describe('FollowButton', () => {
       isLoading: false,
     });
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByLabelText('New seasons'));
     fireEvent.press(screen.getByLabelText('New episodes'));
@@ -258,15 +278,15 @@ describe('FollowButton', () => {
       isLoading: false,
     });
 
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onError?.();
-    });
+    mockCreateMutate.mockRejectedValue(new Error('Network error'));
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
     fireEvent.press(screen.getByLabelText('Follow this show'));
     fireEvent.press(screen.getByText('Follow show'));
 
-    expect(screen.getByText('Could not follow this show. Please try again.')).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByText('Could not follow this show. Please try again.')).toBeTruthy(),
+    );
     expect(screen.queryByText('Following')).toBeNull();
   });
 
@@ -276,7 +296,7 @@ describe('FollowButton', () => {
       isLoading: true,
     });
 
-    render(<FollowButton tvShowId={tvShowId} />);
+    renderFollowButton();
 
     expect(screen.getByLabelText('Follow this show').props.accessibilityState?.busy).toBe(true);
   });

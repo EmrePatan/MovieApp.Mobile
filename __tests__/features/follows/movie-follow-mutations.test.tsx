@@ -1,19 +1,20 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
-import {
-  createMovieFollow,
-  removeMovieFollow,
-} from '@/features/follows/api/movie-follow-api';
+import { resolveMovieFollowRemoval } from '@/features/follows/utils/resolve-follow-removal';
+import { resolveMovieFollowUpsert } from '@/features/follows/utils/resolve-movie-follow-upsert';
 import { movieFollowStatusQueryKey } from '@/features/follows/hooks/follow-query-keys';
 import {
   useCreateMovieFollow,
   useRemoveMovieFollow,
 } from '@/features/follows/hooks/useMovieFollowMutations';
 
-jest.mock('@/features/follows/api/movie-follow-api', () => ({
-  createMovieFollow: jest.fn(),
-  removeMovieFollow: jest.fn(),
+jest.mock('@/features/follows/utils/resolve-follow-removal', () => ({
+  resolveMovieFollowRemoval: jest.fn(),
+}));
+
+jest.mock('@/features/follows/utils/resolve-movie-follow-upsert', () => ({
+  resolveMovieFollowUpsert: jest.fn(),
 }));
 
 jest.mock('@/features/follows/utils/invalidate-follow-catalog-queries', () => ({
@@ -39,7 +40,7 @@ describe('movie follow mutations', () => {
 
   it('optimistically follows before create resolves', async () => {
     let resolveCreate!: (value: { isFollowing: boolean }) => void;
-    (createMovieFollow as jest.Mock).mockImplementation(
+    (resolveMovieFollowUpsert as jest.Mock).mockImplementation(
       () =>
         new Promise((resolve) => {
           resolveCreate = resolve;
@@ -68,7 +69,7 @@ describe('movie follow mutations', () => {
   });
 
   it('rolls back optimistic follow when create fails', async () => {
-    (createMovieFollow as jest.Mock).mockRejectedValue(new Error('Network error'));
+    (resolveMovieFollowUpsert as jest.Mock).mockRejectedValue(new Error('Network error'));
 
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -89,10 +90,10 @@ describe('movie follow mutations', () => {
 
   it('optimistically unfollows before remove resolves', async () => {
     let resolveRemove!: () => void;
-    (removeMovieFollow as jest.Mock).mockImplementation(
+    (resolveMovieFollowRemoval as jest.Mock).mockImplementation(
       () =>
-        new Promise<void>((resolve) => {
-          resolveRemove = resolve;
+        new Promise((resolve) => {
+          resolveRemove = () => resolve({ isFollowing: false });
         }),
     );
 
@@ -118,7 +119,7 @@ describe('movie follow mutations', () => {
   });
 
   it('rolls back optimistic unfollow when remove fails', async () => {
-    (removeMovieFollow as jest.Mock).mockRejectedValue(new Error('Network error'));
+    (resolveMovieFollowRemoval as jest.Mock).mockRejectedValue(new Error('Network error'));
 
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
