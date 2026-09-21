@@ -16,6 +16,8 @@ import {
   routeLayoutHandler,
   useRouteLayoutContext,
 } from '@/debug/route-layout-probe';
+import { logRouteScreenMount, useRouteScreenProbe } from '@/debug/route-screen-probe';
+import { ROUTE_OWNERSHIP_AUDIT } from '@/debug/route-ownership-audit';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -37,9 +39,19 @@ export function CreditsDetailContent({
   const { t } = useTranslation();
   const router = useRouter();
   const route = useRouteLayoutContext();
+  const { onRootLayout: onCastRootLayout } = useRouteScreenProbe('cast-see-all', {
+    renderer: 'FlatList',
+  });
   const [activeTab, setActiveTab] = useState<CreditsTab>(
     credits.cast.length > 0 ? 'cast' : 'crew',
   );
+
+  useEffect(() => {
+    logRouteScreenMount('cast-see-all', {
+      ownership: ROUTE_OWNERSHIP_AUDIT.castSeeAll,
+      dataCount: credits.cast.length,
+    });
+  }, [credits.cast.length]);
 
   useEffect(() => {
     logRouteLayoutMeta(LAYOUT_SCOPE, route, {
@@ -131,10 +143,13 @@ export function CreditsDetailContent({
         ListHeaderComponent={listHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        onLayout={routeLayoutHandler(LAYOUT_SCOPE, 'list', route, {
-          renderer: 'FlatList',
-          dataCount: credits.cast.length,
-        })}
+        onLayout={(event) => {
+          onCastRootLayout(event);
+          routeLayoutHandler(LAYOUT_SCOPE, 'list', route, {
+            renderer: 'FlatList',
+            dataCount: credits.cast.length,
+          })(event);
+        }}
       />
     );
   }

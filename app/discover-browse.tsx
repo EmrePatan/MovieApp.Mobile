@@ -8,10 +8,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import {
+  DISCOVER_ROUTE_PROBE_STAGE,
+  DiscoverRouteProbe,
+} from '@/debug/discover-route-probe';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -307,7 +312,7 @@ export default function DiscoverScreen() {
     [handleResultPress],
   );
 
-  return (
+  const productionScreen = (
     <View style={commonStyles.screen} testID="discover-browse-screen">
       <FlatList
         testID="discover-browse-list"
@@ -335,6 +340,20 @@ export default function DiscoverScreen() {
       {filterSheetVisible ? filterSheet : null}
     </View>
   );
+
+  if (__DEV__ && Platform.OS === 'android') {
+    return (
+      <DiscoverRouteProbe
+        stage={DISCOVER_ROUTE_PROBE_STAGE}
+        production={productionScreen}
+        items={items}
+        listHeader={listHeader}
+        onPress={handleResultPress}
+      />
+    );
+  }
+
+  return productionScreen;
 }
 
 const styles = StyleSheet.create({
