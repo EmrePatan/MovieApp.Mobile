@@ -26,6 +26,7 @@ export interface SearchAutocompleteItem {
   type: 'movie' | 'tv' | 'person';
   title: string;
   posterUrl: string | null;
+  tmdbId?: number | null;
   knownForDepartment?: string | null;
 }
 

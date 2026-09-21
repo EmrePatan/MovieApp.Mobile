@@ -9,12 +9,28 @@ import {
 import { getUiFormatLocaleTag, i18n } from '@/i18n';
 import type { InsightsV3MovieDna } from '../types';
 
+const ENGLISH_WEEKDAY_TO_INDEX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
 export function formatWeekdayName(dayOfWeek: number | string | null | undefined): string {
   if (dayOfWeek == null) {
     return '—';
   }
 
   if (typeof dayOfWeek === 'string') {
+    const normalized = dayOfWeek.trim().toLowerCase();
+    const mappedIndex = ENGLISH_WEEKDAY_TO_INDEX[normalized];
+    if (mappedIndex != null) {
+      return i18n.t(`insights.format.weekdays.${mappedIndex}`);
+    }
+
     return dayOfWeek;
   }
 
@@ -44,23 +60,31 @@ export function formatMonthYear(month: number, year: number): string {
 
 export function formatEstimatedDuration(totalMinutes: number): string {
   if (totalMinutes <= 0) {
-    return '0m';
+    return i18n.t('insights.format.duration.zeroMinutes');
   }
 
   if (totalMinutes < 60) {
-    return `${totalMinutes}m`;
+    return i18n.t('insights.format.duration.minutes', { count: totalMinutes });
   }
 
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
   if (hours < 24) {
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    if (minutes > 0) {
+      return i18n.t('insights.format.duration.hoursMinutes', { hours, minutes });
+    }
+
+    return i18n.t('insights.format.duration.hours', { count: hours });
   }
 
   const days = Math.floor(hours / 24);
   const remainingHours = hours % 24;
-  return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
+  if (remainingHours > 0) {
+    return i18n.t('insights.format.duration.daysHours', { days, hours: remainingHours });
+  }
+
+  return i18n.t('insights.format.duration.days', { count: days });
 }
 
 export function formatHoursFromMinutes(totalMinutes: number): string {
@@ -143,11 +167,15 @@ export function getElapsedDaysInYear(year: number, asOf = new Date()): number {
   return Math.max(diff, 1);
 }
 
-export function formatActiveYearDayPercent(
+export type ActiveYearDayPercentDisplay =
+  | { kind: 'percent'; value: number }
+  | { kind: 'under-one' };
+
+export function formatActiveYearDayPercentDisplay(
   activeDays: number,
   year: number,
   asOf = new Date(),
-): number | null {
+): ActiveYearDayPercentDisplay | null {
   if (activeDays <= 0) {
     return null;
   }
@@ -157,7 +185,26 @@ export function formatActiveYearDayPercent(
     return null;
   }
 
-  return Math.min(100, Math.round((activeDays / elapsedDays) * 100));
+  const exactPercent = (activeDays / elapsedDays) * 100;
+  if (exactPercent < 1) {
+    return { kind: 'under-one' };
+  }
+
+  return { kind: 'percent', value: Math.min(100, Math.round(exactPercent)) };
+}
+
+/** @deprecated Use formatActiveYearDayPercentDisplay for localized rendering. */
+export function formatActiveYearDayPercent(
+  activeDays: number,
+  year: number,
+  asOf = new Date(),
+): number | null {
+  const display = formatActiveYearDayPercentDisplay(activeDays, year, asOf);
+  if (!display) {
+    return null;
+  }
+
+  return display.kind === 'under-one' ? 0 : display.value;
 }
 
 function getTopGenreName(movieDna: InsightsV3MovieDna): string | null {
@@ -263,7 +310,17 @@ export function formatDominantGenreHeadline(genreName: string): string {
 }
 
 export function formatDecadeLabel(bucket: string): string {
-  return bucket;
+  const normalized = bucket.trim();
+  const decadeKey = `insights.format.decades.${normalized.toLowerCase()}`;
+  if (i18n.exists(decadeKey)) {
+    return i18n.t(decadeKey);
+  }
+
+  if (/^\d{4}s$/i.test(normalized)) {
+    return i18n.t('insights.format.decades.pattern', { decade: normalized });
+  }
+
+  return normalized;
 }
 
 const MINUTES_PER_HOUR = 60;
@@ -271,9 +328,16 @@ const MINUTES_PER_DAY = MINUTES_PER_HOUR * 24;
 const MINUTES_PER_MONTH = MINUTES_PER_DAY * 30;
 const MINUTES_PER_YEAR = MINUTES_PER_DAY * 365;
 
+function formatWatchTimeUnit(
+  key: 'years' | 'months' | 'days' | 'hours' | 'minutes',
+  count: number,
+): string {
+  return i18n.t(`insights.format.watchTime.${key}`, { count });
+}
+
 export function formatWatchTimeBreakdown(totalMinutes: number): string {
   if (totalMinutes <= 0) {
-    return '0h';
+    return formatWatchTimeUnit('hours', 0);
   }
 
   let remaining = Math.floor(totalMinutes);
@@ -288,22 +352,22 @@ export function formatWatchTimeBreakdown(totalMinutes: number): string {
 
   const parts: string[] = [];
   if (years > 0) {
-    parts.push(`${years}y`);
+    parts.push(formatWatchTimeUnit('years', years));
   }
   if (months > 0) {
-    parts.push(`${months}mo`);
+    parts.push(formatWatchTimeUnit('months', months));
   }
   if (days > 0) {
-    parts.push(`${days}d`);
+    parts.push(formatWatchTimeUnit('days', days));
   }
   if (hours > 0) {
-    parts.push(`${hours}h`);
+    parts.push(formatWatchTimeUnit('hours', hours));
   }
   if (parts.length === 0 && minutes > 0) {
-    parts.push(`${minutes}m`);
+    parts.push(formatWatchTimeUnit('minutes', minutes));
   }
   if (parts.length === 0) {
-    parts.push('0h');
+    parts.push(formatWatchTimeUnit('hours', 0));
   }
 
   return parts.join(' ');

@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -24,6 +25,7 @@ import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import type { RecommendationItem } from '@/features/recommendations/types';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { useAiRecommendations } from '../hooks/useAiRecommendations';
+import { useAiRecommendationQuota } from '../hooks/useAiRecommendationQuota';
 import {
   AI_RECOMMENDATION_DAILY_LIMIT,
   AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
@@ -43,11 +45,14 @@ export function AiRecommendationsContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [quotaRemaining, setQuotaRemaining] = useState(AI_RECOMMENDATION_DAILY_LIMIT);
+  const [quotaOverride, setQuotaOverride] = useState<number | undefined>(undefined);
+  const quotaQuery = useAiRecommendationQuota();
   const recommendationsMutation = useAiRecommendations();
+  const quotaRemaining = quotaOverride ?? quotaQuery.data?.remaining ?? null;
 
   const trimmedMessage = message.trim();
   const hasTrackedMetricRef = useRef(false);
@@ -68,7 +73,8 @@ export function AiRecommendationsContent() {
       {
         onSuccess: (response) => {
           setSessionId(response.sessionId);
-          setQuotaRemaining(response.quotaRemaining);
+          setQuotaOverride(response.quotaRemaining);
+          void queryClient.invalidateQueries({ queryKey: ['ai-recommendations', 'quota'] });
           if (!hasTrackedMetricRef.current && response.returnedCount > 0) {
             trackProductMetric(PRODUCT_METRICS.aiRecommendationsUsed);
             hasTrackedMetricRef.current = true;
@@ -76,12 +82,12 @@ export function AiRecommendationsContent() {
         },
         onError: (error) => {
           if (isApiError(error) && error.kind === 'rate_limited') {
-            setQuotaRemaining(0);
+            setQuotaOverride(0);
           }
         },
       },
     );
-  }, [hasTrackedMetricRef, message, recommendationsMutation, sessionId, trimmedMessage]);
+  }, [hasTrackedMetricRef, message, queryClient, recommendationsMutation, sessionId, trimmedMessage]);
 
   const handlePromptPress = useCallback((prompt: string) => {
     setMessage(prompt);
@@ -107,10 +113,13 @@ export function AiRecommendationsContent() {
     setMessage('');
     setSessionId(null);
     setValidationError(null);
+    setQuotaOverride(undefined);
     recommendationsMutation.reset();
   }, [recommendationsMutation]);
 
-  const isQuotaExhausted = quotaRemaining <= 0;
+  const quotaLimit = quotaQuery.data?.limit ?? AI_RECOMMENDATION_DAILY_LIMIT;
+  const isQuotaHydrated = quotaRemaining !== null;
+  const isQuotaExhausted = isQuotaHydrated && quotaRemaining <= 0;
 
   const resultItems = useMemo(() => {
     const response = recommendationsMutation.data;
@@ -307,10 +316,11 @@ export function AiRecommendationsContent() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       <ScrollView
+        style={styles.flex}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -328,10 +338,12 @@ export function AiRecommendationsContent() {
               {t('aiRecommendations.subtitle')}
             </AppText>
             <AppText variant="caption" muted testID="ai-recommendations-quota-remaining">
-              {t('aiRecommendations.quotaRemaining', {
-                remaining: quotaRemaining,
-                limit: AI_RECOMMENDATION_DAILY_LIMIT,
-              })}
+              {isQuotaHydrated
+                ? t('aiRecommendations.quotaRemaining', {
+                    remaining: quotaRemaining,
+                    limit: quotaLimit,
+                  })
+                : t('aiRecommendations.quotaLoading')}
             </AppText>
           </View>
         </View>
@@ -401,16 +413,23 @@ export function AiRecommendationsContent() {
               })}
             </View>
 
-            <AppButton
-              title={t('aiRecommendations.getRecommendations')}
-              onPress={handleSubmit}
-              disabled={recommendationsMutation.isPending || isQuotaExhausted}
-            />
           </View>
         ) : null}
 
         {statusContent}
       </ScrollView>
+
+      {showFullComposer ? (
+        <View
+          style={[styles.composerFooter, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
+        >
+          <AppButton
+            title={t('aiRecommendations.getRecommendations')}
+            onPress={handleSubmit}
+            disabled={recommendationsMutation.isPending || isQuotaExhausted || !isQuotaHydrated}
+          />
+        </View>
+      ) : null}
     </KeyboardAvoidingView>
   );
 }
@@ -457,6 +476,13 @@ const styles = StyleSheet.create({
   composerSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
+  },
+  composerFooter: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
+    backgroundColor: colors.background,
   },
   composerLabel: {
     color: colors.textSecondary,

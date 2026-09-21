@@ -29,8 +29,9 @@ function pushTrace(detail: AuthDeepLinkTraceDetail): void {
     traceBuffer.shift();
   }
 
-  // Temporary safe diagnostics for TestFlight lifecycle validation (no tokens logged).
-  console.info('[auth-deep-link]', detail);
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    console.info('[auth-deep-link]', detail);
+  }
 }
 
 export function traceAuthDeepLink(

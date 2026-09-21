@@ -240,7 +240,7 @@ describe('SearchScreen', () => {
     expect(screen.queryByLabelText('Search for Interstellar, Movie')).toBeNull();
   });
 
-  it('submits a query from autocomplete', () => {
+  it('opens catalog detail directly from movie autocomplete suggestions', () => {
     (useAutocomplete as jest.Mock).mockReturnValue({
       data: {
         items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: '/fake/interstellar-poster.jpg' }],
@@ -252,7 +252,40 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
     fireEvent.press(screen.getByLabelText('Search for Interstellar, Movie'));
 
-    expect(useSearchResults).toHaveBeenLastCalledWith('Interstellar', 'all');
+    expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
+      expect.objectContaining({ push: mockPush }),
+      '1',
+      'movie',
+      'search',
+      expect.objectContaining({ queryClient: expect.any(Object) }),
+    );
+    expect(useSearchResults).not.toHaveBeenLastCalledWith('Interstellar', 'all');
+  });
+
+  it('opens person detail directly from person autocomplete suggestions', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'person-1',
+            type: 'person',
+            title: 'Jimmy Fallon',
+            posterUrl: null,
+            tmdbId: 12345,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'jim');
+    fireEvent.press(screen.getByLabelText('Search for Jimmy Fallon, Person'));
+
+    expect(mockOpenPersonDetail).toHaveBeenCalledWith(
+      expect.objectContaining({ push: mockPush }),
+      12345,
+    );
   });
 
   it('keeps the search input mounted while submitted search is loading', () => {

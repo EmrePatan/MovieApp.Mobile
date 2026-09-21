@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useLocalSearchParams, usePathname, useSegments } from 'expo-router';
 import {
+  isValidGuid,
   normalizeRouteIdParam,
   parseCatalogIdFromPathname,
   parseCatalogStackCatalogId,
@@ -19,16 +20,28 @@ export function useCatalogRouteIdState(contentType: 'movie' | 'tv') {
   const isDetailPathActive = Boolean(pathnameId);
 
   const stableIdRef = useRef<string | undefined>(undefined);
+  const routeKeyRef = useRef<string | undefined>(undefined);
+  const routeKey = `${pathname}:${rawId ?? ''}`;
+
+  if (routeKeyRef.current !== routeKey) {
+    routeKeyRef.current = routeKey;
+    stableIdRef.current = isValidGuid(rawId) ? rawId : undefined;
+  }
+
   if (resolvedId) {
     stableIdRef.current = resolvedId;
   }
+
   const stableResolvedId = resolvedId ?? stableIdRef.current;
+  const hasResolvableRouteTarget = Boolean(
+    isValidGuid(rawId) || pathnameId || parseCatalogStackCatalogId(pathname, contentType),
+  );
 
   return {
     rawId,
     pathname,
     resolvedId: stableResolvedId,
     isDetailPathActive,
-    isInvalid: Boolean(rawId) && !stableResolvedId,
+    isInvalid: hasResolvableRouteTarget && !stableResolvedId,
   };
 }

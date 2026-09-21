@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3MonthlyActivity, InsightsV3YourYear } from '../types';
 import {
-  formatActiveYearDayPercent,
+  formatActiveYearDayPercentDisplay,
   formatMonthName,
   formatMonthYear,
   formatWeekdayName,
@@ -35,7 +35,7 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
     [yourYear.months],
   );
   const hasActivity = yourYear.months.some((month) => month.total > 0);
-  const activeDayPercent = formatActiveYearDayPercent(yourYear.activeDays, year);
+  const activeDayPercent = formatActiveYearDayPercentDisplay(yourYear.activeDays, year);
   const peakMonthNumber = yourYear.peakMonth?.month ?? null;
 
   return (
@@ -97,7 +97,9 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
             <View style={styles.callout} accessibilityRole="text">
               <Ionicons name="calendar-outline" size={16} color={colors.accent} />
               <AppText variant="bodySmall" style={styles.calloutText}>
-                {t('insights.yourYear.activeDayCallout', { percent: activeDayPercent })}
+                {activeDayPercent.kind === 'under-one'
+                  ? t('insights.yourYear.activeDayCalloutUnderOne')
+                  : t('insights.yourYear.activeDayCallout', { percent: activeDayPercent.value })}
               </AppText>
             </View>
           ) : null}
@@ -302,7 +304,6 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     color: colors.textMuted,
-    textTransform: 'lowercase',
   },
   callout: {
     flexDirection: 'row',

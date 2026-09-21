@@ -1,6 +1,7 @@
 import {
   buildSelectableYears,
   formatActiveYearDayPercent,
+  formatActiveYearDayPercentDisplay,
   formatAchievementBadgeNumber,
   formatAchievementCategoryLabel,
   formatDecadeLabel,
@@ -42,6 +43,7 @@ describe('insights format helpers', () => {
 
   it('formats weekday names', () => {
     expect(formatWeekdayName(6)).toBe('Saturday');
+    expect(formatWeekdayName('Saturday')).toBe('Saturday');
     expect(formatWeekdayName(null)).toBe('—');
   });
 
@@ -122,6 +124,9 @@ describe('insights format helpers', () => {
     );
     expect(formatDominantGenreHeadline('Drama')).toBe('Drama dominates your library');
     expect(formatActiveYearDayPercent(42, 2026, new Date('2026-09-18T12:00:00Z'))).toBeGreaterThan(0);
+    expect(
+      formatActiveYearDayPercentDisplay(1, 2026, new Date('2026-09-18T12:00:00Z')),
+    ).toEqual({ kind: 'under-one' });
     expect(formatDecadeLabel('2020s')).toBe('2020s');
     expect(formatDecadeLabel('Older')).toBe('Older');
     expect(formatAchievementBadgeNumber(1000)).toBe('1,000');

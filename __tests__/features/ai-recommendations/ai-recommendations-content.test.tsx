@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApiError } from '@/api/errors';
 import { AiRecommendationsContent } from '@/features/ai-recommendations/components/AiRecommendationsContent';
 import { postAiRecommendations } from '@/features/ai-recommendations/api/ai-recommendations-api';
+import { useAiRecommendationQuota } from '@/features/ai-recommendations/hooks/useAiRecommendationQuota';
 
 const mockPush = jest.fn();
 
@@ -13,11 +14,34 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/features/ai-recommendations/api/ai-recommendations-api', () => ({
   postAiRecommendations: jest.fn(),
+  getAiRecommendationQuota: jest.fn(),
+}));
+
+const mockQuotaData = { remaining: 3, limit: 3 };
+
+jest.mock('@/features/ai-recommendations/hooks/useAiRecommendationQuota', () => ({
+  useAiRecommendationQuota: jest.fn(() => ({
+    data: mockQuotaData,
+    isLoading: false,
+    isError: false,
+  })),
 }));
 
 jest.mock('@/features/metrics/track-product-metric', () => ({
   trackProductMetric: jest.fn(),
 }));
+
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
+async function waitForQuotaHydration() {
+  await waitFor(() => {
+    expect(screen.getByTestId('ai-recommendations-quota-remaining')).not.toHaveTextContent(
+      'Checking today’s request limit…',
+    );
+  });
+}
 
 function renderScreen() {
   const queryClient = new QueryClient({
@@ -68,22 +92,30 @@ const successResponse = {
 describe('AiRecommendationsContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAiRecommendationQuota as jest.Mock).mockReturnValue({
+      data: mockQuotaData,
+      isLoading: false,
+      isError: false,
+    });
   });
 
-  it('renders the prompt composer and suggested prompts', () => {
+  it('renders the prompt composer and suggested prompts', async () => {
     renderScreen();
 
     expect(screen.getByText('AI Recommendations')).toBeTruthy();
-    expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
-      '3 of 3 requests left today',
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
+        '3 of 3 requests left today',
+      );
+    });
     expect(screen.getByLabelText('AI recommendation prompt')).toBeTruthy();
     expect(screen.getByText('Get Recommendations')).toBeTruthy();
     expect(screen.getByLabelText('Use prompt: A cozy mystery for a rainy night')).toBeTruthy();
   });
 
-  it('shows validation feedback for short prompts', () => {
+  it('shows validation feedback for short prompts', async () => {
     renderScreen();
+    await waitForQuotaHydration();
 
     fireEvent.changeText(screen.getByLabelText('AI recommendation prompt'), 'hi');
     fireEvent.press(screen.getByText('Get Recommendations'));
@@ -96,6 +128,7 @@ describe('AiRecommendationsContent', () => {
     (postAiRecommendations as jest.Mock).mockResolvedValue(successResponse);
 
     renderScreen();
+    await waitForQuotaHydration();
 
     fireEvent.changeText(
       screen.getByLabelText('AI recommendation prompt'),
@@ -133,6 +166,7 @@ describe('AiRecommendationsContent', () => {
     (postAiRecommendations as jest.Mock).mockResolvedValue(successResponse);
 
     renderScreen();
+    await waitForQuotaHydration();
 
     fireEvent.changeText(
       screen.getByLabelText('AI recommendation prompt'),
@@ -184,6 +218,7 @@ describe('AiRecommendationsContent', () => {
     );
 
     renderScreen();
+    await waitForQuotaHydration();
 
     fireEvent.changeText(
       screen.getByLabelText('AI recommendation prompt'),
@@ -219,6 +254,7 @@ describe('AiRecommendationsContent', () => {
     });
 
     renderScreen();
+    await waitForQuotaHydration();
 
     fireEvent.changeText(
       screen.getByLabelText('AI recommendation prompt'),
@@ -247,6 +283,7 @@ describe('AiRecommendationsContent', () => {
     });
 
     renderScreen();
+    await waitForQuotaHydration();
 
     fireEvent.changeText(
       screen.getByLabelText('AI recommendation prompt'),

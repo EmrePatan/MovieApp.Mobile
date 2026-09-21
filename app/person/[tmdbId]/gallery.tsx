@@ -1,16 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { GalleryDetailContent } from '@/features/gallery/components/GalleryDetailContent';
 import { usePersonGallery } from '@/features/gallery/hooks/useGallery';
+import { usePersonRouteTmdbId } from '@/features/details/person/hooks/usePersonRouteTmdbId';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
-import { parsePositiveInt } from '@/features/details/shared/routes';
-import { useLocalSearchParams } from 'expo-router';
 
 export default function PersonGalleryScreen() {
   const { t } = useTranslation();
-  const { tmdbId } = useLocalSearchParams<{ tmdbId?: string }>();
-  const resolvedTmdbId = parsePositiveInt(tmdbId);
-  const isInvalid = resolvedTmdbId === null;
-  const query = usePersonGallery(isInvalid || resolvedTmdbId === null ? 0 : resolvedTmdbId);
+  const { tmdbId, isInvalid } = usePersonRouteTmdbId();
+  const query = usePersonGallery(tmdbId ?? 0);
+
+  if (!tmdbId) {
+    return null;
+  }
 
   return (
     <DetailQueryState

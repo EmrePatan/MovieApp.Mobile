@@ -1,16 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { PersonFilmographyDetailContent } from '@/features/details/person/components/PersonFilmographyDetailContent';
 import { usePersonDetails } from '@/features/details/person/hooks/usePersonDetails';
+import { usePersonRouteTmdbId } from '@/features/details/person/hooks/usePersonRouteTmdbId';
 import { DetailQueryState } from '@/features/details/shared/components/DetailQueryState';
-import { parsePositiveInt } from '@/features/details/shared/routes';
-import { useLocalSearchParams } from 'expo-router';
 
 export default function PersonFilmographyScreen() {
   const { t } = useTranslation();
-  const { tmdbId } = useLocalSearchParams<{ tmdbId?: string }>();
-  const resolvedTmdbId = parsePositiveInt(tmdbId);
-  const isInvalid = resolvedTmdbId === null;
-  const query = usePersonDetails(isInvalid || resolvedTmdbId === null ? 0 : resolvedTmdbId);
+  const { tmdbId, isInvalid } = usePersonRouteTmdbId();
+  const query = usePersonDetails(tmdbId ?? 0);
+
+  if (!tmdbId) {
+    return null;
+  }
 
   return (
     <DetailQueryState

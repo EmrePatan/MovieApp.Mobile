@@ -37,4 +37,22 @@ describe('useCatalogRouteIdState', () => {
     expect(result.current.resolvedId).toBe(movieId);
     expect(result.current.isDetailPathActive).toBe(true);
   });
+
+  it('does not carry a previous catalog id into a newly opened detail route', () => {
+    const nextMovieId = '8f14e45f-ceea-467f-a0fc-57c1f6b9f9f9';
+    (usePathname as jest.Mock).mockReturnValue(`/movie/${movieId}`);
+    (useSegments as jest.Mock).mockReturnValue(['movie', movieId]);
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ id: movieId });
+
+    const { result, rerender } = renderHook(() => useCatalogRouteIdState('movie'));
+    expect(result.current.resolvedId).toBe(movieId);
+
+    (usePathname as jest.Mock).mockReturnValue(`/movie/${nextMovieId}`);
+    (useSegments as jest.Mock).mockReturnValue(['movie', nextMovieId]);
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ id: nextMovieId });
+    rerender({});
+
+    expect(result.current.resolvedId).toBe(nextMovieId);
+    expect(result.current.resolvedId).not.toBe(movieId);
+  });
 });

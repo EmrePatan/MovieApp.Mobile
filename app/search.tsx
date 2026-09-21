@@ -171,9 +171,21 @@ export default function SearchScreen() {
 
   const handleSuggestionSelect = useCallback(
     (suggestion: SearchAutocompleteItem) => {
+      Keyboard.dismiss();
+
+      if (suggestion.type === 'person' && suggestion.tmdbId) {
+        openPersonDetail(router, suggestion.tmdbId);
+        return;
+      }
+
+      if (suggestion.type === 'movie' || suggestion.type === 'tv') {
+        openCatalogDetailFromTab(router, suggestion.id, suggestion.type, 'search', { queryClient });
+        return;
+      }
+
       submitSearch(suggestion.title);
     },
-    [submitSearch],
+    [queryClient, router, submitSearch],
   );
 
   const handleHistorySelect = useCallback(

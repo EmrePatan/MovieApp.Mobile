@@ -77,19 +77,23 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.sm,
     minHeight: 24,
+    paddingHorizontal: spacing.md,
   },
   title: {
     color: '#0A0A0F',
     fontSize: 17,
     fontWeight: '600',
     letterSpacing: 0.2,
+    flexShrink: 1,
+    textAlign: 'center',
   },
   arrow: {
-    position: 'absolute',
-    right: 0,
+    flexShrink: 0,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

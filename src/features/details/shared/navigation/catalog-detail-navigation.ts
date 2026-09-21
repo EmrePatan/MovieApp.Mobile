@@ -25,6 +25,26 @@ export interface OpenCatalogDetailOptions {
 }
 
 let lastCatalogDetailWatchRegion: string | null = null;
+let activeCatalogNavigationKey: string | null = null;
+
+function pushCatalogDetailRoute(
+  router: ImperativeRouter,
+  href: string,
+  navigationKey: string,
+): void {
+  if (activeCatalogNavigationKey === navigationKey) {
+    return;
+  }
+
+  activeCatalogNavigationKey = navigationKey;
+  router.push(href);
+
+  setTimeout(() => {
+    if (activeCatalogNavigationKey === navigationKey) {
+      activeCatalogNavigationKey = null;
+    }
+  }, 750);
+}
 
 export async function openCatalogDetailFromFilmography(
   router: ImperativeRouter,
@@ -37,7 +57,7 @@ export async function openCatalogDetailFromFilmography(
       prefetchCatalogDetail(options.queryClient, entry.catalogId, entry.mediaType);
     }
 
-    router.push(href);
+    pushCatalogDetailRoute(router, href, `${entry.mediaType}:${entry.catalogId}`);
     return entry.catalogId;
   }
 
@@ -49,7 +69,8 @@ export async function openCatalogDetailFromFilmography(
     prefetchCatalogDetail(options.queryClient, details.id, entry.mediaType);
   }
 
-  router.push(buildCatalogDetailRoute(details.id, entry.mediaType));
+  const href = buildCatalogDetailRoute(details.id, entry.mediaType);
+  pushCatalogDetailRoute(router, href, `${entry.mediaType}:${details.id}`);
   return details.id;
 }
 
@@ -75,7 +96,7 @@ export function openCatalogDetailFromTab(
     prefetchCatalogDetail(options.queryClient, id, type);
   }
 
-  router.push(href);
+  pushCatalogDetailRoute(router, href, `${type}:${id}`);
 }
 
 export function openCatalogDetailFromLibraryStack(
@@ -112,4 +133,5 @@ export function openDetailFromLibraryStack(
 
 export function resetCatalogDetailOriginForTests(): void {
   lastCatalogDetailWatchRegion = null;
+  activeCatalogNavigationKey = null;
 }

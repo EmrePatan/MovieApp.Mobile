@@ -7,6 +7,7 @@ jest.mock('@/features/metrics/track-product-metric', () => ({
 import {
   getCatalogDetailWatchRegion,
   openCatalogDetailFromLibraryStack,
+  openCatalogDetailFromTab,
   resetCatalogDetailOriginForTests,
 } from '@/features/details/shared/navigation/catalog-detail-navigation';
 
@@ -23,5 +24,14 @@ describe('catalog-detail-navigation watchRegion context', () => {
     });
 
     expect(getCatalogDetailWatchRegion()).toBe('US');
+  });
+
+  it('ignores duplicate catalog detail pushes within the debounce window', () => {
+    const router = { push: jest.fn() };
+
+    openCatalogDetailFromTab(router, 'movie-1', 'movie', 'search');
+    openCatalogDetailFromTab(router, 'movie-1', 'movie', 'search');
+
+    expect(router.push).toHaveBeenCalledTimes(1);
   });
 });
