@@ -1,5 +1,6 @@
 import { useCallback, useEffect, type ReactNode } from 'react';
 import {
+  LayoutChangeEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
@@ -17,12 +18,20 @@ import {
 import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
 
+interface RenderResultRowOptions {
+  route: ReturnType<typeof useRouteLayoutContext>;
+  item: SearchResultItem;
+  index: number;
+  onPress: (item: SearchResultItem) => void;
+}
+
 interface SearchMappedResultsScrollProps {
   layoutScope: string;
   testID: string;
   items: SearchResultItem[];
   keyExtractor: (item: SearchResultItem) => string;
   onPress: (item: SearchResultItem) => void;
+  renderRow?: (options: RenderResultRowOptions) => ReactNode;
   contentContainerStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
   refreshControl?: ScrollViewProps['refreshControl'];
@@ -38,6 +47,7 @@ export function SearchMappedResultsScroll({
   items,
   keyExtractor,
   onPress,
+  renderRow,
   contentContainerStyle,
   style,
   refreshControl,
@@ -47,6 +57,13 @@ export function SearchMappedResultsScroll({
   keyboardDismissMode,
 }: SearchMappedResultsScrollProps) {
   const route = useRouteLayoutContext();
+  const rowRenderer = renderRow ?? ((options) => renderSearchResultRow({
+    layoutScope,
+    route: options.route,
+    item: options.item,
+    index: options.index,
+    onPress: options.onPress,
+  }));
 
   useEffect(() => {
     if (__DEV__) {
@@ -77,6 +94,27 @@ export function SearchMappedResultsScroll({
     [onEndReached],
   );
 
+  const scrollViewportHandler = (event: LayoutChangeEvent) => {
+    if (__DEV__ && layoutScope === 'streaming-discover') {
+      const { x, y, width, height } = event.nativeEvent.layout;
+      logNavigationDiagnostic('streaming-scroll:viewport-layout', {
+        pathname: route.pathname,
+        x,
+        y,
+        width,
+        height,
+      });
+    }
+
+    routeLayoutHandler(layoutScope, 'scroll', route, {
+      testID,
+      renderer: 'ScrollView',
+      dataCount: items.length,
+      style: describeViewStyle(style),
+      contentContainerStyle: describeViewStyle(contentContainerStyle),
+    })(event);
+  };
+
   return (
     <ScrollView
       testID={testID}
@@ -87,19 +125,34 @@ export function SearchMappedResultsScroll({
       keyboardDismissMode={keyboardDismissMode}
       onScroll={onEndReached ? handleScroll : undefined}
       scrollEventThrottle={400}
-      onLayout={routeLayoutHandler(layoutScope, 'scroll', route, {
-        testID,
-        renderer: 'ScrollView',
-        dataCount: items.length,
-        style: describeViewStyle(style),
-        contentContainerStyle: describeViewStyle(contentContainerStyle),
-      })}
+      onLayout={scrollViewportHandler}
     >
-      {items.map((item, index) => (
-        <View key={keyExtractor(item)}>
-          {renderSearchResultRow({ layoutScope, route, item, index, onPress })}
-        </View>
-      ))}
+      <View
+        collapsable={false}
+        onLayout={
+          layoutScope === 'streaming-discover'
+            ? (event) => {
+                const { x, y, width, height } = event.nativeEvent.layout;
+                logNavigationDiagnostic('streaming-scroll:content-layout', {
+                  pathname: route.pathname,
+                  itemCount: items.length,
+                  x,
+                  y,
+                  width,
+                  height,
+                });
+              }
+            : routeLayoutHandler(layoutScope, 'scroll-content', route, {
+                itemCount: items.length,
+              })
+        }
+      >
+        {items.map((item, index) => (
+          <View key={keyExtractor(item)} collapsable={false}>
+            {rowRenderer({ route, item, index, onPress })}
+          </View>
+        ))}
+      </View>
       {footer}
     </ScrollView>
   );

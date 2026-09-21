@@ -40,6 +40,7 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchMappedResultsScroll } from '@/features/search/components/SearchMappedResultsScroll';
+import { renderStreamingResultRow } from '@/features/search/utils/render-streaming-result-row';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import {
@@ -312,6 +313,7 @@ export default function StreamingDiscoverScreen() {
         items={resultsData}
         keyExtractor={searchResultKeyExtractor}
         onPress={handleResultPress}
+        renderRow={renderStreamingResultRow}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <MovieAppRefreshControl

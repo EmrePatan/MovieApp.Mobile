@@ -85,6 +85,9 @@ describe('StreamingDiscoverScreen', () => {
                 type: 'movie',
                 title: 'Inception',
                 posterUrl: null,
+                releaseDate: '2010-07-16',
+                voteAverage: 8.8,
+                year: 2010,
               },
             ],
           },
@@ -108,7 +111,7 @@ describe('StreamingDiscoverScreen', () => {
 
     expect(screen.getByTestId('streaming-discover-scroll')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
-    expect(screen.getByText('Inception')).toBeTruthy();
+    expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
   });
 
   it('renders provider selector outside FlatList when results data is empty and no provider is selected', () => {
@@ -182,7 +185,7 @@ describe('StreamingDiscoverScreen', () => {
     });
 
     render(<StreamingDiscoverScreen />);
-    fireEvent.press(screen.getByText('Inception'));
+    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8'));
 
     expect(openCatalogDetailFromLibraryStack).toHaveBeenCalledWith(
       expect.anything(),
