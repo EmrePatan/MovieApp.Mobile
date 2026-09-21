@@ -6,7 +6,7 @@ import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { UpcomingCatalogItem } from '../types';
-import { formatRelativeAirDate } from '@/utils/date';
+import { formatRelativeAirDateLocalized } from '@/utils/format-relative-air-date';
 import { formatCatalogYear, formatContentType, formatIsoDate } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -45,7 +45,7 @@ export const UpcomingListCard = memo(function UpcomingListCard({
   const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const year = formatCatalogYear(item.releaseDate, item.year);
   const releaseDate = formatIsoDate(item.releaseDate);
-  const relativeDate = formatRelativeAirDate(item.releaseDate);
+  const relativeDate = formatRelativeAirDateLocalized(item.releaseDate, t);
   const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
   const kindLabel = getKindLabel(item);
   const trackedLabel = item.isFollowed

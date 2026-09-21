@@ -21,9 +21,9 @@ import type { CatalogMediaFilter } from '@/features/library/types';
 import { ComingUpTabBar } from '@/features/upcoming/components/ComingUpTabBar';
 import { UpcomingListCard } from '@/features/upcoming/components/UpcomingListCard';
 import { useUpcomingCatalog } from '@/features/upcoming/hooks/useUpcomingCatalog';
+import { useComingUpInitialTab } from '@/features/upcoming/hooks/useComingUpInitialTab';
 import {
   buildComingUpHref,
-  parseComingUpTab,
   type ComingUpTab,
 } from '@/features/upcoming/navigation/coming-up-navigation';
 import type { UpcomingCatalogItem } from '@/features/upcoming/types';
@@ -56,7 +56,11 @@ export default function UpcomingScreen() {
   const router = useRouter();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
   const { isAuthenticated } = useAuth();
-  const activeTab = parseComingUpTab(tab);
+  const { activeTab, isResolvingInitialTab } = useComingUpInitialTab({
+    tabParam: tab,
+    isAuthenticated,
+    router,
+  });
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
 
   const followedQuery = useUpcomingCatalog('followed', undefined, {
@@ -92,7 +96,7 @@ export default function UpcomingScreen() {
   const handleItemPress = useCallback(
     (item: UpcomingCatalogItem) => {
       openCatalogDetailFromLibraryStack(router, item.id, item.type, 'upcoming', {
-        libraryReturnHref: buildComingUpHref(activeTab),
+        libraryReturnHref: buildComingUpHref(activeTab ?? 'upcoming'),
       });
     },
     [activeTab, router],
@@ -131,7 +135,7 @@ export default function UpcomingScreen() {
       : t('upcoming.subtitleForYouGuest')
     : t('upcoming.subtitleCatalog');
 
-  const listHeader = (
+  const listHeader = activeTab ? (
     <>
       <LibraryStackHeader title={t('upcoming.title')} subtitle={subtitle}>
         {activeTab === 'for-you' && !isAuthenticated ? (
@@ -149,7 +153,18 @@ export default function UpcomingScreen() {
       </LibraryStackHeader>
       <ComingUpTabBar activeTab={activeTab} onTabChange={handleTabChange} />
     </>
+  ) : (
+    <LibraryStackHeader title={t('upcoming.title')} subtitle={t('upcoming.subtitleCatalog')} />
   );
+
+  if (isResolvingInitialTab) {
+    return (
+      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+        {listHeader}
+        <LibraryLoadingState accessibilityLabel={t('common.loadingUpcoming')} />
+      </SafeAreaView>
+    );
+  }
 
   if (activeTab === 'for-you' && !isAuthenticated) {
     return (

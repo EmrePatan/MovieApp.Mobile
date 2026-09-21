@@ -5,7 +5,7 @@ import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { UpcomingCatalogItem } from '../types';
-import { formatRelativeAirDate } from '@/utils/date';
+import { formatRelativeAirDateLocalized } from '@/utils/format-relative-air-date';
 import { formatCatalogYear, formatContentType, formatIsoDate, formatRating } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
@@ -30,7 +30,7 @@ export const UpcomingCard = memo(function UpcomingCard({ item, onPress }: Upcomi
   const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const year = formatCatalogYear(item.releaseDate, item.year);
   const releaseDate = formatIsoDate(item.releaseDate);
-  const relativeAirDate = formatRelativeAirDate(item.releaseDate);
+  const relativeAirDate = formatRelativeAirDateLocalized(item.releaseDate, t);
   const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
   const trackedLabel = item.isFollowed ? t('upcoming.card.notified') : null;
   const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeAirDate ? `, ${relativeAirDate}` : releaseDate ? `, ${releaseDate}` : ''}${trackedLabel ? `, ${trackedLabel}` : ''}`;

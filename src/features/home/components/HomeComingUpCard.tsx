@@ -5,7 +5,7 @@ import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { HomeItem } from '../types';
-import { formatRelativeAirDate } from '@/utils/date';
+import { formatRelativeAirDateLocalized } from '@/utils/format-relative-air-date';
 import { formatIsoDate } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
@@ -32,7 +32,7 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
   const { t } = useTranslation();
   const isTvEpisode = item.upcomingKind === 'TvEpisode';
   const releaseDate = formatIsoDate(item.releaseDate);
-  const relativeAirDate = formatRelativeAirDate(item.releaseDate);
+  const relativeAirDate = formatRelativeAirDateLocalized(item.releaseDate, t);
   const seasonEpisode = formatSeasonEpisode(item.seasonNumber, item.episodeNumber);
   const accessibilityLabel = `${item.title}${seasonEpisode ? `, ${seasonEpisode}` : ''}${item.episodeName ? `, ${item.episodeName}` : ''}${relativeAirDate ? `, ${relativeAirDate}` : releaseDate ? `, ${releaseDate}` : ''}`;
 

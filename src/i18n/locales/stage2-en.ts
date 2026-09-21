@@ -247,6 +247,13 @@ export const stage2En = {
       tvShows: 'TV Shows',
       showFilter: 'Show {{label}}',
     },
+    sections: {
+      trending: 'Trending Now',
+      topRated: 'Top Rated',
+      newReleases: 'New Releases',
+      recommendedForYou: 'Recommended For You',
+      comingUp: 'Coming Up',
+    },
     comingUpBadge: {
       premiere: 'Premiere',
       release: 'Release',
@@ -507,6 +514,13 @@ export const stage2En = {
         rating_desc: 'Top Rated',
         newest: 'Newest',
       },
+    },
+  },
+  date: {
+    relative: {
+      today: 'Today',
+      tomorrow: 'Tomorrow',
+      inDays: 'in {{count}} days',
     },
   },
   upcoming: {

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { ComingUpTab } from '../navigation/coming-up-navigation';
@@ -5,10 +6,7 @@ import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
-const TABS: { id: ComingUpTab; label: string }[] = [
-  { id: 'for-you', label: 'For You' },
-  { id: 'upcoming', label: 'Upcoming' },
-];
+const TABS: ComingUpTab[] = ['for-you', 'upcoming'];
 
 interface ComingUpTabBarProps {
   activeTab: ComingUpTab;
@@ -16,25 +14,29 @@ interface ComingUpTabBarProps {
 }
 
 export function ComingUpTabBar({ activeTab, onTabChange }: ComingUpTabBarProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container} accessibilityRole="tablist">
-      {TABS.map((tab) => {
-        const selected = activeTab === tab.id;
+      {TABS.map((tabId) => {
+        const selected = activeTab === tabId;
+        const label =
+          tabId === 'for-you' ? t('upcoming.tabs.forYou') : t('upcoming.tabs.upcoming');
 
         return (
           <Pressable
-            key={tab.id}
+            key={tabId}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={tab.label}
-            onPress={() => onTabChange(tab.id)}
+            accessibilityLabel={label}
+            onPress={() => onTabChange(tabId)}
             style={styles.tabButton}
           >
             <AppText
               variant="body"
               style={[styles.tabLabel, selected && styles.tabLabelSelected]}
             >
-              {tab.label}
+              {label}
             </AppText>
             {selected ? <View style={styles.indicator} /> : <View style={styles.indicatorSpacer} />}
           </Pressable>

@@ -8,13 +8,13 @@ export function parseComingUpTab(value?: string | string[]): ComingUpTab {
   return normalized === 'upcoming' ? 'upcoming' : 'for-you';
 }
 
-export function buildComingUpHref(tab: ComingUpTab = 'for-you'): string {
-  return `/upcoming?tab=${tab}`;
+export function buildComingUpHref(tab?: ComingUpTab): string {
+  return tab ? `/upcoming?tab=${tab}` : '/upcoming';
 }
 
 export function openComingUpScreen(
   router: ImperativeRouter,
-  tab: ComingUpTab = 'for-you',
+  tab?: ComingUpTab,
   returnHref?: string,
 ): void {
   openLibraryStackScreen(router, buildComingUpHref(tab), returnHref);

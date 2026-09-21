@@ -174,7 +174,7 @@ export default function HomeScreen() {
       }
 
       if (sectionType === 'ComingUp') {
-        openComingUpScreen(router, 'for-you');
+        openComingUpScreen(router);
       }
     },
     [router],

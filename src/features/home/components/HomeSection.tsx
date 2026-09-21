@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, StyleSheet, View } from 'react-native';
 import type { HomeItem, HomeSection as HomeSectionModel } from '../types';
 import { HomeSectionHeader } from './HomeSectionHeader';
@@ -6,6 +7,7 @@ import { HomeContentCard } from './HomeContentCard';
 import { homeItemKeyExtractor } from '../utils/home-list-keys';
 import { getHomeRailItemLayout } from '../utils/home-list-layout';
 import { getHomeSectionVariant } from '../utils/home-section-variant';
+import { resolveHomeSectionTitle } from '../utils/resolve-home-section-title';
 import { layout } from '@/theme/layout';
 
 interface HomeSectionProps {
@@ -33,7 +35,9 @@ export const HomeSection = memo(function HomeSection({
   onItemPress,
   onSeeAllPress,
 }: HomeSectionProps) {
+  const { t } = useTranslation();
   const variant = getHomeSectionVariant(section.type);
+  const localizedTitle = resolveHomeSectionTitle(section.type, section.title, t);
 
   const renderItem = useCallback(
     ({ item }: { item: HomeItem }) => (
@@ -53,7 +57,7 @@ export const HomeSection = memo(function HomeSection({
 
   return (
     <View style={styles.container}>
-      <HomeSectionHeader title={section.title} onSeeAllPress={onSeeAllPress} />
+      <HomeSectionHeader title={localizedTitle} onSeeAllPress={onSeeAllPress} />
       {section.items.length > 0 ? (
         <FlatList
           horizontal

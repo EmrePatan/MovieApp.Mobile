@@ -279,6 +279,13 @@ export const stage2Tr = {
       tvShows: 'Diziler',
       showFilter: '{{label}} göster',
     },
+    sections: {
+      trending: 'Şimdi Trend',
+      topRated: 'En Yüksek Puanlı',
+      newReleases: 'Yeni Vizyon',
+      recommendedForYou: 'Senin İçin Önerilen',
+      comingUp: 'Yakında',
+    },
     comingUpBadge: {
       premiere: 'Prömiyer',
       release: 'Yayın',
@@ -549,11 +556,18 @@ export const stage2Tr = {
       },
     },
   },
+  date: {
+    relative: {
+      today: 'Bugün',
+      tomorrow: 'Yarın',
+      inDays: '{{count}} gün içinde',
+    },
+  },
   upcoming: {
     title: 'Yakında',
     tabs: {
-      forYou: 'Senin İçin',
-      upcoming: 'Yaklaşan',
+      forYou: 'Sana Özel',
+      upcoming: 'Tümü',
     },
     subtitleForYouAuth: 'Yaklaşan yayınları veya bölümleri olan takip ettiğin film ve diziler',
     subtitleForYouGuest: 'Takip ettiğin yaklaşan yayınları görmek için giriş yap',

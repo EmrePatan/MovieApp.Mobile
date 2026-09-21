@@ -63,10 +63,10 @@ const tvEpisodeItem = {
   episodeName: 'Good News About Hell',
 };
 
-function createQueryResult(items: unknown[] = []) {
+function createQueryResult(items: unknown[] = [], isLoading = false) {
   return {
-    data: { pages: [{ items }] },
-    isLoading: false,
+    data: isLoading ? undefined : { pages: [{ items }] },
+    isLoading,
     isError: false,
     isRefetching: false,
     isFetching: false,
@@ -86,13 +86,15 @@ describe('UpcomingScreen', () => {
       mockTabParam = tab;
     });
     (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
-    (useUpcomingCatalog as jest.Mock).mockImplementation((scope: string) => {
-      if (scope === 'followed') {
-        return createQueryResult([]);
-      }
+    (useUpcomingCatalog as jest.Mock).mockImplementation(
+      (scope: string, pageSize?: number) => {
+        if (scope === 'followed') {
+          return pageSize === 1 ? createQueryResult([]) : createQueryResult([]);
+        }
 
-      return createQueryResult([movieItem]);
-    });
+        return createQueryResult([movieItem]);
+      },
+    );
   });
 
   it('renders For You and Upcoming tabs with Coming Up title', () => {
@@ -103,14 +105,12 @@ describe('UpcomingScreen', () => {
     expect(screen.getByRole('tab', { name: 'Upcoming' })).toBeTruthy();
   });
 
-  it('defaults to For You and requests scope=followed', () => {
+  it('defaults to Upcoming when personalized content is empty', () => {
     render(<UpcomingScreen />);
 
-    expect(useUpcomingCatalog).toHaveBeenCalledWith('followed', undefined, {
-      enabled: true,
-    });
+    expect(mockSetParams).toHaveBeenCalledWith({ tab: 'upcoming' });
     expect(useUpcomingCatalog).toHaveBeenCalledWith('catalog', undefined, {
-      enabled: false,
+      enabled: true,
     });
   });
 
@@ -130,6 +130,7 @@ describe('UpcomingScreen', () => {
   });
 
   it('renders For You empty state with Explore Upcoming action', () => {
+    mockTabParam = 'for-you';
     render(<UpcomingScreen />);
 
     expect(screen.getByText('Nothing coming up yet')).toBeTruthy();
@@ -154,6 +155,7 @@ describe('UpcomingScreen', () => {
   });
 
   it('Explore Upcoming switches tabs without navigating away', () => {
+    mockTabParam = 'for-you';
     render(<UpcomingScreen />);
 
     fireEvent.press(screen.getByText('Explore Upcoming'));
