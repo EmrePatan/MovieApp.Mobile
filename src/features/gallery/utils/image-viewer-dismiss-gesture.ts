@@ -3,6 +3,8 @@ export const IMAGE_VIEWER_DISMISS_VELOCITY_THRESHOLD = 800;
 export const IMAGE_VIEWER_VERTICAL_INTENT_THRESHOLD = 6;
 
 export function shouldCaptureImageViewerDismissGesture(dx: number, dy: number): boolean {
+  'worklet';
+
   return (
     dy >= IMAGE_VIEWER_VERTICAL_INTENT_THRESHOLD &&
     dy > Math.abs(dx)
