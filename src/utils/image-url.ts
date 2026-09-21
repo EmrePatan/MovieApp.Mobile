@@ -104,31 +104,6 @@ export function normalizeTmdbAbsoluteUrl(url: string, size: ImageSize = 'w500'):
   return buildTmdbImageUrl(filePath, size);
 }
 
-let lastDevImageResolutionLogKey: string | null = null;
-
-/**
- * DEV-only helper for tracing poster path resolution without logging secrets.
- */
-export function logImageResolutionInDev(
-  rawPath: string,
-  resolvedUri: string | null,
-): void {
-  if (typeof __DEV__ === 'undefined' || !__DEV__) {
-    return;
-  }
-
-  const logKey = `${rawPath}=>${resolvedUri ?? 'null'}`;
-  if (lastDevImageResolutionLogKey === logKey) {
-    return;
-  }
-
-  lastDevImageResolutionLogKey = logKey;
-  console.debug('[image] resolved catalog path', {
-    rawPath,
-    resolvedUri,
-  });
-}
-
 /**
  * Resolves catalog image paths from the backend into a loadable URI.
  * Absolute URLs are returned unchanged unless they are TMDB URLs, which are normalized.
@@ -146,11 +121,9 @@ export function resolveImageUri(
   const trimmed = normalizeImagePathInput(path);
 
   if (/^https?:\/\//i.test(trimmed)) {
-    const resolved = isTmdbUrl(trimmed)
+    return isTmdbUrl(trimmed)
       ? normalizeTmdbAbsoluteUrl(trimmed, size)
       : trimmed;
-    logImageResolutionInDev(trimmed, resolved);
-    return resolved;
   }
 
   const base = getEffectiveImageBase();
@@ -163,7 +136,6 @@ export function resolveImageUri(
     resolved = `${base}${normalizedPath}`;
   }
 
-  logImageResolutionInDev(trimmed, resolved);
   return resolved;
 }
 
