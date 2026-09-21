@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
+import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -152,7 +152,7 @@ export default function NowInTheatersScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
-        style={mergeFlatListStyle()}
+        {...getFlatListClippingProps(true)}
         contentContainerStyle={styles.listContent}
       />
     </StackListScreen>

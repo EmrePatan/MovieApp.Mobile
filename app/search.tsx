@@ -13,10 +13,7 @@ import {
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { useQueryClient } from '@tanstack/react-query';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import {
-  getFlatListClippingProps,
-  mergeFlatListStyle,
-} from '@/components/layout/flat-list-layout';
+import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   parseSearchReturnOrigin,
@@ -278,9 +275,16 @@ export default function SearchScreen() {
   }, [refetch]);
 
   const renderResult = useCallback(
-    ({ item }: { item: SearchResultItem }) => (
-      <SearchResultCard item={item} onPress={handleResultPress} />
-    ),
+    ({ item, index }: { item: SearchResultItem; index: number }) => {
+      if (__DEV__ && index === 0) {
+        logNavigationDiagnostic('render:search-result-item', {
+          itemId: item.id,
+          itemType: item.type,
+        });
+      }
+
+      return <SearchResultCard item={item} onPress={handleResultPress} />;
+    },
     [handleResultPress],
   );
 
@@ -354,31 +358,39 @@ export default function SearchScreen() {
     t,
   ]);
 
+  const searchScreenHeader = (
+    <SearchScreenHeader
+      value={inputText}
+      onChangeText={setInputText}
+      onSubmit={handleSubmit}
+      onClear={handleClear}
+      onBack={canNavigateBack ? handleBack : undefined}
+      inputRef={searchInputRef}
+      autoFocus
+    >
+      {showAutocomplete ? (
+        <SearchSuggestionList
+          suggestions={autocompleteQuery.data?.items ?? []}
+          isLoading={autocompleteQuery.isLoading}
+          onSelect={handleSuggestionSelect}
+        />
+      ) : null}
+      {hasActiveSearch ? (
+        <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+      ) : null}
+    </SearchScreenHeader>
+  );
+
+  if (__DEV__ && hasActiveSearch) {
+    logNavigationDiagnostic('render:search-results-branch', {
+      resultCount: results.length,
+    });
+  }
+
   return (
     <StackListScreen
       testID="search-screen"
-      header={
-        <SearchScreenHeader
-          value={inputText}
-          onChangeText={setInputText}
-          onSubmit={handleSubmit}
-          onClear={handleClear}
-          onBack={canNavigateBack ? handleBack : undefined}
-          inputRef={searchInputRef}
-          autoFocus
-        >
-          {showAutocomplete ? (
-            <SearchSuggestionList
-              suggestions={autocompleteQuery.data?.items ?? []}
-              isLoading={autocompleteQuery.isLoading}
-              onSelect={handleSuggestionSelect}
-            />
-          ) : null}
-          {hasActiveSearch ? (
-            <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
-          ) : null}
-        </SearchScreenHeader>
-      }
+      header={hasActiveSearch ? undefined : searchScreenHeader}
     >
       {hasActiveSearch ? (
         <FlatList
@@ -388,6 +400,7 @@ export default function SearchScreen() {
           keyExtractor={searchResultKeyExtractor}
           renderItem={renderResult}
           getItemLayout={getSearchResultItemLayout}
+          ListHeaderComponent={searchScreenHeader}
           ListEmptyComponent={listEmptyComponent}
           ListFooterComponent={
             searchQuery.isFetchingNextPage ? (
@@ -397,7 +410,6 @@ export default function SearchScreen() {
             ) : null
           }
           refreshControl={refreshControl}
-          style={mergeFlatListStyle(styles.resultsList)}
           contentContainerStyle={styles.listContent}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -436,9 +448,6 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  resultsList: {
-    flex: 1,
-  },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,

@@ -117,6 +117,12 @@ describe('DiscoverScreen', () => {
     (useDiscoveryBrowse as jest.Mock).mockReturnValue(createBrowseQueryMock());
   });
 
+  it('mounts the browse FlatList when items are available', () => {
+    render(<DiscoverScreen />);
+
+    expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
+  });
+
   it('renders dynamic browse title and results without top-level mode/type controls', () => {
     render(<DiscoverScreen />);
 

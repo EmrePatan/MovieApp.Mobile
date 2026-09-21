@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
+import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -316,7 +316,7 @@ export default function AdvancedDiscoverScreen() {
             onRefresh={handleRefresh}
           />
         }
-        style={mergeFlatListStyle()}
+        {...getFlatListClippingProps(true)}
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}

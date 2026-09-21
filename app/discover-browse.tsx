@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
+import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -54,6 +54,7 @@ import { SearchResultCard } from '@/features/search/components/SearchResultCard'
 import type { SearchResultItem } from '@/features/search/types';
 import {
   createLayoutDiagnosticHandler,
+  logNavigationDiagnostic,
   useNavigationDiagnostics,
 } from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
@@ -218,9 +219,16 @@ export default function DiscoverScreen() {
   );
 
   const renderResult = useCallback(
-    ({ item }: { item: SearchResultItem }) => (
-      <SearchResultCard item={item} onPress={handleResultPress} />
-    ),
+    ({ item, index }: { item: SearchResultItem; index: number }) => {
+      if (__DEV__ && index === 0) {
+        logNavigationDiagnostic('render:discover-browse-result-item', {
+          itemId: item.id,
+          itemType: item.type,
+        });
+      }
+
+      return <SearchResultCard item={item} onPress={handleResultPress} />;
+    },
     [handleResultPress],
   );
 
@@ -291,7 +299,7 @@ export default function DiscoverScreen() {
     return (
       <StackListScreen testID="discover-browse-screen" header={listHeader}>
         <SearchLoadingState />
-        {filterSheet}
+        {filterSheetVisible ? filterSheet : null}
       </StackListScreen>
     );
   }
@@ -306,9 +314,15 @@ export default function DiscoverScreen() {
         <View style={styles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
-        {filterSheet}
+        {filterSheetVisible ? filterSheet : null}
       </StackListScreen>
     );
+  }
+
+  if (__DEV__) {
+    logNavigationDiagnostic('render:discover-browse-success-branch', {
+      itemCount: items.length,
+    });
   }
 
   return (
@@ -334,12 +348,12 @@ export default function DiscoverScreen() {
             onRefresh={handleRefresh}
           />
         }
-        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        {...getFlatListClippingProps(true)}
       />
-      {filterSheet}
+      {filterSheetVisible ? filterSheet : null}
     </StackListScreen>
   );
 }

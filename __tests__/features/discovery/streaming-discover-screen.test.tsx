@@ -92,6 +92,13 @@ describe('StreamingDiscoverScreen', () => {
     });
   });
 
+  it('mounts the streaming discover FlatList when providers are available', () => {
+    render(<StreamingDiscoverScreen />);
+
+    expect(screen.getByTestId('streaming-discover-list')).toBeTruthy();
+    expect(screen.getByLabelText('Netflix')).toBeTruthy();
+  });
+
   it('renders streaming discover controls without a region selector', () => {
     render(<StreamingDiscoverScreen />);
 

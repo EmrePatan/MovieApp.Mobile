@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { StackListScreen } from '@/components/layout/StackListScreen';
-import { mergeFlatListStyle } from '@/components/layout/flat-list-layout';
+import { getFlatListClippingProps } from '@/components/layout/flat-list-layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
@@ -46,6 +46,7 @@ import { searchResultKeyExtractor } from '@/features/search/utils/search-list-ke
 import type { SearchResultItem } from '@/features/search/types';
 import {
   createLayoutDiagnosticHandler,
+  logNavigationDiagnostic,
   useNavigationDiagnostics,
 } from '@/debug/navigation-diagnostics';
 import { colors } from '@/theme/colors';
@@ -173,7 +174,14 @@ export default function StreamingDiscoverScreen() {
   );
 
   const listHeader = useMemo(
-    () => (
+    () => {
+      if (__DEV__) {
+        logNavigationDiagnostic('render:streaming-discover-header', {
+          providerCount: providersQuery.data?.providers?.length ?? 0,
+        });
+      }
+
+      return (
       <View style={styles.headerContent}>
         <AppText variant="title" accessibilityRole="header">
           {t('discovery.streamingDiscover.title')}
@@ -234,7 +242,8 @@ export default function StreamingDiscoverScreen() {
 
         <JustWatchAttribution />
       </View>
-    ),
+      );
+    },
     [
       discoverState,
       providersQuery.data?.providers,
@@ -290,24 +299,43 @@ export default function StreamingDiscoverScreen() {
     t,
   ]);
 
-  return (
-    <StackListScreen
-      testID="streaming-discover-screen"
-      topBar={
+  if (__DEV__) {
+    logNavigationDiagnostic('render:streaming-discover-success-branch', {
+      providerCount: providersQuery.data?.providers?.length ?? 0,
+      itemCount: items.length,
+    });
+  }
+
+  const streamingListHeader = useMemo(
+    () => (
+      <>
         <View style={styles.topBar}>
           <DetailBackButton />
         </View>
-      }
-    >
+        {listHeader}
+      </>
+    ),
+    [listHeader],
+  );
+
+  return (
+    <StackListScreen testID="streaming-discover-screen">
       <FlatList
         testID="streaming-discover-list"
         onLayout={createLayoutDiagnosticHandler('streaming-discover-flatlist')}
         data={discoverState.watchProviderIds.length > 0 ? items : []}
         keyExtractor={searchResultKeyExtractor}
-        renderItem={({ item }) => (
-          <SearchResultCard item={item} onPress={handleResultPress} />
-        )}
-        ListHeaderComponent={listHeader}
+        renderItem={({ item, index }) => {
+          if (__DEV__ && index === 0) {
+            logNavigationDiagnostic('render:streaming-discover-result-item', {
+              itemId: item.id,
+              itemType: item.type,
+            });
+          }
+
+          return <SearchResultCard item={item} onPress={handleResultPress} />;
+        }}
+        ListHeaderComponent={streamingListHeader}
         ListEmptyComponent={listEmpty}
         ListFooterComponent={
           resultsQuery.isFetchingNextPage ? (
@@ -322,7 +350,6 @@ export default function StreamingDiscoverScreen() {
             onRefresh={() => void resultsQuery.refetch()}
           />
         }
-        style={mergeFlatListStyle()}
         contentContainerStyle={styles.listContent}
         onEndReached={() => {
           if (resultsQuery.hasNextPage && !resultsQuery.isFetchingNextPage) {
@@ -333,6 +360,7 @@ export default function StreamingDiscoverScreen() {
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
+        {...getFlatListClippingProps(true)}
       />
     </StackListScreen>
   );

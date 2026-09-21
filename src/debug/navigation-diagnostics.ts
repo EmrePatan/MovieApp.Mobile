@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 
 /** Bump when #45 diagnostics/fixes change so Metro logs prove the active bundle. */
-export const NAV_DIAGNOSTIC_BUILD_ID = 'MA-45-2026-09-21-v2';
+export const NAV_DIAGNOSTIC_BUILD_ID = 'MA-45-2026-09-21-v3';
 
 const PREFIX = `[NAV_DIAG:${NAV_DIAGNOSTIC_BUILD_ID}]`;
 
