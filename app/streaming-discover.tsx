@@ -40,10 +40,11 @@ import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-produ
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
 import {
+  logNavigationDiagnostic,
   useNavigationDiagnostics,
   useScreenRenderTrace,
 } from '@/debug/navigation-diagnostics';
@@ -100,9 +101,17 @@ export default function StreamingDiscoverScreen() {
     providerCount,
     itemCount: items.length,
     resultsDataCount: resultsData.length,
-    headerPlacement: 'stack-screen',
-    listMounted: true,
+    headerPlacement: hasSelectedProviders ? 'flat-list' : 'stack-screen',
+    listMounted: hasSelectedProviders,
   });
+
+  useEffect(() => {
+    if (__DEV__ && hasSelectedProviders) {
+      logNavigationDiagnostic('streaming-discover:flatlist:created', {
+        resultsDataCount: resultsData.length,
+      });
+    }
+  }, [hasSelectedProviders, resultsData.length]);
 
   const currentRoute = useMemo(
     () => serializeStreamingDiscoverRoute(discoverState),
@@ -269,6 +278,17 @@ export default function StreamingDiscoverScreen() {
     ],
   );
 
+  const renderStreamingResult = useCallback(
+    ({ item, index }: { item: SearchResultItem; index: number }) =>
+      renderSearchResultRow({
+        scope: 'streaming-discover',
+        item,
+        index,
+        onPress: handleResultPress,
+      }),
+    [handleResultPress],
+  );
+
   const listEmpty = useMemo(() => {
     if (!hasSelectedProviders) {
       return null;
@@ -307,16 +327,22 @@ export default function StreamingDiscoverScreen() {
     t,
   ]);
 
+  if (!hasSelectedProviders) {
+    return (
+      <StackListScreen testID="streaming-discover-screen" header={providerHeader}>
+        <View style={styles.resultsPlaceholder} />
+      </StackListScreen>
+    );
+  }
+
   return (
-    <StackListScreen testID="streaming-discover-screen" header={providerHeader}>
+    <StackListScreen testID="streaming-discover-screen">
       <FlatList
         testID="streaming-discover-list"
-        style={styles.resultsList}
         data={resultsData}
         keyExtractor={searchResultKeyExtractor}
-        renderItem={({ item }) => (
-          <SearchResultCard item={item} onPress={handleResultPress} />
-        )}
+        renderItem={renderStreamingResult}
+        ListHeaderComponent={providerHeader}
         ListEmptyComponent={listEmpty}
         ListFooterComponent={
           resultsQuery.isFetchingNextPage ? (
@@ -354,8 +380,8 @@ const styles = StyleSheet.create({
     marginHorizontal: -spacing.lg,
     paddingHorizontal: spacing.lg,
   },
-  resultsList: {
-    flex: 1,
+  resultsPlaceholder: {
+    flexGrow: 1,
   },
   listContent: {
     paddingHorizontal: spacing.lg,

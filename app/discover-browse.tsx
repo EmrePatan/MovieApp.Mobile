@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateDiscoverySort,
@@ -49,7 +49,7 @@ import {
 } from '@/features/discovery/utils/discover-params';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { SearchResultCard } from '@/features/search/components/SearchResultCard';
+import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import type { SearchResultItem } from '@/features/search/types';
 import {
   logNavigationDiagnostic,
@@ -95,14 +95,24 @@ export default function DiscoverScreen() {
     isFetching: browseQuery.isFetching,
   });
 
+  const listMounted = items.length > 0 || !browseQuery.isLoading;
+
   useScreenRenderTrace('discover-browse', {
     pathname: `/${segments.join('/')}`,
     mode,
     itemCount: items.length,
     bodyKind: 'flat-list',
-    headerPlacement: 'stack-screen',
-    listMounted: items.length > 0 || !browseQuery.isLoading,
+    headerPlacement: listMounted ? 'flat-list' : 'stack-screen',
+    listMounted,
   });
+
+  useEffect(() => {
+    if (__DEV__ && listMounted && items.length > 0) {
+      logNavigationDiagnostic('discover-browse:flatlist:created', {
+        itemCount: items.length,
+      });
+    }
+  }, [items.length, listMounted]);
 
   const activeFilterCount = useMemo(
     () => countActiveDiscoveryFilters(filters, mode, typeFilter),
@@ -228,16 +238,13 @@ export default function DiscoverScreen() {
   );
 
   const renderResult = useCallback(
-    ({ item, index }: { item: SearchResultItem; index: number }) => {
-      if (__DEV__ && index === 0) {
-        logNavigationDiagnostic('render:discover-browse-result-item', {
-          itemId: item.id,
-          itemType: item.type,
-        });
-      }
-
-      return <SearchResultCard item={item} onPress={handleResultPress} />;
-    },
+    ({ item, index }: { item: SearchResultItem; index: number }) =>
+      renderSearchResultRow({
+        scope: 'discover-browse',
+        item,
+        index,
+        onPress: handleResultPress,
+      }),
     [handleResultPress],
   );
 
@@ -329,13 +336,13 @@ export default function DiscoverScreen() {
   }
 
   return (
-    <StackListScreen testID="discover-browse-screen" header={listHeader}>
+    <StackListScreen testID="discover-browse-screen">
       <FlatList
         testID="discover-browse-list"
-        style={styles.resultsList}
         data={items}
         keyExtractor={catalogItemKeyExtractor}
         renderItem={renderResult}
+        ListHeaderComponent={listHeader}
         ListEmptyComponent={emptyState}
         ListFooterComponent={
           browseQuery.isFetchingNextPage ? (
@@ -360,9 +367,6 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-  resultsList: {
-    flex: 1,
-  },
   header: {
     gap: spacing.md,
     paddingHorizontal: spacing.lg,

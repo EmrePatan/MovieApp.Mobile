@@ -28,7 +28,6 @@ import { SearchEmptyState } from '@/features/search/components/SearchEmptyState'
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchHistorySection } from '@/features/search/components/SearchHistorySection';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
-import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import { SearchScreenHeader } from '@/features/search/components/SearchScreenHeader';
 import { SearchSuggestionList } from '@/features/search/components/SearchSuggestionList';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
@@ -45,8 +44,8 @@ import {
   type SearchTypeFilter,
 } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
-import { getSearchResultItemLayout } from '@/features/search/utils/search-list-layout';
 import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import { renderSearchResultRow } from '@/features/search/utils/render-search-result-row';
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import {
@@ -275,16 +274,13 @@ export default function SearchScreen() {
   }, [refetch]);
 
   const renderResult = useCallback(
-    ({ item, index }: { item: SearchResultItem; index: number }) => {
-      if (__DEV__ && index === 0) {
-        logNavigationDiagnostic('render:search-result-item', {
-          itemId: item.id,
-          itemType: item.type,
-        });
-      }
-
-      return <SearchResultCard item={item} onPress={handleResultPress} />;
-    },
+    ({ item, index }: { item: SearchResultItem; index: number }) =>
+      renderSearchResultRow({
+        scope: 'search',
+        item,
+        index,
+        onPress: handleResultPress,
+      }),
     [handleResultPress],
   );
 
@@ -321,9 +317,17 @@ export default function SearchScreen() {
     displayMode,
     resultCount: results.length,
     bodyKind: hasActiveSearch ? 'flat-list' : 'scroll-view',
-    headerPlacement: 'stack-screen',
+    headerPlacement: hasActiveSearch ? 'flat-list' : 'stack-screen',
     listMounted: hasActiveSearch,
   });
+
+  useEffect(() => {
+    if (__DEV__ && hasActiveSearch && results.length > 0) {
+      logNavigationDiagnostic('search:flatlist:created', {
+        resultCount: results.length,
+      });
+    }
+  }, [hasActiveSearch, results.length]);
 
   const listEmptyComponent = useMemo(() => {
     if (!hasActiveSearch) {
@@ -391,15 +395,17 @@ export default function SearchScreen() {
   );
 
   return (
-    <StackListScreen testID="search-screen" header={searchScreenHeader}>
+    <StackListScreen
+      testID="search-screen"
+      header={hasActiveSearch ? undefined : searchScreenHeader}
+    >
       {hasActiveSearch ? (
         <FlatList
           testID="search-results-list"
-          style={styles.resultsList}
           data={results}
           keyExtractor={searchResultKeyExtractor}
           renderItem={renderResult}
-          getItemLayout={getSearchResultItemLayout}
+          ListHeaderComponent={searchScreenHeader}
           ListEmptyComponent={listEmptyComponent}
           ListFooterComponent={
             searchQuery.isFetchingNextPage ? (
@@ -446,9 +452,6 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  resultsList: {
-    flex: 1,
-  },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,

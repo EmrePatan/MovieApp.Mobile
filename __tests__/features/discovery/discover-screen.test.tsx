@@ -121,8 +121,9 @@ describe('DiscoverScreen', () => {
     render(<DiscoverScreen />);
 
     expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
-    expect(screen.getByTestId('discover-browse-list').props.ListHeaderComponent).toBeUndefined();
+    expect(screen.getByTestId('discover-browse-list').props.ListHeaderComponent).toBeTruthy();
     expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
   });
 
   it('renders dynamic browse title and results without top-level mode/type controls', () => {

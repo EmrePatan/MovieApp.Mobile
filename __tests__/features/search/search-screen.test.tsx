@@ -355,7 +355,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    expect(screen.getByTestId('search-results-list').props.ListHeaderComponent).toBeUndefined();
+    expect(screen.getByTestId('search-results-list').props.ListHeaderComponent).toBeTruthy();
     expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
     expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
   });

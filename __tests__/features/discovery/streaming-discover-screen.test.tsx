@@ -59,6 +59,8 @@ jest.mock('@tanstack/react-query', () => {
 describe('StreamingDiscoverScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({});
     (useDiscoveryWatchProviders as jest.Mock).mockReturnValue({
       data: {
         watchRegion: 'TR',
@@ -97,11 +99,16 @@ describe('StreamingDiscoverScreen', () => {
     });
   });
 
-  it('mounts the streaming discover FlatList when providers are available', () => {
+  it('mounts the streaming discover FlatList with result rows when a provider is selected', () => {
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({ watchProviderId: '8' });
+
     render(<StreamingDiscoverScreen />);
 
     expect(screen.getByTestId('streaming-discover-list')).toBeTruthy();
+    expect(screen.getByTestId('streaming-discover-list').props.ListHeaderComponent).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
+    expect(screen.getByText('Inception')).toBeTruthy();
   });
 
   it('renders provider selector outside FlatList when results data is empty and no provider is selected', () => {
@@ -127,7 +134,7 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByTestId('streaming-discover-provider-header')).toBeTruthy();
     expect(screen.getByLabelText('Netflix')).toBeTruthy();
     expect(screen.getByLabelText('Disney Plus')).toBeTruthy();
-    expect(screen.getByTestId('streaming-discover-list').props.data).toEqual([]);
+    expect(screen.queryByTestId('streaming-discover-list')).toBeNull();
   });
 
   it('renders streaming discover controls without a region selector', () => {
