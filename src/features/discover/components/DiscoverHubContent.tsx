@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -22,11 +22,14 @@ import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
 import { DiscoverPreviewSection } from './DiscoverPreviewSection';
 import { spacing } from '@/theme/spacing';
+import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
+import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 
 export function DiscoverHubContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const scrollRef = useRef<ScrollView>(null);
   const { region: userRegion, isHydrated } = useRegionalPreference();
   const previewQuery = useExplorePreview(10);
   const nowInTheatersPreviewQuery = useNowInTheatersPreview(userRegion, isHydrated);
@@ -101,8 +104,27 @@ export function DiscoverHubContent() {
     (item) => item.type === 'tv',
   );
 
+  const scrollDiscoverToTop = useCallback(() => {
+    scrollScrollViewToTop(scrollRef);
+  }, []);
+
+  const refreshDiscoverHub = useCallback(() => {
+    void previewQuery.refetch();
+    void nowInTheatersPreviewQuery.refetch();
+    void onTvThisWeekPreviewQuery.refetch();
+  }, [nowInTheatersPreviewQuery, onTvThisWeekPreviewQuery, previewQuery]);
+
+  usePrimaryTabReselectHandler('discover', {
+    scrollToTop: scrollDiscoverToTop,
+    refresh: refreshDiscoverHub,
+  });
+
   return (
-    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      ref={scrollRef}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
           {t('discover.hub.title')}

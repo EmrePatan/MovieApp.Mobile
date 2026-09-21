@@ -12,6 +12,8 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { HomeHeaderProfileAvatar } from '@/features/home/components/HomeHeaderProfileAvatar';
 import { useInsightsV3 } from '../hooks/useInsightsV3';
 import { beginInsightsTrace, markInsightsPerfEvent, resetInsightsTrace } from '@/perf/insights-trace';
+import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
+import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { buildSelectableYears } from '../utils/insights-format';
 import { InsightsErasSection } from './InsightsErasSection';
 import { InsightsLoadingSkeleton } from './InsightsLoadingSkeleton';
@@ -34,6 +36,7 @@ export function InsightsHubContent() {
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const insightsQuery = useInsightsV3(selectedYear);
   const hasMarkedApiStart = useRef(false);
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     beginInsightsTrace();
@@ -75,6 +78,15 @@ export function InsightsHubContent() {
     void insightsQuery.refetch();
   }, [insightsQuery]);
 
+  const scrollInsightsToTop = useCallback(() => {
+    scrollScrollViewToTop(scrollRef);
+  }, []);
+
+  usePrimaryTabReselectHandler('insights', {
+    scrollToTop: scrollInsightsToTop,
+    refresh: handleRefresh,
+  });
+
   const isRefreshing = insightsQuery.isRefetching && !insightsQuery.isLoading;
   const refreshControl = createIosRefreshControl({
     refreshing: isRefreshing,
@@ -115,6 +127,7 @@ export function InsightsHubContent() {
 
   const insightsScrollView = (
     <AnimatedScrollView
+      ref={scrollRef}
       contentContainerStyle={styles.scrollContent}
       refreshControl={refreshControl}
       onScroll={androidPullToRefresh.scrollHandler}

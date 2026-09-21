@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -32,6 +32,9 @@ import { LibraryWatchlistsOverview } from './LibraryWatchlistsOverview';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { scrollFlatListToTop } from '@/features/navigation/scroll-to-top';
+import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
+import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = spacing.sm;
@@ -52,6 +55,8 @@ export function LibraryHubContent() {
   const libraryQuery = useLibrary(category, effectiveMediaType, {
     enabled: !isWatchlistsCategory,
   });
+  const watchlistsQuery = useWatchlists(isWatchlistsCategory);
+  const listRef = useRef<FlatList>(null);
 
   const itemWidth = useMemo(
     () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
@@ -86,6 +91,24 @@ export function LibraryHubContent() {
   const handleRefresh = useCallback(() => {
     void libraryQuery.refetch();
   }, [libraryQuery]);
+
+  const scrollLibraryToTop = useCallback(() => {
+    scrollFlatListToTop(listRef);
+  }, []);
+
+  const refreshLibraryHub = useCallback(() => {
+    if (isWatchlistsCategory) {
+      void watchlistsQuery.refetch();
+      return;
+    }
+
+    void libraryQuery.refetch();
+  }, [isWatchlistsCategory, libraryQuery, watchlistsQuery]);
+
+  usePrimaryTabReselectHandler('library', {
+    scrollToTop: scrollLibraryToTop,
+    refresh: refreshLibraryHub,
+  });
 
   const handleLoadMore = useCallback(() => {
     if (
@@ -157,7 +180,7 @@ export function LibraryHubContent() {
   }
 
   if (isWatchlistsCategory) {
-    return <LibraryWatchlistsOverview listHeader={listHeader} />;
+    return <LibraryWatchlistsOverview listHeader={listHeader} listRef={listRef} />;
   }
 
   if (libraryQuery.isLoading && displayItems.length === 0) {
@@ -201,6 +224,7 @@ export function LibraryHubContent() {
 
   return (
     <FlatList
+      ref={listRef}
       testID="library-grid-three-column"
       data={displayItems}
       keyExtractor={getLibraryGridItemKey}

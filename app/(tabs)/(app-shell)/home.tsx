@@ -27,6 +27,8 @@ import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
+import { scrollFlatListToTop } from '@/features/navigation/scroll-to-top';
+import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -39,6 +41,7 @@ export default function HomeScreen() {
   const [isHomeFocused, setIsHomeFocused] = useState(true);
   const hasLoggedMeaningfulRender = useRef(false);
   const hasLoggedPersonalizedRender = useRef(false);
+  const listRef = useRef<FlatList<HomeSectionModel>>(null);
 
   useEffect(() => {
     markHomePerfEvent('home_mount');
@@ -109,6 +112,15 @@ export default function HomeScreen() {
       setIsManualRefreshing(false);
     });
   }, [refetch]);
+
+  const scrollHomeToTop = useCallback(() => {
+    scrollFlatListToTop(listRef);
+  }, []);
+
+  usePrimaryTabReselectHandler('home', {
+    scrollToTop: scrollHomeToTop,
+    refresh: handleRefresh,
+  });
 
   const handleRetryBrowse = useCallback(() => {
     void browse.refetch();
@@ -297,6 +309,7 @@ export default function HomeScreen() {
 
   const homeList = (
     <AnimatedFlatList
+      ref={listRef}
       data={sections}
       keyExtractor={homeSectionKeyExtractor}
       renderItem={renderSection}

@@ -1,4 +1,7 @@
-import { resolveActivePrimaryTab } from '@/features/navigation/primary-tab-routes';
+import {
+  isPrimaryTabRootPath,
+  resolveActivePrimaryTab,
+} from '@/features/navigation/primary-tab-routes';
 
 describe('primary tab routes', () => {
   it('maps browse and result routes to their owning primary tab', () => {
@@ -15,5 +18,16 @@ describe('primary tab routes', () => {
     expect(resolveActivePrimaryTab('/movie/abc')).toBe('home');
     expect(resolveActivePrimaryTab('/tv/abc')).toBe('home');
     expect(resolveActivePrimaryTab('/person/42')).toBe('home');
+  });
+
+  it('identifies primary tab root paths', () => {
+    expect(isPrimaryTabRootPath('home', '/home')).toBe(true);
+    expect(isPrimaryTabRootPath('home', '/search')).toBe(false);
+    expect(isPrimaryTabRootPath('discover', '/discover')).toBe(true);
+    expect(isPrimaryTabRootPath('discover', '/discover-browse')).toBe(false);
+    expect(isPrimaryTabRootPath('library', '/library')).toBe(true);
+    expect(isPrimaryTabRootPath('library', '/upcoming')).toBe(false);
+    expect(isPrimaryTabRootPath('insights', '/insights')).toBe(true);
+    expect(isPrimaryTabRootPath('insights', '/pick-something')).toBe(false);
   });
 });

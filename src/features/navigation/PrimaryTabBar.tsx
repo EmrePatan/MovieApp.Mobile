@@ -4,9 +4,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { handlePrimaryTabPress } from '@/features/navigation/primary-tab-press';
 import { resolveBottomNavVisibility } from '@/features/navigation/bottom-nav-visibility';
 import {
-  PRIMARY_TAB_HREFS,
   resolveActivePrimaryTab,
   type PrimaryTabId,
 } from '@/features/navigation/primary-tab-routes';
@@ -40,6 +40,15 @@ export function PrimaryTabBar() {
 
   const activeTab = resolveActivePrimaryTab(pathname);
 
+  const handleTabPress = (tabId: PrimaryTabId) => {
+    handlePrimaryTabPress({
+      tabId,
+      pathname,
+      activeTab,
+      router,
+    });
+  };
+
   return (
     <View style={[styles.container, getTabBarStyle(insets)]}>
       {PRIMARY_TABS.map((tab) => {
@@ -51,7 +60,7 @@ export function PrimaryTabBar() {
             key={tab.id}
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
-            onPress={() => router.navigate(PRIMARY_TAB_HREFS[tab.id])}
+            onPress={() => handleTabPress(tab.id)}
             style={styles.tabButton}
           >
             <Ionicons name={tab.icon} size={22} color={color} />

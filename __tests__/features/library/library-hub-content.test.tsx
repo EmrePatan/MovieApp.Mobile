@@ -28,6 +28,16 @@ jest.mock('@/features/metrics/track-product-metric', () => ({
 const mockRefetch = jest.fn();
 const mockFetchNextPage = jest.fn();
 
+jest.mock('@/features/watchlists/hooks/useWatchlists', () => ({
+  useWatchlists: jest.fn(() => ({
+    refetch: jest.fn(),
+  })),
+}));
+
+jest.mock('@/features/navigation/usePrimaryTabReselectHandler', () => ({
+  usePrimaryTabReselectHandler: jest.fn(),
+}));
+
 jest.mock('@/features/library/components/LibraryWatchlistsOverview', () => ({
   LibraryWatchlistsOverview: ({ listHeader }: { listHeader: React.ReactNode }) => {
     const { View, Text } = require('react-native');

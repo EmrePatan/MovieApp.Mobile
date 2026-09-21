@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -23,9 +23,10 @@ import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LibraryWatchlistsOverviewProps {
   listHeader: ReactNode;
+  listRef?: RefObject<FlatList | null>;
 }
 
-export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverviewProps) {
+export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchlistsOverviewProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const watchlistsQuery = useWatchlists();
@@ -126,6 +127,7 @@ export function LibraryWatchlistsOverview({ listHeader }: LibraryWatchlistsOverv
   return (
     <View style={styles.screen}>
       <FlatList
+        ref={listRef}
         testID="library-watchlists-overview"
         data={watchlists}
         keyExtractor={(item) => item.id}

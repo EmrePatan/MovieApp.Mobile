@@ -33,6 +33,10 @@ function matchesRoutePrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+export function isPrimaryTabRootPath(tabId: PrimaryTabId, pathname: string): boolean {
+  return pathname === PRIMARY_TAB_HREFS[tabId];
+}
+
 export function resolveActivePrimaryTab(pathname: string): PrimaryTabId {
   if (DISCOVER_ROUTE_PREFIXES.some((prefix) => matchesRoutePrefix(pathname, prefix))) {
     return 'discover';
