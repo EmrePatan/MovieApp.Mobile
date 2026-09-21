@@ -7,7 +7,17 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { colors } from '@/theme/colors';
 import { useTvShowFollowStatus } from '../hooks/useTvShowFollowStatus';
 import { ensurePushDeviceRegisteredAsync } from '../services/push-device-service';
+import {
+  getNotificationPermissionState,
+  openNotificationSettingsAsync,
+  requestNotificationPermissionAsync,
+} from '../services/notification-permission-service';
+import {
+  isNotificationPermissionPromptDismissed,
+  markNotificationPermissionPromptDismissed,
+} from '../services/notification-permission-prompt-storage';
 import { FollowPreferencesModal } from './FollowPreferencesModal';
+import { NotificationPermissionPromptModal } from './NotificationPermissionPromptModal';
 
 interface FollowButtonProps {
   tvShowId: string;
@@ -19,7 +29,9 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
   const { data: status, isLoading } = useTvShowFollowStatus(tvShowId);
   const [preferencesVisible, setPreferencesVisible] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [permissionHint, setPermissionHint] = useState<string | null>(null);
+  const [permissionPromptVisible, setPermissionPromptVisible] = useState(false);
+  const [permissionRequiresSettings, setPermissionRequiresSettings] = useState(false);
+  const [permissionActionBusy, setPermissionActionBusy] = useState(false);
 
   const isFollowing = status?.isFollowing ?? false;
   const isBusy = isAuthenticated && isLoading;
@@ -31,16 +43,57 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
     }
 
     setFeedback(null);
-    setPermissionHint(null);
     setPreferencesVisible(true);
   };
 
-  const handleFollowSuccess = async () => {
-    const registrationResult = await ensurePushDeviceRegisteredAsync();
-    if (registrationResult === 'permission_denied') {
-      setPermissionHint(
-        t('details.actions.followedEnableNotifications'),
-      );
+  const handleFollowSuccess = async (notifyNewSeasons: boolean, notifyNewEpisodes: boolean) => {
+    setFeedback(t('details.actions.followed'));
+
+    const notificationsRequested = notifyNewSeasons || notifyNewEpisodes;
+    if (!notificationsRequested) {
+      return;
+    }
+
+    const permissionState = await getNotificationPermissionState();
+    if (permissionState === 'granted') {
+      await ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false });
+      return;
+    }
+
+    if (await isNotificationPermissionPromptDismissed()) {
+      return;
+    }
+
+    setPermissionRequiresSettings(permissionState === 'settings_required');
+    setPermissionPromptVisible(true);
+  };
+
+  const handleDismissPermissionPrompt = async () => {
+    await markNotificationPermissionPromptDismissed();
+    setPermissionPromptVisible(false);
+  };
+
+  const handleEnableNotifications = async () => {
+    setPermissionActionBusy(true);
+
+    try {
+      if (permissionRequiresSettings) {
+        await openNotificationSettingsAsync();
+        setPermissionPromptVisible(false);
+        return;
+      }
+
+      const granted = await requestNotificationPermissionAsync();
+      if (granted) {
+        await ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false });
+        setPermissionPromptVisible(false);
+        return;
+      }
+
+      const nextState = await getNotificationPermissionState();
+      setPermissionRequiresSettings(nextState === 'settings_required');
+    } finally {
+      setPermissionActionBusy(false);
     }
   };
 
@@ -48,12 +101,7 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
 
   return (
     <>
-      <FeedbackMessage message={feedback} tone="error" onDismiss={() => setFeedback(null)} />
-      <FeedbackMessage
-        message={permissionHint}
-        tone="info"
-        onDismiss={() => setPermissionHint(null)}
-      />
+      <FeedbackMessage message={feedback} tone="success" onDismiss={() => setFeedback(null)} />
       <DetailCircularAction
         label={t('details.actions.followLabel')}
         accessibilityLabel={label}
@@ -75,6 +123,14 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
         status={status}
         onClose={() => setPreferencesVisible(false)}
         onFollowSuccess={handleFollowSuccess}
+      />
+
+      <NotificationPermissionPromptModal
+        visible={permissionPromptVisible}
+        requiresSettings={permissionRequiresSettings}
+        busy={permissionActionBusy}
+        onDismiss={handleDismissPermissionPrompt}
+        onEnable={handleEnableNotifications}
       />
     </>
   );

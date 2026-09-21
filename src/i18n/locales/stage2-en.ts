@@ -714,6 +714,7 @@ export const stage2En = {
       notifyWhenReleased: 'Notify me when released',
       releaseAlertOn: 'Release alert on',
       signInReleaseAlerts: 'Please sign in to get release alerts.',
+      followed: 'Following',
       followedEnableNotifications:
         'Followed. Enable notifications in device settings to receive release alerts.',
       enableNotificationsSettings:
@@ -728,6 +729,13 @@ export const stage2En = {
     },
     collection: {
       partOf: 'Part of {{name}}',
+    },
+    notificationsPermission: {
+      title: 'Enable notifications',
+      body: 'Allow notifications so we can alert you about new episodes and releases.',
+      enable: 'Enable notifications',
+      openSettings: 'Open settings',
+      notNow: 'Not now',
     },
     followPreferences: {
       titleFollowing: 'Follow preferences',

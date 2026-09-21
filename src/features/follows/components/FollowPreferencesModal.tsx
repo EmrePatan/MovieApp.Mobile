@@ -23,7 +23,10 @@ interface FollowPreferencesModalProps {
   isFollowing: boolean;
   status?: TvShowFollowStatusResponse;
   onClose: () => void;
-  onFollowSuccess?: () => void | Promise<void>;
+  onFollowSuccess?: (
+    notifyNewSeasons: boolean,
+    notifyNewEpisodes: boolean,
+  ) => void | Promise<void>;
 }
 
 export function FollowPreferencesModal({
@@ -114,7 +117,7 @@ function FollowPreferencesSheet({
     createFollow.mutate(request, {
       onSuccess: async () => {
         onClose();
-        await onFollowSuccess?.();
+        await onFollowSuccess?.(notifyNewSeasons, notifyNewEpisodes);
       },
       onError: (error) => {
         if (isApiError(error) && error.status === 503) {

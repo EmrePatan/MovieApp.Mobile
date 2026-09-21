@@ -1,6 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { ApiError } from '@/api/errors';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { FollowButton } from '@/features/follows/components/FollowButton';
 import { useTvShowFollowStatus } from '@/features/follows/hooks/useTvShowFollowStatus';
 import {
@@ -9,6 +8,8 @@ import {
   useUpdateTvShowFollow,
 } from '@/features/follows/hooks/useTvShowFollowMutations';
 import { ensurePushDeviceRegisteredAsync } from '@/features/follows/services/push-device-service';
+import { getNotificationPermissionState } from '@/features/follows/services/notification-permission-service';
+import { isNotificationPermissionPromptDismissed } from '@/features/follows/services/notification-permission-prompt-storage';
 
 const tvShowId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 const mockRequireAuth = jest.fn(() => true);
@@ -29,12 +30,23 @@ jest.mock('@/features/follows/hooks/useTvShowFollowStatus', () => ({
 
 jest.mock('@/features/follows/hooks/useTvShowFollowMutations', () => ({
   useCreateTvShowFollow: jest.fn(),
-  useUpdateTvShowFollow: jest.fn(),
   useRemoveTvShowFollow: jest.fn(),
+  useUpdateTvShowFollow: jest.fn(),
 }));
 
 jest.mock('@/features/follows/services/push-device-service', () => ({
   ensurePushDeviceRegisteredAsync: jest.fn(),
+}));
+
+jest.mock('@/features/follows/services/notification-permission-service', () => ({
+  getNotificationPermissionState: jest.fn(),
+  requestNotificationPermissionAsync: jest.fn(),
+  openNotificationSettingsAsync: jest.fn(),
+}));
+
+jest.mock('@/features/follows/services/notification-permission-prompt-storage', () => ({
+  isNotificationPermissionPromptDismissed: jest.fn(),
+  markNotificationPermissionPromptDismissed: jest.fn(),
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -57,6 +69,8 @@ describe('FollowButton', () => {
       isPending: false,
     });
     (ensurePushDeviceRegisteredAsync as jest.Mock).mockResolvedValue('registered');
+    (getNotificationPermissionState as jest.Mock).mockResolvedValue('granted');
+    (isNotificationPermissionPromptDismissed as jest.Mock).mockResolvedValue(false);
   });
 
   it('opens the modal without creating a follow when inactive button is tapped', () => {
@@ -92,26 +106,7 @@ describe('FollowButton', () => {
     expect(screen.getByLabelText('Manage follow').props.accessibilityState?.selected).toBe(true);
   });
 
-  it('opens preferences when active follow is tapped', () => {
-    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
-      data: {
-        isFollowing: true,
-        notifyNewSeasons: false,
-        notifyNewEpisodes: true,
-        baselineEstablished: true,
-      },
-      isLoading: false,
-    });
-
-    render(<FollowButton tvShowId={tvShowId} />);
-    fireEvent.press(screen.getByLabelText('Manage follow'));
-
-    expect(screen.getByText('Follow preferences')).toBeTruthy();
-    expect(screen.getByLabelText('New seasons').props.accessibilityState?.checked).toBe(false);
-    expect(screen.getByLabelText('New episodes').props.accessibilityState?.checked).toBe(true);
-  });
-
-  it('registers push device after successful follow confirmation', async () => {
+  it('shows compact success feedback after follow confirmation', async () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: {
         isFollowing: false,
@@ -131,42 +126,89 @@ describe('FollowButton', () => {
     fireEvent.press(screen.getByText('Follow show'));
 
     await waitFor(() => {
-      expect(mockCreateMutate).toHaveBeenCalledWith(
-        {
-          notifyNewSeasons: true,
-          notifyNewEpisodes: true,
-        },
-        expect.any(Object),
-      );
-      expect(ensurePushDeviceRegisteredAsync).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('keeps follow active when permission is denied after confirmation', async () => {
-    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
-      data: {
-        isFollowing: false,
-        notifyNewSeasons: true,
-        notifyNewEpisodes: true,
-        baselineEstablished: false,
-      },
-      isLoading: false,
-    });
-    (ensurePushDeviceRegisteredAsync as jest.Mock).mockResolvedValue('permission_denied');
-    mockCreateMutate.mockImplementation((_variables, options) => {
-      options?.onSuccess?.();
-    });
-
-    render(<FollowButton tvShowId={tvShowId} />);
-    fireEvent.press(screen.getByLabelText('Follow this show'));
-    fireEvent.press(screen.getByText('Follow show'));
-
-    await waitFor(() => {
+      expect(screen.getByText('Following')).toBeTruthy();
       expect(
-        screen.getByText(
+        screen.queryByText(
           'Followed. Enable notifications in device settings to receive release alerts.',
         ),
-      ).toBeTruthy();
+      ).toBeNull();
+    });
+  });
+
+  it('registers push device when permission is already granted', async () => {
+    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
+      data: {
+        isFollowing: false,
+        notifyNewSeasons: true,
+        notifyNewEpisodes: true,
+        baselineEstablished: false,
+      },
+      isLoading: false,
+    });
+
+    mockCreateMutate.mockImplementation((_variables, options) => {
+      options?.onSuccess?.();
+    });
+
+    render(<FollowButton tvShowId={tvShowId} />);
+    fireEvent.press(screen.getByLabelText('Follow this show'));
+    fireEvent.press(screen.getByText('Follow show'));
+
+    await waitFor(() => {
+      expect(ensurePushDeviceRegisteredAsync).toHaveBeenCalledWith({ allowPermissionRequest: false });
+    });
+  });
+
+  it('opens permission guidance modal when notifications are not granted', async () => {
+    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
+      data: {
+        isFollowing: false,
+        notifyNewSeasons: true,
+        notifyNewEpisodes: true,
+        baselineEstablished: false,
+      },
+      isLoading: false,
+    });
+    (getNotificationPermissionState as jest.Mock).mockResolvedValue('requestable');
+    mockCreateMutate.mockImplementation((_variables, options) => {
+      void Promise.resolve(options?.onSuccess?.());
+    });
+
+    render(<FollowButton tvShowId={tvShowId} />);
+    fireEvent.press(screen.getByLabelText('Follow this show'));
+    await act(async () => {
+      fireEvent.press(screen.getByText('Follow show'));
+    });
+
+    expect(await screen.findByText('Enable notifications', {}, { timeout: 3000 })).toBeTruthy();
+    expect(
+      screen.getByText('Allow notifications so we can alert you about new episodes and releases.'),
+    ).toBeTruthy();
+  });
+
+  it('does not reopen permission guidance after it was dismissed', async () => {
+    (useTvShowFollowStatus as jest.Mock).mockReturnValue({
+      data: {
+        isFollowing: false,
+        notifyNewSeasons: true,
+        notifyNewEpisodes: true,
+        baselineEstablished: false,
+      },
+      isLoading: false,
+    });
+    (getNotificationPermissionState as jest.Mock).mockResolvedValue('requestable');
+    (isNotificationPermissionPromptDismissed as jest.Mock).mockResolvedValue(true);
+    mockCreateMutate.mockImplementation((_variables, options) => {
+      options?.onSuccess?.();
+    });
+
+    render(<FollowButton tvShowId={tvShowId} />);
+    fireEvent.press(screen.getByLabelText('Follow this show'));
+    fireEvent.press(screen.getByText('Follow show'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Following')).toBeTruthy();
+      expect(screen.queryByText('Enable notifications')).toBeNull();
     });
   });
 

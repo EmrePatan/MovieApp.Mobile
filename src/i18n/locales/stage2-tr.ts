@@ -764,8 +764,9 @@ export const stage2Tr = {
       notifyWhenReleased: 'Yayınlandığında bildir',
       releaseAlertOn: 'Yayın uyarısı açık',
       signInReleaseAlerts: 'Yayın uyarıları almak için giriş yap.',
+      followed: 'Takip edildi',
       followedEnableNotifications: 'Takip edildi. Yayın uyarıları almak için cihaz ayarlarından bildirimleri etkinleştir.',
-      enableNotificationsSettings: 'Yayın uyarıları almak için cihaz ayarlarından bildirimleri etkinleştir.',
+      enableNotificationsSettings: 'Yayın uyarıları almak için cihaz ayarından bildirimleri etkinleştir.',
       playTrailer: 'Fragmanı Oynat',
       trailerButton: 'Fragman',
       trailerOpenError: 'Fragman açılamadı',
@@ -776,6 +777,13 @@ export const stage2Tr = {
     },
     collection: {
       partOf: '{{name}} koleksiyonunun bir parçası',
+    },
+    notificationsPermission: {
+      title: 'Bildirimleri aç',
+      body: 'Yeni bölüm ve yayınlardan haberdar olmak için bildirimlere izin ver.',
+      enable: 'Bildirimleri aç',
+      openSettings: 'Ayarları aç',
+      notNow: 'Şimdi değil',
     },
     followPreferences: {
       titleFollowing: 'Takip tercihleri',
