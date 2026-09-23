@@ -9,7 +9,7 @@ import {
   REVIEW_OWN_COLLAPSED_LINE_COUNT,
 } from '../utils/review-content-length';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
 
@@ -27,9 +27,15 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
   return (
     <View style={styles.container} testID="reviews-own-review-bar">
       <View style={styles.headerRow}>
-        <AppText variant="caption" style={styles.label}>
-          {t('reviews.yourReview')}
-        </AppText>
+        <View style={styles.labelRow}>
+          <AppText variant="caption" style={styles.label}>
+            {t('reviews.yourReview')}
+          </AppText>
+          <AppText variant="caption" muted style={styles.dot}>
+            ·
+          </AppText>
+          <ReviewAuthorRating userRating={review.userRating} variant="inline" />
+        </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('reviews.editReview')}
@@ -42,8 +48,6 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
           </AppText>
         </Pressable>
       </View>
-
-      <ReviewAuthorRating userRating={review.userRating} variant="inline" size="md" />
 
       <AppText
         variant="bodySmall"
@@ -75,32 +79,37 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.xs,
-    marginHorizontal: layout.screenPaddingHorizontal,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    gap: 4,
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+    minHeight: 28,
+  },
+  labelRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexWrap: 'wrap',
+    minWidth: 0,
   },
   label: {
-    color: colors.accentMuted,
+    color: colors.textSecondary,
     fontWeight: '600',
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.2,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  dot: {
+    lineHeight: 16,
   },
   preview: {
-    lineHeight: 21,
-    color: colors.textPrimary,
-    fontSize: 14,
+    lineHeight: 20,
+    color: colors.textSecondary,
+    fontSize: 13,
   },
   expandButton: {
     alignSelf: 'flex-start',
@@ -116,8 +125,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
     marginRight: -spacing.sm,
-    marginTop: -spacing.xs,
-    marginBottom: -spacing.xs,
   },
   editLabel: {
     color: colors.accent,

@@ -154,7 +154,6 @@ describe('ReviewsDetailContent', () => {
 
     expect(screen.getByTestId('reviews-write-section')).toBeTruthy();
     expect(screen.getByText('Share your thoughts')).toBeTruthy();
-    expect(screen.getByText('What do you think about this title?')).toBeTruthy();
     expect(screen.getByText('Write review')).toBeTruthy();
   });
 
@@ -167,10 +166,11 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByTestId('reviews-content-title')).toHaveTextContent('Interstellar');
     expect(screen.queryByTestId('reviews-header-rating')).toBeNull();
     expect(screen.getByTestId('reviews-review-count')).toHaveTextContent('1 review');
-    expect(screen.getByText('Community rating')).toBeTruthy();
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/4\.0/);
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/3 ratings/);
     expect(screen.getByTestId('reviews-rating-distribution')).toBeTruthy();
+    expect(screen.getByText('Distribution')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-rating-histogram')).toBeNull();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
@@ -620,6 +620,7 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
+    fireEvent.press(screen.getByTestId('reviews-distribution-toggle'));
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
     expect(screen.getByText('Your review matches this rating. See it above.')).toBeTruthy();
   });

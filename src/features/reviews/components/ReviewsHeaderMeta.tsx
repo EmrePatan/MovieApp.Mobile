@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 
 interface ReviewsHeaderMetaProps {
   contentTitle?: string;
@@ -28,39 +27,63 @@ export function ReviewsHeaderMeta({
 
   return (
     <View style={styles.container} testID="reviews-header-meta">
-      {contentTitle ? (
-        <AppText
-          variant="bodySmall"
-          muted
-          style={styles.title}
-          numberOfLines={2}
-          testID="reviews-content-title"
-        >
-          {contentTitle}
-        </AppText>
-      ) : null}
+      <View style={styles.row}>
+        {contentTitle ? (
+          <AppText
+            variant="bodySmall"
+            muted
+            style={styles.title}
+            numberOfLines={1}
+            testID="reviews-content-title"
+          >
+            {contentTitle}
+          </AppText>
+        ) : null}
 
-      {reviewCountLabel ? (
-        <AppText variant="caption" style={styles.count} testID="reviews-review-count">
-          {reviewCountLabel}
-        </AppText>
-      ) : null}
+        {contentTitle && reviewCountLabel ? (
+          <AppText variant="bodySmall" muted style={styles.separator} accessibilityElementsHidden>
+            ·
+          </AppText>
+        ) : null}
+
+        {reviewCountLabel ? (
+          <AppText
+            variant="bodySmall"
+            style={styles.count}
+            numberOfLines={1}
+            testID="reviews-review-count"
+          >
+            {reviewCountLabel}
+          </AppText>
+        ) : null}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: 3,
-    marginTop: 2,
+    marginTop: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+    minWidth: 0,
   },
   title: {
     fontWeight: '500',
     lineHeight: 20,
+    flexShrink: 1,
+  },
+  separator: {
+    lineHeight: 20,
+    color: colors.textMuted,
   },
   count: {
     color: colors.textMuted,
-    fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 20,
+    flexShrink: 0,
   },
 });

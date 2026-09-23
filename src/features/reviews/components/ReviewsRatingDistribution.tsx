@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +10,7 @@ import {
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+import { interaction } from '@/theme/interaction';
 import { RATING_STAR_COUNT } from '../utils/rating-star-buckets';
 
 interface ReviewsRatingDistributionProps {
@@ -27,7 +29,10 @@ export function ReviewsRatingDistribution({
   ratingCount,
 }: ReviewsRatingDistributionProps) {
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
   const maxCount = Math.max(...Object.values(buckets), 1);
+  const scoreLabel = formatCommunityStarRatingDisplay(averageScore);
+  const countLabel = formatCommunityRatingCountLabel(ratingCount);
 
   if (ratingCount === 0) {
     return null;
@@ -38,29 +43,77 @@ export function ReviewsRatingDistribution({
     (_, index) => RATING_STAR_COUNT - index,
   );
 
+  const toggleExpanded = () => {
+    setExpanded((current) => !current);
+  };
+
+  const handleSelectStars = (stars: number) => {
+    const nextStars = selectedStars === stars ? null : stars;
+    onSelectStars(nextStars);
+  };
+
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
-      <AppText variant="caption" style={styles.sectionLabel}>
-        {t('reviews.communityRating')}
-      </AppText>
-
-      <View style={styles.card} testID="reviews-community-rating">
-        <View style={styles.scoreBlock}>
-          <View style={styles.scoreRow}>
-            <Ionicons name="star" size={16} color={colors.accentStrong} />
-            <AppText style={styles.scoreValue}>
-              {formatCommunityStarRatingDisplay(averageScore)}
-            </AppText>
-            <AppText variant="caption" muted style={styles.scoreOutOf}>
-              / 5
-            </AppText>
-          </View>
-          <AppText variant="caption" muted style={styles.countLabel}>
-            {formatCommunityRatingCountLabel(ratingCount)}
+      <View style={styles.summaryRow} testID="reviews-community-rating">
+        <View style={styles.summaryLeft}>
+          <Ionicons name="star" size={14} color={colors.accentStrong} />
+          <AppText variant="bodySmall" style={styles.scoreText}>
+            {scoreLabel}
+          </AppText>
+          <AppText variant="caption" muted style={styles.dotSeparator}>
+            ·
+          </AppText>
+          <AppText variant="caption" muted style={styles.countText} numberOfLines={1}>
+            {countLabel}
           </AppText>
         </View>
 
-        <View style={styles.rows}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            expanded
+              ? t('reviews.hideRatingDistribution')
+              : t('reviews.showRatingDistribution')
+          }
+          accessibilityState={{ expanded }}
+          onPress={toggleExpanded}
+          hitSlop={4}
+          style={({ pressed }) => [styles.distributionToggle, pressed && styles.pressed]}
+          testID="reviews-distribution-toggle"
+        >
+          <AppText variant="caption" style={styles.distributionLabel}>
+            {t('reviews.ratingDistribution')}
+          </AppText>
+          <Ionicons
+            name={expanded ? 'chevron-up' : 'chevron-forward'}
+            size={14}
+            color={colors.textMuted}
+          />
+        </Pressable>
+      </View>
+
+      {selectedStars != null ? (
+        <View style={styles.filterRow}>
+          <AppText variant="caption" style={styles.filterLabel}>
+            {t('reviews.activeStarFilter', { stars: selectedStars })}
+          </AppText>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('reviews.clearStarFilter', { stars: selectedStars })}
+            onPress={() => onSelectStars(null)}
+            hitSlop={4}
+            style={({ pressed }) => [styles.clearFilterButton, pressed && styles.pressed]}
+            testID="reviews-clear-star-filter"
+          >
+            <AppText variant="caption" style={styles.clearFilterLabel}>
+              {t('common.clearFilters')}
+            </AppText>
+          </Pressable>
+        </View>
+      ) : null}
+
+      {expanded ? (
+        <View style={styles.histogram} testID="reviews-rating-histogram">
           {starsDescending.map((stars) => {
             const count = buckets[stars] ?? 0;
             const selected = selectedStars === stars;
@@ -76,7 +129,7 @@ export function ReviewsRatingDistribution({
                 })}
                 accessibilityState={{ selected }}
                 disabled={count === 0}
-                onPress={() => onSelectStars(selected ? null : stars)}
+                onPress={() => handleSelectStars(stars)}
                 style={({ pressed }) => [
                   styles.row,
                   count === 0 && styles.rowDisabled,
@@ -99,14 +152,14 @@ export function ReviewsRatingDistribution({
                     ]}
                   />
                 </View>
-                <AppText variant="caption" muted style={styles.count}>
+                <AppText variant="caption" muted style={styles.barCount}>
                   {count}
                 </AppText>
               </Pressable>
             );
           })}
         </View>
-      </View>
+      ) : null}
     </View>
   );
 }
@@ -116,61 +169,80 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     gap: spacing.xs,
   },
-  sectionLabel: {
-    color: colors.textMuted,
-    fontWeight: '600',
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.2,
-  },
-  card: {
+  summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    minHeight: interaction.touchTarget,
   },
-  scoreBlock: {
-    minWidth: 72,
-    maxWidth: 96,
-    gap: 2,
-  },
-  scoreRow: {
+  summaryLeft: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 3,
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    minWidth: 0,
   },
-  scoreValue: {
+  scoreText: {
     color: colors.textPrimary,
-    fontSize: 26,
-    lineHeight: 30,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
-  scoreOutOf: {
-    fontSize: 11,
-    lineHeight: 14,
-    marginBottom: 2,
+  dotSeparator: {
+    lineHeight: 16,
   },
-  countLabel: {
+  countText: {
+    flexShrink: 1,
     fontVariant: ['tabular-nums'],
+  },
+  distributionToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    minHeight: interaction.touchTarget,
+    justifyContent: 'flex-end',
+    paddingLeft: spacing.sm,
+  },
+  distributionLabel: {
+    color: colors.textMuted,
+    fontWeight: '500',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingLeft: spacing.xs,
+  },
+  filterLabel: {
+    color: colors.accent,
+    fontWeight: '600',
     fontSize: 11,
     lineHeight: 14,
   },
-  rows: {
-    flex: 1,
+  clearFilterButton: {
+    minHeight: interaction.touchTarget,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  clearFilterLabel: {
+    color: colors.textSecondary,
+    fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 14,
+  },
+  histogram: {
     gap: 3,
-    minWidth: 0,
+    paddingTop: 2,
+    paddingBottom: spacing.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    minHeight: 18,
+    minHeight: 20,
   },
   rowDisabled: {
     opacity: 0.35,
@@ -207,11 +279,14 @@ const styles = StyleSheet.create({
   fillSelected: {
     backgroundColor: colors.accent,
   },
-  count: {
+  barCount: {
     width: 20,
     textAlign: 'right',
     fontVariant: ['tabular-nums'],
     fontSize: 10,
     lineHeight: 12,
+  },
+  pressed: {
+    opacity: interaction.pressedOpacity,
   },
 });

@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   card: {
     gap: spacing.xs,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs + 2,
   },
   cardSurface: {
     marginHorizontal: layout.screenPaddingHorizontal,

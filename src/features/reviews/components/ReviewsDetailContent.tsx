@@ -277,6 +277,16 @@ export function ReviewsDetailContent({
         onDismiss={() => setAuthFeedback(null)}
       />
 
+      {!isInitialLoading && !reviewsQuery.isError && showCommunityControls && hasCommunityRatings && ratingAggregate ? (
+        <ReviewsRatingDistribution
+          buckets={ratingBuckets}
+          selectedStars={ratingStars}
+          onSelectStars={handleRatingStarsChange}
+          averageScore={ratingAggregate.averageScore}
+          ratingCount={ratingAggregate.ratingCount}
+        />
+      ) : null}
+
       {!myReview && composerMode !== 'create' && !showEmptyStateWithWriteAction ? (
         <ReviewsWritePrompt onPress={handleWriteReview} />
       ) : null}
@@ -324,18 +334,7 @@ export function ReviewsDetailContent({
       ) : null}
 
       {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
-        <View style={styles.communityPanel}>
-          {hasCommunityRatings && ratingAggregate ? (
-            <ReviewsRatingDistribution
-              buckets={ratingBuckets}
-              selectedStars={ratingStars}
-              onSelectStars={handleRatingStarsChange}
-              averageScore={ratingAggregate.averageScore}
-              ratingCount={ratingAggregate.ratingCount}
-            />
-          ) : null}
-          <ReviewsSortControl value={sort} onChange={handleSortChange} />
-        </View>
+        <ReviewsSortControl value={sort} onChange={handleSortChange} />
       ) : null}
     </View>
   );
@@ -443,9 +442,9 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.md,
-    gap: spacing.xs,
+    paddingTop: 0,
+    paddingBottom: spacing.xs,
+    gap: 2,
   },
   headerTitle: {
     color: colors.textPrimary,
@@ -456,12 +455,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   listHeader: {
-    gap: spacing.md,
-    paddingBottom: spacing.xs,
-  },
-  communityPanel: {
     gap: spacing.sm,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.xs,
   },
   loading: {
     paddingVertical: spacing.xxl,
@@ -501,7 +496,7 @@ const reviewListSeparatorStyles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     marginLeft: layout.screenPaddingHorizontal + 36 + spacing.sm,
     marginRight: layout.screenPaddingHorizontal,
-    marginVertical: spacing.sm,
+    marginVertical: spacing.xs,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
 });

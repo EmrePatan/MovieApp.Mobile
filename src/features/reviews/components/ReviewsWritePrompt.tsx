@@ -2,9 +2,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
+import { spacing } from '@/theme/spacing';
 
 interface ReviewsWritePromptProps {
   onPress: () => void;
@@ -21,16 +21,11 @@ export function ReviewsWritePrompt({ onPress }: ReviewsWritePromptProps) {
       style={({ pressed }) => [styles.container, pressed && styles.pressed]}
       testID="reviews-write-section"
     >
-      <View style={styles.copyBlock}>
-        <AppText variant="bodySmall" style={styles.headline}>
+      <View style={styles.row}>
+        <AppText variant="bodySmall" style={styles.prompt} numberOfLines={2}>
           {t('reviews.writePrompt')}
         </AppText>
-        <AppText variant="caption" muted style={styles.subtitle}>
-          {t('reviews.writePromptSubtitle')}
-        </AppText>
-      </View>
-      <View style={styles.ctaPill}>
-        <AppText variant="caption" style={styles.ctaLabel}>
+        <AppText variant="caption" style={styles.action}>
           {t('reviews.writeReviewCta')}
         </AppText>
       </View>
@@ -40,46 +35,29 @@ export function ReviewsWritePrompt({ onPress }: ReviewsWritePromptProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: layout.screenPaddingHorizontal,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    gap: spacing.sm,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     minHeight: interaction.touchTarget,
+    justifyContent: 'center',
   },
   pressed: {
     opacity: interaction.pressedOpacity,
   },
-  copyBlock: {
-    gap: 4,
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
-  headline: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+  prompt: {
+    flex: 1,
+    color: colors.textSecondary,
+    fontWeight: '500',
     lineHeight: 20,
+    minWidth: 0,
   },
-  subtitle: {
-    lineHeight: 17,
-    fontSize: 12,
-  },
-  ctaPill: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderAccent,
-    minHeight: interaction.touchTarget,
-    justifyContent: 'center',
-  },
-  ctaLabel: {
+  action: {
     color: colors.accent,
     fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 16,
+    flexShrink: 0,
   },
 });
