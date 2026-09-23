@@ -926,6 +926,15 @@ export const stage2En = {
       delete: 'Delete notification',
       unreadDot: 'Unread',
     },
+    body: {
+      movieReleased_one: 'Now available',
+      movieReleased_other: '{{count}} releases',
+      newEpisodes_one: '1 new episode',
+      newEpisodes_other: '{{count}} new episodes',
+      newSeason_one: 'New season premiere',
+      newSeason_other: '{{count}} new season premieres',
+      fallback: 'New content is available.',
+    },
   },
   insights: {
     hub: {

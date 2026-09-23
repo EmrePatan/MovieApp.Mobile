@@ -946,6 +946,15 @@ export const stage2Es = {
       delete: 'Eliminar notificación',
       unreadDot: 'Sin leer',
     },
+    body: {
+      movieReleased_one: 'Ya disponible',
+      movieReleased_other: '{{count}} estrenos',
+      newEpisodes_one: '1 episodio nuevo',
+      newEpisodes_other: '{{count}} episodios nuevos',
+      newSeason_one: 'Estreno de nueva temporada',
+      newSeason_other: '{{count}} estrenos de temporada',
+      fallback: 'Hay contenido nuevo disponible.',
+    },
   },
   insights: {
     hub: {

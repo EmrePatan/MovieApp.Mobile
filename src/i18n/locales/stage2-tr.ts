@@ -947,6 +947,15 @@ export const stage2Tr = {
       delete: 'Bildirimi sil',
       unreadDot: 'Okunmamış',
     },
+    body: {
+      movieReleased_one: 'Şimdi yayında',
+      movieReleased_other: '{{count}} yeni çıkış',
+      newEpisodes_one: '1 yeni bölüm',
+      newEpisodes_other: '{{count}} yeni bölüm',
+      newSeason_one: 'Yeni sezon yayında',
+      newSeason_other: '{{count}} yeni sezon',
+      fallback: 'Yeni içerik yayında.',
+    },
   },
   insights: {
     hub: {

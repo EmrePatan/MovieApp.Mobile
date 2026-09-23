@@ -10,6 +10,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { formatNotificationBody } from '../utils/format-notification-body';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
 import type { NotificationItem } from '../types';
 import { colors } from '@/theme/colors';
@@ -35,10 +36,11 @@ export const NotificationRow = memo(function NotificationRow({
   const swipeableRef = useRef<Swipeable>(null);
   const isUnread = item.readAtUtc == null;
   const relativeTime = formatNotificationRelativeTime(item.createdAtUtc);
+  const body = formatNotificationBody(item, t);
   const accessibilityLabel = t('notifications.row.accessibility', {
     unreadPrefix: isUnread ? t('notifications.row.unreadPrefix') : '',
     title: item.title,
-    body: item.body,
+    body,
     relativeTime,
   });
 
@@ -107,7 +109,7 @@ export const NotificationRow = memo(function NotificationRow({
           ) : null}
         </View>
         <AppText variant="bodySmall" muted numberOfLines={2}>
-          {item.body}
+          {body}
         </AppText>
       </View>
     </Pressable>
