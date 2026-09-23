@@ -26,7 +26,7 @@ interface SearchResultCardProps {
   onPress?: (item: SearchResultItem) => void;
 }
 
-const PERSON_PORTRAIT_SIZE = layout.posterList.height;
+const PERSON_PORTRAIT_SIZE = layout.posterList.width;
 
 const PersonSearchResultCard = memo(function PersonSearchResultCard({
   item,
@@ -75,7 +75,7 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
               },
             ]}
           >
-            <Ionicons name="person-outline" size={28} color={colors.textMuted} />
+            <Ionicons name="person-outline" size={22} color={colors.textMuted} />
           </View>
         )}
       </View>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
     paddingTop: spacing.xs,
-    minHeight: layout.posterList.height - spacing.xs,
+    minHeight: PERSON_PORTRAIT_SIZE,
     justifyContent: 'center',
   },
   title: {

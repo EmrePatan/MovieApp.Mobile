@@ -586,7 +586,7 @@ export const stage2Tr = {
       seriesPremiere: 'Dizi prömiyeri',
       release: 'Yayın',
       alertOn: 'Uyarı açık',
-      following: 'Takip ediliyor',
+      following: 'Takipte',
       notified: 'Bildirildi',
       releaseAlertOn: 'yayın uyarısı açık',
       followed: 'takip ediliyor',

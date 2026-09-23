@@ -23,7 +23,6 @@ import {
   setPersonFilmographyScrollOffset,
 } from '../utils/person-filmography-scroll-state';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const GRID_COLUMNS = 2;
@@ -112,19 +111,17 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
     [queryClient, router, t],
   );
 
-  const listHeader = (
-    <View>
+  const screenHeader = (
+    <>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <View style={styles.headerContent}>
-          <DetailBackButton />
-          <View style={styles.header}>
-            <AppText variant="title" style={styles.headerTitle}>
-              {t('details.sections.filmography')}
-            </AppText>
-            <AppText variant="bodySmall" muted numberOfLines={2}>
-              {person.name}
-            </AppText>
-          </View>
+        <DetailBackButton contentInset={false} />
+        <View style={styles.header}>
+          <AppText variant="title" style={styles.headerTitle}>
+            {t('details.sections.filmography')}
+          </AppText>
+          <AppText variant="bodySmall" muted numberOfLines={2}>
+            {person.name}
+          </AppText>
         </View>
       </SafeAreaView>
       <FilmographyFilterTabs activeFilter={activeFilter} onFilterChange={setActiveFilter} />
@@ -133,13 +130,13 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
         tone="error"
         onDismiss={() => setErrorMessage(null)}
       />
-    </View>
+    </>
   );
 
   if (filteredFilmography.length === 0) {
     return (
       <View style={styles.container} testID="person-filmography-detail-empty">
-        {listHeader}
+        {screenHeader}
         <AppText variant="bodySmall" muted style={styles.empty}>
           {t('library.watchlistDetail.filteredEmpty.all')}
         </AppText>
@@ -148,14 +145,16 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
   }
 
   return (
-    <FlatList
+    <View style={styles.container}>
+      {screenHeader}
+      <FlatList
       ref={listRef}
       data={filteredFilmography}
       keyExtractor={(entry) => `${entry.mediaType}-${entry.tmdbId}`}
       numColumns={GRID_COLUMNS}
       columnWrapperStyle={styles.row}
       contentContainerStyle={styles.content}
-      ListHeaderComponent={listHeader}
+      style={styles.list}
       testID="person-filmography-grid"
       onScroll={(event) => handleScroll(event.nativeEvent.contentOffset.y)}
       scrollEventThrottle={16}
@@ -174,7 +173,8 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
           </View>
         );
       }}
-    />
+      />
+    </View>
   );
 }
 
@@ -186,16 +186,16 @@ const styles = StyleSheet.create({
   headerSafeArea: {
     backgroundColor: colors.background,
   },
-  headerContent: {
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: layout.screenPaddingVertical,
-  },
   header: {
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
     gap: spacing.xs,
   },
   headerTitle: {
     color: colors.textPrimary,
+  },
+  list: {
+    flex: 1,
   },
   content: {
     paddingHorizontal: spacing.lg,
