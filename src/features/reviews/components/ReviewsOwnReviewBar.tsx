@@ -81,6 +81,9 @@ const styles = StyleSheet.create({
   container: {
     gap: 4,
     paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingBottom: spacing.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
   },
   headerRow: {
     flexDirection: 'row',

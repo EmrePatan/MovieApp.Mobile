@@ -71,19 +71,19 @@ export const ReviewCard = memo(function ReviewCard({
 
         <View style={styles.meta}>
           <View style={styles.topRow}>
-            <View style={styles.nameBlock}>
-              <AppText variant="bodySmall" style={styles.authorName} numberOfLines={1}>
-                {review.user.displayName}
-              </AppText>
-              {isOwnReview ? (
-                <View style={styles.youBadge}>
-                  <AppText variant="caption" style={styles.youBadgeText}>
-                    {t('reviews.youBadge')}
-                  </AppText>
-                </View>
-              ) : null}
+            <AppText variant="bodySmall" style={styles.authorName} numberOfLines={1}>
+              {review.user.displayName}
+            </AppText>
+            {isOwnReview ? (
+              <View style={styles.youBadge}>
+                <AppText variant="caption" style={styles.youBadgeText}>
+                  {t('reviews.youBadge')}
+                </AppText>
+              </View>
+            ) : null}
+            <View style={styles.ratingSlot}>
+              <ReviewAuthorRating userRating={review.userRating} variant="inline" />
             </View>
-            <ReviewAuthorRating userRating={review.userRating} variant="inline" />
           </View>
 
           <View style={styles.bottomRow}>
@@ -213,17 +213,14 @@ const styles = StyleSheet.create({
   },
   topRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  nameBlock: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
     minWidth: 0,
-    flexWrap: 'wrap',
+  },
+  ratingSlot: {
+    marginLeft: 'auto',
+    flexShrink: 0,
+    paddingLeft: spacing.xs,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -236,6 +233,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.textPrimary,
     flexShrink: 1,
+    flexGrow: 1,
+    minWidth: 0,
     fontSize: 14,
     lineHeight: 18,
   },

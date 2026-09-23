@@ -169,8 +169,8 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/4\.0/);
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/3 ratings/);
     expect(screen.getByTestId('reviews-rating-distribution')).toBeTruthy();
-    expect(screen.getByText('Distribution')).toBeTruthy();
-    expect(screen.queryByTestId('reviews-rating-histogram')).toBeNull();
+    expect(screen.getByTestId('reviews-rating-histogram')).toBeTruthy();
+    expect(screen.getByTestId('reviews-feed-header')).toBeTruthy();
     expect(screen.getByText('Alex Smith')).toBeTruthy();
     expect(screen.getByText('Solid watch.')).toBeTruthy();
   });
@@ -620,7 +620,6 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
-    fireEvent.press(screen.getByTestId('reviews-distribution-toggle'));
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
     expect(screen.getByText('Your review matches this rating. See it above.')).toBeTruthy();
   });

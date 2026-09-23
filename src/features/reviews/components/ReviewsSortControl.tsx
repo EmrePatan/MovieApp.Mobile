@@ -1,13 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import type { ReviewSortOption } from '../types';
 import { getReviewSortLabel, REVIEW_SORT_OPTIONS } from '../utils/review-sort';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
-import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
+import { spacing } from '@/theme/spacing';
 
 interface ReviewsSortControlProps {
   value: ReviewSortOption;
@@ -33,43 +32,42 @@ export function ReviewsSortControl({ value, onChange }: ReviewsSortControlProps)
   };
 
   return (
-    <View style={styles.wrapper}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('common.sortByLabel', { label: currentLabel })}
-        onPress={openSortMenu}
-        style={({ pressed }) => [styles.selector, pressed && styles.pressed]}
-        testID="reviews-sort-control"
-      >
-        <AppText variant="caption" style={styles.label} numberOfLines={1}>
-          {currentLabel}
-        </AppText>
-        <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
-      </Pressable>
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('common.sortByLabel', { label: currentLabel })}
+      onPress={openSortMenu}
+      style={({ pressed }) => [styles.selector, pressed && styles.pressed]}
+      testID="reviews-sort-control"
+    >
+      <AppText variant="caption" muted style={styles.sortPrefix} numberOfLines={1}>
+        {t('common.sortBy')}
+      </AppText>
+      <AppText variant="caption" style={styles.activeLabel} numberOfLines={1}>
+        {currentLabel}
+      </AppText>
+      <Ionicons name="chevron-down" size={12} color={colors.textMuted} />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: layout.screenPaddingHorizontal,
-  },
   selector: {
-    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     minHeight: interaction.touchTarget,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: colors.surface,
-    maxWidth: '100%',
+    justifyContent: 'flex-end',
+    paddingLeft: spacing.sm,
+    flexShrink: 0,
+    maxWidth: '62%',
   },
-  label: {
-    color: colors.textSecondary,
+  sortPrefix: {
+    fontSize: 11,
+    lineHeight: 14,
+    flexShrink: 0,
+  },
+  activeLabel: {
+    color: colors.textPrimary,
     fontWeight: '600',
     fontSize: 12,
     lineHeight: 16,

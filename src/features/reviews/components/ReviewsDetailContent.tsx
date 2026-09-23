@@ -23,7 +23,7 @@ import { ReviewsOwnReviewBar } from './ReviewsOwnReviewBar';
 import { ReviewsPaginationControl } from './ReviewsPaginationControl';
 import { ReviewsHeaderMeta } from './ReviewsHeaderMeta';
 import { ReviewsRatingDistribution } from './ReviewsRatingDistribution';
-import { ReviewsSortControl } from './ReviewsSortControl';
+import { ReviewsFeedHeader } from './ReviewsFeedHeader';
 import { ReviewsEmptyState } from './ReviewsEmptyState';
 import { ReviewsWritePrompt } from './ReviewsWritePrompt';
 import { useMyReview } from '../hooks/useMyReview';
@@ -125,6 +125,7 @@ export function ReviewsDetailContent({
   );
   const showCommunityControls = publicReviews.length > 0;
   const hasCommunityRatings = communityRatingCount > 0;
+  const communityReviewCount = Math.max(0, totalCount - (myReview ? 1 : 0));
 
   const handleSortChange = useCallback((nextSort: ReviewSortOption) => {
     setSort(nextSort);
@@ -334,7 +335,11 @@ export function ReviewsDetailContent({
       ) : null}
 
       {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
-        <ReviewsSortControl value={sort} onChange={handleSortChange} />
+        <ReviewsFeedHeader
+          reviewCount={communityReviewCount}
+          sort={sort}
+          onSortChange={handleSortChange}
+        />
       ) : null}
     </View>
   );

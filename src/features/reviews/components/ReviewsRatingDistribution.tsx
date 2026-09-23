@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,7 +28,6 @@ export function ReviewsRatingDistribution({
   ratingCount,
 }: ReviewsRatingDistributionProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
   const maxCount = Math.max(...Object.values(buckets), 1);
   const scoreLabel = formatCommunityStarRatingDisplay(averageScore);
   const countLabel = formatCommunityRatingCountLabel(ratingCount);
@@ -43,76 +41,37 @@ export function ReviewsRatingDistribution({
     (_, index) => RATING_STAR_COUNT - index,
   );
 
-  const toggleExpanded = () => {
-    setExpanded((current) => !current);
-  };
-
   const handleSelectStars = (stars: number) => {
-    const nextStars = selectedStars === stars ? null : stars;
-    onSelectStars(nextStars);
+    onSelectStars(selectedStars === stars ? null : stars);
   };
 
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
-      <View style={styles.summaryRow} testID="reviews-community-rating">
-        <View style={styles.summaryLeft}>
-          <Ionicons name="star" size={14} color={colors.accentStrong} />
-          <AppText variant="bodySmall" style={styles.scoreText}>
-            {scoreLabel}
-          </AppText>
-          <AppText variant="caption" muted style={styles.dotSeparator}>
-            ·
-          </AppText>
-          <AppText variant="caption" muted style={styles.countText} numberOfLines={1}>
+      <View style={styles.distributionRow} testID="reviews-community-rating">
+        <View style={styles.scoreColumn}>
+          <View style={styles.scoreRow}>
+            <Ionicons name="star" size={14} color={colors.accentStrong} />
+            <AppText style={styles.scoreValue}>{scoreLabel}</AppText>
+          </View>
+          <AppText variant="caption" muted style={styles.countLabel} numberOfLines={2}>
             {countLabel}
           </AppText>
+          {selectedStars != null ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('reviews.clearStarFilter', { stars: selectedStars })}
+              onPress={() => onSelectStars(null)}
+              hitSlop={4}
+              style={({ pressed }) => [styles.clearFilterButton, pressed && styles.pressed]}
+              testID="reviews-clear-star-filter"
+            >
+              <AppText variant="caption" style={styles.filterLabel}>
+                {t('reviews.activeStarFilter', { stars: selectedStars })}
+              </AppText>
+            </Pressable>
+          ) : null}
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            expanded
-              ? t('reviews.hideRatingDistribution')
-              : t('reviews.showRatingDistribution')
-          }
-          accessibilityState={{ expanded }}
-          onPress={toggleExpanded}
-          hitSlop={4}
-          style={({ pressed }) => [styles.distributionToggle, pressed && styles.pressed]}
-          testID="reviews-distribution-toggle"
-        >
-          <AppText variant="caption" style={styles.distributionLabel}>
-            {t('reviews.ratingDistribution')}
-          </AppText>
-          <Ionicons
-            name={expanded ? 'chevron-up' : 'chevron-forward'}
-            size={14}
-            color={colors.textMuted}
-          />
-        </Pressable>
-      </View>
-
-      {selectedStars != null ? (
-        <View style={styles.filterRow}>
-          <AppText variant="caption" style={styles.filterLabel}>
-            {t('reviews.activeStarFilter', { stars: selectedStars })}
-          </AppText>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('reviews.clearStarFilter', { stars: selectedStars })}
-            onPress={() => onSelectStars(null)}
-            hitSlop={4}
-            style={({ pressed }) => [styles.clearFilterButton, pressed && styles.pressed]}
-            testID="reviews-clear-star-filter"
-          >
-            <AppText variant="caption" style={styles.clearFilterLabel}>
-              {t('common.clearFilters')}
-            </AppText>
-          </Pressable>
-        </View>
-      ) : null}
-
-      {expanded ? (
         <View style={styles.histogram} testID="reviews-rating-histogram">
           {starsDescending.map((stars) => {
             const count = buckets[stars] ?? 0;
@@ -141,7 +100,7 @@ export function ReviewsRatingDistribution({
                   <AppText variant="caption" style={styles.starText}>
                     {stars}
                   </AppText>
-                  <Ionicons name="star" size={9} color={colors.textMuted} />
+                  <Ionicons name="star" size={8} color={colors.textMuted} />
                 </View>
                 <View style={styles.track}>
                   <View
@@ -159,7 +118,7 @@ export function ReviewsRatingDistribution({
             );
           })}
         </View>
-      ) : null}
+      </View>
     </View>
   );
 }
@@ -167,82 +126,57 @@ export function ReviewsRatingDistribution({
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: layout.screenPaddingHorizontal,
-    gap: spacing.xs,
   },
-  summaryRow: {
+  distributionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    minHeight: interaction.touchTarget,
+    alignItems: 'flex-start',
+    gap: spacing.md,
   },
-  summaryLeft: {
+  scoreColumn: {
+    width: 72,
+    gap: 2,
+    paddingTop: 1,
+  },
+  scoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    flex: 1,
-    minWidth: 0,
   },
-  scoreText: {
+  scoreValue: {
     color: colors.textPrimary,
+    fontSize: 22,
+    lineHeight: 26,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
-  dotSeparator: {
-    lineHeight: 16,
-  },
-  countText: {
-    flexShrink: 1,
+  countLabel: {
     fontVariant: ['tabular-nums'],
-  },
-  distributionToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    minHeight: interaction.touchTarget,
-    justifyContent: 'flex-end',
-    paddingLeft: spacing.sm,
-  },
-  distributionLabel: {
-    color: colors.textMuted,
-    fontWeight: '500',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    paddingLeft: spacing.xs,
-  },
-  filterLabel: {
-    color: colors.accent,
-    fontWeight: '600',
     fontSize: 11,
     lineHeight: 14,
   },
   clearFilterButton: {
-    minHeight: interaction.touchTarget,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    minHeight: 28,
     justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
   },
-  clearFilterLabel: {
-    color: colors.textSecondary,
-    fontWeight: '500',
-    fontSize: 11,
-    lineHeight: 14,
+  filterLabel: {
+    color: colors.accent,
+    fontWeight: '600',
+    fontSize: 10,
+    lineHeight: 13,
   },
   histogram: {
-    gap: 3,
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
     paddingTop: 2,
-    paddingBottom: spacing.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    minHeight: 20,
+    minHeight: 16,
   },
   rowDisabled: {
     opacity: 0.35,
@@ -251,7 +185,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   starLabel: {
-    width: 20,
+    width: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -280,7 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   barCount: {
-    width: 20,
+    width: 18,
     textAlign: 'right',
     fontVariant: ['tabular-nums'],
     fontSize: 10,

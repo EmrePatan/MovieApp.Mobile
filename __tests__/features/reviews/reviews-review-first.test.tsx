@@ -104,7 +104,7 @@ function mockReviewsQuery(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe('Reviews review-first architecture', () => {
+describe('Reviews feed-first architecture', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await initI18nForTests('en');
@@ -133,27 +133,21 @@ describe('Reviews review-first architecture', () => {
     expect(screen.getByTestId('reviews-review-count')).toHaveTextContent('2 reviews');
   });
 
-  it('keeps the histogram collapsed until distribution is opened', () => {
+  it('shows the rating histogram immediately without a distribution toggle', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/4\.0/);
-    expect(screen.queryByTestId('reviews-rating-histogram')).toBeNull();
-
-    fireEvent.press(screen.getByTestId('reviews-distribution-toggle'));
     expect(screen.getByTestId('reviews-rating-histogram')).toBeTruthy();
-    expect(screen.getByTestId('reviews-rating-bar-4')).toBeTruthy();
-
-    fireEvent.press(screen.getByTestId('reviews-distribution-toggle'));
-    expect(screen.queryByTestId('reviews-rating-histogram')).toBeNull();
+    expect(screen.getByTestId('reviews-rating-bar-5')).toBeTruthy();
+    expect(screen.queryByTestId('reviews-distribution-toggle')).toBeNull();
   });
 
-  it('shows and clears an active star filter from the compact summary', () => {
+  it('preserves star filtering and clear-filter behavior', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
-    fireEvent.press(screen.getByTestId('reviews-distribution-toggle'));
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
-
     expect(screen.getByText('4★ filter')).toBeTruthy();
+
     fireEvent.press(screen.getByTestId('reviews-clear-star-filter'));
     expect(screen.queryByText('4★ filter')).toBeNull();
   });
@@ -168,13 +162,22 @@ describe('Reviews review-first architecture', () => {
     expect(screen.getByLabelText(t('reviews.editReview'))).toBeTruthy();
   });
 
-  it('opens sort options from a single compact selector', () => {
+  it('renders the feed header with community count left and sort control right', () => {
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
+
+    expect(screen.getByTestId('reviews-feed-header')).toBeTruthy();
+    expect(screen.getByText(t('reviews.communityFeedLabel'))).toBeTruthy();
+    expect(screen.getByTestId('reviews-feed-count')).toHaveTextContent('(1)');
+    expect(screen.getByTestId('reviews-sort-control')).toHaveTextContent(
+      new RegExp(t('reviews.sort.newest')),
+    );
+    expect(screen.queryByText('Highest rated')).toBeNull();
+  });
+
+  it('opens sort options from the right-aligned selector', () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
-
-    expect(screen.getByTestId('reviews-sort-control')).toHaveTextContent('Newest');
-    expect(screen.queryByText('Highest rated')).toBeNull();
 
     fireEvent.press(screen.getByTestId('reviews-sort-control'));
     expect(alertSpy).toHaveBeenCalled();
@@ -182,12 +185,15 @@ describe('Reviews review-first architecture', () => {
     alertSpy.mockRestore();
   });
 
-  it('uses Turkish labels for compact review-first controls', async () => {
+  it('uses Turkish labels for feed-first controls', async () => {
     await initI18nForTests('tr');
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
-    expect(screen.getByText(t('reviews.ratingDistribution'))).toBeTruthy();
-    expect(screen.getByTestId('reviews-sort-control')).toHaveTextContent(t('reviews.sort.newest'));
+    expect(screen.getByText(t('reviews.communityFeedLabel'))).toBeTruthy();
+    expect(screen.getByTestId('reviews-sort-control')).toHaveTextContent(
+      new RegExp(t('reviews.sort.newest')),
+    );
+    expect(screen.getByTestId('reviews-rating-histogram')).toBeTruthy();
   });
 });

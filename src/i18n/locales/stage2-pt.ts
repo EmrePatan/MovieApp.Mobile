@@ -918,6 +918,7 @@ export const stage2Pt = {
     yourReview: 'Sua crítica',
     youBadge: 'Você',
     communityRating: 'Avaliação da comunidade',
+    communityFeedLabel: 'CRÍTICAS',
     ratingDistribution: 'Distribuição',
     showRatingDistribution: 'Mostrar distribuição de avaliações',
     hideRatingDistribution: 'Ocultar distribuição de avaliações',

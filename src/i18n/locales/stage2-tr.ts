@@ -919,6 +919,7 @@ export const stage2Tr = {
     yourReview: 'Yorumun',
     youBadge: 'Sen',
     communityRating: 'Topluluk puanı',
+    communityFeedLabel: 'YORUMLAR',
     ratingDistribution: 'Dağılım',
     showRatingDistribution: 'Puan dağılımını göster',
     hideRatingDistribution: 'Puan dağılımını gizle',

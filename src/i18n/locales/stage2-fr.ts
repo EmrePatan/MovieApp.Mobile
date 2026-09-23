@@ -918,6 +918,7 @@ export const stage2Fr = {
     yourReview: 'Votre avis',
     youBadge: 'Vous',
     communityRating: 'Note de la communauté',
+    communityFeedLabel: 'AVIS',
     ratingDistribution: 'Distribution',
     showRatingDistribution: 'Afficher la distribution des notes',
     hideRatingDistribution: 'Masquer la distribution des notes',
