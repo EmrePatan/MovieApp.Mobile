@@ -1,8 +1,10 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { en } from './locales/en';
+import { es } from './locales/es';
 import { tr } from './locales/tr';
-import { toFormatLocaleTag } from './locale-tags';
+import { normalizeUiLanguage, toFormatLocaleTag } from './locale-tags';
+import { SUPPORTED_UI_LANGUAGES } from './types';
 import type { UiLanguage } from './types';
 
 let initialized = false;
@@ -13,10 +15,11 @@ export async function ensureI18nInitialized(language: UiLanguage = 'en'): Promis
       resources: {
         en: { translation: en },
         tr: { translation: tr },
+        es: { translation: es },
       },
       lng: language,
       fallbackLng: 'en',
-      supportedLngs: ['en', 'tr'],
+      supportedLngs: [...SUPPORTED_UI_LANGUAGES],
       interpolation: { escapeValue: false },
       react: { useSuspense: false },
     });
@@ -35,7 +38,7 @@ export async function changeUiLanguage(language: UiLanguage): Promise<void> {
 }
 
 export function getCurrentUiLanguage(): UiLanguage {
-  return i18n.language === 'tr' ? 'tr' : 'en';
+  return normalizeUiLanguage(i18n.language);
 }
 
 export function getUiFormatLocaleTag(): string {

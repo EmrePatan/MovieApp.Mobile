@@ -11,5 +11,9 @@ export function buildUpcomingCatalogPath(criteria: UpcomingCatalogRequest = {}):
     params.set('scope', criteria.scope);
   }
 
+  if (criteria.releaseRegion) {
+    params.set('releaseRegion', criteria.releaseRegion);
+  }
+
   return `/api/catalog/upcoming?${params.toString()}`;
 }

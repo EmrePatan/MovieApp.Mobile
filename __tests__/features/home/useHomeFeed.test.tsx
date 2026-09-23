@@ -26,6 +26,16 @@ jest.mock('@/features/upcoming/api/upcoming-api', () => ({
   getUpcomingCatalog: jest.fn(),
 }));
 
+jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
+  useRegionalPreference: () => ({
+    region: 'TR',
+    source: 'saved',
+    isHydrated: true,
+    setRegion: jest.fn(),
+    resetToDeviceDefault: jest.fn(),
+  }),
+}));
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {

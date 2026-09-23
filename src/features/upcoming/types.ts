@@ -44,6 +44,7 @@ export interface UpcomingCatalogRequest {
   page?: number;
   pageSize?: number;
   scope?: UpcomingCatalogScope;
+  releaseRegion?: string;
 }
 
 export const DEFAULT_UPCOMING_PAGE_SIZE = 20;

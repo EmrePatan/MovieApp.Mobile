@@ -5,6 +5,7 @@ export const UPCOMING_CATALOG_QUERY_KEY_ROOT = ['upcoming', 'catalog'] as const;
 export function upcomingCatalogInfiniteQueryKey(
   pageSize = DEFAULT_UPCOMING_PAGE_SIZE,
   scope: 'catalog' | 'followed' = 'followed',
-): readonly ['upcoming', 'catalog', 'catalog' | 'followed', number] {
-  return [...UPCOMING_CATALOG_QUERY_KEY_ROOT, scope, pageSize];
+  releaseRegion = 'TR',
+): readonly ['upcoming', 'catalog', 'catalog' | 'followed', number, string] {
+  return [...UPCOMING_CATALOG_QUERY_KEY_ROOT, scope, pageSize, releaseRegion];
 }

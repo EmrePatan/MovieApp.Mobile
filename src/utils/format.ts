@@ -1,4 +1,4 @@
-import { getUiFormatLocaleTag } from '@/i18n';
+import { getUiFormatLocaleTag, i18n } from '@/i18n';
 import { translateContentType } from '@/i18n/catalog-labels';
 
 export function formatIsoDate(value: string | null | undefined): string | null {
@@ -27,14 +27,14 @@ export function formatRuntimeMinutes(minutes: number | null | undefined): string
   const remainingMinutes = minutes % 60;
 
   if (hours === 0) {
-    return `${remainingMinutes}m`;
+    return i18n.t('insights.format.duration.minutes', { count: remainingMinutes });
   }
 
   if (remainingMinutes === 0) {
-    return `${hours}h`;
+    return i18n.t('insights.format.duration.hours', { count: hours });
   }
 
-  return `${hours}h ${remainingMinutes}m`;
+  return i18n.t('insights.format.duration.hoursMinutes', { hours, minutes: remainingMinutes });
 }
 
 export function formatRating(value: number): string {

@@ -17,6 +17,13 @@ describe('resolveInitialUiLanguage', () => {
     });
   });
 
+  it('maps Spanish device locale to es', () => {
+    expect(resolveInitialUiLanguage(null, 'es-ES')).toEqual({
+      language: 'es',
+      source: 'device',
+    });
+  });
+
   it('falls back to English for unsupported device locales', () => {
     expect(resolveInitialUiLanguage(null, 'de')).toEqual({
       language: 'en',
@@ -44,5 +51,10 @@ describe('i18n language switching', () => {
 
     expect(validateLoginForm('', '').email).toBe('E-posta gerekli.');
     expect(i18n.language).toBe('tr');
+
+    await changeUiLanguage('es');
+
+    expect(validateLoginForm('', '').email).toBe('El correo es obligatorio.');
+    expect(i18n.language).toBe('es');
   });
 });

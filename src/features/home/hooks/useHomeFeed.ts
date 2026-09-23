@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { mergeProgressiveHomeSections } from '../utils/merge-progressive-home-sections';
 import { mapUpcomingCatalogItemsToHomeItems } from '../utils/map-upcoming-catalog-to-home-item';
+import { resolveHomeSectionTitle } from '../utils/resolve-home-section-title';
 import {
   resolvePersonalizationState,
   type PersonalizationState,
@@ -12,6 +14,7 @@ import { useHomeComingUpCatalogFallback } from './useHomeComingUpCatalogFallback
 import { useHomePersonalized } from './useHomePersonalized';
 
 export function useHomeFeed(type: HomeTypeFilter = 'all', sectionSize = DEFAULT_HOME_SECTION_SIZE) {
+  const { t } = useTranslation();
   const browse = useHomeBrowse(type, sectionSize);
   const personalized = useHomePersonalized(type, sectionSize);
 
@@ -52,13 +55,13 @@ export function useHomeFeed(type: HomeTypeFilter = 'all', sectionSize = DEFAULT_
 
     const comingUpSection: HomeSection = {
       type: 'ComingUp',
-      title: 'Coming Up',
+      title: resolveHomeSectionTitle('ComingUp', 'Coming Up', t),
       displayOrder: 0,
       items: mapUpcomingCatalogItemsToHomeItems(catalogItems),
     };
 
     return [...mergedSections, comingUpSection];
-  }, [comingUpCatalogFallback.data?.items, hasPersonalizedComingUp, mergedSections]);
+  }, [comingUpCatalogFallback.data?.items, hasPersonalizedComingUp, mergedSections, t]);
 
   const refetch = useCallback(async () => {
     await Promise.all([

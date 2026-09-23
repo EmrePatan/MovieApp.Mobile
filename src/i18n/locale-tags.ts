@@ -1,8 +1,9 @@
 import { countryCodeToFlagEmoji } from '@/features/discovery/utils/country-flag';
+import { getSupportedUiLocale, isSupportedUiLanguage } from './supported-locales';
 import type { UiLanguage } from './types';
 
 export function toFormatLocaleTag(language: UiLanguage): string {
-  return language === 'tr' ? 'tr-TR' : 'en-US';
+  return getSupportedUiLocale(language).formatTag;
 }
 
 export function normalizeDeviceLanguageCode(languageCode: string | null | undefined): UiLanguage {
@@ -11,11 +12,15 @@ export function normalizeDeviceLanguageCode(languageCode: string | null | undefi
     return 'tr';
   }
 
+  if (normalized.startsWith('es')) {
+    return 'es';
+  }
+
   return 'en';
 }
 
 export function getLanguageCountryCode(language: UiLanguage): string {
-  return language === 'tr' ? 'TR' : 'US';
+  return getSupportedUiLocale(language).countryCode;
 }
 
 export function getLanguageFlagEmoji(language: UiLanguage): string {
@@ -24,10 +29,13 @@ export function getLanguageFlagEmoji(language: UiLanguage): string {
 
 export function getLanguageLabel(language: UiLanguage, inLanguage?: UiLanguage): string {
   const viewer = inLanguage ?? language;
+  return getSupportedUiLocale(language).labels[viewer];
+}
 
-  if (viewer === 'tr') {
-    return language === 'tr' ? 'Türkçe' : 'İngilizce';
+export function normalizeUiLanguage(value: string | null | undefined): UiLanguage {
+  if (isSupportedUiLanguage(value)) {
+    return value;
   }
 
-  return language === 'tr' ? 'Turkish' : 'English';
+  return 'en';
 }

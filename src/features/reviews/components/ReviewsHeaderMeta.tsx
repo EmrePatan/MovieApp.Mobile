@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -8,19 +9,22 @@ interface ReviewsHeaderMetaProps {
   reviewCount?: number;
 }
 
-function formatReviewCountLabel(totalCount: number): string {
-  return `${totalCount} ${totalCount === 1 ? 'review' : 'reviews'}`;
-}
-
 export function ReviewsHeaderMeta({
   contentTitle,
   reviewCount,
 }: ReviewsHeaderMetaProps) {
+  const { t } = useTranslation();
   const hasReviews = reviewCount !== undefined;
 
   if (!contentTitle && !hasReviews) {
     return null;
   }
+
+  const reviewCountLabel = hasReviews
+    ? t(reviewCount === 1 ? 'common.reviewCount' : 'common.reviewsCount', {
+        count: reviewCount,
+      })
+    : null;
 
   return (
     <View style={styles.container} testID="reviews-header-meta">
@@ -35,9 +39,9 @@ export function ReviewsHeaderMeta({
         </AppText>
       ) : null}
 
-      {hasReviews ? (
+      {reviewCountLabel ? (
         <AppText variant="caption" muted testID="reviews-review-count">
-          {formatReviewCountLabel(reviewCount!)}
+          {reviewCountLabel}
         </AppText>
       ) : null}
     </View>

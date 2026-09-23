@@ -12,6 +12,9 @@ export function buildHomeQueryString(criteria: HomeRequest = {}): string {
   const params = new URLSearchParams();
   params.set('type', criteria.type ?? 'all');
   params.set('sectionSize', String(criteria.sectionSize ?? DEFAULT_HOME_SECTION_SIZE));
+  if (criteria.releaseRegion) {
+    params.set('releaseRegion', criteria.releaseRegion);
+  }
   return params.toString();
 }
 

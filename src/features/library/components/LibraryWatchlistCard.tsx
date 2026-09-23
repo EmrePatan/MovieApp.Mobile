@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -12,18 +13,19 @@ interface LibraryWatchlistCardProps {
   onPress: (watchlistId: string) => void;
 }
 
-function formatItemCount(count: number): string {
-  return count === 1 ? '1 title' : `${count} titles`;
-}
-
 export const LibraryWatchlistCard = memo(function LibraryWatchlistCard({
   watchlist,
   onPress,
 }: LibraryWatchlistCardProps) {
+  const { t } = useTranslation();
+  const itemCountLabel = t('library.watchlistsOverview.titleCount', {
+    count: watchlist.itemCount,
+  });
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${watchlist.name}, ${formatItemCount(watchlist.itemCount)}`}
+      accessibilityLabel={`${watchlist.name}, ${itemCountLabel}`}
       onPress={() => onPress(watchlist.id)}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
@@ -35,7 +37,7 @@ export const LibraryWatchlistCard = memo(function LibraryWatchlistCard({
           {watchlist.name}
         </AppText>
         <AppText variant="caption" muted>
-          {formatItemCount(watchlist.itemCount)}
+          {itemCountLabel}
         </AppText>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

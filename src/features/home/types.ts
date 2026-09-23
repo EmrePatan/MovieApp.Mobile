@@ -5,6 +5,7 @@ export type HomeTypeFilter = 'all' | ContentType;
 export interface HomeRequest {
   type?: HomeTypeFilter;
   sectionSize?: number;
+  releaseRegion?: string;
 }
 
 export type HomeSectionType =

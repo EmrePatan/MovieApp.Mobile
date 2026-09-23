@@ -1,3 +1,5 @@
+import { getUiFormatLocaleTag, i18n } from '@/i18n';
+
 export function getAuthorInitials(displayName: string): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) {
@@ -17,7 +19,7 @@ export function formatReviewDate(value: string): string {
     return value;
   }
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(getUiFormatLocaleTag(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -27,7 +29,7 @@ export function formatReviewDate(value: string): string {
 export function formatReviewDateLabel(createdAt: string, updatedAt: string): string {
   const formatted = formatReviewDate(createdAt);
   if (updatedAt !== createdAt) {
-    return `${formatted} · edited`;
+    return `${formatted} · ${i18n.t('reviews.editedSuffix')}`;
   }
 
   return formatted;

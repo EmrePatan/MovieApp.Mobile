@@ -664,6 +664,8 @@ export const stage2Tr = {
       emptyTitle: 'Henüz izleme listen yok',
       emptyMessage: 'İzlemek istediğin film ve dizileri kaydetmek için bir liste oluştur.',
       newListAction: 'Yeni Liste',
+      titleCount_one: '1 başlık',
+      titleCount_other: '{{count}} başlık',
     },
     watchlistDetail: {
       defaultTitle: 'İzleme listesi',
@@ -913,6 +915,7 @@ export const stage2Tr = {
       ratingAsc: 'En düşük puanlı',
     },
     yourReview: 'Yorumun',
+    editedSuffix: 'düzenlendi',
     edit: 'Düzenle',
     editReview: 'Yorumu düzenle',
     validation: {
