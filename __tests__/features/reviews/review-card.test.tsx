@@ -1,6 +1,22 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Text } from 'react-native';
 import { ReviewCard } from '@/features/reviews/components/ReviewCard';
 import type { ReviewResponse } from '@/features/reviews/types';
+
+jest.mock('@/features/reviews/components/ReviewTranslationControls', () => {
+  const React = require('react');
+  const { Text: NativeText } = require('react-native');
+
+  return {
+    ReviewTranslationControls: ({
+      review,
+      numberOfLines,
+    }: {
+      review: { content: string };
+      numberOfLines?: number;
+    }) => React.createElement(NativeText, { numberOfLines }, review.content),
+  };
+});
 
 const review: ReviewResponse = {
   id: 'review-id',

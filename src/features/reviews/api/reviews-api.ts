@@ -11,12 +11,14 @@ import {
   buildTvReviewsPath,
   buildUpdateMovieReviewPath,
   buildUpdateTvReviewPath,
+  buildReviewTranslationPath,
 } from './routes';
 import type {
   CreateReviewRequest,
   ReviewListResponse,
   ReviewResponse,
   ReviewSortOption,
+  ReviewTranslationResponse,
   UpdateReviewRequest,
 } from '../types';
 
@@ -118,4 +120,18 @@ export async function deleteMovieReview(movieId: string): Promise<void> {
 
 export async function deleteTvReview(tvShowId: string): Promise<void> {
   await api.delete<void>(buildDeleteTvReviewPath(tvShowId));
+}
+
+export async function translateReview(
+  reviewId: string,
+  signal?: AbortSignal,
+): Promise<ReviewTranslationResponse> {
+  return api.post<ReviewTranslationResponse>(
+    buildReviewTranslationPath(reviewId),
+    {},
+    {
+      authenticated: false,
+      signal,
+    },
+  );
 }

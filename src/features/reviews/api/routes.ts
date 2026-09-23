@@ -79,3 +79,7 @@ export function buildUpdateTvReviewPath(tvShowId: string): string {
 export function buildDeleteTvReviewPath(tvShowId: string): string {
   return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}`;
 }
+
+export function buildReviewTranslationPath(reviewId: string): string {
+  return `/api/reviews/${encodePathSegment(reviewId)}/translation`;
+}

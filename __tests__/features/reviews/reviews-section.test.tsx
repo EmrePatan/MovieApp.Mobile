@@ -13,7 +13,20 @@ import {
   useDeleteReviewMutation,
   useUpdateReviewMutation,
 } from '@/features/reviews/hooks/useReviewMutations';
-import type { ReviewResponse } from '@/features/reviews/types';
+jest.mock('@/features/reviews/components/ReviewTranslationControls', () => {
+  const React = require('react');
+  const { Text: NativeText } = require('react-native');
+
+  return {
+    ReviewTranslationControls: ({
+      review,
+      numberOfLines,
+    }: {
+      review: { content: string };
+      numberOfLines?: number;
+    }) => React.createElement(NativeText, { numberOfLines }, review.content),
+  };
+});
 
 const mockCreateMutate = jest.fn();
 const mockUpdateMutate = jest.fn();

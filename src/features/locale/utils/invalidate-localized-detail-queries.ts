@@ -20,4 +20,5 @@ export function invalidateLocalizedDetailQueries(queryClient: QueryClient): void
   void queryClient.invalidateQueries({ queryKey: AUTOCOMPLETE_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: RECOMMENDATIONS_QUERY_KEY_ROOT });
+  void queryClient.invalidateQueries({ queryKey: ['reviews', 'translation'] });
 }

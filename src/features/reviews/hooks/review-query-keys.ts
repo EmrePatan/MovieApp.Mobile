@@ -27,3 +27,11 @@ export function movieMyReviewQueryKey(movieId: string) {
 export function tvMyReviewQueryKey(tvShowId: string) {
   return ['reviews', 'tv', tvShowId, 'me'] as const;
 }
+
+export function reviewTranslationQueryKey(
+  reviewId: string,
+  updatedAt: string,
+  targetLocale: string,
+) {
+  return ['reviews', 'translation', reviewId, updatedAt, targetLocale] as const;
+}

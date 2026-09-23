@@ -9,6 +9,7 @@ import {
   buildTvReviewsPath,
   buildUpdateMovieReviewPath,
   buildUpdateTvReviewPath,
+  buildReviewTranslationPath,
 } from '@/features/reviews/api/routes';
 import {
   createMovieReview,
@@ -49,6 +50,10 @@ describe('reviews api routes', () => {
     expect(buildCreateMovieReviewPath(movieId)).toBe(`/api/reviews/movies/${movieId}`);
     expect(buildUpdateMovieReviewPath(movieId)).toBe(`/api/reviews/movies/${movieId}`);
     expect(buildDeleteMovieReviewPath(movieId)).toBe(`/api/reviews/movies/${movieId}`);
+  });
+
+  it('builds review translation route', () => {
+    expect(buildReviewTranslationPath('review-123')).toBe('/api/reviews/review-123/translation');
   });
 
   it('builds tv review routes', () => {

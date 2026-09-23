@@ -13,6 +13,7 @@ import {
   REVIEW_LIST_COLLAPSED_LINE_COUNT,
 } from '../utils/review-content-length';
 import { ReviewAuthorRating } from './ReviewAuthorRating';
+import { ReviewTranslationControls } from './ReviewTranslationControls';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -115,13 +116,22 @@ export const ReviewCard = memo(function ReviewCard({
         ) : null}
       </View>
       <View style={styles.body}>
-        <AppText
-          variant="bodySmall"
-          style={styles.content}
-          numberOfLines={expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined}
-        >
-          {content}
-        </AppText>
+        {isOwnReview ? (
+          <AppText
+            variant="bodySmall"
+            style={styles.content}
+            numberOfLines={expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined}
+          >
+            {content}
+          </AppText>
+        ) : (
+          <ReviewTranslationControls
+            review={review}
+            numberOfLines={
+              expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined
+            }
+          />
+        )}
         {canExpand ? (
           <Pressable
             accessibilityRole="button"

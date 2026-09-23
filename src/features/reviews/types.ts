@@ -27,6 +27,17 @@ export interface ReviewResponse {
   createdAt: string;
   updatedAt: string;
   userRating?: number | null;
+  authoringLocale?: string | null;
+}
+
+export type ReviewTranslationOutcome = 'Translated' | 'SourceMatchesTarget';
+
+export interface ReviewTranslationResponse {
+  reviewId: string;
+  outcome: ReviewTranslationOutcome;
+  translatedText?: string | null;
+  detectedSourceLanguage?: string | null;
+  targetLocale: string;
 }
 
 export interface ReviewListResponse {
