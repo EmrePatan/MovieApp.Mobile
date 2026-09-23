@@ -886,6 +886,8 @@ export const stage2Pt = {
   reviews: {
     title: 'Críticas',
     writePrompt: 'Compartilhe sua opinião',
+    writePromptSubtitle: 'O que você acha deste título?',
+    writeReviewCta: 'Escrever crítica',
     writeAction: 'Escrever',
     writeAccessibility: 'Escrever uma crítica',
     writeReviewTitle: 'Escrever crítica',
@@ -914,6 +916,8 @@ export const stage2Pt = {
       ratingAsc: 'Menos bem avaliados',
     },
     yourReview: 'Sua crítica',
+    youBadge: 'Você',
+    communityRating: 'Avaliação da comunidade',
     editedSuffix: 'editado',
     edit: 'Editar',
     editReview: 'Editar crítica',

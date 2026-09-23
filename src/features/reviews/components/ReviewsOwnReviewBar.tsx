@@ -27,12 +27,9 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
   return (
     <View style={styles.container} testID="reviews-own-review-bar">
       <View style={styles.headerRow}>
-        <View style={styles.labelRow}>
-          <AppText variant="caption" style={styles.label}>
-            {t('reviews.yourReview')}
-          </AppText>
-          <ReviewAuthorRating userRating={review.userRating} />
-        </View>
+        <AppText variant="caption" style={styles.label}>
+          {t('reviews.yourReview')}
+        </AppText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('reviews.editReview')}
@@ -45,14 +42,17 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
           </AppText>
         </Pressable>
       </View>
+
+      <ReviewAuthorRating userRating={review.userRating} variant="inline" size="md" />
+
       <AppText
         variant="bodySmall"
-        muted
-        numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
         style={styles.preview}
+        numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
       >
         {content}
       </AppText>
+
       {canExpand ? (
         <Pressable
           accessibilityRole="button"
@@ -77,40 +77,33 @@ const styles = StyleSheet.create({
   container: {
     gap: spacing.xs,
     marginHorizontal: layout.screenPaddingHorizontal,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  labelRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    flexWrap: 'wrap',
-  },
   label: {
-    color: colors.accent,
+    color: colors.accentMuted,
     fontWeight: '600',
     fontSize: 11,
     lineHeight: 14,
     letterSpacing: 0.2,
   },
   preview: {
-    lineHeight: 19,
-    fontSize: 13,
+    lineHeight: 21,
+    color: colors.textPrimary,
+    fontSize: 14,
   },
   expandButton: {
     alignSelf: 'flex-start',
-    marginTop: 1,
   },
   expandLabel: {
     color: colors.accent,
@@ -121,15 +114,15 @@ const styles = StyleSheet.create({
     minHeight: interaction.touchTarget,
     minWidth: interaction.touchTarget,
     alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-    paddingTop: 1,
-    marginTop: -6,
-    marginRight: -4,
+    justifyContent: 'center',
+    marginRight: -spacing.sm,
+    marginTop: -spacing.xs,
+    marginBottom: -spacing.xs,
   },
   editLabel: {
     color: colors.accent,
     fontWeight: '600',
-    fontSize: 11,
+    fontSize: 12,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

@@ -886,6 +886,8 @@ export const stage2Fr = {
   reviews: {
     title: 'Avis',
     writePrompt: 'Partagez votre avis',
+    writePromptSubtitle: 'Que pensez-vous de ce titre ?',
+    writeReviewCta: 'Écrire un avis',
     writeAction: 'Écrire',
     writeAccessibility: 'Écrire un avis',
     writeReviewTitle: 'Écrire un avis',
@@ -914,6 +916,8 @@ export const stage2Fr = {
       ratingAsc: 'Les moins bien notés',
     },
     yourReview: 'Votre avis',
+    youBadge: 'Vous',
+    communityRating: 'Note de la communauté',
     editedSuffix: 'modifié',
     edit: 'Modifier',
     editReview: 'Modifier l\'avis',

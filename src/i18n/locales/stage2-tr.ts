@@ -887,6 +887,8 @@ export const stage2Tr = {
   reviews: {
     title: 'Yorumlar',
     writePrompt: 'Düşüncelerini paylaş',
+    writePromptSubtitle: 'Bu yapım hakkında ne düşünüyorsun?',
+    writeReviewCta: 'Yorum yaz',
     writeAction: 'Yaz',
     writeAccessibility: 'İnceleme yaz',
     writeReviewTitle: 'İnceleme yaz',
@@ -915,6 +917,8 @@ export const stage2Tr = {
       ratingAsc: 'En düşük puanlı',
     },
     yourReview: 'Yorumun',
+    youBadge: 'Sen',
+    communityRating: 'Topluluk puanı',
     editedSuffix: 'düzenlendi',
     edit: 'Düzenle',
     editReview: 'Yorumu düzenle',

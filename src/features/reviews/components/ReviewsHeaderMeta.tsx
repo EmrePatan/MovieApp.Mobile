@@ -31,6 +31,7 @@ export function ReviewsHeaderMeta({
       {contentTitle ? (
         <AppText
           variant="bodySmall"
+          muted
           style={styles.title}
           numberOfLines={2}
           testID="reviews-content-title"
@@ -40,7 +41,7 @@ export function ReviewsHeaderMeta({
       ) : null}
 
       {reviewCountLabel ? (
-        <AppText variant="caption" muted testID="reviews-review-count">
+        <AppText variant="caption" style={styles.count} testID="reviews-review-count">
           {reviewCountLabel}
         </AppText>
       ) : null}
@@ -50,10 +51,16 @@ export function ReviewsHeaderMeta({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 2,
+    gap: 3,
+    marginTop: 2,
   },
   title: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: '500',
+    lineHeight: 20,
+  },
+  count: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

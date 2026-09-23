@@ -80,6 +80,35 @@ describe('ReviewTranslationControls', () => {
     expect(reviewsApi.translateReview).toHaveBeenCalledTimes(1);
   });
 
+  it('shows only retry after a failed translation request', async () => {
+    jest.spyOn(reviewsApi, 'translateReview').mockRejectedValue(new Error('network'));
+
+    renderWithClient(<ReviewTranslationControls review={review} />);
+
+    fireEvent.press(screen.getByTestId('review-see-translation'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('review-translation-retry')).toBeTruthy();
+    });
+
+    expect(screen.getByText('Película increíble')).toBeTruthy();
+    expect(screen.queryByTestId('review-see-translation')).toBeNull();
+  });
+
+  it('keeps original text visible while translating', () => {
+    jest.spyOn(reviewsApi, 'translateReview').mockImplementation(
+      () => new Promise(() => undefined),
+    );
+
+    renderWithClient(<ReviewTranslationControls review={review} />);
+
+    fireEvent.press(screen.getByTestId('review-see-translation'));
+
+    expect(screen.getByText('Película increíble')).toBeTruthy();
+    expect(screen.getByText('Translating…')).toBeTruthy();
+    expect(screen.queryByTestId('review-see-translation')).toBeNull();
+  });
+
   it('keeps original text when source matches target', async () => {
     jest.spyOn(reviewsApi, 'translateReview').mockResolvedValue({
       reviewId: review.id,

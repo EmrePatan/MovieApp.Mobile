@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { ReviewSortOption } from '../types';
 import { getReviewSortLabel, REVIEW_SORT_OPTIONS } from '../utils/review-sort';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+import { interaction } from '@/theme/interaction';
 
 interface ReviewsSortControlProps {
   value: ReviewSortOption;
@@ -36,7 +37,11 @@ export function ReviewsSortControl({ value, onChange }: ReviewsSortControlProps)
             onPress={() => onChange(option)}
             style={[styles.chip, selected && styles.chipSelected]}
           >
-            <AppText variant="caption" style={[styles.label, selected && styles.labelSelected]}>
+            <AppText
+              variant="caption"
+              numberOfLines={1}
+              style={[styles.label, selected && styles.labelSelected]}
+            >
               {getReviewSortLabel(option)}
             </AppText>
           </Pressable>
@@ -54,17 +59,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 6,
     paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingVertical: 2,
   },
   chip: {
-    minHeight: 28,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    minHeight: interaction.touchTarget,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    maxWidth: 180,
   },
   chipSelected: {
     backgroundColor: colors.accentTint12,
@@ -73,8 +80,8 @@ const styles = StyleSheet.create({
   label: {
     color: colors.textSecondary,
     fontWeight: '500',
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
   },
   labelSelected: {
     color: colors.accent,

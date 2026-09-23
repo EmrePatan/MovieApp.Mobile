@@ -40,13 +40,14 @@ export function ReviewsRatingDistribution({
 
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
-      <View style={styles.mainRow}>
-        <View style={styles.scoreBlock} testID="reviews-community-rating">
-          <AppText variant="caption" style={styles.communityLabel}>
-            Community
-          </AppText>
+      <AppText variant="caption" style={styles.sectionLabel}>
+        {t('reviews.communityRating')}
+      </AppText>
+
+      <View style={styles.card} testID="reviews-community-rating">
+        <View style={styles.scoreBlock}>
           <View style={styles.scoreRow}>
-            <Ionicons name="star" size={18} color={colors.accentStrong} />
+            <Ionicons name="star" size={16} color={colors.accentStrong} />
             <AppText style={styles.scoreValue}>
               {formatCommunityStarRatingDisplay(averageScore)}
             </AppText>
@@ -113,40 +114,46 @@ export function ReviewsRatingDistribution({
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: layout.screenPaddingHorizontal,
+    gap: spacing.xs,
   },
-  mainRow: {
+  sectionLabel: {
+    color: colors.textMuted,
+    fontWeight: '600',
+    fontSize: 11,
+    lineHeight: 14,
+    letterSpacing: 0.2,
+  },
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   scoreBlock: {
-    minWidth: 88,
+    minWidth: 72,
+    maxWidth: 96,
     gap: 2,
-  },
-  communityLabel: {
-    color: colors.textMuted,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    fontSize: 10,
-    lineHeight: 12,
   },
   scoreRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 4,
-    marginTop: 2,
+    gap: 3,
   },
   scoreValue: {
     color: colors.textPrimary,
-    fontSize: 28,
-    lineHeight: 32,
+    fontSize: 26,
+    lineHeight: 30,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   scoreOutOf: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11,
+    lineHeight: 14,
     marginBottom: 2,
   },
   countLabel: {
@@ -156,22 +163,23 @@ const styles = StyleSheet.create({
   },
   rows: {
     flex: 1,
-    gap: 2,
+    gap: 3,
+    minWidth: 0,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    minHeight: 16,
+    minHeight: 18,
   },
   rowDisabled: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
   rowPressed: {
     opacity: 0.85,
   },
   starLabel: {
-    width: 22,
+    width: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
   },
   track: {
     flex: 1,
-    height: 5,
+    height: 4,
     borderRadius: borderRadius.full,
     backgroundColor: colors.surfaceElevated,
     overflow: 'hidden',
@@ -200,7 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   count: {
-    width: 22,
+    width: 20,
     textAlign: 'right',
     fontVariant: ['tabular-nums'],
     fontSize: 10,

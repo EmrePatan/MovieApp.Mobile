@@ -21,38 +21,65 @@ export function ReviewsWritePrompt({ onPress }: ReviewsWritePromptProps) {
       style={({ pressed }) => [styles.container, pressed && styles.pressed]}
       testID="reviews-write-section"
     >
-      <AppText variant="bodySmall" muted style={styles.prompt}>
-        {t('reviews.writePrompt')}
-      </AppText>
-      <AppText variant="caption" style={styles.action}>
-        {t('reviews.writeAction')}
-      </AppText>
+      <View style={styles.copyBlock}>
+        <AppText variant="bodySmall" style={styles.headline}>
+          {t('reviews.writePrompt')}
+        </AppText>
+        <AppText variant="caption" muted style={styles.subtitle}>
+          {t('reviews.writePromptSubtitle')}
+        </AppText>
+      </View>
+      <View style={styles.ctaPill}>
+        <AppText variant="caption" style={styles.ctaLabel}>
+          {t('reviews.writeReviewCta')}
+        </AppText>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     marginHorizontal: layout.screenPaddingHorizontal,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
     backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    gap: spacing.sm,
     minHeight: interaction.touchTarget,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
   },
-  prompt: {
-    flex: 1,
+  copyBlock: {
+    gap: 4,
   },
-  action: {
+  headline: {
+    color: colors.textPrimary,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  subtitle: {
+    lineHeight: 17,
+    fontSize: 12,
+  },
+  ctaPill: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.accentTint12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderAccent,
+    minHeight: interaction.touchTarget,
+    justifyContent: 'center',
+  },
+  ctaLabel: {
     color: colors.accent,
     fontWeight: '600',
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

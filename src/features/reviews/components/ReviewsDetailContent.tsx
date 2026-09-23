@@ -443,23 +443,25 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.md,
     gap: spacing.xs,
   },
   headerTitle: {
     color: colors.textPrimary,
+    letterSpacing: -0.2,
   },
   listContent: {
     paddingBottom: spacing.xxl,
     flexGrow: 1,
   },
   listHeader: {
-    gap: spacing.sm,
+    gap: spacing.md,
     paddingBottom: spacing.xs,
   },
   communityPanel: {
     gap: spacing.sm,
-    paddingBottom: spacing.xs,
+    paddingBottom: spacing.sm,
   },
   loading: {
     paddingVertical: spacing.xxl,
@@ -496,9 +498,10 @@ function ReviewListSeparator() {
 
 const reviewListSeparatorStyles = StyleSheet.create({
   separator: {
-    height: 1,
-    marginHorizontal: layout.screenPaddingHorizontal,
-    marginVertical: spacing.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    height: StyleSheet.hairlineWidth,
+    marginLeft: layout.screenPaddingHorizontal + 36 + spacing.sm,
+    marginRight: layout.screenPaddingHorizontal,
+    marginVertical: spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
 });

@@ -866,6 +866,8 @@ export const stage2En = {
   reviews: {
     title: 'Reviews',
     writePrompt: 'Share your thoughts',
+    writePromptSubtitle: 'What do you think about this title?',
+    writeReviewCta: 'Write review',
     writeAction: 'Write',
     writeAccessibility: 'Write a review',
     writeReviewTitle: 'Write review',
@@ -894,6 +896,8 @@ export const stage2En = {
       ratingAsc: 'Lowest rated',
     },
     yourReview: 'Your review',
+    youBadge: 'You',
+    communityRating: 'Community rating',
     editedSuffix: 'edited',
     edit: 'Edit',
     editReview: 'Edit review',

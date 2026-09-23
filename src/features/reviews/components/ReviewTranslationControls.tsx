@@ -76,6 +76,11 @@ export function ReviewTranslationControls({
     translationQuery.refetch();
   };
 
+  const showToggleAction =
+    shouldShowAction &&
+    !translationQuery.isFetching &&
+    !translationQuery.isError;
+
   if (!shouldShowAction && !translationQuery.isFetching && !translationQuery.data) {
     return (
       <AppText variant="bodySmall" style={styles.content} numberOfLines={numberOfLines}>
@@ -97,7 +102,11 @@ export function ReviewTranslationControls({
       ) : null}
 
       {translationQuery.isFetching ? (
-        <View style={styles.inlineStatus}>
+        <View
+          style={styles.inlineStatus}
+          accessibilityRole="progressbar"
+          accessibilityLabel={t('reviews.translating')}
+        >
           <ActivityIndicator size="small" color={colors.textMuted} />
           <AppText variant="caption" muted>
             {t('reviews.translating')}
@@ -116,6 +125,7 @@ export function ReviewTranslationControls({
             onPress={handleRetry}
             hitSlop={4}
             style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
+            testID="review-translation-retry"
           >
             <AppText variant="caption" style={styles.actionLabel}>
               {t('reviews.tryAgain')}
@@ -124,7 +134,7 @@ export function ReviewTranslationControls({
         </View>
       ) : null}
 
-      {shouldShowAction && !translationQuery.isFetching ? (
+      {showToggleAction ? (
         canShowTranslated ? (
           <Pressable
             accessibilityRole="button"
@@ -145,7 +155,6 @@ export function ReviewTranslationControls({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('reviews.seeTranslationAccessibility')}
-            disabled={translationQuery.isFetching}
             onPress={handleSeeTranslation}
             hitSlop={4}
             style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
@@ -169,10 +178,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   content: {
-    lineHeight: 20,
+    lineHeight: 21,
     color: colors.textSecondary,
     letterSpacing: 0.1,
-    fontSize: 13,
+    fontSize: 14,
   },
   metadata: {
     fontSize: 11,
@@ -186,6 +195,8 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     alignSelf: 'flex-start',
+    minHeight: interaction.touchTarget,
+    justifyContent: 'center',
   },
   actionRow: {
     flexDirection: 'row',

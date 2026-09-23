@@ -886,6 +886,8 @@ export const stage2Es = {
   reviews: {
     title: 'Reseñas',
     writePrompt: 'Comparte tu opinión',
+    writePromptSubtitle: '¿Qué opinas de este título?',
+    writeReviewCta: 'Escribir reseña',
     writeAction: 'Escribir',
     writeAccessibility: 'Escribir una reseña',
     writeReviewTitle: 'Escribir reseña',
@@ -914,6 +916,8 @@ export const stage2Es = {
       ratingAsc: 'Peor valoradas',
     },
     yourReview: 'Tu reseña',
+    youBadge: 'Tú',
+    communityRating: 'Valoración de la comunidad',
     editedSuffix: 'editada',
     edit: 'Editar',
     editReview: 'Editar reseña',

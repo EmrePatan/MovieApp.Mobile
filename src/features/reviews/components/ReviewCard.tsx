@@ -19,7 +19,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 
-const AVATAR_SIZE = 34;
+const AVATAR_SIZE = 36;
 const CONTENT_INDENT = AVATAR_SIZE + spacing.sm;
 
 type ReviewCardVariant = 'row' | 'surface';
@@ -46,6 +46,7 @@ export const ReviewCard = memo(function ReviewCard({
   const dateLabel = formatReviewDateLabel(review.createdAt, review.updatedAt);
   const content = review.content.trim();
   const canExpand = likelyExceedsCollapsedLines(content, REVIEW_LIST_COLLAPSED_LINE_COUNT);
+  const hasActions = isOwnReview && (onEdit || onDelete);
 
   return (
     <View
@@ -67,54 +68,63 @@ export const ReviewCard = memo(function ReviewCard({
             {getAuthorInitials(review.user.displayName)}
           </AppText>
         </View>
+
         <View style={styles.meta}>
-          <View style={styles.nameRow}>
-            <AppText variant="bodySmall" style={styles.authorName} numberOfLines={1}>
-              {review.user.displayName}
+          <View style={styles.topRow}>
+            <View style={styles.nameBlock}>
+              <AppText variant="bodySmall" style={styles.authorName} numberOfLines={1}>
+                {review.user.displayName}
+              </AppText>
+              {isOwnReview ? (
+                <View style={styles.youBadge}>
+                  <AppText variant="caption" style={styles.youBadgeText}>
+                    {t('reviews.youBadge')}
+                  </AppText>
+                </View>
+              ) : null}
+            </View>
+            <ReviewAuthorRating userRating={review.userRating} variant="inline" />
+          </View>
+
+          <View style={styles.bottomRow}>
+            <AppText variant="caption" muted style={styles.dateLabel} numberOfLines={1}>
+              {dateLabel}
             </AppText>
-            {isOwnReview ? (
-              <View style={styles.youBadge}>
-                <AppText variant="caption" style={styles.youBadgeText}>You</AppText>
+            {hasActions ? (
+              <View style={styles.actions}>
+                {onEdit ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('reviews.editReview')}
+                    hitSlop={8}
+                    onPress={onEdit}
+                    style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
+                  >
+                    <Ionicons name="pencil-outline" size={16} color={colors.textMuted} />
+                  </Pressable>
+                ) : null}
+                {onDelete ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('common.deleteReview')}
+                    disabled={isDeleting}
+                    hitSlop={8}
+                    onPress={onDelete}
+                    style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
+                  >
+                    {isDeleting ? (
+                      <ActivityIndicator color={colors.textMuted} size="small" />
+                    ) : (
+                      <Ionicons name="trash-outline" size={16} color={colors.danger} />
+                    )}
+                  </Pressable>
+                ) : null}
               </View>
             ) : null}
-            <ReviewAuthorRating userRating={review.userRating} />
           </View>
-          <AppText variant="caption" muted style={styles.dateLabel}>
-            {dateLabel}
-          </AppText>
         </View>
-        {isOwnReview && (onEdit || onDelete) ? (
-          <View style={styles.actions}>
-            {onEdit ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('reviews.editReview')}
-                hitSlop={8}
-                onPress={onEdit}
-                style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
-              >
-                <Ionicons name="pencil-outline" size={16} color={colors.textMuted} />
-              </Pressable>
-            ) : null}
-            {onDelete ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('common.deleteReview')}
-                disabled={isDeleting}
-                hitSlop={8}
-                onPress={onDelete}
-                style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
-              >
-                {isDeleting ? (
-                  <ActivityIndicator color={colors.textMuted} size="small" />
-                ) : (
-                  <Ionicons name="trash-outline" size={16} color={colors.danger} />
-                )}
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
       </View>
+
       <View style={styles.body}>
         {isOwnReview ? (
           <AppText
@@ -160,14 +170,14 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.md,
-    paddingBottom: spacing.sm + 2,
+    paddingBottom: spacing.sm,
   },
   cardSurface: {
     marginHorizontal: layout.screenPaddingHorizontal,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   header: {
@@ -179,10 +189,10 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   avatarOwn: {
@@ -193,18 +203,34 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontWeight: '600',
     letterSpacing: 0.3,
-    fontSize: 11,
+    fontSize: 12,
   },
   meta: {
     flex: 1,
-    gap: 3,
+    gap: 4,
+    minWidth: 0,
     paddingTop: 1,
   },
-  nameRow: {
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  nameBlock: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+    minWidth: 0,
     flexWrap: 'wrap',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    minHeight: 20,
   },
   authorName: {
     fontWeight: '600',
@@ -216,16 +242,17 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontSize: 11,
     lineHeight: 14,
+    flex: 1,
   },
   body: {
     paddingLeft: CONTENT_INDENT,
-    gap: 3,
+    gap: 4,
   },
   content: {
-    lineHeight: 20,
+    lineHeight: 21,
     color: colors.textSecondary,
     letterSpacing: 0.1,
-    fontSize: 13,
+    fontSize: 14,
   },
   expandButton: {
     alignSelf: 'flex-start',
@@ -244,15 +271,14 @@ const styles = StyleSheet.create({
   youBadgeText: {
     color: colors.accent,
     fontWeight: '600',
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 10,
+    lineHeight: 13,
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
-    marginTop: 2,
-    marginLeft: spacing.xs,
+    gap: 0,
+    marginRight: -spacing.xs,
   },
   actionButton: {
     width: layout.touchTarget,
