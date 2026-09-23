@@ -25,6 +25,14 @@ jest.mock('expo-notifications', () => ({
   },
 }));
 
+jest.mock('@/i18n', () => {
+  const actual = jest.requireActual<typeof import('@/i18n')>('@/i18n');
+  return {
+    ...actual,
+    getUiFormatLocaleTag: jest.fn(() => 'en-US'),
+  };
+});
+
 jest.mock('@/features/follows/api/push-devices-api', () => ({
   registerPushDevice: jest.fn(),
   unregisterPushDevice: jest.fn(),
@@ -68,6 +76,7 @@ describe('ensurePushDeviceRegisteredAsync', () => {
     expect(registerPushDevice).toHaveBeenCalledWith({
       expoPushToken: 'ExponentPushToken[abcdefghijklmnopqrstuvwxyz123456]',
       platform: 'ios',
+      contentLocale: 'en-US',
     });
     expect(saveRegisteredExpoPushToken).toHaveBeenCalledWith(
       'ExponentPushToken[abcdefghijklmnopqrstuvwxyz123456]',

@@ -1,7 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { de } from './locales/de';
 import { en } from './locales/en';
 import { es } from './locales/es';
+import { fr } from './locales/fr';
+import { it } from './locales/it';
+import { pt } from './locales/pt';
 import { tr } from './locales/tr';
 import { normalizeUiLanguage, toFormatLocaleTag } from './locale-tags';
 import { SUPPORTED_UI_LANGUAGES } from './types';
@@ -16,6 +20,10 @@ export async function ensureI18nInitialized(language: UiLanguage = 'en'): Promis
         en: { translation: en },
         tr: { translation: tr },
         es: { translation: es },
+        de: { translation: de },
+        fr: { translation: fr },
+        it: { translation: it },
+        pt: { translation: pt },
       },
       lng: language,
       fallbackLng: 'en',

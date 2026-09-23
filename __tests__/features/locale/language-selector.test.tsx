@@ -1,7 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { changeUiLanguage } from '@/i18n';
 import { LanguageSelector } from '@/features/locale/components/LanguageSelector';
+import { SUPPORTED_UI_LANGUAGES } from '@/i18n/types';
 
 describe('LanguageSelector', () => {
+  beforeEach(async () => {
+    await changeUiLanguage('en');
+  });
+
   it('shows the selected language while collapsed', () => {
     render(
       <LanguageSelector
@@ -18,7 +24,7 @@ describe('LanguageSelector', () => {
     expect(screen.queryByLabelText('Turkish')).toBeNull();
   });
 
-  it('renders language options and preserves selection behavior', () => {
+  it('renders all seven language options and preserves selection behavior', () => {
     const onSelect = jest.fn();
     const onToggleExpanded = jest.fn();
 
@@ -33,8 +39,11 @@ describe('LanguageSelector', () => {
       />,
     );
 
-    expect(screen.getAllByText('English').length).toBeGreaterThan(0);
-    expect(screen.getByText('Turkish')).toBeTruthy();
+    expect(SUPPORTED_UI_LANGUAGES).toHaveLength(7);
+    expect(screen.getByLabelText('English')).toBeTruthy();
+    expect(screen.getByLabelText('Turkish')).toBeTruthy();
+    expect(screen.getByLabelText('German')).toBeTruthy();
+    expect(screen.getByLabelText('Portuguese (Brazil)')).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText('Turkish'));
 

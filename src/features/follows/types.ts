@@ -17,6 +17,7 @@ export interface UpsertTvShowFollowRequest {
 export interface RegisterPushDeviceRequest {
   expoPushToken: string;
   platform: 'ios' | 'android';
+  contentLocale?: string;
 }
 
 export interface UnregisterPushDeviceRequest {

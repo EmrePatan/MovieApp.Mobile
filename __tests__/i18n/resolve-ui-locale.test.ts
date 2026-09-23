@@ -24,8 +24,15 @@ describe('resolveInitialUiLanguage', () => {
     });
   });
 
-  it('falls back to English for unsupported device locales', () => {
+  it('maps German device locale to de', () => {
     expect(resolveInitialUiLanguage(null, 'de')).toEqual({
+      language: 'de',
+      source: 'device',
+    });
+  });
+
+  it('falls back to English for unsupported device locales', () => {
+    expect(resolveInitialUiLanguage(null, 'ja')).toEqual({
       language: 'en',
       source: 'device',
     });

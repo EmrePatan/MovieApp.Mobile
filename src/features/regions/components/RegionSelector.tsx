@@ -52,13 +52,14 @@ export function RegionSelector({
         <View style={styles.options}>
           {REGION_OPTIONS.map((option) => {
             const selected = option.code === value;
+            const optionLabel = getRegionLabel(option.code);
 
             return (
               <Pressable
                 key={option.code}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
-                accessibilityLabel={option.label}
+                accessibilityLabel={optionLabel}
                 onPress={() => onSelect(option.code)}
                 style={({ pressed }) => [
                   styles.option,
@@ -69,7 +70,7 @@ export function RegionSelector({
                 <View style={styles.optionContent}>
                   <CircularFlagBadge emoji={getRegionFlagEmoji(option.code)} />
                   <AppText variant="bodySmall" style={selected ? styles.optionLabelSelected : undefined}>
-                    {option.label}
+                    {optionLabel}
                   </AppText>
                 </View>
                 {selected ? (

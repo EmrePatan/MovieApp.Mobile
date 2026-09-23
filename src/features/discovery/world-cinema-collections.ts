@@ -1,4 +1,4 @@
-import { REGION_OPTIONS } from '@/features/regions/region-options';
+import { getRegionLabel, REGION_OPTIONS } from '@/features/regions/region-options';
 import {
   translateOriginCountryLabel,
   translateWorldCinemaCollection,
@@ -33,9 +33,8 @@ export function getOriginCountryLabel(code: string): string {
     return translated;
   }
 
-  const regionLabel = REGION_OPTIONS.find((option) => option.code === normalized)?.label;
-  if (regionLabel) {
-    return regionLabel;
+  if (REGION_OPTIONS.some((option) => option.code === normalized)) {
+    return getRegionLabel(normalized);
   }
 
   return normalized;
@@ -52,7 +51,10 @@ export function getOriginCountryOptions(): { code: string; label: string }[] {
         !WORLD_CINEMA_CURATED_COLLECTIONS.some(
           (collection) => collection.originCountry === option.code,
         ),
-    ),
+    ).map((option) => ({
+      code: option.code,
+      label: getOriginCountryLabel(option.code),
+    })),
     ...ADDITIONAL_ORIGIN_COUNTRY_CODES.map((code) => ({
       code,
       label: getOriginCountryLabel(code),

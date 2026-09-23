@@ -2,6 +2,7 @@ import {
   buildEpisodeDetailRoute,
   buildMovieDetailRoute,
 } from '@/features/details/shared/routes';
+import { i18n } from '@/i18n';
 import type { RecentWatchHistoryItemResponse } from '../types';
 
 export function buildRecentHistoryRoute(item: RecentWatchHistoryItemResponse): string | null {
@@ -22,22 +23,28 @@ export function buildRecentHistoryRoute(item: RecentWatchHistoryItemResponse): s
 }
 
 export function getRecentHistoryTitle(item: RecentWatchHistoryItemResponse): string {
+  const movieLabel = i18n.t('contentType.movie');
+  const tvShowLabel = i18n.t('contentType.tvShow');
+  const episodeLabel = i18n.t('contentType.episode');
+
   if (item.type === 'movie') {
-    return item.title ?? 'Movie';
+    return item.title ?? movieLabel;
   }
 
-  const episodeLabel =
+  const episodeNumberLabel =
     item.seasonNumber != null && item.episodeNumber != null
       ? `S${item.seasonNumber} E${item.episodeNumber}`
-      : 'Episode';
+      : episodeLabel;
 
   if (item.episodeTitle) {
-    return `${item.tvShowTitle ?? 'TV Show'} · ${episodeLabel} · ${item.episodeTitle}`;
+    return `${item.tvShowTitle ?? tvShowLabel} · ${episodeNumberLabel} · ${item.episodeTitle}`;
   }
 
-  return `${item.tvShowTitle ?? 'TV Show'} · ${episodeLabel}`;
+  return `${item.tvShowTitle ?? tvShowLabel} · ${episodeNumberLabel}`;
 }
 
 export function getRecentHistorySubtitle(item: RecentWatchHistoryItemResponse): string {
-  return item.type === 'movie' ? 'Movie' : 'TV Episode';
+  return item.type === 'movie'
+    ? i18n.t('contentType.movie')
+    : i18n.t('contentType.tvEpisode');
 }

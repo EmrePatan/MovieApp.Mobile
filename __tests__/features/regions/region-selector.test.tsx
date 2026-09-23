@@ -1,6 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { RegionSelector } from '@/features/regions/components/RegionSelector';
 
+jest.mock('@/i18n', () => {
+  const actual = jest.requireActual<typeof import('@/i18n')>('@/i18n');
+  return {
+    ...actual,
+    getUiFormatLocaleTag: jest.fn(() => 'en-US'),
+  };
+});
+
 describe('RegionSelector', () => {
   it('renders semantic label and selected region', () => {
     render(
@@ -15,7 +23,7 @@ describe('RegionSelector', () => {
     );
 
     expect(screen.getByText('Watch region')).toBeTruthy();
-    expect(screen.getByLabelText('Watch region Turkey')).toBeTruthy();
+    expect(screen.getByLabelText('Watch region Türkiye')).toBeTruthy();
     expect(screen.queryByLabelText('United States')).toBeNull();
   });
 

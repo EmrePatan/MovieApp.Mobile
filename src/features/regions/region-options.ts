@@ -1,26 +1,39 @@
 import { countryCodeToFlagEmoji } from '@/features/discovery/utils/country-flag';
+import { getUiFormatLocaleTag } from '@/i18n';
 
 export const DEFAULT_RELEASE_REGION = 'TR';
 export const FALLBACK_USER_REGION = DEFAULT_RELEASE_REGION;
 
 export const REGION_OPTIONS: {
   code: string;
-  label: string;
 }[] = [
-  { code: 'TR', label: 'Turkey' },
-  { code: 'US', label: 'United States' },
-  { code: 'GB', label: 'United Kingdom' },
-  { code: 'DE', label: 'Germany' },
-  { code: 'FR', label: 'France' },
-  { code: 'ES', label: 'Spain' },
-  { code: 'IT', label: 'Italy' },
-  { code: 'NL', label: 'Netherlands' },
-  { code: 'CA', label: 'Canada' },
-  { code: 'AU', label: 'Australia' },
+  { code: 'TR' },
+  { code: 'US' },
+  { code: 'GB' },
+  { code: 'DE' },
+  { code: 'FR' },
+  { code: 'ES' },
+  { code: 'IT' },
+  { code: 'NL' },
+  { code: 'CA' },
+  { code: 'AU' },
 ];
 
-export function getRegionLabel(code: string): string {
-  return REGION_OPTIONS.find((option) => option.code === code)?.label ?? code;
+export function getRegionLabel(code: string, formatLocaleTag?: string): string {
+  const normalizedCode = normalizeRegionCode(code);
+  const locale = formatLocaleTag ?? getUiFormatLocaleTag();
+
+  try {
+    const displayNames = new Intl.DisplayNames([locale], { type: 'region' });
+    const localized = displayNames.of(normalizedCode);
+    if (localized) {
+      return localized;
+    }
+  } catch {
+    // Fall back to the region code when Intl is unavailable.
+  }
+
+  return normalizedCode;
 }
 
 export function normalizeRegionCode(code: string | undefined | null): string {

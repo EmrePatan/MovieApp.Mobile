@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import { getUiFormatLocaleTag } from '@/i18n';
 import { registerPushDevice, unregisterPushDevice } from '../api/push-devices-api';
 import type { PushRegistrationResult } from '../types';
 import {
@@ -98,6 +99,7 @@ export async function ensurePushDeviceRegisteredAsync(
   await registerPushDevice({
     expoPushToken,
     platform: Platform.OS === 'ios' ? 'ios' : 'android',
+    contentLocale: getUiFormatLocaleTag(),
   });
 
   lastRegisteredExpoPushToken = expoPushToken;

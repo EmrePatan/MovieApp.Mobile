@@ -16,6 +16,22 @@ export function normalizeDeviceLanguageCode(languageCode: string | null | undefi
     return 'es';
   }
 
+  if (normalized.startsWith('de')) {
+    return 'de';
+  }
+
+  if (normalized.startsWith('fr')) {
+    return 'fr';
+  }
+
+  if (normalized.startsWith('it')) {
+    return 'it';
+  }
+
+  if (normalized.startsWith('pt')) {
+    return 'pt';
+  }
+
   return 'en';
 }
 

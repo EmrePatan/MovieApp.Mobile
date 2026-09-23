@@ -1,9 +1,13 @@
+import { de } from '@/i18n/locales/de';
 import { en } from '@/i18n/locales/en';
 import { es } from '@/i18n/locales/es';
+import { fr } from '@/i18n/locales/fr';
+import { it as itLocale } from '@/i18n/locales/it';
+import { pt } from '@/i18n/locales/pt';
 import { tr } from '@/i18n/locales/tr';
 import { SUPPORTED_UI_LOCALES, getSupportedUiLocale } from '@/i18n/supported-locales';
 import { toFormatLocaleTag, normalizeDeviceLanguageCode } from '@/i18n/locale-tags';
-import type { UiLanguage } from '@/i18n/types';
+import { SUPPORTED_UI_LANGUAGES, type UiLanguage } from '@/i18n/types';
 
 type TranslationTree = Record<string, unknown>;
 
@@ -34,12 +38,31 @@ function extractPlaceholders(value: string): string[] {
 
 describe('locale integrity', () => {
   const englishPaths = collectLeafPaths(en);
-  const turkishPaths = collectLeafPaths(tr);
-  const spanishPaths = collectLeafPaths(es);
+  const localeTrees: Record<UiLanguage, Map<string, string>> = {
+    en: englishPaths,
+    tr: collectLeafPaths(tr),
+    es: collectLeafPaths(es),
+    de: collectLeafPaths(de),
+    fr: collectLeafPaths(fr),
+    it: collectLeafPaths(itLocale),
+    pt: collectLeafPaths(pt),
+  };
 
-  it('keeps EN/TR/ES key parity', () => {
-    expect([...turkishPaths.keys()].sort()).toEqual([...englishPaths.keys()].sort());
-    expect([...spanishPaths.keys()].sort()).toEqual([...englishPaths.keys()].sort());
+  it('registers all seven supported UI locales', () => {
+    expect(SUPPORTED_UI_LANGUAGES).toEqual(['en', 'tr', 'es', 'de', 'fr', 'it', 'pt']);
+    expect(SUPPORTED_UI_LOCALES).toHaveLength(7);
+  });
+
+  it('keeps key parity across all locale resources', () => {
+    const englishKeys = [...englishPaths.keys()].sort();
+
+    for (const language of SUPPORTED_UI_LANGUAGES) {
+      if (language === 'en') {
+        continue;
+      }
+
+      expect([...localeTrees[language].keys()].sort()).toEqual(englishKeys);
+    }
   });
 
   it('preserves interpolation placeholders against canonical EN', () => {
@@ -49,8 +72,13 @@ describe('locale integrity', () => {
         continue;
       }
 
-      expect(extractPlaceholders(turkishPaths.get(path)!)).toEqual(englishPlaceholders);
-      expect(extractPlaceholders(spanishPaths.get(path)!)).toEqual(englishPlaceholders);
+      for (const language of SUPPORTED_UI_LANGUAGES) {
+        if (language === 'en') {
+          continue;
+        }
+
+        expect(extractPlaceholders(localeTrees[language].get(path)!)).toEqual(englishPlaceholders);
+      }
     }
   });
 
@@ -59,6 +87,10 @@ describe('locale integrity', () => {
       en: 'en-US',
       tr: 'tr-TR',
       es: 'es-ES',
+      de: 'de-DE',
+      fr: 'fr-FR',
+      it: 'it-IT',
+      pt: 'pt-BR',
     };
 
     for (const locale of SUPPORTED_UI_LOCALES) {
@@ -67,9 +99,14 @@ describe('locale integrity', () => {
     }
   });
 
-  it('resolves device Spanish and unsupported fallback', () => {
+  it('resolves device locales and unsupported fallback', () => {
     expect(normalizeDeviceLanguageCode('es-ES')).toBe('es');
     expect(normalizeDeviceLanguageCode('es-MX')).toBe('es');
-    expect(normalizeDeviceLanguageCode('de-DE')).toBe('en');
+    expect(normalizeDeviceLanguageCode('de-DE')).toBe('de');
+    expect(normalizeDeviceLanguageCode('fr-FR')).toBe('fr');
+    expect(normalizeDeviceLanguageCode('it-IT')).toBe('it');
+    expect(normalizeDeviceLanguageCode('pt-BR')).toBe('pt');
+    expect(normalizeDeviceLanguageCode('pt-PT')).toBe('pt');
+    expect(normalizeDeviceLanguageCode('ja-JP')).toBe('en');
   });
 });
