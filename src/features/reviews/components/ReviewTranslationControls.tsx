@@ -178,10 +178,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   content: {
-    lineHeight: 21,
-    color: colors.textSecondary,
-    letterSpacing: 0.1,
-    fontSize: 14,
+    lineHeight: 24,
+    color: colors.textPrimary,
+    letterSpacing: 0.15,
+    fontSize: 16,
   },
   metadata: {
     fontSize: 11,

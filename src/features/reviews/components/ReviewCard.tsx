@@ -12,15 +12,19 @@ import {
   likelyExceedsCollapsedLines,
   REVIEW_LIST_COLLAPSED_LINE_COUNT,
 } from '../utils/review-content-length';
-import { ReviewAuthorRating } from './ReviewAuthorRating';
+import {
+  backendScoreToStarRating,
+  formatStarRatingDisplay,
+  isValidBackendScore,
+} from '@/features/ratings/utils/star-rating';
+import { ReviewStarRow } from './ReviewStarRow';
 import { ReviewTranslationControls } from './ReviewTranslationControls';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 
-const AVATAR_SIZE = 36;
-const CONTENT_INDENT = AVATAR_SIZE + spacing.sm;
+const AVATAR_SIZE = 40;
 
 type ReviewCardVariant = 'row' | 'surface';
 
@@ -47,13 +51,14 @@ export const ReviewCard = memo(function ReviewCard({
   const content = review.content.trim();
   const canExpand = likelyExceedsCollapsedLines(content, REVIEW_LIST_COLLAPSED_LINE_COUNT);
   const hasActions = isOwnReview && (onEdit || onDelete);
+  const starRating =
+    review.userRating != null && isValidBackendScore(review.userRating)
+      ? backendScoreToStarRating(review.userRating)
+      : null;
 
   return (
     <View
-      style={[
-        styles.card,
-        variant === 'surface' && styles.cardSurface,
-      ]}
+      style={[styles.card, variant === 'surface' && styles.cardSurface]}
       accessibilityRole="summary"
       testID={isOwnReview ? 'review-card-own' : 'review-card'}
     >
@@ -70,7 +75,7 @@ export const ReviewCard = memo(function ReviewCard({
         </View>
 
         <View style={styles.meta}>
-          <View style={styles.topRow}>
+          <View style={styles.nameRow}>
             <AppText variant="bodySmall" style={styles.authorName} numberOfLines={1}>
               {review.user.displayName}
             </AppText>
@@ -81,15 +86,6 @@ export const ReviewCard = memo(function ReviewCard({
                 </AppText>
               </View>
             ) : null}
-            <View style={styles.ratingSlot}>
-              <ReviewAuthorRating userRating={review.userRating} variant="inline" />
-            </View>
-          </View>
-
-          <View style={styles.bottomRow}>
-            <AppText variant="caption" muted style={styles.dateLabel} numberOfLines={1}>
-              {dateLabel}
-            </AppText>
             {hasActions ? (
               <View style={styles.actions}>
                 {onEdit ? (
@@ -122,6 +118,18 @@ export const ReviewCard = memo(function ReviewCard({
               </View>
             ) : null}
           </View>
+
+          {starRating != null ? (
+            <View
+              testID="review-author-rating"
+              accessibilityRole="text"
+              accessibilityLabel={t('reviews.ratedOutOfFiveStars', {
+                label: formatStarRatingDisplay(starRating),
+              })}
+            >
+              <ReviewStarRow starRating={starRating} size={13} />
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -161,16 +169,21 @@ export const ReviewCard = memo(function ReviewCard({
           </Pressable>
         ) : null}
       </View>
+
+      <AppText variant="caption" muted style={styles.dateFooter} numberOfLines={1}>
+        {dateLabel}
+      </AppText>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
   card: {
-    gap: spacing.xs,
+    gap: spacing.sm,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xs + 2,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
   cardSurface: {
     marginHorizontal: layout.screenPaddingHorizontal,
@@ -178,7 +191,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surfaceElevated,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: colors.border,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   header: {
     flexDirection: 'row',
@@ -193,7 +207,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: colors.border,
   },
   avatarOwn: {
     backgroundColor: colors.accentTint12,
@@ -201,57 +215,45 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: '700',
     letterSpacing: 0.3,
     fontSize: 12,
   },
   meta: {
     flex: 1,
-    gap: 4,
+    gap: 6,
     minWidth: 0,
     paddingTop: 1,
   },
-  topRow: {
+  nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
     minWidth: 0,
   },
-  ratingSlot: {
-    marginLeft: 'auto',
-    flexShrink: 0,
-    paddingLeft: spacing.xs,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    minHeight: 20,
-  },
   authorName: {
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.textPrimary,
     flexShrink: 1,
     flexGrow: 1,
     minWidth: 0,
     fontSize: 14,
     lineHeight: 18,
-  },
-  dateLabel: {
-    fontSize: 11,
-    lineHeight: 14,
-    flex: 1,
+    letterSpacing: 0.2,
   },
   body: {
-    paddingLeft: CONTENT_INDENT,
-    gap: 4,
+    gap: spacing.xs,
   },
   content: {
-    lineHeight: 21,
-    color: colors.textSecondary,
-    letterSpacing: 0.1,
+    lineHeight: 22,
+    color: colors.textPrimary,
+    letterSpacing: 0.12,
     fontSize: 14,
+  },
+  dateFooter: {
+    alignSelf: 'flex-end',
+    fontSize: 11,
+    lineHeight: 14,
   },
   expandButton: {
     alignSelf: 'flex-start',
@@ -266,6 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.sm,
     paddingVertical: 1,
+    flexShrink: 0,
   },
   youBadgeText: {
     color: colors.accent,
@@ -276,7 +279,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 0,
+    marginLeft: 'auto',
     marginRight: -spacing.xs,
   },
   actionButton: {

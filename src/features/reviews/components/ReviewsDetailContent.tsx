@@ -8,8 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
 import { AppText } from '@/components/common/AppText';
@@ -21,11 +20,13 @@ import { ReviewCard } from './ReviewCard';
 import { ReviewComposer } from './ReviewComposer';
 import { ReviewsOwnReviewBar } from './ReviewsOwnReviewBar';
 import { ReviewsPaginationControl } from './ReviewsPaginationControl';
-import { ReviewsHeaderMeta } from './ReviewsHeaderMeta';
 import { ReviewsRatingDistribution } from './ReviewsRatingDistribution';
 import { ReviewsFeedHeader } from './ReviewsFeedHeader';
 import { ReviewsEmptyState } from './ReviewsEmptyState';
-import { ReviewsWritePrompt } from './ReviewsWritePrompt';
+import { ReviewsScreenHeader } from './ReviewsScreenHeader';
+import { ReviewsWriteFab } from './ReviewsWriteFab';
+import { useMovieDetails } from '@/features/details/movie/hooks/useMovieDetails';
+import { useTvShowDetails } from '@/features/details/tv/hooks/useTvShowDetails';
 import { useMyReview } from '../hooks/useMyReview';
 import {
   useCreateReviewMutation,
@@ -57,7 +58,14 @@ export function ReviewsDetailContent({
   contentTitle,
 }: ReviewsDetailContentProps) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const movieDetailsQuery = useMovieDetails(contentType === 'movie' ? contentId : undefined);
+  const tvShowDetailsQuery = useTvShowDetails(contentType === 'tv' ? contentId : undefined);
+  const posterPath =
+    contentType === 'movie'
+      ? movieDetailsQuery.data?.posterPath ?? null
+      : tvShowDetailsQuery.data?.posterPath ?? null;
   const { requireAuth } = useRequireAuth();
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<ReviewSortOption>(DEFAULT_REVIEW_SORT);
@@ -255,21 +263,22 @@ export function ReviewsDetailContent({
 
   const showMeta = !isInitialLoading && !reviewsQuery.isError;
 
+  const showWriteFab =
+    composerMode === 'hidden' &&
+    !showEmptyStateWithWriteAction &&
+    !isInitialLoading &&
+    !reviewsQuery.isError &&
+    !myReview;
+
   const listHeader = (
     <View style={styles.listHeader}>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <DetailBackButton contentInset={false} />
-        <View style={styles.header}>
-          <AppText variant="title" style={styles.headerTitle}>
-            {t('reviews.title')}
-          </AppText>
-          {showMeta ? (
-            <ReviewsHeaderMeta
-              contentTitle={contentTitle}
-              reviewCount={totalCount}
-            />
-          ) : null}
-        </View>
+        <ReviewsScreenHeader
+          contentTitle={contentTitle}
+          reviewCount={showMeta ? totalCount : undefined}
+          posterPath={posterPath}
+          showMeta={showMeta}
+        />
       </SafeAreaView>
 
       <FeedbackMessage
@@ -288,12 +297,18 @@ export function ReviewsDetailContent({
         />
       ) : null}
 
-      {!myReview && composerMode !== 'create' && !showEmptyStateWithWriteAction ? (
-        <ReviewsWritePrompt onPress={handleWriteReview} />
-      ) : null}
-
       {myReview && composerMode !== 'edit' ? (
         <ReviewsOwnReviewBar review={myReview} onEdit={handleEditReview} />
+      ) : null}
+
+      {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
+        <ReviewsFeedHeader
+          reviewCount={communityReviewCount}
+          sort={sort}
+          selectedStars={ratingStars}
+          onSortChange={handleSortChange}
+          onClearFilter={() => handleRatingStarsChange(null)}
+        />
       ) : null}
 
       {composerMode === 'create' ? (
@@ -334,13 +349,6 @@ export function ReviewsDetailContent({
         </View>
       ) : null}
 
-      {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
-        <ReviewsFeedHeader
-          reviewCount={communityReviewCount}
-          sort={sort}
-          onSortChange={handleSortChange}
-        />
-      ) : null}
     </View>
   );
 
@@ -386,6 +394,16 @@ export function ReviewsDetailContent({
       )
     ) : null;
 
+  const writeFab = showWriteFab ? (
+    <ReviewsWriteFab
+      accessibilityLabel={
+        myReview ? t('reviews.editReview') : t('reviews.writeAccessibility')
+      }
+      onPress={myReview ? handleEditReview : handleWriteReview}
+      testID="reviews-write-section"
+    />
+  ) : null;
+
   if (isInitialLoading) {
     return (
       <View style={styles.container} testID="reviews-detail-content">
@@ -393,6 +411,11 @@ export function ReviewsDetailContent({
         <View style={styles.loading} testID="reviews-loading">
           <ActivityIndicator color={colors.accent} />
         </View>
+        {writeFab ? (
+          <View style={[styles.fabContainer, { bottom: spacing.lg + insets.bottom }]}>
+            {writeFab}
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -412,32 +435,50 @@ export function ReviewsDetailContent({
             retryLabel={t('common.retry')}
           />
         </View>
+        {writeFab ? (
+          <View style={[styles.fabContainer, { bottom: spacing.lg + insets.bottom }]}>
+            {writeFab}
+          </View>
+        ) : null}
       </View>
     );
   }
 
   return (
-    <FlatList
-      testID="reviews-detail-content"
-      style={styles.container}
-      data={publicReviews}
-      keyExtractor={(item) => item.id}
-      renderItem={renderReviewItem}
-      ItemSeparatorComponent={ReviewListSeparator}
-      ListHeaderComponent={listHeader}
-      ListEmptyComponent={listEmpty}
-      ListFooterComponent={listFooter}
-      contentContainerStyle={styles.listContent}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      initialNumToRender={layout.verticalList.initialNumToRender}
-      maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-      windowSize={layout.verticalList.windowSize}
-    />
+    <View style={styles.screen}>
+      <FlatList
+        testID="reviews-detail-content"
+        style={styles.container}
+        data={publicReviews}
+        keyExtractor={(item) => item.id}
+        renderItem={renderReviewItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmpty}
+        ListFooterComponent={listFooter}
+        contentContainerStyle={[
+          styles.listContent,
+          showWriteFab && { paddingBottom: spacing.xxl + insets.bottom + 56 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={layout.verticalList.initialNumToRender}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+        windowSize={layout.verticalList.windowSize}
+      />
+      {writeFab ? (
+        <View style={[styles.fabContainer, { bottom: spacing.lg + insets.bottom }]}>
+          {writeFab}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -445,15 +486,11 @@ const styles = StyleSheet.create({
   headerSafeArea: {
     backgroundColor: colors.background,
   },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: 0,
-    paddingBottom: spacing.xs,
-    gap: 2,
-  },
-  headerTitle: {
-    color: colors.textPrimary,
-    letterSpacing: -0.2,
+  fabContainer: {
+    position: 'absolute',
+    right: 0,
+    left: 0,
+    pointerEvents: 'box-none',
   },
   listContent: {
     paddingBottom: spacing.xxl,
@@ -492,16 +529,3 @@ const styles = StyleSheet.create({
   },
 });
 
-function ReviewListSeparator() {
-  return <View style={reviewListSeparatorStyles.separator} />;
-}
-
-const reviewListSeparatorStyles = StyleSheet.create({
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    marginLeft: layout.screenPaddingHorizontal + 36 + spacing.sm,
-    marginRight: layout.screenPaddingHorizontal,
-    marginVertical: spacing.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-  },
-});

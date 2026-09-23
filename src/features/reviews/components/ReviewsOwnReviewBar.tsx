@@ -9,7 +9,7 @@ import {
   REVIEW_OWN_COLLAPSED_LINE_COUNT,
 } from '../utils/review-content-length';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
 
@@ -25,65 +25,68 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
   const canExpand = likelyExceedsCollapsedLines(content, REVIEW_OWN_COLLAPSED_LINE_COUNT);
 
   return (
-    <View style={styles.container} testID="reviews-own-review-bar">
-      <View style={styles.headerRow}>
-        <View style={styles.labelRow}>
-          <AppText variant="caption" style={styles.label}>
-            {t('reviews.yourReview')}
-          </AppText>
-          <AppText variant="caption" muted style={styles.dot}>
-            ·
-          </AppText>
-          <ReviewAuthorRating userRating={review.userRating} variant="inline" />
+    <View style={styles.wrapper} testID="reviews-own-review-bar">
+      <View style={styles.card}>
+        <View style={styles.headerRow}>
+          <View style={styles.labelRow}>
+            <AppText variant="caption" style={styles.label}>
+              {t('reviews.yourReview')}
+            </AppText>
+            <ReviewAuthorRating userRating={review.userRating} variant="inline" />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('reviews.editReview')}
+            onPress={onEdit}
+            hitSlop={8}
+            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+          >
+            <AppText variant="caption" style={styles.editLabel}>
+              {t('reviews.edit')}
+            </AppText>
+          </Pressable>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('reviews.editReview')}
-          onPress={onEdit}
-          hitSlop={8}
-          style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+
+        <AppText
+          variant="bodySmall"
+          style={styles.preview}
+          numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
         >
-          <AppText variant="caption" style={styles.editLabel}>
-            {t('reviews.edit')}
-          </AppText>
-        </Pressable>
+          {content}
+        </AppText>
+
+        {canExpand ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              expanded ? t('common.showLessOfYourReview') : t('common.readMoreOfYourReview')
+            }
+            onPress={() => setExpanded((current) => !current)}
+            hitSlop={4}
+            style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
+            testID="reviews-own-review-expand"
+          >
+            <AppText variant="caption" style={styles.expandLabel}>
+              {expanded ? t('common.showLess') : t('common.readMore')}
+            </AppText>
+          </Pressable>
+        ) : null}
       </View>
-
-      <AppText
-        variant="bodySmall"
-        style={styles.preview}
-        numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
-      >
-        {content}
-      </AppText>
-
-      {canExpand ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            expanded ? t('common.showLessOfYourReview') : t('common.readMoreOfYourReview')
-          }
-          onPress={() => setExpanded((current) => !current)}
-          hitSlop={4}
-          style={({ pressed }) => [styles.expandButton, pressed && styles.pressed]}
-          testID="reviews-own-review-expand"
-        >
-          <AppText variant="caption" style={styles.expandLabel}>
-            {expanded ? t('common.showLess') : t('common.readMore')}
-          </AppText>
-        </Pressable>
-      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: 4,
+  wrapper: {
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingBottom: spacing.xs,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  card: {
+    gap: 4,
+    padding: spacing.sm,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   headerRow: {
     flexDirection: 'row',
@@ -96,22 +99,20 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
     flexWrap: 'wrap',
     minWidth: 0,
   },
   label: {
     color: colors.textSecondary,
-    fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  dot: {
-    lineHeight: 16,
+    fontWeight: '700',
+    fontSize: 11,
+    lineHeight: 14,
+    letterSpacing: 0.4,
   },
   preview: {
     lineHeight: 20,
-    color: colors.textSecondary,
+    color: colors.textPrimary,
     fontSize: 13,
   },
   expandButton: {

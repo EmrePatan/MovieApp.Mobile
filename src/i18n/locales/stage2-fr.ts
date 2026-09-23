@@ -919,6 +919,8 @@ export const stage2Fr = {
     youBadge: 'Vous',
     communityRating: 'Note de la communauté',
     communityFeedLabel: 'AVIS',
+    ratingsSectionLabel: 'NOTES',
+    filterAll: 'Tous',
     ratingDistribution: 'Distribution',
     showRatingDistribution: 'Afficher la distribution des notes',
     hideRatingDistribution: 'Masquer la distribution des notes',

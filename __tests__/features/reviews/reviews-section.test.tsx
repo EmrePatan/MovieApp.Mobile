@@ -68,6 +68,14 @@ jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
   useDeleteReviewMutation: jest.fn(),
 }));
 
+jest.mock('@/features/details/movie/hooks/useMovieDetails', () => ({
+  useMovieDetails: jest.fn(() => ({ data: null, isLoading: false })),
+}));
+
+jest.mock('@/features/details/tv/hooks/useTvShowDetails', () => ({
+  useTvShowDetails: jest.fn(() => ({ data: null, isLoading: false })),
+}));
+
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 const userId = 'user-id';
 
@@ -153,8 +161,7 @@ describe('ReviewsDetailContent', () => {
     );
 
     expect(screen.getByTestId('reviews-write-section')).toBeTruthy();
-    expect(screen.getByText('Share your thoughts')).toBeTruthy();
-    expect(screen.getByText('Write review')).toBeTruthy();
+    expect(screen.getByLabelText('Write a review')).toBeTruthy();
   });
 
   it('renders review count and public reviews', () => {
@@ -392,7 +399,7 @@ describe('ReviewsDetailContent', () => {
     );
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    expect(screen.getByTestId('review-author-rating')).toHaveTextContent('4.0');
+    expect(screen.getByLabelText('Rated 4.0 out of 5 stars')).toBeTruthy();
   });
 
   it('shows half-star author ratings on review cards', () => {
@@ -411,7 +418,7 @@ describe('ReviewsDetailContent', () => {
     );
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
-    expect(screen.getByTestId('review-author-rating')).toHaveTextContent('3.5');
+    expect(screen.getByLabelText('Rated 3.5 out of 5 stars')).toBeTruthy();
   });
 
   it('does not show community histogram when there are no community ratings', () => {

@@ -920,6 +920,8 @@ export const stage2Tr = {
     youBadge: 'Sen',
     communityRating: 'Topluluk puanı',
     communityFeedLabel: 'YORUMLAR',
+    ratingsSectionLabel: 'DEĞERLENDİRMELER',
+    filterAll: 'Tümü',
     ratingDistribution: 'Dağılım',
     showRatingDistribution: 'Puan dağılımını göster',
     hideRatingDistribution: 'Puan dağılımını gizle',

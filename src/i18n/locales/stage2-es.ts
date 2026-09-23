@@ -919,6 +919,8 @@ export const stage2Es = {
     youBadge: 'Tú',
     communityRating: 'Valoración de la comunidad',
     communityFeedLabel: 'RESEÑAS',
+    ratingsSectionLabel: 'VALORACIONES',
+    filterAll: 'Todos',
     ratingDistribution: 'Distribución',
     showRatingDistribution: 'Mostrar distribución de valoraciones',
     hideRatingDistribution: 'Ocultar distribución de valoraciones',

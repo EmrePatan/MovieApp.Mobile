@@ -64,6 +64,14 @@ jest.mock('@/features/reviews/hooks/useReviewMutations', () => ({
   useDeleteReviewMutation: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }));
 
+jest.mock('@/features/details/movie/hooks/useMovieDetails', () => ({
+  useMovieDetails: jest.fn(() => ({ data: null, isLoading: false })),
+}));
+
+jest.mock('@/features/details/tv/hooks/useTvShowDetails', () => ({
+  useTvShowDetails: jest.fn(() => ({ data: null, isLoading: false })),
+}));
+
 const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 const userId = 'user-id';
 

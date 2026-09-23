@@ -899,6 +899,8 @@ export const stage2En = {
     youBadge: 'You',
     communityRating: 'Community rating',
     communityFeedLabel: 'REVIEWS',
+    ratingsSectionLabel: 'RATINGS',
+    filterAll: 'All',
     ratingDistribution: 'Distribution',
     showRatingDistribution: 'Show rating distribution',
     hideRatingDistribution: 'Hide rating distribution',
