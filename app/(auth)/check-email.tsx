@@ -33,8 +33,8 @@ export default function CheckEmailScreen() {
     setIsSubmitting(true);
 
     try {
-      const message = await resendVerification(email);
-      setSuccessMessage(message);
+      await resendVerification(email);
+      setSuccessMessage(t('auth.resendVerificationSuccess'));
     } catch (error) {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'resend-verification'));

@@ -81,9 +81,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: spacing.xs,
   },
   label: {
-    marginTop: spacing.xs,
+    marginTop: 2,
   },
 });

@@ -3,7 +3,7 @@ import { stage2Tr } from './stage2-tr';
 const stage1Tr = {
   common: {
     loading: 'Yükleniyor...',
-    startingApp: 'MovieApp başlatılıyor...',
+    startingApp: 'Movie Cave başlatılıyor...',
     tryAgain: 'Tekrar dene',
     somethingWentWrong: 'Bir şeyler ters gitti',
     cancel: 'İptal',
@@ -57,7 +57,7 @@ const stage1Tr = {
     verifyEmailTagline2: 'ADIM.',
     verifyEmailHeadline1: 'E-posta',
     verifyEmailHeadline2: 'adresini doğrula.',
-    verifyEmailSupporting: 'E-postanı doğruladığında MovieApp’e tam erişim açılır.',
+    verifyEmailSupporting: 'E-postanı doğruladığında Movie Cave’e tam erişim açılır.',
     verifyEmailConfirming: 'E-posta adresi doğrulanıyor...',
     forgotPasswordTagline1: 'ŞİFRE',
     forgotPasswordTagline2: 'SIFIRLAMA?',
@@ -77,7 +77,9 @@ const stage1Tr = {
     continueWithGoogle: 'Google ile devam et',
     continueWithApple: 'Apple ile devam et',
     verificationEmailSentTo: 'Doğrulama e-postası {{email}} adresine gönderildi',
-    emailVerifiedWelcome: 'E-posta doğrulandı. MovieApp’e hoş geldin.',
+    emailVerifiedWelcome: 'E-posta doğrulandı. Movie Cave’e hoş geldin.',
+    resendVerificationSuccess:
+      'Bu e-posta doğrulama gerektiriyorsa kısa süre içinde bir doğrulama e-postası alırsın.',
     verifyBeforeSignIn: 'Giriş yapmadan önce e-posta adresini doğrula.',
     unableToSignIn: 'Giriş yapılamadı. Lütfen tekrar dene.',
     unableToCreateAccount: 'Hesap oluşturulamadı. Lütfen tekrar dene.',

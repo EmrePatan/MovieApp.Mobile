@@ -9,6 +9,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { Screen } from '@/components/common/Screen';
+import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { ProfileHero } from '@/features/profile/components/ProfileHero';
 import { ProfileMenuRow, ProfileSection } from '@/features/profile/components/ProfileSection';
 import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
@@ -72,6 +73,7 @@ export default function ProfileScreen() {
           onRefresh: handleRefresh,
         })}
       >
+        <DetailBackButton />
         {profile ? <ProfileHero profile={profile} /> : null}
 
         <ProfileSection title={t('profile.preferences')}>

@@ -106,14 +106,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.xs,
     right: spacing.xs,
+    maxWidth: layout.posterCarousel.width - spacing.xs * 2,
     backgroundColor: colors.accent,
     borderRadius: spacing.xs,
     paddingHorizontal: spacing.xs,
     paddingVertical: 2,
+    alignSelf: 'flex-end',
   },
   badgeText: {
     color: colors.background,
     fontWeight: '600',
+    textAlign: 'center',
+    flexShrink: 1,
   },
   meta: {
     marginTop: spacing.sm,

@@ -331,7 +331,7 @@ export const stage2En = {
       },
       pickSomething: {
         title: 'Pick Something For Me',
-        subtitle: 'Let MovieApp choose your next title',
+        subtitle: 'Let Movie Cave choose your next title',
         accessibility: 'Pick Something For Me',
       },
       aiRecommendations: {

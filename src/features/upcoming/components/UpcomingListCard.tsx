@@ -134,14 +134,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.xs,
     right: spacing.xs,
+    maxWidth: layout.posterList.width - spacing.xs * 2,
     backgroundColor: colors.accent,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.xs,
     paddingVertical: 2,
+    alignSelf: 'flex-end',
   },
   followedBadgeText: {
     color: colors.background,
     fontWeight: '600',
+    textAlign: 'center',
+    flexShrink: 1,
   },
   meta: {
     flex: 1,

@@ -7,10 +7,12 @@ import { useAuth } from '@/auth/useAuth';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 
 const mockPush = jest.fn();
+const mockBack = jest.fn();
 const mockLogout = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, back: mockBack }),
+  useSegments: () => ['(tabs)', 'profile'],
 }));
 
 jest.mock('@/auth/useAuth', () => ({
@@ -77,6 +79,13 @@ describe('ProfileScreen', () => {
     expect(screen.queryByText('My Library')).toBeNull();
     expect(screen.queryByText('Your Year')).toBeNull();
     expect(screen.queryByText('Your Taste')).toBeNull();
+  });
+
+  it('renders a back affordance to leave profile', () => {
+    renderProfileScreen();
+
+    fireEvent.press(screen.getByLabelText('Back'));
+    expect(mockBack).toHaveBeenCalled();
   });
 
   it('navigates to account settings', () => {

@@ -365,7 +365,7 @@ export const stage2Tr = {
       },
       pickSomething: {
         title: 'Benim İçin Bir Şey Seç',
-        subtitle: 'MovieApp bir sonraki başlığını seçsin',
+        subtitle: 'Movie Cave bir sonraki başlığını seçsin',
         accessibility: 'Benim İçin Bir Şey Seç',
       },
       aiRecommendations: {

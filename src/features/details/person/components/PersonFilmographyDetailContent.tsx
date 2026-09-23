@@ -23,6 +23,7 @@ import {
   setPersonFilmographyScrollOffset,
 } from '../utils/person-filmography-scroll-state';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const GRID_COLUMNS = 2;
@@ -114,14 +115,16 @@ export function PersonFilmographyDetailContent({ person }: PersonFilmographyDeta
   const listHeader = (
     <View>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <DetailBackButton contentInset={false} />
-        <View style={styles.header}>
-          <AppText variant="title" style={styles.headerTitle}>
-            {t('details.sections.filmography')}
-          </AppText>
-          <AppText variant="bodySmall" muted numberOfLines={2}>
-            {person.name}
-          </AppText>
+        <View style={styles.headerContent}>
+          <DetailBackButton />
+          <View style={styles.header}>
+            <AppText variant="title" style={styles.headerTitle}>
+              {t('details.sections.filmography')}
+            </AppText>
+            <AppText variant="bodySmall" muted numberOfLines={2}>
+              {person.name}
+            </AppText>
+          </View>
         </View>
       </SafeAreaView>
       <FilmographyFilterTabs activeFilter={activeFilter} onFilterChange={setActiveFilter} />
@@ -183,8 +186,11 @@ const styles = StyleSheet.create({
   headerSafeArea: {
     backgroundColor: colors.background,
   },
+  headerContent: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingTop: layout.screenPaddingVertical,
+  },
   header: {
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
     gap: spacing.xs,
   },

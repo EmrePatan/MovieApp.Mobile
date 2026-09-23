@@ -1,5 +1,5 @@
 import { requireOptionalNativeModule } from 'expo-modules-core';
-import { Platform, TurboModuleRegistry } from 'react-native';
+import { Keyboard, Platform, TurboModuleRegistry } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { getGoogleSocialAuthConfig, isGoogleSocialAuthConfigured } from './social-auth-config';
 import type { SocialAuthProvider } from '@/models/api/auth';
@@ -156,6 +156,7 @@ async function requestAppleIdentityToken(): Promise<string> {
   }
 
   try {
+    Keyboard.dismiss();
     const credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,

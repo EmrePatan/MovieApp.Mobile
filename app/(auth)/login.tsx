@@ -45,8 +45,8 @@ export default function LoginScreen() {
     setIsResending(true);
 
     try {
-      const message = await resendVerification(pendingVerificationEmail);
-      setResendMessage(message);
+      await resendVerification(pendingVerificationEmail);
+      setResendMessage(t('auth.resendVerificationSuccess'));
     } catch (error) {
       if (isApiError(error)) {
         setFormError(getUserMessageForAuthError(error.kind, 'resend-verification'));

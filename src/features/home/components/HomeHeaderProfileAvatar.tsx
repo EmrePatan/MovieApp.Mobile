@@ -34,7 +34,7 @@ export function HomeHeaderProfileAvatar({
 }: HomeHeaderProfileAvatarProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const displayName = user?.displayName ?? 'MovieApp';
+  const displayName = user?.displayName ?? t('profile.aboutBrandName');
   const initials = getInitials(displayName);
   const accessibilityLabel = user
     ? t('common.openProfileNamed', { name: displayName })

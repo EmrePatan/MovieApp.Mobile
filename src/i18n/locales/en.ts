@@ -3,7 +3,7 @@ import { stage2En } from './stage2-en';
 const stage1En = {
   common: {
     loading: 'Loading...',
-    startingApp: 'Starting MovieApp...',
+    startingApp: 'Starting Movie Cave...',
     tryAgain: 'Try Again',
     somethingWentWrong: 'Something went wrong',
     cancel: 'Cancel',
@@ -57,7 +57,7 @@ const stage1En = {
     verifyEmailTagline2: 'STEP.',
     verifyEmailHeadline1: 'Verify your',
     verifyEmailHeadline2: 'email address.',
-    verifyEmailSupporting: 'Confirming your email unlocks full access to MovieApp.',
+    verifyEmailSupporting: 'Confirming your email unlocks full access to Movie Cave.',
     verifyEmailConfirming: 'Confirming your email address...',
     forgotPasswordTagline1: 'NEED A',
     forgotPasswordTagline2: 'RESET?',
@@ -77,7 +77,9 @@ const stage1En = {
     continueWithGoogle: 'Continue with Google',
     continueWithApple: 'Continue with Apple',
     verificationEmailSentTo: 'Verification email sent to {{email}}',
-    emailVerifiedWelcome: 'Email verified. Welcome to MovieApp.',
+    emailVerifiedWelcome: 'Email verified. Welcome to Movie Cave.',
+    resendVerificationSuccess:
+      'If this email requires verification, you will receive a verification email shortly.',
     verifyBeforeSignIn: 'Please verify your email address before signing in.',
     unableToSignIn: 'Unable to sign in. Please try again.',
     unableToCreateAccount: 'Unable to create your account. Please try again.',
