@@ -76,7 +76,7 @@ describe('AddToWatchlistButton', () => {
   });
 
   describe('detail optimistic UX', () => {
-    it('shows a busy spinner instead of a false default state while membership is unresolved', () => {
+    it('opens the picker while membership is still loading', () => {
       mockUseWatchlistMembership.mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -85,8 +85,10 @@ describe('AddToWatchlistButton', () => {
       render(<AddToWatchlistButton contentType="movie" contentId="movie-id" variant="detail" />);
 
       const button = screen.getByLabelText('Add to watchlist');
-      expect(button.props.accessibilityState.busy).toBe(true);
-      expect(button.props.accessibilityState.disabled).toBe(true);
+      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.disabled).toBe(false);
+      fireEvent.press(button);
+      expect(screen.getByTestId('watchlist-modal')).toBeTruthy();
     });
   });
 });

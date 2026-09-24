@@ -22,14 +22,13 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { data: status, isLoading } = useMovieFollowStatus(movieId);
+  const { data: status } = useMovieFollowStatus(movieId);
   const createFollow = useCreateMovieFollow(movieId);
   const removeFollow = useRemoveMovieFollow(movieId);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [permissionHint, setPermissionHint] = useState<string | null>(null);
 
   const isFollowing = status?.isFollowing ?? false;
-  const isInitialLoading = isAuthenticated && isLoading;
   const isMutationPending = createFollow.isPending || removeFollow.isPending;
 
   const handleFollowSuccess = async () => {
@@ -93,7 +92,7 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
         label={label}
         accessibilityLabel={accessibilityLabel}
         active={isAuthenticated && isFollowing}
-        busy={isInitialLoading}
+        busy={isMutationPending}
         disabled={isMutationPending}
         onPress={handlePress}
       >

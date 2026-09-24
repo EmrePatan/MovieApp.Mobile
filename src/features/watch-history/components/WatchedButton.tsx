@@ -72,9 +72,12 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
     target.type === 'tvshow'
       ? isTvShowFullyWatched(tvProgress.data)
       : (statusQuery.data as { isWatched?: boolean } | undefined)?.isWatched ?? false;
-  const isInitialLoading = isAuthenticated && statusQuery.isLoading;
   const isMutationPending = toggleMutation.isPending;
-  const isInteractionDisabled = isInitialLoading || isMutationPending;
+  const isDetailVariant = variant === 'detail';
+  const isInitialLoading = !isDetailVariant && isAuthenticated && statusQuery.isLoading;
+  const isInteractionDisabled = isDetailVariant
+    ? isMutationPending
+    : isInitialLoading || isMutationPending;
   const active = isAuthenticated && isWatched;
 
   const handlePress = () => {
@@ -108,8 +111,8 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
           label={t('details.actions.watchedLabel')}
           accessibilityLabel={label}
           active={active}
-          busy={isInitialLoading || isMutationPending}
-          disabled={isInitialLoading || isMutationPending}
+          busy={isMutationPending}
+          disabled={isMutationPending}
           onPress={handlePress}
         >
           <Ionicons

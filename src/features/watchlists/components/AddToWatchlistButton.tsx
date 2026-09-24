@@ -35,7 +35,8 @@ export function AddToWatchlistButton({
   const [visible, setVisible] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const isBusy = isAuthenticated && isMembershipLoading;
+  const isDetailVariant = variant === 'detail';
+  const isBusy = isAuthenticated && isMembershipLoading && !isDetailVariant;
   const active = isAuthenticated && isContentInAnyWatchlist(membership);
   const label = active ? t('watchlists.addButton.active') : t('watchlists.addButton.inactive');
   const buttonTitle = active ? t('watchlists.addButton.activeTitle') : t('watchlists.addButton.inactiveTitle');

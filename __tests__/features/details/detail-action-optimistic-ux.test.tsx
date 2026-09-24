@@ -200,7 +200,7 @@ describe('detail action optimistic UX integration', () => {
     await waitFor(() => {
       expect(screen.getByLabelText('Release alert on')).toBeTruthy();
     });
-    expect(screen.getByLabelText('Release alert on').props.accessibilityState.busy).toBe(false);
+    expect(screen.getByLabelText('Release alert on').props.accessibilityState.busy).toBe(true);
 
     resolveFollow();
     await waitFor(() => expect(createMovieFollow).toHaveBeenCalledWith(movieId));

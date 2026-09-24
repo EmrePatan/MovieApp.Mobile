@@ -49,9 +49,13 @@ export function FavoriteButton({
   const toggleFavorite = useToggleFavorite(contentType, contentId);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const isInitialLoading = isAuthenticated && shouldQueryStatus && isStatusLoading;
   const isMutationPending = toggleFavorite.isPending;
-  const isInteractionDisabled = isInitialLoading || isMutationPending;
+  const isDetailVariant = variant === 'detail';
+  const isInitialLoading =
+    !isDetailVariant && isAuthenticated && shouldQueryStatus && isStatusLoading;
+  const isInteractionDisabled = isDetailVariant
+    ? isMutationPending
+    : isInitialLoading || isMutationPending;
   const active = isAuthenticated && isFavorited;
 
   const handlePress = () => {
@@ -85,8 +89,8 @@ export function FavoriteButton({
           label={t('details.actions.favoriteLabel')}
           accessibilityLabel={label}
           active={active}
-          busy={isInitialLoading || isMutationPending}
-          disabled={isInitialLoading || isMutationPending}
+          busy={isMutationPending}
+          disabled={isMutationPending}
           onPress={handlePress}
         >
           <Ionicons

@@ -26,7 +26,7 @@ interface FollowButtonProps {
 export function FollowButton({ tvShowId }: FollowButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { data: status, isLoading } = useTvShowFollowStatus(tvShowId);
+  const { data: status } = useTvShowFollowStatus(tvShowId);
   const [preferencesVisible, setPreferencesVisible] = useState(false);
   const [signInFeedback, setSignInFeedback] = useState<string | null>(null);
   const [permissionPromptVisible, setPermissionPromptVisible] = useState(false);
@@ -34,8 +34,6 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
   const [permissionActionBusy, setPermissionActionBusy] = useState(false);
 
   const isFollowing = status?.isFollowing ?? false;
-  const isBusy = isAuthenticated && isLoading;
-
   const handlePress = () => {
     if (!requireAuth()) {
       setSignInFeedback(t('details.actions.signInFollowTv'));
@@ -108,7 +106,6 @@ export function FollowButton({ tvShowId }: FollowButtonProps) {
         label={t('details.actions.followLabel')}
         accessibilityLabel={label}
         active={isAuthenticated && isFollowing}
-        busy={isBusy}
         onPress={handlePress}
       >
         <Ionicons
