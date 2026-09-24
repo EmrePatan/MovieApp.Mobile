@@ -16,4 +16,23 @@ describe('clear user query cache', () => {
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['home'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['notifications'] });
   });
+
+  it('removes personalized library, insights, recommendation and follow caches', () => {
+    const removeQueries = jest.fn();
+    const queryClient = { removeQueries } as never;
+
+    clearUserQueryCache(queryClient);
+
+    for (const root of [
+      'library',
+      'insights',
+      'recommendations',
+      'ai-recommendations',
+      'following',
+      'movie-follow-status',
+      'tv-show-follow-status',
+    ]) {
+      expect(removeQueries).toHaveBeenCalledWith({ queryKey: [root] });
+    }
+  });
 });

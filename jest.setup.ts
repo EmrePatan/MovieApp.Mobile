@@ -92,6 +92,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/features/follows/services/push-device-service', () => ({
   ensurePushDeviceRegisteredAsync: jest.fn().mockResolvedValue('unavailable'),
   unregisterKnownPushDeviceAsync: jest.fn().mockResolvedValue(undefined),
+  forgetKnownPushDeviceAsync: jest.fn().mockResolvedValue(undefined),
   resetPushPermissionRequestState: jest.fn(),
   getLastRegisteredExpoPushToken: jest.fn().mockReturnValue(null),
 }));

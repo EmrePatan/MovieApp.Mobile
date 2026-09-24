@@ -26,6 +26,7 @@ export interface AuthContextValue extends AuthState {
   resendVerification: (email: string) => Promise<string>;
   signInWithSocial: (provider: import('@/models/api/auth').SocialAuthProvider) => Promise<void>;
   logout: () => Promise<void>;
+  completeAccountDeletion: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateSession: (accessToken: string, user: import('@/models/api/auth').UserProfile) => Promise<void>;
 }

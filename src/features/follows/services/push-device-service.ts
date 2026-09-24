@@ -107,6 +107,11 @@ export async function ensurePushDeviceRegisteredAsync(
   return 'registered';
 }
 
+export async function forgetKnownPushDeviceAsync(): Promise<void> {
+  lastRegisteredExpoPushToken = null;
+  await clearStoredExpoPushToken();
+}
+
 export async function unregisterKnownPushDeviceAsync(): Promise<void> {
   const token = await resolveExpoPushTokenForUnregister();
   if (!token) {

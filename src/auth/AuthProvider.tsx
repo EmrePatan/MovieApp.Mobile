@@ -26,6 +26,7 @@ import { queryClient } from '@/api/query-client';
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
 import {
   ensurePushDeviceRegisteredAsync,
+  forgetKnownPushDeviceAsync,
   resetPushPermissionRequestState,
   unregisterKnownPushDeviceAsync,
 } from '@/features/follows/services/push-device-service';
@@ -93,17 +94,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const endAuthenticatedSession = useCallback(
-    async (options?: { resetPushPermission?: boolean }) => {
+    async (options?: { resetPushPermission?: boolean; accountDeleted?: boolean }) => {
       try {
-        await unregisterKnownPushDeviceAsync();
+        // A deleted account's push devices are removed server-side and its token is revoked.
+        if (options?.accountDeleted) {
+          await forgetKnownPushDeviceAsync();
+        } else {
+          await unregisterKnownPushDeviceAsync();
+        }
       } catch {
-        // Session teardown should continue even if push unregister fails.
+        // Session teardown should continue even if push cleanup fails.
       }
 
       if (options?.resetPushPermission) {
         resetPushPermissionRequestState();
       }
 
+      clearUserQueryCache(queryClient);
       await clearSession();
     },
     [clearSession],
@@ -206,8 +213,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const logout = useCallback(async () => {
-    clearUserQueryCache(queryClient);
     await endAuthenticatedSession({ resetPushPermission: true });
+  }, [endAuthenticatedSession]);
+
+  const completeAccountDeletion = useCallback(async () => {
+    await endAuthenticatedSession({ resetPushPermission: true, accountDeleted: true });
   }, [endAuthenticatedSession]);
 
   const updateSession = useCallback(
@@ -239,6 +249,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       resendVerification,
       signInWithSocial,
       logout,
+      completeAccountDeletion,
       refreshUser,
       updateSession,
     }),
@@ -253,6 +264,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       resendVerification,
       signInWithSocial,
       logout,
+      completeAccountDeletion,
       refreshUser,
       updateSession,
     ],

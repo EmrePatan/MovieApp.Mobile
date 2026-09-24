@@ -7,7 +7,6 @@ import {
   updateProfile,
 } from '../api/profile-api';
 import { currentProfileQueryKey, profileStatisticsQueryKey } from './profile-query-keys';
-import { clearUserQueryCache } from '../utils/clear-user-query-cache';
 import type {
   ChangeEmailRequest,
   ChangePasswordRequest,
@@ -63,14 +62,12 @@ export function useChangePasswordMutation() {
 }
 
 export function useDeleteAccountMutation() {
-  const queryClient = useQueryClient();
-  const { logout } = useAuth();
+  const { completeAccountDeletion } = useAuth();
 
   return useMutation({
     mutationFn: (payload: DeleteAccountRequest) => deleteAccount(payload),
     onSuccess: async () => {
-      clearUserQueryCache(queryClient);
-      await logout();
+      await completeAccountDeletion();
     },
   });
 }

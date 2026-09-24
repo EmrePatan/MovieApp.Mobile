@@ -13,6 +13,13 @@ const USER_QUERY_PREFIXES = [
   ['search-history'],
   ['home'],
   ['notifications'],
+  ['library'],
+  ['insights'],
+  ['recommendations'],
+  ['ai-recommendations'],
+  ['following'],
+  ['movie-follow-status'],
+  ['tv-show-follow-status'],
 ] as const;
 
 export function clearUserQueryCache(queryClient: QueryClient) {
