@@ -6,7 +6,7 @@ import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatal
 
 export default function TvShowDetailScreen() {
   const { t } = useTranslation();
-  const { resolvedId: tvShowId, isInvalid, isDetailPathActive } = useCatalogRouteIdState('tv');
+  const { resolvedId: tvShowId, isInvalid, isDetailPathActive } = useCatalogRouteIdState();
   const query = useTvShowDetails(isDetailPathActive ? tvShowId : undefined);
 
   if (!tvShowId || !isDetailPathActive) {

@@ -6,7 +6,7 @@ import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatal
 
 export default function MovieDetailScreen() {
   const { t } = useTranslation();
-  const { resolvedId: movieId, isInvalid, isDetailPathActive } = useCatalogRouteIdState('movie');
+  const { resolvedId: movieId, isInvalid, isDetailPathActive } = useCatalogRouteIdState();
   const query = useMovieDetails(isDetailPathActive ? movieId : undefined);
 
   if (!movieId || !isDetailPathActive) {

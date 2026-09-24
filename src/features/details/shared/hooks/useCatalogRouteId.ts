@@ -1,26 +1,19 @@
-import { usePathname } from 'expo-router';
-import {
-  isCatalogChildDestinationPathname,
-  parseCatalogIdFromPathname,
-  parseCatalogStackSegment,
-} from '../routes';
+import { useLocalSearchParams } from 'expo-router';
+import { isValidGuid, normalizeRouteIdParam } from '../routes';
 
 /**
- * Catalog detail index routes must resolve their id from the active pathname only.
- * Expo Router can keep stale `params.id` values during stack transitions; using them
- * causes brief or stuck "invalid request" states and wrong detail queries.
+ * Catalog detail index routes must resolve their id from their own route params.
+ * The pathname is global: when detail B is pushed over detail A, A is still mounted
+ * underneath and would otherwise re-render as B, which iOS reveals during back-swipe.
  */
-export function useCatalogRouteIdState(contentType: 'movie' | 'tv') {
-  const pathname = usePathname();
-  const pathnameId = parseCatalogIdFromPathname(pathname, contentType);
-  const isDetailPathActive = pathnameId != null;
-  const rawSegment = parseCatalogStackSegment(pathname, contentType);
-  const isChildDestination = isCatalogChildDestinationPathname(pathname, contentType);
+export function useCatalogRouteIdState() {
+  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+  const rawId = normalizeRouteIdParam(id);
+  const resolvedId = isValidGuid(rawId) ? rawId : undefined;
 
   return {
-    pathname,
-    resolvedId: isDetailPathActive ? pathnameId : undefined,
-    isDetailPathActive,
-    isInvalid: Boolean(rawSegment) && !isChildDestination && !pathnameId,
+    resolvedId,
+    isDetailPathActive: resolvedId != null,
+    isInvalid: Boolean(rawId) && !resolvedId,
   };
 }
