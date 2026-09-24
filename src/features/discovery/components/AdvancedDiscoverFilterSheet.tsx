@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateAdvancedDiscoverMediaType,
@@ -57,25 +57,60 @@ interface AdvancedDiscoverFilterSheetProps {
   onClear: () => void;
 }
 
+const GENRE_CHIP_COLLAPSED_COUNT = 8;
+
 function toggleGenre(genreIds: string[], genreId: string): string[] {
   return genreIds.includes(genreId)
     ? genreIds.filter((id) => id !== genreId)
     : [...genreIds, genreId];
 }
 
+function buildCollapsedGenreList(genres: Genre[], selectedIds: string[], expanded: boolean): Genre[] {
+  if (expanded || genres.length <= GENRE_CHIP_COLLAPSED_COUNT) {
+    return genres;
+  }
+
+  const visible = genres.slice(0, GENRE_CHIP_COLLAPSED_COUNT);
+  const visibleIds = new Set(visible.map((genre) => genre.id));
+
+  for (const genre of genres) {
+    if (selectedIds.includes(genre.id) && !visibleIds.has(genre.id)) {
+      visible.push(genre);
+      visibleIds.add(genre.id);
+    }
+  }
+
+  return visible;
+}
+
 function GenreSelector({
   genres,
   selectedIds,
+  expanded,
+  onToggleExpanded,
   onToggle,
   noGenresLabel,
   genreAccessibilityLabel,
+  showAllLabel,
+  showLessLabel,
 }: {
   genres: Genre[];
   selectedIds: string[];
+  expanded: boolean;
+  onToggleExpanded: () => void;
   onToggle: (genreId: string) => void;
   noGenresLabel: string;
   genreAccessibilityLabel: (name: string) => string;
+  showAllLabel: string;
+  showLessLabel: string;
 }) {
+  const displayGenres = useMemo(
+    () => buildCollapsedGenreList(genres, selectedIds, expanded),
+    [expanded, genres, selectedIds],
+  );
+
+  const canCollapse = genres.length > GENRE_CHIP_COLLAPSED_COUNT;
+
   if (genres.length === 0) {
     return (
       <AppText variant="bodySmall" muted>
@@ -85,28 +120,42 @@ function GenreSelector({
   }
 
   return (
-    <View style={styles.chipGrid}>
-      {genres.map((genre) => {
-        const selected = selectedIds.includes(genre.id);
+    <View style={styles.genreSection}>
+      <View style={styles.chipGrid}>
+        {displayGenres.map((genre) => {
+          const selected = selectedIds.includes(genre.id);
 
-        return (
-          <Pressable
-            key={genre.id}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            accessibilityLabel={genreAccessibilityLabel(translateGenreName(genre.name))}
-            onPress={() => onToggle(genre.id)}
-            style={[styles.filterChip, selected && styles.filterChipSelected]}
-          >
-            <AppText
-              variant="caption"
-              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+          return (
+            <Pressable
+              key={genre.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={genreAccessibilityLabel(translateGenreName(genre.name))}
+              onPress={() => onToggle(genre.id)}
+              style={[styles.filterChip, selected && styles.filterChipSelected]}
             >
-              {translateGenreName(genre.name)}
-            </AppText>
-          </Pressable>
-        );
-      })}
+              <AppText
+                variant="caption"
+                style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+              >
+                {translateGenreName(genre.name)}
+              </AppText>
+            </Pressable>
+          );
+        })}
+      </View>
+      {canCollapse ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+          onPress={onToggleExpanded}
+          style={styles.genreToggle}
+        >
+          <AppText variant="bodySmall" style={styles.genreToggleText}>
+            {expanded ? showLessLabel : showAllLabel}
+          </AppText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -245,6 +294,7 @@ export function AdvancedDiscoverFilterSheet({
   const { region: userRegion, isHydrated } = useRegionalPreference();
   const [watchRegionExpanded, setWatchRegionExpanded] = useState(false);
   const [certificationCountryExpanded, setCertificationCountryExpanded] = useState(false);
+  const [genresExpanded, setGenresExpanded] = useState(false);
   const watchRegion = draft.watchRegion ?? userRegion;
   const certificationCountry = draft.certificationCountry ?? userRegion;
   const certificationOptions = listCertificationOptions(certificationCountry);
@@ -255,6 +305,7 @@ export function AdvancedDiscoverFilterSheet({
       setDraftMediaType(mediaType);
       setDraft(filters);
       setUseYearRange(filters.yearFrom != null || filters.yearTo != null);
+      setGenresExpanded(false);
     }
 
     wasVisibleRef.current = visible;
@@ -321,6 +372,10 @@ export function AdvancedDiscoverFilterSheet({
                 <GenreSelector
                   genres={genresQuery.data ?? []}
                   selectedIds={draft.genreIds}
+                  expanded={genresExpanded}
+                  onToggleExpanded={() => setGenresExpanded((value) => !value)}
+                  showAllLabel={t('common.showAllCount', { count: genresQuery.data?.length ?? 0 })}
+                  showLessLabel={t('common.showLess')}
                   noGenresLabel={t('common.noGenresAvailable')}
                   genreAccessibilityLabel={(name) => t('common.genreLabel', { name })}
                   onToggle={(genreId) =>
@@ -766,6 +821,19 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: spacing.xs,
+  },
+  genreSection: {
+    gap: spacing.xs,
+  },
+  genreToggle: {
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingVertical: spacing.xs,
+  },
+  genreToggleText: {
+    color: colors.accent,
+    fontWeight: '600',
   },
   sectionLabel: {
     color: colors.textSecondary,

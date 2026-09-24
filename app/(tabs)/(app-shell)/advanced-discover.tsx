@@ -26,11 +26,9 @@ import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/nav
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { ActiveFilterChips } from '@/features/discovery/components/ActiveFilterChips';
 import { AdvancedDiscoverFilterSheet } from '@/features/discovery/components/AdvancedDiscoverFilterSheet';
-import { AdvancedDiscoverQuickFilters } from '@/features/discovery/components/AdvancedDiscoverQuickFilters';
 import {
   countActiveAdvancedDiscoverFilters,
   createDefaultAdvancedDiscoverFilters,
-  ensureStreamingDraftDefaults,
   hasActiveAdvancedDiscoverFilters,
   hasStreamingAvailabilityFilters,
   resolveAdvancedDiscoverWatchRegion,
@@ -42,10 +40,6 @@ import { useAdvancedDiscover } from '@/features/discovery/hooks/useAdvancedDisco
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
 import { buildAdvancedDiscoverActiveFilterChips } from '@/features/discovery/utils/advanced-discover-active-chips';
-import {
-  toggleQuickFilter,
-  type AdvancedDiscoverQuickFilterKey,
-} from '@/features/discovery/utils/advanced-discover-quick-filters';
 import {
   parseAdvancedDiscoverParams,
   serializeAdvancedDiscoverParams,
@@ -152,20 +146,6 @@ export default function AdvancedDiscoverScreen() {
     [discoverState, genresQuery.data, providersQuery.data?.providers, replaceDiscoverState],
   );
 
-  const handleQuickFilterToggle = useCallback(
-    (key: AdvancedDiscoverQuickFilterKey) => {
-      setHasAppliedFilters(true);
-      replaceDiscoverState({
-        mediaType,
-        filters: ensureStreamingDraftDefaults(
-          toggleQuickFilter(key, filters, userRegion),
-          userRegion,
-        ),
-      });
-    },
-    [filters, mediaType, replaceDiscoverState, userRegion],
-  );
-
   const openCatalogDetail = useCallback(
     (id: string, itemType: 'movie' | 'tv') => {
       prefetchCatalogDetail(queryClient, id, itemType);
@@ -238,9 +218,6 @@ export default function AdvancedDiscoverScreen() {
           {getMediaTypeLabel(mediaType)}
           {sortLabel ? ` · ${sortLabel}` : ''}
         </AppText>
-        {shouldFetchResults ? (
-          <AdvancedDiscoverQuickFilters filters={filters} onToggle={handleQuickFilterToggle} />
-        ) : null}
         {activeFilterChips.length > 0 ? <ActiveFilterChips chips={activeFilterChips} /> : null}
         <View style={styles.filtersRow}>
           <Pressable
@@ -268,16 +245,7 @@ export default function AdvancedDiscoverScreen() {
         </View>
       </View>
     ),
-    [
-      activeFilterChips.length,
-      activeFilterCount,
-      filters,
-      handleQuickFilterToggle,
-      mediaType,
-      shouldFetchResults,
-      sortLabel,
-      t,
-    ],
+    [activeFilterChips.length, activeFilterCount, mediaType, sortLabel, t],
   );
 
   const topBar = (
