@@ -31,7 +31,7 @@ function createSection(
 }
 
 describe('applyHomeSectionPolicy', () => {
-  it('orders cold-start sections with Trending, Top Rated, and New Releases', () => {
+  it('orders cold-start sections with Trending and Top Rated', () => {
     const sections = [
       createSection('TopRated', 'Top Rated', [createItem({ id: 'top' })]),
       createSection('NewReleases', 'New Releases', [createItem({ id: 'new' })]),
@@ -41,11 +41,7 @@ describe('applyHomeSectionPolicy', () => {
 
     const presented = applyHomeSectionPolicy(sections, false);
 
-    expect(presented.map((section) => section.type)).toEqual([
-      'Trending',
-      'TopRated',
-      'NewReleases',
-    ]);
+    expect(presented.map((section) => section.type)).toEqual(['Trending', 'TopRated']);
   });
 
   it('orders cold-start sections with Coming Up before Trending when present', () => {
@@ -80,7 +76,6 @@ describe('applyHomeSectionPolicy', () => {
       'RecommendedForYou',
       'Trending',
       'TopRated',
-      'NewReleases',
     ]);
   });
 

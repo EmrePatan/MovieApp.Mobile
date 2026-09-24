@@ -7,6 +7,7 @@ export const EXCLUDED_HOME_SECTION_TYPES = new Set<HomeSectionType>([
   'BasedOnFavorites',
   'BecauseYouWatched',
   'HotThisWeek',
+  'NewReleases',
 ]);
 
 export const PERSONALIZED_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
@@ -14,14 +15,12 @@ export const PERSONALIZED_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
   'ComingUp',
   'Trending',
   'TopRated',
-  'NewReleases',
 ];
 
 export const COLD_START_HOME_SECTION_ORDER: readonly HomeSectionType[] = [
   'ComingUp',
   'Trending',
   'TopRated',
-  'NewReleases',
 ];
 
 export const PERSONALIZED_HERO_SOURCE_ORDER: readonly HomeSectionType[] = ['HotThisWeek'];

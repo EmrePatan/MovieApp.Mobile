@@ -52,7 +52,7 @@ describe('presentHomeSections', () => {
     expect(presented.sections[0].items).toHaveLength(10);
   });
 
-  it('orders cold-start rails as Trending, Top Rated, then New Releases', () => {
+  it('orders cold-start rails as Trending then Top Rated', () => {
     const sections = [
       createSection('HotThisWeek', [createItem({ id: 'hot-id' })]),
       createSection('NewReleases', [createItem({ id: 'new-id' })]),
@@ -64,11 +64,7 @@ describe('presentHomeSections', () => {
 
     expect(presented.showColdWelcome).toBe(false);
     expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
-    expect(presented.sections.map((section) => section.type)).toEqual([
-      'Trending',
-      'TopRated',
-      'NewReleases',
-    ]);
+    expect(presented.sections.map((section) => section.type)).toEqual(['Trending', 'TopRated']);
   });
 
   it('orders personalized rails with Trending after Recommended For You', () => {
@@ -86,7 +82,6 @@ describe('presentHomeSections', () => {
       'RecommendedForYou',
       'Trending',
       'TopRated',
-      'NewReleases',
     ]);
   });
 

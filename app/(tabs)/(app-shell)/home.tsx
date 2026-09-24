@@ -181,15 +181,6 @@ export default function HomeScreen() {
         return;
       }
 
-      if (sectionType === 'NewReleases') {
-        openLibraryStackScreen(
-          router,
-          '/discover-browse?mode=new_releases&type=all',
-          '/(tabs)/home',
-        );
-        return;
-      }
-
       if (sectionType === 'ComingUp') {
         openComingUpScreen(router);
       }
@@ -214,7 +205,7 @@ export default function HomeScreen() {
           section={item}
           onItemPress={handleItemPress}
           onSeeAllPress={
-            item.type === 'Trending' || item.type === 'TopRated' || item.type === 'NewReleases'
+            item.type === 'Trending' || item.type === 'TopRated'
               ? () => handleSeeAllPress(item.type)
               : undefined
           }

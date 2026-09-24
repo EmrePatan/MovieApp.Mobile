@@ -254,7 +254,7 @@ describe('HomeScreen', () => {
     expect(screen.queryByText('Find your next favorite')).toBeNull();
     expect(screen.getByText('Top Rated')).toBeTruthy();
     expect(screen.getByText('Trending Now')).toBeTruthy();
-    expect(screen.getByText('New Releases')).toBeTruthy();
+    expect(screen.queryByText('New Releases')).toBeNull();
     expect(screen.queryByLabelText('Show TV Shows')).toBeNull();
   });
 
