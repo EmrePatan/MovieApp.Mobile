@@ -7,9 +7,9 @@ export type ExternalRatingProviderBrandId =
   | 'metacritic'
   | 'tmdb';
 
-type SvgBrandConfig = {
-  kind: 'svg';
-  svgKey: 'imdb' | 'letterboxd' | 'metacritic' | 'tmdb';
+type ImageBrandConfig = {
+  kind: 'image';
+  source: ImageSourcePropType;
   height: number;
   aspectRatio: number;
   accessibilityLabel: string;
@@ -23,38 +23,38 @@ type RottenTomatoesBrandConfig = {
   accessibilityLabel: string;
 };
 
-export type ExternalRatingProviderBrandConfig = SvgBrandConfig | RottenTomatoesBrandConfig;
+export type ExternalRatingProviderBrandConfig = ImageBrandConfig | RottenTomatoesBrandConfig;
 
 export const EXTERNAL_RATING_PROVIDER_BRAND_CONFIG: Record<
   ExternalRatingProviderBrandId,
   ExternalRatingProviderBrandConfig
 > = {
   imdb: {
-    kind: 'svg',
-    svgKey: 'imdb',
+    kind: 'image',
+    source: require('../../../../assets/external-ratings/imdb.png'),
     height: 18,
     aspectRatio: 575 / 289.83,
     accessibilityLabel: 'IMDb',
   },
   letterboxd: {
-    kind: 'svg',
-    svgKey: 'letterboxd',
+    kind: 'image',
+    source: require('../../../../assets/external-ratings/letterboxd.png'),
     height: 16,
     aspectRatio: 512.093 / 54.024,
     accessibilityLabel: 'Letterboxd',
   },
   metacritic: {
-    kind: 'svg',
-    svgKey: 'metacritic',
+    kind: 'image',
+    source: require('../../../../assets/external-ratings/metacritic.png'),
     height: 18,
-    aspectRatio: 4.5,
+    aspectRatio: 176 / 40,
     accessibilityLabel: 'Metacritic',
   },
   tmdb: {
-    kind: 'svg',
-    svgKey: 'tmdb',
+    kind: 'image',
+    source: require('../../../../assets/external-ratings/tmdb.png'),
     height: 22,
-    aspectRatio: 512 / 369,
+    aspectRatio: 185.04 / 133.4,
     accessibilityLabel: 'TMDB',
   },
   'rotten-tomatoes': {

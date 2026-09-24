@@ -1,41 +1,10 @@
 import { Image, StyleSheet, View } from 'react-native';
-import { SvgXml } from 'react-native-svg';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { EXTERNAL_RATING_BRAND_SVGS } from '../config/external-rating-brand-svgs';
 import { resolveExternalRatingProviderBrandConfig } from '../config/external-rating-provider-brand-config';
-import { resolveRenderableBrandSvg } from '../utils/brand-svg';
 
 interface ExternalRatingProviderBrandProps {
   source: string;
-}
-
-function SvgProviderBrand({
-  xml,
-  height,
-  aspectRatio,
-  fallbackLabel,
-}: {
-  xml: string;
-  height: number;
-  aspectRatio: number;
-  fallbackLabel: string;
-}) {
-  const renderableXml = resolveRenderableBrandSvg(xml);
-  if (!renderableXml) {
-    return <AppText style={styles.fallbackLabel}>{fallbackLabel}</AppText>;
-  }
-
-  const width = height * aspectRatio;
-
-  return (
-    <SvgXml
-      xml={renderableXml}
-      width={width}
-      height={height}
-      accessibilityRole="image"
-    />
-  );
 }
 
 export function ExternalRatingProviderBrand({ source }: ExternalRatingProviderBrandProps) {
@@ -52,12 +21,16 @@ export function ExternalRatingProviderBrand({ source }: ExternalRatingProviderBr
       importantForAccessibility="no"
       accessibilityLabel={config.accessibilityLabel}
     >
-      {config.kind === 'svg' ? (
-        <SvgProviderBrand
-          xml={EXTERNAL_RATING_BRAND_SVGS[config.svgKey]}
-          height={config.height}
-          aspectRatio={config.aspectRatio}
-          fallbackLabel={config.accessibilityLabel}
+      {config.kind === 'image' ? (
+        <Image
+          source={config.source}
+          style={{
+            width: config.height * config.aspectRatio,
+            height: config.height,
+          }}
+          resizeMode="contain"
+          accessibilityLabel={config.accessibilityLabel}
+          testID={`external-rating-brand-${source}`}
         />
       ) : (
         <View style={styles.rtIconRow}>

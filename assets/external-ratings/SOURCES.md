@@ -11,4 +11,4 @@ Bundled for offline display in Movie Cave detail "Other Ratings" cards.
 | `rt-tomatometer.png` | Rotten Tomatoes (Tomatometer) | Rendered from Wikimedia Commons [Rotten Tomatoes.svg](https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes.svg) (fresh tomato mark) |
 | `rt-popcorn.png` | Rotten Tomatoes (Popcornmeter) | Rendered from Wikimedia Commons [Rotten Tomatoes positive audience.svg](https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes_positive_audience.svg) (hot popcorn mark) |
 
-Runtime code reads SVG sources via `src/features/external-ratings/config/external-rating-brand-svgs.ts` (generated from the `.svg` files above).
+Runtime UI uses bundled PNGs (`*.png`) rasterized from the SVG sources above for reliable React Native rendering. Re-rasterize after SVG updates with `sharp` (widths: IMDb 320, Letterboxd 280, Metacritic 280, TMDB 120).
