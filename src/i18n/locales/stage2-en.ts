@@ -717,6 +717,7 @@ export const stage2En = {
       overview: 'Overview',
       genres: 'Genres',
       whereToWatch: 'Where to Watch',
+      otherRatings: 'Other Ratings',
       castAndCrew: 'Cast & Crew',
       similar: 'You May Also Like',
       reviews: 'Reviews',

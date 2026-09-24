@@ -735,6 +735,7 @@ export const stage2It = {
       overview: 'Trama',
       genres: 'Generi',
       whereToWatch: 'Dove guardare',
+      otherRatings: 'Altre valutazioni',
       castAndCrew: 'Cast e troupe',
       similar: 'Potrebbe piacerti anche',
       reviews: 'Recensioni',

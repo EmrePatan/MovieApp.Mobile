@@ -4,6 +4,7 @@ import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { DetailInlineRatingSection } from '@/features/ratings/components/DetailInlineRatingSection';
+import { OtherRatingsSection } from '@/features/external-ratings/components/OtherRatingsSection';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
@@ -53,6 +54,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       {movie.isReleased ? (
         <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
       ) : null}
+      <OtherRatingsSection mediaType="movie" contentId={movie.id} />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}

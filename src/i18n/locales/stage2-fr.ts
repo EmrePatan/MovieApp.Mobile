@@ -735,6 +735,7 @@ export const stage2Fr = {
       overview: 'Synopsis',
       genres: 'Genres',
       whereToWatch: 'Où regarder',
+      otherRatings: 'Autres notes',
       castAndCrew: 'Distribution et équipe',
       similar: 'Vous pourriez aussi aimer',
       reviews: 'Avis',

@@ -12,6 +12,7 @@ import {
 } from '@/features/watch-history/hooks/watch-history-query-keys';
 import { getWatchlistMembership } from '@/features/watchlists/api/watchlists-api';
 import { watchlistMembershipQueryKey } from '@/features/watchlists/hooks/watchlist-query-keys';
+import { prefetchExternalRatings } from '@/features/external-ratings/hooks/external-ratings-query-options';
 import { getMovieDetails } from '../../movie/api/movie-api';
 import { movieQueryKey } from '../../movie/hooks/useMovieDetails';
 import { getTvShowDetails } from '../../tv/api/tv-api';
@@ -110,6 +111,8 @@ export function prefetchCatalogDetail(
       staleTime: CATALOG_DETAIL_STALE_TIME_MS,
     });
   }
+
+  prefetchExternalRatings(queryClient, type, id);
 
   void prefetchCatalogDetailActionStatuses(queryClient, id, type);
 }

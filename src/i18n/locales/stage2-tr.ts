@@ -735,6 +735,7 @@ export const stage2Tr = {
       overview: 'Özet',
       genres: 'Türler',
       whereToWatch: 'Nerede İzlenir',
+      otherRatings: 'Diğer Puanlar',
       castAndCrew: 'Oyuncular ve Ekip',
       similar: 'Bunları da Beğenebilirsin',
       reviews: 'Yorumlar',

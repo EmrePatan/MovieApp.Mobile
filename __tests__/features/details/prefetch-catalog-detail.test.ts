@@ -4,6 +4,8 @@ import { getMovieDetails } from '@/features/details/movie/api/movie-api';
 import { movieQueryKey } from '@/features/details/movie/hooks/useMovieDetails';
 import { getTvShowDetails } from '@/features/details/tv/api/tv-api';
 import { tvShowQueryKey } from '@/features/details/tv/hooks/useTvShowDetails';
+import { externalRatingsQueryKey } from '@/features/external-ratings/hooks/external-ratings-query-keys';
+import { getExternalRatings } from '@/features/external-ratings/api/external-ratings-api';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { getMovieFavoriteStatus, getTvFavoriteStatus } from '@/features/favorites/api/favorites-api';
 import { favoriteStatusQueryKey } from '@/features/favorites/hooks/favorite-query-keys';
@@ -51,6 +53,10 @@ jest.mock('@/features/watchlists/api/watchlists-api', () => ({
   getWatchlistMembership: jest.fn(),
 }));
 
+jest.mock('@/features/external-ratings/api/external-ratings-api', () => ({
+  getExternalRatings: jest.fn(),
+}));
+
 describe('prefetchCatalogDetail', () => {
   const movieId = '65de321a-597a-46ec-a499-67ad9e20795e';
   const tvShowId = 'a2f4b2f0-2f39-4a5a-9c0d-8d1f6e6b6f10';
@@ -66,7 +72,21 @@ describe('prefetchCatalogDetail', () => {
     (getTvShowProgress as jest.Mock).mockResolvedValue({ isFullyWatched: false });
     (getMovieFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
     (getTvShowFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
+    (getExternalRatings as jest.Mock).mockResolvedValue({ ratings: [] });
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+  });
+
+  it('prefetches external ratings with the canonical query key', async () => {
+    const queryClient = new QueryClient();
+    const prefetchSpy = jest.spyOn(queryClient, 'prefetchQuery');
+
+    prefetchCatalogDetail(queryClient, movieId, 'movie');
+
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: externalRatingsQueryKey('movie', movieId),
+      }),
+    );
   });
 
   it('prefetches movie details for valid ids', async () => {
