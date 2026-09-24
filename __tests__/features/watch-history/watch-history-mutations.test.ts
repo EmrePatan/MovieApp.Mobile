@@ -31,6 +31,7 @@ describe('watch history cache invalidation', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['watch-history', 'recent'] });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['home'] });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['recommendations'] });
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['library'] });
   });
 
   it('invalidates episode progress and history queries', () => {
@@ -55,6 +56,7 @@ describe('watch history cache invalidation', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['watch-history', 'recent'] });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['home'] });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['recommendations'] });
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['library'] });
   });
 
   it('toggles season watched episode ids without duplicates', () => {

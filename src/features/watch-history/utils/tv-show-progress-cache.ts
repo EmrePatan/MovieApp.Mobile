@@ -12,6 +12,7 @@ export function buildSeasonProgressMap(
 }
 
 function recalculateAggregate(
+  current: TvShowWatchProgressResponse,
   seasons: TvShowSeasonProgressResponse[],
 ): Pick<
   TvShowWatchProgressResponse,
@@ -22,6 +23,7 @@ function recalculateAggregate(
   | 'regularTotalEpisodes'
   | 'regularWatchedEpisodes'
   | 'isFullyWatched'
+  | 'isCompleted'
 > {
   const totalEpisodes = seasons.reduce((sum, season) => sum + season.totalEpisodes, 0);
   const watchedEpisodes = seasons.reduce((sum, season) => sum + season.watchedEpisodes, 0);
@@ -32,6 +34,9 @@ function recalculateAggregate(
     0,
   );
 
+  const isFullyWatched =
+    regularTotalEpisodes > 0 && regularWatchedEpisodes >= regularTotalEpisodes;
+
   return {
     seasons,
     totalEpisodes,
@@ -39,8 +44,10 @@ function recalculateAggregate(
     progressPercentage: calculateSeasonProgressPercentage(watchedEpisodes, totalEpisodes),
     regularTotalEpisodes,
     regularWatchedEpisodes,
-    isFullyWatched:
-      regularTotalEpisodes > 0 && regularWatchedEpisodes >= regularTotalEpisodes,
+    isFullyWatched,
+    // Completion depends on the series status and ingested totals only the server knows:
+    // optimistic edits may revoke it but never grant it.
+    isCompleted: current.isCompleted === true && isFullyWatched,
   };
 }
 
@@ -76,7 +83,7 @@ export function updateTvShowAggregateSeasonProgress(
 
   queryClient.setQueryData<TvShowWatchProgressResponse>(key, {
     ...current,
-    ...recalculateAggregate(seasons),
+    ...recalculateAggregate(current, seasons),
   });
 }
 
@@ -106,7 +113,7 @@ export function updateTvShowAggregateAllSeasonsWatched(
 
     queryClient.setQueryData<TvShowWatchProgressResponse>(key, {
       ...current,
-      ...recalculateAggregate(seasons),
+      ...recalculateAggregate(current, seasons),
     });
     return;
   }
@@ -125,6 +132,6 @@ export function updateTvShowAggregateAllSeasonsWatched(
 
   queryClient.setQueryData<TvShowWatchProgressResponse>(key, {
     ...current,
-    ...recalculateAggregate(seasons),
+    ...recalculateAggregate(current, seasons),
   });
 }

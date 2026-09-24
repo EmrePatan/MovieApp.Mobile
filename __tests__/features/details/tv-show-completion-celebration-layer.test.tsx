@@ -16,6 +16,8 @@ const progressData = {
   totalEpisodes: 35,
   watchedEpisodes: 34,
   progressPercentage: 97,
+  isFullyWatched: false,
+  isCompleted: false,
   nextEpisode: null,
   seasons: [],
 };
@@ -31,7 +33,7 @@ describe('TvShowCompletionCelebrationLayer', () => {
     });
   });
 
-  it('shows confetti from the stack-level layer when progress crosses completion', () => {
+  it('shows confetti from the stack-level layer when the server reports completion', () => {
     const view = render(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
 
     expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
@@ -41,6 +43,8 @@ describe('TvShowCompletionCelebrationLayer', () => {
         ...progressData,
         watchedEpisodes: 35,
         progressPercentage: 100,
+        isFullyWatched: true,
+        isCompleted: true,
       },
       isLoading: false,
       isError: false,
@@ -49,5 +53,25 @@ describe('TvShowCompletionCelebrationLayer', () => {
     view.rerender(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
 
     expect(screen.getByTestId('show-completed-confetti')).toBeTruthy();
+  });
+
+  it('does not celebrate a returning series that is only caught up', () => {
+    const view = render(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
+
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        ...progressData,
+        watchedEpisodes: 35,
+        progressPercentage: 100,
+        isFullyWatched: true,
+        isCompleted: false,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    view.rerender(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
+
+    expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
   });
 });

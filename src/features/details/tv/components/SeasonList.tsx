@@ -14,7 +14,6 @@ import { buildSeasonProgressMap } from '@/features/watch-history/utils/tv-show-p
 import type { TvShowSeasonProgressResponse } from '@/features/watch-history/types';
 import { ShowCompletedBanner } from '@/features/watch-history/components/ShowCompletedBanner';
 import { useToggleSeasonWatched } from '@/features/watch-history/hooks/useWatchHistoryMutations';
-import { isShowFullyWatched } from '@/features/watch-history/utils/show-completion-celebration';
 import {
   formatSeasonProgressCount,
   formatTvShowWatchedSummary,
@@ -243,9 +242,7 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
     (!tvProgressQuery.isLoading && !tvProgressQuery.isError && tvProgressQuery.data != null);
 
   const tvProgress = tvProgressQuery.data;
-  const watchedEpisodes = tvProgress?.watchedEpisodes ?? 0;
-  const totalEpisodes = tvProgress?.totalEpisodes ?? 0;
-  const isFullyWatched = isShowFullyWatched(watchedEpisodes, totalEpisodes);
+  const isShowCompleted = tvProgress?.isCompleted === true;
   const tvSummary =
     isAuthenticated && tvProgress
       ? formatTvShowWatchedSummary(tvProgress.watchedEpisodes, tvProgress.totalEpisodes)
@@ -287,7 +284,7 @@ export function SeasonList({ tvShowId, seasons, showTitle = '' }: SeasonListProp
         ) : null}
       </View>
 
-      {isFullyWatched && showTitle ? (
+      {isShowCompleted && showTitle ? (
         <ShowCompletedBanner showTitle={showTitle} />
       ) : null}
 

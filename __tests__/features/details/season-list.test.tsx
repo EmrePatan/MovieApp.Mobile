@@ -186,6 +186,7 @@ describe('SeasonList progress UI', () => {
         ...progressData,
         watchedEpisodes: 35,
         progressPercentage: 100,
+        isCompleted: true,
         seasons: progressData.seasons.map((season) => ({
           ...season,
           watchedEpisodes: season.totalEpisodes,
@@ -232,6 +233,7 @@ describe('SeasonList progress UI', () => {
         totalEpisodes: 35,
         watchedEpisodes: 35,
         progressPercentage: 100,
+        isCompleted: true,
         nextEpisode: null,
         seasons: [
           {
@@ -270,6 +272,7 @@ describe('SeasonList progress UI', () => {
         totalEpisodes: 35,
         watchedEpisodes: 35,
         progressPercentage: 100,
+        isCompleted: true,
         nextEpisode: null,
         seasons: [
           {
@@ -294,6 +297,30 @@ describe('SeasonList progress UI', () => {
 
     expect(screen.getByTestId('show-completed-banner')).toBeTruthy();
     expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
+  });
+
+  it('does not show the completion banner for a caught-up returning series', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 35,
+        watchedEpisodes: 35,
+        progressPercentage: 100,
+        isFullyWatched: true,
+        isCompleted: false,
+        nextEpisode: null,
+        seasons: [
+          { seasonNumber: 1, totalEpisodes: 22, watchedEpisodes: 22, progressPercentage: 100 },
+          { seasonNumber: 2, totalEpisodes: 13, watchedEpisodes: 13, progressPercentage: 100 },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<SeasonList tvShowId="tv-id" seasons={seasons} showTitle="Severance" />);
+
+    expect(screen.queryByTestId('show-completed-banner')).toBeNull();
   });
 
   it('collapses long season lists and expands on demand', () => {

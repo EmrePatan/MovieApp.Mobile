@@ -2,43 +2,29 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { shouldTriggerShowCompletionCelebration } from '../utils/show-completion-celebration';
 
 interface UseShowCompletionCelebrationOptions {
-  watchedEpisodes: number;
-  totalEpisodes: number;
+  isCompleted: boolean;
   enabled: boolean;
 }
 
 export function useShowCompletionCelebration({
-  watchedEpisodes,
-  totalEpisodes,
+  isCompleted,
   enabled,
 }: UseShowCompletionCelebrationOptions) {
-  const previousWatchedRef = useRef<number | null>(null);
+  const previousCompletedRef = useRef<boolean | null>(null);
   const [confettiVisible, setConfettiVisible] = useState(false);
 
   useEffect(() => {
-    if (!enabled || totalEpisodes <= 0) {
-      if (!enabled) {
-        previousWatchedRef.current = null;
-      }
-
+    if (!enabled) {
+      previousCompletedRef.current = null;
       return;
     }
 
-    const previousWatched = previousWatchedRef.current;
-
-    if (previousWatched === null) {
-      previousWatchedRef.current = watchedEpisodes;
-      return;
-    }
-
-    if (
-      shouldTriggerShowCompletionCelebration(previousWatched, watchedEpisodes, totalEpisodes)
-    ) {
+    if (shouldTriggerShowCompletionCelebration(previousCompletedRef.current, isCompleted)) {
       setConfettiVisible(true);
     }
 
-    previousWatchedRef.current = watchedEpisodes;
-  }, [enabled, totalEpisodes, watchedEpisodes]);
+    previousCompletedRef.current = isCompleted;
+  }, [enabled, isCompleted]);
 
   const dismissConfetti = useCallback(() => {
     setConfettiVisible(false);

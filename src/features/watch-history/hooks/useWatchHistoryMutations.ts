@@ -23,6 +23,7 @@ import type {
   SeasonWatchedEpisodesResponse,
   TvShowWatchProgressResponse,
 } from '../types';
+import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { calculateSeasonProgressPercentage } from '../utils/season-progress';
@@ -41,14 +42,20 @@ export function invalidateRecentWatchHistory(queryClient: ReturnType<typeof useQ
   void queryClient.invalidateQueries({ queryKey: ['watch-history', 'recent'] });
 }
 
+/** Surfaces whose content depends on watch state: recent history, home, and library shelves. */
+export function invalidateWatchStateDependents(queryClient: ReturnType<typeof useQueryClient>) {
+  invalidateRecentWatchHistory(queryClient);
+  invalidateHomeQueries(queryClient);
+  invalidateLibraryQueries(queryClient);
+}
+
 export function invalidateMovieWatchHistoryQueries(
   queryClient: ReturnType<typeof useQueryClient>,
   movieId: string,
 ) {
   void queryClient.invalidateQueries({ queryKey: movieWatchStatusQueryKey(movieId) });
   void queryClient.invalidateQueries({ queryKey: ['watch-history', 'movies'] });
-  invalidateRecentWatchHistory(queryClient);
-  invalidateHomeQueries(queryClient);
+  invalidateWatchStateDependents(queryClient);
 }
 
 export function invalidateEpisodeWatchHistoryQueries(
@@ -66,8 +73,7 @@ export function invalidateEpisodeWatchHistoryQueries(
   void queryClient.invalidateQueries({
     queryKey: seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
   });
-  invalidateRecentWatchHistory(queryClient);
-  invalidateHomeQueries(queryClient);
+  invalidateWatchStateDependents(queryClient);
 }
 
 export function applySeasonWatchedEpisodeIds(
@@ -375,8 +381,7 @@ export function useBulkUpdateEpisodeWatchState(tvShowId: string, seasonNumber: n
       void queryClient.invalidateQueries({
         queryKey: seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
       });
-      invalidateRecentWatchHistory(queryClient);
-      invalidateHomeQueries(queryClient);
+      invalidateWatchStateDependents(queryClient);
     },
   });
 }
@@ -481,8 +486,7 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
         queryKey: seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
       });
       void queryClient.invalidateQueries({ queryKey: ['watch-history', 'episode'] });
-      invalidateRecentWatchHistory(queryClient);
-      invalidateHomeQueries(queryClient);
+      invalidateWatchStateDependents(queryClient);
     },
   });
 }
@@ -514,8 +518,7 @@ export function useToggleTvShowWatched(tvShowId: string) {
       void queryClient.invalidateQueries({
         queryKey: ['watch-history', 'tv', tvShowId, 'season'],
       });
-      invalidateRecentWatchHistory(queryClient);
-      invalidateHomeQueries(queryClient);
+      invalidateWatchStateDependents(queryClient);
     },
   });
 }
@@ -530,8 +533,7 @@ export function useMarkThroughEpisode(tvShowId: string, seasonNumber: number) {
       void queryClient.invalidateQueries({
         queryKey: ['watch-history', 'tv', tvShowId, 'season'],
       });
-      invalidateRecentWatchHistory(queryClient);
-      invalidateHomeQueries(queryClient);
+      invalidateWatchStateDependents(queryClient);
     },
   });
 }

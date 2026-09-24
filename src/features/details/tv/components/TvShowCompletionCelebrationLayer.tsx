@@ -18,8 +18,7 @@ export function TvShowCompletionCelebrationLayer({
   const tvProgress = tvProgressQuery.data;
 
   const { confettiVisible, dismissConfetti } = useShowCompletionCelebration({
-    watchedEpisodes: tvProgress?.watchedEpisodes ?? 0,
-    totalEpisodes: tvProgress?.totalEpisodes ?? 0,
+    isCompleted: tvProgress?.isCompleted === true,
     enabled: isAuthenticated && progressReady,
   });
 

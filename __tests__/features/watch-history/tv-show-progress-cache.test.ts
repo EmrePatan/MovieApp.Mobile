@@ -48,4 +48,56 @@ describe('tv show progress cache helpers', () => {
       ],
     });
   });
+
+  it('never grants completion optimistically when the last episodes are marked', () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), {
+      tvShowId,
+      totalEpisodes: 18,
+      watchedEpisodes: 10,
+      progressPercentage: 55.56,
+      regularTotalEpisodes: 18,
+      regularWatchedEpisodes: 10,
+      isFullyWatched: false,
+      isCompleted: false,
+      nextEpisode: null,
+      seasons: [
+        { seasonNumber: 1, totalEpisodes: 10, watchedEpisodes: 10, progressPercentage: 100 },
+        { seasonNumber: 2, totalEpisodes: 8, watchedEpisodes: 0, progressPercentage: 0 },
+      ],
+    });
+
+    updateTvShowAggregateSeasonProgress(queryClient, tvShowId, 2, 8, 8);
+
+    expect(queryClient.getQueryData(tvShowProgressQueryKey(tvShowId))).toMatchObject({
+      isFullyWatched: true,
+      isCompleted: false,
+    });
+  });
+
+  it('revokes completion optimistically when an episode is unmarked', () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), {
+      tvShowId,
+      totalEpisodes: 18,
+      watchedEpisodes: 18,
+      progressPercentage: 100,
+      regularTotalEpisodes: 18,
+      regularWatchedEpisodes: 18,
+      isFullyWatched: true,
+      isCompleted: true,
+      nextEpisode: null,
+      seasons: [
+        { seasonNumber: 1, totalEpisodes: 10, watchedEpisodes: 10, progressPercentage: 100 },
+        { seasonNumber: 2, totalEpisodes: 8, watchedEpisodes: 8, progressPercentage: 100 },
+      ],
+    });
+
+    updateTvShowAggregateSeasonProgress(queryClient, tvShowId, 2, 7, 8);
+
+    expect(queryClient.getQueryData(tvShowProgressQueryKey(tvShowId))).toMatchObject({
+      isFullyWatched: false,
+      isCompleted: false,
+    });
+  });
 });

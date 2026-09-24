@@ -111,7 +111,10 @@ export interface TvShowWatchProgressResponse {
   progressPercentage: number;
   regularTotalEpisodes: number;
   regularWatchedEpisodes: number;
+  /** Every aired regular episode is watched; a returning series in this state is still "watching". */
   isFullyWatched: boolean;
+  /** Server-decided: the series has concluded (ended/canceled) and every regular episode is watched. */
+  isCompleted: boolean;
   nextEpisode: NextEpisodeResponse | null;
   seasons: TvShowSeasonProgressResponse[];
 }
