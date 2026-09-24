@@ -85,7 +85,7 @@ export function FavoriteButton({
           label={t('details.actions.favoriteLabel')}
           accessibilityLabel={label}
           active={active}
-          busy={isMutationPending}
+          busy={isInitialLoading || isMutationPending}
           disabled={isInitialLoading || isMutationPending}
           onPress={handlePress}
         >

@@ -66,7 +66,7 @@ export function AddToWatchlistButton({
           label={t('common.watchlist')}
           accessibilityLabel={label}
           active={active}
-          busy={false}
+          busy={isBusy}
           disabled={isBusy}
           onPress={handlePress}
         >

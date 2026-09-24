@@ -74,4 +74,19 @@ describe('AddToWatchlistButton', () => {
 
     expect(screen.getByText('Please sign in to use watchlists.')).toBeTruthy();
   });
+
+  describe('detail optimistic UX', () => {
+    it('shows a busy spinner instead of a false default state while membership is unresolved', () => {
+      mockUseWatchlistMembership.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      });
+
+      render(<AddToWatchlistButton contentType="movie" contentId="movie-id" variant="detail" />);
+
+      const button = screen.getByLabelText('Add to watchlist');
+      expect(button.props.accessibilityState.busy).toBe(true);
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
+  });
 });

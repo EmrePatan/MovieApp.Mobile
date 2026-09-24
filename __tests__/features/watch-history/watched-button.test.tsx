@@ -118,7 +118,7 @@ describe('WatchedButton', () => {
   });
 
   describe('detail optimistic UX', () => {
-    it('disables detail action while initial status is unresolved', () => {
+    it('shows a busy spinner instead of a false default state while initial status is unresolved', () => {
       (useMovieWatchStatus as jest.Mock).mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -129,7 +129,7 @@ describe('WatchedButton', () => {
       );
 
       const button = screen.getByLabelText('Mark as watched');
-      expect(button.props.accessibilityState.busy).toBe(false);
+      expect(button.props.accessibilityState.busy).toBe(true);
       expect(button.props.accessibilityState.disabled).toBe(true);
     });
 
