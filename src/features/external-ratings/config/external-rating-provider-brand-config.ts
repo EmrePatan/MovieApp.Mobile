@@ -44,42 +44,79 @@ const BRAND_DIMENSIONS: Record<ExternalRatingBrandVariant, BrandDimensions> = {
   },
   compact: {
     imageHeights: {
-      imdb: 13,
-      letterboxd: 12,
-      metacritic: 13,
-      tmdb: 15,
+      imdb: 16,
+      letterboxd: 16,
+      metacritic: 14,
+      tmdb: 16,
     },
     rtIconSize: 15,
   },
 };
 
-const BRAND_ASSETS = {
+type RasterBrandAsset = {
+  wordmark: ImageSourcePropType;
+  wordmarkAspectRatio: number;
+  icon: ImageSourcePropType;
+  iconAspectRatio: number;
+  accessibilityLabel: string;
+};
+
+const BRAND_ASSETS: Record<
+  Exclude<ExternalRatingProviderBrandId, 'rotten-tomatoes'>,
+  RasterBrandAsset
+> = {
   imdb: {
-    source: require('../../../../assets/external-ratings/imdb.png'),
-    aspectRatio: 575 / 289.83,
+    wordmark: require('../../../../assets/external-ratings/imdb.png'),
+    wordmarkAspectRatio: 575 / 289.83,
+    icon: require('../../../../assets/external-ratings/imdb-icon.png'),
+    iconAspectRatio: 1,
     accessibilityLabel: 'IMDb',
   },
   letterboxd: {
-    source: require('../../../../assets/external-ratings/letterboxd.png'),
-    aspectRatio: 512.093 / 54.024,
+    wordmark: require('../../../../assets/external-ratings/letterboxd.png'),
+    wordmarkAspectRatio: 512.093 / 54.024,
+    icon: require('../../../../assets/external-ratings/letterboxd-icon.png'),
+    iconAspectRatio: 1,
     accessibilityLabel: 'Letterboxd',
   },
   metacritic: {
-    source: require('../../../../assets/external-ratings/metacritic.png'),
-    aspectRatio: 176 / 40,
+    wordmark: require('../../../../assets/external-ratings/metacritic.png'),
+    wordmarkAspectRatio: 176 / 40,
+    icon: require('../../../../assets/external-ratings/metacritic-icon.png'),
+    iconAspectRatio: 96 / 22,
     accessibilityLabel: 'Metacritic',
   },
   tmdb: {
-    source: require('../../../../assets/external-ratings/tmdb.png'),
-    aspectRatio: 185.04 / 133.4,
+    wordmark: require('../../../../assets/external-ratings/tmdb.png'),
+    wordmarkAspectRatio: 185.04 / 133.4,
+    icon: require('../../../../assets/external-ratings/tmdb-icon.png'),
+    iconAspectRatio: 96 / 69,
     accessibilityLabel: 'TMDB',
   },
-  'rotten-tomatoes': {
-    tomatometerIcon: require('../../../../assets/external-ratings/rt-tomatometer.png'),
-    popcornIcon: require('../../../../assets/external-ratings/rt-popcorn.png'),
-    accessibilityLabel: 'Rotten Tomatoes Tomatometer and Popcornmeter',
-  },
+};
+
+const ROTTEN_TOMATOES_ASSETS = {
+  tomatometerIcon: require('../../../../assets/external-ratings/rt-tomatometer.png'),
+  popcornIcon: require('../../../../assets/external-ratings/rt-popcorn.png'),
+  accessibilityLabel: 'Rotten Tomatoes Tomatometer and Popcornmeter',
 } as const;
+
+function resolveRasterBrand(
+  brand: RasterBrandAsset,
+  brandId: Exclude<ExternalRatingProviderBrandId, 'rotten-tomatoes'>,
+  variant: ExternalRatingBrandVariant,
+): ImageBrandConfig {
+  const dimensions = BRAND_DIMENSIONS[variant];
+  const useIcon = variant === 'compact';
+
+  return {
+    kind: 'image',
+    source: useIcon ? brand.icon : brand.wordmark,
+    height: dimensions.imageHeights[brandId],
+    aspectRatio: useIcon ? brand.iconAspectRatio : brand.wordmarkAspectRatio,
+    accessibilityLabel: brand.accessibilityLabel,
+  };
+}
 
 export function resolveExternalRatingProviderBrandConfig(
   source: string,
@@ -88,52 +125,28 @@ export function resolveExternalRatingProviderBrandConfig(
   const dimensions = BRAND_DIMENSIONS[variant];
 
   if (source === 'imdb') {
-    return {
-      kind: 'image',
-      source: BRAND_ASSETS.imdb.source,
-      height: dimensions.imageHeights.imdb,
-      aspectRatio: BRAND_ASSETS.imdb.aspectRatio,
-      accessibilityLabel: BRAND_ASSETS.imdb.accessibilityLabel,
-    };
+    return resolveRasterBrand(BRAND_ASSETS.imdb, 'imdb', variant);
   }
 
   if (source === 'letterboxd') {
-    return {
-      kind: 'image',
-      source: BRAND_ASSETS.letterboxd.source,
-      height: dimensions.imageHeights.letterboxd,
-      aspectRatio: BRAND_ASSETS.letterboxd.aspectRatio,
-      accessibilityLabel: BRAND_ASSETS.letterboxd.accessibilityLabel,
-    };
+    return resolveRasterBrand(BRAND_ASSETS.letterboxd, 'letterboxd', variant);
   }
 
   if (source === 'metacritic') {
-    return {
-      kind: 'image',
-      source: BRAND_ASSETS.metacritic.source,
-      height: dimensions.imageHeights.metacritic,
-      aspectRatio: BRAND_ASSETS.metacritic.aspectRatio,
-      accessibilityLabel: BRAND_ASSETS.metacritic.accessibilityLabel,
-    };
+    return resolveRasterBrand(BRAND_ASSETS.metacritic, 'metacritic', variant);
   }
 
   if (source === 'tmdb') {
-    return {
-      kind: 'image',
-      source: BRAND_ASSETS.tmdb.source,
-      height: dimensions.imageHeights.tmdb,
-      aspectRatio: BRAND_ASSETS.tmdb.aspectRatio,
-      accessibilityLabel: BRAND_ASSETS.tmdb.accessibilityLabel,
-    };
+    return resolveRasterBrand(BRAND_ASSETS.tmdb, 'tmdb', variant);
   }
 
   if (source === 'rotten-tomatoes') {
     return {
       kind: 'rotten-tomatoes-icons',
-      tomatometerIcon: BRAND_ASSETS['rotten-tomatoes'].tomatometerIcon,
-      popcornIcon: BRAND_ASSETS['rotten-tomatoes'].popcornIcon,
+      tomatometerIcon: ROTTEN_TOMATOES_ASSETS.tomatometerIcon,
+      popcornIcon: ROTTEN_TOMATOES_ASSETS.popcornIcon,
       iconSize: dimensions.rtIconSize,
-      accessibilityLabel: BRAND_ASSETS['rotten-tomatoes'].accessibilityLabel,
+      accessibilityLabel: ROTTEN_TOMATOES_ASSETS.accessibilityLabel,
     };
   }
 
