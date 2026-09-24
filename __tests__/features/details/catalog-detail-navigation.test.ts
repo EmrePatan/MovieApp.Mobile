@@ -6,6 +6,7 @@ jest.mock('@/features/metrics/track-product-metric', () => ({
 
 import {
   getCatalogDetailWatchRegion,
+  openCatalogDetailFromDetail,
   openCatalogDetailFromLibraryStack,
   openCatalogDetailFromTab,
   resetCatalogDetailOriginForTests,
@@ -42,5 +43,15 @@ describe('catalog-detail-navigation watchRegion context', () => {
     openCatalogDetailFromLibraryStack(router, 'movie-1', 'movie', 'upcoming');
 
     expect(router.push).toHaveBeenCalledTimes(1);
+  });
+
+  it('pushes one detail entry per recommendation tap burst from a detail screen', () => {
+    const router = { push: jest.fn() };
+
+    openCatalogDetailFromDetail(router, 'tv-2', 'tv');
+    openCatalogDetailFromDetail(router, 'tv-2', 'tv');
+
+    expect(router.push).toHaveBeenCalledTimes(1);
+    expect(router.push).toHaveBeenCalledWith('/tv/tv-2');
   });
 });

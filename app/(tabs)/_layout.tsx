@@ -13,7 +13,6 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="(app-shell)" options={{ headerShown: false }} />
       <Tabs.Screen name="profile" options={hiddenTabScreenOptions} />
-      <Tabs.Screen name="watchlist" options={hiddenTabScreenOptions} />
     </Tabs>
   );
 }

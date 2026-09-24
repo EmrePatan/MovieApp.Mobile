@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
-import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { openCatalogDetailFromDetail } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { RecommendationCard } from './RecommendationCard';
 import { useSimilarMovies } from '../hooks/useSimilarMovies';
@@ -34,7 +34,7 @@ export function SimilarContentSection({
 
   const handleItemPress = useCallback(
     (item: RecommendationItem) => {
-      router.push(buildCatalogDetailRoute(item.id, item.type));
+      openCatalogDetailFromDetail(router, item.id, item.type);
     },
     [router],
   );

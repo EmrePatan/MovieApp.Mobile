@@ -99,6 +99,14 @@ export function openCatalogDetailFromTab(
   pushCatalogDetailRoute(router, href, `${type}:${id}`);
 }
 
+export function openCatalogDetailFromDetail(
+  router: ImperativeRouter,
+  id: string,
+  type: 'movie' | 'tv',
+): void {
+  pushCatalogDetailRoute(router, buildCatalogDetailRoute(id, type), `${type}:${id}`);
+}
+
 export function openCatalogDetailFromLibraryStack(
   router: ImperativeRouter,
   id: string,

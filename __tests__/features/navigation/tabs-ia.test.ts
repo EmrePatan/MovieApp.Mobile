@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 describe('primary bottom navigation IA', () => {
@@ -20,7 +20,11 @@ describe('primary bottom navigation IA', () => {
     expect(tabsLayoutSource).toMatch(/name="profile"/);
   });
 
-  it('hides Watchlist from the bottom tab bar', () => {
-    expect(tabsLayoutSource).toMatch(/name="watchlist"\s+options=\{hiddenTabScreenOptions\}/);
+  it('keeps Watchlist inside the app-shell stack instead of a sibling tab route', () => {
+    // Primary tab presses use dismissTo (POP_TO); a sibling tab navigator does not handle it.
+    expect(tabsLayoutSource).not.toMatch(/name="watchlist"/);
+    expect(existsSync(join(process.cwd(), 'app/(tabs)/watchlist'))).toBe(false);
+    expect(existsSync(join(process.cwd(), 'app/(tabs)/(app-shell)/watchlist/index.tsx'))).toBe(true);
+    expect(existsSync(join(process.cwd(), 'app/(tabs)/(app-shell)/watchlist/[id].tsx'))).toBe(true);
   });
 });

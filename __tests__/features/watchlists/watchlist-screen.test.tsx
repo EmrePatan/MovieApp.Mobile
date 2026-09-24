@@ -8,7 +8,7 @@ import {
   useRemoveWatchlistItemMutation,
 } from '@/features/watchlists/hooks/useWatchlistMutations';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
-import WatchlistScreen from '../../../app/(tabs)/watchlist';
+import WatchlistScreen from '../../../app/(tabs)/(app-shell)/watchlist';
 import { t } from '../../i18n/i18n-test-utils';
 
 const mockPush = jest.fn();

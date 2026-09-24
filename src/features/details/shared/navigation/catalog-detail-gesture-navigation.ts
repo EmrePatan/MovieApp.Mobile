@@ -5,8 +5,11 @@ export interface CatalogDetailGestureOptions {
 
 interface GestureNavigationTarget {
   getParent?: () => GestureNavigationTarget | undefined;
+  getState?: () => { routeNames?: readonly string[] } | undefined;
   setOptions: (options: CatalogDetailGestureOptions) => void;
 }
+
+const CATALOG_ROOT_ROUTE_NAMES = ['movie', 'tv'];
 
 export function buildCatalogDetailGestureOptions(
   gestureEnabled: boolean,
@@ -29,21 +32,29 @@ function walkNavigationChain(navigation: GestureNavigationTarget): GestureNaviga
   return chain;
 }
 
-/**
- * After catalog detail moved to the root stack (ee2d5e7), the native interactive
- * pop back to the opening origin is owned by the root-stack `movie` / `tv`
- * screen. Walk the navigator chain so nested `[id]` layouts still reach it.
- */
-export function resolveCatalogDetailGestureNavigation(
-  navigation: GestureNavigationTarget,
-): GestureNavigationTarget {
-  const chain = walkNavigationChain(navigation);
+function isCatalogRootScreen(navigation: GestureNavigationTarget): boolean {
+  const routeNames = navigation.getState?.()?.routeNames ?? [];
+  return CATALOG_ROOT_ROUTE_NAMES.some((name) => routeNames.includes(name));
+}
 
-  if (chain.length >= 2) {
-    return chain[Math.max(1, chain.length - 2)];
+/**
+ * Ancestors whose interactive pop would leave the current catalog detail: the
+ * `[id]` entry inside the `movie` / `tv` stack (which returns to a previously
+ * opened detail, e.g. after a recommendation) up to the `movie` / `tv` screen in
+ * the stack that declares them. Resolved by route names so layout nesting
+ * changes do not shift the target.
+ */
+export function resolveCatalogDetailGestureNavigations(
+  navigation: GestureNavigationTarget,
+): GestureNavigationTarget[] {
+  const chain = walkNavigationChain(navigation);
+  const catalogRootIndex = chain.findIndex(isCatalogRootScreen);
+
+  if (catalogRootIndex >= 1) {
+    return chain.slice(1, catalogRootIndex + 1);
   }
 
-  return chain[0];
+  return [chain[1] ?? chain[0]];
 }
 
 function applyCatalogDetailGestureOptions(
@@ -58,7 +69,9 @@ function applyCatalogDetailGestureOptions(
     return;
   }
 
-  resolveCatalogDetailGestureNavigation(navigation).setOptions(options);
+  for (const target of resolveCatalogDetailGestureNavigations(navigation)) {
+    target.setOptions(options);
+  }
 }
 
 export function setCatalogDetailGestureEnabled(

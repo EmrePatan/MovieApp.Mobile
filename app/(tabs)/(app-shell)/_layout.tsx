@@ -25,6 +25,7 @@ export default function AppShellLayout() {
       <Stack.Screen name="following" />
       <Stack.Screen name="upcoming" />
       <Stack.Screen name="watch-history" />
+      <Stack.Screen name="watchlist" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="pick-something" />
       <Stack.Screen name="ai-recommendations" />
