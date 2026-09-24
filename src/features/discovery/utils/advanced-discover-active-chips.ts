@@ -58,7 +58,7 @@ export function buildAdvancedDiscoverActiveFilterChips(
   const { mediaType, filters } = state;
   const chips: ActiveFilterChip[] = [];
   const genreNameById = new Map(genres.map((genre) => [genre.id, genre.name]));
-  const providerNameById = new Map(providers.map((provider) => [provider.providerId, provider.providerName]));
+  const providerNameById = new Map(providers.map((provider) => [provider.providerId, provider.name]));
 
   const patchFilters = (patch: Partial<AdvancedDiscoverFilters>) => {
     handlers.onUpdate({
