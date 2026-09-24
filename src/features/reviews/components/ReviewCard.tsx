@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   authorName: {
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.textPrimary,
     flexShrink: 1,
     flexGrow: 1,

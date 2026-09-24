@@ -4,6 +4,8 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   StyleSheet,
   View,
@@ -39,6 +41,7 @@ import { DEFAULT_REVIEW_SORT } from '../types';
 import {
   buildStarBucketsFromDistribution,
   reviewMatchesStarFilter,
+  sumStarBuckets,
 } from '../utils/rating-star-buckets';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -102,6 +105,7 @@ export function ReviewsDetailContent({
     () => buildStarBucketsFromDistribution(reviewsQuery.data?.reviewScoreDistribution),
     [reviewsQuery.data?.reviewScoreDistribution],
   );
+  const reviewRatedCount = useMemo(() => sumStarBuckets(ratingBuckets), [ratingBuckets]);
   const ownReviewMatchesRatingFilter = reviewMatchesStarFilter(ownRatingScore, ratingStars);
 
   const publicReviews = useMemo(() => {
@@ -131,9 +135,8 @@ export function ReviewsDetailContent({
     0,
     (ratingAggregate?.ratingCount ?? 0) - (ownRatingScore != null ? 1 : 0),
   );
-  const showCommunityControls = publicReviews.length > 0;
+  const showCommunityControls = publicReviews.length > 0 || ratingStars != null;
   const hasCommunityRatings = communityRatingCount > 0;
-  const communityReviewCount = Math.max(0, totalCount - (myReview ? 1 : 0));
 
   const handleSortChange = useCallback((nextSort: ReviewSortOption) => {
     setSort(nextSort);
@@ -278,6 +281,15 @@ export function ReviewsDetailContent({
           reviewCount={showMeta ? totalCount : undefined}
           posterPath={posterPath}
           showMeta={showMeta}
+          summary={
+            showMeta && ratingAggregate
+              ? {
+                  averageScore: ratingAggregate.averageScore,
+                  ratingCount: ratingAggregate.ratingCount,
+                  reviewCount: totalCount,
+                }
+              : undefined
+          }
         />
       </SafeAreaView>
 
@@ -287,14 +299,18 @@ export function ReviewsDetailContent({
         onDismiss={() => setAuthFeedback(null)}
       />
 
-      {!isInitialLoading && !reviewsQuery.isError && showCommunityControls && hasCommunityRatings && ratingAggregate ? (
-        <ReviewsRatingDistribution
-          buckets={ratingBuckets}
-          selectedStars={ratingStars}
-          onSelectStars={handleRatingStarsChange}
-          averageScore={ratingAggregate.averageScore}
-          ratingCount={ratingAggregate.ratingCount}
-        />
+      {!isInitialLoading && !reviewsQuery.isError && ratingAggregate && reviewRatedCount > 0 ? (
+        <>
+          <ReviewsRatingDistribution
+            buckets={ratingBuckets}
+            selectedStars={ratingStars}
+            onSelectStars={handleRatingStarsChange}
+            reviewRatedCount={reviewRatedCount}
+            averageScore={ratingAggregate.averageScore}
+            ratingCount={ratingAggregate.ratingCount}
+          />
+          <View style={styles.sectionDivider} />
+        </>
       ) : null}
 
       {myReview && composerMode !== 'edit' ? (
@@ -303,17 +319,25 @@ export function ReviewsDetailContent({
 
       {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
         <ReviewsFeedHeader
-          reviewCount={communityReviewCount}
+          filteredReviewCount={totalCount}
           sort={sort}
           selectedStars={ratingStars}
           onSortChange={handleSortChange}
-          onClearFilter={() => handleRatingStarsChange(null)}
+          onRatingStarsChange={handleRatingStarsChange}
         />
       ) : null}
 
-      {composerMode === 'create' ? (
-        <View testID="review-composer-anchor">
+    </View>
+  );
+
+  const isComposing = composerMode !== 'hidden';
+
+  const composerDock =
+    isComposing ? (
+      <View style={styles.composerDock} testID="review-composer-anchor">
+        {composerMode === 'create' ? (
           <ReviewComposer
+            contentTitle={contentTitle}
             submitLabel={t('common.postReview')}
             isSubmitting={createReview.isPending}
             errorMessage={mutationError}
@@ -321,36 +345,34 @@ export function ReviewsDetailContent({
             onSubmit={handleCreate}
             onCancel={handleCancelComposer}
           />
-        </View>
-      ) : null}
-
-      {composerMode === 'edit' && myReview ? (
-        <View style={styles.editComposerBlock} testID="review-composer-anchor">
-          <ReviewComposer
-            initialContent={myReview.content}
-            submitLabel={t('common.saveReview')}
-            isSubmitting={updateReview.isPending}
-            errorMessage={mutationError}
-            autoFocus
-            onSubmit={handleUpdate}
-            onCancel={handleCancelComposer}
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.deleteReview')}
-            disabled={deleteReview.isPending}
-            onPress={handleDelete}
-            style={({ pressed }) => [styles.deleteReviewButton, pressed && styles.pressed]}
-          >
-            <AppText variant="caption" style={styles.deleteReviewLabel}>
-              {t('common.deleteReview')}
-            </AppText>
-          </Pressable>
-        </View>
-      ) : null}
-
-    </View>
-  );
+        ) : null}
+        {composerMode === 'edit' && myReview ? (
+          <View style={styles.editComposerBlock}>
+            <ReviewComposer
+              contentTitle={contentTitle}
+              initialContent={myReview.content}
+              submitLabel={t('common.saveReview')}
+              isSubmitting={updateReview.isPending}
+              errorMessage={mutationError}
+              autoFocus
+              onSubmit={handleUpdate}
+              onCancel={handleCancelComposer}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.deleteReview')}
+              disabled={deleteReview.isPending}
+              onPress={handleDelete}
+              style={({ pressed }) => [styles.deleteReviewButton, pressed && styles.pressed]}
+            >
+              <AppText variant="caption" style={styles.deleteReviewLabel}>
+                {t('common.deleteReview')}
+              </AppText>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+    ) : null;
 
   const renderReviewItem = useCallback(
     ({ item }: { item: ReviewResponse }) => (
@@ -446,25 +468,35 @@ export function ReviewsDetailContent({
 
   return (
     <View style={styles.screen}>
-      <FlatList
-        testID="reviews-detail-content"
-        style={styles.container}
-        data={publicReviews}
-        keyExtractor={(item) => item.id}
-        renderItem={renderReviewItem}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={listEmpty}
-        ListFooterComponent={listFooter}
-        contentContainerStyle={[
-          styles.listContent,
-          showWriteFab && { paddingBottom: spacing.xxl + insets.bottom + 56 },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        initialNumToRender={layout.verticalList.initialNumToRender}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-        windowSize={layout.verticalList.windowSize}
-      />
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+      >
+        <FlatList
+          testID="reviews-detail-content"
+          style={styles.container}
+          data={publicReviews}
+          keyExtractor={(item) => item.id}
+          renderItem={renderReviewItem}
+          ListHeaderComponent={listHeader}
+          ListEmptyComponent={listEmpty}
+          ListFooterComponent={listFooter}
+          contentContainerStyle={[
+            styles.listContent,
+            isComposing && { paddingBottom: spacing.lg },
+            showWriteFab && { paddingBottom: spacing.xxl + insets.bottom + 56 },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          showsVerticalScrollIndicator={false}
+          initialNumToRender={layout.verticalList.initialNumToRender}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+          windowSize={layout.verticalList.windowSize}
+        />
+        {composerDock}
+      </KeyboardAvoidingView>
       {writeFab ? (
         <View style={[styles.fabContainer, { bottom: spacing.lg + insets.bottom }]}>
           {writeFab}
@@ -478,6 +510,14 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  composerDock: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
+    backgroundColor: colors.surfaceElevated,
   },
   container: {
     flex: 1,
@@ -499,6 +539,13 @@ const styles = StyleSheet.create({
   listHeader: {
     gap: spacing.sm,
     paddingBottom: spacing.xs,
+  },
+  sectionDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.borderSubtle,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
   loading: {
     paddingVertical: spacing.xxl,

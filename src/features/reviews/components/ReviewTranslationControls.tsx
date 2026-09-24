@@ -175,17 +175,19 @@ export function ReviewTranslationControls({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 4,
+    gap: 2,
   },
   content: {
-    lineHeight: 24,
+    lineHeight: 22,
     color: colors.textPrimary,
-    letterSpacing: 0.15,
-    fontSize: 16,
+    letterSpacing: 0.12,
+    fontSize: 14,
+    fontWeight: '400',
   },
   metadata: {
     fontSize: 11,
-    lineHeight: 14,
+    lineHeight: 13,
+    marginTop: -1,
   },
   inlineStatus: {
     flexDirection: 'row',
@@ -195,7 +197,9 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     alignSelf: 'flex-start',
-    minHeight: interaction.touchTarget,
+    marginTop: -2,
+    paddingVertical: 2,
+    minHeight: 0,
     justifyContent: 'center',
   },
   actionRow: {

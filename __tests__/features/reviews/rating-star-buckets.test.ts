@@ -3,6 +3,7 @@ import {
   buildStarBucketsFromDistribution,
   reviewMatchesStarFilter,
   scoreToStarBucket,
+  sumStarBuckets,
 } from '@/features/reviews/utils/rating-star-buckets';
 
 describe('rating-star-buckets', () => {
@@ -40,6 +41,10 @@ describe('rating-star-buckets', () => {
     expect(ratingOnlyBuckets[2]).toBe(12);
     expect(writtenReviewBuckets[2]).toBe(0);
     expect(writtenReviewBuckets[4]).toBe(1);
+  });
+
+  it('sums star bucket counts for review-rated histogram totals', () => {
+    expect(sumStarBuckets({ 1: 0, 2: 1, 3: 0, 4: 2, 5: 1 })).toBe(4);
   });
 
   it('aggregates score distribution into star buckets', () => {

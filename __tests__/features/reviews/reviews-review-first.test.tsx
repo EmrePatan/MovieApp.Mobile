@@ -1,5 +1,4 @@
 import React from 'react';
-import { Alert } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
@@ -139,7 +138,7 @@ describe('Reviews feed-first architecture', () => {
     );
 
     expect(screen.getByTestId('reviews-content-title')).toHaveTextContent('Game of Thrones');
-    expect(screen.getByTestId('reviews-review-count')).toHaveTextContent('2 reviews');
+    expect(screen.getByTestId('reviews-header-summary')).toHaveTextContent(/2 reviews/);
   });
 
   it('shows the rating histogram immediately without a distribution toggle', () => {
@@ -155,10 +154,10 @@ describe('Reviews feed-first architecture', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
-    expect(screen.getByText('4★ filter')).toBeTruthy();
+    expect(screen.getByTestId('reviews-filter-star-chip')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('reviews-clear-star-filter'));
-    expect(screen.queryByText('4★ filter')).toBeNull();
+    fireEvent.press(screen.getByTestId('reviews-filter-star-chip'));
+    expect(screen.queryByTestId('reviews-filter-star-chip')).toBeNull();
   });
 
   it('renders a compact own-review row with rating and edit action', () => {
@@ -171,27 +170,20 @@ describe('Reviews feed-first architecture', () => {
     expect(screen.getByLabelText(t('reviews.editReview'))).toBeTruthy();
   });
 
-  it('renders the feed header with community count left and sort control right', () => {
+  it('renders watchlist-style filter and sort chips in the feed header', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
     expect(screen.getByTestId('reviews-feed-header')).toBeTruthy();
-    expect(screen.getByText(t('reviews.communityFeedLabel'))).toBeTruthy();
-    expect(screen.getByTestId('reviews-feed-count')).toHaveTextContent('(1)');
-    expect(screen.getByTestId('reviews-sort-control')).toHaveTextContent(
-      new RegExp(t('reviews.sort.newest')),
-    );
-    expect(screen.queryByText('Highest rated')).toBeNull();
+    expect(screen.getByTestId('reviews-sort-icon')).toBeTruthy();
+    expect(screen.getByTestId('reviews-sort-chip-newest')).toBeTruthy();
+    expect(screen.getByTestId('reviews-sort-chip-ratingDesc')).toBeTruthy();
   });
 
-  it('opens sort options from the right-aligned selector', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-
+  it('changes sort from inline chips', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
-    fireEvent.press(screen.getByTestId('reviews-sort-control'));
-    expect(alertSpy).toHaveBeenCalled();
-
-    alertSpy.mockRestore();
+    fireEvent.press(screen.getByTestId('reviews-sort-chip-oldest'));
+    expect(screen.getByTestId('reviews-sort-chip-oldest')).toBeTruthy();
   });
 
   it('uses Turkish labels for feed-first controls', async () => {
@@ -199,9 +191,9 @@ describe('Reviews feed-first architecture', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />);
 
-    expect(screen.getByText(t('reviews.communityFeedLabel'))).toBeTruthy();
-    expect(screen.getByTestId('reviews-sort-control')).toHaveTextContent(
-      new RegExp(t('reviews.sort.newest')),
+    expect(screen.getByTestId('reviews-sort-icon')).toBeTruthy();
+    expect(screen.getByTestId('reviews-sort-chip-newest')).toHaveTextContent(
+      t('reviews.sort.newest'),
     );
     expect(screen.getByTestId('reviews-rating-histogram')).toBeTruthy();
   });

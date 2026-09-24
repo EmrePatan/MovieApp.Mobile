@@ -1,84 +1,77 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
-import { AppText } from '@/components/common/AppText';
-import { ReviewsSortControl } from './ReviewsSortControl';
-import { ReviewsFilterPills } from './ReviewsFilterPills';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { ReviewsRatingFilterControl } from './ReviewsRatingFilterControl';
+import { ReviewsSortChips } from './ReviewsSortChips';
 import type { ReviewSortOption } from '../types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 interface ReviewsFeedHeaderProps {
-  reviewCount: number;
+  filteredReviewCount: number;
   sort: ReviewSortOption;
   selectedStars: number | null;
   onSortChange: (value: ReviewSortOption) => void;
-  onClearFilter: () => void;
+  onRatingStarsChange: (stars: number | null) => void;
 }
 
 export function ReviewsFeedHeader({
-  reviewCount,
+  filteredReviewCount,
   sort,
   selectedStars,
   onSortChange,
-  onClearFilter,
+  onRatingStarsChange,
 }: ReviewsFeedHeaderProps) {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.sectionRow} accessibilityRole="header">
-        <AppText variant="caption" style={styles.sectionLabel}>
-          {t('reviews.communityFeedLabel')}
-        </AppText>
-        <AppText variant="caption" style={styles.sectionCount} testID="reviews-feed-count">
-          ({reviewCount})
-        </AppText>
-      </View>
-
-      <View style={styles.container} testID="reviews-feed-header">
-        <ReviewsFilterPills
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
+      contentContainerStyle={styles.scrollContent}
+      testID="reviews-feed-header"
+    >
+      <View style={styles.row}>
+        <ReviewsRatingFilterControl
           selectedStars={selectedStars}
-          onClearFilter={onClearFilter}
+          filteredReviewCount={filteredReviewCount}
+          onSelectStars={onRatingStarsChange}
         />
-
-        <ReviewsSortControl value={sort} onChange={onSortChange} />
+        <View
+          style={styles.sortLead}
+          accessibilityLabel={t('common.sortBy')}
+          accessibilityRole="image"
+          testID="reviews-sort-icon"
+        >
+          <Ionicons name="swap-vertical-outline" size={16} color={colors.textMuted} />
+        </View>
+        <ReviewsSortChips value={sort} onChange={onSortChange} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    gap: spacing.sm,
+  scroll: {
+    flexGrow: 0,
+  },
+  scrollContent: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
-  sectionRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: layout.screenPaddingHorizontal,
+    gap: spacing.xs,
+    flexWrap: 'nowrap',
   },
-  sectionLabel: {
-    color: colors.textMuted,
-    fontWeight: '700',
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.6,
-  },
-  sectionCount: {
-    color: colors.textMuted,
-    fontWeight: '600',
-    fontSize: 11,
-    lineHeight: 14,
-    fontVariant: ['tabular-nums'],
-  },
-  container: {
-    flexDirection: 'row',
+  sortLead: {
+    width: 24,
+    height: 28,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    minHeight: 40,
+    justifyContent: 'center',
   },
 });

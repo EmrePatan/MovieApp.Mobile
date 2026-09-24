@@ -73,10 +73,18 @@ describe('ReviewComposer', () => {
     focusSpy.mockRestore();
   });
 
-  it('renders elevated composer shell', () => {
-    render(<ReviewComposer submitLabel="Post review" onSubmit={jest.fn()} />);
+  it('renders docked composer toolbar', () => {
+    render(
+      <ReviewComposer
+        submitLabel="Post review"
+        onSubmit={jest.fn()}
+        onCancel={jest.fn()}
+        contentTitle="Interstellar"
+      />,
+    );
     expect(screen.getByTestId('review-composer')).toBeTruthy();
-    expect(screen.getByText('Write review')).toBeTruthy();
+    expect(screen.getByText('Interstellar')).toBeTruthy();
+    expect(screen.getByText('Cancel')).toBeTruthy();
   });
 
   it('shows server error and closes via header action', () => {
@@ -91,7 +99,7 @@ describe('ReviewComposer', () => {
     );
 
     expect(screen.getByText('Could not save review.')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Close composer'));
+    fireEvent.press(screen.getByLabelText('Cancel'));
     expect(onCancel).toHaveBeenCalled();
   });
 });

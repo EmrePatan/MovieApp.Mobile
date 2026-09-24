@@ -170,10 +170,12 @@ describe('ReviewsDetailContent', () => {
       <ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />,
     );
 
-    expect(screen.getByText('Reviews')).toBeTruthy();
+    expect(screen.getByTestId('reviews-sort-icon')).toBeTruthy();
+    expect(screen.getByTestId('reviews-sort-chip-newest')).toBeTruthy();
     expect(screen.getByTestId('reviews-content-title')).toHaveTextContent('Interstellar');
     expect(screen.queryByTestId('reviews-header-rating')).toBeNull();
-    expect(screen.getByTestId('reviews-review-count')).toHaveTextContent('1 review');
+    expect(screen.getByTestId('reviews-header-summary')).toHaveTextContent(/1 review/);
+    expect(screen.getByTestId('reviews-header-summary')).toHaveTextContent(/3 ratings/);
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/4\.0/);
     expect(screen.getByTestId('reviews-community-rating')).toHaveTextContent(/3 ratings/);
     expect(screen.getByTestId('reviews-rating-distribution')).toBeTruthy();
@@ -218,7 +220,7 @@ describe('ReviewsDetailContent', () => {
     expect(screen.getByText('No one has shared their thoughts on this title yet.')).toBeTruthy();
     expect(screen.getByTestId('reviews-empty-state-action')).toBeTruthy();
     expect(screen.queryByTestId('reviews-write-section')).toBeNull();
-    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
   });
 
   it('shows error with retry', () => {
@@ -458,7 +460,7 @@ describe('ReviewsDetailContent', () => {
     );
 
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
-    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
     expect(screen.queryByTestId('reviews-header-rating')).toBeNull();
     expect(screen.getByText('No reviews yet')).toBeTruthy();
   });
@@ -497,7 +499,7 @@ describe('ReviewsDetailContent', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
-    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
     expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
     expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
   });
@@ -566,7 +568,7 @@ describe('ReviewsDetailContent', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
-    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
   });
 
   it('hides community controls when only the current user has a review', () => {
@@ -591,7 +593,7 @@ describe('ReviewsDetailContent', () => {
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
-    expect(screen.queryByTestId('reviews-sort-control')).toBeNull();
+    expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
   });
 
@@ -695,7 +697,7 @@ describe('ReviewsDetailContent', () => {
       movieId,
       expect.objectContaining({ ratingStars: 4 }),
     );
-    expect(screen.getByText('4★ filter')).toBeTruthy();
+    expect(screen.getByTestId('reviews-filter-star-chip')).toBeTruthy();
     expect(screen.queryByText('No 4-star reviews yet.')).toBeNull();
   });
 

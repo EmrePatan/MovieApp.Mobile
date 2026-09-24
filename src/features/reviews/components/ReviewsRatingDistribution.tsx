@@ -17,6 +17,9 @@ interface ReviewsRatingDistributionProps {
   buckets: Record<number, number>;
   selectedStars: number | null;
   onSelectStars: (stars: number | null) => void;
+  /** Written reviews that include a user rating (histogram population). */
+  reviewRatedCount: number;
+  /** Community average from all ratings (including ratings without a review). */
   averageScore: number;
   ratingCount: number;
 }
@@ -27,6 +30,7 @@ export function ReviewsRatingDistribution({
   buckets,
   selectedStars,
   onSelectStars,
+  reviewRatedCount,
   averageScore,
   ratingCount,
 }: ReviewsRatingDistributionProps) {
@@ -36,7 +40,7 @@ export function ReviewsRatingDistribution({
   const countLabel = formatCommunityRatingCountLabel(ratingCount);
   const averageStars = backendScoreToStarRating(averageScore);
 
-  if (ratingCount === 0) {
+  if (reviewRatedCount === 0) {
     return null;
   }
 
@@ -52,7 +56,7 @@ export function ReviewsRatingDistribution({
   return (
     <View style={styles.wrapper} testID="reviews-rating-distribution">
       <AppText variant="caption" style={styles.sectionLabel}>
-        {t('reviews.ratingsSectionLabel')} ({ratingCount})
+        {t('reviews.reviewsDistributionSectionLabel')}
       </AppText>
 
       <View style={styles.distributionRow} testID="reviews-community-rating">
@@ -71,7 +75,7 @@ export function ReviewsRatingDistribution({
                   stars,
                   count,
                 })}
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, disabled: count === 0 }}
                 disabled={count === 0}
                 onPress={() => handleSelectStars(stars)}
                 style={({ pressed }) => [
@@ -81,6 +85,13 @@ export function ReviewsRatingDistribution({
                 ]}
                 testID={`reviews-rating-bar-${stars}`}
               >
+                {count > 0 ? (
+                  <AppText variant="caption" style={styles.columnCount}>
+                    {count}
+                  </AppText>
+                ) : (
+                  <View style={styles.columnCountSpacer} />
+                )}
                 <View style={styles.columnTrack}>
                   <View
                     style={[
@@ -102,28 +113,16 @@ export function ReviewsRatingDistribution({
         </View>
 
         <View style={styles.scoreColumn}>
+          <AppText variant="caption" style={styles.scoreCaption}>
+            {t('reviews.reviewsCommunityAverageCaption')}
+          </AppText>
           <AppText style={styles.scoreValue}>{scoreLabel}</AppText>
           <ReviewStarRow starRating={averageStars} size={14} />
           <AppText variant="caption" muted style={styles.countLabel} numberOfLines={2}>
             {countLabel}
           </AppText>
-          {selectedStars != null ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('reviews.clearStarFilter', { stars: selectedStars })}
-              onPress={() => onSelectStars(null)}
-              hitSlop={4}
-              style={({ pressed }) => [styles.clearFilterButton, pressed && styles.pressed]}
-              testID="reviews-clear-star-filter"
-            >
-              <AppText variant="caption" style={styles.filterLabel}>
-                {t('reviews.activeStarFilter', { stars: selectedStars })}
-              </AppText>
-            </Pressable>
-          ) : null}
         </View>
       </View>
-
     </View>
   );
 }
@@ -135,10 +134,10 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     color: colors.textMuted,
-    fontWeight: '700',
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.6,
+    fontWeight: '500',
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.15,
   },
   distributionRow: {
     flexDirection: 'row',
@@ -151,12 +150,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: spacing.xs,
     minWidth: 0,
-    height: BAR_HEIGHT + 18,
+    height: BAR_HEIGHT + 22,
   },
   column: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
     minWidth: 0,
     paddingVertical: 2,
     borderRadius: borderRadius.sm,
@@ -166,6 +165,16 @@ const styles = StyleSheet.create({
   },
   columnPressed: {
     opacity: 0.85,
+  },
+  columnCount: {
+    color: colors.textMuted,
+    fontSize: 9,
+    lineHeight: 11,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  columnCountSpacer: {
+    height: 11,
   },
   columnTrack: {
     width: '100%',
@@ -186,10 +195,10 @@ const styles = StyleSheet.create({
   },
   columnStar: {
     color: colors.textMuted,
-    fontVariant: ['tabular-nums'],
     fontWeight: '600',
     fontSize: 10,
     lineHeight: 12,
+    fontVariant: ['tabular-nums'],
   },
   columnStarSelected: {
     color: colors.accentStrong,
@@ -197,8 +206,15 @@ const styles = StyleSheet.create({
   scoreColumn: {
     width: 72,
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
     paddingBottom: 2,
+  },
+  scoreCaption: {
+    color: colors.textMuted,
+    fontSize: 9,
+    lineHeight: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   scoreValue: {
     color: colors.textPrimary,
@@ -212,21 +228,6 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
     fontSize: 11,
     lineHeight: 14,
-  },
-  clearFilterButton: {
-    alignSelf: 'center',
-    marginTop: 2,
-    minHeight: 24,
-    justifyContent: 'center',
-  },
-  filterLabel: {
-    color: colors.accent,
-    fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 13,
     textAlign: 'center',
-  },
-  pressed: {
-    opacity: interaction.pressedOpacity,
   },
 });

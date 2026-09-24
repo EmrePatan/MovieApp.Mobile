@@ -57,3 +57,7 @@ export function buildStarBucketsFromDistribution(
 
   return buckets;
 }
+
+export function sumStarBuckets(buckets: Record<number, number>): number {
+  return Object.values(buckets).reduce((total, count) => total + count, 0);
+}

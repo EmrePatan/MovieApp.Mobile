@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
+import { formatCommunityStarRatingDisplay } from '@/features/ratings/utils/star-rating';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -10,11 +11,18 @@ import { layout } from '@/theme/layout';
 const POSTER_WIDTH = 44;
 const POSTER_HEIGHT = 66;
 
+export interface ReviewsHeaderSummary {
+  averageScore: number;
+  ratingCount: number;
+  reviewCount: number;
+}
+
 interface ReviewsScreenHeaderProps {
   contentTitle?: string;
   reviewCount?: number;
   posterPath?: string | null;
   showMeta?: boolean;
+  summary?: ReviewsHeaderSummary;
 }
 
 export function ReviewsScreenHeader({
@@ -22,6 +30,7 @@ export function ReviewsScreenHeader({
   reviewCount,
   posterPath,
   showMeta = true,
+  summary,
 }: ReviewsScreenHeaderProps) {
   const { t } = useTranslation();
   const hasReviews = reviewCount !== undefined;
@@ -70,7 +79,20 @@ export function ReviewsScreenHeader({
                 {contentTitle}
               </AppText>
             ) : null}
-            {reviewCountLabel ? (
+            {summary ? (
+              <AppText
+                variant="caption"
+                muted
+                numberOfLines={2}
+                testID="reviews-header-summary"
+              >
+                {t('reviews.headerSummary', {
+                  average: formatCommunityStarRatingDisplay(summary.averageScore),
+                  ratingCount: summary.ratingCount,
+                  reviewCount: summary.reviewCount,
+                })}
+              </AppText>
+            ) : reviewCountLabel ? (
               <AppText
                 variant="caption"
                 muted
