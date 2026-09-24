@@ -48,6 +48,8 @@ export interface ReviewListResponse {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+  /** Persisted 1-10 scores of users who wrote a review. Same keys as rating summary. */
+  reviewScoreDistribution?: Record<string, number>;
 }
 
 export interface CreateReviewRequest {

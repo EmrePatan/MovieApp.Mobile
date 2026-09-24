@@ -10,9 +10,36 @@ describe('rating-star-buckets', () => {
     expect(scoreToStarBucket(1)).toBe(1);
     expect(scoreToStarBucket(2)).toBe(1);
     expect(scoreToStarBucket(3)).toBe(2);
+    expect(scoreToStarBucket(4)).toBe(2);
+    expect(scoreToStarBucket(5)).toBe(3);
+    expect(scoreToStarBucket(6)).toBe(3);
+    expect(scoreToStarBucket(7)).toBe(4);
     expect(scoreToStarBucket(8)).toBe(4);
     expect(scoreToStarBucket(9)).toBe(5);
     expect(scoreToStarBucket(10)).toBe(5);
+  });
+
+  it('matches the backend (score + 1) / 2 integer-division filter for every persisted score', () => {
+    for (let score = 1; score <= 10; score += 1) {
+      expect(scoreToStarBucket(score)).toBe(Math.trunc((score + 1) / 2));
+    }
+  });
+
+  it('treats half-star UI values as the integer bucket above them', () => {
+    expect(scoreToStarBucket(3)).toBe(scoreToStarBucket(4));
+    expect(scoreToStarBucket(3)).toBe(2);
+    expect(reviewMatchesStarFilter(3, 2)).toBe(true);
+    expect(reviewMatchesStarFilter(4, 2)).toBe(true);
+    expect(reviewMatchesStarFilter(3, 1)).toBe(false);
+  });
+
+  it('does not put ratings-only scores into review histogram buckets', () => {
+    const ratingOnlyBuckets = buildStarBucketsFromDistribution({ '3': 10, '4': 2, '8': 1 });
+    const writtenReviewBuckets = buildStarBucketsFromDistribution({ '8': 1 });
+
+    expect(ratingOnlyBuckets[2]).toBe(12);
+    expect(writtenReviewBuckets[2]).toBe(0);
+    expect(writtenReviewBuckets[4]).toBe(1);
   });
 
   it('aggregates score distribution into star buckets', () => {

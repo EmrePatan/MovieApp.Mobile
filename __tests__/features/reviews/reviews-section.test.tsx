@@ -105,6 +105,7 @@ function mockReviewsQuery(overrides: Record<string, unknown> = {}) {
       totalPages: 1,
       hasNextPage: false,
       hasPreviousPage: false,
+      reviewScoreDistribution: { '8': 2, '3': 1 },
     },
     isLoading: false,
     isError: false,
@@ -621,6 +622,7 @@ describe('ReviewsDetailContent', () => {
           totalPages: 1,
           hasNextPage: false,
           hasPreviousPage: false,
+          reviewScoreDistribution: { '8': 1 },
         },
       }),
     );
@@ -629,6 +631,72 @@ describe('ReviewsDetailContent', () => {
 
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
     expect(screen.getByText('Your review matches this rating. See it above.')).toBeTruthy();
+  });
+
+  it('does not present a ratings-only star bucket as a filterable review bucket', () => {
+    (useRatingAggregate as jest.Mock).mockReturnValue({
+      data: {
+        averageScore: 4,
+        ratingCount: 12,
+        scoreDistribution: { '3': 10, '4': 1, '8': 1 },
+      },
+      isLoading: false,
+    });
+    (useMovieReviews as jest.Mock).mockImplementation((_id, options) =>
+      mockReviewsQuery({
+        data: {
+          items: options?.ratingStars === 2 ? [] : [otherReview],
+          page: 1,
+          pageSize: 10,
+          totalCount: options?.ratingStars === 2 ? 0 : 1,
+          totalPages: options?.ratingStars === 2 ? 0 : 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+          reviewScoreDistribution: { '8': 1 },
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    const twoStarBar = screen.getByTestId('reviews-rating-bar-2');
+    expect(twoStarBar.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(twoStarBar);
+    expect(screen.queryByText('No 2-star reviews yet.')).toBeNull();
+    expect(useMovieReviews).not.toHaveBeenCalledWith(
+      movieId,
+      expect.objectContaining({ ratingStars: 2 }),
+    );
+  });
+
+  it('filters written reviews when a populated histogram bucket is tapped', () => {
+    (useMovieReviews as jest.Mock).mockImplementation((_id, options) =>
+      mockReviewsQuery({
+        data: {
+          items:
+            options?.ratingStars === 4
+              ? [{ ...otherReview, id: 'four-star-review', userRating: 8 }]
+              : [otherReview],
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+          reviewScoreDistribution: { '8': 1, '3': 0 },
+        },
+      }),
+    );
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
+    expect(useMovieReviews).toHaveBeenCalledWith(
+      movieId,
+      expect.objectContaining({ ratingStars: 4 }),
+    );
+    expect(screen.getByText('4★ filter')).toBeTruthy();
+    expect(screen.queryByText('No 4-star reviews yet.')).toBeNull();
   });
 
   it('uses tv review query for tv content', () => {

@@ -102,6 +102,7 @@ function mockReviewsQuery(overrides: Record<string, unknown> = {}) {
       totalPages: 1,
       hasNextPage: false,
       hasPreviousPage: false,
+      reviewScoreDistribution: { '8': 2, '3': 1 },
     },
     isLoading: false,
     isError: false,

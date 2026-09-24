@@ -99,8 +99,8 @@ export function ReviewsDetailContent({
   const ratingAggregate = ratingAggregateQuery.data;
   const ownRatingScore = myReview?.userRating ?? myRatingQuery.data?.score ?? null;
   const ratingBuckets = useMemo(
-    () => buildStarBucketsFromDistribution(ratingAggregate?.scoreDistribution),
-    [ratingAggregate?.scoreDistribution],
+    () => buildStarBucketsFromDistribution(reviewsQuery.data?.reviewScoreDistribution),
+    [reviewsQuery.data?.reviewScoreDistribution],
   );
   const ownReviewMatchesRatingFilter = reviewMatchesStarFilter(ownRatingScore, ratingStars);
 
