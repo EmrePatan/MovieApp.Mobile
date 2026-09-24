@@ -30,11 +30,11 @@ describe('format-external-rating', () => {
 
     expect(cards.map((card) => card.id)).toEqual([
       'imdb',
-      'rotten-tomatoes',
       'metacritic',
+      'rotten-tomatoes',
     ]);
 
-    const rtCard = cards[1];
+    const rtCard = cards[2];
     expect(rtCard.kind).toBe('rotten-tomatoes');
     if (rtCard.kind === 'rotten-tomatoes') {
       expect(rtCard.tomatometerScore).toBe('93%');

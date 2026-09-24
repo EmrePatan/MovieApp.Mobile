@@ -368,7 +368,7 @@ export const stage2En = {
       },
       aiRecommendations: {
         title: 'AI Recommendations',
-        subtitle: 'Describe your mood and get personalized picks',
+        subtitle: 'AI picks based on your mood',
         accessibility: 'AI Recommendations',
       },
       nowInTheaters: {
@@ -432,6 +432,16 @@ export const stage2En = {
         DK: 'Denmark',
       },
       fallbackExplorer: '{{genreName}} Explorer',
+    },
+    streamingPlatformsHub: {
+      title: 'Streaming Platforms',
+      directoryTitle: 'Streaming Platforms',
+      directorySubtitle: 'Choose a platform to browse',
+      seeAll: 'See All',
+      seeAllAccessibility: 'See all streaming platforms',
+      seeAllAccessibilityGeneric: 'See all streaming titles',
+      openPlatform: 'Open {{provider}}',
+      empty: 'No titles found for this platform right now.',
     },
   },
   discovery: {
@@ -500,6 +510,11 @@ export const stage2En = {
         range90to120: '90–120 min',
         over120: 'Over 120 min',
       },
+    },
+    streamingPlatform: {
+      weeklySubtitle: 'Popular on this service this week',
+      catalogSubtitle: 'Browse movies and series on this service',
+      chooseProvider: 'Choose a platform to browse',
     },
     streamingDiscover: {
       title: 'Streaming Services',

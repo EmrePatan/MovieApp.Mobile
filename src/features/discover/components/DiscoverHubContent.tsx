@@ -13,10 +13,10 @@ import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { SearchResultItem } from '@/features/search/types';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
-import { createStreamingDiscoverHref } from '@/features/discovery/utils/streaming-discover-params';
 import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
 import { useOnTvThisWeekPreview } from '@/features/discovery/hooks/useOnTvThisWeekPreview';
 import { WorldCinemaHubSection } from './WorldCinemaHubSection';
+import { StreamingPlatformsHubSection } from '@/features/discovery/components/StreamingPlatformsHubSection';
 import { createNowInTheatersHref } from '@/features/discovery/utils/now-in-theaters-params';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
@@ -49,10 +49,6 @@ export function DiscoverHubContent() {
   const openAdvancedDiscover = useCallback(() => {
     router.push(createAdvancedDiscoverHref());
   }, [router]);
-
-  const openStreamingDiscover = useCallback(() => {
-    router.push(createStreamingDiscoverHref({}, userRegion));
-  }, [router, userRegion]);
 
   const openTrendingBrowse = useCallback(() => {
     openLibraryStackScreen(
@@ -144,13 +140,6 @@ export function DiscoverHubContent() {
           accessibilityLabel={t('discover.hub.advancedDiscover.accessibility')}
         />
         <DiscoverFeatureEntry
-          title={t('discover.hub.streamingServices.title')}
-          subtitle={t('discover.hub.streamingServices.subtitle')}
-          icon="tv-outline"
-          onPress={openStreamingDiscover}
-          accessibilityLabel={t('discover.hub.streamingServices.accessibility')}
-        />
-        <DiscoverFeatureEntry
           title={t('discover.hub.pickSomething.title')}
           subtitle={t('discover.hub.pickSomething.subtitle')}
           icon="shuffle-outline"
@@ -165,6 +154,8 @@ export function DiscoverHubContent() {
           accessibilityLabel={t('discover.hub.aiRecommendations.accessibility')}
         />
       </View>
+
+      <StreamingPlatformsHubSection />
 
       <WorldCinemaHubSection />
 

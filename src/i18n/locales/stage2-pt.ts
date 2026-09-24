@@ -370,7 +370,7 @@ export const stage2Pt = {
       },
       aiRecommendations: {
         title: 'Recomendações com IA',
-        subtitle: 'Descreva seu clima e receba escolhas personalizadas',
+        subtitle: 'A IA sugere pelo seu humor',
         accessibility: 'Recomendações com IA',
       },
       nowInTheaters: {
@@ -434,6 +434,14 @@ export const stage2Pt = {
         DK: 'Dinamarca',
       },
       fallbackExplorer: 'Explorador de {{genreName}}',
+    },
+    streamingPlatformsHub: {
+      title: 'Plataformas de streaming',
+      directoryTitle: 'Plataformas de streaming',
+      seeAll: 'Ver tudo',
+      seeAllAccessibility: 'Ver todas as plataformas de streaming',
+      seeAllAccessibilityGeneric: 'Ver todos os títulos em streaming',
+      empty: 'Nenhum título encontrado para esta plataforma no momento.',
     },
   },
   discovery: {

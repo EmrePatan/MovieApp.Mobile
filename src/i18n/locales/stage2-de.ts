@@ -370,7 +370,7 @@ export const stage2De = {
       },
       aiRecommendations: {
         title: 'KI-Empfehlungen',
-        subtitle: 'Beschreibe deine Stimmung und erhalte personalisierte Vorschläge',
+        subtitle: 'KI schlägt nach deiner Stimmung vor',
         accessibility: 'KI-Empfehlungen',
       },
       nowInTheaters: {
@@ -434,6 +434,14 @@ export const stage2De = {
         DK: 'Dänemark',
       },
       fallbackExplorer: '{{genreName}}-Entdecker',
+    },
+    streamingPlatformsHub: {
+      title: 'Streaming-Plattformen',
+      directoryTitle: 'Streaming-Plattformen',
+      seeAll: 'Alle anzeigen',
+      seeAllAccessibility: 'Alle Streaming-Plattformen anzeigen',
+      seeAllAccessibilityGeneric: 'Alle Streaming-Titel anzeigen',
+      empty: 'Für diese Plattform wurden gerade keine Titel gefunden.',
     },
   },
   discovery: {

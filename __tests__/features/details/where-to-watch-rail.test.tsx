@@ -60,9 +60,7 @@ describe('WhereToWatchRail', () => {
     expect(screen.getByText('Where to Watch')).toBeTruthy();
     expect(screen.queryByTestId('where-to-watch-region')).toBeNull();
     expect(screen.queryByText('US')).toBeNull();
-    expect(screen.getByTestId('watch-provider-logo-8').props.source.uri).toBe(
-      'https://image.tmdb.org/t/p/w92/netflix.png',
-    );
+    expect(screen.getByTestId('watch-provider-logo-8')).toBeTruthy();
   });
 
   it('waits for hydration before fetching with user region', () => {

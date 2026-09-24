@@ -22,7 +22,11 @@ const INITIAL_LOAD_STATE: ProviderLogoLoadState = {
 interface ProviderLogoImageProps {
   name: string;
   logoPath: string | null | undefined;
+  /** Square logo slot; ignored when `width` and `height` are set. */
   size: number;
+  /** Optional rectangular slot (e.g. poster-frame artwork). */
+  width?: number;
+  height?: number;
   imageInset?: number;
   testID?: string;
 }
@@ -31,6 +35,8 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
   name,
   logoPath,
   size,
+  width,
+  height,
   imageInset = 0,
   testID,
 }: ProviderLogoImageProps) {
@@ -39,7 +45,8 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
   const [loadState, setLoadState] = useState<ProviderLogoLoadState>(INITIAL_LOAD_STATE);
   const logoSize = PROVIDER_LOGO_SIZES[loadState.sizeIndex];
   const logoUri = resolveImageUri(logoPath, logoSize);
-  const imageSize = size - imageInset * 2;
+  const slotWidth = (width ?? size) - imageInset * 2;
+  const slotHeight = (height ?? size) - imageInset * 2;
   const showFallback = !logoUri || loadState.hasError;
   const imageKey = `${logoPath ?? ''}:${loadState.sizeIndex}:${loadState.retryVersion}`;
 
@@ -82,7 +89,7 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
   if (showFallback) {
     return (
       <View
-        style={[styles.fallback, { width: imageSize, height: imageSize }]}
+        style={[styles.fallback, { width: slotWidth, height: slotHeight }]}
         testID={testID ? `${testID}-fallback` : undefined}
       >
         <AppText variant="caption" style={styles.fallbackText}>
@@ -99,8 +106,8 @@ export const ProviderLogoImage = memo(function ProviderLogoImage({
       style={[
         styles.image,
         {
-          width: imageSize,
-          height: imageSize,
+          width: slotWidth,
+          height: slotHeight,
           borderRadius: imageInset > 0 ? borderRadius.md : 0,
         },
       ]}

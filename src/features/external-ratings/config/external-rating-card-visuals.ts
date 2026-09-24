@@ -19,29 +19,27 @@ export const EXTERNAL_RATING_CARD_LOGO_VISUALS: Record<
 > = {
   imdb: {
     asset: 'icon',
-    height: 15,
-    visualWeight: 0.92,
+    height: 20,
     surface: 'dark',
   },
   letterboxd: {
-    asset: 'wordmark',
-    height: 13,
+    asset: 'icon',
+    height: 20,
     surface: 'dark',
   },
   metacritic: {
-    asset: 'wordmark',
-    height: 11,
-    surface: 'light',
+    asset: 'icon',
+    height: 20,
+    surface: 'dark',
   },
   tmdb: {
     asset: 'icon',
-    height: 17,
-    visualWeight: 0.95,
+    height: 20,
     surface: 'dark',
   },
 };
 
-export const EXTERNAL_RATING_RT_CARD_ICON_SIZE = 18;
+export const EXTERNAL_RATING_RT_CARD_ICON_SIZE = 20;
 
 export const EXTERNAL_RATING_CARD_LAYOUT = {
   minHeight: 44,

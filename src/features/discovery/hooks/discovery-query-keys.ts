@@ -7,6 +7,7 @@ import { NOW_IN_THEATERS_PREVIEW_SIZE } from '../now-in-theaters-types';
 import { ON_TV_THIS_WEEK_PREVIEW_SIZE } from '../on-tv-this-week-types';
 import type { WorldCinemaState } from '../world-cinema-types';
 import { WORLD_CINEMA_PREVIEW_SIZE } from '../world-cinema-types';
+import { STREAMING_HUB_PREVIEW_SIZE } from '../streaming-platform-hub-types';
 import type { StreamingDiscoverState } from '../streaming-discover-types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
 import type {
@@ -113,6 +114,25 @@ export function nowInTheatersInfiniteQueryKey(
   pageSize: number,
 ) {
   return ['discovery', 'now-in-theaters', state.releaseRegion, pageSize] as const;
+}
+
+export function streamingProviderPreviewQueryKey(
+  providerId: number | null,
+  mediaType: AdvancedDiscoverMediaType,
+  watchRegion: string,
+  weekId: string,
+  pageSize: number = STREAMING_HUB_PREVIEW_SIZE,
+) {
+  return [
+    'discovery',
+    'streaming-hub',
+    'preview',
+    providerId,
+    mediaType,
+    watchRegion,
+    weekId,
+    pageSize,
+  ] as const;
 }
 
 export function streamingDiscoverInfiniteQueryKey(

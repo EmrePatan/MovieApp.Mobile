@@ -20,6 +20,7 @@ module.exports = {
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
         '^expo/virtual/env$': '<rootDir>/__mocks__/expo-virtual-env.js',
+        '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
       },
       transform: {
         '^.+\\.(ts|tsx)$': [
@@ -48,6 +49,7 @@ module.exports = {
         '^@/(.*)$': '<rootDir>/src/$1',
         '^expo/virtual/env$': '<rootDir>/__mocks__/expo-virtual-env.js',
         '^react-native/setup-env$': '<rootDir>/__mocks__/react-native-setup-env.js',
+        '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
       },
     },
   ],

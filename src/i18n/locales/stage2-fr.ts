@@ -370,7 +370,7 @@ export const stage2Fr = {
       },
       aiRecommendations: {
         title: 'Recommandations IA',
-        subtitle: 'Décrivez votre humeur et recevez des sélections personnalisées',
+        subtitle: 'L’IA propose selon votre humeur',
         accessibility: 'Recommandations IA',
       },
       nowInTheaters: {
@@ -434,6 +434,14 @@ export const stage2Fr = {
         DK: 'Danemark',
       },
       fallbackExplorer: 'Explorateur de {{genreName}}',
+    },
+    streamingPlatformsHub: {
+      title: 'Plateformes de streaming',
+      directoryTitle: 'Plateformes de streaming',
+      seeAll: 'Tout voir',
+      seeAllAccessibility: 'Voir toutes les plateformes de streaming',
+      seeAllAccessibilityGeneric: 'Voir tous les titres en streaming',
+      empty: 'Aucun titre trouvé pour cette plateforme pour le moment.',
     },
   },
   discovery: {

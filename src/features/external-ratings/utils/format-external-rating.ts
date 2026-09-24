@@ -82,18 +82,6 @@ export function buildExternalRatingCards(ratings: ExternalRatingItem[]): Externa
     });
   }
 
-  const tomatometer = bySource.get('tomatometer');
-  const popcornmeter = bySource.get('popcornmeter');
-  if (tomatometer || popcornmeter) {
-    cards.push({
-      id: 'rotten-tomatoes',
-      kind: 'rotten-tomatoes',
-      tomatometerScore: tomatometer ? formatExternalRatingValue(tomatometer) : null,
-      popcornmeterScore: popcornmeter ? formatExternalRatingValue(popcornmeter) : null,
-      accessibilityLabel: buildRottenTomatoesAccessibilityLabel(tomatometer, popcornmeter),
-    });
-  }
-
   const letterboxd = bySource.get('letterboxd');
   if (letterboxd) {
     cards.push({
@@ -124,6 +112,18 @@ export function buildExternalRatingCards(ratings: ExternalRatingItem[]): Externa
       source: 'tmdb',
       scoreLine: formatExternalRatingValue(tmdb),
       accessibilityLabel: `TMDB ${formatExternalRatingValue(tmdb)}`,
+    });
+  }
+
+  const tomatometer = bySource.get('tomatometer');
+  const popcornmeter = bySource.get('popcornmeter');
+  if (tomatometer || popcornmeter) {
+    cards.push({
+      id: 'rotten-tomatoes',
+      kind: 'rotten-tomatoes',
+      tomatometerScore: tomatometer ? formatExternalRatingValue(tomatometer) : null,
+      popcornmeterScore: popcornmeter ? formatExternalRatingValue(popcornmeter) : null,
+      accessibilityLabel: buildRottenTomatoesAccessibilityLabel(tomatometer, popcornmeter),
     });
   }
 

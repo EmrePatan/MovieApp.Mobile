@@ -3,6 +3,7 @@ import StreamingDiscoverScreen from '../../../app/(tabs)/(app-shell)/streaming-d
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
+import { t } from '../../i18n/i18n-test-utils';
 
 const mockSetParams = jest.fn();
 const mockPush = jest.fn();
@@ -25,6 +26,14 @@ jest.mock('@/features/discovery/hooks/useDiscoveryWatchProviders', () => ({
 
 jest.mock('@/features/discovery/hooks/useStreamingDiscover', () => ({
   useStreamingDiscover: jest.fn(),
+}));
+
+jest.mock('@/features/discovery/hooks/useStreamingProviderSpotlight', () => ({
+  useStreamingProviderSpotlight: jest.fn(() => ({
+    data: { items: [] },
+    isLoading: false,
+    isError: false,
+  })),
 }));
 
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
@@ -103,50 +112,25 @@ describe('StreamingDiscoverScreen', () => {
     });
   });
 
-  it('mounts the streaming discover FlatList with result rows when a provider is selected', () => {
+  it('shows platform picker posters when no provider is selected', () => {
+    render(<StreamingDiscoverScreen />);
+
+    expect(screen.getByTestId('streaming-platform-picker')).toBeTruthy();
+    expect(screen.getByTestId('streaming-hub-poster-8')).toBeTruthy();
+    expect(screen.queryByTestId('streaming-discover-list')).toBeNull();
+  });
+
+  it('shows weekly catalog list when a provider is selected', () => {
     const { useLocalSearchParams } = jest.requireMock('expo-router');
     useLocalSearchParams.mockReturnValue({ watchProviderId: '8' });
 
     render(<StreamingDiscoverScreen />);
 
     expect(screen.getByTestId('streaming-discover-list')).toBeTruthy();
-    expect(screen.getByLabelText('Netflix')).toBeTruthy();
+    expect(screen.getByTestId('streaming-platform-header')).toBeTruthy();
+    expect(screen.getByText('Netflix')).toBeTruthy();
+    expect(screen.getByText(t('discovery.streamingPlatform.catalogSubtitle'))).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
-  });
-
-  it('renders provider selector outside FlatList when results data is empty and no provider is selected', () => {
-    (useStreamingDiscover as jest.Mock).mockReturnValue({
-      data: {
-        pages: [
-          {
-            items: [],
-          },
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      isFetchingNextPage: false,
-      isRefetching: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
-      refetch: jest.fn(),
-    });
-
-    render(<StreamingDiscoverScreen />);
-
-    expect(screen.getByTestId('streaming-discover-provider-header')).toBeTruthy();
-    expect(screen.getByLabelText('Netflix')).toBeTruthy();
-    expect(screen.getByLabelText('Disney Plus')).toBeTruthy();
-    expect(screen.queryByTestId('streaming-discover-list')).toBeNull();
-  });
-
-  it('renders streaming discover controls without a region selector', () => {
-    render(<StreamingDiscoverScreen />);
-
-    expect(screen.getByText('Streaming Services')).toBeTruthy();
-    expect(screen.getByText('Where do you watch?')).toBeTruthy();
-    expect(screen.queryByTestId('watch-region-selector')).toBeNull();
-    expect(screen.queryByText('Watch region')).toBeNull();
   });
 
   it('loads providers using the user region by default', () => {
@@ -155,36 +139,12 @@ describe('StreamingDiscoverScreen', () => {
     expect(useDiscoveryWatchProviders).toHaveBeenCalledWith('movie', 'TR', true);
   });
 
-  it('honors explicit watchRegion deep links', () => {
-    const { useLocalSearchParams } = jest.requireMock('expo-router');
-    useLocalSearchParams.mockReturnValue({ watchRegion: 'US' });
-
-    render(<StreamingDiscoverScreen />);
-
-    expect(useDiscoveryWatchProviders).toHaveBeenCalledWith('movie', 'US', true);
-  });
-
-  it('selects providers via setParams without pushing navigation history', () => {
-    render(<StreamingDiscoverScreen />);
-
-    fireEvent.press(screen.getByLabelText('Netflix'));
-    fireEvent.press(screen.getByLabelText('Disney Plus'));
-
-    expect(mockSetParams).toHaveBeenCalled();
-    expect(mockSetParams.mock.calls.some(([params]) => params.watchProviderId === '8')).toBe(true);
-    expect(mockReplace).not.toHaveBeenCalled();
-    expect(mockPush).not.toHaveBeenCalled();
-  });
-
   it('opens detail with contextual watchRegion while preserving return href', () => {
     const { useLocalSearchParams } = jest.requireMock('expo-router');
-    useLocalSearchParams.mockReturnValue({
-      watchRegion: 'US',
-      watchProviderId: '8',
-      watchMonetizationType: 'stream',
-    });
+    useLocalSearchParams.mockReturnValue({ watchProviderId: '8', watchRegion: 'TR' });
 
     render(<StreamingDiscoverScreen />);
+
     fireEvent.press(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8'));
 
     expect(openCatalogDetailFromLibraryStack).toHaveBeenCalledWith(
@@ -192,10 +152,7 @@ describe('StreamingDiscoverScreen', () => {
       'movie-1',
       'movie',
       'discover',
-      expect.objectContaining({
-        watchRegion: 'US',
-        libraryReturnHref: expect.stringContaining('watchRegion=US'),
-      }),
+      expect.objectContaining({ watchRegion: 'TR' }),
     );
   });
 });

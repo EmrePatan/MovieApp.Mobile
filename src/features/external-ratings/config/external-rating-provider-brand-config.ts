@@ -90,8 +90,8 @@ const BRAND_ASSETS: Record<
   metacritic: {
     wordmark: require('../../../../assets/external-ratings/metacritic.png'),
     wordmarkAspectRatio: 176 / 40,
-    icon: require('../../../../assets/external-ratings/metacritic-icon.png'),
-    iconAspectRatio: 96 / 22,
+    icon: require('../../../../assets/external-ratings/metacritic-mark.png'),
+    iconAspectRatio: 1,
     accessibilityLabel: 'Metacritic',
   },
   tmdb: {

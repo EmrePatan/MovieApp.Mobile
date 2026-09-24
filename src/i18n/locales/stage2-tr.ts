@@ -370,7 +370,7 @@ export const stage2Tr = {
       },
       aiRecommendations: {
         title: 'AI Önerileri',
-        subtitle: 'Ruh halini anlat ve kişiselleştirilmiş öneriler al',
+        subtitle: 'Yapay zeka, ruh haline göre önerir',
         accessibility: 'AI Önerileri',
       },
       nowInTheaters: {
@@ -434,6 +434,16 @@ export const stage2Tr = {
         DK: 'Danimarka',
       },
       fallbackExplorer: '{{genreName}} Kaşifi',
+    },
+    streamingPlatformsHub: {
+      title: 'Yayın Platformları',
+      directoryTitle: 'Yayın Platformları',
+      directorySubtitle: 'İzlemek istediğin platformu seç',
+      seeAll: 'Tümünü Gör',
+      seeAllAccessibility: 'Tüm yayın platformlarını gör',
+      seeAllAccessibilityGeneric: 'Yayın listesinin tamamını gör',
+      openPlatform: '{{provider}} aç',
+      empty: 'Bu platform için şu anda başlık bulunamadı.',
     },
   },
   discovery: {
@@ -505,6 +515,11 @@ export const stage2Tr = {
         range90to120: '90–120 dk',
         over120: '120 dk üzeri',
       },
+    },
+    streamingPlatform: {
+      weeklySubtitle: 'Bu platformda bu hafta popüler olanlar',
+      catalogSubtitle: 'Bu platformda film ve dizi keşfet',
+      chooseProvider: 'Listelemek için bir platform seç',
     },
     streamingDiscover: {
       title: 'Yayın Platformları',

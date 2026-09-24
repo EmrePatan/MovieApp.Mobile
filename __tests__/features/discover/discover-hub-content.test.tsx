@@ -78,6 +78,44 @@ jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
   })),
 }));
 
+jest.mock('@/features/discovery/hooks/useDiscoveryWatchProviders', () => ({
+  useDiscoveryWatchProviders: jest.fn(() => ({
+    data: {
+      watchRegion: 'TR',
+      mediaType: 'movie',
+      providers: [
+        {
+          providerId: 8,
+          name: 'Netflix',
+          logoPath: '/netflix.png',
+          displayPriority: 1,
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })),
+}));
+
+jest.mock('@/features/discovery/hooks/useStreamingProviderSpotlight', () => ({
+  useStreamingProviderSpotlight: jest.fn(() => ({
+    data: {
+      items: [
+        {
+          id: 'spot-1',
+          type: 'movie',
+          title: 'Spotlight Film',
+          posterUrl: '/poster.jpg',
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/discovery/hooks/useWorldCinemaPreview', () => ({
   useWorldCinemaPreview: jest.fn(() => ({
     data: {
@@ -147,8 +185,8 @@ describe('DiscoverHubContent', () => {
   it('opens AI Recommendations from the discover hub', () => {
     render(<DiscoverHubContent />);
 
-    expect(screen.getByLabelText('AI Recommendations')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('AI Recommendations'));
+    expect(screen.getByLabelText(t('discover.hub.aiRecommendations.accessibility'))).toBeTruthy();
+    fireEvent.press(screen.getByLabelText(t('discover.hub.aiRecommendations.accessibility')));
 
     expect(mockPush).toHaveBeenCalledWith('/ai-recommendations');
   });
@@ -230,14 +268,25 @@ describe('DiscoverHubContent', () => {
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/now-in-theaters'));
   });
 
-  it('opens streaming discover from Streaming Services', () => {
+  it('renders streaming platform poster row and opens platform on tap', () => {
     render(<DiscoverHubContent />);
 
-    fireEvent.press(screen.getByLabelText('Streaming Services'));
+    expect(screen.getByTestId('streaming-platforms-hub')).toBeTruthy();
+    expect(screen.queryByTestId('streaming-platforms-preview')).toBeNull();
 
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringContaining('/streaming-discover?mediaType=movie&watchRegion=TR'),
+    fireEvent.press(
+      screen.getByLabelText(t('discover.streamingPlatformsHub.openPlatform', { provider: 'Netflix' })),
     );
+
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('watchProviderId=8'));
+  });
+
+  it('opens streaming platforms directory from See All', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByTestId('streaming-platforms-hub-see-all'));
+
+    expect(mockPush).toHaveBeenCalledWith('/streaming-platforms');
   });
 
   it('renders New Releases preview and does not show Explore by Genre', () => {
