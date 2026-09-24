@@ -5,18 +5,24 @@ import { resolveExternalRatingProviderBrandConfig } from '../config/external-rat
 
 interface ExternalRatingProviderBrandProps {
   source: string;
+  variant?: 'default' | 'compact';
 }
 
-export function ExternalRatingProviderBrand({ source }: ExternalRatingProviderBrandProps) {
-  const config = resolveExternalRatingProviderBrandConfig(source);
+export function ExternalRatingProviderBrand({
+  source,
+  variant = 'default',
+}: ExternalRatingProviderBrandProps) {
+  const config = resolveExternalRatingProviderBrandConfig(source, variant);
 
   if (!config) {
     return <AppText style={styles.fallbackLabel}>{source}</AppText>;
   }
 
+  const compact = variant === 'compact';
+
   return (
     <View
-      style={styles.brandRow}
+      style={[styles.brandRow, compact && styles.brandRowCompact]}
       accessibilityElementsHidden
       importantForAccessibility="no"
       accessibilityLabel={config.accessibilityLabel}
@@ -59,10 +65,13 @@ const styles = StyleSheet.create({
     minHeight: 22,
     justifyContent: 'center',
   },
+  brandRowCompact: {
+    minHeight: 16,
+  },
   rtIconRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   rtIcon: {
     width: 20,
@@ -70,7 +79,7 @@ const styles = StyleSheet.create({
   },
   fallbackLabel: {
     color: colors.textSecondary,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
 });

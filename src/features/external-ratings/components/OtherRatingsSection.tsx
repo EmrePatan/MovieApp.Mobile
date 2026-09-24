@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
@@ -11,8 +11,8 @@ import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
-const CARD_WIDTH = 156;
-const CARD_HEIGHT = 88;
+const CHIP_HEIGHT = 30;
+const SKELETON_CHIP_WIDTH = 88;
 
 interface OtherRatingsSectionProps {
   mediaType: ExternalRatingsMediaType;
@@ -27,29 +27,30 @@ export function OtherRatingsSection({ mediaType, contentId }: OtherRatingsSectio
     return (
       <View style={styles.container} testID="other-ratings-loading">
         <HomeSectionHeader title={t('details.sections.otherRatings')} />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        >
+        <View style={styles.chipRow}>
           {Array.from({ length: 3 }, (_, index) => (
             <SkeletonBlock
               key={index}
-              width={CARD_WIDTH}
-              height={CARD_HEIGHT}
-              style={styles.cardSkeleton}
+              width={SKELETON_CHIP_WIDTH}
+              height={CHIP_HEIGHT}
+              style={styles.chipSkeleton}
             />
           ))}
-        </ScrollView>
+        </View>
       </View>
     );
   }
 
-  if (query.isError || !query.data?.ratings?.length) {
+  if (query.isError) {
     return null;
   }
 
-  const cards = buildExternalRatingCards(query.data.ratings);
+  const ratings = query.data?.ratings;
+  if (!ratings?.length) {
+    return null;
+  }
+
+  const cards = buildExternalRatingCards(ratings);
   if (!cards.length) {
     return null;
   }
@@ -57,53 +58,54 @@ export function OtherRatingsSection({ mediaType, contentId }: OtherRatingsSectio
   return (
     <View style={styles.container} testID="other-ratings-section">
       <HomeSectionHeader title={t('details.sections.otherRatings')} />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      >
+      <View style={styles.chipRow}>
         {cards.map((card) => (
           <View
             key={card.id}
-            style={styles.card}
+            style={styles.chip}
             accessible
             accessibilityLabel={card.accessibilityLabel}
           >
-            <ExternalRatingProviderBrand source={card.source} />
-            <AppText style={styles.scoreLine}>{card.scoreLine}</AppText>
+            <ExternalRatingProviderBrand source={card.source} variant="compact" />
+            <AppText style={styles.scoreLine} numberOfLines={1}>
+              {card.scoreLine}
+            </AppText>
           </View>
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
-  listContent: {
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    gap: spacing.sm,
   },
-  card: {
-    width: CARD_WIDTH,
-    minHeight: CARD_HEIGHT,
-    borderRadius: 12,
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: CHIP_HEIGHT,
+    maxWidth: '100%',
+    paddingHorizontal: 10,
+    borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
     backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    justifyContent: 'space-between',
   },
-  cardSkeleton: {
-    borderRadius: 12,
+  chipSkeleton: {
+    borderRadius: 8,
   },
   scoreLine: {
+    flexShrink: 1,
     color: colors.textPrimary,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    marginTop: spacing.sm,
   },
 });

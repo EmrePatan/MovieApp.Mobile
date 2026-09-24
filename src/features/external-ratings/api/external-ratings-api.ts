@@ -1,5 +1,6 @@
 import { api } from '@/api/client';
 import type { ExternalRatingsMediaType, ExternalRatingsResponse } from '../types';
+import { normalizeExternalRatingsResponse } from '../utils/normalize-external-ratings-response';
 import { buildMovieExternalRatingsPath, buildTvShowExternalRatingsPath } from './routes';
 
 export async function getExternalRatings(
@@ -12,8 +13,10 @@ export async function getExternalRatings(
       ? buildMovieExternalRatingsPath(contentId)
       : buildTvShowExternalRatingsPath(contentId);
 
-  return api.get<ExternalRatingsResponse>(path, {
+  const raw = await api.get<unknown>(path, {
     authenticated: false,
     signal,
   });
+
+  return normalizeExternalRatingsResponse(raw);
 }
