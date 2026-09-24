@@ -53,4 +53,23 @@ describe('OtherRatingsSection', () => {
     expect(screen.getByText('8.4 / 10')).toBeTruthy();
     expect(screen.getByText('4.2 / 5')).toBeTruthy();
   });
+
+  it('renders rotten tomatoes scores beside their icons', () => {
+    mockUseExternalRatings.mockReturnValue({
+      isLoading: false,
+      data: {
+        ratings: [
+          { source: 'tomatometer', value: 89, scale: 100 },
+          { source: 'popcornmeter', value: 90, scale: 100 },
+        ],
+      },
+      isError: false,
+    });
+
+    const screen = render(<OtherRatingsSection mediaType="movie" contentId={contentId} />);
+    expect(screen.getByTestId('external-rating-card-rotten-tomatoes')).toBeTruthy();
+    expect(screen.getByText('89%', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByText('90%', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.queryByText('89% · 90%')).toBeNull();
+  });
 });

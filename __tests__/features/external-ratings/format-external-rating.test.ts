@@ -20,7 +20,7 @@ describe('format-external-rating', () => {
     expect(line).toBe('93% · 89%');
   });
 
-  it('omits missing providers and builds a combined RT card', () => {
+  it('builds a rotten tomatoes card with paired score fields', () => {
     const cards = buildExternalRatingCards([
       { source: 'imdb', value: 8.4, scale: 10 },
       { source: 'tomatometer', value: 93, scale: 100 },
@@ -33,6 +33,14 @@ describe('format-external-rating', () => {
       'rotten-tomatoes',
       'metacritic',
     ]);
-    expect(cards[1].scoreLine).toBe('93% · 89%');
+
+    const rtCard = cards[1];
+    expect(rtCard.kind).toBe('rotten-tomatoes');
+    if (rtCard.kind === 'rotten-tomatoes') {
+      expect(rtCard.tomatometerScore).toBe('93%');
+      expect(rtCard.popcornmeterScore).toBe('89%');
+      expect(rtCard.accessibilityLabel).toContain('Tomatometer 93%');
+      expect(rtCard.accessibilityLabel).toContain('Popcornmeter 89%');
+    }
   });
 });

@@ -1,4 +1,9 @@
 import type { ImageSourcePropType } from 'react-native';
+import {
+  EXTERNAL_RATING_CARD_LOGO_VISUALS,
+  EXTERNAL_RATING_RT_CARD_ICON_SIZE,
+  type ExternalRatingCardProviderId,
+} from './external-rating-card-visuals';
 
 export type ExternalRatingProviderBrandId =
   | 'imdb'
@@ -7,7 +12,9 @@ export type ExternalRatingProviderBrandId =
   | 'metacritic'
   | 'tmdb';
 
-export type ExternalRatingBrandVariant = 'default' | 'compact';
+export type ExternalRatingBrandVariant = 'default' | 'compact' | 'card';
+
+export type ExternalRatingBrandSurface = 'dark' | 'light';
 
 type ImageBrandConfig = {
   kind: 'image';
@@ -15,6 +22,7 @@ type ImageBrandConfig = {
   height: number;
   aspectRatio: number;
   accessibilityLabel: string;
+  surface: ExternalRatingBrandSurface;
 };
 
 type RottenTomatoesBrandConfig = {
@@ -32,7 +40,7 @@ type BrandDimensions = {
   rtIconSize: number;
 };
 
-const BRAND_DIMENSIONS: Record<ExternalRatingBrandVariant, BrandDimensions> = {
+const BRAND_DIMENSIONS: Record<Exclude<ExternalRatingBrandVariant, 'card'>, BrandDimensions> = {
   default: {
     imageHeights: {
       imdb: 18,
@@ -101,10 +109,28 @@ const ROTTEN_TOMATOES_ASSETS = {
   accessibilityLabel: 'Rotten Tomatoes Tomatometer and Popcornmeter',
 } as const;
 
+function resolveRasterBrandForCard(
+  brand: RasterBrandAsset,
+  brandId: ExternalRatingCardProviderId,
+): ImageBrandConfig {
+  const visual = EXTERNAL_RATING_CARD_LOGO_VISUALS[brandId];
+  const useIcon = visual.asset === 'icon';
+  const height = visual.height * (visual.visualWeight ?? 1);
+
+  return {
+    kind: 'image',
+    source: useIcon ? brand.icon : brand.wordmark,
+    height,
+    aspectRatio: useIcon ? brand.iconAspectRatio : brand.wordmarkAspectRatio,
+    accessibilityLabel: brand.accessibilityLabel,
+    surface: visual.surface,
+  };
+}
+
 function resolveRasterBrand(
   brand: RasterBrandAsset,
   brandId: Exclude<ExternalRatingProviderBrandId, 'rotten-tomatoes'>,
-  variant: ExternalRatingBrandVariant,
+  variant: Exclude<ExternalRatingBrandVariant, 'card'>,
 ): ImageBrandConfig {
   const dimensions = BRAND_DIMENSIONS[variant];
   const useIcon = variant === 'compact';
@@ -115,6 +141,7 @@ function resolveRasterBrand(
     height: dimensions.imageHeights[brandId],
     aspectRatio: useIcon ? brand.iconAspectRatio : brand.wordmarkAspectRatio,
     accessibilityLabel: brand.accessibilityLabel,
+    surface: 'dark',
   };
 }
 
@@ -122,6 +149,31 @@ export function resolveExternalRatingProviderBrandConfig(
   source: string,
   variant: ExternalRatingBrandVariant = 'default',
 ): ExternalRatingProviderBrandConfig | null {
+  if (variant === 'card') {
+    if (source === 'imdb') {
+      return resolveRasterBrandForCard(BRAND_ASSETS.imdb, 'imdb');
+    }
+    if (source === 'letterboxd') {
+      return resolveRasterBrandForCard(BRAND_ASSETS.letterboxd, 'letterboxd');
+    }
+    if (source === 'metacritic') {
+      return resolveRasterBrandForCard(BRAND_ASSETS.metacritic, 'metacritic');
+    }
+    if (source === 'tmdb') {
+      return resolveRasterBrandForCard(BRAND_ASSETS.tmdb, 'tmdb');
+    }
+    if (source === 'rotten-tomatoes') {
+      return {
+        kind: 'rotten-tomatoes-icons',
+        tomatometerIcon: ROTTEN_TOMATOES_ASSETS.tomatometerIcon,
+        popcornIcon: ROTTEN_TOMATOES_ASSETS.popcornIcon,
+        iconSize: EXTERNAL_RATING_RT_CARD_ICON_SIZE,
+        accessibilityLabel: ROTTEN_TOMATOES_ASSETS.accessibilityLabel,
+      };
+    }
+    return null;
+  }
+
   const dimensions = BRAND_DIMENSIONS[variant];
 
   if (source === 'imdb') {
@@ -151,4 +203,16 @@ export function resolveExternalRatingProviderBrandConfig(
   }
 
   return null;
+}
+
+export function resolveRottenTomatoesCardIcons(): {
+  tomatometerIcon: ImageSourcePropType;
+  popcornIcon: ImageSourcePropType;
+  iconSize: number;
+} {
+  return {
+    tomatometerIcon: ROTTEN_TOMATOES_ASSETS.tomatometerIcon,
+    popcornIcon: ROTTEN_TOMATOES_ASSETS.popcornIcon,
+    iconSize: EXTERNAL_RATING_RT_CARD_ICON_SIZE,
+  };
 }

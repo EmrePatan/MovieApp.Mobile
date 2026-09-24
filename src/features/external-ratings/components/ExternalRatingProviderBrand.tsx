@@ -5,7 +5,7 @@ import { resolveExternalRatingProviderBrandConfig } from '../config/external-rat
 
 interface ExternalRatingProviderBrandProps {
   source: string;
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'card';
 }
 
 export function ExternalRatingProviderBrand({
@@ -18,43 +18,57 @@ export function ExternalRatingProviderBrand({
     return <AppText style={styles.fallbackLabel}>{source}</AppText>;
   }
 
-  const compact = variant === 'compact';
+  if (config.kind === 'rotten-tomatoes-icons') {
+    return (
+      <View
+        style={styles.rtIconRow}
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      >
+        <Image
+          source={config.tomatometerIcon}
+          style={{ width: config.iconSize, height: config.iconSize }}
+          resizeMode="contain"
+          accessibilityLabel="Tomatometer"
+          testID="rt-tomatometer-icon"
+        />
+        <Image
+          source={config.popcornIcon}
+          style={{ width: config.iconSize, height: config.iconSize }}
+          resizeMode="contain"
+          accessibilityLabel="Popcornmeter"
+          testID="rt-popcorn-icon"
+        />
+      </View>
+    );
+  }
+
+  const imageStyle = {
+    width: config.height * config.aspectRatio,
+    height: config.height,
+  };
+
+  const image = (
+    <Image
+      source={config.source}
+      style={imageStyle}
+      resizeMode="contain"
+      accessibilityLabel={config.accessibilityLabel}
+      testID={`external-rating-brand-${source}`}
+    />
+  );
 
   return (
     <View
-      style={[styles.brandRow, compact && styles.brandRowCompact]}
+      style={[styles.brandRow, variant === 'compact' && styles.brandRowCompact]}
       accessibilityElementsHidden
       importantForAccessibility="no"
       accessibilityLabel={config.accessibilityLabel}
     >
-      {config.kind === 'image' ? (
-        <Image
-          source={config.source}
-          style={{
-            width: config.height * config.aspectRatio,
-            height: config.height,
-          }}
-          resizeMode="contain"
-          accessibilityLabel={config.accessibilityLabel}
-          testID={`external-rating-brand-${source}`}
-        />
+      {config.surface === 'light' ? (
+        <View style={styles.lightSurface}>{image}</View>
       ) : (
-        <View style={styles.rtIconRow}>
-          <Image
-            source={config.tomatometerIcon}
-            style={[styles.rtIcon, { width: config.iconSize, height: config.iconSize }]}
-            resizeMode="contain"
-            accessibilityLabel="Tomatometer"
-            testID="rt-tomatometer-icon"
-          />
-          <Image
-            source={config.popcornIcon}
-            style={[styles.rtIcon, { width: config.iconSize, height: config.iconSize }]}
-            resizeMode="contain"
-            accessibilityLabel="Popcornmeter"
-            testID="rt-popcorn-icon"
-          />
-        </View>
+        image
       )}
     </View>
   );
@@ -68,14 +82,17 @@ const styles = StyleSheet.create({
   brandRowCompact: {
     minHeight: 16,
   },
+  lightSurface: {
+    backgroundColor: '#F0F0F2',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    justifyContent: 'center',
+  },
   rtIconRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  rtIcon: {
-    width: 20,
-    height: 20,
   },
   fallbackLabel: {
     color: colors.textSecondary,

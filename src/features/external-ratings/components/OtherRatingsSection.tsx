@@ -1,18 +1,17 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { AppText } from '@/components/common/AppText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import type { ExternalRatingsMediaType } from '../types';
 import { useExternalRatings } from '../hooks/useExternalRatings';
 import { buildExternalRatingCards } from '../utils/format-external-rating';
-import { ExternalRatingProviderBrand } from './ExternalRatingProviderBrand';
+import { EXTERNAL_RATING_CARD_LAYOUT } from '../config/external-rating-card-visuals';
+import { ExternalRatingCard } from './ExternalRatingCard';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
-const CHIP_HEIGHT = 30;
-const SKELETON_CHIP_WIDTH = 88;
+const SKELETON_CARD_WIDTH = 108;
 
 interface OtherRatingsSectionProps {
   mediaType: ExternalRatingsMediaType;
@@ -27,16 +26,20 @@ export function OtherRatingsSection({ mediaType, contentId }: OtherRatingsSectio
     return (
       <View style={styles.container} testID="other-ratings-loading">
         <HomeSectionHeader title={t('details.sections.otherRatings')} />
-        <View style={styles.chipRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.carouselContent}
+        >
           {Array.from({ length: 3 }, (_, index) => (
             <SkeletonBlock
               key={index}
-              width={SKELETON_CHIP_WIDTH}
-              height={CHIP_HEIGHT}
-              style={styles.chipSkeleton}
+              width={SKELETON_CARD_WIDTH}
+              height={EXTERNAL_RATING_CARD_LAYOUT.minHeight}
+              style={styles.cardSkeleton}
             />
           ))}
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -58,21 +61,16 @@ export function OtherRatingsSection({ mediaType, contentId }: OtherRatingsSectio
   return (
     <View style={styles.container} testID="other-ratings-section">
       <HomeSectionHeader title={t('details.sections.otherRatings')} />
-      <View style={styles.chipRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.carouselContent}
+        decelerationRate="fast"
+      >
         {cards.map((card) => (
-          <View
-            key={card.id}
-            style={styles.chip}
-            accessible
-            accessibilityLabel={card.accessibilityLabel}
-          >
-            <ExternalRatingProviderBrand source={card.source} variant="compact" />
-            <AppText style={styles.scoreLine} numberOfLines={1}>
-              {card.scoreLine}
-            </AppText>
-          </View>
+          <ExternalRatingCard key={card.id} card={card} />
         ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -81,31 +79,14 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.md,
   },
-  chipRow: {
+  carouselContent: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+    alignItems: 'stretch',
+    gap: spacing.sm,
     paddingHorizontal: layout.screenPaddingHorizontal,
   },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    height: CHIP_HEIGHT,
-    maxWidth: '100%',
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
-  },
-  chipSkeleton: {
-    borderRadius: 8,
-  },
-  scoreLine: {
-    flexShrink: 1,
-    color: colors.textPrimary,
-    fontSize: 12,
-    fontWeight: '600',
+  cardSkeleton: {
+    borderRadius: EXTERNAL_RATING_CARD_LAYOUT.borderRadius,
+    backgroundColor: colors.skeleton,
   },
 });
