@@ -22,16 +22,27 @@ import { AppInput } from '@/components/inputs/AppInput';
 import { useDiscoveryWatchProviders } from '../hooks/useDiscoveryWatchProviders';
 import { useGenres } from '../hooks/useGenres';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
+import { RegionSelector } from '@/features/regions/components/RegionSelector';
 import { WatchMonetizationSelector } from './WatchMonetizationSelector';
 import { WatchProviderSelector } from './WatchProviderSelector';
+import { WatchRegionSelector } from './WatchRegionSelector';
+import {
+  listCertificationOptions,
+  isSupportedCertificationCountry,
+} from '../discover-certification-options';
+import { DISCOVER_RELEASE_TYPE_OPTIONS } from '../discover-release-type-options';
+import { translateDiscoverReleaseType } from '@/i18n/catalog-labels';
 import {
   ADVANCED_DISCOVER_MEDIA_OPTIONS,
   ADVANCED_DISCOVER_RUNTIME_PRESETS,
   ADVANCED_DISCOVER_SORT_OPTIONS,
+  ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS,
   createDefaultAdvancedDiscoverFilters,
+  ensureStreamingDraftDefaults,
   type AdvancedDiscoverFilters,
   type AdvancedDiscoverMediaType,
   type AdvancedDiscoverSort,
+  type GenreMatchMode,
 } from '../advanced-discover-types';
 import type { Genre } from '../types';
 import { colors } from '@/theme/colors';
@@ -232,7 +243,11 @@ export function AdvancedDiscoverFilterSheet({
     filters.yearFrom != null || filters.yearTo != null,
   );
   const { region: userRegion, isHydrated } = useRegionalPreference();
+  const [watchRegionExpanded, setWatchRegionExpanded] = useState(false);
+  const [certificationCountryExpanded, setCertificationCountryExpanded] = useState(false);
   const watchRegion = draft.watchRegion ?? userRegion;
+  const certificationCountry = draft.certificationCountry ?? userRegion;
+  const certificationOptions = listCertificationOptions(certificationCountry);
   const providersQuery = useDiscoveryWatchProviders(draftMediaType, watchRegion, isHydrated);
 
   useEffect(() => {
@@ -246,7 +261,7 @@ export function AdvancedDiscoverFilterSheet({
   }, [visible, filters, mediaType]);
 
   const handleApply = () => {
-    onApply(draftMediaType, draft);
+    onApply(draftMediaType, ensureStreamingDraftDefaults(draft, userRegion));
     onClose();
   };
 
@@ -276,6 +291,9 @@ export function AdvancedDiscoverFilterSheet({
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator
             >
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.content')}
+            </AppText>
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.mediaTypeSection')}</AppText>
               <MediaTypeSelector
@@ -287,6 +305,9 @@ export function AdvancedDiscoverFilterSheet({
                     ...current,
                     genreIds: [],
                     watchProviderIds: [],
+                    certification: null,
+                    certificationCountry: null,
+                    releaseTypes: [],
                   }));
                 }}
               />
@@ -310,8 +331,37 @@ export function AdvancedDiscoverFilterSheet({
                   }
                 />
               )}
+              {draft.genreIds.length > 1 ? (
+                <View style={styles.chipGrid}>
+                  {(['all', 'any'] as GenreMatchMode[]).map((mode) => {
+                    const selected = draft.genreMatch === mode;
+                    const label = t(`discovery.advancedDiscover.genreMatch.${mode}`);
+
+                    return (
+                      <Pressable
+                        key={mode}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        accessibilityLabel={label}
+                        onPress={() => setDraft((current) => ({ ...current, genreMatch: mode }))}
+                        style={[styles.filterChip, selected && styles.filterChipSelected]}
+                      >
+                        <AppText
+                          variant="caption"
+                          style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+                        >
+                          {label}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
             </View>
 
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.release')}
+            </AppText>
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.yearSection')}</AppText>
               <View style={styles.chipGrid}>
@@ -395,6 +445,100 @@ export function AdvancedDiscoverFilterSheet({
               />
             )}
 
+            {draftMediaType === 'movie' ? (
+              <>
+                <View style={styles.section}>
+                  <AppText variant="bodySmall" style={styles.sectionLabel}>
+                    {t('discovery.advancedDiscover.certificationSection')}
+                  </AppText>
+                  <RegionSelector
+                    label={t('discovery.advancedDiscover.certificationCountry')}
+                    value={certificationCountry}
+                    expanded={certificationCountryExpanded}
+                    onToggleExpanded={() => setCertificationCountryExpanded((value) => !value)}
+                    onSelect={(code) =>
+                      setDraft((current) => ({
+                        ...current,
+                        certificationCountry: code,
+                        certification: null,
+                      }))
+                    }
+                  />
+                  {isSupportedCertificationCountry(certificationCountry) ? (
+                    <View style={styles.chipGrid}>
+                      {certificationOptions.map((option) => {
+                        const selected = draft.certification === option.value;
+
+                        return (
+                          <Pressable
+                            key={option.value}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected }}
+                            onPress={() =>
+                              setDraft((current) => ({
+                                ...current,
+                                certificationCountry,
+                                certification: selected ? null : option.value,
+                              }))
+                            }
+                            style={[styles.filterChip, selected && styles.filterChipSelected]}
+                          >
+                            <AppText
+                              variant="caption"
+                              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+                            >
+                              {option.label}
+                            </AppText>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  ) : (
+                    <AppText variant="bodySmall" muted>
+                      {t('discovery.advancedDiscover.certificationUnavailable')}
+                    </AppText>
+                  )}
+                </View>
+                <View style={styles.section}>
+                  <AppText variant="bodySmall" style={styles.sectionLabel}>
+                    {t('discovery.advancedDiscover.releaseTypeSection')}
+                  </AppText>
+                  <View style={styles.chipGrid}>
+                    {DISCOVER_RELEASE_TYPE_OPTIONS.map((option) => {
+                      const selected = draft.releaseTypes.includes(option.value);
+
+                      return (
+                        <Pressable
+                          key={option.value}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected }}
+                          onPress={() =>
+                            setDraft((current) => ({
+                              ...current,
+                              releaseTypes: selected
+                                ? current.releaseTypes.filter((entry) => entry !== option.value)
+                                : [...current.releaseTypes, option.value],
+                            }))
+                          }
+                          style={[styles.filterChip, selected && styles.filterChipSelected]}
+                        >
+                          <AppText
+                            variant="caption"
+                            style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+                          >
+                            {translateDiscoverReleaseType(option.value)}
+                          </AppText>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.quality')}
+            </AppText>
             <AppInput
               label={t('common.minimumRating')}
               value={draft.minRating != null ? String(draft.minRating) : ''}
@@ -409,7 +553,60 @@ export function AdvancedDiscoverFilterSheet({
               keyboardType="decimal-pad"
               maxLength={4}
             />
+            <AppInput
+              label={t('common.maximumRating')}
+              value={draft.maxRating != null ? String(draft.maxRating) : ''}
+              onChangeText={(text) => {
+                const trimmed = text.trim();
+                setDraft((current) => ({
+                  ...current,
+                  maxRating: trimmed.length === 0 ? null : Number.parseFloat(trimmed) || null,
+                }));
+              }}
+              placeholder={t('common.placeholderRatingRange')}
+              keyboardType="decimal-pad"
+              maxLength={4}
+            />
+            <View style={styles.section}>
+              <AppText variant="bodySmall" style={styles.sectionLabel}>
+                {t('discovery.advancedDiscover.voteCount.section')}
+              </AppText>
+              <View style={styles.chipGrid}>
+                {ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS.map((option) => {
+                  const selected = draft.minVoteCount === option;
+                  const label =
+                    option == null
+                      ? t('discovery.advancedDiscover.voteCount.any')
+                      : t('discovery.advancedDiscover.voteCount.option', { count: option });
 
+                  return (
+                    <Pressable
+                      key={String(option)}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      onPress={() =>
+                        setDraft((current) => ({
+                          ...current,
+                          minVoteCount: option,
+                        }))
+                      }
+                      style={[styles.filterChip, selected && styles.filterChipSelected]}
+                    >
+                      <AppText
+                        variant="caption"
+                        style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
+                      >
+                        {label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.duration')}
+            </AppText>
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.runtimeSection')}</AppText>
               <RuntimeSelector
@@ -426,6 +623,9 @@ export function AdvancedDiscoverFilterSheet({
               />
             </View>
 
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.origin')}
+            </AppText>
             <AppInput
               label={t('common.originalLanguage')}
               value={draft.originalLanguage ?? ''}
@@ -457,8 +657,16 @@ export function AdvancedDiscoverFilterSheet({
               maxLength={2}
             />
 
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.streaming')}
+            </AppText>
             <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.streamingSection')}</AppText>
+              <WatchRegionSelector
+                value={watchRegion}
+                expanded={watchRegionExpanded}
+                onToggleExpanded={() => setWatchRegionExpanded((value) => !value)}
+                onSelect={(code) => setDraft((current) => ({ ...current, watchRegion: code }))}
+              />
               <WatchProviderSelector
                 providers={providersQuery.data?.providers ?? []}
                 selectedProviderIds={draft.watchProviderIds}
@@ -466,12 +674,24 @@ export function AdvancedDiscoverFilterSheet({
                 isError={providersQuery.isError}
                 onRetry={() => void providersQuery.refetch()}
                 onToggle={(providerId) =>
-                  setDraft((current) => ({
-                    ...current,
-                    watchProviderIds: current.watchProviderIds.includes(providerId)
+                  setDraft((current) => {
+                    const removing = current.watchProviderIds.includes(providerId);
+                    const watchProviderIds = removing
                       ? current.watchProviderIds.filter((id) => id !== providerId)
-                      : [...current.watchProviderIds, providerId],
-                  }))
+                      : [...current.watchProviderIds, providerId];
+                    const watchMonetizationTypes =
+                      !removing &&
+                      watchProviderIds.length > 0 &&
+                      current.watchMonetizationTypes.length === 0
+                        ? (['stream'] as const)
+                        : current.watchMonetizationTypes;
+
+                    return {
+                      ...current,
+                      watchProviderIds,
+                      watchMonetizationTypes: [...watchMonetizationTypes],
+                    };
+                  })
                 }
               />
               <WatchMonetizationSelector
@@ -487,6 +707,9 @@ export function AdvancedDiscoverFilterSheet({
               />
             </View>
 
+            <AppText variant="bodySmall" style={styles.sectionHeading}>
+              {t('discovery.advancedDiscover.sections.sort')}
+            </AppText>
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.sortSection')}</AppText>
               <SortSelector
@@ -547,6 +770,11 @@ const styles = StyleSheet.create({
   sectionLabel: {
     color: colors.textSecondary,
     fontWeight: '600',
+  },
+  sectionHeading: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+    marginTop: spacing.sm,
   },
   row: {
     flexDirection: 'row',

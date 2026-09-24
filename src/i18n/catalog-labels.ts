@@ -183,6 +183,14 @@ export function translateAdvancedDiscoverTitle(): string {
   return i18n.t('discovery.advancedDiscover.title');
 }
 
+export function translateDiscoverReleaseType(releaseType: string): string {
+  const key =
+    releaseType === 'theatrical_limited'
+      ? 'theatricalLimited'
+      : releaseType;
+  return i18n.t(`discovery.advancedDiscover.releaseTypes.${key}`);
+}
+
 export function translateWorldCinemaSort(sort: AdvancedDiscoverSort): string {
   return i18n.t(`discovery.worldCinemaScreen.sortOptions.${sort}`);
 }

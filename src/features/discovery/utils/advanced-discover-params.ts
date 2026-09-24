@@ -6,6 +6,8 @@ import {
   type AdvancedDiscoverMediaType,
   type AdvancedDiscoverSort,
   type AdvancedDiscoverState,
+  type DiscoverReleaseType,
+  type GenreMatchMode,
 } from '../advanced-discover-types';
 import type { WatchMonetizationType } from '../watch-provider-types';
 
@@ -14,6 +16,15 @@ const SORT_VALUES = new Set<AdvancedDiscoverSort>(
   ADVANCED_DISCOVER_SORT_OPTIONS,
 );
 const MONETIZATION_TYPES = new Set<WatchMonetizationType>(['stream', 'free', 'ads', 'rent', 'buy']);
+const GENRE_MATCH_VALUES = new Set<GenreMatchMode>(['all', 'any']);
+const RELEASE_TYPE_VALUES = new Set<DiscoverReleaseType>([
+  'premiere',
+  'theatrical_limited',
+  'theatrical',
+  'digital',
+  'physical',
+  'television',
+]);
 
 function readParam(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) {
@@ -39,6 +50,14 @@ function parseSort(value: string | undefined): AdvancedDiscoverSort {
   return 'popularity_desc';
 }
 
+function parseGenreMatch(value: string | undefined): GenreMatchMode {
+  if (value && GENRE_MATCH_VALUES.has(value as GenreMatchMode)) {
+    return value as GenreMatchMode;
+  }
+
+  return 'all';
+}
+
 function parseGenreIds(value: string | string[] | undefined): string[] {
   const rawValues = Array.isArray(value) ? value : value ? [value] : [];
   const ids = rawValues
@@ -47,6 +66,18 @@ function parseGenreIds(value: string | string[] | undefined): string[] {
     .filter((entry) => entry.length > 0);
 
   return Array.from(new Set(ids));
+}
+
+function parseReleaseTypes(value: string | string[] | undefined): DiscoverReleaseType[] {
+  const rawValues = Array.isArray(value) ? value : value ? [value] : [];
+  const types = rawValues
+    .flatMap((entry) => entry.split(','))
+    .map((entry) => entry.trim())
+    .filter((entry): entry is DiscoverReleaseType =>
+      RELEASE_TYPE_VALUES.has(entry as DiscoverReleaseType),
+    );
+
+  return Array.from(new Set(types));
 }
 
 function parseYear(value: string | undefined): number | null {
@@ -62,13 +93,26 @@ function parseYear(value: string | undefined): number | null {
   return parsed;
 }
 
-function parseMinRating(value: string | undefined): number | null {
+function parseRating(value: string | undefined): number | null {
   if (!value) {
     return null;
   }
 
   const parsed = Number.parseFloat(value);
   if (!Number.isFinite(parsed) || parsed < 0 || parsed > 10) {
+    return null;
+  }
+
+  return parsed;
+}
+
+function parseVoteCount(value: string | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
     return null;
   }
 
@@ -137,6 +181,15 @@ function parseOriginCountry(value: string | undefined): string | null {
   return /^[A-Z]{2}$/.test(trimmed) ? trimmed : null;
 }
 
+function parseCertification(value: string | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 type AdvancedDiscoverRouteParams = Record<string, string | string[] | undefined>;
 
 export function parseAdvancedDiscoverParams(
@@ -147,14 +200,20 @@ export function parseAdvancedDiscoverParams(
   const filters: AdvancedDiscoverFilters = {
     ...createDefaultAdvancedDiscoverFilters(),
     genreIds: parseGenreIds(params.genres),
+    genreMatch: parseGenreMatch(readParam(params.genreMatch)),
     year: parseYear(readParam(params.year)),
     yearFrom: parseYear(readParam(params.yearFrom)),
     yearTo: parseYear(readParam(params.yearTo)),
-    minRating: parseMinRating(readParam(params.minRating)),
+    minRating: parseRating(readParam(params.minRating)),
+    maxRating: parseRating(readParam(params.maxRating)),
+    minVoteCount: parseVoteCount(readParam(params.minVoteCount)),
     minRuntimeMinutes: parseRuntime(readParam(params.minRuntime)),
     maxRuntimeMinutes: parseRuntime(readParam(params.maxRuntime)),
     originalLanguage: parseLanguage(readParam(params.language)),
     originCountry: parseOriginCountry(readParam(params.originCountry)),
+    certification: parseCertification(readParam(params.certification)),
+    certificationCountry: parseOriginCountry(readParam(params.certificationCountry)),
+    releaseTypes: parseReleaseTypes(params.releaseType),
     watchRegion: parseWatchRegion(readParam(params.watchRegion)),
     watchProviderIds: parseWatchProviderIds(params.watchProviderId),
     watchMonetizationTypes: parseWatchMonetizationTypes(params.watchMonetizationType),
@@ -179,6 +238,10 @@ export function serializeAdvancedDiscoverParams(
     params.genres = filters.genreIds.join(',');
   }
 
+  if (filters.genreIds.length > 1 && filters.genreMatch === 'any') {
+    params.genreMatch = 'any';
+  }
+
   if (filters.year != null) {
     params.year = String(filters.year);
   }
@@ -195,6 +258,14 @@ export function serializeAdvancedDiscoverParams(
     params.minRating = String(filters.minRating);
   }
 
+  if (filters.maxRating != null) {
+    params.maxRating = String(filters.maxRating);
+  }
+
+  if (filters.minVoteCount != null) {
+    params.minVoteCount = String(filters.minVoteCount);
+  }
+
   if (filters.minRuntimeMinutes != null) {
     params.minRuntime = String(filters.minRuntimeMinutes);
   }
@@ -209,6 +280,18 @@ export function serializeAdvancedDiscoverParams(
 
   if (filters.originCountry) {
     params.originCountry = filters.originCountry;
+  }
+
+  if (filters.certification) {
+    params.certification = filters.certification;
+  }
+
+  if (filters.certificationCountry) {
+    params.certificationCountry = filters.certificationCountry;
+  }
+
+  if (filters.releaseTypes.length > 0) {
+    params.releaseType = filters.releaseTypes.join(',');
   }
 
   if (filters.watchRegion) {

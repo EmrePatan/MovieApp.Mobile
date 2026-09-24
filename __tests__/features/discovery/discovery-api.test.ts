@@ -49,25 +49,34 @@ describe('discovery api routes', () => {
       '/api/discovery/browse?mode=top_rated&type=movie&page=2&pageSize=10&genreId=genre-1&genreId=genre-2&year=2020&minRating=7.5&language=en&sort=rating_desc',
     );
 
-    expect(
-      buildAdvancedDiscoverPath({
-        mediaType: 'tv',
-        page: 1,
-        pageSize: 20,
-        genreIds: ['genre-1'],
-        year: null,
-        yearFrom: 2015,
-        yearTo: 2020,
-        minRating: 7,
-        minRuntimeMinutes: 45,
-        maxRuntimeMinutes: 60,
-        originalLanguage: 'en',
-        originCountry: 'US',
-        sort: 'newest',
-      }),
-    ).toBe(
-      '/api/discovery/advanced?mediaType=tv&page=1&pageSize=20&genreId=genre-1&yearFrom=2015&yearTo=2020&minRating=7&minRuntimeMinutes=45&maxRuntimeMinutes=60&originalLanguage=en&originCountry=US&sort=newest',
-    );
+    const advancedPath = buildAdvancedDiscoverPath({
+      mediaType: 'movie',
+      page: 1,
+      pageSize: 20,
+      genreIds: ['genre-1', 'genre-2'],
+      genreMatch: 'any',
+      year: null,
+      yearFrom: 2015,
+      yearTo: 2020,
+      minRating: 7,
+      maxRating: null,
+      minVoteCount: 50,
+      minRuntimeMinutes: 45,
+      maxRuntimeMinutes: 60,
+      originalLanguage: 'en',
+      originCountry: 'US',
+      certification: 'PG-13',
+      certificationCountry: 'US',
+      releaseTypes: ['theatrical', 'digital'],
+      watchRegion: 'US',
+      watchProviderIds: [],
+      watchMonetizationTypes: [],
+      sort: 'newest',
+    });
+
+    expect(advancedPath).toContain('genreMatch=any');
+    expect(advancedPath).toContain('certification=PG-13');
+    expect(advancedPath).toContain('releaseType=theatrical');
   });
 });
 

@@ -125,6 +125,18 @@ export function buildAdvancedDiscoverPath(criteria: AdvancedDiscoverRequest): st
     params.set('minRating', String(criteria.minRating));
   }
 
+  if (criteria.maxRating != null) {
+    params.set('maxRating', String(criteria.maxRating));
+  }
+
+  if (criteria.minVoteCount != null) {
+    params.set('minVoteCount', String(criteria.minVoteCount));
+  }
+
+  if (criteria.genreIds.length > 1 && criteria.genreMatch === 'any') {
+    params.set('genreMatch', 'any');
+  }
+
   if (criteria.minRuntimeMinutes != null) {
     params.set('minRuntimeMinutes', String(criteria.minRuntimeMinutes));
   }
@@ -139,6 +151,18 @@ export function buildAdvancedDiscoverPath(criteria: AdvancedDiscoverRequest): st
 
   if (criteria.originCountry) {
     params.set('originCountry', criteria.originCountry);
+  }
+
+  if (criteria.certification) {
+    params.set('certification', criteria.certification);
+  }
+
+  if (criteria.certificationCountry) {
+    params.set('certificationCountry', criteria.certificationCountry);
+  }
+
+  for (const releaseType of criteria.releaseTypes ?? []) {
+    params.append('releaseType', releaseType);
   }
 
   if (criteria.sort) {

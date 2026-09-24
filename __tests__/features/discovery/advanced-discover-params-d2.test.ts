@@ -1,3 +1,4 @@
+import { createDefaultAdvancedDiscoverFilters } from '@/features/discovery/advanced-discover-types';
 import {
   parseAdvancedDiscoverParams,
   serializeAdvancedDiscoverParams,
@@ -18,19 +19,11 @@ describe('advanced-discover-params D2', () => {
     const state = {
       mediaType: 'movie' as const,
       filters: {
-        genreIds: [],
-        year: null,
-        yearFrom: null,
-        yearTo: null,
-        minRating: null,
-        minRuntimeMinutes: null,
-        maxRuntimeMinutes: null,
-        originalLanguage: null,
+        ...createDefaultAdvancedDiscoverFilters(),
         originCountry: 'KR',
         watchRegion: 'TR',
         watchProviderIds: [8],
         watchMonetizationTypes: ['stream' as const],
-        sort: 'popularity_desc' as const,
       },
     };
 

@@ -8,16 +8,32 @@ export type AdvancedDiscoverSort =
   | 'newest'
   | 'oldest';
 
+export type GenreMatchMode = 'all' | 'any';
+
+export type DiscoverReleaseType =
+  | 'premiere'
+  | 'theatrical_limited'
+  | 'theatrical'
+  | 'digital'
+  | 'physical'
+  | 'television';
+
 export interface AdvancedDiscoverFilters {
   genreIds: string[];
+  genreMatch: GenreMatchMode;
   year: number | null;
   yearFrom: number | null;
   yearTo: number | null;
   minRating: number | null;
+  maxRating: number | null;
+  minVoteCount: number | null;
   minRuntimeMinutes: number | null;
   maxRuntimeMinutes: number | null;
   originalLanguage: string | null;
   originCountry: string | null;
+  certification: string | null;
+  certificationCountry: string | null;
+  releaseTypes: DiscoverReleaseType[];
   watchRegion: string | null;
   watchProviderIds: number[];
   watchMonetizationTypes: WatchMonetizationType[];
@@ -48,6 +64,14 @@ export const ADVANCED_DISCOVER_SORT_OPTIONS: AdvancedDiscoverSort[] = [
   'oldest',
 ];
 
+export const ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS: (number | null)[] = [
+  null,
+  50,
+  100,
+  500,
+  1000,
+];
+
 export const ADVANCED_DISCOVER_RUNTIME_PRESETS: {
   key: string;
   minRuntimeMinutes: number | null;
@@ -62,14 +86,20 @@ export const ADVANCED_DISCOVER_RUNTIME_PRESETS: {
 export function createDefaultAdvancedDiscoverFilters(): AdvancedDiscoverFilters {
   return {
     genreIds: [],
+    genreMatch: 'all',
     year: null,
     yearFrom: null,
     yearTo: null,
     minRating: null,
+    maxRating: null,
+    minVoteCount: null,
     minRuntimeMinutes: null,
     maxRuntimeMinutes: null,
     originalLanguage: null,
     originCountry: null,
+    certification: null,
+    certificationCountry: null,
+    releaseTypes: [],
     watchRegion: null,
     watchProviderIds: [],
     watchMonetizationTypes: [],
@@ -96,6 +126,9 @@ export function countActiveAdvancedDiscoverFilters(
 
   if (filters.genreIds.length > 0) {
     count += filters.genreIds.length;
+    if (filters.genreIds.length > 1 && filters.genreMatch === 'any') {
+      count += 1;
+    }
   }
 
   if (filters.year != null) {
@@ -110,6 +143,14 @@ export function countActiveAdvancedDiscoverFilters(
     count += 1;
   }
 
+  if (filters.maxRating != null) {
+    count += 1;
+  }
+
+  if (filters.minVoteCount != null) {
+    count += 1;
+  }
+
   if (filters.minRuntimeMinutes != null || filters.maxRuntimeMinutes != null) {
     count += 1;
   }
@@ -120,6 +161,14 @@ export function countActiveAdvancedDiscoverFilters(
 
   if (filters.originCountry) {
     count += 1;
+  }
+
+  if (filters.certification) {
+    count += 1;
+  }
+
+  if (filters.releaseTypes.length > 0) {
+    count += filters.releaseTypes.length;
   }
 
   if (filters.watchRegion) {
@@ -161,4 +210,25 @@ export function resolveAdvancedDiscoverWatchRegion(
   }
 
   return filters.watchRegion ?? userRegion;
+}
+
+export function ensureStreamingDraftDefaults(
+  filters: AdvancedDiscoverFilters,
+  userRegion: string,
+): AdvancedDiscoverFilters {
+  let next = filters;
+
+  if (next.watchProviderIds.length > 0 && next.watchMonetizationTypes.length === 0) {
+    next = { ...next, watchMonetizationTypes: ['stream'] };
+  }
+
+  if (hasStreamingAvailabilityFilters(next) && !next.watchRegion) {
+    next = { ...next, watchRegion: userRegion };
+  }
+
+  if (next.certification && !next.certificationCountry) {
+    next = { ...next, certificationCountry: userRegion };
+  }
+
+  return next;
 }
