@@ -23,7 +23,6 @@ import { useLibrary } from '../hooks/useLibrary';
 import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { flattenLibraryPages } from '../utils/flatten-library-pages';
 import { getLibraryGridItemKey } from '../utils/library-item-key';
-import { getLibraryGridItemLayout } from '../utils/library-grid-layout';
 import { resolveLibraryEmptyCopy } from '../utils/library-empty-copy';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryGridCard } from './LibraryGridCard';
@@ -152,12 +151,6 @@ export function LibraryHubContent() {
     [category, handleItemPress, itemHeight, itemWidth],
   );
 
-  const getItemLayout = useCallback(
-    (_data: ArrayLike<LibraryItem> | null | undefined, index: number) =>
-      getLibraryGridItemLayout(itemHeight, category, GRID_COLUMNS, index),
-    [category, itemHeight],
-  );
-
   const listHeader = (
     <LibraryHubHeader
       category={category}
@@ -231,7 +224,6 @@ export function LibraryHubContent() {
       numColumns={GRID_COLUMNS}
       columnWrapperStyle={styles.row}
       renderItem={renderItem}
-      getItemLayout={getItemLayout}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={emptyComponent}
       removeClippedSubviews

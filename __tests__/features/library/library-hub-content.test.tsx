@@ -176,6 +176,13 @@ describe('LibraryHubContent', () => {
     expect(screen.queryByTestId('library-grid-single-item')).toBeNull();
   });
 
+  it('lets the multi-column grid measure rows instead of supplying fixed item layouts', () => {
+    render(<LibraryHubContent />);
+
+    // FlatList passes row indexes to getItemLayout and the list header height is dynamic.
+    expect(screen.getByTestId('library-grid-three-column').props.getItemLayout).toBeUndefined();
+  });
+
   it('does not double-pad the My Library heading inside the grid list', () => {
     render(<LibraryHubContent />);
 

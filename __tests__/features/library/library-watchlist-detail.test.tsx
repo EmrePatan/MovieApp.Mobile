@@ -134,6 +134,13 @@ describe('LibraryWatchlistDetailContent', () => {
     expect(screen.getByLabelText('Interstellar, Watchlist')).toBeTruthy();
   });
 
+  it('lets the multi-column grid measure rows instead of supplying fixed item layouts', () => {
+    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+
+    // FlatList passes row indexes to getItemLayout and the list header height is dynamic.
+    expect(screen.getByTestId('library-watchlist-detail').props.getItemLayout).toBeUndefined();
+  });
+
   it('does not show Delete List as a permanent primary action', () => {
     render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
