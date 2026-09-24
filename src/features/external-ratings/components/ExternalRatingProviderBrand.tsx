@@ -4,6 +4,7 @@ import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { EXTERNAL_RATING_BRAND_SVGS } from '../config/external-rating-brand-svgs';
 import { resolveExternalRatingProviderBrandConfig } from '../config/external-rating-provider-brand-config';
+import { resolveRenderableBrandSvg } from '../utils/brand-svg';
 
 interface ExternalRatingProviderBrandProps {
   source: string;
@@ -13,16 +14,23 @@ function SvgProviderBrand({
   xml,
   height,
   aspectRatio,
+  fallbackLabel,
 }: {
   xml: string;
   height: number;
   aspectRatio: number;
+  fallbackLabel: string;
 }) {
+  const renderableXml = resolveRenderableBrandSvg(xml);
+  if (!renderableXml) {
+    return <AppText style={styles.fallbackLabel}>{fallbackLabel}</AppText>;
+  }
+
   const width = height * aspectRatio;
 
   return (
     <SvgXml
-      xml={xml}
+      xml={renderableXml}
       width={width}
       height={height}
       accessibilityRole="image"
@@ -49,6 +57,7 @@ export function ExternalRatingProviderBrand({ source }: ExternalRatingProviderBr
           xml={EXTERNAL_RATING_BRAND_SVGS[config.svgKey]}
           height={config.height}
           aspectRatio={config.aspectRatio}
+          fallbackLabel={config.accessibilityLabel}
         />
       ) : (
         <View style={styles.rtIconRow}>
