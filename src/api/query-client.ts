@@ -13,7 +13,8 @@ export const queryClient = new QueryClient({
             error.kind === 'forbidden' ||
             error.kind === 'not_found' ||
             error.kind === 'validation' ||
-            error.kind === 'conflict'
+            error.kind === 'conflict' ||
+            error.kind === 'cancelled'
           ) {
             return false;
           }

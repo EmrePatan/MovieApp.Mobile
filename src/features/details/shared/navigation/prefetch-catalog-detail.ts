@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
-import { getAccessToken } from '@/auth/auth-storage';
+import { api } from '@/api/client';
 import { getMovieFavoriteStatus, getTvFavoriteStatus } from '@/features/favorites/api/favorites-api';
 import { favoriteStatusQueryKey } from '@/features/favorites/hooks/favorite-query-keys';
 import { getMovieFollowStatus } from '@/features/follows/api/movie-follow-api';
@@ -35,13 +35,12 @@ function toMembershipRecord(watchlistIds: string[]): Record<string, boolean> {
  * instead of firing a fresh request. Uses the exact query keys those hooks use, so
  * this is a pure cache warm-up with no risk of duplicate in-flight requests.
  */
-async function prefetchCatalogDetailActionStatuses(
+function prefetchCatalogDetailActionStatuses(
   queryClient: QueryClient,
   id: string,
   type: 'movie' | 'tv',
-): Promise<void> {
-  const token = await getAccessToken();
-  if (!token) {
+): void {
+  if (!api.hasAccessToken()) {
     return;
   }
 
@@ -114,5 +113,5 @@ export function prefetchCatalogDetail(
 
   prefetchExternalRatings(queryClient, type, id);
 
-  void prefetchCatalogDetailActionStatuses(queryClient, id, type);
+  prefetchCatalogDetailActionStatuses(queryClient, id, type);
 }

@@ -46,7 +46,10 @@ import {
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
-import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import {
+  flattenDedupedSearchResultPages,
+  searchResultKeyExtractor,
+} from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -75,7 +78,7 @@ export default function DiscoverScreen() {
   const browseQuery = useDiscoveryBrowse(mode, typeFilter, filters);
 
   const items = useMemo(
-    () => browseQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    () => flattenDedupedSearchResultPages(browseQuery.data?.pages),
     [browseQuery.data?.pages],
   );
 

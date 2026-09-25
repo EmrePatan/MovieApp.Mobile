@@ -83,6 +83,58 @@ describe('PosterImage loading lifecycle', () => {
     expect(screen.queryByLabelText('film-outline')).toBeNull();
   });
 
+  it('shows the fallback when onLoadEnd follows each failed attempt', () => {
+    render(
+      <PosterImage
+        uri="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Interstellar poster"
+      />,
+    );
+
+    const failedLoadEnd = screen.UNSAFE_getByType(Image).props.onLoadEnd;
+
+    act(() => {
+      screen.UNSAFE_getByType(Image).props.onError?.();
+    });
+    act(() => {
+      failedLoadEnd?.();
+    });
+
+    act(() => {
+      const retriedImage = screen.UNSAFE_getByType(Image);
+      retriedImage.props.onError?.();
+      retriedImage.props.onLoadEnd?.();
+    });
+
+    expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+    expect(screen.getByLabelText('film-outline')).toBeTruthy();
+  });
+
+  it('treats onLoadEnd without onError as a successful load', () => {
+    render(
+      <PosterImage
+        uri="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Interstellar poster"
+      />,
+    );
+
+    const image = screen.UNSAFE_getByType(Image);
+
+    act(() => {
+      image.props.onLoadEnd?.();
+    });
+    act(() => {
+      screen.UNSAFE_getByType(Image).props.onError?.();
+    });
+
+    expect(screen.UNSAFE_getByType(Image)).toBeTruthy();
+    expect(screen.queryByLabelText('film-outline')).toBeNull();
+  });
+
   it('retries once on transient onError before showing fallback', () => {
     render(
       <PosterImage

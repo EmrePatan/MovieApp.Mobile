@@ -26,7 +26,10 @@ import {
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
-import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import {
+  flattenDedupedSearchResultPages,
+  searchResultKeyExtractor,
+} from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -47,7 +50,7 @@ export default function NowInTheatersScreen() {
   const resultsQuery = useNowInTheaters(discoverState, undefined, isHydrated);
 
   const items = useMemo(
-    () => resultsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    () => flattenDedupedSearchResultPages(resultsQuery.data?.pages),
     [resultsQuery.data?.pages],
   );
 

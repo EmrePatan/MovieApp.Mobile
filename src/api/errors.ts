@@ -3,6 +3,7 @@ import { i18n } from '@/i18n';
 export type ApiErrorKind =
   | 'network'
   | 'timeout'
+  | 'cancelled'
   | 'validation'
   | 'unauthorized'
   | 'forbidden'
@@ -69,6 +70,8 @@ export function getDefaultUserMessage(kind: ApiErrorKind): string {
       return i18n.t('errors.network');
     case 'timeout':
       return i18n.t('errors.timeout');
+    case 'cancelled':
+      return i18n.t('errors.requestCancelled');
     case 'validation':
       return i18n.t('errors.validation');
     case 'unauthorized':

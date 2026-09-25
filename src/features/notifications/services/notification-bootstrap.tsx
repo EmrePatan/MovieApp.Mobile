@@ -38,10 +38,12 @@ export function getNotificationResponseKey(
 
 let pendingNotificationResponse: Notifications.NotificationResponse | null = null;
 let lastProcessedNotificationResponseKey: string | null = null;
+const inFlightNotificationResponseKeys = new Set<string>();
 
 export function resetNotificationBootstrapStateForTests(): void {
   pendingNotificationResponse = null;
   lastProcessedNotificationResponseKey = null;
+  inFlightNotificationResponseKeys.clear();
 }
 
 export function setPendingNotificationResponseForTests(
@@ -68,7 +70,10 @@ export async function processNotificationResponse(
 ): Promise<void> {
   const responseKey = getNotificationResponseKey(response);
 
-  if (lastProcessedNotificationResponseKey === responseKey) {
+  if (
+    lastProcessedNotificationResponseKey === responseKey ||
+    inFlightNotificationResponseKeys.has(responseKey)
+  ) {
     return;
   }
 
@@ -85,6 +90,8 @@ export async function processNotificationResponse(
     return;
   }
 
+  inFlightNotificationResponseKeys.add(responseKey);
+
   try {
     const readResponse = await markNotificationRead(notificationId);
     lastProcessedNotificationResponseKey = responseKey;
@@ -94,6 +101,8 @@ export async function processNotificationResponse(
     );
   } catch {
     // Ownership validation failed or notification no longer exists.
+  } finally {
+    inFlightNotificationResponseKeys.delete(responseKey);
   }
 }
 
