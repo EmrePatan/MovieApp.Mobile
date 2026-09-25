@@ -31,7 +31,9 @@ interface EpisodeListItemProps {
   seasonNumber: number;
   episode: EpisodeSummaryResponse;
   isWatched: boolean;
+  isTogglePending: boolean;
   showWatchedControl: boolean;
+  onToggleWatched: (episode: EpisodeSummaryResponse, isWatched: boolean) => void;
   onMarkThrough: (episode: EpisodeSummaryResponse) => void;
 }
 
@@ -40,13 +42,14 @@ function EpisodeListItem({
   seasonNumber,
   episode,
   isWatched,
+  isTogglePending,
   showWatchedControl,
+  onToggleWatched,
   onMarkThrough,
 }: EpisodeListItemProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const { requireAuth } = useRequireAuth();
-  const toggleWatched = useToggleEpisodeWatched(episode.id, tvShowId, seasonNumber);
   const title = episode.name ?? `${t('common.episode')} ${episode.episodeNumber}`;
   const airDate = formatIsoDate(episode.airDate);
   const runtime = formatRuntimeMinutes(episode.runtimeMinutes);
@@ -69,7 +72,7 @@ function EpisodeListItem({
       return;
     }
 
-    toggleWatched.mutate(isWatched);
+    onToggleWatched(episode, isWatched);
   };
 
   const handleLongPress = () => {
@@ -95,17 +98,17 @@ function EpisodeListItem({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={isWatched ? t('common.markAsUnwatched') : t('common.markAsWatched')}
-          accessibilityState={{ selected: isWatched, busy: toggleWatched.isPending }}
-          disabled={toggleWatched.isPending}
+          accessibilityState={{ selected: isWatched, busy: isTogglePending }}
+          disabled={isTogglePending}
           onPress={handleToggleWatched}
           hitSlop={6}
           style={({ pressed }) => [
             styles.watchedControl,
-            pressed && !toggleWatched.isPending && styles.pressed,
+            pressed && !isTogglePending && styles.pressed,
           ]}
           testID={`episode-watched-toggle-${episode.episodeNumber}`}
         >
-          {toggleWatched.isPending ? (
+          {isTogglePending ? (
             <ActivityIndicator color={colors.accent} size="small" />
           ) : (
             <Ionicons
@@ -166,8 +169,12 @@ export function EpisodeList({
   const { isAuthenticated } = useAuth();
   const { requireAuth } = useRequireAuth();
   const watchedQuery = useSeasonWatchedEpisodes(tvShowId, seasonNumber);
+  const toggleWatched = useToggleEpisodeWatched(tvShowId, seasonNumber);
   const markThroughMutation = useMarkThroughEpisode(tvShowId, seasonNumber);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const pendingEpisodeId = toggleWatched.isPending
+    ? toggleWatched.variables?.episodeId ?? null
+    : null;
 
   const watchedIds = useMemo(
     () => new Set(watchedQuery.data?.watchedEpisodeIds ?? []),
@@ -196,6 +203,17 @@ export function EpisodeList({
     layout.posterList.width +
     spacing.md;
 
+  const handleToggleWatched = useCallback(
+    (episode: EpisodeSummaryResponse, isWatched: boolean) => {
+      if (!requireAuth()) {
+        return;
+      }
+
+      toggleWatched.mutate({ episodeId: episode.id, isWatched });
+    },
+    [requireAuth, toggleWatched],
+  );
+
   const renderItem = useCallback(
     ({ item, index }: { item: EpisodeSummaryResponse; index: number }) => (
       <View>
@@ -204,7 +222,9 @@ export function EpisodeList({
           seasonNumber={seasonNumber}
           episode={item}
           isWatched={watchedIds.has(item.id)}
+          isTogglePending={pendingEpisodeId === item.id}
           showWatchedControl={isAuthenticated}
+          onToggleWatched={handleToggleWatched}
           onMarkThrough={handleMarkThrough}
         />
         {index < episodes.length - 1 ? (
@@ -215,7 +235,9 @@ export function EpisodeList({
     [
       episodes.length,
       handleMarkThrough,
+      handleToggleWatched,
       isAuthenticated,
+      pendingEpisodeId,
       seasonNumber,
       separatorInset,
       tvShowId,

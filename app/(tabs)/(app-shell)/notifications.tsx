@@ -23,6 +23,7 @@ import { useMarkNotificationRead } from '@/features/notifications/hooks/useMarkN
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
 import type { NotificationItem } from '@/features/notifications/types';
 import { flattenNotificationPages } from '@/features/notifications/utils/flatten-notification-pages';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { buildNotificationRoute } from '@/features/notifications/utils/notification-navigation';
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
 import { colors } from '@/theme/colors';
@@ -86,11 +87,7 @@ export default function NotificationsScreen() {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !notificationsQuery.hasNextPage ||
-      notificationsQuery.isFetchingNextPage ||
-      notificationsQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(notificationsQuery)) {
       return;
     }
 

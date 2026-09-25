@@ -20,6 +20,7 @@ import type { CatalogMediaFilter } from '@/features/library/types';
 import { ComingUpTabBar } from '@/features/upcoming/components/ComingUpTabBar';
 import { UpcomingListCard } from '@/features/upcoming/components/UpcomingListCard';
 import { useUpcomingCatalog } from '@/features/upcoming/hooks/useUpcomingCatalog';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { useComingUpInitialTab } from '@/features/upcoming/hooks/useComingUpInitialTab';
 import {
   buildComingUpHref,
@@ -102,11 +103,7 @@ export default function UpcomingScreen() {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !activeQuery.hasNextPage ||
-      activeQuery.isFetchingNextPage ||
-      activeQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(activeQuery)) {
       return;
     }
 

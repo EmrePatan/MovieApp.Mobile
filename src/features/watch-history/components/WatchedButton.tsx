@@ -50,7 +50,6 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
   const toggleMovie = useToggleMovieWatched(target.type === 'movie' ? target.contentId : '');
   const toggleTvShow = useToggleTvShowWatched(target.type === 'tvshow' ? target.contentId : '');
   const toggleEpisode = useToggleEpisodeWatched(
-    target.type === 'episode' ? target.contentId : '',
     target.type === 'episode' ? target.tvShowId : '',
     target.type === 'episode' ? target.seasonNumber : 0,
   );
@@ -90,15 +89,25 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
       return;
     }
 
-    toggleMutation.mutate(isWatched, {
-      onError: (error) => {
-        setFeedback(
-          isApiError(error)
-            ? t('details.actions.watchedUpdateError')
-            : t('details.actions.watchedUpdateError'),
-        );
-      },
-    });
+    const onError = (error: unknown) => {
+      setFeedback(
+        isApiError(error)
+          ? t('details.actions.watchedUpdateError')
+          : t('details.actions.watchedUpdateError'),
+      );
+    };
+
+    if (target.type === 'episode') {
+      toggleEpisode.mutate({ episodeId: target.contentId, isWatched }, { onError });
+      return;
+    }
+
+    if (target.type === 'tvshow') {
+      toggleTvShow.mutate(isWatched, { onError });
+      return;
+    }
+
+    toggleMovie.mutate(isWatched, { onError });
   };
 
   const label = active ? t('common.markAsUnwatched') : t('common.markAsWatched');

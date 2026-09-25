@@ -22,6 +22,7 @@ import type { LibraryCategory, LibraryItem } from '../types/library';
 import { useLibrary } from '../hooks/useLibrary';
 import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { flattenLibraryPages } from '../utils/flatten-library-pages';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { getLibraryGridItemKey } from '../utils/library-item-key';
 import { resolveLibraryEmptyCopy } from '../utils/library-empty-copy';
 import { LibraryEmptyState } from './LibraryEmptyState';
@@ -110,11 +111,7 @@ export function LibraryHubContent() {
   });
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !libraryQuery.hasNextPage ||
-      libraryQuery.isFetchingNextPage ||
-      libraryQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(libraryQuery)) {
       return;
     }
 

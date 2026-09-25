@@ -28,6 +28,7 @@ import {
 } from '@/features/discovery/components/ActiveFilterChips';
 import { DiscoverFilterSheet } from '@/features/discovery/components/DiscoverFilterSheet';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
 import {
   countActiveDiscoveryFilters,
@@ -131,19 +132,18 @@ export default function DiscoverScreen() {
   const {
     hasNextPage,
     isFetchingNextPage,
-    isFetching,
     fetchNextPage,
     refetch: refetchBrowse,
     isRefetching,
   } = browseQuery;
 
   const handleLoadMore = useCallback(() => {
-    if (!hasNextPage || isFetchingNextPage || isFetching) {
+    if (!shouldRequestNextInfinitePage({ hasNextPage, isFetchingNextPage })) {
       return;
     }
 
     void fetchNextPage();
-  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleRefresh = useCallback(() => {
     void refetchBrowse();

@@ -19,6 +19,7 @@ import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/nav
 import { useFavoritesItems } from '@/features/favorites/hooks/useFavoritesItems';
 import { useRemoveFavoriteMutation } from '@/features/favorites/hooks/useFavoriteMutations';
 import { flattenFavoritesPages } from '@/features/favorites/utils/favorite-library-items';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { LibraryContentCard } from '@/features/library/components/LibraryContentCard';
 import { LibraryEmptyState } from '@/features/library/components/LibraryEmptyState';
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
@@ -97,11 +98,7 @@ export default function FavoritesScreen() {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !favoritesQuery.hasNextPage ||
-      favoritesQuery.isFetchingNextPage ||
-      favoritesQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(favoritesQuery)) {
       return;
     }
 

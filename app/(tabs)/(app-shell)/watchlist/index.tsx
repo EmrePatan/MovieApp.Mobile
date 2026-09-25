@@ -19,6 +19,7 @@ import { LibraryEmptyState } from '@/features/library/components/LibraryEmptySta
 import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
 import { LibrarySortControl } from '@/features/library/components/LibrarySortControl';
 import { getLibraryItemKey } from '@/features/library/utils/library-item-key';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
 import type { CatalogMediaFilter, LibrarySortOption } from '@/features/library/types';
 import { LibraryMediaFilterControl } from '@/features/library/components/LibraryMediaFilterControl';
@@ -165,11 +166,7 @@ export default function WatchlistScreen() {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !itemsQuery.hasNextPage ||
-      itemsQuery.isFetchingNextPage ||
-      itemsQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(itemsQuery)) {
       return;
     }
 

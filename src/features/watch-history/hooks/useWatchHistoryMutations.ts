@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { getSeason } from '@/features/details/season/api/season-api';
 import {
   bulkUpdateEpisodeWatchState,
@@ -31,6 +31,19 @@ import {
   updateTvShowAggregateAllSeasonsWatched,
   updateTvShowAggregateSeasonProgress,
 } from '../utils/tv-show-progress-cache';
+
+function restoreQuerySnapshot<T>(
+  queryClient: QueryClient,
+  queryKey: readonly unknown[],
+  previous: T | undefined,
+): void {
+  if (previous === undefined) {
+    queryClient.removeQueries({ queryKey, exact: true });
+    return;
+  }
+
+  queryClient.setQueryData(queryKey, previous);
+}
 
 export function invalidateHomeQueries(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: ['home'] });
@@ -73,7 +86,11 @@ export function invalidateEpisodeWatchHistoryQueries(
   void queryClient.invalidateQueries({
     queryKey: seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
   });
-  invalidateWatchStateDependents(queryClient);
+  invalidateRecentWatchHistory(queryClient);
+  invalidateLibraryQueries(queryClient);
+  void queryClient.invalidateQueries({ queryKey: ['home', 'personalized'] });
+  void queryClient.invalidateQueries({ queryKey: ['recommendations'] });
+  invalidateProfileStatistics(queryClient);
 }
 
 export function applySeasonWatchedEpisodeIds(
@@ -190,9 +207,11 @@ export function useToggleMovieWatched(movieId: string) {
       return { previous };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(movieWatchStatusQueryKey(movieId), context.previous);
-      }
+      restoreQuerySnapshot(
+        queryClient,
+        movieWatchStatusQueryKey(movieId),
+        context?.previous,
+      );
     },
     onSuccess: (nextValue) => {
       queryClient.setQueryData(movieWatchStatusQueryKey(movieId), nextValue);
@@ -201,15 +220,16 @@ export function useToggleMovieWatched(movieId: string) {
   });
 }
 
-export function useToggleEpisodeWatched(
-  episodeId: string,
-  tvShowId: string,
-  seasonNumber: number,
-) {
+export interface ToggleEpisodeWatchedInput {
+  episodeId: string;
+  isWatched: boolean;
+}
+
+export function useToggleEpisodeWatched(tvShowId: string, seasonNumber: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (isWatched: boolean) => {
+    mutationFn: async ({ episodeId, isWatched }: ToggleEpisodeWatchedInput) => {
       if (isWatched) {
         await unmarkEpisodeWatched(episodeId);
         return {
@@ -226,7 +246,7 @@ export function useToggleEpisodeWatched(
         watchedAt: result.watchedAt,
       } satisfies EpisodeWatchStatusResponse;
     },
-    onMutate: async (isWatched) => {
+    onMutate: async ({ episodeId, isWatched }) => {
       const queryKey = episodeWatchStatusQueryKey(episodeId);
       const seasonKey = seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber);
       await queryClient.cancelQueries({ queryKey });
@@ -276,27 +296,27 @@ export function useToggleEpisodeWatched(
         previousTvProgress,
       };
     },
-    onError: (_error, _variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(episodeWatchStatusQueryKey(episodeId), context.previous);
-      }
-      if (context?.previousSeason) {
-        queryClient.setQueryData(
-          seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
-          context.previousSeason,
-        );
-      }
-      if (context?.previousSeasonProgress) {
-        queryClient.setQueryData(
-          seasonProgressQueryKey(tvShowId, seasonNumber),
-          context.previousSeasonProgress,
-        );
-      }
+    onError: (_error, { episodeId }, context) => {
+      restoreQuerySnapshot(
+        queryClient,
+        episodeWatchStatusQueryKey(episodeId),
+        context?.previous,
+      );
+      restoreQuerySnapshot(
+        queryClient,
+        seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
+        context?.previousSeason,
+      );
+      restoreQuerySnapshot(
+        queryClient,
+        seasonProgressQueryKey(tvShowId, seasonNumber),
+        context?.previousSeasonProgress,
+      );
       if (context?.previousTvProgress) {
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
     },
-    onSuccess: (nextValue) => {
+    onSuccess: (nextValue, { episodeId }) => {
       queryClient.setQueryData(episodeWatchStatusQueryKey(episodeId), nextValue);
       invalidateEpisodeWatchHistoryQueries(
         queryClient,
@@ -357,18 +377,16 @@ export function useBulkUpdateEpisodeWatchState(tvShowId: string, seasonNumber: n
       return { previousSeason, previousSeasonProgress, previousTvProgress };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousSeason) {
-        queryClient.setQueryData(
-          seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
-          context.previousSeason,
-        );
-      }
-      if (context?.previousSeasonProgress) {
-        queryClient.setQueryData(
-          seasonProgressQueryKey(tvShowId, seasonNumber),
-          context.previousSeasonProgress,
-        );
-      }
+      restoreQuerySnapshot(
+        queryClient,
+        seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
+        context?.previousSeason,
+      );
+      restoreQuerySnapshot(
+        queryClient,
+        seasonProgressQueryKey(tvShowId, seasonNumber),
+        context?.previousSeasonProgress,
+      );
       if (context?.previousTvProgress) {
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
@@ -461,18 +479,16 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
       return { previousSeasonProgress, previousSeasonWatched, previousTvProgress };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousSeasonProgress) {
-        queryClient.setQueryData(
-          seasonProgressQueryKey(tvShowId, seasonNumber),
-          context.previousSeasonProgress,
-        );
-      }
-      if (context?.previousSeasonWatched) {
-        queryClient.setQueryData(
-          seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
-          context.previousSeasonWatched,
-        );
-      }
+      restoreQuerySnapshot(
+        queryClient,
+        seasonProgressQueryKey(tvShowId, seasonNumber),
+        context?.previousSeasonProgress,
+      );
+      restoreQuerySnapshot(
+        queryClient,
+        seasonWatchedEpisodesQueryKey(tvShowId, seasonNumber),
+        context?.previousSeasonWatched,
+      );
       if (context?.previousTvProgress) {
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
