@@ -290,7 +290,7 @@ describe('FollowButton', () => {
     expect(screen.queryByText('Following')).toBeNull();
   });
 
-  it('does not call create while follow status is loading', () => {
+  it('does not mark follow action busy while follow status is loading', () => {
     (useTvShowFollowStatus as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
@@ -298,6 +298,6 @@ describe('FollowButton', () => {
 
     renderFollowButton();
 
-    expect(screen.getByLabelText('Follow this show').props.accessibilityState?.busy).toBe(true);
+    expect(screen.getByLabelText('Follow this show').props.accessibilityState?.busy).not.toBe(true);
   });
 });

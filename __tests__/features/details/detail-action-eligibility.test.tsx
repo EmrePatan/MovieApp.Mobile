@@ -90,6 +90,10 @@ jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () =
   WhereToWatchRail: () => null,
 }));
 
+jest.mock('@/features/external-ratings/components/OtherRatingsSection', () => ({
+  OtherRatingsSection: () => null,
+}));
+
 const baseMovie: Omit<MovieDetailsResponse, 'isReleased' | 'canFollowForRelease' | 'canSetReleaseAlert'> = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   externalIds: { tmdbId: 1, tvdbId: null, imdbId: null },

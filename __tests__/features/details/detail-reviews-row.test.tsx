@@ -55,6 +55,10 @@ jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () =
   WhereToWatchRail: () => null,
 }));
 
+jest.mock('@/features/external-ratings/components/OtherRatingsSection', () => ({
+  OtherRatingsSection: () => null,
+}));
+
 jest.mock('@/features/gallery/components/CatalogGallerySection', () => ({
   CatalogGallerySection: () => null,
 }));

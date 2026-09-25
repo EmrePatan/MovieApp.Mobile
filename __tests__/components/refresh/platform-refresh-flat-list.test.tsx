@@ -10,7 +10,7 @@ const repoRoot = path.resolve(__dirname, '../../..');
 const platformRefreshSurfaceFiles = [
   'app/(tabs)/(app-shell)/discover-browse.tsx',
   'app/(tabs)/(app-shell)/search.tsx',
-  'app/(tabs)/(app-shell)/streaming-discover.tsx',
+  'src/features/discovery/components/StreamingPlatformScreen.tsx',
   'app/(tabs)/(app-shell)/world-cinema.tsx',
   'app/(tabs)/(app-shell)/upcoming.tsx',
   'app/(tabs)/(app-shell)/on-tv-this-week.tsx',

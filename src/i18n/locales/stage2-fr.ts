@@ -439,9 +439,11 @@ export const stage2Fr = {
     streamingPlatformsHub: {
       title: 'Plateformes de streaming',
       directoryTitle: 'Plateformes de streaming',
+      directorySubtitle: 'Choisissez une plateforme à parcourir',
       seeAll: 'Tout voir',
       seeAllAccessibility: 'Voir toutes les plateformes de streaming',
       seeAllAccessibilityGeneric: 'Voir tous les titres en streaming',
+      openPlatform: 'Ouvrir {{provider}}',
       empty: 'Aucun titre trouvé pour cette plateforme pour le moment.',
     },
   },
@@ -565,6 +567,11 @@ export const stage2Fr = {
         language: 'Langue {{language}}',
         originCountry: 'De {{country}}',
       },
+    },
+    streamingPlatform: {
+      weeklySubtitle: 'Populaire sur ce service cette semaine',
+      catalogSubtitle: 'Parcourez films et séries sur ce service',
+      chooseProvider: 'Choisissez une plateforme à parcourir',
     },
     streamingDiscover: {
       title: 'Services de streaming',
