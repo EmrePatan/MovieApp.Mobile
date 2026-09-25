@@ -1,16 +1,30 @@
 param(
-    [string]$SourcePath = (Join-Path $PSScriptRoot '..\assets\images\movie-cave-app-icon-source.png'),
-    [string]$AssetsPath = (Join-Path $PSScriptRoot '..\assets')
+    [Parameter(Mandatory = $true)]
+    [string]$SourcePath,
+    [string]$AssetsPath = (Join-Path $PSScriptRoot '..\assets'),
+    [switch]$AllowOverwrite
 )
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
+if (-not $AllowOverwrite) {
+    throw @"
+Launcher assets are maintained manually in this repo.
+To regenerate from a source PNG, pass -AllowOverwrite and -SourcePath explicitly.
+This script overwrites icon.png, favicon.png, and assets/branding adaptive icons.
+"@
+}
+
 if (-not (Test-Path $SourcePath)) {
-    throw "Approved app icon source not found: $SourcePath"
+    throw "Source artwork not found: $SourcePath"
 }
 
 function Save-Png($bitmap, $path) {
+    $directory = Split-Path $path -Parent
+    if ($directory -and -not (Test-Path $directory)) {
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    }
     $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
 }
 
@@ -23,27 +37,6 @@ function Resize-Square($bitmap, $size) {
     $graphics.DrawImage($bitmap, 0, 0, $size, $size)
     $graphics.Dispose()
     return $canvas
-}
-
-function Get-CornerBackgroundColor($bitmap) {
-    $width = $bitmap.Width - 1
-    $height = $bitmap.Height - 1
-    $pixels = @(
-        $bitmap.GetPixel(0, 0),
-        $bitmap.GetPixel($width, 0),
-        $bitmap.GetPixel(0, $height),
-        $bitmap.GetPixel($width, $height)
-    )
-
-    $red = [int][Math]::Round(($pixels | ForEach-Object { $_.R } | Measure-Object -Average).Average)
-    $green = [int][Math]::Round(($pixels | ForEach-Object { $_.G } | Measure-Object -Average).Average)
-    $blue = [int][Math]::Round(($pixels | ForEach-Object { $_.B } | Measure-Object -Average).Average)
-
-    return [System.Drawing.Color]::FromArgb($red, $green, $blue)
-}
-
-function ColorTo-Hex($color) {
-    return '#' + $color.R.ToString('X2') + $color.G.ToString('X2') + $color.B.ToString('X2')
 }
 
 function New-Monochrome($bitmap, $size) {
@@ -65,29 +58,21 @@ function New-Monochrome($bitmap, $size) {
 }
 
 $source = [System.Drawing.Bitmap]::FromFile($SourcePath)
-$backgroundColor = Get-CornerBackgroundColor $source
 $icon = Resize-Square $source 1024
 
 Save-Png $icon (Join-Path $AssetsPath 'icon.png')
-Save-Png $icon (Join-Path $AssetsPath 'android-icon-foreground.png')
-
-$background = New-Object System.Drawing.Bitmap(1024, 1024)
-$backgroundGraphics = [System.Drawing.Graphics]::FromImage($background)
-$backgroundGraphics.Clear($backgroundColor)
-$backgroundGraphics.Dispose()
-Save-Png $background (Join-Path $AssetsPath 'android-icon-background.png')
+Save-Png $icon (Join-Path $AssetsPath 'branding\adaptive-icon-foreground.png')
 
 $monochrome = New-Monochrome $source 1024
-Save-Png $monochrome (Join-Path $AssetsPath 'android-icon-monochrome.png')
+Save-Png $monochrome (Join-Path $AssetsPath 'branding\monochrome-icon.png')
 
 $favicon = Resize-Square $source 48
 Save-Png $favicon (Join-Path $AssetsPath 'favicon.png')
 
 $icon.Dispose()
-$background.Dispose()
 $monochrome.Dispose()
 $favicon.Dispose()
 $source.Dispose()
 
-Write-Host "Generated Movie Cave launcher assets from approved source."
-Write-Host "Adaptive icon background color: $(ColorTo-Hex $backgroundColor)"
+Write-Host 'Generated launcher assets (icon, favicon, branding adaptive/monochrome).'
+Write-Host 'Android adaptive background remains app.config.ts android.adaptiveIcon.backgroundColor.'
