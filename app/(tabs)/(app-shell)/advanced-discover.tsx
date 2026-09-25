@@ -55,6 +55,7 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
+import { flattenDedupedSearchResultPages } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -96,7 +97,7 @@ export default function AdvancedDiscoverScreen() {
       return [];
     }
 
-    return discoverQuery.data?.pages.flatMap((page) => page.items) ?? [];
+    return flattenDedupedSearchResultPages(discoverQuery.data?.pages);
   }, [discoverQuery.data?.pages, shouldFetchResults]);
 
   const activeFilterCount = useMemo(

@@ -27,7 +27,8 @@ export const PosterImage = memo(function PosterImage({
 }: PosterImageProps) {
   const resolvedUri = resolveImageUri(uri);
   const stateKey = imageStateKey ?? resolvedUri;
-  const { hasError, imageKey, onImageError, onImageLoad } = useRemoteImageLoadState(stateKey);
+  const { hasError, imageKey, onImageError, onImageLoad, onImageLoadEnd } =
+    useRemoteImageLoadState(stateKey);
   const showFallback = !resolvedUri || hasError;
   const [trackedUri, setTrackedUri] = useState(resolvedUri);
   const [isLoading, setIsLoading] = useState(Boolean(resolvedUri));
@@ -39,6 +40,11 @@ export const PosterImage = memo(function PosterImage({
 
   const handleLoad = () => {
     onImageLoad();
+    setIsLoading(false);
+  };
+
+  const handleLoadEnd = () => {
+    onImageLoadEnd();
     setIsLoading(false);
   };
 
@@ -69,7 +75,7 @@ export const PosterImage = memo(function PosterImage({
             style={[styles.image, { width, height }]}
             resizeMode="cover"
             onLoad={handleLoad}
-            onLoadEnd={handleLoad}
+            onLoadEnd={handleLoadEnd}
             onError={handleError}
           />
           {isLoading ? (

@@ -9,6 +9,29 @@ export function homeItemKeyExtractor(item: HomeItem): string {
   return createHomeContentKey(item);
 }
 
+export function areHomeItemsVisuallyEqual(
+  previous: HomeItem,
+  next: HomeItem | undefined,
+): boolean {
+  if (!next) {
+    return false;
+  }
+
+  return (
+    previous.id === next.id &&
+    previous.contentType === next.contentType &&
+    previous.title === next.title &&
+    previous.posterUrl === next.posterUrl &&
+    previous.backdropUrl === next.backdropUrl &&
+    previous.releaseDate === next.releaseDate &&
+    previous.voteAverage === next.voteAverage &&
+    previous.upcomingKind === next.upcomingKind &&
+    previous.episodeName === next.episodeName &&
+    previous.seasonNumber === next.seasonNumber &&
+    previous.episodeNumber === next.episodeNumber
+  );
+}
+
 export function homeComingUpItemKeyExtractor(item: HomeItem): string {
   const contentKey = createHomeContentKey(item);
 

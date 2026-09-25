@@ -1,9 +1,8 @@
-import * as SecureStore from 'expo-secure-store';
 import { QueryClient } from '@tanstack/react-query';
+import { api } from '@/api/client';
 import { getMovieDetails } from '@/features/details/movie/api/movie-api';
 import { movieQueryKey } from '@/features/details/movie/hooks/useMovieDetails';
 import { getTvShowDetails } from '@/features/details/tv/api/tv-api';
-import { tvShowQueryKey } from '@/features/details/tv/hooks/useTvShowDetails';
 import { externalRatingsQueryKey } from '@/features/external-ratings/hooks/external-ratings-query-keys';
 import { getExternalRatings } from '@/features/external-ratings/api/external-ratings-api';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
@@ -73,7 +72,11 @@ describe('prefetchCatalogDetail', () => {
     (getMovieFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
     (getTvShowFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
     (getExternalRatings as jest.Mock).mockResolvedValue({ ratings: [] });
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    api.setTokenGetter(() => null);
+  });
+
+  afterEach(() => {
+    api.setTokenGetter(() => null);
   });
 
   it('prefetches external ratings with the canonical query key', async () => {
@@ -120,7 +123,7 @@ describe('prefetchCatalogDetail', () => {
   });
 
   it('warms the movie detail action-bar status caches when authenticated', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue('a-token');
+    api.setTokenGetter(() => 'a-token');
     const queryClient = new QueryClient();
 
     prefetchCatalogDetail(queryClient, movieId, 'movie');
@@ -142,7 +145,7 @@ describe('prefetchCatalogDetail', () => {
   });
 
   it('warms the tv detail action-bar status caches when authenticated', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue('a-token');
+    api.setTokenGetter(() => 'a-token');
     const queryClient = new QueryClient();
 
     prefetchCatalogDetail(queryClient, tvShowId, 'tv');
@@ -164,7 +167,7 @@ describe('prefetchCatalogDetail', () => {
   });
 
   it('does not warm action-bar status caches when unauthenticated', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    api.setTokenGetter(() => null);
     const queryClient = new QueryClient();
 
     prefetchCatalogDetail(queryClient, movieId, 'movie');

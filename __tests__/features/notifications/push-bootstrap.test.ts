@@ -104,6 +104,43 @@ describe('notification push bootstrap', () => {
     );
   });
 
+  it('prevents duplicate navigation when the same response is processed concurrently', async () => {
+    let resolveRead: (value: {
+      id: string;
+      readAtUtc: string;
+      contentType: string;
+      contentId: string;
+    }) => void = () => {};
+    mockMarkNotificationRead.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRead = resolve;
+        }),
+    );
+    const navigate = jest.fn();
+    const response = createNotificationResponse({
+      notificationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    });
+    const options = {
+      isAuthenticated: true,
+      navigate,
+      invalidateNotifications: jest.fn(),
+    };
+
+    const first = processNotificationResponse(response, options);
+    const second = processNotificationResponse(response, options);
+    resolveRead({
+      id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      readAtUtc: '2026-09-14T19:00:00Z',
+      contentType: 'movie',
+      contentId: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
+    });
+    await Promise.all([first, second]);
+
+    expect(mockMarkNotificationRead).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledTimes(1);
+  });
+
   it('prevents duplicate navigation for the same response', async () => {
     const navigate = jest.fn();
     const response = createNotificationResponse({

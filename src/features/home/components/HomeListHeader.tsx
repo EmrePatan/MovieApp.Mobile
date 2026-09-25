@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { HomeHeroCarousel } from './HomeHeroCarousel';
 import { ColdHomeWelcome } from './ColdHomeWelcome';
 import type { HomeItem } from '../types';
+import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 
 interface HomeListHeaderProps {
   heroItems: HomeItem[];
@@ -25,10 +26,8 @@ function areHomeListHeaderPropsEqual(
     return false;
   }
 
-  return previous.heroItems.every(
-    (item, index) =>
-      item.id === next.heroItems[index]?.id &&
-      item.contentType === next.heroItems[index]?.contentType,
+  return previous.heroItems.every((item, index) =>
+    areHomeItemsVisuallyEqual(item, next.heroItems[index]),
   );
 }
 

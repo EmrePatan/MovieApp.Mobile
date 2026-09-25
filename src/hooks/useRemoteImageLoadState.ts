@@ -18,6 +18,7 @@ const INITIAL_LOAD_STATE: RemoteImageLoadState = {
 export function useRemoteImageLoadState(sourceKey: string | null | undefined) {
   const generationRef = useRef(0);
   const loadedRef = useRef(false);
+  const failedAttemptRef = useRef<string | null>(null);
   const normalizedKey = sourceKey ?? '';
   const [trackedKey, setTrackedKey] = useState(normalizedKey);
   const [loadState, setLoadState] = useState<RemoteImageLoadState>(INITIAL_LOAD_STATE);
@@ -31,16 +32,32 @@ export function useRemoteImageLoadState(sourceKey: string | null | undefined) {
 
   const generation = generationRef.current;
   const { hasError, retryVersion } = loadState;
+  const attemptId = `${normalizedKey}:${retryVersion}`;
 
   const onImageLoad = useCallback(() => {
-    loadedRef.current = true;
-  }, []);
-
-  const onImageError = useCallback(() => {
-    if (loadedRef.current) {
+    if (generationRef.current !== generation) {
       return;
     }
 
+    loadedRef.current = true;
+  }, [generation]);
+
+  const onImageLoadEnd = useCallback(() => {
+    // React Native emits onLoadEnd after both success and failure.
+    // A failed attempt must not be recorded as loaded, or the retry's onError is ignored.
+    if (generationRef.current !== generation || failedAttemptRef.current === attemptId) {
+      return;
+    }
+
+    loadedRef.current = true;
+  }, [attemptId, generation]);
+
+  const onImageError = useCallback(() => {
+    if (loadedRef.current || generationRef.current !== generation) {
+      return;
+    }
+
+    failedAttemptRef.current = attemptId;
     const generationAtError = generation;
     const retryAtError = retryVersion;
 
@@ -60,12 +77,13 @@ export function useRemoteImageLoadState(sourceKey: string | null | undefined) {
 
       return { ...current, hasError: true };
     });
-  }, [generation, retryVersion]);
+  }, [attemptId, generation, retryVersion]);
 
   return {
     hasError,
     imageKey: `${normalizedKey}:${retryVersion}`,
     onImageError,
     onImageLoad,
+    onImageLoadEnd,
   };
 }

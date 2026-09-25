@@ -1,6 +1,14 @@
-import { i18n } from '@/i18n';
 import { getApiBaseUrl, API_REQUEST_TIMEOUT_MS } from './config';
 import { ApiError, mapStatusToErrorKind, type ProblemDetails } from './errors';
+
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as { name?: unknown }).name === 'AbortError'
+  );
+}
 
 function isJsonResponseContentType(contentType: string): boolean {
   const normalized = contentType.toLowerCase();
@@ -43,6 +51,10 @@ class ApiClient {
 
   setTokenGetter(getter: TokenGetter): void {
     this.tokenGetter = getter;
+  }
+
+  hasAccessToken(): boolean {
+    return Boolean(this.tokenGetter?.());
   }
 
   setAcceptLanguageGetter(getter: AcceptLanguageGetter): void {
@@ -114,6 +126,10 @@ class ApiClient {
     signal?.addEventListener('abort', abortListener);
 
     try {
+      if (signal?.aborted) {
+        throw new ApiError({ kind: 'cancelled' });
+      }
+
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
@@ -150,9 +166,9 @@ class ApiClient {
         throw error;
       }
 
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (isAbortError(error)) {
         if (signal?.aborted) {
-          throw new ApiError({ kind: 'unknown', message: i18n.t('errors.requestCancelled') });
+          throw new ApiError({ kind: 'cancelled' });
         }
 
         throw new ApiError({ kind: 'timeout' });

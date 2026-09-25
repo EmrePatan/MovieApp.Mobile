@@ -21,6 +21,34 @@ describe('CatalogImage lifecycle', () => {
     expect(screen.queryByLabelText('film-outline')).toBeNull();
   });
 
+  it('shows fallback when onLoadEnd follows each failed attempt', () => {
+    render(
+      <CatalogImage
+        path="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Interstellar poster"
+      />,
+    );
+
+    const failedLoadEnd = screen.UNSAFE_getByType(Image).props.onLoadEnd;
+
+    act(() => {
+      screen.UNSAFE_getByType(Image).props.onError?.();
+    });
+    act(() => {
+      failedLoadEnd?.();
+    });
+    act(() => {
+      const retriedImage = screen.UNSAFE_getByType(Image);
+      retriedImage.props.onError?.();
+      retriedImage.props.onLoadEnd?.();
+    });
+
+    expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+    expect(screen.getByLabelText('film-outline')).toBeTruthy();
+  });
+
   it('shows fallback only after retryable onError is exhausted', () => {
     render(
       <CatalogImage
