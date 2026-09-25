@@ -3,11 +3,13 @@ import { DetailQueryState } from '@/features/details/shared/components/DetailQue
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import { useTvShowDetails } from '@/features/details/tv/hooks/useTvShowDetails';
 import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatalogRouteId';
+import { useWarmExternalRatingsDetail } from '@/features/external-ratings/hooks/useWarmExternalRatingsDetail';
 
 export default function TvShowDetailScreen() {
   const { t } = useTranslation();
   const { resolvedId: tvShowId, isInvalid, isDetailPathActive } = useCatalogRouteIdState();
   const query = useTvShowDetails(isDetailPathActive ? tvShowId : undefined);
+  useWarmExternalRatingsDetail('tv', tvShowId, isDetailPathActive);
 
   if (!tvShowId || !isDetailPathActive) {
     return null;

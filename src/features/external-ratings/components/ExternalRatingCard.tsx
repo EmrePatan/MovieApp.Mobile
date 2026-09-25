@@ -61,6 +61,7 @@ function RottenTomatoesRatingCard({ card }: { card: ExternalRatingRottenTomatoes
             source={icons.tomatometerIcon}
             style={{ width: icons.iconSize, height: icons.iconSize }}
             resizeMode="contain"
+            fadeDuration={0}
             accessibilityLabel="Tomatometer"
             testID="rt-tomatometer-icon"
           />
@@ -80,6 +81,7 @@ function RottenTomatoesRatingCard({ card }: { card: ExternalRatingRottenTomatoes
             source={icons.popcornIcon}
             style={{ width: icons.iconSize, height: icons.iconSize }}
             resizeMode="contain"
+            fadeDuration={0}
             accessibilityLabel="Popcornmeter"
             testID="rt-popcorn-icon"
           />

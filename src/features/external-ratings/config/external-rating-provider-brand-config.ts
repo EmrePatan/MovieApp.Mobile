@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import { Image, type ImageSourcePropType } from 'react-native';
 import {
   EXTERNAL_RATING_CARD_LOGO_VISUALS,
   EXTERNAL_RATING_RT_CARD_ICON_SIZE,
@@ -215,4 +215,27 @@ export function resolveRottenTomatoesCardIcons(): {
     popcornIcon: ROTTEN_TOMATOES_ASSETS.popcornIcon,
     iconSize: EXTERNAL_RATING_RT_CARD_ICON_SIZE,
   };
+}
+
+let brandAssetsPreloaded = false;
+
+/** Warms bundled brand PNGs so card logos do not pop in after scores (Android decode/fade). */
+export function preloadExternalRatingBrandAssets(): void {
+  if (brandAssetsPreloaded) {
+    return;
+  }
+  brandAssetsPreloaded = true;
+
+  const sources: ImageSourcePropType[] = [
+    ...Object.values(BRAND_ASSETS).flatMap((brand) => [brand.wordmark, brand.icon]),
+    ROTTEN_TOMATOES_ASSETS.tomatometerIcon,
+    ROTTEN_TOMATOES_ASSETS.popcornIcon,
+  ];
+
+  for (const source of sources) {
+    const resolved = Image.resolveAssetSource(source);
+    if (resolved?.uri) {
+      void Image.prefetch(resolved.uri);
+    }
+  }
 }

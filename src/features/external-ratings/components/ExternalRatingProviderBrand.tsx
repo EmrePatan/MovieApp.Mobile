@@ -29,6 +29,7 @@ export function ExternalRatingProviderBrand({
           source={config.tomatometerIcon}
           style={{ width: config.iconSize, height: config.iconSize }}
           resizeMode="contain"
+          fadeDuration={0}
           accessibilityLabel="Tomatometer"
           testID="rt-tomatometer-icon"
         />
@@ -36,6 +37,7 @@ export function ExternalRatingProviderBrand({
           source={config.popcornIcon}
           style={{ width: config.iconSize, height: config.iconSize }}
           resizeMode="contain"
+          fadeDuration={0}
           accessibilityLabel="Popcornmeter"
           testID="rt-popcorn-icon"
         />
@@ -53,6 +55,7 @@ export function ExternalRatingProviderBrand({
       source={config.source}
       style={imageStyle}
       resizeMode="contain"
+      fadeDuration={0}
       accessibilityLabel={config.accessibilityLabel}
       testID={`external-rating-brand-${source}`}
     />

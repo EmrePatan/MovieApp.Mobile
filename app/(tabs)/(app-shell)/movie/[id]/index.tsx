@@ -3,11 +3,13 @@ import { DetailQueryState } from '@/features/details/shared/components/DetailQue
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { useMovieDetails } from '@/features/details/movie/hooks/useMovieDetails';
 import { useCatalogRouteIdState } from '@/features/details/shared/hooks/useCatalogRouteId';
+import { useWarmExternalRatingsDetail } from '@/features/external-ratings/hooks/useWarmExternalRatingsDetail';
 
 export default function MovieDetailScreen() {
   const { t } = useTranslation();
   const { resolvedId: movieId, isInvalid, isDetailPathActive } = useCatalogRouteIdState();
   const query = useMovieDetails(isDetailPathActive ? movieId : undefined);
+  useWarmExternalRatingsDetail('movie', movieId, isDetailPathActive);
 
   if (!movieId || !isDetailPathActive) {
     return null;
