@@ -30,6 +30,30 @@ const heroItem: HomeItem = {
 };
 
 describe('HomeListHeader', () => {
+  it('passes a refreshed title through when the hero id stays the same', () => {
+    const onItemPress = jest.fn();
+    const onExplorePress = jest.fn();
+    const { rerender } = render(
+      <HomeListHeader
+        heroItems={[heroItem]}
+        showColdWelcome={false}
+        onItemPress={onItemPress}
+        onExplorePress={onExplorePress}
+      />,
+    );
+
+    rerender(
+      <HomeListHeader
+        heroItems={[{ ...heroItem, title: 'Updated Hero', voteAverage: 9.2 }]}
+        showColdWelcome={false}
+        onItemPress={onItemPress}
+        onExplorePress={onExplorePress}
+      />,
+    );
+
+    expect(screen.getByText('Hero carousel: Updated Hero')).toBeTruthy();
+  });
+
   it('shows hero carousel for cold users when hero items exist', () => {
     render(
       <HomeListHeader

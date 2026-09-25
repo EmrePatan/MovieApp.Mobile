@@ -84,6 +84,21 @@ describe('HomeHero', () => {
     expect(screen.getByLabelText('Featured, Interstellar, Movie, 2014, Rating 8.4')).toBeTruthy();
   });
 
+  it('updates title and rating when the same hero id is refreshed', () => {
+    const { rerender } = renderHero();
+
+    rerender(
+      <HomeHero
+        item={createItem({ title: 'Dune', voteAverage: 9.1, releaseDate: '2021-10-22' })}
+        onPress={mockOnPress}
+      />,
+    );
+
+    expect(screen.getByText('Dune')).toBeTruthy();
+    expect(screen.getByText('Movie  •  2021')).toBeTruthy();
+    expect(screen.getByLabelText('Rating 9.1')).toBeTruthy();
+  });
+
   it('handles long titles and missing metadata', () => {
     renderHero(
       createItem({

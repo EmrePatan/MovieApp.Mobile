@@ -21,6 +21,7 @@ import {
   getHomeHeroSnapInterval,
   HERO_CAROUSEL_SIDE_INSET,
 } from '../utils/home-hero-layout';
+import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
@@ -76,10 +77,8 @@ function areHomeHeroCarouselPropsEqual(
     return false;
   }
 
-  return previous.items.every(
-    (item, index) =>
-      item.id === next.items[index]?.id &&
-      item.contentType === next.items[index]?.contentType,
+  return previous.items.every((item, index) =>
+    areHomeItemsVisuallyEqual(item, next.items[index]),
   );
 }
 

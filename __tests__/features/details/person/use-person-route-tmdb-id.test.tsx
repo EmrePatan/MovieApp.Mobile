@@ -1,15 +1,17 @@
 import { renderHook } from '@testing-library/react-native';
-import { useLocalSearchParams, usePathname } from 'expo-router';
+import { useIsFocused, useLocalSearchParams, usePathname } from 'expo-router';
 import { usePersonRouteTmdbId } from '@/features/details/person/hooks/usePersonRouteTmdbId';
 
 jest.mock('expo-router', () => ({
   usePathname: jest.fn(),
   useLocalSearchParams: jest.fn(),
+  useIsFocused: jest.fn(() => true),
 }));
 
 describe('usePersonRouteTmdbId', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsFocused as jest.Mock).mockReturnValue(true);
   });
 
   it('resolves the person id from route params', () => {
@@ -73,5 +75,23 @@ describe('usePersonRouteTmdbId', () => {
 
     expect(result.current.tmdbId).toBe(1001);
     expect(result.current.isPersonPathActive).toBe(true);
+  });
+
+  it('keeps this person id when another person route is focused on top', () => {
+    (usePathname as jest.Mock).mockReturnValue('/person/1001');
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ tmdbId: '1001' });
+
+    const { result, rerender } = renderHook(() => usePersonRouteTmdbId());
+
+    expect(result.current.tmdbId).toBe(1001);
+
+    (useIsFocused as jest.Mock).mockReturnValue(false);
+    (usePathname as jest.Mock).mockReturnValue('/person/2002');
+    (useLocalSearchParams as jest.Mock).mockReturnValue({});
+
+    rerender({});
+
+    expect(result.current.tmdbId).toBe(1001);
+    expect(result.current.isPersonPathActive).toBe(false);
   });
 });
