@@ -99,6 +99,16 @@ describe('useHomeFeed', () => {
     });
   });
 
+  it('does not fetch home endpoints while the home screen is inactive', async () => {
+    renderHook(() => useHomeFeed('all', 10, { screenActive: false }), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(getHomeBrowse).not.toHaveBeenCalled();
+      expect(getHomePersonalized).not.toHaveBeenCalled();
+      expect(getUpcomingCatalog).not.toHaveBeenCalled();
+    });
+  });
+
   it('refetches browse and personalized in parallel', async () => {
     const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
 

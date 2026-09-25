@@ -13,10 +13,20 @@ import { useHomeBrowse } from './useHomeBrowse';
 import { useHomeComingUpCatalogFallback } from './useHomeComingUpCatalogFallback';
 import { useHomePersonalized } from './useHomePersonalized';
 
-export function useHomeFeed(type: HomeTypeFilter = 'all', sectionSize = DEFAULT_HOME_SECTION_SIZE) {
+export interface UseHomeFeedOptions {
+  /** When false, Home network work is paused while another screen has focus. */
+  screenActive?: boolean;
+}
+
+export function useHomeFeed(
+  type: HomeTypeFilter = 'all',
+  sectionSize = DEFAULT_HOME_SECTION_SIZE,
+  options?: UseHomeFeedOptions,
+) {
   const { t } = useTranslation();
-  const browse = useHomeBrowse(type, sectionSize);
-  const personalized = useHomePersonalized(type, sectionSize);
+  const screenActive = options?.screenActive ?? true;
+  const browse = useHomeBrowse(type, sectionSize, { screenActive });
+  const personalized = useHomePersonalized(type, sectionSize, { screenActive });
 
   const personalization = useMemo<PersonalizationState>(
     () =>
@@ -41,7 +51,9 @@ export function useHomeFeed(type: HomeTypeFilter = 'all', sectionSize = DEFAULT_
     [mergedSections],
   );
 
-  const comingUpCatalogFallback = useHomeComingUpCatalogFallback(!hasPersonalizedComingUp);
+  const comingUpCatalogFallback = useHomeComingUpCatalogFallback(
+    screenActive && !hasPersonalizedComingUp,
+  );
 
   const sectionsWithComingUp = useMemo(() => {
     if (hasPersonalizedComingUp) {

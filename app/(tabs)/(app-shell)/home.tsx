@@ -66,7 +66,7 @@ export default function HomeScreen() {
     isInitialBrowseLoading,
     isFetching,
     refetch,
-  } = useHomeFeed('all', DEFAULT_HOME_SECTION_SIZE);
+  } = useHomeFeed('all', DEFAULT_HOME_SECTION_SIZE, { screenActive: isHomeFocused });
 
   const { sections, heroItems, showColdWelcome } = useMemo(() => {
     const nonEmptySections = mergedSections.filter((section) => section.items.length > 0);

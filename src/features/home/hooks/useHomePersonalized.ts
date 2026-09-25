@@ -14,15 +14,25 @@ export function homePersonalizedQueryKey(
   return [...HOME_QUERY_KEY_ROOT, 'personalized', type, sectionSize, releaseRegion] as const;
 }
 
-export function useHomePersonalized(type: HomeTypeFilter, sectionSize = DEFAULT_HOME_SECTION_SIZE) {
+export interface UseHomePersonalizedOptions {
+  /** When false, in-flight personalized requests are aborted (e.g. user left Home). */
+  screenActive?: boolean;
+}
+
+export function useHomePersonalized(
+  type: HomeTypeFilter,
+  sectionSize = DEFAULT_HOME_SECTION_SIZE,
+  options?: UseHomePersonalizedOptions,
+) {
   const { isAuthenticated, isSessionRestored } = useAuth();
   const { region, isHydrated } = useRegionalPreference();
+  const screenActive = options?.screenActive ?? true;
 
   return useQuery({
     queryKey: homePersonalizedQueryKey(type, sectionSize, region),
     queryFn: ({ signal }) =>
       getHomePersonalized({ type, sectionSize, releaseRegion: region }, signal),
     staleTime: 60_000,
-    enabled: isSessionRestored && isAuthenticated && isHydrated,
+    enabled: screenActive && isSessionRestored && isAuthenticated && isHydrated,
   });
 }
