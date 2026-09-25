@@ -11,6 +11,7 @@ import { AppText } from '@/components/common/AppText';
 import { BackdropImage } from '@/features/details/shared/components/CatalogImage';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
 import type { HomeItem } from '../types';
+import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
@@ -58,8 +59,7 @@ function HeroMediaPlaceholder({ height }: { height: number }) {
 
 function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): boolean {
   return (
-    previous.item.id === next.item.id &&
-    previous.item.contentType === next.item.contentType &&
+    areHomeItemsVisuallyEqual(previous.item, next.item) &&
     previous.onPress === next.onPress &&
     previous.heroHeight === next.heroHeight &&
     previous.cardWidth === next.cardWidth &&

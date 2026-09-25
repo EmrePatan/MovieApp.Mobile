@@ -8,10 +8,10 @@ import { DetailQueryState } from '@/features/details/shared/components/DetailQue
 export default function MovieCreditsScreen() {
   const { t } = useTranslation();
   useCatalogChildDestinationGestureGuard();
-  const { resolvedId, isActive, isInvalid, title } = useCreditsRouteState('movie');
-  const query = useMovieCredits(isActive && resolvedId ? resolvedId : '');
+  const { resolvedId, isInvalid, title } = useCreditsRouteState('movie');
+  const query = useMovieCredits(resolvedId ?? '');
 
-  if (!isActive) {
+  if (!resolvedId) {
     return null;
   }
 

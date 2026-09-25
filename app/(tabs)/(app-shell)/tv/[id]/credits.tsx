@@ -8,10 +8,10 @@ import { DetailQueryState } from '@/features/details/shared/components/DetailQue
 export default function TvCreditsScreen() {
   const { t } = useTranslation();
   useCatalogChildDestinationGestureGuard();
-  const { resolvedId, isActive, isInvalid, title } = useCreditsRouteState('tv');
-  const query = useTvShowCredits(isActive && resolvedId ? resolvedId : '');
+  const { resolvedId, isInvalid, title } = useCreditsRouteState('tv');
+  const query = useTvShowCredits(resolvedId ?? '');
 
-  if (!isActive) {
+  if (!resolvedId) {
     return null;
   }
 
