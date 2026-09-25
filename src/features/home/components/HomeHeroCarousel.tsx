@@ -11,8 +11,6 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useQueryClient } from '@tanstack/react-query';
-import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { HomeHero } from './HomeHero';
 import type { HomeItem, HomeTypeFilter } from '../types';
 import {
@@ -90,7 +88,6 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   isScreenFocused = true,
 }: HomeHeroCarouselProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const heroHeight = useMemo(() => getHomeHeroHeight(width), [width]);
   const cardWidth = useMemo(() => getHomeHeroCardWidth(width), [width]);
@@ -165,23 +162,6 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
       subscription.remove();
     };
   }, []);
-
-  useEffect(() => {
-    if (!isScreenFocused) {
-      return;
-    }
-
-    const activeItem = items[activeIndex];
-    if (!activeItem) {
-      return;
-    }
-
-    prefetchCatalogDetail(
-      queryClient,
-      activeItem.id,
-      activeItem.contentType === 'movie' ? 'movie' : 'tv',
-    );
-  }, [activeIndex, isScreenFocused, items, queryClient]);
 
   useEffect(() => {
     if (items.length <= 1) {

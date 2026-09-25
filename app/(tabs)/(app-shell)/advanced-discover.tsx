@@ -22,6 +22,7 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { ActiveFilterChips } from '@/features/discovery/components/ActiveFilterChips';
@@ -175,19 +176,18 @@ export default function AdvancedDiscoverScreen() {
   const {
     hasNextPage,
     isFetchingNextPage,
-    isFetching,
     fetchNextPage,
     refetch: refetchDiscover,
     isRefetching,
   } = discoverQuery;
 
   const handleLoadMore = useCallback(() => {
-    if (!hasNextPage || isFetchingNextPage || isFetching) {
+    if (!shouldRequestNextInfinitePage({ hasNextPage, isFetchingNextPage })) {
       return;
     }
 
     void fetchNextPage();
-  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleRefresh = useCallback(() => {
     void refetchDiscover();

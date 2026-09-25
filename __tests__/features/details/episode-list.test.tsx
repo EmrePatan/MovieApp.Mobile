@@ -119,7 +119,9 @@ describe('EpisodeList', () => {
 
     fireEvent.press(screen.getByTestId('episode-watched-toggle-2'));
 
-    expect(mockMutate).toHaveBeenCalledWith(false);
+    expect(useToggleEpisodeWatched).toHaveBeenCalledTimes(1);
+    expect(useToggleEpisodeWatched).toHaveBeenCalledWith('tv-id', 1);
+    expect(mockMutate).toHaveBeenCalledWith({ episodeId: 'episode-2', isWatched: false });
   });
 
   it('navigates to episode detail when the content area is pressed', () => {

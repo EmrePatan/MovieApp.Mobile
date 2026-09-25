@@ -21,6 +21,11 @@ import { useRecentWatchHistory } from '@/features/watch-history/hooks/useRecentW
 import type { RecentWatchHistoryItemResponse } from '@/features/watch-history/types';
 import { openDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { buildRecentHistoryRoute } from '@/features/watch-history/utils/history-navigation';
+import {
+  flattenRecentWatchHistoryPages,
+  recentWatchHistoryItemKey,
+} from '@/features/watch-history/utils/flatten-recent-watch-history-pages';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -31,7 +36,7 @@ export default function WatchHistoryScreen() {
   const historyQuery = useRecentWatchHistory();
 
   const items = useMemo(
-    () => historyQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    () => flattenRecentWatchHistoryPages(historyQuery.data?.pages ?? []),
     [historyQuery.data?.pages],
   );
 
@@ -50,11 +55,7 @@ export default function WatchHistoryScreen() {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !historyQuery.hasNextPage ||
-      historyQuery.isFetchingNextPage ||
-      historyQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(historyQuery)) {
       return;
     }
 
@@ -127,7 +128,7 @@ export default function WatchHistoryScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <FlatList
         data={items}
-        keyExtractor={(item) => `${item.type}-${item.movieId ?? item.episodeId}-${item.watchedAt}`}
+        keyExtractor={recentWatchHistoryItemKey}
         renderItem={renderItem}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={

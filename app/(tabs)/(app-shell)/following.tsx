@@ -20,6 +20,7 @@ import { openLibraryStackScreen } from '@/features/library/navigation/library-st
 import { FollowingEmptyState } from '@/features/following/components/FollowingEmptyState';
 import { FollowingListCard } from '@/features/following/components/FollowingListCard';
 import { useFollowingCatalog } from '@/features/following/hooks/useFollowingCatalog';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import type { FollowingCatalogItem } from '@/features/following/types';
 import {
   filterFollowingItems,
@@ -65,11 +66,7 @@ export default function FollowingScreen() {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !followingQuery.hasNextPage ||
-      followingQuery.isFetchingNextPage ||
-      followingQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(followingQuery)) {
       return;
     }
 

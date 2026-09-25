@@ -104,7 +104,10 @@ describe('WatchedButton', () => {
       />,
     );
     fireEvent.press(screen.getByLabelText('Mark as watched'));
-    expect(mockMutate).toHaveBeenCalledWith(false, expect.any(Object));
+    expect(mockMutate).toHaveBeenCalledWith(
+      { episodeId: 'episode-id', isWatched: false },
+      expect.any(Object),
+    );
   });
 
   it('prompts login when unauthenticated', () => {

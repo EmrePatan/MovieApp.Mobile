@@ -17,6 +17,7 @@ import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { useWatchlistItems } from '@/features/watchlists/hooks/useWatchlistItems';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 import { flattenWatchlistPages } from '@/features/watchlists/utils/library-items';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import type { CatalogMediaFilter, LibrarySortOption } from '../types';
 import type { LibraryItem as GridLibraryItem } from '../types/library';
 import { getLibraryGridItemKey } from '../utils/library-item-key';
@@ -127,11 +128,7 @@ export function LibraryWatchlistDetailContent({
   );
 
   const handleLoadMore = useCallback(() => {
-    if (
-      !itemsQuery.hasNextPage ||
-      itemsQuery.isFetchingNextPage ||
-      itemsQuery.isFetching
-    ) {
+    if (!shouldRequestNextInfinitePage(itemsQuery)) {
       return;
     }
 

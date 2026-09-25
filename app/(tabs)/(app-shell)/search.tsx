@@ -20,6 +20,7 @@ import {
 import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { SearchExploreLanding } from '@/features/discovery/components/SearchExploreLanding';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { openPersonDetail } from '@/features/details/shared/navigation/person-detail-navigation';
@@ -244,19 +245,18 @@ export default function SearchScreen() {
   const {
     hasNextPage,
     isFetchingNextPage,
-    isFetching,
     fetchNextPage,
     refetch,
     isRefetching,
   } = searchQuery;
 
   const handleLoadMore = useCallback(() => {
-    if (!hasNextPage || isFetchingNextPage || isFetching) {
+    if (!shouldRequestNextInfinitePage({ hasNextPage, isFetchingNextPage })) {
       return;
     }
 
     void fetchNextPage();
-  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleRefresh = useCallback(() => {
     void refetch();

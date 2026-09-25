@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, Image, StyleSheet } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
@@ -130,6 +130,30 @@ describe('HomeHeroCarousel', () => {
     );
 
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
+  });
+
+  it('prefetches the next backdrop without loading detail or action-bar queries', () => {
+    const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
+    const items = [
+      createItem({ id: 'hero-1', backdropUrl: '/backdrop-a.jpg' }),
+      createItem({ id: 'hero-2', backdropUrl: '/backdrop-b.jpg' }),
+    ];
+
+    const { UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+
+    expect(prefetchSpy).toHaveBeenCalled();
+    expect(mockPrefetchQuery).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(6000);
+    });
+    advanceCarouselToActiveIndex(list, 1);
+
+    expect(mockPrefetchQuery).not.toHaveBeenCalled();
+    prefetchSpy.mockRestore();
   });
 
   it('uses the semantic accent color for the active indicator', () => {
