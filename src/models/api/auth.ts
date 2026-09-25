@@ -11,7 +11,17 @@ export interface UserProfile {
 export interface AuthResponse {
   accessToken: string;
   expiresAt: string;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
   user: UserProfile;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface LogoutRequest {
+  refreshToken: string;
 }
 
 export interface LoginRequest {

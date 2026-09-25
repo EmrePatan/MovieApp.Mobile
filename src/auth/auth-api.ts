@@ -9,6 +9,7 @@ import type {
   RegisterResponse,
   ResendVerificationRequest,
   ResetPasswordRequest,
+  RefreshTokenRequest,
   SocialAuthRequest,
   VerifyEmailRequest,
 } from '@/models/api/auth';
@@ -47,4 +48,18 @@ export async function getCurrentUser(): Promise<CurrentUserResponse> {
 
 export async function socialAuthRequest(payload: SocialAuthRequest): Promise<AuthResponse> {
   return api.post<AuthResponse>('/api/auth/social', payload, { authenticated: false });
+}
+
+export async function refreshSessionRequest(payload: RefreshTokenRequest): Promise<AuthResponse> {
+  return api.post<AuthResponse>('/api/auth/refresh', payload, {
+    authenticated: false,
+    suppressUnauthorizedHandler: true,
+  });
+}
+
+export async function logoutRequest(refreshToken: string): Promise<void> {
+  await api.post<void>('/api/auth/logout', { refreshToken }, {
+    authenticated: false,
+    suppressUnauthorizedHandler: true,
+  });
 }

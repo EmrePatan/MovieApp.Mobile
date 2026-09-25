@@ -28,5 +28,9 @@ export interface AuthContextValue extends AuthState {
   logout: () => Promise<void>;
   completeAccountDeletion: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  updateSession: (accessToken: string, user: import('@/models/api/auth').UserProfile) => Promise<void>;
+  updateSession: (
+    accessToken: string,
+    refreshToken: string,
+    user: import('@/models/api/auth').UserProfile,
+  ) => Promise<void>;
 }

@@ -41,7 +41,7 @@ export function useChangeEmailMutation() {
     mutationFn: (payload: ChangeEmailRequest) => changeEmail(payload),
     onSuccess: async (response) => {
       queryClient.setQueryData(currentProfileQueryKey(), response.user);
-      await updateSession(response.accessToken, response.user);
+      await updateSession(response.accessToken, response.refreshToken, response.user);
       invalidateProfileQueries(queryClient);
     },
   });
@@ -55,7 +55,7 @@ export function useChangePasswordMutation() {
     mutationFn: (payload: ChangePasswordRequest) => changePassword(payload),
     onSuccess: async (response) => {
       queryClient.setQueryData(currentProfileQueryKey(), response.user);
-      await updateSession(response.accessToken, response.user);
+      await updateSession(response.accessToken, response.refreshToken, response.user);
       invalidateProfileQueries(queryClient);
     },
   });

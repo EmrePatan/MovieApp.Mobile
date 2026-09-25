@@ -13,13 +13,22 @@ import {
   getCurrentUser,
   loginRequest,
   registerRequest,
+  logoutRequest,
+  refreshSessionRequest,
   resendVerificationRequest,
   socialAuthRequest,
   verifyEmailRequest,
 } from './auth-api';
 import { requestSocialIdentityToken } from './social-auth-service';
 import type { SocialAuthProvider } from '@/models/api/auth';
-import { getAccessToken, removeAccessToken, saveAccessToken } from './auth-storage';
+import {
+  getAccessToken,
+  getRefreshToken,
+  removeAccessToken,
+  removeRefreshToken,
+  saveAccessToken,
+  saveRefreshToken,
+} from './auth-storage';
 import type { AuthContextValue } from './auth-types';
 import type { UserProfile } from '@/models/api/auth';
 import { queryClient } from '@/api/query-client';
@@ -43,6 +52,7 @@ interface AuthProviderProps {
 
 async function hydrateCurrentUser(
   endAuthenticatedSession: () => Promise<void>,
+  refreshSession: () => Promise<boolean>,
   setUser: (profile: UserProfile | null) => void,
   isMounted: () => boolean,
 ) {
@@ -53,6 +63,22 @@ async function hydrateCurrentUser(
     }
   } catch (error) {
     if (isApiError(error) && error.kind === 'unauthorized') {
+      const refreshed = await refreshSession();
+      if (refreshed) {
+        try {
+          const currentUser = await getCurrentUser();
+          if (isMounted()) {
+            setUser(currentUser);
+          }
+          return;
+        } catch (retryError) {
+          if (isApiError(retryError) && retryError.kind === 'unauthorized') {
+            await endAuthenticatedSession();
+            return;
+          }
+        }
+      }
+
       await endAuthenticatedSession();
       return;
     }
@@ -78,13 +104,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const clearSession = useCallback(async () => {
     await removeAccessToken();
+    await removeRefreshToken();
     syncToken(null);
     setUser(null);
   }, [syncToken]);
 
   const establishSession = useCallback(
-    async (accessToken: string, profile: UserProfile) => {
+    async (accessToken: string, refreshToken: string, profile: UserProfile) => {
       await saveAccessToken(accessToken);
+      await saveRefreshToken(refreshToken);
       syncToken(accessToken);
       setUser(profile);
       markHomePerfEvent('session_established');
@@ -92,6 +120,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     [syncToken],
   );
+
+  const refreshSession = useCallback(async (): Promise<boolean> => {
+    const storedRefreshToken = await getRefreshToken();
+    if (!storedRefreshToken) {
+      return false;
+    }
+
+    try {
+      const response = await refreshSessionRequest({ refreshToken: storedRefreshToken });
+      await establishSession(response.accessToken, response.refreshToken, response.user);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [establishSession]);
 
   const endAuthenticatedSession = useCallback(
     async (options?: { resetPushPermission?: boolean; accountDeleted?: boolean }) => {
@@ -123,7 +166,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     api.setTokenGetter(() => tokenRef.current);
     api.setUnauthorizedHandler(() => handleUnauthorized());
-  }, [handleUnauthorized]);
+    api.setSessionRefreshHandler(() => refreshSession());
+  }, [handleUnauthorized, refreshSession]);
 
   useEffect(() => {
     let isMounted = true;
@@ -147,6 +191,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         await hydrateCurrentUser(
           () => endAuthenticatedSession(),
+          () => refreshSession(),
           (profile) => {
             if (isMounted) {
               setUser(profile);
@@ -167,13 +212,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted = false;
     };
-  }, [clearSession, endAuthenticatedSession, syncToken]);
+  }, [clearSession, endAuthenticatedSession, refreshSession, syncToken]);
 
   const login = useCallback(
     async (email: string, password: string) => {
       const response = await loginRequest({ email, password });
       markHomePerfEvent('login_response');
-      await establishSession(response.accessToken, response.user);
+      await establishSession(response.accessToken, response.refreshToken, response.user);
     },
     [establishSession],
   );
@@ -193,7 +238,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const verifyEmail = useCallback(
     async (token: string) => {
       const response = await verifyEmailRequest({ token });
-      await establishSession(response.accessToken, response.user);
+      await establishSession(response.accessToken, response.refreshToken, response.user);
     },
     [establishSession],
   );
@@ -207,12 +252,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async (provider: SocialAuthProvider) => {
       const identityToken = await requestSocialIdentityToken(provider);
       const response = await socialAuthRequest({ provider, identityToken });
-      await establishSession(response.accessToken, response.user);
+      await establishSession(response.accessToken, response.refreshToken, response.user);
     },
     [establishSession],
   );
 
   const logout = useCallback(async () => {
+    const refreshToken = await getRefreshToken();
+    if (refreshToken) {
+      try {
+        await logoutRequest(refreshToken);
+      } catch {
+        // Local session teardown should continue even if revoke fails.
+      }
+    }
+
     await endAuthenticatedSession({ resetPushPermission: true });
   }, [endAuthenticatedSession]);
 
@@ -221,8 +275,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [endAuthenticatedSession]);
 
   const updateSession = useCallback(
-    async (accessToken: string, profile: UserProfile) => {
-      await establishSession(accessToken, profile);
+    async (accessToken: string, refreshToken: string, profile: UserProfile) => {
+      await establishSession(accessToken, refreshToken, profile);
     },
     [establishSession],
   );

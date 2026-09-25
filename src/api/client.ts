@@ -36,18 +36,22 @@ export interface RequestOptions {
   signal?: AbortSignal;
   authenticated?: boolean;
   suppressUnauthorizedHandler?: boolean;
+  isRetryAfterRefresh?: boolean;
   headers?: Record<string, string>;
 }
 
 type TokenGetter = () => string | null;
 type UnauthorizedHandler = () => void | Promise<void>;
+type SessionRefreshHandler = () => Promise<boolean>;
 type AcceptLanguageGetter = () => string;
 
 class ApiClient {
   private tokenGetter: TokenGetter | null = null;
   private acceptLanguageGetter: AcceptLanguageGetter | null = null;
   private unauthorizedHandler: UnauthorizedHandler | null = null;
+  private sessionRefreshHandler: SessionRefreshHandler | null = null;
   private unauthorizedTeardownPromise: Promise<void> | null = null;
+  private sessionRefreshPromise: Promise<boolean> | null = null;
 
   setTokenGetter(getter: TokenGetter): void {
     this.tokenGetter = getter;
@@ -63,6 +67,10 @@ class ApiClient {
 
   setUnauthorizedHandler(handler: UnauthorizedHandler): void {
     this.unauthorizedHandler = handler;
+  }
+
+  setSessionRefreshHandler(handler: SessionRefreshHandler): void {
+    this.sessionRefreshHandler = handler;
   }
 
   resetUnauthorizedHandlingForTests(): void {
@@ -147,7 +155,20 @@ class ApiClient {
         const problem = (payload ?? {}) as ProblemDetails;
         const kind = mapStatusToErrorKind(response.status);
 
-        if (kind === 'unauthorized' && authenticated && !options.suppressUnauthorizedHandler) {
+        if (
+          kind === 'unauthorized' &&
+          authenticated &&
+          !options.suppressUnauthorizedHandler &&
+          !options.isRetryAfterRefresh
+        ) {
+          const refreshed = await this.tryRefreshSession();
+          if (refreshed) {
+            return this.request<T>(method, path, body, {
+              ...options,
+              isRetryAfterRefresh: true,
+            });
+          }
+
           this.handleUnauthorized();
         }
 
@@ -179,6 +200,22 @@ class ApiClient {
       clearTimeout(timeoutId);
       signal?.removeEventListener('abort', abortListener);
     }
+  }
+
+  private async tryRefreshSession(): Promise<boolean> {
+    if (!this.sessionRefreshHandler) {
+      return false;
+    }
+
+    if (!this.sessionRefreshPromise) {
+      this.sessionRefreshPromise = this.sessionRefreshHandler()
+        .catch(() => false)
+        .finally(() => {
+          this.sessionRefreshPromise = null;
+        });
+    }
+
+    return await this.sessionRefreshPromise;
   }
 
   private handleUnauthorized(): void {

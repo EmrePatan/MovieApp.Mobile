@@ -33,6 +33,8 @@ export interface DeleteAccountRequest {
 export interface UserProfileAuthResponse {
   accessToken: string;
   expiresAt: string;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
   user: UserProfileResponse;
 }
 
