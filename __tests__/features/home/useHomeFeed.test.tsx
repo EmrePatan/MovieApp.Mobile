@@ -114,6 +114,48 @@ describe('useHomeFeed', () => {
     expect(getUpcomingCatalog).toHaveBeenCalled();
   });
 
+  it('does not refetch the catalog Coming Up fallback once personalized Coming Up is present', async () => {
+    (getHomePersonalized as jest.Mock).mockResolvedValue({
+      sections: [
+        {
+          type: 'ComingUp',
+          title: 'Coming Up',
+          displayOrder: 0,
+          items: [
+            {
+              id: 'followed-1',
+              contentType: 'movie',
+              title: 'Followed Release',
+              originalTitle: null,
+              posterUrl: null,
+              backdropUrl: null,
+              releaseDate: '2026-12-19',
+              voteAverage: 0,
+              voteCount: 0,
+            },
+          ],
+        },
+      ],
+      isPersonalized: true,
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    });
+
+    const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(result.current.mergedSections.some((section) => section.type === 'ComingUp')).toBe(
+        true,
+      );
+    });
+
+    const catalogCallsAfterLoad = (getUpcomingCatalog as jest.Mock).mock.calls.length;
+    await result.current.refetch();
+
+    expect(getHomeBrowse).toHaveBeenCalledTimes(2);
+    expect(getHomePersonalized).toHaveBeenCalledTimes(2);
+    expect(getUpcomingCatalog).toHaveBeenCalledTimes(catalogCallsAfterLoad);
+  });
+
   it('adds a catalog Coming Up section when personalized Coming Up is empty', async () => {
     (getUpcomingCatalog as jest.Mock).mockResolvedValue({
       items: [

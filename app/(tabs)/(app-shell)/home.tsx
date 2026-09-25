@@ -161,32 +161,25 @@ export default function HomeScreen() {
     router.push('/(tabs)/discover');
   }, [router]);
 
-  const handleSeeAllPress = useCallback(
-    (sectionType: HomeSectionModel['type']) => {
-      if (sectionType === 'Trending') {
-        openLibraryStackScreen(
-          router,
-          '/discover-browse?mode=trending&type=all',
-          '/(tabs)/home',
-        );
-        return;
-      }
+  const handleTrendingSeeAll = useCallback(() => {
+    openLibraryStackScreen(
+      router,
+      '/discover-browse?mode=trending&type=all',
+      '/(tabs)/home',
+    );
+  }, [router]);
 
-      if (sectionType === 'TopRated') {
-        openLibraryStackScreen(
-          router,
-          '/discover-browse?mode=top_rated&type=all',
-          '/(tabs)/home',
-        );
-        return;
-      }
+  const handleTopRatedSeeAll = useCallback(() => {
+    openLibraryStackScreen(
+      router,
+      '/discover-browse?mode=top_rated&type=all',
+      '/(tabs)/home',
+    );
+  }, [router]);
 
-      if (sectionType === 'ComingUp') {
-        openComingUpScreen(router);
-      }
-    },
-    [router],
-  );
+  const handleComingUpSeeAll = useCallback(() => {
+    openComingUpScreen(router);
+  }, [router]);
 
   const renderSection = useCallback(
     ({ item }: { item: HomeSectionModel }) => {
@@ -195,24 +188,29 @@ export default function HomeScreen() {
           <HomeComingUpSection
             section={item}
             onItemPress={handleComingUpItemPress}
-            onSeeAllPress={() => handleSeeAllPress(item.type)}
+            onSeeAllPress={handleComingUpSeeAll}
           />
         );
       }
 
+      const onSeeAllPress =
+        item.type === 'Trending'
+          ? handleTrendingSeeAll
+          : item.type === 'TopRated'
+            ? handleTopRatedSeeAll
+            : undefined;
+
       return (
-        <HomeSection
-          section={item}
-          onItemPress={handleItemPress}
-          onSeeAllPress={
-            item.type === 'Trending' || item.type === 'TopRated'
-              ? () => handleSeeAllPress(item.type)
-              : undefined
-          }
-        />
+        <HomeSection section={item} onItemPress={handleItemPress} onSeeAllPress={onSeeAllPress} />
       );
     },
-    [handleComingUpItemPress, handleItemPress, handleSeeAllPress],
+    [
+      handleComingUpItemPress,
+      handleComingUpSeeAll,
+      handleItemPress,
+      handleTopRatedSeeAll,
+      handleTrendingSeeAll,
+    ],
   );
 
   const listHeader = useMemo(

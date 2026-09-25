@@ -1,5 +1,6 @@
 import { api } from '@/api/client';
 import { ApiError } from '@/api/errors';
+import { queryClient } from '@/api/query-client';
 
 describe('api client', () => {
   const originalFetch = global.fetch;
@@ -146,6 +147,45 @@ describe('api client', () => {
     expect(unauthorizedHandler).toHaveBeenCalledTimes(1);
   });
 
+  it('maps caller cancellation to a cancelled error before the request starts', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    global.fetch = jest.fn();
+
+    await expect(api.get('/api/auth/me', { signal: controller.signal })).rejects.toMatchObject<
+      Partial<ApiError>
+    >({
+      kind: 'cancelled',
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('maps timeout aborts separately from caller cancellation', async () => {
+    const abortError = new Error('Aborted');
+    abortError.name = 'AbortError';
+    global.fetch = jest.fn().mockRejectedValue(abortError);
+
+    await expect(api.get('/api/auth/me')).rejects.toMatchObject<Partial<ApiError>>({
+      kind: 'timeout',
+    });
+  });
+
+  it('maps an in-flight caller abort to cancelled', async () => {
+    const controller = new AbortController();
+    const abortError = new Error('Aborted');
+    abortError.name = 'AbortError';
+    global.fetch = jest.fn().mockImplementation(() => {
+      controller.abort();
+      return Promise.reject(abortError);
+    });
+
+    await expect(api.get('/api/auth/me', { signal: controller.signal })).rejects.toMatchObject<
+      Partial<ApiError>
+    >({
+      kind: 'cancelled',
+    });
+  });
+
   it('maps network failures to ApiError', async () => {
     global.fetch = jest.fn().mockRejectedValue(new TypeError('Network request failed'));
 
@@ -197,5 +237,19 @@ describe('api client', () => {
       kind: 'conflict',
       status: 409,
     });
+  });
+
+  it('does not retry cancelled requests', () => {
+    const retry = queryClient.getDefaultOptions().queries?.retry;
+
+    expect(typeof retry).toBe('function');
+    if (typeof retry !== 'function') {
+      return;
+    }
+
+    expect(retry(0, new ApiError({ kind: 'cancelled' }))).toBe(false);
+    expect(retry(0, new ApiError({ kind: 'timeout' }))).toBe(true);
+    expect(retry(1, new ApiError({ kind: 'network' }))).toBe(true);
+    expect(retry(2, new ApiError({ kind: 'network' }))).toBe(false);
   });
 });

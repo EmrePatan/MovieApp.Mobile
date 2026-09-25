@@ -63,13 +63,19 @@ export function useHomeFeed(type: HomeTypeFilter = 'all', sectionSize = DEFAULT_
     return [...mergedSections, comingUpSection];
   }, [comingUpCatalogFallback.data?.items, hasPersonalizedComingUp, mergedSections, t]);
 
+  const refetchBrowse = browse.refetch;
+  const refetchPersonalized = personalized.refetch;
+  const refetchComingUpFallback = comingUpCatalogFallback.refetch;
+
   const refetch = useCallback(async () => {
-    await Promise.all([
-      browse.refetch(),
-      personalized.refetch(),
-      comingUpCatalogFallback.refetch(),
-    ]);
-  }, [browse, comingUpCatalogFallback, personalized]);
+    const tasks: Array<Promise<unknown>> = [refetchBrowse(), refetchPersonalized()];
+
+    if (!hasPersonalizedComingUp) {
+      tasks.push(refetchComingUpFallback());
+    }
+
+    await Promise.all(tasks);
+  }, [hasPersonalizedComingUp, refetchBrowse, refetchComingUpFallback, refetchPersonalized]);
 
   const isInitialBrowseLoading = browse.isLoading && !browse.data;
   const isFetching =

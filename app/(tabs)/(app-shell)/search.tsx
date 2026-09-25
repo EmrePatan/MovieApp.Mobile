@@ -44,7 +44,10 @@ import {
   type SearchTypeFilter,
 } from '@/features/search/types';
 import { AUTOCOMPLETE_DEBOUNCE_MS } from '@/features/search/types';
-import { searchResultKeyExtractor } from '@/features/search/utils/search-list-keys';
+import {
+  flattenDedupedSearchResultPages,
+  searchResultKeyExtractor,
+} from '@/features/search/utils/search-list-keys';
 import { resolveSearchDisplayMode } from '@/features/search/utils/search-display-mode';
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
@@ -104,7 +107,7 @@ export default function SearchScreen() {
   const clearHistory = useClearSearchHistory();
 
   const results = useMemo(
-    () => searchQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    () => flattenDedupedSearchResultPages(searchQuery.data?.pages),
     [searchQuery.data?.pages],
   );
 
