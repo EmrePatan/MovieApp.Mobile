@@ -7,6 +7,7 @@ import { DetailCircularAction } from '@/features/details/shared/components/Detai
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { colors } from '@/theme/colors';
 import { useCreateMovieFollow, useRemoveMovieFollow } from '../hooks/useMovieFollowMutations';
+import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useMovieFollowStatus } from '../hooks/useMovieFollowStatus';
 import { ensurePushDeviceRegisteredAsync } from '../services/push-device-service';
 import {
@@ -22,7 +23,13 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { data: status } = useMovieFollowStatus(movieId);
+  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
+    useDetailActionStatusBatch();
+  const followStatusEnabled =
+    !deferIndividualStatusQueries && (batchHydrated || batchFailed);
+  const { data: status } = useMovieFollowStatus(movieId, {
+    enabled: followStatusEnabled,
+  });
   const createFollow = useCreateMovieFollow(movieId);
   const removeFollow = useRemoveMovieFollow(movieId);
   const [feedback, setFeedback] = useState<string | null>(null);

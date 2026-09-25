@@ -5,6 +5,7 @@ import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { colors } from '@/theme/colors';
+import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useTvShowFollowStatus } from '../hooks/useTvShowFollowStatus';
 import { ensurePushDeviceRegisteredAsync } from '../services/push-device-service';
 import {
@@ -26,7 +27,13 @@ interface FollowButtonProps {
 export function FollowButton({ tvShowId }: FollowButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { data: status } = useTvShowFollowStatus(tvShowId);
+  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
+    useDetailActionStatusBatch();
+  const followStatusEnabled =
+    !deferIndividualStatusQueries && (batchHydrated || batchFailed);
+  const { data: status } = useTvShowFollowStatus(tvShowId, {
+    enabled: followStatusEnabled,
+  });
   const [preferencesVisible, setPreferencesVisible] = useState(false);
   const [signInFeedback, setSignInFeedback] = useState<string | null>(null);
   const [permissionPromptVisible, setPermissionPromptVisible] = useState(false);

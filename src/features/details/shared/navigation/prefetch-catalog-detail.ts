@@ -1,18 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
-import { getMovieFavoriteStatus, getTvFavoriteStatus } from '@/features/favorites/api/favorites-api';
-import { favoriteStatusQueryKey } from '@/features/favorites/hooks/favorite-query-keys';
-import { getMovieFollowStatus } from '@/features/follows/api/movie-follow-api';
-import { getTvShowFollowStatus } from '@/features/follows/api/follow-api';
-import { movieFollowStatusQueryKey, tvShowFollowStatusQueryKey } from '@/features/follows/hooks/follow-query-keys';
-import { getMovieWatchStatus, getTvShowProgress } from '@/features/watch-history/api/watch-history-api';
-import {
-  movieWatchStatusQueryKey,
-  tvShowProgressQueryKey,
-} from '@/features/watch-history/hooks/watch-history-query-keys';
-import { getWatchlistMembership } from '@/features/watchlists/api/watchlists-api';
-import { watchlistMembershipQueryKey } from '@/features/watchlists/hooks/watchlist-query-keys';
+import { getLibraryActionStatus } from '@/features/library-actions/api/library-actions-api';
+import { libraryActionStatusQueryKey } from '@/features/library-actions/hooks/library-actions-query-keys';
+import { seedDetailActionCachesFromLibraryActions } from '@/features/library-actions/utils/seed-detail-action-caches';
 import { prefetchExternalRatings } from '@/features/external-ratings/hooks/external-ratings-query-options';
+import { getTvShowProgress } from '@/features/watch-history/api/watch-history-api';
+import { tvShowProgressQueryKey } from '@/features/watch-history/hooks/watch-history-query-keys';
 import { getMovieDetails } from '../../movie/api/movie-api';
 import { movieQueryKey } from '../../movie/hooks/useMovieDetails';
 import { getTvShowDetails } from '../../tv/api/tv-api';
@@ -21,20 +14,7 @@ import { isValidGuid } from '../routes';
 
 const CATALOG_DETAIL_STALE_TIME_MS = 60_000;
 const ACTION_STATUS_STALE_TIME_MS = 30_000;
-const WATCHLIST_MEMBERSHIP_STALE_TIME_MS = 15_000;
 
-function toMembershipRecord(watchlistIds: string[]): Record<string, boolean> {
-  return Object.fromEntries(watchlistIds.map((watchlistId) => [watchlistId, true]));
-}
-
-/**
- * Warms the detail-action-bar status queries (favorite, watchlist, watched, follow)
- * in parallel with the catalog detail navigation, so by the time the detail screen
- * mounts, `useFavoriteStatus`/`useWatchlistMembership`/`useMovieWatchStatus`/
- * `useTvShowProgress`/`useTvShowFollowStatus`/`useMovieFollowStatus` hit warm cache
- * instead of firing a fresh request. Uses the exact query keys those hooks use, so
- * this is a pure cache warm-up with no risk of duplicate in-flight requests.
- */
 function prefetchCatalogDetailActionStatuses(
   queryClient: QueryClient,
   id: string,
@@ -45,47 +25,23 @@ function prefetchCatalogDetailActionStatuses(
   }
 
   void queryClient.prefetchQuery({
-    queryKey: favoriteStatusQueryKey(type, id),
-    queryFn: ({ signal }) =>
-      type === 'movie'
-        ? getMovieFavoriteStatus(id, signal).then((response) => response.isFavorited)
-        : getTvFavoriteStatus(id, signal).then((response) => response.isFavorited),
-    staleTime: ACTION_STATUS_STALE_TIME_MS,
-  });
-
-  void queryClient.prefetchQuery({
-    queryKey: watchlistMembershipQueryKey(type, id),
+    queryKey: libraryActionStatusQueryKey(type, id),
     queryFn: async ({ signal }) => {
-      const membership = await getWatchlistMembership(type, id, signal);
-      return toMembershipRecord(membership.watchlistIds);
+      const fetchStartedAt = Date.now();
+      const actions = await getLibraryActionStatus(type, id, signal);
+      seedDetailActionCachesFromLibraryActions(queryClient, type, id, actions, fetchStartedAt);
+      return actions;
     },
-    staleTime: WATCHLIST_MEMBERSHIP_STALE_TIME_MS,
+    staleTime: ACTION_STATUS_STALE_TIME_MS,
   });
 
-  if (type === 'movie') {
+  if (type === 'tv') {
     void queryClient.prefetchQuery({
-      queryKey: movieWatchStatusQueryKey(id),
-      queryFn: ({ signal }) => getMovieWatchStatus(id, signal),
+      queryKey: tvShowProgressQueryKey(id),
+      queryFn: ({ signal }) => getTvShowProgress(id, signal),
       staleTime: ACTION_STATUS_STALE_TIME_MS,
     });
-    void queryClient.prefetchQuery({
-      queryKey: movieFollowStatusQueryKey(id),
-      queryFn: ({ signal }) => getMovieFollowStatus(id, signal),
-      staleTime: ACTION_STATUS_STALE_TIME_MS,
-    });
-    return;
   }
-
-  void queryClient.prefetchQuery({
-    queryKey: tvShowProgressQueryKey(id),
-    queryFn: ({ signal }) => getTvShowProgress(id, signal),
-    staleTime: ACTION_STATUS_STALE_TIME_MS,
-  });
-  void queryClient.prefetchQuery({
-    queryKey: tvShowFollowStatusQueryKey(id),
-    queryFn: ({ signal }) => getTvShowFollowStatus(id, signal),
-    staleTime: ACTION_STATUS_STALE_TIME_MS,
-  });
 }
 
 export function prefetchCatalogDetail(

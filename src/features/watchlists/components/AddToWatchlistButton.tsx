@@ -6,6 +6,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useWatchlistMembership } from '../hooks/useWatchlists';
 import { isContentInAnyWatchlist } from '../utils/watchlist-membership';
 import { WatchlistPickerModal } from './WatchlistPickerModal';
@@ -27,10 +28,16 @@ export function AddToWatchlistButton({
 }: AddToWatchlistButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
+  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
+    useDetailActionStatusBatch();
+  const membershipQueryEnabled =
+    isAuthenticated &&
+    !deferIndividualStatusQueries &&
+    (batchHydrated || batchFailed);
   const { data: membership = {}, isLoading: isMembershipLoading } = useWatchlistMembership(
     contentType,
     contentId,
-    isAuthenticated,
+    membershipQueryEnabled,
   );
   const [visible, setVisible] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);

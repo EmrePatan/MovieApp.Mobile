@@ -6,6 +6,7 @@ import { isApiError } from '@/api/errors';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useEpisodeWatchStatus } from '../hooks/useEpisodeWatchStatus';
 import { useMovieWatchStatus } from '../hooks/useMovieWatchStatus';
 import { useTvShowProgress } from '../hooks/useTvShowProgress';
@@ -44,7 +45,15 @@ interface WatchedButtonProps {
 export function WatchedButton({ target, size = 48, variant = 'default' }: WatchedButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const movieStatus = useMovieWatchStatus(target.type === 'movie' ? target.contentId : '');
+  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
+    useDetailActionStatusBatch();
+  const movieWatchStatusEnabled =
+    target.type === 'movie' &&
+    !deferIndividualStatusQueries &&
+    (batchHydrated || batchFailed);
+  const movieStatus = useMovieWatchStatus(target.type === 'movie' ? target.contentId : '', {
+    enabled: movieWatchStatusEnabled,
+  });
   const tvProgress = useTvShowProgress(target.type === 'tvshow' ? target.contentId : '');
   const episodeStatus = useEpisodeWatchStatus(target.type === 'episode' ? target.contentId : '');
   const toggleMovie = useToggleMovieWatched(target.type === 'movie' ? target.contentId : '');

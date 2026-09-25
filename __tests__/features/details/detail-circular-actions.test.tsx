@@ -15,6 +15,15 @@ const mockFavoriteMutate = jest.fn();
 const mockWatchedMutate = jest.fn();
 const mockRequireAuth = jest.fn(() => true);
 
+jest.mock('@/features/library-actions/hooks/useCatalogDetailLibraryActions', () => ({
+  useCatalogDetailLibraryActions: () => ({
+    batchPending: false,
+    batchFailed: true,
+    batchHydrated: false,
+    deferIndividualStatusQueries: false,
+  }),
+}));
+
 jest.mock('@/hooks/useRequireAuth', () => ({
   useRequireAuth: () => ({
     isAuthenticated: true,

@@ -9,6 +9,7 @@ import {
   DetailCircularAction,
 } from '@/features/details/shared/components/DetailCircularAction';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useFavoriteStatus } from '../hooks/useFavoriteStatus';
 import { useToggleFavorite } from '../hooks/useFavoriteMutations';
 import type { FavoriteContentType } from '../types';
@@ -37,7 +38,13 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const shouldQueryStatus = !favoriteStatusResolved && !favoriteStatusPending;
+  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
+    useDetailActionStatusBatch();
+  const shouldQueryStatus =
+    !favoriteStatusResolved &&
+    !favoriteStatusPending &&
+    !deferIndividualStatusQueries &&
+    (batchHydrated || batchFailed || !isAuthenticated);
   const { data: queriedIsFavorited, isLoading: isStatusLoading } = useFavoriteStatus(
     contentType,
     contentId,
