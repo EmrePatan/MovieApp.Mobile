@@ -9,8 +9,14 @@ export function buildSearchPath(criteria: SearchRequest): string {
   const params = new URLSearchParams();
   params.set('q', criteria.q);
   params.set('type', criteria.type ?? 'all');
-  params.set('page', String(criteria.page ?? 1));
   params.set('pageSize', String(criteria.pageSize ?? DEFAULT_SEARCH_PAGE_SIZE));
+
+  if (criteria.cursor) {
+    params.set('cursor', criteria.cursor);
+    params.set('page', '1');
+  } else {
+    params.set('page', String(criteria.page ?? 1));
+  }
 
   if (criteria.sort) {
     params.set('sort', criteria.sort);

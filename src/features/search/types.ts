@@ -50,6 +50,7 @@ export interface SearchRequest {
   page?: number;
   pageSize?: number;
   sort?: string;
+  cursor?: string | null;
 }
 
 export const DEFAULT_SEARCH_PAGE_SIZE = 20;

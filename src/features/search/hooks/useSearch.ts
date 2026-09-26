@@ -19,14 +19,15 @@ export function useSearchResults(
         {
           q: normalizedQuery,
           type: typeFilter,
-          page: pageParam,
+          page: typeof pageParam === 'number' ? pageParam : 1,
+          cursor: typeof pageParam === 'string' ? pageParam : null,
           pageSize: DEFAULT_SEARCH_PAGE_SIZE,
         },
         signal,
       ),
-    initialPageParam: 1,
+    initialPageParam: 1 as number | string,
     getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
+      lastPage.nextCursor ?? (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
     enabled,
     staleTime: 60_000,
   });
