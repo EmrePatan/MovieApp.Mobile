@@ -21,9 +21,16 @@ export function useLibrary(
   return useInfiniteQuery({
     queryKey: libraryInfiniteQueryKey(category, mediaType),
     queryFn: ({ pageParam, signal }) =>
-      getLibrary(category, mediaType, pageParam, DEFAULT_LIBRARY_PAGE_SIZE, signal),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
+      getLibrary(
+        category,
+        mediaType,
+        pageParam,
+        DEFAULT_LIBRARY_PAGE_SIZE,
+        signal,
+      ),
+    initialPageParam: 1 as number | string,
+    getNextPageParam: (lastPage) =>
+      lastPage.nextCursor ?? (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
     enabled: isAuthenticated && enabled,
     staleTime: 30_000,
   });

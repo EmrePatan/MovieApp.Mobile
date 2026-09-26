@@ -7,12 +7,13 @@ import { buildLibraryPath } from './routes';
 export async function getLibrary(
   category: LibraryCategory,
   mediaType: CatalogMediaFilter,
-  page = 1,
+  pageOrCursor: number | string = 1,
   pageSize = DEFAULT_LIBRARY_PAGE_SIZE,
   signal?: AbortSignal,
 ): Promise<LibraryListResponse> {
-  return api.get<LibraryListResponse>(
-    buildLibraryPath(category, mediaType, page, pageSize),
-    { signal },
-  );
+  const path = typeof pageOrCursor === 'string'
+    ? buildLibraryPath(category, mediaType, 1, pageSize, pageOrCursor)
+    : buildLibraryPath(category, mediaType, pageOrCursor, pageSize);
+
+  return api.get<LibraryListResponse>(path, { signal });
 }

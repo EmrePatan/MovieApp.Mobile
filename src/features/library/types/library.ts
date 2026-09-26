@@ -32,6 +32,7 @@ export interface LibraryListResponse {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+  nextCursor?: string | null;
 }
 
 export const DEFAULT_LIBRARY_PAGE_SIZE = 24;
