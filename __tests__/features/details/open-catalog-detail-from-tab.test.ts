@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { api } from '@/api/client';
 import { getMovieDetails } from '@/features/details/movie/api/movie-api';
 import { movieQueryKey } from '@/features/details/movie/hooks/useMovieDetails';
 import {
@@ -27,6 +28,7 @@ describe('catalog detail navigation', () => {
   beforeEach(() => {
     resetCatalogDetailOriginForTests();
     jest.clearAllMocks();
+    api.setAcceptLanguageGetter(() => 'en-US');
     (getMovieDetails as jest.Mock).mockResolvedValue({ id: movieId, title: 'Matrix' });
   });
 
@@ -62,7 +64,7 @@ describe('catalog detail navigation', () => {
 
     expect(prefetchSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: movieQueryKey(movieId),
+        queryKey: movieQueryKey(movieId, 'en-US'),
       }),
     );
     expect(push).toHaveBeenCalledWith(`/movie/${movieId}`);

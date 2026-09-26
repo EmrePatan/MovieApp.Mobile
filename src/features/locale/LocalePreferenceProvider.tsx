@@ -35,6 +35,9 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
       acceptLanguageTagRef.current = toFormatLocaleTag(resolved.language);
 
       if (!cancelled) {
+        if (resolved.language !== 'en') {
+          invalidateLocalizedDetailQueries(queryClient);
+        }
         setLanguageState(resolved.language);
         setSource(resolved.source);
         setIsHydrated(true);

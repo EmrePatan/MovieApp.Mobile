@@ -7,11 +7,11 @@ describe('details query keys', () => {
   const id = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 
   it('uses movie query key', () => {
-    expect(movieQueryKey(id)).toEqual(['movie', id]);
+    expect(movieQueryKey(id, 'en-US')).toEqual(['movie', id, 'en-US']);
   });
 
   it('uses tv show query key', () => {
-    expect(tvShowQueryKey(id)).toEqual(['tvshow', id]);
+    expect(tvShowQueryKey(id, 'tr-TR')).toEqual(['tvshow', id, 'tr-TR']);
   });
 
   it('uses season query key', () => {

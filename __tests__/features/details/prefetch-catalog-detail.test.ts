@@ -73,10 +73,12 @@ describe('prefetchCatalogDetail', () => {
     (getTvShowFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
     (getExternalRatings as jest.Mock).mockResolvedValue({ ratings: [] });
     api.setTokenGetter(() => null);
+    api.setAcceptLanguageGetter(() => 'en-US');
   });
 
   afterEach(() => {
     api.setTokenGetter(() => null);
+    api.setAcceptLanguageGetter(() => 'en-US');
   });
 
   it('prefetches external ratings with the canonical query key', async () => {
@@ -100,13 +102,13 @@ describe('prefetchCatalogDetail', () => {
 
     expect(prefetchSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: movieQueryKey(movieId),
+        queryKey: movieQueryKey(movieId, 'en-US'),
         staleTime: 60_000,
       }),
     );
 
     await queryClient.fetchQuery({
-      queryKey: movieQueryKey(movieId),
+      queryKey: movieQueryKey(movieId, 'en-US'),
       queryFn: ({ signal }) => getMovieDetails(movieId, signal),
     });
 

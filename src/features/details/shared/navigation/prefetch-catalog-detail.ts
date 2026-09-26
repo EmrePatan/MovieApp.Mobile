@@ -6,6 +6,7 @@ import { seedDetailActionCachesFromLibraryActions } from '@/features/library-act
 import { prefetchExternalRatings } from '@/features/external-ratings/hooks/external-ratings-query-options';
 import { getTvShowProgress } from '@/features/watch-history/api/watch-history-api';
 import { tvShowProgressQueryKey } from '@/features/watch-history/hooks/watch-history-query-keys';
+import { resolveDetailQueryLocaleTag } from '@/features/locale/detail-query-locale';
 import { getMovieDetails } from '../../movie/api/movie-api';
 import { movieQueryKey } from '../../movie/hooks/useMovieDetails';
 import { getTvShowDetails } from '../../tv/api/tv-api';
@@ -53,15 +54,17 @@ export function prefetchCatalogDetail(
     return;
   }
 
+  const localeTag = resolveDetailQueryLocaleTag();
+
   if (type === 'movie') {
     void queryClient.prefetchQuery({
-      queryKey: movieQueryKey(id),
+      queryKey: movieQueryKey(id, localeTag),
       queryFn: ({ signal }) => getMovieDetails(id, signal),
       staleTime: CATALOG_DETAIL_STALE_TIME_MS,
     });
   } else {
     void queryClient.prefetchQuery({
-      queryKey: tvShowQueryKey(id),
+      queryKey: tvShowQueryKey(id, localeTag),
       queryFn: ({ signal }) => getTvShowDetails(id, signal),
       staleTime: CATALOG_DETAIL_STALE_TIME_MS,
     });

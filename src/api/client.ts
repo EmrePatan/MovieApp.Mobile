@@ -65,6 +65,10 @@ class ApiClient {
     this.acceptLanguageGetter = getter;
   }
 
+  getAcceptLanguageTag(): string | undefined {
+    return this.acceptLanguageGetter?.();
+  }
+
   setUnauthorizedHandler(handler: UnauthorizedHandler): void {
     this.unauthorizedHandler = handler;
   }
