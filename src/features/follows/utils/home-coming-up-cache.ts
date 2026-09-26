@@ -40,7 +40,7 @@ export function removeFollowedCatalogFromHomeCaches(
   queryClient.setQueriesData<HomeSectionsCache>(
     { queryKey: HOME_QUERY_KEY_ROOT },
     (current) => {
-      if (!current) {
+      if (!current || !Array.isArray(current.sections)) {
         return current;
       }
 
