@@ -9,6 +9,8 @@ export const SEARCH_QUERY_KEY_ROOT = ['search'] as const;
 export const AUTOCOMPLETE_QUERY_KEY_ROOT = ['autocomplete'] as const;
 export const DISCOVERY_QUERY_KEY_ROOT = ['discovery'] as const;
 export const RECOMMENDATIONS_QUERY_KEY_ROOT = ['recommendations'] as const;
+export const SEASON_DETAIL_QUERY_KEY_ROOT = ['season'] as const;
+export const EPISODE_DETAIL_QUERY_KEY_ROOT = ['episode'] as const;
 
 export function invalidateLocalizedDetailQueries(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: MOVIE_DETAIL_QUERY_KEY_ROOT });
@@ -20,5 +22,7 @@ export function invalidateLocalizedDetailQueries(queryClient: QueryClient): void
   void queryClient.invalidateQueries({ queryKey: AUTOCOMPLETE_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: RECOMMENDATIONS_QUERY_KEY_ROOT });
+  void queryClient.invalidateQueries({ queryKey: SEASON_DETAIL_QUERY_KEY_ROOT });
+  void queryClient.invalidateQueries({ queryKey: EPISODE_DETAIL_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: ['reviews', 'translation'] });
 }

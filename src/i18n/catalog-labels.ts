@@ -145,6 +145,39 @@ export function translateMovieDnaEditorialFallback(key: MovieDnaEditorialFallbac
   return i18n.t(`insights.movieDna.editorialFallback.${key}`);
 }
 
+const KNOWN_FOR_DEPARTMENTS = new Set([
+  'acting',
+  'directing',
+  'writing',
+  'production',
+  'creator',
+  'camera',
+  'sound',
+  'editing',
+  'art',
+  'crew',
+]);
+
+export function translateKnownForDepartment(
+  department: string | null | undefined,
+): string | null {
+  if (!department || department.trim().length === 0) {
+    return null;
+  }
+
+  const normalized = department.trim().toLowerCase();
+  if (!KNOWN_FOR_DEPARTMENTS.has(normalized)) {
+    return department.trim();
+  }
+
+  const key = `details.knownForDepartments.${normalized}`;
+  if (i18n.exists(key)) {
+    return i18n.t(key);
+  }
+
+  return department.trim();
+}
+
 export function translateCrewDepartment(department: string | null | undefined): string | null {
   if (!department || department.trim().length === 0) {
     return i18n.t('details.crewDepartments.other');

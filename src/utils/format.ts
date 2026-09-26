@@ -1,5 +1,5 @@
 import { getUiFormatLocaleTag, i18n } from '@/i18n';
-import { translateContentType } from '@/i18n/catalog-labels';
+import { translateContentType, translateKnownForDepartment } from '@/i18n/catalog-labels';
 
 export function formatIsoDate(value: string | null | undefined): string | null {
   if (!value) {
@@ -48,11 +48,7 @@ export function formatContentType(type: 'movie' | 'tv' | 'person'): string {
 export function formatKnownForDepartment(
   department: string | null | undefined,
 ): string | null {
-  if (!department || department.trim().length === 0) {
-    return null;
-  }
-
-  return department.trim();
+  return translateKnownForDepartment(department);
 }
 
 export function formatCatalogYear(

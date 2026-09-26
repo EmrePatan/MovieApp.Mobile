@@ -1,3 +1,4 @@
+import { changeUiLanguage } from '@/i18n';
 import {
   formatCatalogYear,
   formatContentType,
@@ -33,10 +34,18 @@ describe('format helpers', () => {
     expect(formatCatalogYear(null, null)).toBeNull();
   });
 
-  it('formats known-for department', () => {
+  it('formats known-for department in English', async () => {
+    await changeUiLanguage('en');
     expect(formatKnownForDepartment('Acting')).toBe('Acting');
     expect(formatKnownForDepartment('  Directing  ')).toBe('Directing');
     expect(formatKnownForDepartment(null)).toBeNull();
     expect(formatKnownForDepartment('')).toBeNull();
+    expect(formatKnownForDepartment('Stunts')).toBe('Stunts');
+  });
+
+  it('formats known-for department in Turkish', async () => {
+    await changeUiLanguage('tr');
+    expect(formatKnownForDepartment('Acting')).toBe('Oyunculuk');
+    expect(formatKnownForDepartment('Production')).toBe('Prodüksiyon');
   });
 });

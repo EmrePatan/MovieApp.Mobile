@@ -907,6 +907,18 @@ export const stage2Tr = {
       crew: 'Ekip',
       other: 'Diğer',
     },
+    knownForDepartments: {
+      acting: 'Oyunculuk',
+      directing: 'Yönetmenlik',
+      writing: 'Senaryo',
+      production: 'Prodüksiyon',
+      creator: 'Yaratıcı',
+      camera: 'Kamera',
+      sound: 'Ses',
+      editing: 'Kurgu',
+      art: 'Sanat',
+      crew: 'Ekip',
+    },
     filmographyFilter: {
       all: 'Tümü',
       movie: 'Filmler',

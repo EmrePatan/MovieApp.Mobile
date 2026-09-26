@@ -1,7 +1,8 @@
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api } from '@/api/client';
 import { queryClient } from '@/api/query-client';
-import { changeUiLanguage, getUiFormatLocaleTag } from '@/i18n';
+import { changeUiLanguage } from '@/i18n';
+import { toFormatLocaleTag } from '@/i18n/locale-tags';
 import type { UiLanguage } from '@/i18n/types';
 import {
   clearSavedUiLanguage,
@@ -18,9 +19,10 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
   const [language, setLanguageState] = useState<UiLanguage>('en');
   const [source, setSource] = useState<LocalePreferenceContextValue['source']>('fallback');
   const [isHydrated, setIsHydrated] = useState(false);
+  const acceptLanguageTagRef = useRef(toFormatLocaleTag('en'));
 
   useEffect(() => {
-    api.setAcceptLanguageGetter(() => getUiFormatLocaleTag());
+    api.setAcceptLanguageGetter(() => acceptLanguageTagRef.current);
   }, []);
 
   useEffect(() => {
@@ -30,6 +32,7 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
       const savedLanguage = await getSavedUiLanguage();
       const resolved = resolveInitialUiLanguage(savedLanguage, getDeviceLanguageCode());
       await changeUiLanguage(resolved.language);
+      acceptLanguageTagRef.current = toFormatLocaleTag(resolved.language);
 
       if (!cancelled) {
         setLanguageState(resolved.language);
@@ -48,6 +51,7 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
   const setLanguage = useCallback(async (nextLanguage: UiLanguage) => {
     await saveUiLanguage(nextLanguage);
     await changeUiLanguage(nextLanguage);
+    acceptLanguageTagRef.current = toFormatLocaleTag(nextLanguage);
     invalidateLocalizedDetailQueries(queryClient);
     setLanguageState(nextLanguage);
     setSource('saved');
@@ -57,6 +61,7 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
     await clearSavedUiLanguage();
     const resolved = resolveInitialUiLanguage(null, getDeviceLanguageCode());
     await changeUiLanguage(resolved.language);
+    acceptLanguageTagRef.current = toFormatLocaleTag(resolved.language);
     invalidateLocalizedDetailQueries(queryClient);
     setLanguageState(resolved.language);
     setSource(resolved.source);

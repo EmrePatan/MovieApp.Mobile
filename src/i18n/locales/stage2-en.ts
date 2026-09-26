@@ -890,6 +890,18 @@ export const stage2En = {
       crew: 'Crew',
       other: 'Other',
     },
+    knownForDepartments: {
+      acting: 'Acting',
+      directing: 'Directing',
+      writing: 'Writing',
+      production: 'Production',
+      creator: 'Creator',
+      camera: 'Camera',
+      sound: 'Sound',
+      editing: 'Editing',
+      art: 'Art',
+      crew: 'Crew',
+    },
     filmographyFilter: { all: 'All', movie: 'Movies', tv: 'TV' },
     watchProgress: {
       title: 'Watch Progress',

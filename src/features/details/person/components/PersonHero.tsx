@@ -9,7 +9,7 @@ import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-ima
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
 import { DetailScrim } from '@/features/details/shared/components/DetailScrim';
-import { formatIsoDate } from '@/utils/format';
+import { formatIsoDate, formatKnownForDepartment } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -39,7 +39,8 @@ export const PersonHero = memo(function PersonHero({
   const portraitSize = Math.round(Math.min(148, width * 0.36));
 
   const birthLine = formatLifeDates(birthday, deathday);
-  const metaParts = [knownForDepartment, birthLine, placeOfBirth].filter(Boolean);
+  const departmentLine = formatKnownForDepartment(knownForDepartment);
+  const metaParts = [departmentLine, birthLine, placeOfBirth].filter(Boolean);
   const [isPortraitViewerOpen, setIsPortraitViewerOpen] = useState(false);
 
   const portraitImages = useMemo(

@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { changeUiLanguage } from '@/i18n';
 import { PersonHero } from '@/features/details/person/components/PersonHero';
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -23,7 +24,24 @@ jest.mock('@/features/gallery/components/ImageViewerModal', () => ({
 }));
 
 describe('PersonHero portrait viewer', () => {
-  it('opens fullscreen viewer when portrait is pressed', () => {
+  it('renders localized known-for department in Turkish UI', async () => {
+    await changeUiLanguage('tr');
+    render(
+      <PersonHero
+        name="Jane Actor"
+        profileImagePath={null}
+        knownForDepartment="Acting"
+        birthday={null}
+        deathday={null}
+        placeOfBirth={null}
+      />,
+    );
+
+    expect(screen.getByText('Oyunculuk')).toBeTruthy();
+  });
+
+  it('opens fullscreen viewer when portrait is pressed', async () => {
+    await changeUiLanguage('en');
     render(
       <PersonHero
         name="Matthew McConaughey"

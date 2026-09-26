@@ -906,6 +906,18 @@ export const stage2Fr = {
       crew: 'Équipe',
       other: 'Autre',
     },
+    knownForDepartments: {
+      acting: 'Interprétation',
+      directing: 'Réalisation',
+      writing: 'Scénario',
+      production: 'Production',
+      creator: 'Créateur',
+      camera: 'Caméra',
+      sound: 'Son',
+      editing: 'Montage',
+      art: 'Art',
+      crew: 'Équipe',
+    },
     filmographyFilter: {
       all: 'Tout',
       movie: 'Films',
