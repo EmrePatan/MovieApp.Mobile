@@ -15,7 +15,12 @@ import {
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
-import type { CreateReviewRequest, ReviewContentType, UpdateReviewRequest } from '../types';
+import type {
+  CreateReviewRequest,
+  ReviewContentType,
+  ReviewListResponse,
+  UpdateReviewRequest,
+} from '../types';
 
 export function invalidateReviewQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -72,6 +77,26 @@ export function useDeleteReviewMutation(contentType: ReviewContentType, contentI
         ? deleteMovieReview(contentId)
         : deleteTvReview(contentId),
     onSuccess: () => {
+      const myReviewKey =
+        contentType === 'movie'
+          ? movieMyReviewQueryKey(contentId)
+          : tvMyReviewQueryKey(contentId);
+      queryClient.setQueryData(myReviewKey, null);
+
+      queryClient.setQueriesData<ReviewListResponse>(
+        { queryKey: ['reviews', contentType, contentId] },
+        (current) => {
+          if (!current) {
+            return current;
+          }
+
+          return {
+            ...current,
+            totalCount: Math.max(0, current.totalCount - 1),
+          };
+        },
+      );
+
       invalidateReviewQueries(queryClient, contentType, contentId);
       invalidateProfileStatistics(queryClient);
       invalidateRecommendationQueries(queryClient);

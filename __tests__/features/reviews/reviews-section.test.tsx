@@ -283,7 +283,7 @@ describe('ReviewsDetailContent', () => {
     fireEvent.press(screen.getByTestId('reviews-empty-state-action'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText('Review'), 'Great film.');
-    fireEvent.press(screen.getByText('Post review'));
+    fireEvent.press(screen.getByText('Send'));
 
     expect(mockCreateMutate).toHaveBeenCalledWith(
       { content: 'Great film.' },
@@ -339,12 +339,27 @@ describe('ReviewsDetailContent', () => {
     fireEvent.press(screen.getByLabelText('Edit review'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText('Review'), 'Updated take.');
-    fireEvent.press(screen.getByText('Save review'));
+    fireEvent.press(screen.getByText('Save'));
 
     expect(mockUpdateMutate).toHaveBeenCalledWith(
       { content: 'Updated take.' },
       expect.any(Object),
     );
+  });
+
+  it('closes the composer when tapping outside while editing', () => {
+    (useMyReview as jest.Mock).mockReturnValue({
+      data: myReview,
+      isLoading: false,
+    });
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+
+    fireEvent.press(screen.getByLabelText('Edit review'));
+    expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId('reviews-composer-dismiss-backdrop'));
+    expect(screen.queryByTestId('review-composer-anchor')).toBeNull();
   });
 
   it('confirms before deleting own review', () => {
@@ -359,10 +374,48 @@ describe('ReviewsDetailContent', () => {
 
     render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByLabelText('Edit review'));
-    fireEvent.press(screen.getByLabelText('Delete review'));
+    fireEvent.press(screen.getByLabelText('Delete'));
 
     expect(alertSpy).toHaveBeenCalled();
     expect(mockDeleteMutate).toHaveBeenCalled();
+
+    alertSpy.mockRestore();
+  });
+
+  it('shows write CTA after deleting own review when the public list is empty', () => {
+    let myReviewData: ReviewResponse | null = myReview;
+    (useMyReview as jest.Mock).mockImplementation(() => ({
+      data: myReviewData,
+      isLoading: false,
+    }));
+    (useMovieReviews as jest.Mock).mockReturnValue(
+      mockReviewsQuery({
+        data: {
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
+    );
+
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+      buttons?.find((button) => button.text === 'Delete')?.onPress?.();
+    });
+
+    mockDeleteMutate.mockImplementation((_arg, options) => {
+      myReviewData = null;
+      options?.onSuccess?.();
+    });
+
+    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    fireEvent.press(screen.getByLabelText('Edit review'));
+    fireEvent.press(screen.getByLabelText('Delete'));
+
+    expect(screen.getByTestId('reviews-empty-state-action')).toBeTruthy();
 
     alertSpy.mockRestore();
   });

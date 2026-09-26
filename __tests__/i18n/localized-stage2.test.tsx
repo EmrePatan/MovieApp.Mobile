@@ -15,6 +15,8 @@ import { ProfileYourYearSection } from '@/features/profile/components/ProfileYou
 import { LibraryContinueWatchingSection } from '@/features/library/components/LibraryContinueWatchingSection';
 import { createProfileStatisticsFixture } from '@/features/profile/utils/profile-statistics-fixtures';
 import { AiRecommendationsContent } from '@/features/ai-recommendations/components/AiRecommendationsContent';
+import { InsightsMovieDnaHero } from '@/features/insights/components/InsightsMovieDnaHero';
+import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function renderWithI18n(ui: React.ReactElement) {
@@ -57,6 +59,17 @@ describe('Stage 2 localization', () => {
     renderWithI18n(<NotificationsEmptyState />);
 
     expect(screen.getByText('Henüz bildirim yok')).toBeTruthy();
+  });
+
+  it('renders localized movie dna kicker', async () => {
+    renderWithI18n(<InsightsMovieDnaHero movieDna={insightsV3Fixture.movieDna} />);
+
+    expect(screen.getByText('Your Movie DNA')).toBeTruthy();
+
+    await changeUiLanguage('tr');
+    renderWithI18n(<InsightsMovieDnaHero movieDna={insightsV3Fixture.movieDna} />);
+
+    expect(screen.getByText("Film DNA'n")).toBeTruthy();
   });
 
   it('renders localized insights milestone section header', async () => {

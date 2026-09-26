@@ -70,7 +70,7 @@ describe('ReviewCard', () => {
     );
 
     fireEvent.press(screen.getByLabelText('Edit review'));
-    fireEvent.press(screen.getByLabelText('Delete review'));
+    fireEvent.press(screen.getByLabelText('Delete'));
 
     expect(onEdit).toHaveBeenCalled();
     expect(onDelete).toHaveBeenCalled();

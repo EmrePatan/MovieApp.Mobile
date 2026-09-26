@@ -10,9 +10,10 @@ describe('primary tab routes', () => {
     expect(resolveActivePrimaryTab('/search')).toBe('home');
     expect(resolveActivePrimaryTab('/discover-browse')).toBe('discover');
     expect(resolveActivePrimaryTab('/world-cinema')).toBe('discover');
+    expect(resolveActivePrimaryTab('/ai-recommendations')).toBe('discover');
     expect(resolveActivePrimaryTab('/upcoming')).toBe('library');
     expect(resolveActivePrimaryTab('/watchlist/123')).toBe('library');
-    expect(resolveActivePrimaryTab('/pick-something')).toBe('insights');
+    expect(resolveActivePrimaryTab('/pick-something')).toBe('discover');
     expect(resolveActivePrimaryTab('/discover')).toBe('discover');
     expect(resolveActivePrimaryTab('/library')).toBe('library');
     expect(resolveActivePrimaryTab('/insights')).toBe('insights');

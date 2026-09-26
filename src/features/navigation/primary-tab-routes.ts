@@ -24,6 +24,8 @@ const DISCOVER_ROUTE_PREFIXES = [
   '/world-cinema',
   '/now-in-theaters',
   '/on-tv-this-week',
+  '/ai-recommendations',
+  '/pick-something',
 ] as const;
 
 const LIBRARY_ROUTE_PREFIXES = [
@@ -36,7 +38,7 @@ const LIBRARY_ROUTE_PREFIXES = [
   '/notifications',
 ] as const;
 
-const INSIGHTS_ROUTE_PREFIXES = ['/insights', '/ai-recommendations', '/pick-something'] as const;
+const INSIGHTS_ROUTE_PREFIXES = ['/insights'] as const;
 
 function matchesRoutePrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);

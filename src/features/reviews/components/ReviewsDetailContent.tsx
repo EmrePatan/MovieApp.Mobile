@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -172,6 +173,7 @@ export function ReviewsDetailContent({
   }, []);
 
   const handleCancelComposer = useCallback(() => {
+    Keyboard.dismiss();
     setComposerMode('hidden');
     setMutationError(null);
   }, []);
@@ -257,7 +259,6 @@ export function ReviewsDetailContent({
     !myReview;
 
   const showEmptyStateWithWriteAction =
-    totalCount === 0 &&
     publicReviews.length === 0 &&
     ratingStars === null &&
     !myReview &&
@@ -347,29 +348,18 @@ export function ReviewsDetailContent({
           />
         ) : null}
         {composerMode === 'edit' && myReview ? (
-          <View style={styles.editComposerBlock}>
-            <ReviewComposer
-              contentTitle={contentTitle}
-              initialContent={myReview.content}
-              submitLabel={t('common.saveReview')}
-              isSubmitting={updateReview.isPending}
-              errorMessage={mutationError}
-              autoFocus
-              onSubmit={handleUpdate}
-              onCancel={handleCancelComposer}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('common.deleteReview')}
-              disabled={deleteReview.isPending}
-              onPress={handleDelete}
-              style={({ pressed }) => [styles.deleteReviewButton, pressed && styles.pressed]}
-            >
-              <AppText variant="caption" style={styles.deleteReviewLabel}>
-                {t('common.deleteReview')}
-              </AppText>
-            </Pressable>
-          </View>
+          <ReviewComposer
+            toolbarTitle={t('reviews.editReview')}
+            initialContent={myReview.content}
+            submitLabel={t('common.saveReview')}
+            isSubmitting={updateReview.isPending}
+            isDeleting={deleteReview.isPending}
+            errorMessage={mutationError}
+            autoFocus
+            onSubmit={handleUpdate}
+            onCancel={handleCancelComposer}
+            onDelete={handleDelete}
+          />
         ) : null}
       </View>
     ) : null;
@@ -473,28 +463,40 @@ export function ReviewsDetailContent({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
       >
-        <FlatList
-          testID="reviews-detail-content"
-          style={styles.container}
-          data={publicReviews}
-          keyExtractor={(item) => item.id}
-          renderItem={renderReviewItem}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={listEmpty}
-          ListFooterComponent={listFooter}
-          contentContainerStyle={[
-            styles.listContent,
-            isComposing && { paddingBottom: spacing.lg },
-            showWriteFab && { paddingBottom: spacing.xxl + insets.bottom + 56 },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-          showsVerticalScrollIndicator={false}
-          initialNumToRender={layout.verticalList.initialNumToRender}
-          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-          windowSize={layout.verticalList.windowSize}
-        />
+        <View style={styles.listSlot}>
+          <FlatList
+            testID="reviews-detail-content"
+            style={styles.container}
+            data={publicReviews}
+            keyExtractor={(item) => item.id}
+            renderItem={renderReviewItem}
+            ListHeaderComponent={listHeader}
+            ListEmptyComponent={listEmpty}
+            ListFooterComponent={listFooter}
+            contentContainerStyle={[
+              styles.listContent,
+              isComposing && { paddingBottom: spacing.lg },
+              showWriteFab && { paddingBottom: spacing.xxl + insets.bottom + 56 },
+            ]}
+            scrollEnabled={!isComposing}
+            keyboardShouldPersistTaps={isComposing ? 'always' : 'handled'}
+            keyboardDismissMode={isComposing ? 'none' : 'interactive'}
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios' && !isComposing}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={layout.verticalList.initialNumToRender}
+            maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+            windowSize={layout.verticalList.windowSize}
+          />
+          {isComposing ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}
+              style={styles.composerDismissBackdrop}
+              onPress={handleCancelComposer}
+              testID="reviews-composer-dismiss-backdrop"
+            />
+          ) : null}
+        </View>
         {composerDock}
       </KeyboardAvoidingView>
       {writeFab ? (
@@ -514,10 +516,22 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
+  listSlot: {
+    flex: 1,
+  },
+  composerDismissBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+  },
   composerDock: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   container: {
     flex: 1,
@@ -558,21 +572,6 @@ const styles = StyleSheet.create({
   },
   listFooter: {
     gap: spacing.sm,
-  },
-  editComposerBlock: {
-    gap: spacing.xs,
-  },
-  deleteReviewButton: {
-    alignSelf: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  deleteReviewLabel: {
-    color: colors.danger,
-    fontWeight: '500',
-  },
-  pressed: {
-    opacity: 0.7,
   },
 });
 

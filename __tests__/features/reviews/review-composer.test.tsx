@@ -87,6 +87,21 @@ describe('ReviewComposer', () => {
     expect(screen.getByText('Cancel')).toBeTruthy();
   });
 
+  it('shows a subtle delete action when onDelete is provided', () => {
+    const onDelete = jest.fn();
+    render(
+      <ReviewComposer
+        submitLabel="Save"
+        onSubmit={jest.fn()}
+        onCancel={jest.fn()}
+        onDelete={onDelete}
+      />,
+    );
+
+    fireEvent.press(screen.getByTestId('review-composer-delete'));
+    expect(onDelete).toHaveBeenCalled();
+  });
+
   it('shows server error and closes via header action', () => {
     const onCancel = jest.fn();
     render(

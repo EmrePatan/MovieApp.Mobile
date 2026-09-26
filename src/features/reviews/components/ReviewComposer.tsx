@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { AppButton } from '@/components/buttons/AppButton';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { MAX_REVIEW_CONTENT_LENGTH } from '../types';
@@ -20,25 +19,90 @@ import { layout } from '@/theme/layout';
 interface ReviewComposerProps {
   initialContent?: string;
   contentTitle?: string;
+  toolbarTitle?: string;
   submitLabel: string;
   isSubmitting?: boolean;
   errorMessage?: string | null;
   autoFocus?: boolean;
   onSubmit: (content: string) => void;
   onCancel?: () => void;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
 const NEAR_LIMIT_RATIO = 0.9;
 
+interface ComposerMutedButtonProps {
+  label: string;
+  accessibilityLabel: string;
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  testID?: string;
+  tone?: 'neutral' | 'accent' | 'destructive';
+}
+
+function ComposerMutedButton({
+  label,
+  accessibilityLabel,
+  onPress,
+  disabled = false,
+  loading = false,
+  testID,
+  tone = 'neutral',
+}: ComposerMutedButtonProps) {
+  const isDisabled = disabled || loading;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      disabled={isDisabled}
+      hitSlop={6}
+      onPress={onPress}
+      testID={testID}
+      style={({ pressed }) => [
+        styles.mutedButton,
+        tone === 'accent' && styles.mutedButtonAccent,
+        tone === 'destructive' && styles.mutedButtonDestructive,
+        pressed && !isDisabled && styles.pressed,
+        isDisabled && styles.mutedButtonDisabled,
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator
+          color={tone === 'accent' ? colors.accentStrong : colors.textMuted}
+          size="small"
+        />
+      ) : (
+        <AppText
+          variant="caption"
+          style={[
+            styles.mutedButtonLabel,
+            tone === 'accent' && styles.mutedButtonLabelAccent,
+            tone === 'destructive' && styles.mutedButtonLabelDestructive,
+          ]}
+        >
+          {label}
+        </AppText>
+      )}
+    </Pressable>
+  );
+}
+
 function ReviewComposerInner({
   initialContent = '',
   contentTitle,
+  toolbarTitle,
   submitLabel,
   isSubmitting = false,
   errorMessage = null,
   autoFocus = false,
   onSubmit,
   onCancel,
+  onDelete,
+  isDeleting = false,
 }: ReviewComposerProps) {
   const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
@@ -96,46 +160,35 @@ function ReviewComposerInner({
     <View style={styles.container} testID="review-composer">
       <View style={styles.toolbar}>
         {onCancel ? (
-          <Pressable
-            accessibilityRole="button"
+          <ComposerMutedButton
+            label={t('common.cancel')}
             accessibilityLabel={t('common.cancel')}
             disabled={isSubmitting}
-            hitSlop={8}
             onPress={handleClose}
-            style={({ pressed }) => [styles.cancelButton, pressed && styles.pressed]}
-          >
-            <AppText variant="bodySmall" style={styles.cancelLabel}>
-              {t('common.cancel')}
-            </AppText>
-          </Pressable>
+          />
         ) : (
           <View style={styles.toolbarSpacer} />
         )}
 
         <View style={styles.toolbarMeta}>
-          {contentTitle ? (
-            <AppText variant="caption" muted numberOfLines={1} style={styles.contentTitle}>
-              {contentTitle}
-            </AppText>
-          ) : (
-            <AppText variant="caption" muted style={styles.contentTitle}>
-              {t('reviews.writeReviewTitle')}
-            </AppText>
-          )}
+          <AppText variant="bodySmall" numberOfLines={1} style={styles.toolbarTitle}>
+            {toolbarTitle ?? contentTitle ?? t('reviews.writeReviewTitle')}
+          </AppText>
         </View>
 
-        <AppButton
-          title={submitLabel}
+        <ComposerMutedButton
+          label={submitLabel}
+          accessibilityLabel={submitLabel}
+          tone="accent"
           loading={isSubmitting}
           disabled={isSubmitting || !hasContent}
           onPress={handleSubmit}
-          style={styles.submitButton}
-          accessibilityLabel={submitLabel}
         />
       </View>
 
       <FeedbackMessage message={errorMessage} tone="error" onDismiss={undefined} />
 
+      <View style={styles.inputShell}>
       <TextInput
         ref={inputRef}
         accessibilityLabel={t('reviews.reviewFieldLabel')}
@@ -154,25 +207,41 @@ function ReviewComposerInner({
         ]}
         textAlignVertical="top"
       />
+      </View>
+
+      {fieldErrors.content ? (
+        <AppText variant="caption" style={styles.error} accessibilityRole="alert">
+          {fieldErrors.content}
+        </AppText>
+      ) : null}
 
       <View style={styles.metaRow}>
-        {fieldErrors.content ? (
-          <AppText variant="caption" style={styles.error} accessibilityRole="alert">
-            {fieldErrors.content}
+        <View style={styles.metaRowSide} />
+        <View style={styles.metaRowCenter}>
+          {onDelete ? (
+            <ComposerMutedButton
+              label={t('common.deleteReview')}
+              accessibilityLabel={t('common.deleteReview')}
+              disabled={isSubmitting}
+              loading={isDeleting}
+              onPress={onDelete}
+              testID="review-composer-delete"
+              tone="destructive"
+            />
+          ) : null}
+        </View>
+        <View style={styles.metaRowSide}>
+          <AppText
+            variant="caption"
+            style={[styles.counter, isNearLimit && styles.counterWarning]}
+            accessibilityLabel={t('reviews.characterCountAccessibility', {
+              current: contentLength,
+              max: MAX_REVIEW_CONTENT_LENGTH,
+            })}
+          >
+            {contentLength}/{MAX_REVIEW_CONTENT_LENGTH}
           </AppText>
-        ) : (
-          <View style={styles.metaSpacer} />
-        )}
-        <AppText
-          variant="caption"
-          style={[styles.counter, isNearLimit && styles.counterWarning]}
-          accessibilityLabel={t('reviews.characterCountAccessibility', {
-            current: contentLength,
-            max: MAX_REVIEW_CONTENT_LENGTH,
-          })}
-        >
-          {contentLength}/{MAX_REVIEW_CONTENT_LENGTH}
-        </AppText>
+        </View>
       </View>
     </View>
   );
@@ -184,45 +253,74 @@ export function ReviewComposer(props: ReviewComposerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.sm,
+    gap: spacing.md,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     paddingBottom: spacing.md,
   },
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    minHeight: 40,
+    minHeight: 44,
+    paddingBottom: spacing.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderSubtle,
   },
   toolbarSpacer: {
-    width: 64,
+    width: 72,
   },
-  cancelButton: {
-    minWidth: 64,
-    minHeight: 40,
+  mutedButton: {
+    minHeight: 36,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.inputBackground,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  cancelLabel: {
+  mutedButtonAccent: {
+    backgroundColor: colors.accentTint18,
+    borderColor: colors.borderAccent,
+  },
+  mutedButtonDestructive: {
+    backgroundColor: 'rgba(200, 90, 75, 0.14)',
+    borderColor: 'rgba(196, 140, 100, 0.38)',
+  },
+  mutedButtonDisabled: {
+    opacity: interaction.disabledOpacity,
+  },
+  mutedButtonLabel: {
     color: colors.textSecondary,
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: 13,
+    letterSpacing: 0.15,
+  },
+  mutedButtonLabelAccent: {
+    color: colors.accentStrong,
+  },
+  mutedButtonLabelDestructive: {
+    color: '#D9A192',
   },
   toolbarMeta: {
     flex: 1,
     minWidth: 0,
     alignItems: 'center',
   },
-  contentTitle: {
+  toolbarTitle: {
     textAlign: 'center',
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
-  submitButton: {
-    minHeight: 36,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.full,
+  inputShell: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
   },
   input: {
-    minHeight: 96,
-    maxHeight: 160,
+    minHeight: 112,
+    maxHeight: 176,
     color: colors.textPrimary,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -244,22 +342,27 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 16,
+    minHeight: 36,
   },
-  metaSpacer: {
+  metaRowSide: {
     flex: 1,
+    justifyContent: 'center',
+  },
+  metaRowCenter: {
+    flexShrink: 0,
+    alignItems: 'center',
   },
   counter: {
     color: colors.textMuted,
     fontVariant: ['tabular-nums'],
+    textAlign: 'right',
+    alignSelf: 'flex-end',
   },
   counterWarning: {
     color: colors.warning,
   },
   error: {
     color: colors.error,
-    flex: 1,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

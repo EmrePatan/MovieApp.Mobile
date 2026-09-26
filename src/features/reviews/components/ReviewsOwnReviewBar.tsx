@@ -81,12 +81,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
   },
   card: {
-    gap: 4,
-    padding: spacing.sm,
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: colors.borderSubtle,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.accentMuted,
   },
   headerRow: {
     flexDirection: 'row',
@@ -104,11 +107,11 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   label: {
-    color: colors.textSecondary,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontWeight: '600',
     fontSize: 11,
     lineHeight: 14,
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
   },
   preview: {
     lineHeight: 20,
