@@ -12,7 +12,12 @@ import {
   resolveActivePrimaryTab,
   type PrimaryTabId,
 } from '@/features/navigation/primary-tab-routes';
-import { getTabBarStyle, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
+import {
+  getTabBarStyle,
+  TAB_BAR_ICON_SIZE,
+  TAB_BAR_LABEL_GAP,
+  tabBarLabelStyle,
+} from '@/features/navigation/tab-bar-style';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -76,7 +81,7 @@ export function PrimaryTabBar() {
             onPress={() => handleTabPress(tab.id)}
             style={styles.tabButton}
           >
-            <Ionicons name={tab.icon} size={22} color={color} />
+            <Ionicons name={tab.icon} size={TAB_BAR_ICON_SIZE} color={color} />
             <AppText style={[tabBarLabelStyle, styles.label, { color }]}>{t(tab.labelKey)}</AppText>
           </Pressable>
         );
@@ -88,14 +93,14 @@ export function PrimaryTabBar() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   label: {
-    marginTop: 2,
+    marginTop: TAB_BAR_LABEL_GAP,
   },
 });
