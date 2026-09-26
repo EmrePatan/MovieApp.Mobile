@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { TextInput } from 'react-native';
+import { Keyboard, TextInput } from 'react-native';
 import SearchScreen from '../../../app/(tabs)/(app-shell)/search';
 import { t } from '../../i18n/i18n-test-utils';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
@@ -166,6 +166,47 @@ describe('SearchScreen', () => {
 
     expect(trackProductMetric).toHaveBeenCalledTimes(1);
     expect(trackProductMetric).toHaveBeenCalledWith('search_submitted');
+  });
+
+  it('uses on-drag keyboard dismiss on autocomplete and results lists', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: null }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
+
+    const suggestionsList = screen.getByTestId('search-suggestions-list');
+    expect(suggestionsList.props.keyboardDismissMode).toBe('on-drag');
+    expect(suggestionsList.props.keyboardShouldPersistTaps).toBe('handled');
+
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
+    fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
+
+    const resultsList = screen.getByTestId('search-results-list');
+    expect(resultsList.props.keyboardDismissMode).toBe('on-drag');
+    expect(resultsList.props.keyboardShouldPersistTaps).toBe('handled');
+  });
+
+  it('keeps the typed query when the keyboard is dismissed during autocomplete', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: null }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
+
+    Keyboard.dismiss();
+
+    expect(screen.getByDisplayValue('inte')).toBeTruthy();
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+    expect(screen.getByLabelText('Search for Interstellar, Movie')).toBeTruthy();
   });
 
   it('renders autocomplete suggestions while typing', () => {

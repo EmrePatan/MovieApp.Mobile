@@ -331,13 +331,6 @@ export default function SearchScreen() {
       inputRef={searchInputRef}
       autoFocus
     >
-      {showAutocomplete ? (
-        <SearchSuggestionList
-          suggestions={autocompleteQuery.data?.items ?? []}
-          isLoading={autocompleteQuery.isLoading}
-          onSelect={handleSuggestionSelect}
-        />
-      ) : null}
       {hasActiveSearch ? (
         <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
       ) : null}
@@ -368,6 +361,18 @@ export default function SearchScreen() {
           windowSize={layout.verticalList.windowSize}
         />
       </View>
+    );
+  }
+
+  if (showAutocomplete) {
+    return (
+      <StackListScreen testID="search-screen" header={searchScreenHeader}>
+        <SearchSuggestionList
+          suggestions={autocompleteQuery.data?.items ?? []}
+          isLoading={autocompleteQuery.isLoading}
+          onSelect={handleSuggestionSelect}
+        />
+      </StackListScreen>
     );
   }
 

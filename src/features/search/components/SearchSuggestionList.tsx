@@ -1,6 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { memo, type ComponentProps } from 'react';
+import { memo, useMemo, type ComponentProps } from 'react';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
@@ -8,6 +8,7 @@ import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchAutocompleteItem } from '../types';
 import { formatContentType, formatKnownForDepartment } from '@/utils/format';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -86,67 +87,114 @@ interface SearchSuggestionListProps {
   suggestions: SearchAutocompleteItem[];
   isLoading: boolean;
   onSelect: (suggestion: SearchAutocompleteItem) => void;
+  testID?: string;
+}
+
+export function searchSuggestionKeyExtractor(suggestion: SearchAutocompleteItem): string {
+  return `${suggestion.type}-${suggestion.id}`;
+}
+
+function SearchSuggestionRow({
+  suggestion,
+  isLast,
+  onSelect,
+}: {
+  suggestion: SearchAutocompleteItem;
+  isLast: boolean;
+  onSelect: (suggestion: SearchAutocompleteItem) => void;
+}) {
+  const { t } = useTranslation();
+  const typeLabel = formatSuggestionTypeLabel(suggestion);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('search.suggestions.searchForTitleType', {
+        title: suggestion.title,
+        type: typeLabel,
+      })}
+      onPress={() => onSelect(suggestion)}
+      style={({ pressed }) => [
+        styles.row,
+        !isLast && styles.rowBorder,
+        pressed && styles.pressed,
+      ]}
+    >
+      <SearchSuggestionLeadingVisual suggestion={suggestion} t={t} />
+      <AppText variant="bodySmall" numberOfLines={1} style={styles.title}>
+        {suggestion.title}
+      </AppText>
+      <AppText variant="caption" muted style={styles.typeLabel}>
+        {typeLabel}
+      </AppText>
+    </Pressable>
+  );
 }
 
 export const SearchSuggestionList = memo(function SearchSuggestionList({
   suggestions,
   isLoading,
   onSelect,
+  testID = 'search-suggestions-list',
 }: SearchSuggestionListProps) {
   const { t } = useTranslation();
 
-  if (isLoading && suggestions.length === 0) {
-    return (
-      <View style={styles.loading} accessibilityLabel={t('common.loadingSuggestions')}>
-        <ActivityIndicator color={colors.accent} size="small" />
-      </View>
-    );
-  }
+  const listEmpty = useMemo(() => {
+    if (isLoading && suggestions.length === 0) {
+      return (
+        <View style={styles.loading} accessibilityLabel={t('common.loadingSuggestions')}>
+          <ActivityIndicator color={colors.accent} size="small" />
+        </View>
+      );
+    }
 
-  if (suggestions.length === 0) {
-    return (
-      <View style={styles.empty} accessibilityLabel={t('search.suggestions.empty')}>
-        <AppText variant="caption" muted>{t('search.suggestions.empty')}</AppText>
-      </View>
-    );
-  }
+    if (suggestions.length === 0) {
+      return (
+        <View style={styles.empty} accessibilityLabel={t('search.suggestions.empty')}>
+          <AppText variant="caption" muted>{t('search.suggestions.empty')}</AppText>
+        </View>
+      );
+    }
+
+    return null;
+  }, [isLoading, suggestions.length, t]);
 
   return (
-    <View style={styles.container} accessibilityRole="list">
-      {suggestions.map((suggestion, index) => {
-        const typeLabel = formatSuggestionTypeLabel(suggestion);
-
-        return (
-          <Pressable
-            key={`${suggestion.type}-${suggestion.id}`}
-            accessibilityRole="button"
-            accessibilityLabel={t('search.suggestions.searchForTitleType', {
-              title: suggestion.title,
-              type: typeLabel,
-            })}
-            onPress={() => onSelect(suggestion)}
-            style={({ pressed }) => [
-              styles.row,
-              index < suggestions.length - 1 && styles.rowBorder,
-              pressed && styles.pressed,
-            ]}
-          >
-            <SearchSuggestionLeadingVisual suggestion={suggestion} t={t} />
-            <AppText variant="bodySmall" numberOfLines={1} style={styles.title}>
-              {suggestion.title}
-            </AppText>
-            <AppText variant="caption" muted style={styles.typeLabel}>
-              {typeLabel}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
+    <FlatList
+      testID={testID}
+      data={suggestions}
+      keyExtractor={searchSuggestionKeyExtractor}
+      renderItem={({ item, index }) => (
+        <SearchSuggestionRow
+          suggestion={item}
+          isLast={index === suggestions.length - 1}
+          onSelect={onSelect}
+        />
+      )}
+      ListEmptyComponent={listEmpty}
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
+      style={styles.list}
+      contentContainerStyle={[
+        styles.listContent,
+        suggestions.length > 0 && styles.listContentWithItems,
+      ]}
+      accessibilityRole="list"
+      showsVerticalScrollIndicator={false}
+    />
   );
 });
 
 const styles = StyleSheet.create({
-  container: {
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingBottom: spacing.xxl,
+  },
+  listContentWithItems: {
     marginTop: spacing.xs,
     borderRadius: spacing.sm,
     backgroundColor: colors.surfaceElevated,
