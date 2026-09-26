@@ -49,6 +49,14 @@ function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: num
   });
 }
 
+function scrollCarouselToOffset(list: FlatList<HomeItem>, offsetX: number) {
+  fireEvent.scroll(list, {
+    nativeEvent: {
+      contentOffset: { x: offsetX, y: 0 },
+    },
+  });
+}
+
 describe('HomeHeroCarousel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -154,6 +162,58 @@ describe('HomeHeroCarousel', () => {
 
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
     prefetchSpy.mockRestore();
+  });
+
+  it('keeps the indicator on the current slide below 50% manual drag', () => {
+    const items = [
+      createItem({ id: 'hero-1' }),
+      createItem({ id: 'hero-2' }),
+    ];
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+    const slideWidth = getCarouselSlideWidth(list);
+
+    scrollCarouselToOffset(list, slideWidth + slideWidth * 0.4);
+
+    expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
+  });
+
+  it('updates the indicator beyond 50% manual drag before momentum ends', () => {
+    const items = [
+      createItem({ id: 'hero-1' }),
+      createItem({ id: 'hero-2' }),
+    ];
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+    const slideWidth = getCarouselSlideWidth(list);
+
+    scrollCarouselToOffset(list, slideWidth + slideWidth * 0.55);
+
+    expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
+  });
+
+  it('returns the indicator when dragging back below the 50% threshold', () => {
+    const items = [
+      createItem({ id: 'hero-1' }),
+      createItem({ id: 'hero-2' }),
+    ];
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+    const slideWidth = getCarouselSlideWidth(list);
+
+    scrollCarouselToOffset(list, slideWidth + slideWidth * 0.55);
+    scrollCarouselToOffset(list, slideWidth + slideWidth * 0.45);
+
+    expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
   });
 
   it('uses the semantic accent color for the active indicator', () => {

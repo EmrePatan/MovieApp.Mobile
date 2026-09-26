@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BottomTabBarHeightCallbackContext } from 'expo-router/build/react-navigation/bottom-tabs/utils/BottomTabBarHeightCallbackContext';
 import { usePathname, useRouter, useSegments } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useCallback, useContext } from 'react';
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
@@ -33,6 +35,14 @@ export function PrimaryTabBar() {
   const segments = useSegments();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const onTabBarHeightChange = useContext(BottomTabBarHeightCallbackContext);
+
+  const handleTabBarLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      onTabBarHeightChange?.(event.nativeEvent.layout.height);
+    },
+    [onTabBarHeightChange],
+  );
 
   if (resolveBottomNavVisibility(segments) === 'hide') {
     return null;
@@ -50,7 +60,10 @@ export function PrimaryTabBar() {
   };
 
   return (
-    <View style={[styles.container, getTabBarStyle(insets)]}>
+    <View
+      onLayout={handleTabBarLayout}
+      style={[styles.container, getTabBarStyle(insets)]}
+    >
       {PRIMARY_TABS.map((tab) => {
         const isActive = highlightedTab === tab.id;
         const color = isActive ? colors.accent : colors.textMuted;

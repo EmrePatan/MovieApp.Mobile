@@ -14,6 +14,12 @@ import {
 import { HomeHero } from './HomeHero';
 import type { HomeItem, HomeTypeFilter } from '../types';
 import {
+  getActiveIndexFromScrollIndex,
+  getHeroCarouselActiveIndexFromOffset,
+  getScrollIndexForActiveIndex,
+  HERO_CAROUSEL_LOOP_HEAD_INDEX,
+} from '../utils/home-hero-carousel-index';
+import {
   getHomeHeroCardWidth,
   getHomeHeroHeight,
   getHomeHeroSnapInterval,
@@ -26,7 +32,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 6000;
-const LOOP_HEAD_INDEX = 1;
+const SCROLL_EVENT_THROTTLE_MS = 32;
 
 function buildLoopedHeroItems(items: HomeItem[]): HomeItem[] {
   if (items.length <= 1) {
@@ -34,22 +40,6 @@ function buildLoopedHeroItems(items: HomeItem[]): HomeItem[] {
   }
 
   return [items[items.length - 1], ...items, items[0]];
-}
-
-function getActiveIndexFromScrollIndex(scrollIndex: number, itemCount: number): number {
-  if (scrollIndex <= 0) {
-    return itemCount - 1;
-  }
-
-  if (scrollIndex >= itemCount + 1) {
-    return 0;
-  }
-
-  return scrollIndex - LOOP_HEAD_INDEX;
-}
-
-function getScrollIndexForActiveIndex(activeIndex: number): number {
-  return activeIndex + LOOP_HEAD_INDEX;
 }
 
 interface HomeHeroCarouselProps {
@@ -120,7 +110,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     setActiveIndex(0);
     setIsInteracting(false);
     listRef.current?.scrollToOffset({
-      offset: items.length > 1 ? snapInterval * LOOP_HEAD_INDEX : 0,
+      offset: items.length > 1 ? snapInterval * HERO_CAROUSEL_LOOP_HEAD_INDEX : 0,
       animated: false,
     });
   }, [filterKey, heroItemsKey, items.length, snapInterval]);
@@ -134,7 +124,6 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
 
     autoAdvanceTimerRef.current = setTimeout(() => {
       const nextIndex = (activeIndex + 1) % items.length;
-      setActiveIndex(nextIndex);
       listRef.current?.scrollToOffset({
         offset: getScrollIndexForActiveIndex(nextIndex) * snapInterval,
         animated: true,
@@ -196,12 +185,28 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         });
       } else if (scrollIndex === items.length + 1) {
         listRef.current?.scrollToOffset({
-          offset: LOOP_HEAD_INDEX * snapInterval,
+          offset: HERO_CAROUSEL_LOOP_HEAD_INDEX * snapInterval,
           animated: false,
         });
       }
 
       setIsInteracting(false);
+    },
+    [items.length, snapInterval],
+  );
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (items.length <= 1) {
+        return;
+      }
+
+      const nextActiveIndex = getHeroCarouselActiveIndexFromOffset(
+        event.nativeEvent.contentOffset.x,
+        snapInterval,
+        items.length,
+      );
+      setActiveIndex((previous) => (previous === nextActiveIndex ? previous : nextActiveIndex));
     },
     [items.length, snapInterval],
   );
@@ -286,7 +291,9 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         renderItem={renderItem}
         getItemLayout={getItemLayout}
         extraData={activeIndex}
-        initialScrollIndex={LOOP_HEAD_INDEX}
+        initialScrollIndex={HERO_CAROUSEL_LOOP_HEAD_INDEX}
+        onScroll={handleScroll}
+        scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={handleScrollEndDrag}
         onMomentumScrollEnd={handleScrollSettled}

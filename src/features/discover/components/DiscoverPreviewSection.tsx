@@ -41,18 +41,43 @@ export function DiscoverPreviewSection({
   const { t } = useTranslation();
   const resolvedEmptyMessage = emptyMessage ?? t('common.nothingToShow');
   const showHeader = !hideTitle && Boolean(title);
+  const seeAllEnabled = Boolean(onSeeAll) && !isLoading && !isError && items.length > 0;
+
+  const sectionHeader = showHeader ? (
+    <View style={styles.header} accessibilityRole="header">
+      <View style={styles.titleRow}>
+        {icon ? <Ionicons name={icon} size={18} color={colors.accent} /> : null}
+        <View style={styles.titleTextColumn}>
+          <AppText variant="subtitle" style={styles.title}>{title}</AppText>
+          {subtitle ? (
+            <AppText variant="caption" muted>
+              {subtitle}
+            </AppText>
+          ) : null}
+        </View>
+      </View>
+      {onSeeAll ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.seeAllTitle', { title })}
+          accessibilityState={{ disabled: !seeAllEnabled }}
+          disabled={!seeAllEnabled}
+          onPress={onSeeAll}
+          hitSlop={8}
+          style={[styles.seeAllAction, !seeAllEnabled && styles.seeAllActionHidden]}
+        >
+          <AppText variant="bodySmall" style={styles.seeAll}>
+            {t('common.seeAll')}
+          </AppText>
+        </Pressable>
+      ) : null}
+    </View>
+  ) : null;
 
   if (!isLoading && !isError && items.length === 0) {
     return (
       <View style={styles.section} testID={testID}>
-        {showHeader ? (
-        <View style={styles.header}>
-          <View style={styles.titleRow}>
-            {icon ? <Ionicons name={icon} size={18} color={colors.accent} /> : null}
-            <AppText variant="subtitle">{title}</AppText>
-          </View>
-        </View>
-        ) : null}
+        {sectionHeader}
         <AppText variant="bodySmall" muted style={styles.emptyMessage}>
           {resolvedEmptyMessage}
         </AppText>
@@ -62,32 +87,7 @@ export function DiscoverPreviewSection({
 
   return (
     <View style={styles.section} testID={testID}>
-      {showHeader ? (
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          {icon ? <Ionicons name={icon} size={18} color={colors.accent} /> : null}
-          <View>
-            <AppText variant="subtitle">{title}</AppText>
-            {subtitle ? (
-              <AppText variant="caption" muted>
-                {subtitle}
-              </AppText>
-            ) : null}
-          </View>
-        </View>
-        {onSeeAll && !isLoading && !isError && items.length > 0 ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.seeAllTitle', { title })}
-            onPress={onSeeAll}
-          >
-            <AppText variant="bodySmall" style={styles.seeAll}>
-              {t('common.seeAll')}
-            </AppText>
-          </Pressable>
-        ) : null}
-      </View>
-      ) : null}
+      {sectionHeader}
 
       {isLoading ? (
         <FlatList
@@ -164,14 +164,32 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: spacing.sm,
     paddingHorizontal: spacing.lg,
   },
   titleRow: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.sm,
+  },
+  titleTextColumn: {
+    flex: 1,
+    minWidth: 0,
+    flexShrink: 1,
+  },
+  title: {
+    flexShrink: 1,
+  },
+  seeAllAction: {
+    flexShrink: 0,
+    marginTop: 2,
+  },
+  seeAllActionHidden: {
+    opacity: 0,
   },
   seeAll: {
     color: colors.accent,
