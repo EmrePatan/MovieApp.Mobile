@@ -160,10 +160,18 @@ describe('AdvancedDiscoverScreen', () => {
     );
   });
 
-  it('opens filter sheet from filters button', () => {
+  it('returns to discover when closing filters before results exist', () => {
     render(<AdvancedDiscoverScreen />);
 
     fireEvent.press(screen.getByLabelText('Close'));
+
+    expect(mockReplace).toHaveBeenCalledWith('/discover');
+  });
+
+  it('opens filter sheet from filters button', () => {
+    render(<AdvancedDiscoverScreen />);
+
+    fireEvent.press(screen.getByText('Show Results'));
     fireEvent.press(screen.getByLabelText('Filters'));
 
     expect(screen.getByText('Media Type')).toBeTruthy();

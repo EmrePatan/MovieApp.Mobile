@@ -313,7 +313,6 @@ export function AdvancedDiscoverFilterSheet({
 
   const handleApply = () => {
     onApply(draftMediaType, ensureStreamingDraftDefaults(draft, userRegion));
-    onClose();
   };
 
   const handleClear = () => {
@@ -321,7 +320,6 @@ export function AdvancedDiscoverFilterSheet({
     setDraft(createDefaultAdvancedDiscoverFilters());
     setUseYearRange(false);
     onClear();
-    onClose();
   };
 
   return (

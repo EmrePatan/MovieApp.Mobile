@@ -50,6 +50,7 @@ import {
   ADVANCED_DISCOVER_PARAM_KEYS,
   setDiscoveryRouteParams,
 } from '@/features/navigation/discovery-route-params';
+import { PRIMARY_TAB_HREFS } from '@/features/navigation/primary-tab-routes';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
@@ -125,6 +126,7 @@ export default function AdvancedDiscoverScreen() {
   const applyFilters = useCallback(
     (nextMediaType: AdvancedDiscoverMediaType, nextFilters: AdvancedDiscoverFilters) => {
       setHasAppliedFilters(true);
+      setFilterSheetVisible(false);
       replaceDiscoverState({ mediaType: nextMediaType, filters: nextFilters });
     },
     [replaceDiscoverState],
@@ -193,6 +195,15 @@ export default function AdvancedDiscoverScreen() {
   const handleRefresh = useCallback(() => {
     void refetchDiscover();
   }, [refetchDiscover]);
+
+  const handleFilterSheetClose = useCallback(() => {
+    if (!shouldFetchResults) {
+      router.replace(PRIMARY_TAB_HREFS.discover);
+      return;
+    }
+
+    setFilterSheetVisible(false);
+  }, [router, shouldFetchResults]);
 
   const sortLabel = useMemo(() => {
     if (!filters.sort || filters.sort === 'popularity_desc') {
@@ -280,7 +291,7 @@ export default function AdvancedDiscoverScreen() {
       visible={filterSheetVisible}
       mediaType={mediaType}
       filters={filters}
-      onClose={() => setFilterSheetVisible(false)}
+      onClose={handleFilterSheetClose}
       onApply={applyFilters}
       onClear={clearFilters}
     />
