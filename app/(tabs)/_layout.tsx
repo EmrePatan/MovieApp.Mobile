@@ -6,7 +6,7 @@ const hiddenTabScreenOptions = { href: null } as const;
 export default function TabsLayout() {
   return (
     <Tabs
-      tabBar={() => <PrimaryTabBar />}
+      tabBar={(props) => <PrimaryTabBar insets={props.insets} />}
       screenOptions={{
         headerShown: false,
       }}

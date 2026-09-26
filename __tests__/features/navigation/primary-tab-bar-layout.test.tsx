@@ -2,11 +2,8 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { View } from 'react-native';
 import { PrimaryTabBar } from '@/features/navigation/PrimaryTabBar';
-import {
-  BASE_TAB_BAR_HEIGHT,
-  getTabBarTotalMinHeight,
-  tabBarLabelStyle,
-} from '@/features/navigation/tab-bar-style';
+import { resolveTabBarLayoutMetrics } from '@/features/navigation/tab-bar-layout-metrics';
+import { getTabBarTotalMinHeight, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 import { initI18nForTests } from '../../i18n/i18n-test-utils';
 
 const mockInsets = { top: 44, bottom: 34, left: 0, right: 0 };
@@ -54,6 +51,7 @@ describe('PrimaryTabBar layout', () => {
     expect(tabBarContainer).toBeTruthy();
 
     const expectedHeight = getTabBarTotalMinHeight(mockInsets);
+    expect(expectedHeight).toBe(resolveTabBarLayoutMetrics(mockInsets).totalHeight);
 
     fireEvent(tabBarContainer!, 'layout', {
       nativeEvent: { layout: { height: expectedHeight, width: 390 } },
