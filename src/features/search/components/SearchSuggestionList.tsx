@@ -159,54 +159,59 @@ export const SearchSuggestionList = memo(function SearchSuggestionList({
     return null;
   }, [isLoading, suggestions.length, t]);
 
+  const hasSuggestions = suggestions.length > 0;
+
   return (
-    <FlatList
-      testID={testID}
-      data={suggestions}
-      keyExtractor={searchSuggestionKeyExtractor}
-      renderItem={({ item, index }) => (
-        <SearchSuggestionRow
-          suggestion={item}
-          isLast={index === suggestions.length - 1}
-          onSelect={onSelect}
-        />
-      )}
-      ListEmptyComponent={listEmpty}
-      keyboardDismissMode="on-drag"
-      keyboardShouldPersistTaps="handled"
-      style={styles.list}
-      contentContainerStyle={[
-        styles.listContent,
-        suggestions.length > 0 && styles.listContentWithItems,
-      ]}
-      accessibilityRole="list"
-      showsVerticalScrollIndicator={false}
-    />
+    <View style={styles.host}>
+      <FlatList
+        testID={testID}
+        data={suggestions}
+        keyExtractor={searchSuggestionKeyExtractor}
+        renderItem={({ item, index }) => (
+          <SearchSuggestionRow
+            suggestion={item}
+            isLast={index === suggestions.length - 1}
+            onSelect={onSelect}
+          />
+        )}
+        ListEmptyComponent={listEmpty}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        style={styles.list}
+        contentContainerStyle={
+          hasSuggestions ? styles.suggestionsCard : styles.listContentEmpty
+        }
+        accessibilityRole="list"
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 });
 
 const styles = StyleSheet.create({
+  host: {
+    flex: 1,
+    paddingHorizontal: layout.screenPaddingHorizontal,
+  },
   list: {
     flex: 1,
   },
-  listContent: {
-    flexGrow: 1,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingBottom: spacing.xxl,
-  },
-  listContentWithItems: {
+  suggestionsCard: {
     marginTop: spacing.xs,
     borderRadius: spacing.sm,
     backgroundColor: colors.surfaceElevated,
     overflow: 'hidden',
+    paddingBottom: spacing.md,
+  },
+  listContentEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   loading: {
-    marginTop: spacing.xs,
     paddingVertical: spacing.md,
     alignItems: 'center',
   },
   empty: {
-    marginTop: spacing.xs,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     alignItems: 'center',
