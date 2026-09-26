@@ -53,6 +53,8 @@ describe('PrimaryTabBar layout', () => {
     const expectedHeight = getTabBarTotalMinHeight(mockInsets);
     expect(expectedHeight).toBe(resolveTabBarLayoutMetrics(mockInsets).totalHeight);
 
+    expect(expectedHeight).toBeLessThan(44 + mockInsets.bottom);
+
     fireEvent(tabBarContainer!, 'layout', {
       nativeEvent: { layout: { height: expectedHeight, width: 390 } },
     });

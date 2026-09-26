@@ -15,13 +15,13 @@ import {
 } from '@/features/navigation/primary-tab-routes';
 import {
   resolveTabBarLayoutMetrics,
+  resolveTabBarPressHitSlop,
   TAB_BAR_ICON_SIZE,
   TAB_BAR_LABEL_GAP,
   TAB_BAR_ROW_HEIGHT,
 } from '@/features/navigation/tab-bar-layout-metrics';
 import { getTabBarStyle, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 
 type TabConfig = {
   id: PrimaryTabId;
@@ -35,13 +35,6 @@ const PRIMARY_TABS: TabConfig[] = [
   { id: 'library', labelKey: 'tabs.library', icon: 'albums-outline' },
   { id: 'insights', labelKey: 'tabs.insights', icon: 'sparkles-outline' },
 ];
-
-const TAB_PRESSABLE_HIT_SLOP = {
-  top: spacing.sm,
-  bottom: spacing.xs,
-  left: spacing.xs,
-  right: spacing.xs,
-} as const;
 
 interface PrimaryTabBarProps {
   /** Insets from React Navigation tabBar render props (preferred on device). */
@@ -57,6 +50,10 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
   const { t } = useTranslation();
   const onTabBarHeightChange = useContext(BottomTabBarHeightCallbackContext);
   const layoutMetrics = useMemo(() => resolveTabBarLayoutMetrics(insets), [insets]);
+  const tabPressHitSlop = useMemo(
+    () => resolveTabBarPressHitSlop(insets, layoutMetrics.labelBottomToShellBottom),
+    [insets, layoutMetrics.labelBottomToShellBottom],
+  );
 
   const handleTabBarLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -96,7 +93,7 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
               onPress={() => handleTabPress(tab.id)}
-              hitSlop={TAB_PRESSABLE_HIT_SLOP}
+              hitSlop={tabPressHitSlop}
               style={styles.tabButton}
             >
               <Ionicons name={tab.icon} size={TAB_BAR_ICON_SIZE} color={color} />

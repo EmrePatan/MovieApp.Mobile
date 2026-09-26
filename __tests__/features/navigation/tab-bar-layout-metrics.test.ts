@@ -1,44 +1,32 @@
 import {
-  resolveTabBarLayoutMetrics,
-  TAB_BAR_PADDING_TOP,
-  TAB_BAR_ROW_HEIGHT,
-} from '@/features/navigation/tab-bar-layout-metrics';
+  IOS_TAB_BAR_VISUAL_BOTTOM_MAX,
+  IOS_TAB_BAR_VISUAL_BOTTOM_MIN,
+  resolveIosTabBarVisualBottomSpacing,
+} from '@/features/navigation/tab-bar-visual-spacing';
 import { spacing } from '@/theme/spacing';
 
-describe('resolveTabBarLayoutMetrics', () => {
-  it('uses runtime bottom inset as label clearance, not an extra stacked band', () => {
-    const bottomInset = 34;
-    const metrics = resolveTabBarLayoutMetrics({
-      top: 44,
-      bottom: bottomInset,
-      left: 0,
-      right: 0,
-    });
+const TAB_SHELL_TOP_PADDING = spacing.xs;
+const TAB_ROW_HEIGHT = 40;
 
-    expect(metrics.paddingBottom).toBe(bottomInset);
-    expect(metrics.labelBottomToShellBottom).toBe(bottomInset);
-    expect(metrics.totalHeight).toBe(TAB_BAR_PADDING_TOP + TAB_BAR_ROW_HEIGHT + bottomInset);
-    expect(metrics.rowHeight).toBe(TAB_BAR_ROW_HEIGHT);
+describe('resolveIosTabBarVisualBottomSpacing', () => {
+  it('maps a large runtime inset to the compact design range', () => {
+    expect(resolveIosTabBarVisualBottomSpacing(34)).toBe(14);
+    expect(resolveIosTabBarVisualBottomSpacing(34)).toBeLessThan(34);
+    expect(resolveIosTabBarVisualBottomSpacing(34)).toBeGreaterThanOrEqual(IOS_TAB_BAR_VISUAL_BOTTOM_MIN);
+    expect(resolveIosTabBarVisualBottomSpacing(34)).toBeLessThanOrEqual(IOS_TAB_BAR_VISUAL_BOTTOM_MAX);
   });
 
-  it('does not add bottom inset twice to total height', () => {
-    const bottomInset = 21;
-    const metrics = resolveTabBarLayoutMetrics({
-      top: 0,
-      bottom: bottomInset,
-      left: 0,
-      right: 0,
-    });
-
-    expect(metrics.totalHeight - metrics.paddingBottom).toBe(
-      TAB_BAR_PADDING_TOP + TAB_BAR_ROW_HEIGHT,
-    );
+  it('uses normal minimum breathing room when inset is zero', () => {
+    expect(resolveIosTabBarVisualBottomSpacing(0)).toBe(spacing.sm);
+    expect(resolveIosTabBarVisualBottomSpacing(0)).toBeGreaterThan(0);
   });
 
-  it('falls back to minimal padding when bottom inset is zero', () => {
-    const metrics = resolveTabBarLayoutMetrics({ top: 0, bottom: 0, left: 0, right: 0 });
+  it('keeps total shell height below the legacy full-inset composition for B=34', () => {
+    const visual = resolveIosTabBarVisualBottomSpacing(34);
+    const compactTotal = TAB_SHELL_TOP_PADDING + TAB_ROW_HEIGHT + visual;
+    const legacyTotal = TAB_SHELL_TOP_PADDING + TAB_ROW_HEIGHT + 34;
 
-    expect(metrics.paddingBottom).toBe(spacing.xs);
-    expect(metrics.totalHeight).toBe(TAB_BAR_PADDING_TOP + TAB_BAR_ROW_HEIGHT + spacing.xs);
+    expect(compactTotal).toBe(58);
+    expect(compactTotal).toBeLessThan(legacyTotal);
   });
 });
