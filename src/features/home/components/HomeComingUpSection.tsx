@@ -21,7 +21,9 @@ export const HomeComingUpSection = memo(function HomeComingUpSection({
   onSeeAllPress,
 }: HomeComingUpSectionProps) {
   const { t } = useTranslation();
-  const localizedTitle = resolveHomeSectionTitle(section.type, section.title, t);
+  const localizedTitle = resolveHomeSectionTitle(section.type, section.title, t, {
+    comingUpSource: section.comingUpSource,
+  });
 
   const renderItem = useCallback(
     ({ item }: { item: HomeItem }) => (

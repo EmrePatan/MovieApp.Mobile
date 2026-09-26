@@ -8,7 +8,6 @@ describe('invalidateFollowCatalogQueries', () => {
   it('invalidates all following and upcoming catalog page-size caches', () => {
     const queryClient = new QueryClient();
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    const refetchQueries = jest.spyOn(queryClient, 'refetchQueries');
 
     invalidateFollowCatalogQueries(queryClient);
 
@@ -20,10 +19,6 @@ describe('invalidateFollowCatalogQueries', () => {
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: HOME_QUERY_KEY_ROOT,
-    });
-    expect(refetchQueries).toHaveBeenCalledWith({
-      queryKey: HOME_QUERY_KEY_ROOT,
-      type: 'active',
     });
   });
 });

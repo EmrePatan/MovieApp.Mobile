@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getHomeBrowse, getHomePersonalized } from '@/features/home/api/home-api';
 import { getUpcomingCatalog } from '@/features/upcoming/api/upcoming-api';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
+import { resolveHomeSectionTitle } from '@/features/home/utils/resolve-home-section-title';
+import { initI18nForTests, t } from '../../i18n/i18n-test-utils';
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({
@@ -51,6 +53,10 @@ function createWrapper() {
 }
 
 describe('useHomeFeed', () => {
+  beforeAll(async () => {
+    await initI18nForTests('en');
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     (getHomeBrowse as jest.Mock).mockResolvedValue({
@@ -191,6 +197,51 @@ describe('useHomeFeed', () => {
       const comingUp = result.current.mergedSections.find((section) => section.type === 'ComingUp');
       expect(comingUp?.items).toHaveLength(1);
       expect(comingUp?.items[0]?.title).toBe('Avatar 4');
+      expect(comingUp?.comingUpSource).toBe('catalog');
+      expect(
+        resolveHomeSectionTitle('ComingUp', comingUp?.title ?? '', t, {
+          comingUpSource: comingUp?.comingUpSource,
+        }),
+      ).toBe('Coming Up');
+    });
+  });
+
+  it('marks personalized Coming Up with the personalized source for title localization', async () => {
+    (getHomePersonalized as jest.Mock).mockResolvedValue({
+      sections: [
+        {
+          type: 'ComingUp',
+          title: 'Coming Up',
+          displayOrder: 0,
+          items: [
+            {
+              id: 'followed-1',
+              contentType: 'movie',
+              title: 'Followed Release',
+              originalTitle: null,
+              posterUrl: null,
+              backdropUrl: null,
+              releaseDate: '2026-12-19',
+              voteAverage: 0,
+              voteCount: 0,
+            },
+          ],
+        },
+      ],
+      isPersonalized: true,
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    });
+
+    const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      const comingUp = result.current.mergedSections.find((section) => section.type === 'ComingUp');
+      expect(comingUp?.comingUpSource).toBe('personalized');
+      expect(
+        resolveHomeSectionTitle('ComingUp', comingUp?.title ?? '', t, {
+          comingUpSource: comingUp?.comingUpSource,
+        }),
+      ).toBe('Coming Up For You');
     });
   });
 });

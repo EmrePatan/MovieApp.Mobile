@@ -1,10 +1,11 @@
 import { QueryClient } from '@tanstack/react-query';
-import { HOME_QUERY_KEY_ROOT } from '@/features/home/hooks/home-query-keys';
-import type { HomeResponse } from '@/features/home/types';
+import { homePersonalizedQueryKey } from '@/features/home/hooks/useHomePersonalized';
+import type { HomePersonalizedResponse } from '@/features/home/types';
 import { removeFollowedCatalogFromHomeCaches } from '@/features/follows/utils/home-coming-up-cache';
 
-const homeData: HomeResponse = {
-  isPersonalized: false,
+const homeData: HomePersonalizedResponse = {
+  isPersonalized: true,
+  generatedAtUtc: '2026-01-01T00:00:00Z',
   sections: [
     {
       type: 'ComingUp',
@@ -61,11 +62,12 @@ const homeData: HomeResponse = {
 describe('removeFollowedCatalogFromHomeCaches', () => {
   it('removes the unfollowed item from Coming Up and drops the section when empty', () => {
     const queryClient = new QueryClient();
-    queryClient.setQueryData([...HOME_QUERY_KEY_ROOT, 'all', 10], homeData);
+    const queryKey = homePersonalizedQueryKey('all', 10, 'TR');
+    queryClient.setQueryData(queryKey, homeData);
 
     removeFollowedCatalogFromHomeCaches(queryClient, 'movie-id');
 
-    const updated = queryClient.getQueryData<HomeResponse>([...HOME_QUERY_KEY_ROOT, 'all', 10]);
+    const updated = queryClient.getQueryData<HomePersonalizedResponse>(queryKey);
     expect(updated?.sections).toHaveLength(2);
     expect(updated?.sections[0]?.type).toBe('ComingUp');
     expect(updated?.sections[0]?.items).toHaveLength(1);
@@ -74,7 +76,8 @@ describe('removeFollowedCatalogFromHomeCaches', () => {
 
   it('removes Coming Up entirely when the last item is unfollowed', () => {
     const queryClient = new QueryClient();
-    queryClient.setQueryData([...HOME_QUERY_KEY_ROOT, 'all', 10], {
+    const queryKey = homePersonalizedQueryKey('all', 10, 'TR');
+    queryClient.setQueryData(queryKey, {
       ...homeData,
       sections: [
         {
@@ -86,7 +89,7 @@ describe('removeFollowedCatalogFromHomeCaches', () => {
 
     removeFollowedCatalogFromHomeCaches(queryClient, 'movie-id');
 
-    const updated = queryClient.getQueryData<HomeResponse>([...HOME_QUERY_KEY_ROOT, 'all', 10]);
+    const updated = queryClient.getQueryData<HomePersonalizedResponse>(queryKey);
     expect(updated?.sections).toHaveLength(0);
   });
 });

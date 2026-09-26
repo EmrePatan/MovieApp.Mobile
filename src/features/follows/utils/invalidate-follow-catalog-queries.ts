@@ -7,5 +7,4 @@ export function invalidateFollowCatalogQueries(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: FOLLOWING_CATALOG_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: UPCOMING_CATALOG_QUERY_KEY_ROOT });
   void queryClient.invalidateQueries({ queryKey: HOME_QUERY_KEY_ROOT });
-  void queryClient.refetchQueries({ queryKey: HOME_QUERY_KEY_ROOT, type: 'active' });
 }

@@ -286,6 +286,7 @@ export const stage2Tr = {
       newReleases: 'Yeni Vizyon',
       recommendedForYou: 'Senin İçin Önerilen',
       comingUp: 'Yakında',
+      comingUpPersonalized: 'Senin İçin Yakında',
     },
     comingUpBadge: {
       premiere: 'Prömiyer',

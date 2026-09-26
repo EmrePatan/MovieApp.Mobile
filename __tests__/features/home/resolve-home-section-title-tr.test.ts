@@ -11,6 +11,9 @@ describe('resolveHomeSectionTitle (Turkish)', () => {
     expect(resolveHomeSectionTitle('TopRated', 'Top Rated', t)).toBe('En Yüksek Puanlı');
     expect(resolveHomeSectionTitle('NewReleases', 'New Releases', t)).toBe('Yeni Vizyon');
     expect(resolveHomeSectionTitle('ComingUp', 'Coming Up', t)).toBe('Yakında');
+    expect(
+      resolveHomeSectionTitle('ComingUp', 'Coming Up', t, { comingUpSource: 'personalized' }),
+    ).toBe('Senin İçin Yakında');
     expect(resolveHomeSectionTitle('RecommendedForYou', 'Recommended For You', t)).toBe(
       'Senin İçin Önerilen',
     );

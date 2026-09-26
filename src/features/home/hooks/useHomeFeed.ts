@@ -57,7 +57,11 @@ export function useHomeFeed(
 
   const sectionsWithComingUp = useMemo(() => {
     if (hasPersonalizedComingUp) {
-      return mergedSections;
+      return mergedSections.map((section) =>
+        section.type === 'ComingUp'
+          ? { ...section, comingUpSource: 'personalized' as const }
+          : section,
+      );
     }
 
     const catalogItems = comingUpCatalogFallback.data?.items ?? [];
@@ -67,8 +71,11 @@ export function useHomeFeed(
 
     const comingUpSection: HomeSection = {
       type: 'ComingUp',
-      title: resolveHomeSectionTitle('ComingUp', 'Coming Up', t),
+      title: resolveHomeSectionTitle('ComingUp', 'Coming Up', t, {
+        comingUpSource: 'catalog',
+      }),
       displayOrder: 0,
+      comingUpSource: 'catalog',
       items: mapUpcomingCatalogItemsToHomeItems(catalogItems),
     };
 

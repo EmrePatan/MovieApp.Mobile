@@ -1,9 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TvShowFollowStatusResponse, UpsertTvShowFollowRequest } from '../types';
-import {
-  commitTvShowFollowStatus,
-  prepareTvShowFollowMutation,
-} from '../utils/follow-mutation-cache';
+import { commitTvShowFollowStatus } from '../utils/follow-mutation-cache';
 import { createUnfollowedTvFollowStatus } from '../utils/follow-status-defaults';
 import { removeFollowedCatalogFromHomeCaches } from '../utils/home-coming-up-cache';
 import { invalidateFollowCatalogQueries } from '../utils/invalidate-follow-catalog-queries';
@@ -30,11 +27,13 @@ export function useCreateTvShowFollow(tvShowId: string) {
     mutationFn: (request: UpsertTvShowFollowRequest) =>
       resolveTvShowFollowUpsert(tvShowId, request),
     onMutate: async (request) => {
-      const previous = await prepareTvShowFollowMutation(queryClient, tvShowId);
+      const queryKey = tvShowFollowStatusQueryKey(tvShowId);
+      const previous = queryClient.getQueryData<TvShowFollowStatusResponse>(queryKey);
       queryClient.setQueryData<TvShowFollowStatusResponse>(
-        tvShowFollowStatusQueryKey(tvShowId),
+        queryKey,
         applyOptimisticTvFollowPreferences(previous, request),
       );
+      await queryClient.cancelQueries({ queryKey });
       return { previous };
     },
     onError: (_error, _variables, context) => {
@@ -56,11 +55,13 @@ export function useUpdateTvShowFollow(tvShowId: string) {
     mutationFn: (request: UpsertTvShowFollowRequest) =>
       resolveTvShowFollowUpsert(tvShowId, request),
     onMutate: async (request) => {
-      const previous = await prepareTvShowFollowMutation(queryClient, tvShowId);
+      const queryKey = tvShowFollowStatusQueryKey(tvShowId);
+      const previous = queryClient.getQueryData<TvShowFollowStatusResponse>(queryKey);
       queryClient.setQueryData<TvShowFollowStatusResponse>(
-        tvShowFollowStatusQueryKey(tvShowId),
+        queryKey,
         applyOptimisticTvFollowPreferences(previous, request),
       );
+      await queryClient.cancelQueries({ queryKey });
       return { previous };
     },
     onError: (_error, _variables, context) => {
@@ -81,11 +82,14 @@ export function useRemoveTvShowFollow(tvShowId: string) {
   return useMutation({
     mutationFn: () => resolveTvShowFollowRemoval(tvShowId),
     onMutate: async () => {
-      const previous = await prepareTvShowFollowMutation(queryClient, tvShowId);
+      const queryKey = tvShowFollowStatusQueryKey(tvShowId);
+      const previous = queryClient.getQueryData<TvShowFollowStatusResponse>(queryKey);
       queryClient.setQueryData<TvShowFollowStatusResponse>(
-        tvShowFollowStatusQueryKey(tvShowId),
+        queryKey,
         createUnfollowedTvFollowStatus(),
       );
+      removeFollowedCatalogFromHomeCaches(queryClient, tvShowId);
+      await queryClient.cancelQueries({ queryKey });
       return { previous };
     },
     onError: (_error, _variables, context) => {

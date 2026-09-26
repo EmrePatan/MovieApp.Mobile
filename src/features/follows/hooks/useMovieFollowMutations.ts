@@ -1,9 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { MovieFollowStatusResponse } from '../types';
-import {
-  commitMovieFollowStatus,
-  prepareMovieFollowMutation,
-} from '../utils/follow-mutation-cache';
+import { commitMovieFollowStatus } from '../utils/follow-mutation-cache';
 import { createUnfollowedMovieFollowStatus } from '../utils/follow-status-defaults';
 import { removeFollowedCatalogFromHomeCaches } from '../utils/home-coming-up-cache';
 import { invalidateFollowCatalogQueries } from '../utils/invalidate-follow-catalog-queries';
@@ -17,10 +14,12 @@ export function useCreateMovieFollow(movieId: string) {
   return useMutation({
     mutationFn: () => resolveMovieFollowUpsert(movieId),
     onMutate: async () => {
-      const previous = await prepareMovieFollowMutation(queryClient, movieId);
-      queryClient.setQueryData<MovieFollowStatusResponse>(movieFollowStatusQueryKey(movieId), {
+      const queryKey = movieFollowStatusQueryKey(movieId);
+      const previous = queryClient.getQueryData<MovieFollowStatusResponse>(queryKey);
+      queryClient.setQueryData<MovieFollowStatusResponse>(queryKey, {
         isFollowing: true,
       });
+      await queryClient.cancelQueries({ queryKey });
       return { previous };
     },
     onError: (_error, _variables, context) => {
@@ -41,11 +40,14 @@ export function useRemoveMovieFollow(movieId: string) {
   return useMutation({
     mutationFn: () => resolveMovieFollowRemoval(movieId),
     onMutate: async () => {
-      const previous = await prepareMovieFollowMutation(queryClient, movieId);
+      const queryKey = movieFollowStatusQueryKey(movieId);
+      const previous = queryClient.getQueryData<MovieFollowStatusResponse>(queryKey);
       queryClient.setQueryData<MovieFollowStatusResponse>(
-        movieFollowStatusQueryKey(movieId),
+        queryKey,
         createUnfollowedMovieFollowStatus(),
       );
+      removeFollowedCatalogFromHomeCaches(queryClient, movieId);
+      await queryClient.cancelQueries({ queryKey });
       return { previous };
     },
     onError: (_error, _variables, context) => {

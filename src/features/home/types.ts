@@ -41,11 +41,15 @@ export interface HomeItem {
   episodeName?: string | null;
 }
 
+export type HomeComingUpSource = 'personalized' | 'catalog';
+
 export interface HomeSection {
   type: HomeSectionType;
   title: string;
   items: HomeItem[];
   displayOrder: number;
+  /** When set on ComingUp, selects the Home rail title (followed vs catalog preview). */
+  comingUpSource?: HomeComingUpSource;
 }
 
 export interface HomeResponse {

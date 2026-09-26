@@ -286,6 +286,7 @@ export const stage2En = {
       newReleases: 'New Releases',
       recommendedForYou: 'Recommended For You',
       comingUp: 'Coming Up',
+      comingUpPersonalized: 'Coming Up For You',
     },
     comingUpBadge: {
       premiere: 'Premiere',

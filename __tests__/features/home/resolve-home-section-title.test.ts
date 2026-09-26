@@ -7,6 +7,9 @@ describe('resolveHomeSectionTitle', () => {
     expect(resolveHomeSectionTitle('TopRated', 'Top Rated', t)).toBe('Top Rated');
     expect(resolveHomeSectionTitle('NewReleases', 'New Releases', t)).toBe('New Releases');
     expect(resolveHomeSectionTitle('ComingUp', 'Coming Up', t)).toBe('Coming Up');
+    expect(
+      resolveHomeSectionTitle('ComingUp', 'Coming Up', t, { comingUpSource: 'personalized' }),
+    ).toBe('Coming Up For You');
   });
 
   it('falls back to the API title for unknown section types', () => {

@@ -3,7 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { resolveMovieFollowRemoval } from '@/features/follows/utils/resolve-follow-removal';
 import { resolveMovieFollowUpsert } from '@/features/follows/utils/resolve-movie-follow-upsert';
+import { homePersonalizedQueryKey } from '@/features/home/hooks/useHomePersonalized';
 import { movieFollowStatusQueryKey } from '@/features/follows/hooks/follow-query-keys';
+import { removeFollowedCatalogFromHomeCaches } from '@/features/follows/utils/home-coming-up-cache';
 import {
   useCreateMovieFollow,
   useRemoveMovieFollow,
@@ -24,6 +26,8 @@ jest.mock('@/features/follows/utils/invalidate-follow-catalog-queries', () => ({
 jest.mock('@/features/follows/utils/home-coming-up-cache', () => ({
   removeFollowedCatalogFromHomeCaches: jest.fn(),
 }));
+
+const homePersonalizedKey = homePersonalizedQueryKey('all', 10, 'TR');
 
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
@@ -86,6 +90,52 @@ describe('movie follow mutations', () => {
     expect(queryClient.getQueryData(movieFollowStatusQueryKey(movieId))).toEqual({
       isFollowing: false,
     });
+  });
+
+  it('optimistically patches home Coming Up before remove resolves', async () => {
+    (resolveMovieFollowRemoval as jest.Mock).mockImplementation(
+      () => new Promise(() => undefined),
+    );
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    queryClient.setQueryData(movieFollowStatusQueryKey(movieId), { isFollowing: true });
+    queryClient.setQueryData(homePersonalizedKey, {
+      isPersonalized: true,
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+      sections: [
+        {
+          type: 'ComingUp',
+          title: 'Coming Up',
+          displayOrder: 0,
+          items: [
+            {
+              id: movieId,
+              contentType: 'movie',
+              title: 'Future Movie',
+              originalTitle: null,
+              posterUrl: null,
+              backdropUrl: null,
+              releaseDate: '2026-12-01',
+              voteAverage: 0,
+              voteCount: 0,
+            },
+          ],
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useRemoveMovieFollow(movieId), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    result.current.mutate();
+
+    await waitFor(() =>
+      expect(removeFollowedCatalogFromHomeCaches).toHaveBeenCalledWith(queryClient, movieId),
+    );
+    expect(result.current.isPending).toBe(true);
   });
 
   it('optimistically unfollows before remove resolves', async () => {

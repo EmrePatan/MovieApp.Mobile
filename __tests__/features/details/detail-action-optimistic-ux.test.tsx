@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { addMovieFavorite } from '@/features/favorites/api/favorites-api';
 import { FavoriteButton } from '@/features/favorites/components/FavoriteButton';
 import { favoriteStatusQueryKey } from '@/features/favorites/hooks/favorite-query-keys';
-import { createMovieFollow } from '@/features/follows/api/movie-follow-api';
+import { createMovieFollow, removeMovieFollow } from '@/features/follows/api/movie-follow-api';
 import { MovieFollowButton } from '@/features/follows/components/MovieFollowButton';
 import { movieFollowStatusQueryKey } from '@/features/follows/hooks/follow-query-keys';
 import { markMovieWatched } from '@/features/watch-history/api/watch-history-api';
@@ -179,6 +179,34 @@ describe('detail action optimistic UX integration', () => {
 
     resolveWatched();
     await waitFor(() => expect(markMovieWatched).toHaveBeenCalledWith(movieId));
+  });
+
+  it('movie unfollow keeps the alert off while mutation is pending', async () => {
+    let resolveRemove!: () => void;
+    (removeMovieFollow as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRemove = () => resolve({ isFollowing: false });
+        }),
+    );
+
+    const queryClient = createQueryClient();
+    queryClient.setQueryData(movieFollowStatusQueryKey(movieId), { isFollowing: true });
+
+    renderWithQueryClient(<MovieFollowButton movieId={movieId} />, queryClient);
+
+    fireEvent.press(screen.getByLabelText('Release alert on'));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Notify me when released')).toBeTruthy();
+    });
+    expect(screen.getByLabelText('Notify me when released').props.accessibilityState.busy).toBe(
+      true,
+    );
+
+    resolveRemove();
+    await waitFor(() => expect(removeMovieFollow).toHaveBeenCalledWith(movieId));
+    expect(screen.getByLabelText('Notify me when released')).toBeTruthy();
   });
 
   it('movie follow updates icon immediately while mutation is pending', async () => {
