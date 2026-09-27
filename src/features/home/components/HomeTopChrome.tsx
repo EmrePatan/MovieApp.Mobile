@@ -13,7 +13,7 @@ export function HomeTopChrome() {
         { marginBottom: -headerLayout.heroOffsetCompensation },
       ]}
     >
-      <HomeHeader layout={headerLayout} />
+      <HomeHeader />
     </View>
   );
 }

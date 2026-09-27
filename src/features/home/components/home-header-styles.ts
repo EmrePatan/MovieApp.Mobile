@@ -1,9 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
+import { HOME_HEADER_BAR_HEIGHT } from '../utils/home-header-layout';
 
-export const HOME_HEADER_COMPACT_TARGET = 36;
+export { HOME_HEADER_BAR_HEIGHT };
+export const HOME_HEADER_COMPACT_TARGET = 40;
 
 export const homeHeaderStyles = StyleSheet.create({
   shell: {
@@ -17,33 +19,41 @@ export const homeHeaderStyles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
   },
-  brandBlock: {
+  headerBar: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    minHeight: HOME_HEADER_COMPACT_TARGET,
-    paddingRight: spacing.md,
-  },
-  actionCluster: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    borderWidth: 1,
-    borderColor: colors.accentTint18,
+    minHeight: HOME_HEADER_BAR_HEIGHT,
+    borderRadius: HOME_HEADER_BAR_HEIGHT / 2,
+    backgroundColor: colors.accentSurface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderAccent,
+    paddingRight: spacing.xs,
   },
-  actionClusterOverlay: {
-    backgroundColor: 'rgba(196, 163, 90, 0.16)',
+  headerBarOverlay: {
+    backgroundColor: 'rgba(20, 20, 28, 0.82)',
     borderColor: colors.borderAccent,
   },
+  searchSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: HOME_HEADER_BAR_HEIGHT,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.sm,
+  },
+  searchPlaceholder: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 20,
+    color: colors.textMuted,
+  },
   actionDivider: {
-    width: 1,
-    height: 20,
+    width: StyleSheet.hairlineWidth,
+    alignSelf: 'stretch',
+    marginVertical: spacing.sm + spacing.xs,
     backgroundColor: colors.borderSubtle,
   },
 });

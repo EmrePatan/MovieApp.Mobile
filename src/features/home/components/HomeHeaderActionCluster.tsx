@@ -1,14 +1,16 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AppText } from '@/components/common/AppText';
 import { homeHeaderStyles } from './home-header-styles';
 import { HomeHeaderIconButton } from './HomeHeaderIconButton';
 import { HomeHeaderProfileAvatar } from './HomeHeaderProfileAvatar';
-import { GlobalSearchIconButton } from '@/features/navigation/components/GlobalSearchEntry';
+import { openSearch } from '@/features/navigation/search-navigation';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { useUnreadNotificationCount } from '@/features/notifications/hooks/useUnreadNotificationCount';
 import { colors } from '@/theme/colors';
+import { interaction } from '@/theme/interaction';
 
 interface HomeHeaderActionClusterProps {
   overlay?: boolean;
@@ -36,16 +38,29 @@ export function HomeHeaderActionCluster({ overlay = false }: HomeHeaderActionClu
     badgeLabel == null
       ? t('common.openNotifications')
       : t('common.openNotificationsUnread', { count: badgeLabel });
-  const iconSize = overlay ? 20 : 22;
+  const iconSize = overlay ? 20 : 23;
 
   return (
     <View
       style={[
-        homeHeaderStyles.actionCluster,
-        overlay && homeHeaderStyles.actionClusterOverlay,
+        homeHeaderStyles.headerBar,
+        overlay && homeHeaderStyles.headerBarOverlay,
       ]}
     >
-      <GlobalSearchIconButton origin="home" overlay={overlay} compact />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('home.search.accessibility')}
+        onPress={() => openSearch(router, 'home')}
+        style={({ pressed }) => [
+          homeHeaderStyles.searchSection,
+          pressed && { opacity: interaction.subtlePressedOpacity },
+        ]}
+      >
+        <Ionicons name="search-outline" size={iconSize} color={colors.textPrimary} />
+        <AppText variant="bodySmall" numberOfLines={1} style={homeHeaderStyles.searchPlaceholder}>
+          {t('home.search.placeholder')}
+        </AppText>
+      </Pressable>
       <View style={homeHeaderStyles.actionDivider} />
       <HomeHeaderIconButton
         accessibilityLabel={notificationsAccessibilityLabel}

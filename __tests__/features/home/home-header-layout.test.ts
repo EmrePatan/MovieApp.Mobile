@@ -1,34 +1,27 @@
 import {
-  getHomeBrandLeftInset,
-  getHomeBrandLogoWidth,
+  HOME_HEADER_BAR_HEIGHT,
+  getHomeHeaderBarHeight,
   getHomeHeaderHeroOffsetCompensation,
   getHomeHeaderLayout,
 } from '@/features/home/utils/home-header-layout';
 
 describe('home header layout', () => {
-  it('scales logo width within safe bounds across phone widths', () => {
-    expect(getHomeBrandLogoWidth(320)).toBe(148);
-    expect(getHomeBrandLogoWidth(390)).toBe(157);
-    expect(getHomeBrandLogoWidth(430)).toBe(176);
-    expect(getHomeBrandLogoWidth(520)).toBe(196);
+  it('uses a fixed premium bar height across phone widths', () => {
+    expect(getHomeHeaderBarHeight()).toBe(HOME_HEADER_BAR_HEIGHT);
+    expect(getHomeHeaderLayout(320).barHeight).toBe(HOME_HEADER_BAR_HEIGHT);
+    expect(getHomeHeaderLayout(430).barHeight).toBe(HOME_HEADER_BAR_HEIGHT);
   });
 
-  it('keeps hero offset tied to logo height rather than a fixed constant', () => {
+  it('keeps hero offset tied to bar height rather than a fixed constant', () => {
     const compact = getHomeHeaderLayout(320);
     const regular = getHomeHeaderLayout(430);
 
     expect(compact.heroOffsetCompensation).toBeGreaterThan(0);
-    expect(regular.heroOffsetCompensation).toBeGreaterThanOrEqual(compact.heroOffsetCompensation);
+    expect(regular.heroOffsetCompensation).toBe(compact.heroOffsetCompensation);
   });
 
-  it('nudges the brand left using spacing tokens with a smaller inset on narrow screens', () => {
-    expect(getHomeBrandLeftInset(320)).toBe(-16);
-    expect(getHomeBrandLeftInset(390)).toBe(-20);
-    expect(getHomeBrandLeftInset(390)).toBeLessThan(getHomeBrandLeftInset(320));
-  });
-
-  it('derives hero compensation from logo height', () => {
+  it('derives hero compensation from bar height', () => {
     expect(getHomeHeaderHeroOffsetCompensation(45)).toBe(0);
-    expect(getHomeHeaderHeroOffsetCompensation(61)).toBe(16);
+    expect(getHomeHeaderHeroOffsetCompensation(54)).toBe(9);
   });
 });
