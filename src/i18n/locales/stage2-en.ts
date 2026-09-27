@@ -796,6 +796,7 @@ export const stage2En = {
       knownForEmpty: 'No acting credits are available yet.',
       filmographyOpenError: 'Could not open this title right now. Please try again.',
       collectionParts: 'Movies in this collection',
+      allMoviesInSeries: 'All Films in the Series',
       collectionEmpty: 'No movies are available in this collection yet.',
       seasons: 'Seasons',
       seasonsWithCount: 'Seasons ({{count}})',
@@ -851,6 +852,7 @@ export const stage2En = {
     },
     collection: {
       partOf: 'Part of {{name}}',
+      loadError: 'Unable to load series films. Please try again.',
     },
     notificationsPermission: {
       title: 'Enable notifications',

@@ -814,6 +814,7 @@ export const stage2Fr = {
       knownForEmpty: 'Aucun crédit d\'interprétation disponible pour le moment.',
       filmographyOpenError: 'Impossible d\'ouvrir ce titre pour le moment. Veuillez réessayer.',
       collectionParts: 'Films de cette collection',
+      allMoviesInSeries: 'Tous les films de la saga',
       collectionEmpty: 'Aucun film disponible dans cette collection pour le moment.',
       seasons: 'Saisons',
       seasonsWithCount: 'Saisons ({{count}})',
@@ -867,6 +868,7 @@ export const stage2Fr = {
     },
     collection: {
       partOf: 'Fait partie de {{name}}',
+      loadError: 'Impossible de charger les films de la saga. Veuillez réessayer.',
     },
     notificationsPermission: {
       title: 'Activer les notifications',

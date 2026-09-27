@@ -22,6 +22,35 @@ export function resolveTvShowStatusTranslationKey(
   return TV_SHOW_STATUS_I18N_KEYS[normalized] ?? null;
 }
 
+export type TvShowStatusKind =
+  | 'returningSeries'
+  | 'inProduction'
+  | 'ended'
+  | 'canceled'
+  | 'pilot'
+  | 'planned';
+
+const TV_SHOW_STATUS_KINDS: Record<string, TvShowStatusKind> = {
+  'returning series': 'returningSeries',
+  'in production': 'inProduction',
+  ended: 'ended',
+  canceled: 'canceled',
+  cancelled: 'canceled',
+  pilot: 'pilot',
+  planned: 'planned',
+};
+
+export function resolveTvShowStatusKind(
+  apiStatus: string | null | undefined,
+): TvShowStatusKind | null {
+  const normalized = apiStatus?.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  return TV_SHOW_STATUS_KINDS[normalized] ?? null;
+}
+
 export function translateTvShowStatus(
   apiStatus: string | null | undefined,
   t: TFunction,

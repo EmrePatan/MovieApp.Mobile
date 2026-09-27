@@ -1,4 +1,7 @@
-import { translateTvShowStatus } from '@/features/details/tv/utils/tv-show-status';
+import {
+  resolveTvShowStatusKind,
+  translateTvShowStatus,
+} from '@/features/details/tv/utils/tv-show-status';
 import { ensureI18nInitialized, i18n } from '@/i18n';
 
 describe('tv show status localization', () => {
@@ -25,5 +28,11 @@ describe('tv show status localization', () => {
     expect(translateTvShowStatus('   ', i18n.t)).toBeNull();
     expect(translateTvShowStatus('Rumored', i18n.t)).toBeNull();
     expect(translateTvShowStatus('Devam Ediyor', i18n.t)).toBeNull();
+    expect(resolveTvShowStatusKind('Rumored')).toBeNull();
+  });
+
+  it('resolves status kind for bar theming', () => {
+    expect(resolveTvShowStatusKind('Ended')).toBe('ended');
+    expect(resolveTvShowStatusKind('Returning Series')).toBe('returningSeries');
   });
 });

@@ -814,6 +814,7 @@ export const stage2Tr = {
       knownForEmpty: 'Henüz oyunculuk kredisi yok.',
       filmographyOpenError: 'Bu başlık şu anda açılamadı. Lütfen tekrar dene.',
       collectionParts: 'Bu koleksiyondaki filmler',
+      allMoviesInSeries: 'Serinin Tüm Filmleri',
       collectionEmpty: 'Bu koleksiyonda henüz film yok.',
       seasons: 'Sezonlar',
       seasonsWithCount: 'Sezonlar ({{count}})',
@@ -868,6 +869,7 @@ export const stage2Tr = {
     },
     collection: {
       partOf: '{{name}} koleksiyonunun bir parçası',
+      loadError: 'Seri filmleri yüklenemedi. Lütfen tekrar deneyin.',
     },
     notificationsPermission: {
       title: 'Bildirimleri aç',

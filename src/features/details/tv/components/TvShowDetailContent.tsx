@@ -13,7 +13,7 @@ import { CatalogGallerySection } from '@/features/gallery/components/CatalogGall
 import { useTvShowGallery } from '@/features/gallery/hooks/useGallery';
 import { buildTvGalleryRoute } from '@/features/details/shared/routes';
 import { SeasonList } from './SeasonList';
-import { TvShowStatusBadge } from './TvShowStatusBadge';
+import { TvShowStatusPosterBar } from './TvShowStatusPosterBar';
 import { formatTvDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { TvShowDetailsResponse } from '../types';
 
@@ -39,7 +39,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         backdropPath={show.backdropPath}
         metadataLine={metadataLine}
         genres={show.genres}
-        identityAccessory={<TvShowStatusBadge status={show.status} />}
+        posterFooter={<TvShowStatusPosterBar status={show.status} />}
         posterAccessibilityLabel={t('common.posterAccessibility', { title: show.title })}
         trailer={{ contentType: 'tv', contentId: show.id }}
       />

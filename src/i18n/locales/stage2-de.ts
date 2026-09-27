@@ -814,6 +814,7 @@ export const stage2De = {
       knownForEmpty: 'Noch keine Schauspiel-Credits verfügbar.',
       filmographyOpenError: 'Titel konnte gerade nicht geöffnet werden. Bitte versuche es erneut.',
       collectionParts: 'Filme in dieser Sammlung',
+      allMoviesInSeries: 'Alle Filme der Reihe',
       collectionEmpty: 'In dieser Sammlung sind noch keine Filme verfügbar.',
       seasons: 'Staffeln',
       seasonsWithCount: 'Staffeln ({{count}})',
@@ -867,6 +868,7 @@ export const stage2De = {
     },
     collection: {
       partOf: 'Teil von {{name}}',
+      loadError: 'Filme der Reihe konnten nicht geladen werden. Bitte erneut versuchen.',
     },
     notificationsPermission: {
       title: 'Benachrichtigungen aktivieren',

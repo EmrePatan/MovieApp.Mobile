@@ -814,6 +814,7 @@ export const stage2It = {
       knownForEmpty: 'Nessun credito recitativo disponibile.',
       filmographyOpenError: 'Impossibile aprire questo titolo ora. Riprova.',
       collectionParts: 'Film in questa collezione',
+      allMoviesInSeries: 'Tutti i film della saga',
       collectionEmpty: 'Nessun film disponibile in questa collezione.',
       seasons: 'Stagioni',
       seasonsWithCount: 'Stagioni ({{count}})',
@@ -867,6 +868,7 @@ export const stage2It = {
     },
     collection: {
       partOf: 'Parte di {{name}}',
+      loadError: 'Impossibile caricare i film della saga. Riprova.',
     },
     notificationsPermission: {
       title: 'Attiva notifiche',

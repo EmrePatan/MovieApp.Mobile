@@ -9,7 +9,7 @@ import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
-import { CollectionLinkRow } from '@/features/details/collection/components/CollectionLinkRow';
+import { CollectionPartsSection } from '@/features/details/collection/components/CollectionPartsSection';
 import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
 import { useMovieGallery } from '@/features/gallery/hooks/useGallery';
 import { buildMovieGalleryRoute } from '@/features/details/shared/routes';
@@ -46,7 +46,6 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         showWatched={movie.isReleased}
         showReleaseAlert={movie.canSetReleaseAlert}
       />
-      <CollectionLinkRow collection={movie.collection} />
       <DetailOverview overview={movie.overview} />
       {movie.isReleased ? (
         <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
@@ -63,6 +62,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         seeAllRoute={buildMovieGalleryRoute(movie.id)}
       />
       <CastRail contentType="movie" contentId={movie.id} title={movie.title} />
+      <CollectionPartsSection collection={movie.collection} />
       <SimilarContentSection contentType="movie" contentId={movie.id} />
     </View>
   );

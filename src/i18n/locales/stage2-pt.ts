@@ -814,6 +814,7 @@ export const stage2Pt = {
       knownForEmpty: 'Nenhum crédito de atuação disponível ainda.',
       filmographyOpenError: 'Não foi possível abrir este título agora. Tente novamente.',
       collectionParts: 'Filmes desta coleção',
+      allMoviesInSeries: 'Todos os filmes da saga',
       collectionEmpty: 'Nenhum filme disponível nesta coleção ainda.',
       seasons: 'Temporadas',
       seasonsWithCount: 'Temporadas ({{count}})',
@@ -867,6 +868,7 @@ export const stage2Pt = {
     },
     collection: {
       partOf: 'Parte de {{name}}',
+      loadError: 'Não foi possível carregar os filmes da saga. Tente novamente.',
     },
     notificationsPermission: {
       title: 'Ativar notificações',
