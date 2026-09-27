@@ -10,8 +10,9 @@ import {
 } from '@/features/library/navigation/library-stack-navigation';
 import { isReviewsDetailRoute } from '../navigation/reviews-detail-navigation';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { DetailNeutralIconControl } from './DetailNeutralIconControl';
 
 interface DetailBackButtonProps {
   label?: string;
@@ -61,7 +62,9 @@ export function DetailBackButton({
           pressed && styles.pressed,
         ]}
       >
-        <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
+        <DetailNeutralIconControl>
+          <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
+        </DetailNeutralIconControl>
       </Pressable>
     );
   }
@@ -104,14 +107,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     zIndex: 20,
-    width: interaction.touchTarget,
-    height: interaction.touchTarget,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(10, 10, 15, 0.72)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.14)',
   },
   pressed: {
     opacity: interaction.pressedOpacity,

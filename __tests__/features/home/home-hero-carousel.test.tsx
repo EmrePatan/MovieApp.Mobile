@@ -1,10 +1,8 @@
 import React from 'react';
-import { FlatList, Image, StyleSheet } from 'react-native';
+import { FlatList, Image } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
-import { colors } from '@/theme/colors';
-
 const mockPrefetchQuery = jest.fn();
 
 jest.mock('@tanstack/react-query', () => ({
@@ -216,17 +214,4 @@ describe('HomeHeroCarousel', () => {
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
   });
 
-  it('uses the semantic accent color for the active indicator', () => {
-    const items = [
-      createItem({ id: 'hero-1' }),
-      createItem({ id: 'hero-2' }),
-    ];
-
-    const { getByTestId } = render(
-      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
-    );
-
-    const activeStyle = StyleSheet.flatten(getByTestId('hero-indicator-active').props.style);
-    expect(activeStyle.backgroundColor).toBe(colors.accent);
-  });
 });

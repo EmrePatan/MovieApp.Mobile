@@ -48,7 +48,6 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
         accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-        elevated
       />
       <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>

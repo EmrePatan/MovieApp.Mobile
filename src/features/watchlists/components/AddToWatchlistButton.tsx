@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
+import { DetailFramedIconControl } from '@/features/details/shared/components/DetailFramedIconControl';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useWatchlistMembership } from '../hooks/useWatchlists';
@@ -100,21 +101,27 @@ export function AddToWatchlistButton({
           disabled={isBusy}
           onPress={handlePress}
           style={({ pressed }) => [
-            styles.iconButton,
-            active && styles.iconButtonActive,
             pressed && !isBusy && styles.pressed,
             isBusy && styles.disabled,
           ]}
         >
-          {isBusy ? (
-            <ActivityIndicator color={colors.accent} size="small" />
-          ) : (
-            <Ionicons
-              name={active ? 'bookmark' : 'bookmark-outline'}
-              size={20}
-              color={active ? colors.accent : colors.textPrimary}
-            />
-          )}
+          <DetailFramedIconControl
+            size={44}
+            borderRadius={borderRadius.md}
+            variant={active ? 'gold' : 'neutral'}
+            glow={active}
+            surfaceColor={active ? colors.accentTint12 : colors.surfaceElevated}
+          >
+            {isBusy ? (
+              <ActivityIndicator color={colors.accent} size="small" />
+            ) : (
+              <Ionicons
+                name={active ? 'bookmark' : 'bookmark-outline'}
+                size={20}
+                color={active ? colors.accent : colors.textPrimary}
+              />
+            )}
+          </DetailFramedIconControl>
         </Pressable>
       ) : (
         <AppButton
@@ -140,20 +147,6 @@ const styles = StyleSheet.create({
   },
   button: {
     minHeight: 48,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconButtonActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
   },
   buttonActive: {
     borderColor: colors.accent,

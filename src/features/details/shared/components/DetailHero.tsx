@@ -6,13 +6,13 @@ import { AppText } from '@/components/common/AppText';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { CatalogImage } from './CatalogImage';
+import { DetailHeroPosterFrame } from './DetailHeroPosterFrame';
 import { DetailMetadataRow } from './DetailMetadataRow';
 import { DetailHeroMedia } from './DetailHeroMedia';
 import { translateGenreNames } from '@/i18n/catalog-labels';
 import { shouldShowOriginalTitle } from '@/utils/format';
 import { layout } from '@/theme/layout';
-import { shadows } from '@/theme/shadows';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
 export interface DetailHeroProps {
@@ -127,7 +127,7 @@ export const DetailHero = memo(function DetailHero({
         <View style={styles.heroIdentity}>
           <View style={styles.titleRow}>
             {showPoster && posterNode ? (
-              <View style={styles.posterFrame}>{posterNode}</View>
+              <DetailHeroPosterFrame>{posterNode}</DetailHeroPosterFrame>
             ) : null}
             <View style={styles.titleBlock}>
               <AppText variant="title" numberOfLines={3}>
@@ -141,7 +141,7 @@ export const DetailHero = memo(function DetailHero({
               <DetailMetadataRow value={metadataLine} />
               {genres.length > 0 ? (
                 <AppText variant="caption" muted numberOfLines={2}>
-                  {translateGenreNames(genres).join(' · ')}
+                  {translateGenreNames(genres).join(' ? ')}
                 </AppText>
               ) : null}
               {identityAccessory}
@@ -200,12 +200,6 @@ const styles = StyleSheet.create({
   },
   posterPressed: {
     opacity: interaction.pressedOpacity,
-  },
-  posterFrame: {
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: 'rgba(196, 163, 90, 0.52)',
-    ...shadows.accentGlowSoft,
   },
 });
 

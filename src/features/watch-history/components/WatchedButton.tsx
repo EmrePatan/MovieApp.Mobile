@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { DetailCircularAction } from '@/features/details/shared/components/DetailCircularAction';
+import { DetailFramedIconControl } from '@/features/details/shared/components/DetailFramedIconControl';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { useEpisodeWatchStatus } from '../hooks/useEpisodeWatchStatus';
@@ -157,40 +158,33 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
         disabled={isInteractionDisabled}
         onPress={handlePress}
         style={({ pressed }) => [
-          styles.button,
-          { width: size, height: size },
-          active && styles.buttonActive,
           pressed && !isInteractionDisabled && styles.pressed,
           isInteractionDisabled && styles.disabled,
         ]}
       >
-        {isInitialLoading ? (
-          <ActivityIndicator color={colors.accent} size="small" />
-        ) : (
-          <Ionicons
-            name={active ? 'checkmark-circle' : 'checkmark-circle-outline'}
-            size={22}
-            color={active ? colors.accent : colors.textPrimary}
-          />
-        )}
+        <DetailFramedIconControl
+          size={size}
+          borderRadius={borderRadius.md}
+          variant={active ? 'gold' : 'neutral'}
+          glow={active}
+          surfaceColor={active ? colors.accentTint12 : colors.surfaceElevated}
+        >
+          {isInitialLoading ? (
+            <ActivityIndicator color={colors.accent} size="small" />
+          ) : (
+            <Ionicons
+              name={active ? 'checkmark-circle' : 'checkmark-circle-outline'}
+              size={22}
+              color={active ? colors.accent : colors.textPrimary}
+            />
+          )}
+        </DetailFramedIconControl>
       </Pressable>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
-  },
   pressed: {
     opacity: interaction.pressedOpacity,
   },

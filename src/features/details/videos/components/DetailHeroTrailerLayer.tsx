@@ -8,9 +8,10 @@ import { extractYouTubeVideoIdFromWatchUrl } from '../utils/extract-youtube-vide
 import { isValidTrailerWatchUrl } from '../utils/validate-trailer-watch-url';
 import { DetailTrailerPlayAffordance } from './DetailTrailerPlayAffordance';
 import { InlineYoutubeTrailerPlayer } from './InlineYoutubeTrailerPlayer';
+import { DetailNeutralIconControl } from '@/features/details/shared/components/DetailNeutralIconControl';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 interface DetailHeroTrailerLayerProps {
   contentType: 'movie' | 'tv';
@@ -111,9 +112,11 @@ export function DetailHeroTrailerLayer({
             accessibilityRole="button"
             accessibilityLabel={t('common.close')}
             onPress={closeTrailer}
-            style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
+            style={({ pressed }) => [pressed && styles.closeButtonPressed]}
           >
-            <Ionicons name="close" size={20} color={colors.textPrimary} />
+            <DetailNeutralIconControl surfaceColor="rgba(0, 0, 0, 0.58)">
+              <Ionicons name="close" size={20} color={colors.textPrimary} />
+            </DetailNeutralIconControl>
           </Pressable>
         </View>
       ) : null}
@@ -126,16 +129,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.md,
     zIndex: 12,
-  },
-  closeButton: {
-    width: interaction.touchTarget,
-    height: interaction.touchTarget,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   closeButtonPressed: {
     opacity: interaction.subtlePressedOpacity,

@@ -25,6 +25,7 @@ import {
 import { ZoomableGalleryImage } from './ZoomableGalleryImage';
 import type { GalleryImage } from '../types';
 import { galleryImageKey } from '../utils/gallery-images';
+import { DetailNeutralIconControl } from '@/features/details/shared/components/DetailNeutralIconControl';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -207,7 +208,9 @@ export function ImageViewerModal({
               ]}
               testID="gallery-image-viewer-close"
             >
-              <Ionicons name="close" size={24} color={colors.textPrimary} />
+              <DetailNeutralIconControl surfaceColor="rgba(10, 10, 15, 0.85)">
+                <Ionicons name="close" size={24} color={colors.textPrimary} />
+              </DetailNeutralIconControl>
             </Pressable>
 
             <View
@@ -244,14 +247,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex: 100,
     elevation: 100,
-    width: interaction.touchTarget,
-    height: interaction.touchTarget,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(10, 10, 15, 0.85)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   pressed: {
     opacity: interaction.pressedOpacity,

@@ -5,6 +5,8 @@ import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
+import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '../detailDirectionalFrame';
+import { DetailDirectionalFrame } from './DetailDirectionalFrame';
 
 interface BackdropImageProps {
   path: string | null | undefined;
@@ -47,6 +49,8 @@ interface CatalogImageProps {
   height: number;
   accessibilityLabel?: string;
   rounded?: boolean;
+  directionalFrame?: boolean;
+  directionalFrameGlow?: boolean;
 }
 
 export const CatalogImage = memo(function CatalogImage({
@@ -55,18 +59,27 @@ export const CatalogImage = memo(function CatalogImage({
   height,
   accessibilityLabel,
   rounded = true,
+  directionalFrame = false,
+  directionalFrameGlow = false,
 }: CatalogImageProps) {
   const uri = resolveImageUri(path);
   const { hasError, imageKey, onImageError, onImageLoad, onImageLoadEnd } =
     useRemoteImageLoadState(uri);
   const showFallback = !uri || hasError;
 
-  return (
+  const outerRadius = rounded ? borderRadius.md : 0;
+  const innerWidth = directionalFrame ? width - DETAIL_DIRECTIONAL_FRAME_BORDER * 2 : width;
+  const innerHeight = directionalFrame ? height - DETAIL_DIRECTIONAL_FRAME_BORDER * 2 : height;
+  const innerRadius = directionalFrame
+    ? Math.max(0, outerRadius - DETAIL_DIRECTIONAL_FRAME_BORDER)
+    : outerRadius;
+
+  const imageBody = (
     <View
       style={[
         styles.imageContainer,
-        rounded && styles.rounded,
-        { width, height },
+        rounded && innerRadius > 0 && { borderRadius: innerRadius },
+        { width: innerWidth, height: innerHeight },
       ]}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="image"
@@ -79,7 +92,11 @@ export const CatalogImage = memo(function CatalogImage({
         <Image
           key={imageKey}
           source={{ uri }}
-          style={[styles.image, rounded && styles.rounded, { width, height }]}
+          style={[
+            styles.image,
+            rounded && innerRadius > 0 && { borderRadius: innerRadius },
+            { width: innerWidth, height: innerHeight },
+          ]}
           resizeMode="cover"
           onError={onImageError}
           onLoad={onImageLoad}
@@ -87,6 +104,21 @@ export const CatalogImage = memo(function CatalogImage({
         />
       )}
     </View>
+  );
+
+  if (!directionalFrame) {
+    return imageBody;
+  }
+
+  return (
+    <DetailDirectionalFrame
+      variant="gold"
+      borderRadius={outerRadius}
+      glow={directionalFrameGlow}
+      style={{ width, height }}
+    >
+      {imageBody}
+    </DetailDirectionalFrame>
   );
 });
 
@@ -102,9 +134,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     overflow: 'hidden',
     backgroundColor: colors.surfaceElevated,
-  },
-  rounded: {
-    borderRadius: borderRadius.md,
   },
   fallbackInner: {
     flex: 1,

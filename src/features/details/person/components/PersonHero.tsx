@@ -8,7 +8,9 @@ import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
+import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
 import { DetailScrim } from '@/features/details/shared/components/DetailScrim';
+import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { formatIsoDate, formatKnownForDepartment } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -37,6 +39,7 @@ export const PersonHero = memo(function PersonHero({
   const insets = useSafeAreaInsets();
   const heroHeight = Math.round(Math.min(360, Math.max(260, width * 0.62)));
   const portraitSize = Math.round(Math.min(148, width * 0.36));
+  const portraitInnerSize = portraitSize - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
 
   const birthLine = formatLifeDates(birthday, deathday);
   const departmentLine = formatKnownForDepartment(knownForDepartment);
@@ -60,6 +63,30 @@ export const PersonHero = memo(function PersonHero({
 
   const portraitLabel = t('details.sections.personPortrait', { name });
 
+  const portraitBody =
+    profileImagePath ? (
+      <Pressable
+        onPress={openPortraitViewer}
+        accessibilityRole="button"
+        accessibilityLabel={portraitLabel}
+        accessibilityHint={t('details.sections.opensPortraitFullscreen')}
+        style={({ pressed }) => [pressed && styles.portraitPressed]}
+        testID="person-hero-portrait"
+      >
+        <CatalogImage
+          path={profileImagePath}
+          width={portraitInnerSize}
+          height={portraitInnerSize}
+          rounded
+          accessibilityLabel={portraitLabel}
+        />
+      </Pressable>
+    ) : (
+      <View style={[styles.portraitFallback, { width: portraitInnerSize, height: portraitInnerSize }]}>
+        <Ionicons name="person-outline" size={48} color={colors.textMuted} />
+      </View>
+    );
+
   return (
     <View style={styles.container}>
       <View style={[styles.mediaContainer, { height: heroHeight }]}>
@@ -78,30 +105,13 @@ export const PersonHero = memo(function PersonHero({
       </View>
 
       <View style={styles.content}>
-        <View style={[styles.portraitFrame, { width: portraitSize, height: portraitSize }]}>
-          {profileImagePath ? (
-            <Pressable
-              onPress={openPortraitViewer}
-              accessibilityRole="button"
-              accessibilityLabel={portraitLabel}
-              accessibilityHint={t('details.sections.opensPortraitFullscreen')}
-              style={({ pressed }) => [pressed && styles.portraitPressed]}
-              testID="person-hero-portrait"
-            >
-              <CatalogImage
-                path={profileImagePath}
-                width={portraitSize}
-                height={portraitSize}
-                rounded
-                accessibilityLabel={portraitLabel}
-              />
-            </Pressable>
-          ) : (
-            <View style={[styles.portraitFallback, { width: portraitSize, height: portraitSize }]}>
-              <Ionicons name="person-outline" size={48} color={colors.textMuted} />
-            </View>
-          )}
-        </View>
+        <DetailDirectionalFrame
+          variant="gold"
+          borderRadius={borderRadius.lg}
+          style={{ width: portraitSize, height: portraitSize }}
+        >
+          {portraitBody}
+        </DetailDirectionalFrame>
 
         <View style={styles.textBlock}>
           <AppText variant="title" numberOfLines={3}>
@@ -161,13 +171,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: spacing.md,
-  },
-  portraitFrame: {
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    backgroundColor: colors.surfaceElevated,
   },
   portraitFallback: {
     alignItems: 'center',

@@ -3,10 +3,11 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
-import { shadows } from '@/theme/shadows';
 import { spacing } from '@/theme/spacing';
+import { DetailDirectionalFrame } from './DetailDirectionalFrame';
 
 export const DETAIL_ACTION_SIZE = 52;
+const ACTION_INNER_SIZE = DETAIL_ACTION_SIZE - 2;
 
 interface DetailCircularActionProps {
   label: string;
@@ -38,17 +39,23 @@ export function DetailCircularAction({
         disabled={isDisabled}
         onPress={onPress}
         style={({ pressed }) => [
-          styles.button,
-          active && styles.buttonActive,
           pressed && !isDisabled && styles.pressed,
           isDisabled && styles.disabled,
         ]}
       >
-        {busy ? (
-          <ActivityIndicator color={active ? colors.accent : colors.textPrimary} size="small" />
-        ) : (
-          children
-        )}
+        <DetailDirectionalFrame
+          variant={active ? 'gold' : 'neutral'}
+          borderRadius={DETAIL_ACTION_SIZE / 2}
+          style={styles.frame}
+        >
+          <View style={styles.buttonSurface}>
+            {busy ? (
+              <ActivityIndicator color={active ? colors.accent : colors.textPrimary} size="small" />
+            ) : (
+              children
+            )}
+          </View>
+        </DetailDirectionalFrame>
       </Pressable>
       <AppText
         variant="caption"
@@ -67,21 +74,17 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     minWidth: DETAIL_ACTION_SIZE,
   },
-  button: {
+  frame: {
     width: DETAIL_ACTION_SIZE,
     height: DETAIL_ACTION_SIZE,
-    borderRadius: DETAIL_ACTION_SIZE / 2,
-    borderWidth: 1,
-    borderColor: 'rgba(58, 58, 74, 0.9)',
+  },
+  buttonSurface: {
+    width: ACTION_INNER_SIZE,
+    height: ACTION_INNER_SIZE,
+    borderRadius: ACTION_INNER_SIZE / 2,
     backgroundColor: 'rgba(12, 12, 18, 0.78)',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadows.none,
-  },
-  buttonActive: {
-    borderColor: 'rgba(196, 163, 90, 0.68)',
-    backgroundColor: 'rgba(14, 14, 20, 0.82)',
-    ...shadows.accentGlowSoft,
   },
   pressed: {
     transform: [{ scale: 0.94 }],
@@ -99,4 +102,3 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
 });
-

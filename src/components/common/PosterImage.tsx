@@ -1,6 +1,8 @@
 import { memo, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
+import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
@@ -13,6 +15,8 @@ interface PosterImageProps {
   height: number;
   accessibilityLabel?: string;
   elevated?: boolean;
+  directionalFrame?: boolean;
+  directionalFrameGlow?: boolean;
   /** Stable identity for recycled list cells; defaults to resolved URI. */
   imageStateKey?: string;
 }
@@ -23,6 +27,8 @@ export const PosterImage = memo(function PosterImage({
   height,
   accessibilityLabel,
   elevated = false,
+  directionalFrame = false,
+  directionalFrameGlow = false,
   imageStateKey,
 }: PosterImageProps) {
   const resolvedUri = resolveImageUri(uri);
@@ -32,6 +38,12 @@ export const PosterImage = memo(function PosterImage({
   const showFallback = !resolvedUri || hasError;
   const [trackedUri, setTrackedUri] = useState(resolvedUri);
   const [isLoading, setIsLoading] = useState(Boolean(resolvedUri));
+
+  const innerWidth = directionalFrame ? width - DETAIL_DIRECTIONAL_FRAME_BORDER * 2 : width;
+  const innerHeight = directionalFrame ? height - DETAIL_DIRECTIONAL_FRAME_BORDER * 2 : height;
+  const innerRadius = directionalFrame
+    ? Math.max(0, borderRadius.md - DETAIL_DIRECTIONAL_FRAME_BORDER)
+    : borderRadius.md;
 
   if (trackedUri !== resolvedUri) {
     setTrackedUri(resolvedUri);
@@ -53,12 +65,12 @@ export const PosterImage = memo(function PosterImage({
     setIsLoading(false);
   };
 
-  return (
+  const posterBody = (
     <View
       style={[
         styles.container,
-        { width, height },
-        elevated && shadows.poster,
+        { width: innerWidth, height: innerHeight, borderRadius: innerRadius },
+        !directionalFrame && elevated && shadows.poster,
       ]}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="image"
@@ -72,7 +84,7 @@ export const PosterImage = memo(function PosterImage({
           <Image
             key={imageKey}
             source={{ uri: resolvedUri }}
-            style={[styles.image, { width, height }]}
+            style={[styles.image, { width: innerWidth, height: innerHeight, borderRadius: innerRadius }]}
             resizeMode="cover"
             onLoad={handleLoad}
             onLoadEnd={handleLoadEnd}
@@ -87,17 +99,29 @@ export const PosterImage = memo(function PosterImage({
       )}
     </View>
   );
+
+  if (!directionalFrame) {
+    return posterBody;
+  }
+
+  return (
+    <DetailDirectionalFrame
+      variant="gold"
+      borderRadius={borderRadius.md}
+      glow={directionalFrameGlow}
+      style={{ width, height }}
+    >
+      {posterBody}
+    </DetailDirectionalFrame>
+  );
 });
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: borderRadius.md,
     overflow: 'hidden',
     backgroundColor: colors.surfaceElevated,
   },
-  image: {
-    borderRadius: borderRadius.md,
-  },
+  image: {},
   fallback: {
     flex: 1,
     alignItems: 'center',

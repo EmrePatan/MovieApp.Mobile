@@ -6,9 +6,12 @@ import {
   getHomeHeroCardWidth,
   getHomeHeroHeight,
 } from '../utils/home-hero-layout';
+import { HOME_HERO_CARD_TILT, HOME_HERO_PERSPECTIVE } from './home-hero-perspective';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { BackdropImage } from '@/features/details/shared/components/CatalogImage';
+import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
+import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
 import type { HomeItem } from '../types';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
@@ -16,7 +19,6 @@ import { formatCatalogYear, formatContentType, formatRating } from '@/utils/form
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
-import { shadows } from '@/theme/shadows';
 
 interface HomeHeroProps {
   item: HomeItem;
@@ -117,30 +119,38 @@ export const HomeHero = memo(function HomeHero({
     onPress?.(item);
   }, [item, onPress]);
 
-  return (
-    <View
-      style={[styles.container, embedded && styles.containerEmbedded]}
-      accessibilityRole="summary"
-      accessibilityLabel={accessibilityLabel}
+  const innerWidth = cardWidth - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
+  const innerHeight = heroHeight - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
+  const innerRadius = borderRadius.xl - DETAIL_DIRECTIONAL_FRAME_BORDER;
+
+  const framedCard = (
+    <DetailDirectionalFrame
+      variant="gold"
+      borderRadius={borderRadius.xl}
+      glow
+      style={{ width: cardWidth, height: heroHeight }}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('common.openTitle', { title: item.title })}
-        unstable_pressDelay={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
-        onPress={handleHeroPress}
-        style={[styles.card, { width: cardWidth, height: heroHeight }]}
+      <View
+        style={[
+          styles.cardInner,
+          {
+            width: innerWidth,
+            height: innerHeight,
+            borderRadius: innerRadius,
+          },
+        ]}
       >
-        <View style={[styles.mediaLayer, { height: heroHeight }]} pointerEvents="none">
+        <View style={[styles.mediaLayer, { height: innerHeight }]} pointerEvents="none">
           {hasBackdrop ? (
-            <BackdropImage path={item.backdropUrl} height={heroHeight} />
+            <BackdropImage path={item.backdropUrl} height={innerHeight} />
           ) : showPosterFallback ? (
             <HeroPosterFallback
               uri={posterUri!}
-              height={heroHeight}
+              height={innerHeight}
               onError={() => setPosterFailed(true)}
             />
           ) : (
-            <HeroMediaPlaceholder height={heroHeight} />
+            <HeroMediaPlaceholder height={innerHeight} />
           )}
         </View>
 
@@ -162,6 +172,26 @@ export const HomeHero = memo(function HomeHero({
             </AppText>
           </View>
         </View>
+      </View>
+    </DetailDirectionalFrame>
+  );
+
+  return (
+    <View
+      style={[styles.container, embedded && styles.containerEmbedded]}
+      accessibilityRole="summary"
+      accessibilityLabel={accessibilityLabel}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('common.openTitle', { title: item.title })}
+        unstable_pressDelay={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
+        onPress={handleHeroPress}
+        style={styles.pressable}
+      >
+        <View style={[styles.perspectiveHost, { width: cardWidth, height: heroHeight }]}>
+          <View style={styles.cardTilt}>{framedCard}</View>
+        </View>
       </Pressable>
     </View>
   );
@@ -171,17 +201,32 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.sm,
     alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
   containerEmbedded: {
     marginBottom: 0,
   },
-  card: {
-    borderRadius: borderRadius.xl,
+  pressable: {
+    alignItems: 'center',
+  },
+  perspectiveHost: {
+    transform: [{ perspective: HOME_HERO_PERSPECTIVE }],
+  },
+  cardTilt: {
+    transform: [
+      { rotateX: HOME_HERO_CARD_TILT.rotateX },
+      { rotateY: HOME_HERO_CARD_TILT.rotateY },
+      { scale: HOME_HERO_CARD_TILT.scale },
+    ],
+    shadowColor: '#000000',
+    shadowOffset: { width: 16, height: 20 },
+    shadowOpacity: 0.45,
+    shadowRadius: 22,
+    elevation: 12,
+  },
+  cardInner: {
     overflow: 'hidden',
     backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
-    ...shadows.card,
   },
   mediaLayer: {
     width: '100%',

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AppText } from '@/components/common/AppText';
 import { translateCrewJob } from '@/i18n/crew-job-labels';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { CrewMember } from '../types';

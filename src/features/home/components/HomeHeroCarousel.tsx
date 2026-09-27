@@ -28,7 +28,6 @@ import {
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
 import { resolveImageUri } from '@/utils/image-url';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 6000;
@@ -301,24 +300,9 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         maxToRenderPerBatch={2}
         windowSize={3}
         accessibilityRole="adjustable"
-        accessibilityLabel={t('home.featuredCarousel')}
-      />
-      <View
-        style={styles.indicatorRow}
-        accessibilityRole="text"
         accessibilityLabel={t('home.slideOf', { current: activeIndex + 1, total: items.length })}
-      >
-        {items.map((item, index) => (
-          <View
-            key={createHomeContentKey(item)}
-            testID={index === activeIndex ? 'hero-indicator-active' : 'hero-indicator-inactive'}
-            style={[
-              styles.indicatorDot,
-              index === activeIndex ? styles.indicatorDotActive : styles.indicatorDotInactive,
-            ]}
-          />
-        ))}
-      </View>
+        accessibilityHint={t('home.featuredCarousel')}
+      />
     </View>
   );
 }, areHomeHeroCarouselPropsEqual);
@@ -336,31 +320,5 @@ const styles = StyleSheet.create({
   slide: {
     overflow: 'visible',
     alignItems: 'flex-start',
-  },
-  indicatorRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    alignSelf: 'center',
-    borderRadius: 999,
-    backgroundColor: 'rgba(10, 10, 15, 0.62)',
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  indicatorDot: {
-    height: 4,
-    borderRadius: 2,
-  },
-  indicatorDotActive: {
-    width: 22,
-    backgroundColor: colors.accent,
-  },
-  indicatorDotInactive: {
-    width: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.28)',
   },
 });

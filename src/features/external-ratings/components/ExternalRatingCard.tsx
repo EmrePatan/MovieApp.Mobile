@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -22,11 +23,30 @@ export function ExternalRatingCard({ card }: ExternalRatingCardProps) {
   return <StandardRatingCard card={card} />;
 }
 
-function StandardRatingCard({ card }: { card: ExternalRatingStandardCardModel }) {
+function RatingCardChrome({
+  children,
+  accessibilityLabel,
+  testID,
+}: {
+  children: ReactNode;
+  accessibilityLabel: string;
+  testID: string;
+}) {
   return (
     <View
-      style={styles.card}
+      style={styles.cardChrome}
       accessible
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
+    >
+      <View style={styles.cardInner}>{children}</View>
+    </View>
+  );
+}
+
+function StandardRatingCard({ card }: { card: ExternalRatingStandardCardModel }) {
+  return (
+    <RatingCardChrome
       accessibilityLabel={card.accessibilityLabel}
       testID={`external-rating-card-${card.id}`}
     >
@@ -37,7 +57,7 @@ function StandardRatingCard({ card }: { card: ExternalRatingStandardCardModel })
       <AppText style={styles.scoreLine} numberOfLines={1}>
         {card.scoreLine}
       </AppText>
-    </View>
+    </RatingCardChrome>
   );
 }
 
@@ -45,9 +65,7 @@ function RottenTomatoesRatingCard({ card }: { card: ExternalRatingRottenTomatoes
   const icons = resolveRottenTomatoesCardIcons();
 
   return (
-    <View
-      style={styles.card}
-      accessible
+    <RatingCardChrome
       accessibilityLabel={card.accessibilityLabel}
       testID="external-rating-card-rotten-tomatoes"
     >
@@ -88,22 +106,25 @@ function RottenTomatoesRatingCard({ card }: { card: ExternalRatingRottenTomatoes
           <AppText style={styles.scoreLine}>{card.popcornmeterScore}</AppText>
         </View>
       ) : null}
-    </View>
+    </RatingCardChrome>
   );
 }
 
 const layout = EXTERNAL_RATING_CARD_LAYOUT;
 
 const styles = StyleSheet.create({
-  card: {
+  cardChrome: {
+    borderRadius: layout.borderRadius,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
+    overflow: 'hidden',
+  },
+  cardInner: {
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: layout.minHeight,
     paddingHorizontal: layout.paddingHorizontal,
     paddingVertical: layout.paddingVertical,
-    borderRadius: layout.borderRadius,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
     backgroundColor: colors.surfaceElevated,
     gap: layout.brandScoreGap,
   },
