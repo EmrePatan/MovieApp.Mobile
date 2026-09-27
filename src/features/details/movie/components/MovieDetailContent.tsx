@@ -45,6 +45,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         contentType="movie"
         contentId={movie.id}
         showCommunityScore={movie.isReleased}
+        catalogTmdbVoteAverage={movie.voteAverage}
       />
       <DetailPersonalRatingProvider
         contentType="movie"

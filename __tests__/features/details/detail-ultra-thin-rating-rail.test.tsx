@@ -64,6 +64,28 @@ describe('DetailUltraThinRatingRail', () => {
     expect(screen.getByText('0')).toBeTruthy();
   });
 
+  it('shows TMDB from catalog vote when external snapshot has no TMDB row', () => {
+    mockUseExternalRatings.mockReturnValue({
+      data: {
+        ratings: [{ source: 'imdb', value: 8, scale: 10 }],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <DetailUltraThinRatingRail
+        contentType="movie"
+        contentId={contentId}
+        catalogTmdbVoteAverage={8.1}
+      />,
+    );
+
+    expect(screen.getByTestId('detail-rail-external-imdb')).toBeTruthy();
+    expect(screen.getByTestId('detail-rail-external-tmdb')).toBeTruthy();
+    expect(screen.getByText('8.1')).toBeTruthy();
+  });
+
   it('hides community segment when showCommunityScore is false and no externals exist', () => {
     mockUseExternalRatings.mockReturnValue({
       data: { ratings: [] },

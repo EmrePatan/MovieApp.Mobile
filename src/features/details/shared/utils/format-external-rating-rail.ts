@@ -1,5 +1,27 @@
 import type { ExternalRatingItem } from '@/features/external-ratings/types';
 
+export function mergeCatalogTmdbRatingForRail(
+  ratings: ExternalRatingItem[],
+  catalogTmdbVoteAverage?: number,
+): ExternalRatingItem[] {
+  if (catalogTmdbVoteAverage == null || catalogTmdbVoteAverage <= 0) {
+    return ratings;
+  }
+
+  if (ratings.some((rating) => rating.source === 'tmdb')) {
+    return ratings;
+  }
+
+  return [
+    ...ratings,
+    {
+      source: 'tmdb',
+      value: catalogTmdbVoteAverage,
+      scale: 10,
+    },
+  ];
+}
+
 export function formatExternalRatingRailValue(rating: ExternalRatingItem): string {
   if (rating.scale === 100 && rating.value === Math.round(rating.value)) {
     return `${Math.round(rating.value)}%`;
@@ -50,6 +72,18 @@ export function buildExternalRatingRailItems(
     });
   }
 
+  const tmdb = bySource.get('tmdb');
+  if (tmdb) {
+    const valueLabel = formatExternalRatingRailValue(tmdb);
+    items.push({
+      id: 'tmdb',
+      kind: 'standard',
+      source: 'tmdb',
+      valueLabel,
+      accessibilityLabel: `TMDB ${valueLabel}`,
+    });
+  }
+
   const letterboxd = bySource.get('letterboxd');
   if (letterboxd) {
     const valueLabel = formatExternalRatingRailValue(letterboxd);
@@ -71,18 +105,6 @@ export function buildExternalRatingRailItems(
       source: 'metacritic',
       valueLabel,
       accessibilityLabel: `Metacritic ${valueLabel}`,
-    });
-  }
-
-  const tmdb = bySource.get('tmdb');
-  if (tmdb) {
-    const valueLabel = formatExternalRatingRailValue(tmdb);
-    items.push({
-      id: 'tmdb',
-      kind: 'standard',
-      source: 'tmdb',
-      valueLabel,
-      accessibilityLabel: `TMDB ${valueLabel}`,
     });
   }
 

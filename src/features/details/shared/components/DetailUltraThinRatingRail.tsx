@@ -17,6 +17,7 @@ import {
 } from '@/features/ratings/utils/star-rating';
 import {
   buildExternalRatingRailItems,
+  mergeCatalogTmdbRatingForRail,
   type ExternalRatingRailItem,
 } from '../utils/format-external-rating-rail';
 import { colors } from '@/theme/colors';
@@ -40,22 +41,29 @@ interface DetailUltraThinRatingRailProps {
   contentType: RatingContentType;
   contentId: string;
   showCommunityScore?: boolean;
+  /** Catalog TMDB vote average when external-ratings snapshot has no TMDB row. */
+  catalogTmdbVoteAverage?: number;
 }
 
 export function DetailUltraThinRatingRail({
   contentType,
   contentId,
   showCommunityScore = true,
+  catalogTmdbVoteAverage,
 }: DetailUltraThinRatingRailProps) {
   const aggregateQuery = useRatingAggregate(contentType, contentId);
   const externalMediaType: ExternalRatingsMediaType =
     contentType === 'movie' ? 'movie' : 'tv';
   const externalQuery = useExternalRatings(externalMediaType, contentId);
 
-  const externalItems = useMemo(
-    () => buildExternalRatingRailItems(externalQuery.data?.ratings ?? []),
-    [externalQuery.data?.ratings],
-  );
+  const externalItems = useMemo(() => {
+    const ratings = mergeCatalogTmdbRatingForRail(
+      externalQuery.data?.ratings ?? [],
+      catalogTmdbVoteAverage,
+    );
+
+    return buildExternalRatingRailItems(ratings);
+  }, [catalogTmdbVoteAverage, externalQuery.data?.ratings]);
 
   const communityMeta = useMemo(() => {
     const aggregate = aggregateQuery.data;

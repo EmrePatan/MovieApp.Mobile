@@ -42,7 +42,11 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         posterAccessibilityLabel={t('common.posterAccessibility', { title: show.title })}
         trailer={{ contentType: 'tv', contentId: show.id }}
       />
-      <DetailUltraThinRatingRail contentType="tv" contentId={show.id} />
+      <DetailUltraThinRatingRail
+        contentType="tv"
+        contentId={show.id}
+        catalogTmdbVoteAverage={show.voteAverage}
+      />
       <DetailPersonalRatingProvider contentType="tv" contentId={show.id} watchEligible>
         <DetailActionBar
           contentType="tv"
