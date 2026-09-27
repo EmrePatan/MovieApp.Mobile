@@ -3,7 +3,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
+import { shadows } from '@/theme/shadows';
 import { borderRadius } from '@/theme/spacing';
+
+export const DETAIL_TRAILER_PLAY_BUTTON_SIZE = 68;
 
 interface DetailTrailerPlayAffordanceProps {
   onPress: () => void;
@@ -21,7 +24,7 @@ export function DetailTrailerPlayAffordance({ onPress }: DetailTrailerPlayAfford
         onPress={onPress}
         style={({ pressed }) => [styles.iconCircle, pressed && styles.buttonPressed]}
       >
-        <Ionicons name="play" size={22} color={colors.textPrimary} style={styles.playIcon} />
+        <Ionicons name="play" size={24} color={colors.textPrimary} style={styles.playIcon} />
       </Pressable>
     </View>
   );
@@ -35,14 +38,15 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   iconCircle: {
-    width: 52,
-    height: 52,
+    width: DETAIL_TRAILER_PLAY_BUTTON_SIZE,
+    height: DETAIL_TRAILER_PLAY_BUTTON_SIZE,
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.58)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: 'rgba(196, 163, 90, 0.72)',
+    ...shadows.accentGlow,
     minHeight: interaction.touchTarget,
     minWidth: interaction.touchTarget,
   },

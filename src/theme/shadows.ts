@@ -15,6 +15,20 @@ export const shadows = {
     shadowRadius: 4,
     elevation: 2,
   },
+  accentGlow: {
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  accentGlowSoft: {
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.14,
+    shadowRadius: 7,
+    elevation: 4,
+  },
   none: {
     shadowColor: 'transparent',
     shadowOffset: { width: 0, height: 0 },

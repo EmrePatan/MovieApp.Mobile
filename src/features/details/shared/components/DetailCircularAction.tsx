@@ -72,15 +72,16 @@ const styles = StyleSheet.create({
     height: DETAIL_ACTION_SIZE,
     borderRadius: DETAIL_ACTION_SIZE / 2,
     borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.accentSurface,
+    borderColor: 'rgba(58, 58, 74, 0.9)',
+    backgroundColor: 'rgba(12, 12, 18, 0.78)',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadows.card,
+    ...shadows.none,
   },
   buttonActive: {
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint14,
+    borderColor: 'rgba(196, 163, 90, 0.68)',
+    backgroundColor: 'rgba(14, 14, 20, 0.82)',
+    ...shadows.accentGlowSoft,
   },
   pressed: {
     transform: [{ scale: 0.94 }],
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   labelActive: {
-    color: colors.textSecondary,
+    color: colors.accent,
   },
 });
-
+
