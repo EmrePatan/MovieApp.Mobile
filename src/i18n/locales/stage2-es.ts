@@ -831,6 +831,14 @@ export const stage2Es = {
       episodeSingular: 'ep',
       episodesPlural: 'eps',
     },
+    tvShowStatus: {
+      returningSeries: 'En emisión',
+      ended: 'Finalizada',
+      canceled: 'Cancelada',
+      inProduction: 'En producción',
+      planned: 'Planificada',
+      pilot: 'Piloto',
+    },
     actions: {
       favoriteLabel: 'Favorito',
       addFavorite: 'Añadir a favoritos',

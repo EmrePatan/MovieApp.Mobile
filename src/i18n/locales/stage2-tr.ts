@@ -831,6 +831,14 @@ export const stage2Tr = {
       episodeSingular: 'böl',
       episodesPlural: 'böl',
     },
+    tvShowStatus: {
+      returningSeries: 'Devam Ediyor',
+      ended: 'Sona Erdi',
+      canceled: 'İptal Edildi',
+      inProduction: 'Yapım Aşamasında',
+      planned: 'Planlandı',
+      pilot: 'Pilot',
+    },
     actions: {
       favoriteLabel: 'Favori',
       addFavorite: 'Favorilere ekle',
