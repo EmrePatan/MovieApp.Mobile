@@ -1,5 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
@@ -95,9 +95,16 @@ const styles = StyleSheet.create({
     flex: 1,
     color: colors.textPrimary,
     fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-    paddingVertical: spacing.sm,
+    paddingVertical: 0,
     paddingRight: spacing.xs,
+    margin: 0,
+    ...Platform.select({
+      android: {
+        includeFontPadding: false,
+        textAlignVertical: 'center',
+      },
+      default: {},
+    }),
   },
   clearButton: {
     minWidth: interaction.touchTarget,
