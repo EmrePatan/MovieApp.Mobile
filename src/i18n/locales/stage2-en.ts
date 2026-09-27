@@ -945,6 +945,7 @@ export const stage2En = {
     removeMyRating: 'Remove My Rating',
     communityUnavailable: 'Community ratings unavailable.',
     communityAverageLine: 'Community average: ★ {{average}} ({{count}} ratings)',
+    communityRailEmptyAccessibility: 'Community rating: 0 stars, no ratings yet',
     detail: {
       rateCta: 'Rate',
       yourScore: 'Your score',

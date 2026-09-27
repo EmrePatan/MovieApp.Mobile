@@ -46,7 +46,7 @@ describe('DetailUltraThinRatingRail', () => {
     expect(screen.getByText('8.1')).toBeTruthy();
   });
 
-  it('shows a muted empty community star without a zero score', () => {
+  it('shows gold star and zero when there are no community ratings', () => {
     mockUseRatingAggregate.mockReturnValue({
       data: { averageScore: 0, ratingCount: 0 },
       isLoading: false,
@@ -60,8 +60,8 @@ describe('DetailUltraThinRatingRail', () => {
 
     render(<DetailUltraThinRatingRail contentType="tv" contentId={contentId} />);
 
-    expect(screen.getByTestId('detail-rail-community-empty')).toBeTruthy();
-    expect(screen.queryByText('0.0')).toBeNull();
+    expect(screen.getByTestId('detail-rail-community-zero')).toBeTruthy();
+    expect(screen.getByText('0')).toBeTruthy();
   });
 
   it('hides community segment when showCommunityScore is false and no externals exist', () => {

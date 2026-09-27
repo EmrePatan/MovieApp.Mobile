@@ -965,6 +965,7 @@ export const stage2It = {
     removeMyRating: 'Rimuovi la mia valutazione',
     communityUnavailable: 'Valutazioni della community non disponibili.',
     communityAverageLine: 'Media community: ★ {{average}} ({{count}} valutazioni)',
+    communityRailEmptyAccessibility: 'Valutazione community: 0 stelle, nessuna valutazione ancora',
     detail: {
       rateCta: 'Vota',
       yourScore: 'Il tuo voto',

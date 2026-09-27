@@ -965,6 +965,7 @@ export const stage2Fr = {
     removeMyRating: 'Supprimer ma note',
     communityUnavailable: 'Notes de la communauté indisponibles.',
     communityAverageLine: 'Moyenne de la communauté : ★ {{average}} ({{count}} notes)',
+    communityRailEmptyAccessibility: 'Note communautaire : 0 étoile, pas encore de notes',
     detail: {
       rateCta: 'Noter',
       yourScore: 'Votre note',

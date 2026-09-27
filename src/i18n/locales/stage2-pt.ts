@@ -965,6 +965,7 @@ export const stage2Pt = {
     removeMyRating: 'Remover minha avaliação',
     communityUnavailable: 'Avaliações da comunidade indisponíveis.',
     communityAverageLine: 'Média da comunidade: ★ {{average}} ({{count}} avaliações)',
+    communityRailEmptyAccessibility: 'Avaliação da comunidade: 0 estrelas, ainda sem avaliações',
     detail: {
       rateCta: 'Avaliar',
       yourScore: 'Sua nota',

@@ -966,6 +966,7 @@ export const stage2Tr = {
     removeMyRating: 'Puanımı Kaldır',
     communityUnavailable: 'Topluluk puanları kullanılamıyor.',
     communityAverageLine: 'Topluluk ortalaması: ★ {{average}} ({{count}} puan)',
+    communityRailEmptyAccessibility: 'Topluluk puanı: 0 yıldız, henüz puan yok',
     detail: {
       rateCta: 'Puan ver',
       yourScore: 'Senin puanın',

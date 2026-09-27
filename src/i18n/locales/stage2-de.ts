@@ -965,6 +965,7 @@ export const stage2De = {
     removeMyRating: 'Meine Bewertung entfernen',
     communityUnavailable: 'Community-Bewertungen nicht verfügbar.',
     communityAverageLine: 'Community-Durchschnitt: ★ {{average}} ({{count}} Bewertungen)',
+    communityRailEmptyAccessibility: 'Community-Bewertung: 0 Sterne, noch keine Bewertungen',
     detail: {
       rateCta: 'Bewerten',
       yourScore: 'Deine Bewertung',

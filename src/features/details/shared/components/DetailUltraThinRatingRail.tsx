@@ -1,4 +1,5 @@
 import { Fragment, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -34,8 +35,6 @@ export const DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT = {
   rtIconSize: 15,
   rtPairGap: spacing.xs,
 } as const;
-
-const EMPTY_STAR_COLOR = 'rgba(107, 107, 128, 0.55)';
 
 interface DetailUltraThinRatingRailProps {
   contentType: RatingContentType;
@@ -109,7 +108,7 @@ export function DetailUltraThinRatingRail({
     return (
       <View style={styles.wrapper} testID="detail-ultra-thin-rating-rail">
         <View style={styles.row}>
-          <CommunityEmptySegment />
+          <CommunityZeroSegment />
         </View>
       </View>
     );
@@ -165,7 +164,7 @@ export function DetailUltraThinRatingRail({
               communityMeta ? (
                 <CommunityScoreSegment communityMeta={communityMeta} />
               ) : (
-                <CommunityEmptySegment />
+                <CommunityZeroSegment />
               )
             ) : (
               <ExternalRailSegment item={segment} />
@@ -216,21 +215,24 @@ function CommunityScoreSegment({
   );
 }
 
-function CommunityEmptySegment() {
+function CommunityZeroSegment() {
+  const { t } = useTranslation();
+
   return (
     <View
       style={styles.segment}
-      accessibilityRole="image"
-      accessibilityLabel="Community rating not available yet"
-      testID="detail-rail-community-empty"
+      accessibilityRole="text"
+      accessibilityLabel={t('ratings.communityRailEmptyAccessibility')}
+      testID="detail-rail-community-zero"
     >
       <Ionicons
-        name="star-outline"
+        name="star"
         size={DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.communityStarSize}
-        color={EMPTY_STAR_COLOR}
+        color={colors.accentStrong}
         accessibilityElementsHidden
         importantForAccessibility="no"
       />
+      <AppText style={styles.communityScore}>0</AppText>
     </View>
   );
 }
