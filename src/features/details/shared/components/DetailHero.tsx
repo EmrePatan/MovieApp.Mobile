@@ -5,14 +5,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
-import { BackdropImage, CatalogImage } from './CatalogImage';
-import { DetailBackButton } from './DetailBackButton';
+import { CatalogImage } from './CatalogImage';
 import { DetailMetadataRow } from './DetailMetadataRow';
-import { DetailScrim } from './DetailScrim';
+import { DetailHeroMedia } from './DetailHeroMedia';
 import { translateGenreNames } from '@/i18n/catalog-labels';
 import { shouldShowOriginalTitle } from '@/utils/format';
 import { layout } from '@/theme/layout';
-import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -28,6 +26,10 @@ export interface DetailHeroProps {
   posterAccessibilityLabel?: string;
   useStillAsHero?: boolean;
   identityAccessory?: ReactNode;
+  trailer?: {
+    contentType: 'movie' | 'tv';
+    contentId: string;
+  };
 }
 
 export const DetailHero = memo(function DetailHero({
@@ -42,6 +44,7 @@ export const DetailHero = memo(function DetailHero({
   posterAccessibilityLabel,
   useStillAsHero = false,
   identityAccessory,
+  trailer,
 }: DetailHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -76,11 +79,13 @@ export const DetailHero = memo(function DetailHero({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.mediaContainer, { height: heroHeight }]}>
-        <BackdropImage path={heroImagePath} height={heroHeight} />
-        <DetailScrim />
-        <DetailBackButton variant="overlay" topOffset={insets.top + spacing.sm} />
-      </View>
+      <DetailHeroMedia
+        key={trailer?.contentId ?? 'detail-hero-media'}
+        heroImagePath={heroImagePath}
+        heroHeight={heroHeight}
+        topOffset={insets.top + spacing.sm}
+        trailer={trailer}
+      />
 
       <View style={styles.content}>
         {breadcrumb ? (
@@ -149,11 +154,6 @@ export const DetailHero = memo(function DetailHero({
 const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.sm,
-  },
-  mediaContainer: {
-    width: '100%',
-    backgroundColor: colors.surfaceElevated,
-    overflow: 'hidden',
   },
   content: {
     marginTop: -layout.posterCarousel.height * 0.35,

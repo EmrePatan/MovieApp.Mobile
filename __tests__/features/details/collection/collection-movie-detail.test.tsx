@@ -8,6 +8,10 @@ import type { MovieDetailsResponse } from '@/features/details/movie/types';
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: jest.fn(), push: jest.fn(), navigate: jest.fn() }),
   useSegments: jest.fn(() => ['(tabs)', 'movie', '[id]']),
+  useFocusEffect: jest.fn((callback: () => void | (() => void)) => {
+    callback();
+    return undefined;
+  }),
 }));
 
 jest.mock('@/features/details/collection/api/collection-api', () => ({
@@ -30,14 +34,6 @@ jest.mock('@/features/details/shared/components/DetailSections', () => ({
   },
 }));
 
-jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
-  PlayTrailerButton: () => {
-    const React = require('react');
-    const { Text } = require('react-native');
-    return React.createElement(Text, null, 'Trailer');
-  },
-}));
-
 jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
   DetailInlineRatingSection: () => null,
 }));
@@ -49,6 +45,16 @@ jest.mock('@/features/reviews/components/ReviewsLinkRow', () => ({ ReviewsLinkRo
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
   SimilarContentSection: () => null,
 }));
+
+jest.mock('@/features/details/videos/hooks/useVideos', () => ({
+  useMovieVideos: jest.fn(),
+  useTvShowVideos: jest.fn(),
+}));
+
+import { useMovieVideos, useTvShowVideos } from '@/features/details/videos/hooks/useVideos';
+
+const mockUseMovieVideos = useMovieVideos as jest.Mock;
+const mockUseTvShowVideos = useTvShowVideos as jest.Mock;
 
 const baseMovie: MovieDetailsResponse = {
   id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
@@ -73,6 +79,16 @@ const baseMovie: MovieDetailsResponse = {
 describe('movie detail collection row', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseMovieVideos.mockReturnValue({
+      data: { primary: { watchUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' } },
+      isLoading: false,
+      isError: false,
+    });
+    mockUseTvShowVideos.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('renders collection row between action bar and overview', () => {

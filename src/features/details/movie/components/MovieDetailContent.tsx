@@ -8,7 +8,6 @@ import { OtherRatingsSection } from '@/features/external-ratings/components/Othe
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
-import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { CollectionLinkRow } from '@/features/details/collection/components/CollectionLinkRow';
 import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
@@ -39,9 +38,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         metadataLine={metadataLine}
         genres={movie.genres}
         posterAccessibilityLabel={t('common.posterAccessibility', { title: movie.title })}
-        identityAccessory={
-          <PlayTrailerButton contentType="movie" contentId={movie.id} />
-        }
+        trailer={{ contentType: 'movie', contentId: movie.id }}
       />
       <DetailActionBar
         contentType="movie"

@@ -131,3 +131,12 @@ jest.mock('@/features/metrics/use-track-product-metric-on-focus', () => ({
   useTrackProductMetricOnFocus: jest.fn(),
 }));
 
+jest.mock('react-native-webview', () => {
+  const mockReact = require('react');
+  const { View } = require('react-native');
+
+  return {
+    WebView: () => mockReact.createElement(View, { testID: 'inline-trailer-webview' }),
+  };
+});
+

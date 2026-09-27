@@ -8,7 +8,6 @@ import { OtherRatingsSection } from '@/features/external-ratings/components/Othe
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
-import { PlayTrailerButton } from '@/features/details/videos/components/PlayTrailerButton';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { CatalogGallerySection } from '@/features/gallery/components/CatalogGallerySection';
 import { useTvShowGallery } from '@/features/gallery/hooks/useGallery';
@@ -40,9 +39,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         metadataLine={metadataLine}
         genres={show.genres}
         posterAccessibilityLabel={t('common.posterAccessibility', { title: show.title })}
-        identityAccessory={
-          <PlayTrailerButton contentType="tv" contentId={show.id} />
-        }
+        trailer={{ contentType: 'tv', contentId: show.id }}
       />
       <DetailActionBar
         contentType="tv"

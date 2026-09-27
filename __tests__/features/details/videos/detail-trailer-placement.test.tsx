@@ -15,6 +15,10 @@ import { useMovieVideos, useTvShowVideos } from '@/features/details/videos/hooks
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: jest.fn(), push: jest.fn(), navigate: jest.fn() }),
   useSegments: jest.fn(() => ['(tabs)', 'movie', '[id]']),
+  useFocusEffect: jest.fn((callback: () => void | (() => void)) => {
+    callback();
+    return undefined;
+  }),
 }));
 
 jest.mock('@/features/details/videos/hooks/useVideos', () => ({
