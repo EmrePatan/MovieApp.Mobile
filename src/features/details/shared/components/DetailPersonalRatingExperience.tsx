@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -37,6 +38,9 @@ const DetailPersonalRatingContext = createContext<DetailPersonalRatingContextVal
   null,
 );
 
+/** Brief pause after a successful rating so the chosen stars stay visible before dismiss. */
+export const PERSONAL_RATING_PROMPT_CLOSE_DELAY_MS = 520;
+
 export function useOptionalDetailPersonalRating(): DetailPersonalRatingContextValue | null {
   return useContext(DetailPersonalRatingContext);
 }
@@ -59,12 +63,31 @@ export function DetailPersonalRatingProvider({
   const rateContent = useRateContent(contentType, contentId);
   const deleteRating = useDeleteRating(contentType, contentId);
   const [promptVisible, setPromptVisible] = useState(false);
+  const [promptSheetBusy, setPromptSheetBusy] = useState(false);
   const [unwatchConfirmVisible, setUnwatchConfirmVisible] = useState(false);
   const unwatchResolverRef = useRef<((value: boolean) => void) | null>(null);
+  const closePromptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearPromptCloseTimeout = useCallback(() => {
+    if (closePromptTimeoutRef.current) {
+      clearTimeout(closePromptTimeoutRef.current);
+      closePromptTimeoutRef.current = null;
+    }
+  }, []);
+
+  const closePrompt = useCallback(() => {
+    clearPromptCloseTimeout();
+    setPromptSheetBusy(false);
+    setPromptVisible(false);
+  }, [clearPromptCloseTimeout]);
+
+  useEffect(() => () => clearPromptCloseTimeout(), [clearPromptCloseTimeout]);
 
   const openPrompt = useCallback(() => {
+    clearPromptCloseTimeout();
+    setPromptSheetBusy(false);
     setPromptVisible(true);
-  }, []);
+  }, [clearPromptCloseTimeout]);
 
   const handleMarkedWatched = useCallback(() => {
     if (!isAuthenticated || !watchEligible) {
@@ -108,11 +131,17 @@ export function DetailPersonalRatingProvider({
     (backendScore: number) => {
       rateContent.mutate(backendScore, {
         onSuccess: () => {
-          setPromptVisible(false);
+          setPromptSheetBusy(true);
+          clearPromptCloseTimeout();
+          closePromptTimeoutRef.current = setTimeout(() => {
+            closePromptTimeoutRef.current = null;
+            setPromptSheetBusy(false);
+            setPromptVisible(false);
+          }, PERSONAL_RATING_PROMPT_CLOSE_DELAY_MS);
         },
       });
     },
-    [rateContent],
+    [clearPromptCloseTimeout, rateContent],
   );
 
   const contextValue = useMemo(
@@ -130,8 +159,8 @@ export function DetailPersonalRatingProvider({
       <PersonalRatingPromptSheet
         visible={promptVisible}
         initialBackendScore={myRatingQuery.data?.score ?? null}
-        isSubmitting={rateContent.isPending}
-        onClose={() => setPromptVisible(false)}
+        isSubmitting={rateContent.isPending || promptSheetBusy}
+        onClose={closePrompt}
         onSubmit={handleSubmitRating}
       />
       <PersonalRatingUnwatchConfirmSheet
