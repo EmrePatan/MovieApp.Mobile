@@ -101,8 +101,8 @@ export function SimilarContentSection({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: 0,
   },
   listContent: {
     paddingHorizontal: spacing.lg,

@@ -8,12 +8,12 @@ describe('season list collapse', () => {
 
   it('collapses long season lists by default', () => {
     expect(shouldCollapseSeasonList(8)).toBe(true);
-    expect(getVisibleSeasons(seasons, false)).toEqual(['season-1', 'season-2', 'season-3']);
+    expect(getVisibleSeasons(seasons, false)).toEqual(['season-1', 'season-2']);
   });
 
   it('shows every season when expanded or short', () => {
     expect(getVisibleSeasons(seasons, true)).toEqual(seasons);
-    expect(shouldCollapseSeasonList(3)).toBe(false);
-    expect(getVisibleSeasons(['a', 'b', 'c'], false)).toEqual(['a', 'b', 'c']);
+    expect(shouldCollapseSeasonList(3)).toBe(true);
+    expect(getVisibleSeasons(['a', 'b', 'c'], false)).toEqual(['a', 'b']);
   });
 });

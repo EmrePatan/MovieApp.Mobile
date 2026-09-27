@@ -1,11 +1,14 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
+import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { CatalogImage } from '../../shared/components/CatalogImage';
+import { WaxSealMedallion } from '../../shared/components/WaxSealMedallion';
+import { waxSealCardStyles } from '../../shared/components/waxSealCardStyles';
 import type { EpisodeSummaryResponse } from '../../episode/types';
 import { useAuth } from '@/auth/useAuth';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -21,10 +24,11 @@ import {
 } from '@/utils/format';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
-const EPISODE_ROW_HEIGHT = 68;
+const EPISODE_STILL_WIDTH = layout.posterList.width;
+const EPISODE_STILL_HEIGHT = Math.round(EPISODE_STILL_WIDTH * (9 / 16));
 
 interface EpisodeListItemProps {
   tvShowId: string;
@@ -90,64 +94,51 @@ function EpisodeListItem({
   };
 
   return (
-    <View
-      style={[styles.row, isWatched && styles.rowWatched]}
-      testID={`episode-row-${episode.episodeNumber}`}
-    >
-      {showWatchedControl ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={isWatched ? t('common.markAsUnwatched') : t('common.markAsWatched')}
-          accessibilityState={{ selected: isWatched, busy: isTogglePending }}
-          disabled={isTogglePending}
-          onPress={handleToggleWatched}
-          hitSlop={6}
-          style={({ pressed }) => [
-            styles.watchedControl,
-            pressed && !isTogglePending && styles.pressed,
-          ]}
-          testID={`episode-watched-toggle-${episode.episodeNumber}`}
-        >
-          {isTogglePending ? (
-            <ActivityIndicator color={colors.accent} size="small" />
-          ) : (
-            <Ionicons
-              name={isWatched ? 'checkmark-circle' : 'ellipse-outline'}
-              size={22}
-              color={isWatched ? colors.progressCompleted : colors.textMuted}
+    <View style={styles.episodeRow} testID={`episode-row-${episode.episodeNumber}`}>
+      <View style={[waxSealCardStyles.card, isWatched && waxSealCardStyles.cardCompleted]}>
+        <View style={waxSealCardStyles.inner}>
+          <WaxSealMedallion
+            completed={isWatched}
+            pending={isTogglePending}
+            onPress={showWatchedControl ? handleToggleWatched : undefined}
+            accessibilityLabel={
+              isWatched ? t('common.markAsUnwatched') : t('common.markAsWatched')
+            }
+            testID={
+              showWatchedControl ? `episode-watched-toggle-${episode.episodeNumber}` : undefined
+            }
+          />
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.openTitle', { title })}
+            onPress={handleOpenEpisode}
+            onLongPress={handleLongPress}
+            delayLongPress={400}
+            style={({ pressed }) => [waxSealCardStyles.content, pressed && styles.pressed]}
+            testID={`episode-content-${episode.episodeNumber}`}
+          >
+            <CatalogImage
+              path={episode.stillPath}
+              width={EPISODE_STILL_WIDTH}
+              height={EPISODE_STILL_HEIGHT}
+              accessibilityLabel={t('common.episodeStillAccessibility', { title })}
+              rounded
             />
-          )}
-        </Pressable>
-      ) : null}
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('common.openTitle', { title })}
-        onPress={handleOpenEpisode}
-        onLongPress={handleLongPress}
-        delayLongPress={400}
-        style={({ pressed }) => [styles.content, pressed && styles.pressed]}
-        testID={`episode-content-${episode.episodeNumber}`}
-      >
-        <CatalogImage
-          path={episode.stillPath}
-          width={layout.posterList.width}
-          height={Math.round(layout.posterList.width * (9 / 16))}
-          accessibilityLabel={t('common.episodeStillAccessibility', { title })}
-          rounded
-        />
-
-        <View style={styles.meta}>
-          <AppText variant="bodySmall" numberOfLines={2}>
-            {t('common.episodeLine', { episode: episode.episodeNumber, title })}
-          </AppText>
-          {metadata ? (
-            <AppText variant="caption" muted numberOfLines={1}>
-              {metadata}
-            </AppText>
-          ) : null}
+            <View style={waxSealCardStyles.body}>
+              <AppText variant="bodySmall" numberOfLines={2}>
+                {t('common.episodeLine', { episode: episode.episodeNumber, title })}
+              </AppText>
+              {metadata ? (
+                <AppText variant="caption" muted numberOfLines={1}>
+                  {metadata}
+                </AppText>
+              ) : null}
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </Pressable>
         </View>
-      </Pressable>
+      </View>
     </View>
   );
 }
@@ -196,13 +187,6 @@ export function EpisodeList({
     [markThroughMutation, requireAuth, t],
   );
 
-  const watchedControlWidth = 44;
-  const separatorInset =
-    spacing.md +
-    (isAuthenticated ? watchedControlWidth + spacing.md : 0) +
-    layout.posterList.width +
-    spacing.md;
-
   const handleToggleWatched = useCallback(
     (episode: EpisodeSummaryResponse, isWatched: boolean) => {
       if (!requireAuth()) {
@@ -215,31 +199,24 @@ export function EpisodeList({
   );
 
   const renderItem = useCallback(
-    ({ item, index }: { item: EpisodeSummaryResponse; index: number }) => (
-      <View>
-        <EpisodeListItem
-          tvShowId={tvShowId}
-          seasonNumber={seasonNumber}
-          episode={item}
-          isWatched={watchedIds.has(item.id)}
-          isTogglePending={pendingEpisodeId === item.id}
-          showWatchedControl={isAuthenticated}
-          onToggleWatched={handleToggleWatched}
-          onMarkThrough={handleMarkThrough}
-        />
-        {index < episodes.length - 1 ? (
-          <View style={[styles.separator, { marginLeft: separatorInset }]} />
-        ) : null}
-      </View>
+    ({ item }: { item: EpisodeSummaryResponse }) => (
+      <EpisodeListItem
+        tvShowId={tvShowId}
+        seasonNumber={seasonNumber}
+        episode={item}
+        isWatched={watchedIds.has(item.id)}
+        isTogglePending={pendingEpisodeId === item.id}
+        showWatchedControl={isAuthenticated}
+        onToggleWatched={handleToggleWatched}
+        onMarkThrough={handleMarkThrough}
+      />
     ),
     [
-      episodes.length,
       handleMarkThrough,
       handleToggleWatched,
       isAuthenticated,
       pendingEpisodeId,
       seasonNumber,
-      separatorInset,
       tvShowId,
       watchedIds,
     ],
@@ -249,14 +226,10 @@ export function EpisodeList({
     () => (
       <View>
         {listHeader}
-        <View style={styles.sectionHeader}>
-          <AppText variant="subtitle" style={styles.sectionTitle}>
-            {t('common.episodes')}
-          </AppText>
-        </View>
+        <HomeSectionHeader title={t('common.episodes')} compactSpacing />
       </View>
     ),
-    [listHeader],
+    [listHeader, t],
   );
 
   if (episodes.length === 0) {
@@ -301,57 +274,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingBottom: spacing.xxl,
+    gap: spacing.sm,
   },
-  sectionHeader: {
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  sectionTitle: {
-    marginBottom: 0,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: spacing.sm,
-    paddingRight: spacing.md,
-    paddingVertical: spacing.sm,
-    minHeight: EPISODE_ROW_HEIGHT,
-    gap: spacing.xs,
-    backgroundColor: colors.surfaceElevated,
-    marginHorizontal: spacing.lg,
-  },
-  rowWatched: {
-    backgroundColor: colors.progressCompletedTint12,
-  },
-  watchedControl: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  content: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: 44,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.lg,
+  episodeRow: {
+    width: '100%',
   },
   pressed: {
     opacity: interaction.pressedOpacity,
   },
-  meta: {
-    flex: 1,
-    gap: spacing.xs,
-  },
   emptySection: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     marginTop: spacing.lg,
     gap: spacing.lg,
   },

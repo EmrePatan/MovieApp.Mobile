@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
 
   content: {
 
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.lg,
 
   },
 

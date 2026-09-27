@@ -354,10 +354,10 @@ describe('SeasonList progress UI', () => {
     render(<SeasonList tvShowId="tv-id" seasons={manySeasons} />);
 
     expect(screen.getByText('Seasons (8)')).toBeTruthy();
-    expect(screen.getByTestId('season-row-3')).toBeTruthy();
-    expect(screen.queryByTestId('season-row-4')).toBeNull();
+    expect(screen.getByTestId('season-row-2')).toBeTruthy();
+    expect(screen.queryByTestId('season-row-3')).toBeNull();
     expect(screen.getByText('Show all 8 seasons')).toBeTruthy();
-    expect(screen.getByText('+5 more')).toBeTruthy();
+    expect(screen.getByText('+6 more')).toBeTruthy();
 
     fireEvent.press(screen.getByTestId('season-list-expand-toggle'));
 

@@ -87,7 +87,7 @@ describe('SeasonList aggregate progress', () => {
     expect(useTvShowProgress).toHaveBeenCalledTimes(1);
     expect(useSeasonProgress).not.toHaveBeenCalled();
     expect(screen.getByText('4 / 10')).toBeTruthy();
-    expect(screen.getAllByTestId('season-list-progress-bar').length).toBe(3);
+    expect(screen.getAllByTestId('season-list-progress-bar').length).toBe(2);
   });
 
   it('still uses one aggregate TV progress query for ten seasons', () => {

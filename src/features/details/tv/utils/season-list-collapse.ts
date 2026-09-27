@@ -1,4 +1,4 @@
-export const COLLAPSED_SEASON_PREVIEW_COUNT = 3;
+export const COLLAPSED_SEASON_PREVIEW_COUNT = 2;
 
 export function shouldCollapseSeasonList(
   seasonCount: number,

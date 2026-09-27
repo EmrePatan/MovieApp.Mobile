@@ -112,7 +112,7 @@ export function CastRail({ contentType, contentId, title }: CastRailProps) {
 const styles = StyleSheet.create({
   container: {
     marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   listContent: {
     paddingHorizontal: spacing.lg,
