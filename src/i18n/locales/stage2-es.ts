@@ -965,6 +965,21 @@ export const stage2Es = {
     removeMyRating: 'Eliminar mi valoración',
     communityUnavailable: 'Valoraciones de la comunidad no disponibles.',
     communityAverageLine: 'Media de la comunidad: ★ {{average}} ({{count}} valoraciones)',
+    detail: {
+      rateCta: 'Valorar',
+      yourScore: 'Tu puntuación',
+      change: 'Cambiar',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: '¿Qué te ha parecido este título?',
+      notNow: 'Ahora no',
+    },
+    unwatchConfirm: {
+      title: '¿Quitar la marca de visto?',
+      message: 'Tu valoración de este título también se eliminará.',
+      confirm: 'Quitar visto y valoración',
+    },
   },
   reviews: {
     title: 'Reseñas',

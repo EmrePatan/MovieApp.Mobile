@@ -965,6 +965,21 @@ export const stage2It = {
     removeMyRating: 'Rimuovi la mia valutazione',
     communityUnavailable: 'Valutazioni della community non disponibili.',
     communityAverageLine: 'Media community: ★ {{average}} ({{count}} valutazioni)',
+    detail: {
+      rateCta: 'Vota',
+      yourScore: 'Il tuo voto',
+      change: 'Modifica',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: 'Com’è stato questo titolo per te?',
+      notNow: 'Non ora',
+    },
+    unwatchConfirm: {
+      title: 'Rimuovere il segno visto?',
+      message: 'Anche il tuo voto per questo titolo verrà rimosso.',
+      confirm: 'Rimuovi visto e voto',
+    },
   },
   reviews: {
     title: 'Recensioni',

@@ -965,6 +965,21 @@ export const stage2De = {
     removeMyRating: 'Meine Bewertung entfernen',
     communityUnavailable: 'Community-Bewertungen nicht verfügbar.',
     communityAverageLine: 'Community-Durchschnitt: ★ {{average}} ({{count}} Bewertungen)',
+    detail: {
+      rateCta: 'Bewerten',
+      yourScore: 'Deine Bewertung',
+      change: 'Ändern',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: 'Wie hat dir dieser Titel gefallen?',
+      notNow: 'Nicht jetzt',
+    },
+    unwatchConfirm: {
+      title: 'Gesehen-Markierung entfernen?',
+      message: 'Deine Bewertung für diesen Titel wird ebenfalls entfernt.',
+      confirm: 'Gesehen und Bewertung entfernen',
+    },
   },
   reviews: {
     title: 'Rezensionen',

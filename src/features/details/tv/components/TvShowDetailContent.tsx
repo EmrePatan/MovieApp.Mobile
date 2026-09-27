@@ -4,6 +4,7 @@ import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
+import { DetailPersonalRatingProvider } from '../../shared/components/DetailPersonalRatingExperience';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
@@ -42,12 +43,16 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         trailer={{ contentType: 'tv', contentId: show.id }}
       />
       <DetailUltraThinRatingRail contentType="tv" contentId={show.id} />
-      <DetailActionBar
-        contentType="tv"
-        contentId={show.id}
-        showWatched
-        showFollow={show.canFollow}
-      />
+      <DetailPersonalRatingProvider contentType="tv" contentId={show.id} watchEligible>
+        <DetailActionBar
+          contentType="tv"
+          contentId={show.id}
+          showWatched
+          showFollow={show.canFollow}
+          watchEligible
+          showPersonalRatingRow
+        />
+      </DetailPersonalRatingProvider>
       <DetailOverview overview={show.overview} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow

@@ -4,6 +4,9 @@ import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
+import {
+  DetailPersonalRatingProvider,
+} from '../../shared/components/DetailPersonalRatingExperience';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
@@ -43,12 +46,20 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         contentId={movie.id}
         showCommunityScore={movie.isReleased}
       />
-      <DetailActionBar
+      <DetailPersonalRatingProvider
         contentType="movie"
         contentId={movie.id}
-        showWatched={movie.isReleased}
-        showReleaseAlert={movie.canSetReleaseAlert}
-      />
+        watchEligible={movie.isReleased}
+      >
+        <DetailActionBar
+          contentType="movie"
+          contentId={movie.id}
+          showWatched={movie.isReleased}
+          showReleaseAlert={movie.canSetReleaseAlert}
+          watchEligible={movie.isReleased}
+          showPersonalRatingRow
+        />
+      </DetailPersonalRatingProvider>
       <DetailOverview overview={movie.overview} />
       <ReviewsLinkRow
         contentType="movie"

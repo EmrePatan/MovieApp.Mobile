@@ -965,6 +965,21 @@ export const stage2Pt = {
     removeMyRating: 'Remover minha avaliação',
     communityUnavailable: 'Avaliações da comunidade indisponíveis.',
     communityAverageLine: 'Média da comunidade: ★ {{average}} ({{count}} avaliações)',
+    detail: {
+      rateCta: 'Avaliar',
+      yourScore: 'Sua nota',
+      change: 'Alterar',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: 'O que achou deste título?',
+      notNow: 'Agora não',
+    },
+    unwatchConfirm: {
+      title: 'Remover marcação de assistido?',
+      message: 'Sua avaliação deste título também será removida.',
+      confirm: 'Remover assistido e avaliação',
+    },
   },
   reviews: {
     title: 'Críticas',

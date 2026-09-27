@@ -945,6 +945,21 @@ export const stage2En = {
     removeMyRating: 'Remove My Rating',
     communityUnavailable: 'Community ratings unavailable.',
     communityAverageLine: 'Community average: ★ {{average}} ({{count}} ratings)',
+    detail: {
+      rateCta: 'Rate',
+      yourScore: 'Your score',
+      change: 'Change',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: 'How did you like this title?',
+      notNow: 'Not now',
+    },
+    unwatchConfirm: {
+      title: 'Remove watched mark?',
+      message: 'Your rating for this title will be removed as well.',
+      confirm: 'Remove watched and rating',
+    },
   },
   reviews: {
     title: 'Reviews',

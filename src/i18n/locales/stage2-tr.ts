@@ -966,6 +966,21 @@ export const stage2Tr = {
     removeMyRating: 'Puanımı Kaldır',
     communityUnavailable: 'Topluluk puanları kullanılamıyor.',
     communityAverageLine: 'Topluluk ortalaması: ★ {{average}} ({{count}} puan)',
+    detail: {
+      rateCta: 'Puan ver',
+      yourScore: 'Senin puanın',
+      change: 'Değiştir',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: 'Bu içeriği nasıl buldun?',
+      notNow: 'Şimdi değil',
+    },
+    unwatchConfirm: {
+      title: 'İzlendi işaretini kaldır?',
+      message: 'Bu içerik için verdiğin puan da kaldırılacak.',
+      confirm: 'İzledi ve puanı kaldır',
+    },
   },
   reviews: {
     title: 'Yorumlar',

@@ -41,9 +41,17 @@ interface WatchedButtonProps {
   target: WatchedTarget;
   size?: number;
   variant?: 'default' | 'detail';
+  onMarkedWatched?: () => void;
+  onBeforeUnwatch?: () => Promise<boolean>;
 }
 
-export function WatchedButton({ target, size = 48, variant = 'default' }: WatchedButtonProps) {
+export function WatchedButton({
+  target,
+  size = 48,
+  variant = 'default',
+  onMarkedWatched,
+  onBeforeUnwatch,
+}: WatchedButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
   const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
@@ -89,7 +97,7 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
     : isInitialLoading || isMutationPending;
   const active = isAuthenticated && isWatched;
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (!requireAuth()) {
       setFeedback(t('details.actions.signInWatchHistory'));
       return;
@@ -97,6 +105,13 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
 
     if (isMutationPending) {
       return;
+    }
+
+    if (active && onBeforeUnwatch) {
+      const proceed = await onBeforeUnwatch();
+      if (!proceed) {
+        return;
+      }
     }
 
     const onError = (error: unknown) => {
@@ -107,17 +122,23 @@ export function WatchedButton({ target, size = 48, variant = 'default' }: Watche
       );
     };
 
+    const onSuccess = () => {
+      if (!active) {
+        onMarkedWatched?.();
+      }
+    };
+
     if (target.type === 'episode') {
-      toggleEpisode.mutate({ episodeId: target.contentId, isWatched }, { onError });
+      toggleEpisode.mutate({ episodeId: target.contentId, isWatched }, { onError, onSuccess });
       return;
     }
 
     if (target.type === 'tvshow') {
-      toggleTvShow.mutate(isWatched, { onError });
+      toggleTvShow.mutate(isWatched, { onError, onSuccess });
       return;
     }
 
-    toggleMovie.mutate(isWatched, { onError });
+    toggleMovie.mutate(isWatched, { onError, onSuccess });
   };
 
   const label = active ? t('common.markAsUnwatched') : t('common.markAsWatched');

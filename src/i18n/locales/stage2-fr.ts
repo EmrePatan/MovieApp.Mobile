@@ -965,6 +965,21 @@ export const stage2Fr = {
     removeMyRating: 'Supprimer ma note',
     communityUnavailable: 'Notes de la communauté indisponibles.',
     communityAverageLine: 'Moyenne de la communauté : ★ {{average}} ({{count}} notes)',
+    detail: {
+      rateCta: 'Noter',
+      yourScore: 'Votre note',
+      change: 'Modifier',
+      scoreOutOfFive: '{{score}}/5',
+    },
+    promptSheet: {
+      title: 'Qu’avez-vous pensé de ce titre ?',
+      notNow: 'Pas maintenant',
+    },
+    unwatchConfirm: {
+      title: 'Retirer la marque « vu » ?',
+      message: 'Votre note pour ce titre sera également supprimée.',
+      confirm: 'Retirer vu et note',
+    },
   },
   reviews: {
     title: 'Avis',
