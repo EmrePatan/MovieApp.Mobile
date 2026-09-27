@@ -49,9 +49,17 @@ jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
     ),
 }));
 
-jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
-  DetailInlineRatingSection: ({ contentType }: { contentType: string }) =>
-    mockReact.createElement('Text', null, `Rating:${contentType}`),
+jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({
+  DetailUltraThinRatingRail: ({
+    contentType,
+    showCommunityScore = true,
+  }: {
+    contentType: string;
+    showCommunityScore?: boolean;
+  }) =>
+    showCommunityScore
+      ? mockReact.createElement('Text', null, `RatingRail:${contentType}`)
+      : null,
 }));
 
 jest.mock('@/auth/useAuth', () => ({
@@ -88,10 +96,6 @@ jest.mock('@/features/details/credits/components/CastRail', () => ({
 
 jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () => ({
   WhereToWatchRail: () => null,
-}));
-
-jest.mock('@/features/external-ratings/components/OtherRatingsSection', () => ({
-  OtherRatingsSection: () => null,
 }));
 
 const baseMovie: Omit<MovieDetailsResponse, 'isReleased' | 'canFollowForRelease' | 'canSetReleaseAlert'> = {
@@ -191,7 +195,7 @@ describe('detail action eligibility', () => {
     );
 
     expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
-    expect(screen.getByText('Rating:movie')).toBeTruthy();
+    expect(screen.getByText('RatingRail:movie')).toBeTruthy();
   });
 
   it('19. shows TV follow when canFollow is true', () => {
@@ -249,7 +253,7 @@ describe('detail action eligibility', () => {
     );
 
     expect(screen.getByText('Actions:tv:watched')).toBeTruthy();
-    expect(screen.getByText('Rating:tv')).toBeTruthy();
+    expect(screen.getByText('RatingRail:tv')).toBeTruthy();
   });
 
   it('23. preserves movie consumption guardrails when alert eligibility is false', () => {
@@ -266,7 +270,7 @@ describe('detail action eligibility', () => {
 
     expect(screen.getByText('Actions:movie')).toBeTruthy();
     expect(screen.queryByText('Actions:movie:watched')).toBeNull();
-    expect(screen.queryByText('Rating:movie')).toBeNull();
+    expect(screen.queryByText('RatingRail:movie')).toBeNull();
   });
 
   it('24. shows movie release alert when release date is unknown but eligibility is true', () => {

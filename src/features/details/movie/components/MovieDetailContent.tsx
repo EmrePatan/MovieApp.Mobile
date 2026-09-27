@@ -3,8 +3,7 @@ import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
-import { DetailInlineRatingSection } from '@/features/ratings/components/DetailInlineRatingSection';
-import { OtherRatingsSection } from '@/features/external-ratings/components/OtherRatingsSection';
+import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
@@ -25,7 +24,6 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
   const metadataLine = formatMovieDetailMetadataLine({
     releaseDate: movie.releaseDate,
     runtimeMinutes: movie.runtimeMinutes,
-    voteAverage: movie.voteAverage,
   });
 
   return (
@@ -40,6 +38,11 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         posterAccessibilityLabel={t('common.posterAccessibility', { title: movie.title })}
         trailer={{ contentType: 'movie', contentId: movie.id }}
       />
+      <DetailUltraThinRatingRail
+        contentType="movie"
+        contentId={movie.id}
+        showCommunityScore={movie.isReleased}
+      />
       <DetailActionBar
         contentType="movie"
         contentId={movie.id}
@@ -47,10 +50,6 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         showReleaseAlert={movie.canSetReleaseAlert}
       />
       <DetailOverview overview={movie.overview} />
-      {movie.isReleased ? (
-        <DetailInlineRatingSection contentType="movie" contentId={movie.id} />
-      ) : null}
-      <OtherRatingsSection mediaType="movie" contentId={movie.id} />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}
@@ -67,4 +66,3 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
     </View>
   );
 }
-

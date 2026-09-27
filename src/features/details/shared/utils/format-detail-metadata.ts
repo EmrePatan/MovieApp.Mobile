@@ -10,14 +10,10 @@ import {
 export function formatMovieDetailMetadataLine(input: {
   releaseDate: string | null;
   runtimeMinutes: number | null;
-  voteAverage: number;
 }): string {
   const parts = [
     translateContentType('movie'),
     formatCatalogYear(input.releaseDate, null),
-    input.voteAverage > 0
-      ? i18n.t('common.ratingStar', { rating: formatRating(input.voteAverage) })
-      : null,
     formatRuntimeMinutes(input.runtimeMinutes),
   ].filter(Boolean);
 
@@ -26,15 +22,11 @@ export function formatMovieDetailMetadataLine(input: {
 
 export function formatTvDetailMetadataLine(input: {
   firstAirDate: string | null;
-  voteAverage: number;
   seasonCount: number;
 }): string {
   const parts = [
     translateContentType('tv'),
     formatCatalogYear(input.firstAirDate, null),
-    input.voteAverage > 0
-      ? i18n.t('common.ratingStar', { rating: formatRating(input.voteAverage) })
-      : null,
     input.seasonCount > 0
       ? i18n.t(input.seasonCount === 1 ? 'common.seasonCount' : 'common.seasonsCount', {
           count: input.seasonCount,

@@ -3,8 +3,7 @@ import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
-import { DetailInlineRatingSection } from '@/features/ratings/components/DetailInlineRatingSection';
-import { OtherRatingsSection } from '@/features/external-ratings/components/OtherRatingsSection';
+import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
@@ -26,7 +25,6 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
   const galleryQuery = useTvShowGallery(show.id);
   const metadataLine = formatTvDetailMetadataLine({
     firstAirDate: show.firstAirDate,
-    voteAverage: show.voteAverage,
     seasonCount: show.seasons.length,
   });
 
@@ -43,6 +41,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         posterAccessibilityLabel={t('common.posterAccessibility', { title: show.title })}
         trailer={{ contentType: 'tv', contentId: show.id }}
       />
+      <DetailUltraThinRatingRail contentType="tv" contentId={show.id} />
       <DetailActionBar
         contentType="tv"
         contentId={show.id}
@@ -50,8 +49,6 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         showFollow={show.canFollow}
       />
       <DetailOverview overview={show.overview} />
-      <DetailInlineRatingSection contentType="tv" contentId={show.id} />
-      <OtherRatingsSection mediaType="tv" contentId={show.id} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow
         contentType="tv"
@@ -68,4 +65,3 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
     </View>
   );
 }
-

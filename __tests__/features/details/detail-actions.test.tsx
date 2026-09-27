@@ -25,9 +25,8 @@ jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
     ),
 }));
 
-jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
-  DetailInlineRatingSection: ({ contentType }: { contentType: string }) =>
-    mockReact.createElement('Text', null, `Rating:${contentType}`),
+jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({
+  DetailUltraThinRatingRail: () => null,
 }));
 
 jest.mock('@/auth/useAuth', () => ({

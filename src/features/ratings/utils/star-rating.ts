@@ -69,6 +69,17 @@ export function formatCommunityRatingCountLabel(ratingCount: number): string {
   return i18n.t('common.ratingsCount', { count: ratingCount });
 }
 
+export function formatCommunityRatingRailCountLabel(ratingCount: number): string {
+  if (ratingCount < 1000) {
+    return `(${ratingCount})`;
+  }
+
+  const compact = ratingCount / 1000;
+  const formatted = compact >= 10 ? Math.round(compact).toString() : compact.toFixed(1).replace(/\.0$/, '');
+
+  return `(${formatted}K)`;
+}
+
 export function formatCommunityRatingAccessibilityLabel(
   averageScore: number,
   ratingCount: number,

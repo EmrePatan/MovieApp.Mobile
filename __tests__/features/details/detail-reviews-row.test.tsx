@@ -30,9 +30,11 @@ jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
   DetailActionBar: () => null,
 }));
 
-jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
-  DetailInlineRatingSection: () =>
-    mockReact.createElement('Text', { testID: 'detail-inline-rating-section' }, 'Rating'),
+jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({
+  DetailUltraThinRatingRail: ({ showCommunityScore = true }: { showCommunityScore?: boolean }) =>
+    showCommunityScore
+      ? mockReact.createElement('Text', { testID: 'detail-ultra-thin-rating-rail' }, 'Rating')
+      : null,
 }));
 
 jest.mock('@/features/reviews/hooks/useMovieReviews', () => ({
@@ -53,10 +55,6 @@ jest.mock('@/features/details/credits/components/CastRail', () => ({
 
 jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () => ({
   WhereToWatchRail: () => null,
-}));
-
-jest.mock('@/features/external-ratings/components/OtherRatingsSection', () => ({
-  OtherRatingsSection: () => null,
 }));
 
 jest.mock('@/features/gallery/components/CatalogGallerySection', () => ({
@@ -158,7 +156,7 @@ describe('detail reviews row', () => {
   it('shows the compact reviews row below rating on movie detail', () => {
     render(<MovieDetailContent movie={releasedMovie} />);
 
-    expect(screen.getByTestId('detail-inline-rating-section')).toBeTruthy();
+    expect(screen.getByTestId('detail-ultra-thin-rating-rail')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
     expect(screen.getByTestId('reviews-count')).toHaveTextContent('121');
     expect(screen.queryByTestId('reviews-section')).toBeNull();
@@ -169,7 +167,7 @@ describe('detail reviews row', () => {
   it('shows the reviews section below seasons on tv detail', () => {
     render(<TvShowDetailContent show={show} />);
 
-    expect(screen.getByTestId('detail-inline-rating-section')).toBeTruthy();
+    expect(screen.getByTestId('detail-ultra-thin-rating-rail')).toBeTruthy();
     expect(screen.getByTestId('season-list-section')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
     expect(screen.getByTestId('reviews-count')).toHaveTextContent('42');
@@ -215,7 +213,7 @@ describe('detail reviews row', () => {
       />,
     );
 
-    expect(screen.queryByTestId('detail-inline-rating-section')).toBeNull();
+    expect(screen.queryByTestId('detail-ultra-thin-rating-rail')).toBeNull();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
   });
 });

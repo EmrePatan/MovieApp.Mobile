@@ -42,8 +42,8 @@ jest.mock('@/features/details/shared/components/DetailSections', () => ({
   },
 }));
 
-jest.mock('@/features/ratings/components/DetailInlineRatingSection', () => ({
-  DetailInlineRatingSection: () => null,
+jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({
+  DetailUltraThinRatingRail: () => null,
 }));
 jest.mock('@/features/details/credits/components/CastRail', () => ({ CastRail: () => null }));
 jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () => ({
