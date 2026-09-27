@@ -107,9 +107,10 @@ describe('movie detail collection row', () => {
     );
 
     const texts = screen
-      .getAllByText(/Trailer|Action Bar|Overview copy/)
+      .getAllByText(/Action Bar|Overview copy/)
       .map((node) => node.props.children);
-    expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
+    expect(texts).toEqual(['Action Bar', 'Overview copy']);
+    expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
     expect(screen.getByTestId('collection-link-row')).toBeTruthy();
     expect(screen.getByLabelText('Part of The Dark Knight Collection')).toBeTruthy();
   });
@@ -119,9 +120,10 @@ describe('movie detail collection row', () => {
 
     expect(screen.queryByTestId('collection-link-row')).toBeNull();
     const texts = screen
-      .getAllByText(/Trailer|Action Bar|Overview copy/)
+      .getAllByText(/Action Bar|Overview copy/)
       .map((node) => node.props.children);
-    expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
+    expect(texts).toEqual(['Action Bar', 'Overview copy']);
+    expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
   });
 
   it('does not fetch collection details from movie detail', () => {

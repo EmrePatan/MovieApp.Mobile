@@ -48,7 +48,7 @@ describe('detail hero inline trailer', () => {
     );
 
     expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
-    expect(screen.getByText('Trailer')).toBeTruthy();
+    expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
     expect(screen.queryByTestId('inline-trailer-player')).toBeNull();
   });
 
@@ -84,7 +84,7 @@ describe('detail hero inline trailer', () => {
       />,
     );
 
-    expect(screen.queryByText('Trailer')).toBeNull();
+    expect(screen.queryByTestId('detail-trailer-play-affordance')).toBeNull();
     expect(screen.queryByTestId('inline-trailer-player')).toBeNull();
   });
 });

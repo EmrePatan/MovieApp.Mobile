@@ -114,17 +114,19 @@ describe('detail trailer placement', () => {
   it('integrates compact Trailer CTA in hero before action bar on movie detail', () => {
     renderWithProviders(<MovieDetailContent movie={movie} />);
 
-    const texts = screen.getAllByText(/Action Bar|Trailer|Overview copy/).map((node) => node.props.children);
-    expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
+    const texts = screen.getAllByText(/Action Bar|Overview copy/).map((node) => node.props.children);
+    expect(texts).toEqual(['Action Bar', 'Overview copy']);
     expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
+    expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
   });
 
   it('integrates compact Trailer CTA in hero before action bar on tv detail', () => {
     renderWithProviders(<TvShowDetailContent show={show} />);
 
-    const texts = screen.getAllByText(/Action Bar|Trailer|Overview copy/).map((node) => node.props.children);
-    expect(texts).toEqual(['Trailer', 'Action Bar', 'Overview copy']);
+    const texts = screen.getAllByText(/Action Bar|Overview copy/).map((node) => node.props.children);
+    expect(texts).toEqual(['Action Bar', 'Overview copy']);
     expect(screen.getByLabelText('Play Trailer')).toBeTruthy();
+    expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
   });
 
   it('omits trailer CTA without leaving layout gap when primary is unavailable', () => {
@@ -136,7 +138,7 @@ describe('detail trailer placement', () => {
 
     renderWithProviders(<MovieDetailContent movie={movie} />);
 
-    expect(screen.queryByText('Trailer')).toBeNull();
+    expect(screen.queryByTestId('detail-trailer-play-affordance')).toBeNull();
     const texts = screen.getAllByText(/Action Bar|Overview copy/).map((node) => node.props.children);
     expect(texts).toEqual(['Action Bar', 'Overview copy']);
   });

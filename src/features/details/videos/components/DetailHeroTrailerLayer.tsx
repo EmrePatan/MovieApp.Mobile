@@ -29,7 +29,7 @@ export function DetailHeroTrailerLayer({
   const { watchUrl } = useDetailTrailerWatchUrl({ contentType, contentId });
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const stopPlayback = useCallback(() => {
+  const closeTrailer = useCallback(() => {
     setIsPlaying(false);
     onPlayingChange?.(false);
   }, [onPlayingChange]);
@@ -60,25 +60,25 @@ export function DetailHeroTrailerLayer({
   }, [t, watchUrl]);
 
   const handlePlaybackError = useCallback(() => {
-    stopPlayback();
+    closeTrailer();
     void openTrailerExternally();
-  }, [openTrailerExternally, stopPlayback]);
+  }, [closeTrailer, openTrailerExternally]);
 
-  const stopPlaybackRef = useRef(stopPlayback);
-  stopPlaybackRef.current = stopPlayback;
+  const closeTrailerRef = useRef(closeTrailer);
+  closeTrailerRef.current = closeTrailer;
 
   useFocusEffect(
     useCallback(() => {
       return () => {
-        stopPlayback();
+        closeTrailerRef.current();
       };
-    }, [stopPlayback]),
+    }, []),
   );
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState !== 'active') {
-        stopPlaybackRef.current();
+        closeTrailerRef.current();
       }
     });
 
@@ -98,7 +98,7 @@ export function DetailHeroTrailerLayer({
       {isPlaying ? (
         <InlineYoutubeTrailerPlayer
           videoId={videoId}
-          onEnded={stopPlayback}
+          onClose={closeTrailer}
           onPlaybackError={handlePlaybackError}
         />
       ) : (
@@ -110,7 +110,7 @@ export function DetailHeroTrailerLayer({
             testID="detail-trailer-close-button"
             accessibilityRole="button"
             accessibilityLabel={t('common.close')}
-            onPress={stopPlayback}
+            onPress={closeTrailer}
             style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
           >
             <Ionicons name="close" size={20} color={colors.textPrimary} />
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   closeOverlay: {
     position: 'absolute',
     right: spacing.md,
-    zIndex: 3,
+    zIndex: 12,
   },
   closeButton: {
     width: interaction.touchTarget,

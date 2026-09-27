@@ -1,25 +1,31 @@
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
-import { buildYoutubeTrailerPlayerHtml } from '../utils/build-youtube-trailer-player-html';
+import {
+  TRAILER_PLAYER_CLOSE_MESSAGE,
+  buildYoutubeTrailerPlayerHtml,
+} from '../utils/build-youtube-trailer-player-html';
 import { getYoutubeEmbedRefererOrigin } from '../utils/youtube-embed-referer';
 
 interface InlineYoutubeTrailerPlayerProps {
   videoId: string;
-  onEnded: () => void;
+  onClose: () => void;
   onPlaybackError?: (errorCode: number) => void;
 }
 
 export const InlineYoutubeTrailerPlayer = memo(function InlineYoutubeTrailerPlayer({
   videoId,
-  onEnded,
+  onClose,
   onPlaybackError,
 }: InlineYoutubeTrailerPlayerProps) {
   const embedOrigin = getYoutubeEmbedRefererOrigin();
 
   const source = useMemo(
     () => ({
-      html: buildYoutubeTrailerPlayerHtml(videoId, embedOrigin),
+      html: buildYoutubeTrailerPlayerHtml(videoId, embedOrigin, {
+        enableFullscreenButton: true,
+        closeOnPresentationExit: true,
+      }),
       baseUrl: embedOrigin,
       headers: {
         Referer: embedOrigin,
@@ -28,20 +34,23 @@ export const InlineYoutubeTrailerPlayer = memo(function InlineYoutubeTrailerPlay
     [embedOrigin, videoId],
   );
 
-  const handleMessage = (event: WebViewMessageEvent) => {
-    const message = event.nativeEvent.data;
-    if (message === 'ended') {
-      onEnded();
-      return;
-    }
-
-    if (message.startsWith('error:')) {
-      const code = Number.parseInt(message.slice('error:'.length), 10);
-      if (Number.isFinite(code)) {
-        onPlaybackError?.(code);
+  const handleMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      const message = event.nativeEvent.data;
+      if (message === 'ended' || message === TRAILER_PLAYER_CLOSE_MESSAGE) {
+        onClose();
+        return;
       }
-    }
-  };
+
+      if (message.startsWith('error:')) {
+        const code = Number.parseInt(message.slice('error:'.length), 10);
+        if (Number.isFinite(code)) {
+          onPlaybackError?.(code);
+        }
+      }
+    },
+    [onClose, onPlaybackError],
+  );
 
   return (
     <View style={styles.container} testID="inline-trailer-player">
@@ -52,7 +61,7 @@ export const InlineYoutubeTrailerPlayer = memo(function InlineYoutubeTrailerPlay
         domStorageEnabled
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
-        allowsFullscreenVideo
+        allowsFullscreenVideo={true}
         onMessage={handleMessage}
         originWhitelist={['https://*']}
       />
@@ -64,7 +73,7 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFill,
     backgroundColor: '#000',
-    zIndex: 1,
+    zIndex: 4,
   },
   webview: {
     flex: 1,

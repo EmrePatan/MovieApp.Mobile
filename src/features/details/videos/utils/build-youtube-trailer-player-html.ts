@@ -1,13 +1,101 @@
-import { getYoutubeEmbedRefererOrigin } from './youtube-embed-referer';
-
 const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
-export function buildYoutubeTrailerPlayerHtml(videoId: string, embedOrigin: string): string {
+/** WebView message: same effect as tapping the hero close control. */
+export const TRAILER_PLAYER_CLOSE_MESSAGE = 'close';
+
+export interface YoutubeTrailerPlayerHtmlOptions {
+  /** Post `close` when fullscreen or native presentation ends (hero returns to poster + play). */
+  closeOnPresentationExit?: boolean;
+  enableFullscreenButton?: boolean;
+  /** @deprecated Use closeOnPresentationExit */
+  listenForPresentationDismiss?: boolean;
+  /** @deprecated Use closeOnPresentationExit */
+  listenForHtmlFullscreenDismiss?: boolean;
+}
+
+export function buildYoutubeTrailerPlayerHtml(
+  videoId: string,
+  embedOrigin: string,
+  options: YoutubeTrailerPlayerHtmlOptions = {},
+): string {
   if (!YOUTUBE_VIDEO_ID_PATTERN.test(videoId)) {
     throw new Error('Invalid YouTube video id.');
   }
 
+  const closeOnPresentationExit =
+    options.closeOnPresentationExit
+    ?? options.listenForPresentationDismiss
+    ?? options.listenForHtmlFullscreenDismiss
+    ?? false;
+
+  const enableFullscreenButton = options.enableFullscreenButton ?? true;
   const safeOrigin = embedOrigin.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const fsFlag = enableFullscreenButton ? 1 : 0;
+
+  const presentationExitScript = closeOnPresentationExit
+    ? `
+      var closePostedAt = 0;
+      var visibilityWasHidden = false;
+      var htmlWasFullscreen = false;
+      var documentWasHidden = false;
+
+      function requestCloseLikeHeroButton() {
+        var now = Date.now();
+        if (now - closePostedAt < 450) {
+          return;
+        }
+        closePostedAt = now;
+        postToApp('${TRAILER_PLAYER_CLOSE_MESSAGE}');
+      }
+
+      function isDocumentHidden() {
+        return !!(document.hidden || document.webkitHidden);
+      }
+
+      function isHtmlFullscreen() {
+        return !!(
+          document.fullscreenElement
+          || document.webkitFullscreenElement
+          || document.webkitCurrentFullScreenElement
+        );
+      }
+
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden' || isDocumentHidden()) {
+          visibilityWasHidden = true;
+          return;
+        }
+
+        if ((document.visibilityState === 'visible' || !isDocumentHidden()) && visibilityWasHidden) {
+          visibilityWasHidden = false;
+          requestCloseLikeHeroButton();
+        }
+      });
+
+      function syncHtmlFullscreenState() {
+        var isFs = isHtmlFullscreen();
+
+        if (htmlWasFullscreen && !isFs) {
+          requestCloseLikeHeroButton();
+        }
+
+        htmlWasFullscreen = isFs;
+      }
+
+      document.addEventListener('fullscreenchange', syncHtmlFullscreenState);
+      document.addEventListener('webkitfullscreenchange', syncHtmlFullscreenState);
+
+      setInterval(function () {
+        syncHtmlFullscreenState();
+
+        var hidden = isDocumentHidden();
+        if (documentWasHidden && !hidden) {
+          requestCloseLikeHeroButton();
+        }
+        documentWasHidden = hidden;
+      }, 200);
+    `
+    : '';
 
   return `<!DOCTYPE html>
 <html>
@@ -28,6 +116,15 @@ export function buildYoutubeTrailerPlayerHtml(videoId: string, embedOrigin: stri
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
       var player;
+
+      function postToApp(message) {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(message);
+        }
+      }
+
+      ${presentationExitScript}
+
       function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
           width: '100%',
@@ -40,19 +137,17 @@ export function buildYoutubeTrailerPlayerHtml(videoId: string, embedOrigin: stri
             controls: 1,
             modestbranding: 1,
             rel: 0,
-            fs: 1,
+            fs: ${fsFlag},
             origin: '${safeOrigin}'
           },
           events: {
             onStateChange: function (event) {
-              if (event.data === 0 && window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage('ended');
+              if (event.data === 0) {
+                postToApp('ended');
               }
             },
             onError: function (event) {
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage('error:' + event.data);
-              }
+              postToApp('error:' + event.data);
             }
           }
         });
