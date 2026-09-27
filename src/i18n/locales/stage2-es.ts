@@ -1,3 +1,5 @@
+import { crewJobsEs } from './crew-jobs/es';
+
 export const stage2Es = {
   common: {
     seeAll: 'Ver todo',
@@ -904,6 +906,7 @@ export const stage2Es = {
       rolesWithMultiple: '{{role}} · Varios roles',
     },
     crewDepartments: {
+      acting: 'Reparto',
       directing: 'Dirección',
       creator: 'Creador',
       writing: 'Guion',
@@ -918,10 +921,10 @@ export const stage2Es = {
       other: 'Otros',
     },
     knownForDepartments: {
-      acting: 'Actuación',
-      directing: 'Dirección',
-      writing: 'Guion',
-      production: 'Producción',
+      acting: 'Actor',
+      directing: 'Director',
+      writing: 'Guionista',
+      production: 'Productor',
       creator: 'Creador',
       camera: 'Cámara',
       sound: 'Sonido',
@@ -929,6 +932,7 @@ export const stage2Es = {
       art: 'Arte',
       crew: 'Equipo',
     },
+    crewJobs: crewJobsEs,
     filmographyFilter: {
       all: 'Todo',
       movie: 'Películas',

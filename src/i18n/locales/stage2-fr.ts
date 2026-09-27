@@ -1,3 +1,5 @@
+import { crewJobsFr } from './crew-jobs/fr';
+
 export const stage2Fr = {
   common: {
     seeAll: 'Tout voir',
@@ -904,6 +906,7 @@ export const stage2Fr = {
       rolesWithMultiple: '{{role}} · Rôles multiples',
     },
     crewDepartments: {
+      acting: 'Distribution',
       directing: 'Réalisation',
       creator: 'Créateur',
       writing: 'Scénario',
@@ -918,10 +921,10 @@ export const stage2Fr = {
       other: 'Autre',
     },
     knownForDepartments: {
-      acting: 'Interprétation',
-      directing: 'Réalisation',
-      writing: 'Scénario',
-      production: 'Production',
+      acting: 'Acteur',
+      directing: 'Réalisateur',
+      writing: 'Scénariste',
+      production: 'Producteur',
       creator: 'Créateur',
       camera: 'Caméra',
       sound: 'Son',
@@ -929,6 +932,7 @@ export const stage2Fr = {
       art: 'Art',
       crew: 'Équipe',
     },
+    crewJobs: crewJobsFr,
     filmographyFilter: {
       all: 'Tout',
       movie: 'Films',

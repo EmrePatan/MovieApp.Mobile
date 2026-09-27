@@ -1,3 +1,5 @@
+import { crewJobsEn } from './crew-jobs/en';
+
 export const stage2En = {
   common: {
     seeAll: 'See All',
@@ -888,6 +890,7 @@ export const stage2En = {
       rolesWithMultiple: '{{role}} · Multiple roles',
     },
     crewDepartments: {
+      acting: 'Cast',
       directing: 'Directing',
       creator: 'Creator',
       writing: 'Writing',
@@ -902,10 +905,10 @@ export const stage2En = {
       other: 'Other',
     },
     knownForDepartments: {
-      acting: 'Acting',
-      directing: 'Directing',
-      writing: 'Writing',
-      production: 'Production',
+      acting: 'Actor',
+      directing: 'Director',
+      writing: 'Writer',
+      production: 'Producer',
       creator: 'Creator',
       camera: 'Camera',
       sound: 'Sound',
@@ -913,6 +916,7 @@ export const stage2En = {
       art: 'Art',
       crew: 'Crew',
     },
+    crewJobs: crewJobsEn,
     filmographyFilter: { all: 'All', movie: 'Movies', tv: 'TV' },
     watchProgress: {
       title: 'Watch Progress',

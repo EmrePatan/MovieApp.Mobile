@@ -2,6 +2,7 @@ import { translateCrewDepartment } from '@/i18n/catalog-labels';
 import type { CrewMember } from '../types';
 
 const CREW_DEPARTMENT_KEYS = [
+  'acting',
   'directing',
   'creator',
   'writing',

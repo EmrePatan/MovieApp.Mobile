@@ -37,7 +37,7 @@ describe('PersonHero portrait viewer', () => {
       />,
     );
 
-    expect(screen.getByText('Oyunculuk')).toBeTruthy();
+    expect(screen.getByText('Oyuncu')).toBeTruthy();
   });
 
   it('opens fullscreen viewer when portrait is pressed', async () => {

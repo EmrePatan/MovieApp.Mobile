@@ -36,8 +36,8 @@ describe('format helpers', () => {
 
   it('formats known-for department in English', async () => {
     await changeUiLanguage('en');
-    expect(formatKnownForDepartment('Acting')).toBe('Acting');
-    expect(formatKnownForDepartment('  Directing  ')).toBe('Directing');
+    expect(formatKnownForDepartment('Acting')).toBe('Actor');
+    expect(formatKnownForDepartment('  Directing  ')).toBe('Director');
     expect(formatKnownForDepartment(null)).toBeNull();
     expect(formatKnownForDepartment('')).toBeNull();
     expect(formatKnownForDepartment('Stunts')).toBe('Stunts');
@@ -45,7 +45,7 @@ describe('format helpers', () => {
 
   it('formats known-for department in Turkish', async () => {
     await changeUiLanguage('tr');
-    expect(formatKnownForDepartment('Acting')).toBe('Oyunculuk');
-    expect(formatKnownForDepartment('Production')).toBe('Prodüksiyon');
+    expect(formatKnownForDepartment('Acting')).toBe('Oyuncu');
+    expect(formatKnownForDepartment('Production')).toBe('Yapımcı');
   });
 });

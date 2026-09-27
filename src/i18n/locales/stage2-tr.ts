@@ -1,3 +1,5 @@
+import { crewJobsTr } from './crew-jobs/tr';
+
 export const stage2Tr = {
   common: {
     seeAll: 'Tümünü Gör',
@@ -905,10 +907,11 @@ export const stage2Tr = {
       rolesWithMultiple: '{{role}} · Birden fazla rol',
     },
     crewDepartments: {
-      directing: 'Yönetmenlik',
+      acting: 'Oyuncular',
+      directing: 'Yönetmen',
       creator: 'Yaratıcı',
-      writing: 'Senaryo',
-      production: 'Prodüksiyon',
+      writing: 'Senarist',
+      production: 'Yapımcı',
       camera: 'Kamera',
       sound: 'Ses',
       editing: 'Kurgu',
@@ -919,10 +922,10 @@ export const stage2Tr = {
       other: 'Diğer',
     },
     knownForDepartments: {
-      acting: 'Oyunculuk',
-      directing: 'Yönetmenlik',
-      writing: 'Senaryo',
-      production: 'Prodüksiyon',
+      acting: 'Oyuncu',
+      directing: 'Yönetmen',
+      writing: 'Senarist',
+      production: 'Yapımcı',
       creator: 'Yaratıcı',
       camera: 'Kamera',
       sound: 'Ses',
@@ -930,6 +933,7 @@ export const stage2Tr = {
       art: 'Sanat',
       crew: 'Ekip',
     },
+    crewJobs: crewJobsTr,
     filmographyFilter: {
       all: 'Tümü',
       movie: 'Filmler',

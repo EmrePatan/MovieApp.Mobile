@@ -40,6 +40,7 @@ export type MovieDnaEditorialFallbackKey =
   | 'default';
 
 const KNOWN_CREW_DEPARTMENTS = new Set([
+  'acting',
   'directing',
   'creator',
   'writing',
@@ -190,6 +191,8 @@ export function translateCrewDepartment(department: string | null | undefined): 
 
   return i18n.t(`details.crewDepartments.${normalized}`);
 }
+
+export { translateCrewJob } from './crew-job-labels';
 
 export function translateWatchProviderType(type: WatchMonetizationType): string {
   return i18n.t(`discovery.watchProviders.monetization.${type}`);

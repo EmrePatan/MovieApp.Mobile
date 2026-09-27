@@ -1,3 +1,4 @@
+import { changeUiLanguage } from '@/i18n';
 import { groupCrewByDepartment } from '@/features/details/credits/utils/group-crew-by-department';
 import type { CrewMember } from '@/features/details/credits/types';
 
@@ -13,6 +14,10 @@ function crewMember(overrides: Partial<CrewMember>): CrewMember {
 }
 
 describe('groupCrewByDepartment', () => {
+  beforeEach(async () => {
+    await changeUiLanguage('en');
+  });
+
   it('groups crew by department in mobile order', () => {
     const grouped = groupCrewByDepartment([
       crewMember({ name: 'Writer', department: 'Writing' }),
@@ -26,6 +31,15 @@ describe('groupCrewByDepartment', () => {
       'Production',
     ]);
     expect(grouped[0]?.data[0]?.name).toBe('Director');
+  });
+
+  it('translates Acting crew department', async () => {
+    await changeUiLanguage('tr');
+    const grouped = groupCrewByDepartment([
+      crewMember({ name: 'Lead', department: 'Acting' }),
+    ]);
+
+    expect(grouped[0]?.title).toBe('Oyuncular');
   });
 
   it('maps unknown departments to Other', () => {
