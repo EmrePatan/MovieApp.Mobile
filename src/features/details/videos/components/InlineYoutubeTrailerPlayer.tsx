@@ -2,24 +2,44 @@ import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { buildYoutubeTrailerPlayerHtml } from '../utils/build-youtube-trailer-player-html';
+import { getYoutubeEmbedRefererOrigin } from '../utils/youtube-embed-referer';
 
 interface InlineYoutubeTrailerPlayerProps {
   videoId: string;
   onEnded: () => void;
+  onPlaybackError?: (errorCode: number) => void;
 }
 
 export const InlineYoutubeTrailerPlayer = memo(function InlineYoutubeTrailerPlayer({
   videoId,
   onEnded,
+  onPlaybackError,
 }: InlineYoutubeTrailerPlayerProps) {
+  const embedOrigin = getYoutubeEmbedRefererOrigin();
+
   const source = useMemo(
-    () => ({ html: buildYoutubeTrailerPlayerHtml(videoId), baseUrl: 'https://www.youtube.com' }),
-    [videoId],
+    () => ({
+      html: buildYoutubeTrailerPlayerHtml(videoId, embedOrigin),
+      baseUrl: embedOrigin,
+      headers: {
+        Referer: embedOrigin,
+      },
+    }),
+    [embedOrigin, videoId],
   );
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    if (event.nativeEvent.data === 'ended') {
+    const message = event.nativeEvent.data;
+    if (message === 'ended') {
       onEnded();
+      return;
+    }
+
+    if (message.startsWith('error:')) {
+      const code = Number.parseInt(message.slice('error:'.length), 10);
+      if (Number.isFinite(code)) {
+        onPlaybackError?.(code);
+      }
     }
   };
 
