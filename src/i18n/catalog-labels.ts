@@ -231,15 +231,6 @@ export function translateWorldCinemaSort(sort: AdvancedDiscoverSort): string {
   return i18n.t(`discovery.worldCinemaScreen.sortOptions.${sort}`);
 }
 
-export function translateWorldCinemaCollection(countryCode: string): string {
-  const key = `discover.worldCinemaHub.collections.${countryCode}`;
-  if (i18n.exists(key)) {
-    return i18n.t(key);
-  }
-
-  return countryCode;
-}
-
 export function translateOriginCountryLabel(countryCode: string): string {
   const normalized = countryCode.trim().toUpperCase();
   const key = `discover.worldCinemaHub.countryLabels.${normalized}`;

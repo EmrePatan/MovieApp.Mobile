@@ -52,27 +52,26 @@ describe('world-cinema-collections', () => {
     expect(getOriginCountryLabel('TR')).toBe('Türkiye');
   });
 
-  it('uses concise demonym labels for curated World Cinema tabs', () => {
+  it('localizes release-region origin countries via countryLabels', () => {
+    expect(getOriginCountryLabel('US')).toBe('United States');
+    expect(getOriginCountryLabel('GB')).toBe('United Kingdom');
+    expect(getOriginCountryLabel('NL')).toBe('Netherlands');
+    expect(getOriginCountryLabel('CA')).toBe('Canada');
+    expect(getOriginCountryLabel('AU')).toBe('Australia');
+  });
+
+  it('uses country names for curated World Cinema hub chips', () => {
     expect(
       WORLD_CINEMA_CURATED_COLLECTIONS.map((collection) =>
         getWorldCinemaCollectionLabel(collection.originCountry),
       ),
-    ).toEqual([
-      'Korean',
-      'Japanese',
-      'Iranian',
-      'French',
-      'Italian',
-      'Spanish',
-      'Indian',
-      'Turkish',
-      'Chinese',
-      'Hong Kong',
-      'Taiwanese',
-      'German',
-      'Mexican',
-      'Argentine',
-      'Brazilian',
-    ]);
+    ).toEqual(
+      WORLD_CINEMA_CURATED_COLLECTIONS.map((collection) =>
+        getOriginCountryLabel(collection.originCountry),
+      ),
+    );
+    expect(getWorldCinemaCollectionLabel('KR')).toBe('South Korea');
+    expect(getWorldCinemaCollectionLabel('FR')).toBe('France');
+    expect(getWorldCinemaCollectionLabel('TR')).toBe('Türkiye');
   });
 });

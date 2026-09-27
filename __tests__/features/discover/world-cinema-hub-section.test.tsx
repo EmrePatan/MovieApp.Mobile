@@ -38,12 +38,12 @@ describe('WorldCinemaHubSection', () => {
     });
   });
 
-  it('renders concise country tabs with flags', () => {
+  it('renders country-name tabs with flags', () => {
     render(<WorldCinemaHubSection />);
 
     expect(screen.getByText('World Cinema')).toBeTruthy();
-    expect(screen.getByText('Korean')).toBeTruthy();
-    expect(screen.getByText('Japanese')).toBeTruthy();
+    expect(screen.getByText('South Korea')).toBeTruthy();
+    expect(screen.getByText('Japan')).toBeTruthy();
     expect(screen.getByText(countryCodeToFlagEmoji('KR'))).toBeTruthy();
     expect(screen.queryByText('Korean Cinema')).toBeNull();
     expect(screen.queryByText('Japanese Cinema')).toBeNull();
@@ -54,8 +54,8 @@ describe('WorldCinemaHubSection', () => {
 
     expect(screen.getByTestId('world-cinema-preview')).toBeTruthy();
     expect(screen.getByText('Parasite')).toBeTruthy();
-    expect(screen.queryByText('Korean')).toBeTruthy();
-    expect(screen.queryAllByText('Korean')).toHaveLength(1);
+    expect(screen.queryByText('South Korea')).toBeTruthy();
+    expect(screen.queryAllByText('South Korea')).toHaveLength(1);
   });
 
   it('switches preview country when a tab is selected', () => {

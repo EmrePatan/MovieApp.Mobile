@@ -1,7 +1,6 @@
 import { getRegionLabel, REGION_OPTIONS } from '@/features/regions/region-options';
 import {
   translateOriginCountryLabel,
-  translateWorldCinemaCollection,
 } from '@/i18n/catalog-labels';
 import { countryCodeToFlagEmoji } from './utils/country-flag';
 import type { WorldCinemaCollection } from './world-cinema-types';
@@ -66,16 +65,7 @@ export function getOriginCountryOptions(): { code: string; label: string }[] {
 }
 
 export function getWorldCinemaCollectionLabel(originCountry: string): string {
-  const normalized = originCountry.trim().toUpperCase();
-  const curated = WORLD_CINEMA_CURATED_COLLECTIONS.find(
-    (collection) => collection.originCountry === normalized,
-  );
-
-  if (curated) {
-    return translateWorldCinemaCollection(normalized);
-  }
-
-  return getOriginCountryLabel(normalized);
+  return getOriginCountryLabel(originCountry);
 }
 
 export function getWorldCinemaTabFlag(originCountry: string): string {
