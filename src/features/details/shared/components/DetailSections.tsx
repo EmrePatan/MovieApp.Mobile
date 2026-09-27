@@ -50,9 +50,11 @@ export function DetailGenres({ genres }: DetailGenresProps) {
 
 interface DetailOverviewProps {
   overview: string | null;
+  /** When true, omits section top margin (e.g. directly after header stack). */
+  compactTop?: boolean;
 }
 
-export function DetailOverview({ overview }: DetailOverviewProps) {
+export function DetailOverview({ overview, compactTop = false }: DetailOverviewProps) {
   const { t } = useTranslation();
 
   if (!overview) {
@@ -60,8 +62,17 @@ export function DetailOverview({ overview }: DetailOverviewProps) {
   }
 
   return (
-    <View style={styles.section}>
-      <HomeSectionHeader title={t('details.sections.overview')} />
+    <View
+      style={[
+        styles.section,
+        styles.overviewSection,
+        compactTop && styles.sectionCompactTop,
+      ]}
+    >
+      <HomeSectionHeader
+        title={t('details.sections.overview')}
+        compactSpacing
+      />
       <CollapsibleText
         text={overview}
         style={styles.body}
@@ -102,6 +113,12 @@ const styles = StyleSheet.create({
   section: {
     marginTop: spacing.md,
     gap: spacing.sm,
+  },
+  sectionCompactTop: {
+    marginTop: 0,
+  },
+  overviewSection: {
+    gap: spacing.xs,
   },
   body: {
     paddingHorizontal: spacing.lg,

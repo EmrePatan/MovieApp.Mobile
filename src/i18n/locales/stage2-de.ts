@@ -966,6 +966,7 @@ export const stage2De = {
     communityUnavailable: 'Community-Bewertungen nicht verfügbar.',
     communityAverageLine: 'Community-Durchschnitt: ★ {{average}} ({{count}} Bewertungen)',
     communityRailEmptyAccessibility: 'Community-Bewertung: 0 Sterne, noch keine Bewertungen',
+    communityRailOpenReviews: 'Rezensionen öffnen',
     detail: {
       rateCta: 'Bewerten',
       yourScore: 'Deine Bewertung',
@@ -975,6 +976,7 @@ export const stage2De = {
     promptSheet: {
       title: 'Wie hat dir dieser Titel gefallen?',
       notNow: 'Nicht jetzt',
+      save: 'Speichern',
     },
     unwatchConfirm: {
       title: 'Gesehen-Markierung entfernen?',

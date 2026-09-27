@@ -16,12 +16,15 @@ export function useWarmExternalRatingsDetail(
 ): void {
   const queryClient = useQueryClient();
 
+  if (enabled && contentId && isValidGuid(contentId)) {
+    preloadExternalRatingBrandAssets();
+  }
+
   useEffect(() => {
     if (!enabled || !contentId || !isValidGuid(contentId)) {
       return;
     }
 
-    preloadExternalRatingBrandAssets();
     prefetchExternalRatings(queryClient, mediaType, contentId);
   }, [queryClient, mediaType, contentId, enabled]);
 }

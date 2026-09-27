@@ -967,6 +967,7 @@ export const stage2Tr = {
     communityUnavailable: 'Topluluk puanları kullanılamıyor.',
     communityAverageLine: 'Topluluk ortalaması: ★ {{average}} ({{count}} puan)',
     communityRailEmptyAccessibility: 'Topluluk puanı: 0 yıldız, henüz puan yok',
+    communityRailOpenReviews: 'Yorumları aç',
     detail: {
       rateCta: 'Puan ver',
       yourScore: 'Senin puanın',
@@ -976,6 +977,7 @@ export const stage2Tr = {
     promptSheet: {
       title: 'Bu içeriği nasıl buldun?',
       notNow: 'Şimdi değil',
+      save: 'Kaydet',
     },
     unwatchConfirm: {
       title: 'İzlendi işaretini kaldır?',

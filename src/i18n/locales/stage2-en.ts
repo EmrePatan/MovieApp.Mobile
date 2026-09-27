@@ -946,6 +946,7 @@ export const stage2En = {
     communityUnavailable: 'Community ratings unavailable.',
     communityAverageLine: 'Community average: ★ {{average}} ({{count}} ratings)',
     communityRailEmptyAccessibility: 'Community rating: 0 stars, no ratings yet',
+    communityRailOpenReviews: 'Open reviews',
     detail: {
       rateCta: 'Rate',
       yourScore: 'Your score',
@@ -955,6 +956,7 @@ export const stage2En = {
     promptSheet: {
       title: 'How did you like this title?',
       notNow: 'Not now',
+      save: 'Save',
     },
     unwatchConfirm: {
       title: 'Remove watched mark?',

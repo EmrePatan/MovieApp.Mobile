@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
+import { DetailHeaderStack } from '../../shared/components/DetailHeaderStack';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
@@ -31,6 +32,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
 
   return (
     <View>
+      <DetailHeaderStack>
       <DetailHero
         title={movie.title}
         originalTitle={movie.originalTitle}
@@ -46,6 +48,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         contentId={movie.id}
         showCommunityScore={movie.isReleased}
         catalogTmdbVoteAverage={movie.voteAverage}
+        contentTitle={movie.title}
       />
       <DetailPersonalRatingProvider
         contentType="movie"
@@ -61,7 +64,8 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
           showPersonalRatingRow
         />
       </DetailPersonalRatingProvider>
-      <DetailOverview overview={movie.overview} />
+      </DetailHeaderStack>
+      <DetailOverview overview={movie.overview} compactTop />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}

@@ -38,6 +38,12 @@ export const layout = {
     widthRatio: 0.52,
     posterOverlapRatio: 0.35,
   },
+  /** Hero + rating rail + action block: single vertical rhythm (avoid stacked margins). */
+  detailHeaderStack: {
+    gap: spacing.sm,
+    /** Space before first body section (e.g. overview after personal rating row). */
+    afterStack: spacing.sm,
+  },
   homeSection: {
     headerHeight: homeSectionHeaderHeight,
     rowHeight:

@@ -966,6 +966,7 @@ export const stage2Fr = {
     communityUnavailable: 'Notes de la communauté indisponibles.',
     communityAverageLine: 'Moyenne de la communauté : ★ {{average}} ({{count}} notes)',
     communityRailEmptyAccessibility: 'Note communautaire : 0 étoile, pas encore de notes',
+    communityRailOpenReviews: 'Ouvrir les avis',
     detail: {
       rateCta: 'Noter',
       yourScore: 'Votre note',
@@ -975,6 +976,7 @@ export const stage2Fr = {
     promptSheet: {
       title: 'Qu’avez-vous pensé de ce titre ?',
       notNow: 'Pas maintenant',
+      save: 'Enregistrer',
     },
     unwatchConfirm: {
       title: 'Retirer la marque « vu » ?',

@@ -63,6 +63,7 @@ export function DetailPersonalRatingProvider({
   const rateContent = useRateContent(contentType, contentId);
   const deleteRating = useDeleteRating(contentType, contentId);
   const [promptVisible, setPromptVisible] = useState(false);
+  const [promptSessionKey, setPromptSessionKey] = useState(0);
   const [promptSheetBusy, setPromptSheetBusy] = useState(false);
   const [unwatchConfirmVisible, setUnwatchConfirmVisible] = useState(false);
   const unwatchResolverRef = useRef<((value: boolean) => void) | null>(null);
@@ -86,6 +87,7 @@ export function DetailPersonalRatingProvider({
   const openPrompt = useCallback(() => {
     clearPromptCloseTimeout();
     setPromptSheetBusy(false);
+    setPromptSessionKey((key) => key + 1);
     setPromptVisible(true);
   }, [clearPromptCloseTimeout]);
 
@@ -135,7 +137,6 @@ export function DetailPersonalRatingProvider({
           clearPromptCloseTimeout();
           closePromptTimeoutRef.current = setTimeout(() => {
             closePromptTimeoutRef.current = null;
-            setPromptSheetBusy(false);
             setPromptVisible(false);
           }, PERSONAL_RATING_PROMPT_CLOSE_DELAY_MS);
         },
@@ -158,6 +159,7 @@ export function DetailPersonalRatingProvider({
       {children}
       <PersonalRatingPromptSheet
         visible={promptVisible}
+        sessionKey={promptSessionKey}
         initialBackendScore={myRatingQuery.data?.score ?? null}
         isSubmitting={rateContent.isPending || promptSheetBusy}
         onClose={closePrompt}
@@ -257,7 +259,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs,
     paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingBottom: spacing.sm,
     minHeight: 28,
   },
   pressed: {

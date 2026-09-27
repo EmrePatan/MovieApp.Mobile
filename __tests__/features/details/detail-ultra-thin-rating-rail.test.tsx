@@ -1,8 +1,18 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { DetailUltraThinRatingRail } from '@/features/details/shared/components/DetailUltraThinRatingRail';
+import { openReviewsDetail } from '@/features/details/shared/navigation/reviews-detail-navigation';
 
 const mockUseRatingAggregate = jest.fn();
 const mockUseExternalRatings = jest.fn();
+const mockPush = jest.fn();
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
+jest.mock('@/features/details/shared/navigation/reviews-detail-navigation', () => ({
+  openReviewsDetail: jest.fn(),
+}));
 
 jest.mock('@/features/ratings/hooks/useRatings', () => ({
   useRatingAggregate: (...args: unknown[]) => mockUseRatingAggregate(...args),
@@ -84,6 +94,44 @@ describe('DetailUltraThinRatingRail', () => {
     expect(screen.getByTestId('detail-rail-external-imdb')).toBeTruthy();
     expect(screen.getByTestId('detail-rail-external-tmdb')).toBeTruthy();
     expect(screen.getByText('8.1')).toBeTruthy();
+  });
+
+  it('shows provider brand logos while external ratings are loading', () => {
+    mockUseExternalRatings.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
+
+    render(
+      <DetailUltraThinRatingRail
+        contentType="movie"
+        contentId={contentId}
+        catalogTmdbVoteAverage={8.1}
+      />,
+    );
+
+    expect(screen.getByTestId('detail-ultra-thin-rating-rail')).toBeTruthy();
+    expect(screen.getByTestId('detail-rail-external-imdb')).toBeTruthy();
+    expect(screen.getByTestId('detail-rail-external-tmdb')).toBeTruthy();
+    expect(screen.queryByTestId('detail-ultra-thin-rating-rail-loading')).toBeNull();
+  });
+
+  it('navigates to reviews when the community score is pressed', () => {
+    render(
+      <DetailUltraThinRatingRail
+        contentType="movie"
+        contentId={contentId}
+        contentTitle="Interstellar"
+      />,
+    );
+
+    fireEvent.press(screen.getByTestId('detail-rail-community-button'));
+
+    expect(openReviewsDetail).toHaveBeenCalledWith(
+      expect.objectContaining({ push: mockPush }),
+      expect.stringContaining('/reviews'),
+    );
   });
 
   it('hides community segment when showCommunityScore is false and no externals exist', () => {

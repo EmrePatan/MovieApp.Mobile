@@ -8,13 +8,22 @@ import { spacing } from '@/theme/spacing';
 interface HomeSectionHeaderProps {
   title: string;
   onSeeAllPress?: () => void;
+  /** Tighter space before section body (detail overview, etc.). */
+  compactSpacing?: boolean;
 }
 
-export function HomeSectionHeader({ title, onSeeAllPress }: HomeSectionHeaderProps) {
+export function HomeSectionHeader({
+  title,
+  onSeeAllPress,
+  compactSpacing = false,
+}: HomeSectionHeaderProps) {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.container} accessibilityRole="header">
+    <View
+      style={[styles.container, compactSpacing && styles.containerCompactSpacing]}
+      accessibilityRole="header"
+    >
       <View style={styles.titleRow}>
         <AppText variant="subtitle" style={styles.title}>{title}</AppText>
         {onSeeAllPress ? (
@@ -40,6 +49,9 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: layout.screenPaddingHorizontal,
     marginBottom: spacing.md,
+  },
+  containerCompactSpacing: {
+    marginBottom: spacing.xs,
   },
   titleRow: {
     flexDirection: 'row',

@@ -108,7 +108,7 @@ export const DetailHero = memo(function DetailHero({
     ) : null;
 
   return (
-    <View style={styles.container}>
+    <View>
       <DetailHeroMedia
         key={trailer?.contentId ?? 'detail-hero-media'}
         heroImagePath={heroImagePath}
@@ -141,7 +141,7 @@ export const DetailHero = memo(function DetailHero({
               <DetailMetadataRow value={metadataLine} />
               {genres.length > 0 ? (
                 <AppText variant="caption" muted numberOfLines={2}>
-                  {translateGenreNames(genres).join(' ? ')}
+                  {translateGenreNames(genres).join(' · ')}
                 </AppText>
               ) : null}
               {identityAccessory}
@@ -168,9 +168,6 @@ export const DetailHero = memo(function DetailHero({
 });
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.sm,
-  },
   content: {
     marginTop: -layout.posterCarousel.height * 0.35,
     paddingHorizontal: spacing.lg,

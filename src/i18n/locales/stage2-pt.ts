@@ -966,6 +966,7 @@ export const stage2Pt = {
     communityUnavailable: 'Avaliações da comunidade indisponíveis.',
     communityAverageLine: 'Média da comunidade: ★ {{average}} ({{count}} avaliações)',
     communityRailEmptyAccessibility: 'Avaliação da comunidade: 0 estrelas, ainda sem avaliações',
+    communityRailOpenReviews: 'Abrir avaliações',
     detail: {
       rateCta: 'Avaliar',
       yourScore: 'Sua nota',
@@ -975,6 +976,7 @@ export const stage2Pt = {
     promptSheet: {
       title: 'O que achou deste título?',
       notNow: 'Agora não',
+      save: 'Guardar',
     },
     unwatchConfirm: {
       title: 'Remover marcação de assistido?',

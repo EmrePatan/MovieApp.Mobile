@@ -966,6 +966,7 @@ export const stage2Es = {
     communityUnavailable: 'Valoraciones de la comunidad no disponibles.',
     communityAverageLine: 'Media de la comunidad: ★ {{average}} ({{count}} valoraciones)',
     communityRailEmptyAccessibility: 'Puntuación de la comunidad: 0 estrellas, aún sin valoraciones',
+    communityRailOpenReviews: 'Abrir reseñas',
     detail: {
       rateCta: 'Valorar',
       yourScore: 'Tu puntuación',
@@ -975,6 +976,7 @@ export const stage2Es = {
     promptSheet: {
       title: '¿Qué te ha parecido este título?',
       notNow: 'Ahora no',
+      save: 'Guardar',
     },
     unwatchConfirm: {
       title: '¿Quitar la marca de visto?',

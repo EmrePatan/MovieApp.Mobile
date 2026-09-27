@@ -1,6 +1,7 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment, useCallback, useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
@@ -16,13 +17,17 @@ import {
   formatCommunityStarRatingDisplay,
 } from '@/features/ratings/utils/star-rating';
 import {
-  buildExternalRatingRailItems,
-  mergeCatalogTmdbRatingForRail,
+  buildExternalRatingRailDisplayItems,
   type ExternalRatingRailItem,
 } from '../utils/format-external-rating-rail';
+import { openReviewsDetail } from '../navigation/reviews-detail-navigation';
+import { buildMovieReviewsRoute, buildTvReviewsRoute } from '../routes';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
+
+const COMMUNITY_RAIL_HIT_SLOP = { top: 10, bottom: 10, left: 6, right: 6 } as const;
 
 export const DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT = {
   minHeight: 28,
@@ -43,6 +48,7 @@ interface DetailUltraThinRatingRailProps {
   showCommunityScore?: boolean;
   /** Catalog TMDB vote average when external-ratings snapshot has no TMDB row. */
   catalogTmdbVoteAverage?: number;
+  contentTitle?: string;
 }
 
 export function DetailUltraThinRatingRail({
@@ -50,20 +56,30 @@ export function DetailUltraThinRatingRail({
   contentId,
   showCommunityScore = true,
   catalogTmdbVoteAverage,
+  contentTitle,
 }: DetailUltraThinRatingRailProps) {
+  const router = useRouter();
   const aggregateQuery = useRatingAggregate(contentType, contentId);
   const externalMediaType: ExternalRatingsMediaType =
     contentType === 'movie' ? 'movie' : 'tv';
   const externalQuery = useExternalRatings(externalMediaType, contentId);
 
   const externalItems = useMemo(() => {
-    const ratings = mergeCatalogTmdbRatingForRail(
-      externalQuery.data?.ratings ?? [],
-      catalogTmdbVoteAverage,
-    );
+    const includeScorePlaceholders =
+      externalQuery.isLoading && externalQuery.data == null;
 
-    return buildExternalRatingRailItems(ratings);
-  }, [catalogTmdbVoteAverage, externalQuery.data?.ratings]);
+    return buildExternalRatingRailDisplayItems(
+      externalQuery.data?.ratings ?? [],
+      {
+        catalogTmdbVoteAverage,
+        includeScorePlaceholders,
+      },
+    );
+  }, [
+    catalogTmdbVoteAverage,
+    externalQuery.data,
+    externalQuery.isLoading,
+  ]);
 
   const communityMeta = useMemo(() => {
     const aggregate = aggregateQuery.data;
@@ -81,9 +97,18 @@ export function DetailUltraThinRatingRail({
     };
   }, [aggregateQuery.data]);
 
-  const showInitialSkeleton =
-    (showCommunityScore && aggregateQuery.isLoading && !aggregateQuery.data) ||
-    (externalQuery.isLoading && !externalQuery.data);
+  const handleCommunityPress = useCallback(() => {
+    if (!contentTitle) {
+      return;
+    }
+
+    const reviewsRoute =
+      contentType === 'movie'
+        ? buildMovieReviewsRoute(contentId, { title: contentTitle })
+        : buildTvReviewsRoute(contentId, { title: contentTitle });
+
+    openReviewsDetail(router, reviewsRoute);
+  }, [contentId, contentTitle, contentType, router]);
 
   if (externalQuery.isError && !communityMeta && !showCommunityScore) {
     return null;
@@ -110,39 +135,15 @@ export function DetailUltraThinRatingRail({
     showCommunityScore &&
     !communityMeta &&
     externalItems.length === 0 &&
-    !showInitialSkeleton &&
     !aggregateQuery.isError
   ) {
     return (
       <View style={styles.wrapper} testID="detail-ultra-thin-rating-rail">
         <View style={styles.row}>
-          <CommunityZeroSegment />
+          <CommunityZeroSegment
+            onPress={contentTitle ? handleCommunityPress : undefined}
+          />
         </View>
-      </View>
-    );
-  }
-
-  if (
-    !showCommunityScore &&
-    externalItems.length === 0 &&
-    showInitialSkeleton
-  ) {
-    return (
-      <View style={styles.wrapper} testID="detail-ultra-thin-rating-rail-loading">
-        <SkeletonBlock width="72%" height={DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.minHeight - 6} />
-      </View>
-    );
-  }
-
-  if (
-    showCommunityScore &&
-    !communityMeta &&
-    externalItems.length === 0 &&
-    showInitialSkeleton
-  ) {
-    return (
-      <View style={styles.wrapper} testID="detail-ultra-thin-rating-rail-loading">
-        <SkeletonBlock width="72%" height={DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.minHeight - 6} />
       </View>
     );
   }
@@ -170,9 +171,14 @@ export function DetailUltraThinRatingRail({
             {index > 0 ? <RailSeparator /> : null}
             {segment === 'community' ? (
               communityMeta ? (
-                <CommunityScoreSegment communityMeta={communityMeta} />
+                <CommunityScoreSegment
+                  communityMeta={communityMeta}
+                  onPress={contentTitle ? handleCommunityPress : undefined}
+                />
               ) : (
-                <CommunityZeroSegment />
+                <CommunityZeroSegment
+                  onPress={contentTitle ? handleCommunityPress : undefined}
+                />
               )
             ) : (
               <ExternalRailSegment item={segment} />
@@ -194,20 +200,64 @@ function RailSeparator() {
   );
 }
 
+function CommunitySegmentChrome({
+  accessibilityLabel,
+  onPress,
+  testID,
+  children,
+}: {
+  accessibilityLabel: string;
+  onPress?: () => void;
+  testID: string;
+  children: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const label = onPress
+    ? `${accessibilityLabel}. ${t('ratings.communityRailOpenReviews')}`
+    : accessibilityLabel;
+
+  if (!onPress) {
+    return (
+      <View
+        style={styles.segment}
+        accessibilityRole="text"
+        accessibilityLabel={label}
+        testID={testID}
+      >
+        {children}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      hitSlop={COMMUNITY_RAIL_HIT_SLOP}
+      style={({ pressed }) => [styles.segment, styles.communityPressable, pressed && styles.pressed]}
+      testID="detail-rail-community-button"
+    >
+      {children}
+    </Pressable>
+  );
+}
+
 function CommunityScoreSegment({
   communityMeta,
+  onPress,
 }: {
   communityMeta: {
     stars: string;
     countLabel: string;
     accessibilityLabel: string;
   };
+  onPress?: () => void;
 }) {
   return (
-    <View
-      style={styles.segment}
-      accessibilityRole="text"
+    <CommunitySegmentChrome
       accessibilityLabel={communityMeta.accessibilityLabel}
+      onPress={onPress}
       testID="detail-rail-community-score"
     >
       <Ionicons
@@ -219,18 +269,17 @@ function CommunityScoreSegment({
       />
       <AppText style={styles.communityScore}>{communityMeta.stars}</AppText>
       <AppText style={styles.communityCount}>{communityMeta.countLabel}</AppText>
-    </View>
+    </CommunitySegmentChrome>
   );
 }
 
-function CommunityZeroSegment() {
+function CommunityZeroSegment({ onPress }: { onPress?: () => void }) {
   const { t } = useTranslation();
 
   return (
-    <View
-      style={styles.segment}
-      accessibilityRole="text"
+    <CommunitySegmentChrome
       accessibilityLabel={t('ratings.communityRailEmptyAccessibility')}
+      onPress={onPress}
       testID="detail-rail-community-zero"
     >
       <Ionicons
@@ -241,7 +290,7 @@ function CommunityZeroSegment() {
         importantForAccessibility="no"
       />
       <AppText style={styles.communityScore}>0</AppText>
-    </View>
+    </CommunitySegmentChrome>
   );
 }
 
@@ -258,9 +307,26 @@ function ExternalRailSegment({ item }: { item: ExternalRatingRailItem }) {
       testID={`detail-rail-external-${item.id}`}
     >
       <ExternalRatingProviderBrand source={item.source} variant="compact" />
-      <AppText style={styles.providerScore}>{item.valueLabel}</AppText>
+      <RailProviderScore item={item} />
     </View>
   );
+}
+
+function RailProviderScore({
+  item,
+}: {
+  item: ExternalRatingRailItem;
+}) {
+  if (item.scorePending) {
+    return (
+      <SkeletonBlock
+        width={32}
+        height={DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.providerScoreFontSize}
+      />
+    );
+  }
+
+  return <AppText style={styles.providerScore}>{item.valueLabel}</AppText>;
 }
 
 function RottenTomatoesRailSegment({
@@ -290,7 +356,7 @@ function RottenTomatoesRailSegment({
         accessibilityElementsHidden
         importantForAccessibility="no"
       />
-      <AppText style={styles.providerScore}>{item.valueLabel}</AppText>
+      <RailProviderScore item={item} />
     </View>
   );
 }
@@ -299,8 +365,6 @@ const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.paddingVertical,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xs,
   },
   row: {
     flexDirection: 'row',
@@ -314,6 +378,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.rtPairGap,
     flexShrink: 0,
+  },
+  communityPressable: {
+    marginVertical: -spacing.xs,
+    paddingVertical: spacing.xs,
+  },
+  pressed: {
+    opacity: interaction.pressedOpacity,
   },
   separator: {
     width: StyleSheet.hairlineWidth,

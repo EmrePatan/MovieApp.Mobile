@@ -4,6 +4,7 @@ import { SplashScreen, Stack } from 'expo-router';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { preloadExternalRatingBrandAssets } from '@/features/external-ratings/config/external-rating-provider-brand-config';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { AppStartupGate } from '@/bootstrap/AppStartupGate';
 import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
@@ -16,6 +17,8 @@ import { useAuth } from '@/auth/useAuth';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
+
+preloadExternalRatingBrandAssets();
 
 void SplashScreen.preventAutoHideAsync();
 

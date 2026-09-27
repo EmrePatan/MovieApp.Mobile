@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
+import { DetailHeaderStack } from '../../shared/components/DetailHeaderStack';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
@@ -31,7 +32,8 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
 
   return (
     <View>
-      <DetailHero
+      <DetailHeaderStack>
+        <DetailHero
         title={show.title}
         originalTitle={show.originalTitle}
         posterPath={show.posterPath}
@@ -46,6 +48,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         contentType="tv"
         contentId={show.id}
         catalogTmdbVoteAverage={show.voteAverage}
+        contentTitle={show.title}
       />
       <DetailPersonalRatingProvider contentType="tv" contentId={show.id} watchEligible>
         <DetailActionBar
@@ -57,7 +60,8 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
           showPersonalRatingRow
         />
       </DetailPersonalRatingProvider>
-      <DetailOverview overview={show.overview} />
+      </DetailHeaderStack>
+      <DetailOverview overview={show.overview} compactTop />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow
         contentType="tv"

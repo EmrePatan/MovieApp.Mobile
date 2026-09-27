@@ -40,6 +40,7 @@ export interface ExternalRatingRailStandardItem {
   source: string;
   valueLabel: string;
   accessibilityLabel: string;
+  scorePending?: boolean;
 }
 
 export interface ExternalRatingRailRottenTomatoesItem {
@@ -48,6 +49,7 @@ export interface ExternalRatingRailRottenTomatoesItem {
   rtSource: 'tomatometer' | 'popcornmeter';
   valueLabel: string;
   accessibilityLabel: string;
+  scorePending?: boolean;
 }
 
 export type ExternalRatingRailItem =
@@ -130,6 +132,94 @@ export function buildExternalRatingRailItems(
       valueLabel,
       accessibilityLabel: `Popcornmeter ${valueLabel}`,
     });
+  }
+
+  return items;
+}
+
+const EXTERNAL_RAIL_DISPLAY_ORDER = [
+  'imdb',
+  'tmdb',
+  'letterboxd',
+  'metacritic',
+  'tomatometer',
+  'popcornmeter',
+] as const;
+
+type ExternalRailDisplaySlotId = (typeof EXTERNAL_RAIL_DISPLAY_ORDER)[number];
+
+function createExternalRatingRailPlaceholder(
+  slotId: ExternalRailDisplaySlotId,
+): ExternalRatingRailItem {
+  if (slotId === 'tomatometer' || slotId === 'popcornmeter') {
+    const label = slotId === 'tomatometer' ? 'Tomatometer' : 'Popcornmeter';
+    return {
+      id: slotId,
+      kind: 'rotten-tomatoes',
+      rtSource: slotId,
+      valueLabel: '',
+      accessibilityLabel: label,
+      scorePending: true,
+    };
+  }
+
+  const accessibilityLabels: Record<
+    Exclude<ExternalRailDisplaySlotId, 'tomatometer' | 'popcornmeter'>,
+    string
+  > = {
+    imdb: 'IMDb',
+    tmdb: 'TMDB',
+    letterboxd: 'Letterboxd',
+    metacritic: 'Metacritic',
+  };
+
+  return {
+    id: slotId,
+    kind: 'standard',
+    source: slotId,
+    valueLabel: '',
+    accessibilityLabel: accessibilityLabels[slotId],
+    scorePending: true,
+  };
+}
+
+/**
+ * Builds the rail row from API ratings, optionally filling missing slots with brand
+ * placeholders (bundled logos + pending score) while external ratings are still loading.
+ */
+export function buildExternalRatingRailDisplayItems(
+  ratings: ExternalRatingItem[],
+  options?: {
+    catalogTmdbVoteAverage?: number;
+    includeScorePlaceholders?: boolean;
+  },
+): ExternalRatingRailItem[] {
+  const merged = mergeCatalogTmdbRatingForRail(ratings, options?.catalogTmdbVoteAverage);
+  const resolved = buildExternalRatingRailItems(merged);
+
+  if (!options?.includeScorePlaceholders) {
+    return resolved;
+  }
+
+  const resolvedById = new Map(resolved.map((item) => [item.id, item]));
+  const items: ExternalRatingRailItem[] = [];
+
+  for (const slotId of EXTERNAL_RAIL_DISPLAY_ORDER) {
+    if (slotId === 'tmdb') {
+      const hasCatalogTmdb =
+        options.catalogTmdbVoteAverage != null && options.catalogTmdbVoteAverage > 0;
+      if (!hasCatalogTmdb && !resolvedById.has('tmdb')) {
+        continue;
+      }
+    }
+
+    const existing = resolvedById.get(slotId);
+    if (existing) {
+      items.push(existing);
+      continue;
+    }
+
+    items.push(createExternalRatingRailPlaceholder(slotId));
   }
 
   return items;

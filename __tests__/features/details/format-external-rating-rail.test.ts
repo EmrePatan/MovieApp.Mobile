@@ -1,4 +1,5 @@
 import {
+  buildExternalRatingRailDisplayItems,
   buildExternalRatingRailItems,
   formatExternalRatingRailValue,
   mergeCatalogTmdbRatingForRail,
@@ -66,5 +67,35 @@ describe('mergeCatalogTmdbRatingForRail', () => {
     );
 
     expect(merged.filter((rating) => rating.source === 'tmdb')).toHaveLength(1);
+  });
+});
+
+describe('buildExternalRatingRailDisplayItems', () => {
+  it('fills missing slots with score placeholders while loading', () => {
+    const items = buildExternalRatingRailDisplayItems([], {
+      catalogTmdbVoteAverage: 8.1,
+      includeScorePlaceholders: true,
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      'imdb',
+      'tmdb',
+      'letterboxd',
+      'metacritic',
+      'tomatometer',
+      'popcornmeter',
+    ]);
+    expect(items.find((item) => item.id === 'imdb')?.scorePending).toBe(true);
+    expect(items.find((item) => item.id === 'tmdb')?.scorePending).toBeUndefined();
+    expect(items.find((item) => item.id === 'tmdb')?.valueLabel).toBe('8.1');
+  });
+
+  it('returns resolved items only when placeholders are disabled', () => {
+    const items = buildExternalRatingRailDisplayItems(
+      [{ source: 'imdb', value: 8, scale: 10 }],
+      { includeScorePlaceholders: false },
+    );
+
+    expect(items.map((item) => item.id)).toEqual(['imdb']);
   });
 });

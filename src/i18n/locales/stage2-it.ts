@@ -966,6 +966,7 @@ export const stage2It = {
     communityUnavailable: 'Valutazioni della community non disponibili.',
     communityAverageLine: 'Media community: ★ {{average}} ({{count}} valutazioni)',
     communityRailEmptyAccessibility: 'Valutazione community: 0 stelle, nessuna valutazione ancora',
+    communityRailOpenReviews: 'Apri recensioni',
     detail: {
       rateCta: 'Vota',
       yourScore: 'Il tuo voto',
@@ -975,6 +976,7 @@ export const stage2It = {
     promptSheet: {
       title: 'Com’è stato questo titolo per te?',
       notNow: 'Non ora',
+      save: 'Salva',
     },
     unwatchConfirm: {
       title: 'Rimuovere il segno visto?',
