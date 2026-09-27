@@ -24,6 +24,7 @@
     "production": {
       "distribution": "store",
       "credentialsSource": "remote",
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
         "EXPO_PUBLIC_IMAGE_BASE_URL": "https://image.tmdb.org/t/p"
