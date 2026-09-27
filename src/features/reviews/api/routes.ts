@@ -83,3 +83,20 @@ export function buildDeleteTvReviewPath(tvShowId: string): string {
 export function buildReviewTranslationPath(reviewId: string): string {
   return `/api/reviews/${encodePathSegment(reviewId)}/translation`;
 }
+
+export function buildCurrentUserReviewsPath(
+  page = 1,
+  pageSize = 15,
+  mediaType?: 'all' | 'movie' | 'tv',
+): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  if (mediaType && mediaType !== 'all') {
+    params.set('type', mediaType);
+  }
+
+  return `/api/reviews/me?${params.toString()}`;
+}

@@ -1,4 +1,9 @@
+import type { CatalogMediaFilter } from '@/features/library/types';
 import { DEFAULT_REVIEW_PAGE_SIZE, DEFAULT_REVIEW_SORT, type ReviewSortOption } from '../types';
+
+export function myCommentsInfiniteQueryKey(mediaType: CatalogMediaFilter) {
+  return ['reviews', 'me', 'list', mediaType] as const;
+}
 
 export function movieReviewsQueryKey(
   movieId: string,

@@ -1331,6 +1331,16 @@ export const stage2De = {
     },
   },
   profile: {
+    myComments: {
+      menuLabel: '💬  Meine Kommentare',
+      title: 'Meine Kommentare',
+      emptyTitle: 'Du hast noch nichts bewertet',
+      emptyDescription: 'Teile deine Gedanken zu den Filmen und Serien, die du schaust.',
+      emptyCta: 'Zu Entdecken',
+      metadataMovie: 'Film',
+      metadataTv: 'Serie',
+      ratingOutOfFive: '{{rating}}/5',
+    },
     preview: {
       watchActivity: 'Schau-Aktivität',
       moviesAndEpisodes: 'Filme & Episoden',

@@ -1331,6 +1331,16 @@ export const stage2Es = {
     },
   },
   profile: {
+    myComments: {
+      menuLabel: '💬  Mis comentarios',
+      title: 'Mis comentarios',
+      emptyTitle: 'Aún no has escrito ningún comentario',
+      emptyDescription: 'Comparte lo que piensas sobre las películas y series que ves.',
+      emptyCta: 'Ir a Descubrir',
+      metadataMovie: 'Película',
+      metadataTv: 'Serie',
+      ratingOutOfFive: '{{rating}}/5',
+    },
     preview: {
       watchActivity: 'Actividad de visionado',
       moviesAndEpisodes: 'películas y episodios',

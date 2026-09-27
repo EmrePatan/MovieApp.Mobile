@@ -101,6 +101,10 @@ export default function ProfileScreen() {
 
         <ProfileSection title={t('profile.account')}>
           <ProfileMenuRow
+            label={t('profile.myComments.menuLabel')}
+            onPress={() => router.push('/profile/my-comments')}
+          />
+          <ProfileMenuRow
             label={t('profile.editProfile')}
             onPress={() => router.push('/profile/edit')}
           />

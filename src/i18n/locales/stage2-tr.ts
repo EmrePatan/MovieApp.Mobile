@@ -1339,6 +1339,16 @@ export const stage2Tr = {
     },
   },
   profile: {
+    myComments: {
+      menuLabel: '💬  Yorumlarım',
+      title: 'Yorumlarım',
+      emptyTitle: 'Henüz yorum yapmadın',
+      emptyDescription: 'İzlediğin içerikler hakkındaki düşüncelerini paylaşabilirsin.',
+      emptyCta: "Keşfet'e Git",
+      metadataMovie: 'Film',
+      metadataTv: 'Dizi',
+      ratingOutOfFive: '{{rating}}/5',
+    },
     preview: {
       watchActivity: 'İzleme Etkinliği',
       moviesAndEpisodes: 'film ve bölüm',

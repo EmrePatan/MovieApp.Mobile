@@ -12,6 +12,7 @@ import {
   buildUpdateMovieReviewPath,
   buildUpdateTvReviewPath,
   buildReviewTranslationPath,
+  buildCurrentUserReviewsPath,
 } from './routes';
 import type {
   CreateReviewRequest,
@@ -21,6 +22,11 @@ import type {
   ReviewTranslationResponse,
   UpdateReviewRequest,
 } from '../types';
+import type { CatalogMediaFilter } from '@/features/library/types';
+import {
+  DEFAULT_MY_COMMENTS_PAGE_SIZE,
+  type UserReviewListResponse,
+} from '../types/my-comments';
 
 export async function getMovieReviews(
   movieId: string,
@@ -131,6 +137,21 @@ export async function translateReview(
     {},
     {
       authenticated: false,
+      signal,
+    },
+  );
+}
+
+export async function getCurrentUserReviews(
+  page = 1,
+  pageSize = DEFAULT_MY_COMMENTS_PAGE_SIZE,
+  mediaType: CatalogMediaFilter = 'all',
+  signal?: AbortSignal,
+): Promise<UserReviewListResponse> {
+  return api.get<UserReviewListResponse>(
+    buildCurrentUserReviewsPath(page, pageSize, mediaType),
+    {
+      authenticated: true,
       signal,
     },
   );

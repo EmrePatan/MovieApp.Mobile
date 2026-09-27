@@ -1314,6 +1314,16 @@ export const stage2En = {
     },
   },
   profile: {
+    myComments: {
+      menuLabel: '💬  My Comments',
+      title: 'My Comments',
+      emptyTitle: 'You have not reviewed anything yet',
+      emptyDescription: 'Share your thoughts on the movies and shows you watch.',
+      emptyCta: 'Go to Discover',
+      metadataMovie: 'Movie',
+      metadataTv: 'TV',
+      ratingOutOfFive: '{{rating}}/5',
+    },
     preview: {
       watchActivity: 'Watch Activity',
       moviesAndEpisodes: 'movies & episodes',
