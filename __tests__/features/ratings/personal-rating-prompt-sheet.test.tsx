@@ -2,7 +2,7 @@ import { render } from '@testing-library/react-native';
 import { PersonalRatingPromptSheet } from '@/features/ratings/components/PersonalRatingPromptSheet';
 
 describe('PersonalRatingPromptSheet', () => {
-  it('initializes whole stars from an existing backend score', () => {
+  it('initializes StarRatingSelector from an existing backend score', () => {
     const screen = render(
       <PersonalRatingPromptSheet
         visible
@@ -12,6 +12,7 @@ describe('PersonalRatingPromptSheet', () => {
       />,
     );
 
-    expect(screen.getByTestId('whole-star-4')).toBeTruthy();
+    expect(screen.getByTestId('star-rating-selector')).toBeTruthy();
+    expect(screen.getByTestId('star-4-full')).toBeTruthy();
   });
 });

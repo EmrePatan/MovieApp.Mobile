@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
-import { WholeStarRatingPicker } from '@/features/ratings/components/WholeStarRatingPicker';
+import { StarRatingSelector } from '@/features/ratings/components/StarRatingSelector';
 import {
   backendScoreToStarRating,
   starRatingToBackendScore,
@@ -32,23 +32,35 @@ function PersonalRatingPromptSheetContent({
 }: PersonalRatingPromptSheetContentProps) {
   const { t } = useTranslation();
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [selectedStars, setSelectedStars] = useState<number | null>(() =>
-    initialBackendScore != null ? backendScoreToStarRating(initialBackendScore) : null,
-  );
+  const [previewRating, setPreviewRating] = useState<number | null>(null);
 
-  const handleSelect = (stars: number) => {
+  const committedStarRating =
+    initialBackendScore != null ? backendScoreToStarRating(initialBackendScore) : null;
+  const displayStarRating = previewRating ?? committedStarRating;
+
+  const handleCommit = (starRating: number) => {
     if (isSubmitting) {
       return;
     }
 
-    setSelectedStars(stars);
+    setPreviewRating(starRating);
     setFeedback(null);
 
     try {
-      onSubmit(starRatingToBackendScore(stars));
+      onSubmit(starRatingToBackendScore(starRating));
     } catch {
+      setPreviewRating(null);
       setFeedback(t('ratings.saveError'));
     }
+  };
+
+  const handleClear = () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setPreviewRating(null);
+    setFeedback(null);
   };
 
   return (
@@ -64,11 +76,15 @@ function PersonalRatingPromptSheetContent({
         <AppText variant="subtitle" style={styles.title}>
           {t('ratings.promptSheet.title')}
         </AppText>
-        <WholeStarRatingPicker
-          value={selectedStars}
-          disabled={isSubmitting}
-          onSelect={handleSelect}
-        />
+        <View style={styles.selectorRow} testID="star-rating-row">
+          <StarRatingSelector
+            value={displayStarRating}
+            disabled={isSubmitting}
+            onPreviewChange={setPreviewRating}
+            onCommit={handleCommit}
+            onClear={handleClear}
+          />
+        </View>
         <FeedbackMessage
           message={feedback}
           tone="error"
@@ -137,5 +153,9 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
+  },
+  selectorRow: {
+    width: '100%',
+    alignItems: 'center',
   },
 });

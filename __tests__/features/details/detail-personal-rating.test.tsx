@@ -120,7 +120,8 @@ describe('DetailPersonalRatingRow', () => {
 
     fireEvent.press(screen.getByTestId('detail-personal-rating-summary'));
     expect(screen.getByTestId('personal-rating-prompt-sheet')).toBeTruthy();
-    expect(screen.getByTestId('whole-star-3')).toBeTruthy();
+    expect(screen.getByTestId('star-rating-selector')).toBeTruthy();
+    expect(screen.getByTestId('star-3-full')).toBeTruthy();
   });
 
   it('opens optional rating prompt after watched transition', () => {
