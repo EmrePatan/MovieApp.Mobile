@@ -9,7 +9,7 @@ export function useWatchlistShareController(
   isAuthenticated: boolean,
 ) {
   const { t } = useTranslation();
-  const { enable } = useWatchlistShareMutations(watchlistId);
+  const { enable, rotate } = useWatchlistShareMutations(watchlistId);
 
   const showShareError = useCallback(() => {
     Alert.alert(t('watchlistShare.errorTitle'), t('watchlistShare.errorMessage'));
@@ -26,6 +26,15 @@ export function useWatchlistShareController(
     },
     [t],
   );
+
+  const recoverShareUrlViaRotate = useCallback(async (): Promise<string | null> => {
+    try {
+      const rotated = await rotate.mutateAsync();
+      return rotated.shareUrl || null;
+    } catch {
+      return null;
+    }
+  }, [rotate]);
 
   const resolveShareUrl = useCallback(async (): Promise<string | null> => {
     if (!watchlistId) {
@@ -48,13 +57,30 @@ export function useWatchlistShareController(
         return storedAfterEnable;
       }
 
+      // Sharing may already be enabled (POST returns empty URL). Profile screen uses rotate here.
+      const rotatedUrl = await recoverShareUrlViaRotate();
+      if (rotatedUrl) {
+        return rotatedUrl;
+      }
+
       showLinkRecoveryHint();
       return null;
     } catch {
+      const rotatedUrl = await recoverShareUrlViaRotate();
+      if (rotatedUrl) {
+        return rotatedUrl;
+      }
+
       showShareError();
       return null;
     }
-  }, [enable, showLinkRecoveryHint, showShareError, watchlistId]);
+  }, [
+    enable,
+    recoverShareUrlViaRotate,
+    showLinkRecoveryHint,
+    showShareError,
+    watchlistId,
+  ]);
 
   const startShare = useCallback(() => {
     if (!watchlistId || !isAuthenticated) {
