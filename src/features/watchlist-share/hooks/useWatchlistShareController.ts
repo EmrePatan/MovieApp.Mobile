@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Alert, Share } from 'react-native';
+import { Alert, InteractionManager, Share } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { buildWatchlistShareMessage } from '../build-watchlist-share-message';
 import { getStoredWatchlistShareUrl, useWatchlistShareMutations } from './useWatchlistShare';
@@ -22,9 +22,23 @@ export function useWatchlistShareController(
   const openNativeShare = useCallback(
     async (url: string) => {
       const message = buildWatchlistShareMessage(url, t);
-      await Share.share({ message, title: t('common.watchlist') });
+      try {
+        await Share.share({ message, title: t('common.watchlist') });
+      } catch {
+        showShareError();
+      }
     },
-    [t],
+    [showShareError, t],
+  );
+
+  const waitForShareSheetHost = useCallback(
+    () =>
+      new Promise<void>((resolve) => {
+        InteractionManager.runAfterInteractions(() => {
+          setTimeout(resolve, 320);
+        });
+      }),
+    [],
   );
 
   const recoverShareUrlViaRotate = useCallback(async (): Promise<string | null> => {
@@ -93,9 +107,11 @@ export function useWatchlistShareController(
         return;
       }
 
+      // Options sheet is a Modal; Share.share while it dismisses often never shows the OS picker.
+      await waitForShareSheetHost();
       await openNativeShare(url);
     })();
-  }, [isAuthenticated, openNativeShare, resolveShareUrl, watchlistId]);
+  }, [isAuthenticated, openNativeShare, resolveShareUrl, waitForShareSheetHost, watchlistId]);
 
   return { startShare, resolveShareUrl, openNativeShare };
 }
