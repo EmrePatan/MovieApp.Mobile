@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   type AccessibilityActionEvent,
   ActivityIndicator,
@@ -35,12 +36,17 @@ export const LibraryGridCard = memo(function LibraryGridCard({
   height,
   onPress,
   onRemove,
-  removeAccessibilityLabel = 'this list',
+  removeAccessibilityLabel,
   isRemoving = false,
 }: LibraryGridCardProps) {
+  const { t } = useTranslation();
   const presentation = resolveLibraryStatusPresentation(item);
   const accessibilityLabel = buildLibraryGridAccessibilityLabel(item, presentation, category);
-  const removeActionLabel = `Remove ${item.title} from ${removeAccessibilityLabel}`;
+  const resolvedListName = removeAccessibilityLabel ?? t('library.watchlistDetail.removeFromThisList');
+  const removeActionLabel = t('common.removeFromList', {
+    title: item.title,
+    listName: resolvedListName,
+  });
 
   const handleRemove = useCallback(() => {
     if (isRemoving) {
@@ -75,7 +81,7 @@ export const LibraryGridCard = memo(function LibraryGridCard({
           path={item.posterUrl}
           width={width}
           height={height}
-          accessibilityLabel={`${item.title} poster`}
+          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         />
         {category === 'watching' ? (
           <LibraryStatusIndicator

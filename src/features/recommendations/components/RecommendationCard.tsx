@@ -21,7 +21,18 @@ export const RecommendationCard = memo(function RecommendationCard({
 }: RecommendationCardProps) {
   const { t } = useTranslation();
   const year = formatCatalogYear(item.releaseDate, item.year);
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}, rating ${formatRating(item.voteAverage)}${item.reason ? `, ${item.reason}` : ''}`;
+  const accessibilityDetails = [
+    formatContentType(item.type),
+    year,
+    t('common.communityRatingAccessibility', { rating: formatRating(item.voteAverage) }),
+    item.reason,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const accessibilityLabel = t('common.itemWithDetails', {
+    title: item.title,
+    details: accessibilityDetails,
+  });
 
   return (
     <Pressable

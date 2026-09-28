@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
@@ -29,13 +30,17 @@ export function PersonFilmographyGridCard({
   busy = false,
   onPress,
 }: PersonFilmographyGridCardProps) {
+  const { t } = useTranslation();
   const year = formatYear(entry.releaseDate);
   const posterHeight = Math.round(width * 1.5);
+  const accessibilityLabel = year
+    ? t('common.itemWithDetails', { title: entry.title, details: year })
+    : entry.title;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${entry.title}${year ? `, ${year}` : ''}`}
+      accessibilityLabel={accessibilityLabel}
       disabled={busy}
       onPress={() => onPress(entry)}
       style={styles.container}
@@ -46,7 +51,7 @@ export function PersonFilmographyGridCard({
         uri={entry.posterPath}
         width={width}
         height={posterHeight}
-        accessibilityLabel={`${entry.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: entry.title })}
       />
       <AppText variant="caption" numberOfLines={2} style={styles.title}>
         {entry.title}

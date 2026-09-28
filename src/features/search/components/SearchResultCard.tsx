@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -105,6 +106,7 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
   item: CatalogSearchResultItem;
   onPress?: (item: SearchResultItem) => void;
 }) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(item.releaseDate, item.year);
 
   const metadataLine = useMemo(() => {
@@ -130,7 +132,7 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
         uri={item.posterUrl}
         width={layout.posterList.width}
         height={layout.posterList.height}
-        accessibilityLabel={`${item.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
       />
       <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>

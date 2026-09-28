@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
@@ -18,12 +19,23 @@ export const FollowingListCard = memo(function FollowingListCard({
   item,
   onPress,
 }: FollowingListCardProps) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(item.releaseDate, item.year);
   const comingDate =
     item.type === 'movie' && isFutureReleaseDate(item.releaseDate)
       ? formatIsoDate(item.releaseDate)
       : null;
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}${comingDate ? `, coming ${comingDate}` : ''}`;
+  const accessibilityDetails = [
+    formatContentType(item.type),
+    year,
+    comingDate ? t('following.comingRelease', { date: comingDate }) : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const accessibilityLabel = t('common.itemWithDetails', {
+    title: item.title,
+    details: accessibilityDetails,
+  });
 
   return (
     <Pressable
@@ -36,7 +48,7 @@ export const FollowingListCard = memo(function FollowingListCard({
         path={item.posterUrl}
         width={layout.posterList.width}
         height={layout.posterList.height}
-        accessibilityLabel={`${item.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
       />
       <View style={styles.meta}>
         <AppText variant="body" numberOfLines={2} style={styles.title}>
@@ -52,7 +64,7 @@ export const FollowingListCard = memo(function FollowingListCard({
         </View>
         {comingDate ? (
           <AppText variant="caption" muted numberOfLines={1}>
-            Coming {comingDate}
+            {t('following.comingRelease', { date: comingDate })}
           </AppText>
         ) : null}
       </View>

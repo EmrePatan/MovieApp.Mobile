@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -22,9 +23,19 @@ export const CollectionPartRow = memo(function CollectionPartRow({
   part,
   onPress,
 }: CollectionPartRowProps) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(part.releaseDate, null);
-  const ratingLine = `${formatRating(part.voteAverage)} · ${formatVoteCount(part.voteCount)} votes`;
-  const accessibilityLabel = `${part.title}${year ? `, ${year}` : ''}, rated ${formatRating(part.voteAverage)}`;
+  const ratingLine = t('details.sections.collectionPartRatingLine', {
+    rating: formatRating(part.voteAverage),
+    count: formatVoteCount(part.voteCount),
+  });
+  const accessibilityDetails = [year, t('common.ratedAccessibility', { rating: formatRating(part.voteAverage) })]
+    .filter(Boolean)
+    .join(', ');
+  const accessibilityLabel = t('common.itemWithDetails', {
+    title: part.title,
+    details: accessibilityDetails,
+  });
 
   return (
     <Pressable
@@ -38,7 +49,7 @@ export const CollectionPartRow = memo(function CollectionPartRow({
         uri={part.posterPath}
         width={POSTER_WIDTH}
         height={POSTER_HEIGHT}
-        accessibilityLabel={`${part.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: part.title })}
         elevated
       />
       <View style={styles.meta}>

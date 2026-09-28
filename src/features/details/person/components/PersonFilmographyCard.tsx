@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
@@ -25,8 +26,18 @@ export const PersonFilmographyCard = memo(function PersonFilmographyCard({
   busy = false,
   onPress,
 }: PersonFilmographyCardProps) {
+  const { t } = useTranslation();
   const year = formatCatalogYear(entry.releaseDate, null);
-  const accessibilityLabel = `${entry.title}${year ? `, ${year}` : ''}${entry.character ? `, as ${entry.character}` : ''}`;
+  const accessibilityDetails = [
+    year,
+    entry.character ? t('common.creditAsCharacter', { character: entry.character }) : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const accessibilityLabel =
+    accessibilityDetails.length > 0
+      ? t('common.itemWithDetails', { title: entry.title, details: accessibilityDetails })
+      : entry.title;
 
   return (
     <Pressable
@@ -41,7 +52,7 @@ export const PersonFilmographyCard = memo(function PersonFilmographyCard({
         uri={entry.posterPath}
         width={POSTER_WIDTH}
         height={POSTER_HEIGHT}
-        accessibilityLabel={`${entry.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: entry.title })}
         elevated
       />
       <View style={styles.meta}>

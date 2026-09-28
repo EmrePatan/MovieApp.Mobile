@@ -40,7 +40,7 @@ export const AiRecommendationResultCard = memo(function AiRecommendationResultCa
         uri={item.posterUrl}
         width={layout.posterList.width}
         height={layout.posterList.height}
-        accessibilityLabel={`${item.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         elevated
       />
       <View style={styles.meta}>

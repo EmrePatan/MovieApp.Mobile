@@ -6,6 +6,8 @@ import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
 import { HOME_HEADER_COMPACT_TARGET } from './home-header-styles';
 
+const COMPACT_HIT_SLOP = { top: 4, right: 4, bottom: 4, left: 4 };
+
 interface HomeHeaderIconButtonProps {
   accessibilityLabel: string;
   onPress: () => void;
@@ -23,10 +25,13 @@ export function HomeHeaderIconButton({
   compact = false,
   badgeLabel = null,
 }: HomeHeaderIconButtonProps) {
+  const needsExpandedHitArea = compact || overlay;
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      hitSlop={needsExpandedHitArea ? COMPACT_HIT_SLOP : undefined}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
@@ -37,7 +42,7 @@ export function HomeHeaderIconButton({
     >
       {children}
       {badgeLabel ? (
-        <View style={styles.badge} accessibilityLabel={`${badgeLabel} unread notifications`}>
+        <View style={styles.badge} importantForAccessibility="no-hide-descendants" accessible={false}>
           <AppText variant="caption" style={styles.badgeText}>
             {badgeLabel}
           </AppText>

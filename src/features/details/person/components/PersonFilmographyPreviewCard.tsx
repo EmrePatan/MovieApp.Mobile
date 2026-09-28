@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
@@ -25,12 +26,16 @@ export function PersonFilmographyPreviewCard({
   busy = false,
   onPress,
 }: PersonFilmographyPreviewCardProps) {
+  const { t } = useTranslation();
   const year = formatYear(entry.releaseDate);
+  const accessibilityLabel = year
+    ? t('common.itemWithDetails', { title: entry.title, details: year })
+    : entry.title;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${entry.title}${year ? `, ${year}` : ''}`}
+      accessibilityLabel={accessibilityLabel}
       disabled={busy}
       onPress={() => onPress(entry)}
       style={styles.container}
@@ -40,7 +45,7 @@ export function PersonFilmographyPreviewCard({
         uri={entry.posterPath}
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
-        accessibilityLabel={`${entry.title} poster`}
+        accessibilityLabel={t('common.posterAccessibility', { title: entry.title })}
       />
       <AppText variant="caption" numberOfLines={2} style={styles.title}>
         {entry.title}

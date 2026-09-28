@@ -63,7 +63,17 @@ export const LibraryContentCard = memo(function LibraryContentCard({
   const { t } = useTranslation();
   const swipeableRef = useRef<Swipeable>(null);
   const year = formatYear(item);
-  const accessibilityLabel = `${item.title}, ${formatContentType(item.type)}${year ? `, ${year}` : ''}, rating ${formatRating(item.voteAverage)}`;
+  const accessibilityDetails = [
+    formatContentType(item.type),
+    year,
+    t('common.communityRatingAccessibility', { rating: formatRating(item.voteAverage) }),
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const accessibilityLabel = t('common.itemWithDetails', {
+    title: item.title,
+    details: accessibilityDetails,
+  });
   const removeActionLabel = t('common.removeFromList', {
     title: item.title,
     listName: removeAccessibilityLabel,
