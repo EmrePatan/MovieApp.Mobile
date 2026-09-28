@@ -5,8 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
-import { openCatalogDetailFromDetail } from '@/features/details/shared/navigation/catalog-detail-navigation';
-import { LibraryMediaFilterControl } from '@/features/library/components/LibraryMediaFilterControl';
+import {
+  MY_COMMENTS_REVIEWS_RETURN_HREF,
+  openReviewsDetail,
+} from '@/features/details/shared/navigation/reviews-detail-navigation';
+import {
+  buildMovieReviewsRoute,
+  buildTvReviewsRoute,
+} from '@/features/details/shared/routes';
+import { MyCommentsMediaFilter } from './MyCommentsMediaFilter';
 import type { CatalogMediaFilter } from '@/features/library/types';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { useMyComments } from '../hooks/useMyComments';
@@ -14,8 +21,8 @@ import type { UserReviewListItem } from '../types/my-comments';
 import { MyCommentRow } from './MyCommentRow';
 import { MyCommentsEmptyState } from './MyCommentsEmptyState';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { MY_COMMENTS_HORIZONTAL_INSET } from '../utils/my-comments-layout';
 
 export function MyCommentsContent() {
   const { t } = useTranslation();
@@ -28,9 +35,16 @@ export function MyCommentsContent() {
     [commentsQuery.data?.pages],
   );
 
-  const handleOpenDetail = useCallback(
+  const handleOpenReviews = useCallback(
     (item: UserReviewListItem) => {
-      openCatalogDetailFromDetail(router, item.contentId, item.contentType);
+      const reviewsRoute =
+        item.contentType === 'movie'
+          ? buildMovieReviewsRoute(item.contentId, { title: item.title })
+          : buildTvReviewsRoute(item.contentId, { title: item.title });
+
+      openReviewsDetail(router, reviewsRoute, {
+        returnHref: MY_COMMENTS_REVIEWS_RETURN_HREF,
+      });
     },
     [router],
   );
@@ -72,14 +86,15 @@ export function MyCommentsContent() {
     <FlatList
       data={items}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <MyCommentRow item={item} onPress={handleOpenDetail} />}
+      renderItem={({ item }) => <MyCommentRow item={item} onPress={handleOpenReviews} />}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
       contentContainerStyle={[
         styles.listContent,
         items.length === 0 && styles.listContentEmpty,
       ]}
       ListHeaderComponent={
         <View style={styles.filters}>
-          <LibraryMediaFilterControl value={mediaType} onChange={setMediaType} />
+          <MyCommentsMediaFilter value={mediaType} onChange={setMediaType} />
         </View>
       }
       ListEmptyComponent={<MyCommentsEmptyState onDiscover={handleDiscover} />}
@@ -98,11 +113,15 @@ export function MyCommentsContent() {
 
 const styles = StyleSheet.create({
   filters: {
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.lg,
+  },
+  separator: {
+    height: spacing.sm,
   },
   listContent: {
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingBottom: spacing.xl,
+    paddingHorizontal: MY_COMMENTS_HORIZONTAL_INSET,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xxl,
   },
   listContentEmpty: {
     flexGrow: 1,

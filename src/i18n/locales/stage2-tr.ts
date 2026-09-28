@@ -1342,12 +1342,19 @@ export const stage2Tr = {
     myComments: {
       menuLabel: '💬  Yorumlarım',
       title: 'Yorumlarım',
+      filters: {
+        all: 'Tümü',
+        movie: 'Film',
+        tv: 'Dizi',
+      },
       emptyTitle: 'Henüz yorum yapmadın',
       emptyDescription: 'İzlediğin içerikler hakkındaki düşüncelerini paylaşabilirsin.',
       emptyCta: "Keşfet'e Git",
       metadataMovie: 'Film',
       metadataTv: 'Dizi',
       ratingOutOfFive: '{{rating}}/5',
+      seeMore: 'Devamını gör',
+      seeMoreAccessibility: 'Yorumunun devamını gör',
     },
     preview: {
       watchActivity: 'İzleme Etkinliği',

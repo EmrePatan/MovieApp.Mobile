@@ -1334,12 +1334,19 @@ export const stage2De = {
     myComments: {
       menuLabel: '💬  Meine Kommentare',
       title: 'Meine Kommentare',
+      filters: {
+        all: 'Alle',
+        movie: 'Film',
+        tv: 'Serie',
+      },
       emptyTitle: 'Du hast noch nichts bewertet',
       emptyDescription: 'Teile deine Gedanken zu den Filmen und Serien, die du schaust.',
       emptyCta: 'Zu Entdecken',
       metadataMovie: 'Film',
       metadataTv: 'Serie',
       ratingOutOfFive: '{{rating}}/5',
+      seeMore: 'Mehr anzeigen',
+      seeMoreAccessibility: 'Mehr von deiner Rezension anzeigen',
     },
     preview: {
       watchActivity: 'Schau-Aktivität',

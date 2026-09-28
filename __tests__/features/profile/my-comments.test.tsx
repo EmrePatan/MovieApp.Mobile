@@ -121,7 +121,36 @@ describe('My Comments profile feature', () => {
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/(app-shell)/discover');
   });
 
-  it('renders movie and TV rows and opens catalog detail', () => {
+  it('navigates to title reviews when a list row is pressed', () => {
+    (useMyComments as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [movieItem],
+            page: 1,
+            pageSize: 15,
+            totalCount: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+
+    renderWithI18n(<MyCommentsContent />);
+
+    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014'));
+    expect(mockPush).toHaveBeenCalledWith('/movie/movie-1/reviews?title=Interstellar');
+  });
+
+  it('renders movie and TV rows and forwards press to handler', () => {
     const onPress = jest.fn();
 
     render(
@@ -137,6 +166,23 @@ describe('My Comments profile feature', () => {
     );
     expect(screen.getByText('Reacher')).toBeTruthy();
     expect(screen.getByText('TV · 2022')).toBeTruthy();
+  });
+
+  it('expands long review previews with See more', () => {
+    const onPress = jest.fn();
+    const longItem: UserReviewListItem = {
+      ...movieItem,
+      content:
+        'A mind-bending journey through space and time that keeps unfolding with emotional weight, scientific curiosity, and stunning visuals across every act of the story.',
+    };
+
+    renderWithI18n(<MyCommentRow item={longItem} onPress={onPress} />);
+
+    expect(screen.getByText('See more')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('my-comment-see-more'));
+    expect(screen.getByText('Show less')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('my-comment-see-more'));
+    expect(onPress).not.toHaveBeenCalled();
   });
 
   it('loads filtered lists through the media filter control', () => {
@@ -166,7 +212,7 @@ describe('My Comments profile feature', () => {
     renderWithI18n(<MyCommentsContent />);
 
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Filter Movies'));
+    fireEvent.press(screen.getByLabelText('Filter Movie'));
     expect(useMyComments).toHaveBeenCalled();
   });
 });

@@ -1317,12 +1317,19 @@ export const stage2En = {
     myComments: {
       menuLabel: '💬  My Comments',
       title: 'My Comments',
+      filters: {
+        all: 'All',
+        movie: 'Movie',
+        tv: 'TV',
+      },
       emptyTitle: 'You have not reviewed anything yet',
       emptyDescription: 'Share your thoughts on the movies and shows you watch.',
       emptyCta: 'Go to Discover',
       metadataMovie: 'Movie',
       metadataTv: 'TV',
       ratingOutOfFive: '{{rating}}/5',
+      seeMore: 'See more',
+      seeMoreAccessibility: 'See more of your review',
     },
     preview: {
       watchActivity: 'Watch Activity',

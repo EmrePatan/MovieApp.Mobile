@@ -18,7 +18,6 @@ import { layout } from '@/theme/layout';
 
 interface ReviewComposerProps {
   initialContent?: string;
-  contentTitle?: string;
   toolbarTitle?: string;
   submitLabel: string;
   isSubmitting?: boolean;
@@ -93,7 +92,6 @@ function ComposerMutedButton({
 
 function ReviewComposerInner({
   initialContent = '',
-  contentTitle,
   toolbarTitle,
   submitLabel,
   isSubmitting = false,
@@ -172,7 +170,7 @@ function ReviewComposerInner({
 
         <View style={styles.toolbarMeta}>
           <AppText variant="bodySmall" numberOfLines={1} style={styles.toolbarTitle}>
-            {toolbarTitle ?? contentTitle ?? t('reviews.writeReviewTitle')}
+            {toolbarTitle ?? t('reviews.writeReviewTitle')}
           </AppText>
         </View>
 

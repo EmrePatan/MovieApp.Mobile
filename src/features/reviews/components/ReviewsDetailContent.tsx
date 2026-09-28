@@ -37,6 +37,7 @@ import {
   useUpdateReviewMutation,
 } from '../hooks/useReviewMutations';
 import { useReviewsQuery } from '../hooks/useReviewsQuery';
+import { useReviewsExternalReturnBack } from '../hooks/useReviewsExternalReturnBack';
 import type { ReviewContentType, ReviewResponse, ReviewSortOption } from '../types';
 import { DEFAULT_REVIEW_SORT } from '../types';
 import {
@@ -62,6 +63,7 @@ export function ReviewsDetailContent({
   contentTitle,
 }: ReviewsDetailContentProps) {
   const { t } = useTranslation();
+  useReviewsExternalReturnBack();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const movieDetailsQuery = useMovieDetails(contentType === 'movie' ? contentId : undefined);
@@ -338,7 +340,6 @@ export function ReviewsDetailContent({
       <View style={styles.composerDock} testID="review-composer-anchor">
         {composerMode === 'create' ? (
           <ReviewComposer
-            contentTitle={contentTitle}
             submitLabel={t('common.postReview')}
             isSubmitting={createReview.isPending}
             errorMessage={mutationError}

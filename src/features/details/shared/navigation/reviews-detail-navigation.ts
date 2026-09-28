@@ -1,9 +1,21 @@
-import type { ImperativeRouter } from 'expo-router';
+import type { Href, ImperativeRouter } from 'expo-router';
 import {
   buildCatalogDetailRoute,
   parseCatalogStackCatalogId,
 } from '../routes';
 import { getMovieSegmentIndex, getTvSegmentIndex } from './catalog-route-segments';
+
+export const MY_COMMENTS_REVIEWS_RETURN_HREF = '/profile/my-comments' as const;
+
+let reviewsReturnHref: string | null = null;
+
+export function peekReviewsReturnHref(): string | null {
+  return reviewsReturnHref;
+}
+
+export function resetReviewsNavigationForTests(): void {
+  reviewsReturnHref = null;
+}
 
 export function isReviewsDetailRoute(segments: readonly string[]): boolean {
   const movieIndex = getMovieSegmentIndex(segments);
@@ -22,8 +34,27 @@ export function isReviewsDetailRoute(segments: readonly string[]): boolean {
 export function openReviewsDetail(
   router: ImperativeRouter,
   reviewsRoute: string,
+  options?: { returnHref?: string },
 ): void {
+  if (options?.returnHref) {
+    reviewsReturnHref = options.returnHref;
+    router.push(reviewsRoute);
+    return;
+  }
+
+  reviewsReturnHref = null;
   router.push(reviewsRoute, { withAnchor: true });
+}
+
+export function returnFromReviewsScreen(router: ImperativeRouter): boolean {
+  const returnHref = reviewsReturnHref;
+  if (!returnHref) {
+    return false;
+  }
+
+  reviewsReturnHref = null;
+  router.dismissTo(returnHref as Href);
+  return true;
 }
 
 export function returnToCatalogDetailFromReviews(

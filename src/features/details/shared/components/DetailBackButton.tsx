@@ -8,7 +8,10 @@ import {
   isLibraryStackRoute,
   returnFromLibraryStackScreen,
 } from '@/features/library/navigation/library-stack-navigation';
-import { isReviewsDetailRoute } from '../navigation/reviews-detail-navigation';
+import {
+  isReviewsDetailRoute,
+  returnFromReviewsScreen,
+} from '../navigation/reviews-detail-navigation';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -19,6 +22,7 @@ interface DetailBackButtonProps {
   topOffset?: number;
   variant?: 'inline' | 'overlay';
   contentInset?: boolean;
+  showLabel?: boolean;
 }
 
 export function DetailBackButton({
@@ -26,6 +30,7 @@ export function DetailBackButton({
   topOffset = 0,
   variant = 'inline',
   contentInset = true,
+  showLabel = true,
 }: DetailBackButtonProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -41,6 +46,10 @@ export function DetailBackButton({
     }
 
     if (isReviewsDetailRoute(segments)) {
+      if (returnFromReviewsScreen(router)) {
+        return;
+      }
+
       if (router.canGoBack()) {
         router.back();
       }
@@ -81,7 +90,7 @@ export function DetailBackButton({
       ]}
     >
       <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-      <AppText variant="body">{displayLabel}</AppText>
+      {showLabel ? <AppText variant="body">{displayLabel}</AppText> : null}
     </Pressable>
   );
 }

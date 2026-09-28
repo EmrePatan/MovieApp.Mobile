@@ -1334,12 +1334,19 @@ export const stage2It = {
     myComments: {
       menuLabel: '💬  I miei commenti',
       title: 'I miei commenti',
+      filters: {
+        all: 'Tutti',
+        movie: 'Film',
+        tv: 'Serie',
+      },
       emptyTitle: 'Non hai ancora scritto commenti',
       emptyDescription: 'Condividi le tue opinioni sui film e le serie che guardi.',
       emptyCta: 'Vai a Scopri',
       metadataMovie: 'Film',
       metadataTv: 'Serie',
       ratingOutOfFive: '{{rating}}/5',
+      seeMore: 'Vedi altro',
+      seeMoreAccessibility: 'Vedi altro della tua recensione',
     },
     preview: {
       watchActivity: 'Attività di visione',

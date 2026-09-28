@@ -79,11 +79,10 @@ describe('ReviewComposer', () => {
         submitLabel="Post review"
         onSubmit={jest.fn()}
         onCancel={jest.fn()}
-        contentTitle="Interstellar"
       />,
     );
     expect(screen.getByTestId('review-composer')).toBeTruthy();
-    expect(screen.getByText('Interstellar')).toBeTruthy();
+    expect(screen.getByText('Write review')).toBeTruthy();
     expect(screen.getByText('Cancel')).toBeTruthy();
   });
 

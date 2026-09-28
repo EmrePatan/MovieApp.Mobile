@@ -1,6 +1,8 @@
 import {
   isReviewsDetailRoute,
   openReviewsDetail,
+  resetReviewsNavigationForTests,
+  returnFromReviewsScreen,
   returnToCatalogDetailFromReviews,
   returnToCatalogDetailFromReviewsPathname,
 } from '@/features/details/shared/navigation/reviews-detail-navigation';
@@ -10,6 +12,10 @@ import {
 } from '@/features/details/shared/routes';
 
 describe('reviews detail navigation', () => {
+  afterEach(() => {
+    resetReviewsNavigationForTests();
+  });
+
   it('builds movie and tv review routes with title', () => {
     const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
     const tvShowId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
@@ -70,5 +76,21 @@ describe('reviews detail navigation', () => {
       '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/reviews',
       { withAnchor: true },
     );
+  });
+
+  it('opens reviews from my comments without anchor and dismisses back to profile', () => {
+    const push = jest.fn();
+    const dismissTo = jest.fn();
+    const router = { push, dismissTo } as never;
+
+    openReviewsDetail(router, '/movie/id/reviews', {
+      returnHref: '/profile/my-comments',
+    });
+
+    expect(push).toHaveBeenCalledWith('/movie/id/reviews');
+
+    expect(returnFromReviewsScreen(router)).toBe(true);
+    expect(dismissTo).toHaveBeenCalledWith('/profile/my-comments');
+    expect(returnFromReviewsScreen(router)).toBe(false);
   });
 });
