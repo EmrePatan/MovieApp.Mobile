@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Modal, StyleSheet, View } from 'react-native';
 import { AppButton } from '@/components/buttons/AppButton';
-import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
+import { AppBottomSheetChrome } from '@/components/layout/AppBottomSheet';
 import { StarRatingSelector } from '@/features/ratings/components/StarRatingSelector';
 import {
   backendScoreToStarRating,
   starRatingToBackendScore,
 } from '@/features/ratings/utils/star-rating';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 interface PersonalRatingPromptSheetProps {
   visible: boolean;
@@ -103,46 +101,39 @@ function PersonalRatingPromptSheetContent({
   };
 
   return (
-    <View style={styles.overlay} testID="personal-rating-prompt-sheet">
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('common.cancel')}
-        style={styles.backdrop}
-        onPress={onClose}
-      />
-      <SafeAreaView style={styles.sheet} edges={['bottom']}>
-        <View style={styles.handle} />
-        <AppText variant="subtitle" style={styles.title}>
-          {t('ratings.promptSheet.title')}
-        </AppText>
-        <View style={styles.selectorRow} testID="star-rating-row">
-          <StarRatingSelector
-            value={committedStarRating}
-            disabled={isSubmitting}
-            onCommit={handleCommit}
-            onClear={handleClear}
-          />
-        </View>
-        <FeedbackMessage
-          message={feedback}
-          tone="error"
-          onDismiss={() => setFeedback(null)}
+    <AppBottomSheetChrome
+      onClose={onClose}
+      title={t('ratings.promptSheet.title')}
+      align="center"
+      testID="personal-rating-prompt-sheet"
+    >
+      <View style={styles.selectorRow} testID="star-rating-row">
+        <StarRatingSelector
+          value={committedStarRating}
+          disabled={isSubmitting}
+          onCommit={handleCommit}
+          onClear={handleClear}
         />
-        <View style={styles.actionSlot}>
-          <AppButton
-            title={
-              hasPendingRating
-                ? t('ratings.promptSheet.save')
-                : t('ratings.promptSheet.notNow')
-            }
-            variant={hasPendingRating ? 'primary' : 'ghost'}
-            disabled={isSubmitting}
-            onPress={handleSecondaryAction}
-            testID={hasPendingRating ? 'personal-rating-save' : 'personal-rating-not-now'}
-          />
-        </View>
-      </SafeAreaView>
-    </View>
+      </View>
+      <FeedbackMessage
+        message={feedback}
+        tone="error"
+        onDismiss={() => setFeedback(null)}
+      />
+      <View style={styles.actionSlot}>
+        <AppButton
+          title={
+            hasPendingRating
+              ? t('ratings.promptSheet.save')
+              : t('ratings.promptSheet.notNow')
+          }
+          variant={hasPendingRating ? 'primary' : 'ghost'}
+          disabled={isSubmitting}
+          onPress={handleSecondaryAction}
+          testID={hasPendingRating ? 'personal-rating-save' : 'personal-rating-not-now'}
+        />
+      </View>
+    </AppBottomSheetChrome>
   );
 }
 
@@ -169,35 +160,6 @@ export function PersonalRatingPromptSheet({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  backdrop: {
-    flex: 1,
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
-    gap: spacing.lg,
-    alignItems: 'center',
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.border,
-    marginBottom: spacing.xs,
-  },
-  title: {
-    textAlign: 'center',
-  },
   selectorRow: {
     width: '100%',
     alignItems: 'center',

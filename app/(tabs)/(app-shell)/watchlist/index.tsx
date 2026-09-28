@@ -23,7 +23,6 @@ import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infin
 import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
 import type { CatalogMediaFilter, LibrarySortOption } from '@/features/library/types';
 import { LibraryMediaFilterControl } from '@/features/library/components/LibraryMediaFilterControl';
-import { WatchlistShareButton } from '@/features/watchlist-share/components/WatchlistShareButton';
 import { CreateWatchlistModal } from '@/features/watchlists/components/CreateWatchlistModal';
 import { WatchlistSelector } from '@/features/watchlists/components/WatchlistSelector';
 import {
@@ -201,13 +200,7 @@ export default function WatchlistScreen() {
 
   const listHeader = (
     <View style={styles.header}>
-      <View style={styles.titleRow}>
-        <AppText variant="title">{t('common.watchlist')}</AppText>
-        <WatchlistShareButton
-          isAuthenticated={isAuthenticated}
-          watchlistId={selectedWatchlistId}
-        />
-      </View>
+      <AppText variant="title">{t('common.watchlist')}</AppText>
       <WatchlistSelector
         watchlists={watchlists}
         selectedWatchlistId={selectedWatchlistId}

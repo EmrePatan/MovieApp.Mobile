@@ -749,7 +749,6 @@ export const stage2Pt = {
       signInRequired: 'Entre para usar listas para assistir.',
     },
     picker: {
-      subtitle: 'Salvar em uma ou mais listas',
       itemCount_one: '1 item',
       itemCount_other: '{{count}} itens',
       enterName: 'Digite um nome para a lista para assistir.',
@@ -772,6 +771,7 @@ export const stage2Pt = {
     },
     optionsSheet: {
       listOptions: 'Opções da lista',
+      shareList: 'Partilhar lista',
       renameList: 'Renomear lista',
       deleteList: 'Excluir lista',
       confirmTitle: 'Excluir lista',
@@ -1348,6 +1348,14 @@ export const stage2Pt = {
       seeMore: 'Ver mais',
       seeMoreAccessibility: 'Ver mais da sua crítica',
     },
+    sharedLists: {
+      menuLabel: '🔗  Listas partilhadas',
+      menuSubtitle: 'Gerir links públicos das listas',
+      title: 'Listas partilhadas',
+      subtitle: 'Listas que partilhas com um link. Para de partilhar ou cria um novo link aqui.',
+      emptyTitle: 'Sem listas partilhadas',
+      emptyMessage: 'Partilha uma lista na Biblioteca e gere os links aqui.',
+    },
     preview: {
       watchActivity: 'Atividade de exibição',
       moviesAndEpisodes: 'filmes e episódios',
@@ -1415,12 +1423,14 @@ export const stage2Pt = {
     shareThisList: 'Partilhar esta lista',
     shareRow: 'Partilhar',
     manageTitle: 'Partilha da lista',
+    sheetSubtitle: 'Qualquer pessoa com o link pode ver esta lista.',
     shareLink: 'Partilhar link',
     createNewLink: 'Criar novo link',
     disableSharing: 'Deixar de partilhar',
     errorTitle: 'Não foi possível partilhar',
-    errorMessage:
-      'A partilha já está ativa. Cria um novo link para obter um URL.',
+    errorMessage: 'Não foi possível criar o link. Tenta novamente.',
+    linkRecoveryHint:
+      'Esta lista já está partilhada, mas o link não está neste dispositivo. Abre Perfil → Listas partilhadas para criar um novo link.',
     publicTitleGeneric: 'Lista partilhada',
     publicTitleNamed: 'Lista de {{name}}',
     publicItemCount: '{{count}} títulos',

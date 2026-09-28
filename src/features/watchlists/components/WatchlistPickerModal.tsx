@@ -12,12 +12,12 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
+import { AppBottomSheetChrome } from '@/components/layout/AppBottomSheet';
 import { useCreateWatchlist, useWatchlistItemMutation } from '../hooks/useWatchlistMutations';
 import { useWatchlistMembership, useWatchlists } from '../hooks/useWatchlists';
 import type { WatchlistContentType } from '../types';
@@ -261,50 +261,25 @@ function WatchlistPickerBody({
   );
 
   return (
-      <View style={styles.overlay}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.closeWatchlistPicker')}
-          onPress={handleClose}
-          style={styles.dismissArea}
-        />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardAvoid}
-        >
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
-            <View style={styles.header}>
-              <View style={styles.headerIcon}>
-                <Ionicons name="bookmark-outline" size={16} color={colors.accent} />
-              </View>
-              <View style={styles.headerCopy}>
-                <AppText variant="bodySmall" style={styles.headerTitle}>
-                  {t('common.addToWatchlist')}
-                </AppText>
-                <AppText variant="caption" muted>
-                  {t('watchlists.picker.subtitle')}
-                </AppText>
-              </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('common.close')}
-                hitSlop={8}
-                onPress={handleClose}
-                style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
-              >
-                <Ionicons name="close" size={18} color={colors.textMuted} />
-              </Pressable>
-            </View>
+    <AppBottomSheetChrome
+      onClose={handleClose}
+      title={t('common.addToWatchlist')}
+      align="stretch"
+      testID="watchlist-picker-sheet"
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.keyboardAvoid}
+      >
+        {errorMessage ? (
+          <FeedbackMessage
+            message={errorMessage}
+            tone="error"
+            onDismiss={() => setErrorMessage(null)}
+          />
+        ) : null}
 
-            {errorMessage ? (
-              <FeedbackMessage
-                message={errorMessage}
-                tone="error"
-                onDismiss={() => setErrorMessage(null)}
-              />
-            ) : null}
-
-            <View style={styles.listsSection}>
+        <View style={styles.listsSection}>
               <AppText variant="caption" style={styles.sectionLabel}>
                 {t('watchlists.selector.yourWatchlists')}
               </AppText>
@@ -394,65 +369,16 @@ function WatchlistPickerBody({
                   )}
                 </Pressable>
               </View>
-            </View>
-          </SafeAreaView>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
+    </AppBottomSheetChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  dismissArea: {
-    flex: 1,
-  },
   keyboardAvoid: {
     width: '100%',
-  },
-  sheet: {
-    backgroundColor: colors.surfaceElevated,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: 0,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
     gap: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.xs,
-  },
-  headerIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  headerCopy: {
-    flex: 1,
-    gap: 2,
-  },
-  headerTitle: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-    letterSpacing: 0.1,
-  },
-  closeButton: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   listsSection: {
     gap: spacing.xs,

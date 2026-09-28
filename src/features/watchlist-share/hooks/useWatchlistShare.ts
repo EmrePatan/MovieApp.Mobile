@@ -6,6 +6,7 @@ import {
   getWatchlistShareStatus,
   rotateWatchlistShare,
 } from '../api/watchlist-share-api';
+import { activeWatchlistSharesQueryKey } from './useActiveWatchlistShares';
 
 const statusKey = (watchlistId: string) => ['watchlist-share', 'status', watchlistId] as const;
 
@@ -28,6 +29,7 @@ export function useWatchlistShareMutations(watchlistId: string | null) {
     if (watchlistId) {
       void queryClient.invalidateQueries({ queryKey: statusKey(watchlistId) });
     }
+    void queryClient.invalidateQueries({ queryKey: activeWatchlistSharesQueryKey });
   };
 
   const enable = useMutation({

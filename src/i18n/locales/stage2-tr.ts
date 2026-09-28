@@ -749,7 +749,6 @@ export const stage2Tr = {
       signInRequired: 'İzleme listelerini kullanmak için giriş yap.',
     },
     picker: {
-      subtitle: 'Bir veya daha fazla listeye kaydet',
       itemCount_one: '1 öğe',
       itemCount_other: '{{count}} öğe',
       enterName: 'Bir izleme listesi adı gir.',
@@ -772,6 +771,7 @@ export const stage2Tr = {
     },
     optionsSheet: {
       listOptions: 'Liste seçenekleri',
+      shareList: 'Listeyi paylaş',
       renameList: 'Listeyi Yeniden Adlandır',
       deleteList: 'Listeyi Sil',
       confirmTitle: 'Listeyi sil',
@@ -1356,6 +1356,14 @@ export const stage2Tr = {
       seeMore: 'Devamını gör',
       seeMoreAccessibility: 'Yorumunun devamını gör',
     },
+    sharedLists: {
+      menuLabel: '🔗  Paylaştığım listeler',
+      menuSubtitle: 'Herkese açık watchlist linklerini yönet',
+      title: 'Paylaştığım listeler',
+      subtitle: 'Linkle paylaştığın listeler. Paylaşımı buradan kapatabilir veya yeni link oluşturabilirsin.',
+      emptyTitle: 'Paylaşılan liste yok',
+      emptyMessage: 'Kütüphaneden bir listeyi paylaş; linkleri buradan yönet.',
+    },
     preview: {
       watchActivity: 'İzleme Etkinliği',
       moviesAndEpisodes: 'film ve bölüm',
@@ -1424,12 +1432,14 @@ export const stage2Tr = {
     shareThisList: 'Bu listeyi paylaş',
     shareRow: 'Paylaş',
     manageTitle: 'Watchlist paylaşımı',
+    sheetSubtitle: 'Linke sahip olan herkes bu listeyi görüntüleyebilir.',
     shareLink: 'Linki paylaş',
     createNewLink: 'Yeni link oluştur',
     disableSharing: 'Paylaşımı kapat',
     errorTitle: 'Paylaşılamadı',
-    errorMessage:
-      'Watchlist paylaşımı zaten açık. Yeni bir paylaşım linki için yeni link oluştur.',
+    errorMessage: 'Paylaşım linki oluşturulamadı. Lütfen tekrar dene.',
+    linkRecoveryHint:
+      'Bu liste zaten paylaşılıyor ama link bu cihazda yok. Profil → Paylaştığım listeler bölümünden yeni link oluşturabilirsin.',
     publicTitleGeneric: 'Paylaşılan Watchlist',
     publicTitleNamed: '{{name}} Watchlist',
     publicItemCount: '{{count}} içerik',

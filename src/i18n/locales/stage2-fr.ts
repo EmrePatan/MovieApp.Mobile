@@ -749,7 +749,6 @@ export const stage2Fr = {
       signInRequired: 'Veuillez vous connecter pour utiliser les listes à voir.',
     },
     picker: {
-      subtitle: 'Enregistrer dans une ou plusieurs listes',
       itemCount_one: '1 élément',
       itemCount_other: '{{count}} éléments',
       enterName: 'Saisissez un nom de liste à voir.',
@@ -772,6 +771,7 @@ export const stage2Fr = {
     },
     optionsSheet: {
       listOptions: 'Options de liste',
+      shareList: 'Partager la liste',
       renameList: 'Renommer la liste',
       deleteList: 'Supprimer la liste',
       confirmTitle: 'Supprimer la liste',
@@ -1348,6 +1348,14 @@ export const stage2Fr = {
       seeMore: 'Voir plus',
       seeMoreAccessibility: 'Voir plus de votre avis',
     },
+    sharedLists: {
+      menuLabel: '🔗  Listes partagées',
+      menuSubtitle: 'Gérer les liens publics des listes',
+      title: 'Listes partagées',
+      subtitle: 'Listes partagées par lien. Arrêtez le partage ou créez un nouveau lien ici.',
+      emptyTitle: 'Aucune liste partagée',
+      emptyMessage: 'Partagez une liste depuis Bibliothèque, puis gérez les liens ici.',
+    },
     preview: {
       watchActivity: 'Activité de visionnage',
       moviesAndEpisodes: 'films et épisodes',
@@ -1415,12 +1423,14 @@ export const stage2Fr = {
     shareThisList: 'Partager cette liste',
     shareRow: 'Partager',
     manageTitle: 'Partage de liste',
+    sheetSubtitle: 'Toute personne disposant du lien peut voir cette liste.',
     shareLink: 'Partager le lien',
     createNewLink: 'Créer un nouveau lien',
     disableSharing: 'Arrêter le partage',
     errorTitle: 'Partage impossible',
-    errorMessage:
-      'Le partage est déjà activé. Crée un nouveau lien pour obtenir une URL.',
+    errorMessage: 'Impossible de créer le lien. Réessaie.',
+    linkRecoveryHint:
+      'Cette liste est déjà partagée, mais le lien n’est pas sur cet appareil. Ouvre Profil → Listes partagées pour créer un nouveau lien.',
     publicTitleGeneric: 'Liste partagée',
     publicTitleNamed: 'Liste de {{name}}',
     publicItemCount: '{{count}} titres',

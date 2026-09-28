@@ -8,7 +8,9 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/auth/useAuth';
 import { ErrorView } from '@/components/common/ErrorView';
+import { useWatchlistShareController } from '@/features/watchlist-share/hooks/useWatchlistShareController';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { RenameWatchlistModal } from '@/features/watchlists/components/RenameWatchlistModal';
 import { WatchlistListOptionsSheet } from '@/features/watchlists/components/WatchlistListOptionsSheet';
@@ -46,6 +48,8 @@ export function LibraryWatchlistDetailContent({
 }: LibraryWatchlistDetailContentProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const watchlistShare = useWatchlistShareController(watchlistId, isAuthenticated);
   const { width } = useWindowDimensions();
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
@@ -99,6 +103,10 @@ export function LibraryWatchlistDetailContent({
 
     setOptionsSheetVisible(true);
   }, [watchlist]);
+
+  const handleShareFromMenu = useCallback(() => {
+    watchlistShare.startShare();
+  }, [watchlistShare]);
 
   const handleItemPress = useCallback(
     (item: GridLibraryItem) => {
@@ -177,6 +185,7 @@ export function LibraryWatchlistDetailContent({
         listName={watchlist?.name ?? ''}
         deleteLoading={deleteWatchlist.isPending}
         onClose={() => setOptionsSheetVisible(false)}
+        onShare={isAuthenticated ? handleShareFromMenu : undefined}
         onRename={() => setRenameModalVisible(true)}
         onConfirmDelete={handleDeleteWatchlist}
       />

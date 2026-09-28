@@ -17,6 +17,7 @@ interface WatchlistListOptionsSheetProps {
   deleteLoading?: boolean;
   onClose: () => void;
   onRename: () => void;
+  onShare?: () => void;
   onConfirmDelete: () => void;
 }
 
@@ -60,6 +61,7 @@ interface WatchlistListOptionsSheetContentProps {
   deleteLoading: boolean;
   onClose: () => void;
   onRename: () => void;
+  onShare?: () => void;
   onConfirmDelete: () => void;
 }
 
@@ -68,6 +70,7 @@ function WatchlistListOptionsSheetContent({
   deleteLoading,
   onClose,
   onRename,
+  onShare,
   onConfirmDelete,
 }: WatchlistListOptionsSheetContentProps) {
   const { t } = useTranslation();
@@ -76,6 +79,11 @@ function WatchlistListOptionsSheetContent({
   const handleRename = () => {
     onClose();
     onRename();
+  };
+
+  const handleShare = () => {
+    onClose();
+    onShare?.();
   };
 
   const handleDeletePress = () => {
@@ -149,6 +157,17 @@ function WatchlistListOptionsSheetContent({
             </View>
 
             <View style={styles.optionsGroup}>
+              {onShare ? (
+                <>
+                  <OptionRow
+                    icon="share-outline"
+                    label={t('watchlists.optionsSheet.shareList')}
+                    onPress={handleShare}
+                    testID="watchlist-share-option"
+                  />
+                  <View style={styles.optionDivider} />
+                </>
+              ) : null}
               <OptionRow
                 icon="pencil-outline"
                 label={t('watchlists.optionsSheet.renameList')}
@@ -177,6 +196,7 @@ export function WatchlistListOptionsSheet({
   deleteLoading = false,
   onClose,
   onRename,
+  onShare,
   onConfirmDelete,
 }: WatchlistListOptionsSheetProps) {
   return (
@@ -187,6 +207,7 @@ export function WatchlistListOptionsSheet({
           deleteLoading={deleteLoading}
           onClose={onClose}
           onRename={onRename}
+          onShare={onShare}
           onConfirmDelete={onConfirmDelete}
         />
       ) : null}

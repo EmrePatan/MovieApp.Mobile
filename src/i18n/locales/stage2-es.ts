@@ -749,7 +749,6 @@ export const stage2Es = {
       signInRequired: 'Inicia sesión para usar listas de seguimiento.',
     },
     picker: {
-      subtitle: 'Guardar en una o más listas',
       itemCount_one: '1 elemento',
       itemCount_other: '{{count}} elementos',
       enterName: 'Introduce un nombre de lista de seguimiento.',
@@ -772,6 +771,7 @@ export const stage2Es = {
     },
     optionsSheet: {
       listOptions: 'Opciones de lista',
+      shareList: 'Compartir lista',
       renameList: 'Renombrar lista',
       deleteList: 'Eliminar lista',
       confirmTitle: 'Eliminar lista',
@@ -1348,6 +1348,14 @@ export const stage2Es = {
       seeMore: 'Ver más',
       seeMoreAccessibility: 'Ver más de tu reseña',
     },
+    sharedLists: {
+      menuLabel: '🔗  Listas compartidas',
+      menuSubtitle: 'Gestiona enlaces públicos de listas',
+      title: 'Listas compartidas',
+      subtitle: 'Listas que compartes con un enlace. Deja de compartir o crea un enlace nuevo aquí.',
+      emptyTitle: 'No hay listas compartidas',
+      emptyMessage: 'Comparte una lista desde Biblioteca y gestiona los enlaces aquí.',
+    },
     preview: {
       watchActivity: 'Actividad de visionado',
       moviesAndEpisodes: 'películas y episodios',
@@ -1415,12 +1423,14 @@ export const stage2Es = {
     shareThisList: 'Compartir esta lista',
     shareRow: 'Compartir',
     manageTitle: 'Compartir lista',
+    sheetSubtitle: 'Cualquiera con el enlace puede ver esta lista.',
     shareLink: 'Compartir enlace',
     createNewLink: 'Crear nuevo enlace',
     disableSharing: 'Dejar de compartir',
     errorTitle: 'No se pudo compartir',
-    errorMessage:
-      'El uso compartido ya está activo. Crea un nuevo enlace para obtener una URL.',
+    errorMessage: 'No se pudo crear el enlace. Inténtalo de nuevo.',
+    linkRecoveryHint:
+      'Esta lista ya está compartida, pero el enlace no está en este dispositivo. Abre Perfil → Listas compartidas para crear un enlace nuevo.',
     publicTitleGeneric: 'Lista compartida',
     publicTitleNamed: 'Lista de {{name}}',
     publicItemCount: '{{count}} títulos',

@@ -731,7 +731,6 @@ export const stage2En = {
       signInRequired: 'Please sign in to use watchlists.',
     },
     picker: {
-      subtitle: 'Save to one or more lists',
       itemCount_one: '1 item',
       itemCount_other: '{{count}} items',
       enterName: 'Enter a watchlist name.',
@@ -754,6 +753,7 @@ export const stage2En = {
     },
     optionsSheet: {
       listOptions: 'List options',
+      shareList: 'Share list',
       renameList: 'Rename List',
       deleteList: 'Delete List',
       confirmTitle: 'Delete list',
@@ -1331,6 +1331,14 @@ export const stage2En = {
       seeMore: 'See more',
       seeMoreAccessibility: 'See more of your review',
     },
+    sharedLists: {
+      menuLabel: '🔗  Shared lists',
+      menuSubtitle: 'Manage public watchlist links',
+      title: 'Shared lists',
+      subtitle: 'Lists you are sharing with a link. Stop sharing or create a new link here.',
+      emptyTitle: 'No shared lists',
+      emptyMessage: 'Share a watchlist from Library, then manage links here.',
+    },
     preview: {
       watchActivity: 'Watch Activity',
       moviesAndEpisodes: 'movies & episodes',
@@ -1399,11 +1407,14 @@ export const stage2En = {
     shareThisList: 'Share this list',
     shareRow: 'Share',
     manageTitle: 'Watchlist sharing',
+    sheetSubtitle: 'Anyone with the link can view this list.',
     shareLink: 'Share link',
     createNewLink: 'Create new link',
     disableSharing: 'Stop sharing',
     errorTitle: 'Could not share',
-    errorMessage: 'Watchlist sharing is already enabled. Create a new link to get a share URL.',
+    errorMessage: 'Could not create a share link. Please try again.',
+    linkRecoveryHint:
+      'This list is already shared, but the link is not on this device. Open Profile → Shared lists to create a new link.',
     publicTitleGeneric: 'Shared Watchlist',
     publicTitleNamed: "{{name}}'s Watchlist",
     publicItemCount: '{{count}} titles',

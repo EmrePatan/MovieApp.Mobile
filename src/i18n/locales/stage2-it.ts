@@ -749,7 +749,6 @@ export const stage2It = {
       signInRequired: 'Accedi per usare le liste da vedere.',
     },
     picker: {
-      subtitle: 'Salva in una o più liste',
       itemCount_one: '1 elemento',
       itemCount_other: '{{count}} elementi',
       enterName: 'Inserisci un nome per la lista da vedere.',
@@ -772,6 +771,7 @@ export const stage2It = {
     },
     optionsSheet: {
       listOptions: 'Opzioni lista',
+      shareList: 'Condividi lista',
       renameList: 'Rinomina lista',
       deleteList: 'Elimina lista',
       confirmTitle: 'Elimina lista',
@@ -1348,6 +1348,14 @@ export const stage2It = {
       seeMore: 'Vedi altro',
       seeMoreAccessibility: 'Vedi altro della tua recensione',
     },
+    sharedLists: {
+      menuLabel: '🔗  Liste condivise',
+      menuSubtitle: 'Gestisci i link pubblici delle liste',
+      title: 'Liste condivise',
+      subtitle: 'Liste che condividi con un link. Interrompi la condivisione o crea un nuovo link qui.',
+      emptyTitle: 'Nessuna lista condivisa',
+      emptyMessage: 'Condividi una lista dalla Libreria e gestisci i link qui.',
+    },
     preview: {
       watchActivity: 'Attività di visione',
       moviesAndEpisodes: 'film ed episodi',
@@ -1415,12 +1423,14 @@ export const stage2It = {
     shareThisList: 'Condividi questa lista',
     shareRow: 'Condividi',
     manageTitle: 'Condivisione lista',
+    sheetSubtitle: 'Chiunque abbia il link può vedere questa lista.',
     shareLink: 'Condividi link',
     createNewLink: 'Crea nuovo link',
     disableSharing: 'Interrompi condivisione',
     errorTitle: 'Impossibile condividere',
-    errorMessage:
-      'La condivisione è già attiva. Crea un nuovo link per ottenere un URL.',
+    errorMessage: 'Impossibile creare il link. Riprova.',
+    linkRecoveryHint:
+      'Questa lista è già condivisa, ma il link non è su questo dispositivo. Apri Profilo → Liste condivise per creare un nuovo link.',
     publicTitleGeneric: 'Lista condivisa',
     publicTitleNamed: 'Lista di {{name}}',
     publicItemCount: '{{count}} titoli',

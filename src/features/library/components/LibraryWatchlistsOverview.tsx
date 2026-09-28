@@ -32,10 +32,10 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   const watchlistsQuery = useWatchlists();
   const [createModalVisible, setCreateModalVisible] = useState(false);
 
-  const watchlists = useMemo(
-    () => watchlistsQuery.data ?? [],
-    [watchlistsQuery.data],
-  );
+  const watchlists = useMemo(() => {
+    const items = watchlistsQuery.data ?? [];
+    return [...items].sort((a, b) => b.itemCount - a.itemCount);
+  }, [watchlistsQuery.data]);
 
   const handleOpenWatchlist = useCallback(
     (watchlistId: string) => {

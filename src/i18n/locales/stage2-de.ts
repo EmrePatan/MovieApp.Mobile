@@ -749,7 +749,6 @@ export const stage2De = {
       signInRequired: 'Bitte melde dich an, um Merklisten zu nutzen.',
     },
     picker: {
-      subtitle: 'In einer oder mehreren Listen speichern',
       itemCount_one: '1 Eintrag',
       itemCount_other: '{{count}} Einträge',
       enterName: 'Gib einen Merklistennamen ein.',
@@ -772,6 +771,7 @@ export const stage2De = {
     },
     optionsSheet: {
       listOptions: 'Listenoptionen',
+      shareList: 'Liste teilen',
       renameList: 'Liste umbenennen',
       deleteList: 'Liste löschen',
       confirmTitle: 'Liste löschen',
@@ -1348,6 +1348,14 @@ export const stage2De = {
       seeMore: 'Mehr anzeigen',
       seeMoreAccessibility: 'Mehr von deiner Rezension anzeigen',
     },
+    sharedLists: {
+      menuLabel: '🔗  Geteilte Listen',
+      menuSubtitle: 'Öffentliche Watchlist-Links verwalten',
+      title: 'Geteilte Listen',
+      subtitle: 'Listen, die du per Link teilst. Hier kannst du teilen beenden oder einen neuen Link erstellen.',
+      emptyTitle: 'Keine geteilten Listen',
+      emptyMessage: 'Teile eine Liste aus der Bibliothek und verwalte Links hier.',
+    },
     preview: {
       watchActivity: 'Schau-Aktivität',
       moviesAndEpisodes: 'Filme & Episoden',
@@ -1415,12 +1423,14 @@ export const stage2De = {
     shareThisList: 'Diese Liste teilen',
     shareRow: 'Teilen',
     manageTitle: 'Watchlist-Freigabe',
+    sheetSubtitle: 'Jede Person mit dem Link kann diese Liste ansehen.',
     shareLink: 'Link teilen',
     createNewLink: 'Neuen Link erstellen',
     disableSharing: 'Freigabe beenden',
     errorTitle: 'Teilen fehlgeschlagen',
-    errorMessage:
-      'Die Watchlist-Freigabe ist bereits aktiv. Erstelle einen neuen Link, um eine URL zu erhalten.',
+    errorMessage: 'Freigabelink konnte nicht erstellt werden. Bitte versuche es erneut.',
+    linkRecoveryHint:
+      'Diese Liste ist bereits freigegeben, aber der Link ist auf diesem Gerät nicht gespeichert. Öffne Profil → Geteilte Listen, um einen neuen Link zu erstellen.',
     publicTitleGeneric: 'Geteilte Watchlist',
     publicTitleNamed: 'Watchlist von {{name}}',
     publicItemCount: '{{count}} Titel',
