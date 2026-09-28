@@ -1,8 +1,12 @@
-/** RN bottom-sheet modal slide animation is ~300ms; brief buffer avoids Share.share being swallowed. */
-const DEFAULT_MODAL_DISMISS_MS = 280;
+import { InteractionManager } from 'react-native';
 
+const DEFAULT_MODAL_DISMISS_MS = 450;
+
+/** Wait for the list options bottom sheet modal to finish closing before Alert / Share. */
 export function waitForShareSheetHost(delayMs = DEFAULT_MODAL_DISMISS_MS): Promise<void> {
   return new Promise((resolve) => {
-    setTimeout(resolve, delayMs);
+    InteractionManager.runAfterInteractions(() => {
+      setTimeout(resolve, delayMs);
+    });
   });
 }

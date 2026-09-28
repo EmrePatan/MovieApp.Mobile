@@ -7,7 +7,7 @@ import {
   rotateWatchlistShare,
 } from '../api/watchlist-share-api';
 import { pickWatchlistShareUrl } from '../pick-watchlist-share-url';
-import { activeWatchlistSharesQueryKey } from './useActiveWatchlistShares';
+export const activeWatchlistSharesQueryKey = ['watchlist-shares', 'active'] as const;
 
 const statusKey = (watchlistId: string) => ['watchlist-share', 'status', watchlistId] as const;
 

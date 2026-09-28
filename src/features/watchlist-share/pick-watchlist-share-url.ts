@@ -3,6 +3,21 @@ export interface WatchlistShareUrlCarrier {
   ShareUrl?: string | null;
 }
 
+export interface WatchlistShareStatusCarrier {
+  isSharingEnabled?: boolean;
+  IsSharingEnabled?: boolean;
+}
+
+export function pickWatchlistShareStatusEnabled(
+  response: WatchlistShareStatusCarrier | null | undefined,
+): boolean {
+  if (!response) {
+    return false;
+  }
+
+  return Boolean(response.isSharingEnabled ?? response.IsSharingEnabled);
+}
+
 export function pickWatchlistShareUrl(
   response: WatchlistShareUrlCarrier | null | undefined,
 ): string | null {

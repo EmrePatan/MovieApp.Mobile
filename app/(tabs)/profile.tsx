@@ -108,10 +108,6 @@ export default function ProfileScreen() {
             onPress={() => router.push('/profile/my-comments')}
           />
           <ProfileMenuRow
-            label={t('profile.sharedLists.menuLabel')}
-            onPress={() => router.push('/profile/shared-lists')}
-          />
-          <ProfileMenuRow
             label={t('profile.editProfile')}
             onPress={() => router.push('/profile/edit')}
           />

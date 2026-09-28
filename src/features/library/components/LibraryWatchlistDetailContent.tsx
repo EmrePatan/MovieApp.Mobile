@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { ErrorView } from '@/components/common/ErrorView';
-import { useWatchlistShareController } from '@/features/watchlist-share/hooks/useWatchlistShareController';
+import { useWatchlistShareActions } from '@/features/watchlist-share/hooks/useWatchlistShareActions';
 import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
 import { RenameWatchlistModal } from '@/features/watchlists/components/RenameWatchlistModal';
 import { WatchlistListOptionsSheet } from '@/features/watchlists/components/WatchlistListOptionsSheet';
@@ -49,7 +49,7 @@ export function LibraryWatchlistDetailContent({
   const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const watchlistShare = useWatchlistShareController(watchlistId, isAuthenticated);
+  const watchlistShare = useWatchlistShareActions(watchlistId, isAuthenticated);
   const { width } = useWindowDimensions();
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
@@ -106,7 +106,7 @@ export function LibraryWatchlistDetailContent({
 
   const handleShareFromMenu = useCallback(() => {
     setOptionsSheetVisible(false);
-    watchlistShare.startShare();
+    watchlistShare.presentFromListOptions();
   }, [watchlistShare]);
 
   const handleItemPress = useCallback(
