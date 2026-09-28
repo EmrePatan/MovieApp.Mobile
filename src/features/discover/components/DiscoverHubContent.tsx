@@ -24,9 +24,11 @@ import { DiscoverPreviewSection } from './DiscoverPreviewSection';
 import { spacing } from '@/theme/spacing';
 import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
+import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
 
 export function DiscoverHubContent() {
   const { t } = useTranslation();
+  const { config } = useAppConfig();
   const router = useRouter();
   const queryClient = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
@@ -146,13 +148,15 @@ export function DiscoverHubContent() {
           onPress={openPickSomething}
           accessibilityLabel={t('discover.hub.pickSomething.accessibility')}
         />
-        <DiscoverFeatureEntry
-          title={t('discover.hub.aiRecommendations.title')}
-          subtitle={t('discover.hub.aiRecommendations.subtitle')}
-          icon="sparkles-outline"
-          onPress={openAiRecommendations}
-          accessibilityLabel={t('discover.hub.aiRecommendations.accessibility')}
-        />
+        {config.features.aiRecommendations ? (
+          <DiscoverFeatureEntry
+            title={t('discover.hub.aiRecommendations.title')}
+            subtitle={t('discover.hub.aiRecommendations.subtitle')}
+            icon="sparkles-outline"
+            onPress={openAiRecommendations}
+            accessibilityLabel={t('discover.hub.aiRecommendations.accessibility')}
+          />
+        ) : null}
       </View>
 
       <StreamingPlatformsHubSection />

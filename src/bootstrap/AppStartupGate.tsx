@@ -3,6 +3,9 @@ import { Animated, StyleSheet, View } from 'react-native';
 import { SplashScreen } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
+import { ForcedUpdateBlockingView } from '@/features/app-config/components/ForcedUpdateBlockingView';
+import { MaintenanceBlockingView } from '@/features/app-config/components/MaintenanceBlockingView';
+import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
 import { BrandedStartupSplash } from './BrandedStartupSplash';
 import {
   BRANDED_SPLASH_BACKGROUND,
@@ -21,6 +24,7 @@ interface AppStartupGateProps {
 export function AppStartupGate({ children }: AppStartupGateProps) {
   const { isLoading: authIsLoading } = useAuth();
   const { isHydrated: localeHydrated } = useLocalePreference();
+  const { isStartupResolved, blocking } = useAppConfig();
   const [iconFontsReady, setIconFontsReady] = useState(false);
   const [showBrandedSplash, setShowBrandedSplash] = useState(true);
   const brandedSplashOpacity = useRef(new Animated.Value(1)).current;
@@ -44,7 +48,12 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
     };
   }, []);
 
-  const shouldReveal = canRevealApplicationUi(iconFontsReady, authIsLoading) && localeHydrated;
+  const isBlockingStartup = blocking === 'maintenance' || blocking === 'forced';
+  const shouldReveal =
+    canRevealApplicationUi(iconFontsReady, authIsLoading) &&
+    localeHydrated &&
+    isStartupResolved &&
+    !isBlockingStartup;
 
   const hideNativeSplashOnce = useCallback(() => {
     if (hasHiddenNativeSplashRef.current) {
@@ -75,6 +84,16 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
   }, [hideNativeSplashOnce]);
 
   useEffect(() => {
+    if (!isStartupResolved) {
+      return;
+    }
+
+    if (isBlockingStartup) {
+      hideNativeSplashOnce();
+      setShowBrandedSplash(false);
+      return;
+    }
+
     if (!shouldReveal) {
       return;
     }
@@ -96,7 +115,7 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
         dismissTimerRef.current = null;
       }
     };
-  }, [dismissBrandedSplash, hideNativeSplashOnce, shouldReveal]);
+  }, [dismissBrandedSplash, hideNativeSplashOnce, isBlockingStartup, isStartupResolved, shouldReveal]);
 
   useEffect(() => {
     return () => {
@@ -108,6 +127,16 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
 
   return (
     <View style={styles.root}>
+      {isStartupResolved && blocking === 'maintenance' ? (
+        <View style={styles.blockingOverlay}>
+          <MaintenanceBlockingView />
+        </View>
+      ) : null}
+      {isStartupResolved && blocking === 'forced' ? (
+        <View style={styles.blockingOverlay}>
+          <ForcedUpdateBlockingView />
+        </View>
+      ) : null}
       {shouldReveal && !showBrandedSplash ? children : null}
       {showBrandedSplash ? (
         <Animated.View
@@ -130,5 +159,9 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     zIndex: 10,
     backgroundColor: BRANDED_SPLASH_BACKGROUND,
+  },
+  blockingOverlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 20,
   },
 });

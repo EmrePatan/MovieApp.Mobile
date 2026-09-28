@@ -222,6 +222,26 @@ const stage1Tr = {
     viewOnMovieCave: "Movie Cave'de incele",
     openInMovieCave: "Movie Cave'de Aç",
   },
+  appConfig: {
+    optionalUpdate: {
+      title: 'Yeni sürüm mevcut',
+      updateButton: 'Güncelle',
+      laterButton: 'Sonra',
+      updateButtonAccessibility: "Movie Cave'i mağazadan güncelle",
+    },
+    forcedUpdate: {
+      title: 'Güncelleme gerekli',
+      body: 'Movie Cave kullanmaya devam etmek için lütfen uygulamayı güncelle.',
+      updateButton: 'Güncelle',
+      updateButtonAccessibility: "Movie Cave'i mağazadan güncelle",
+    },
+    maintenance: {
+      title: 'Movie Cave bakımda',
+      body: 'İyileştirmeler yapıyoruz. Lütfen biraz sonra tekrar dene.',
+      retryButton: 'Tekrar dene',
+      retryButtonAccessibility: 'Movie Cave yüklemesini tekrar dene',
+    },
+  },
 };
 
 export const tr = {

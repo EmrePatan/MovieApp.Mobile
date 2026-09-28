@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { preloadExternalRatingBrandAssets } from '@/features/external-ratings/config/external-rating-provider-brand-config';
 import { AuthProvider } from '@/auth/AuthProvider';
+import { AppConfigProvider } from '@/features/app-config/AppConfigProvider';
+import { OptionalUpdateModal } from '@/features/app-config/components/OptionalUpdateModal';
 import { AppStartupGate } from '@/bootstrap/AppStartupGate';
 import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
 import { RegionalPreferenceProvider } from '@/features/regions/RegionalPreferenceProvider';
@@ -64,11 +66,14 @@ export default function RootLayout() {
         <LocalePreferenceProvider>
           <RegionalPreferenceProvider>
             <AuthProvider>
-              <AppStartupGate>
-                <NotificationBootstrapProvider>
-                  <RootNavigator />
-                </NotificationBootstrapProvider>
-              </AppStartupGate>
+              <AppConfigProvider>
+                <AppStartupGate>
+                  <NotificationBootstrapProvider>
+                    <RootNavigator />
+                    <OptionalUpdateModal />
+                  </NotificationBootstrapProvider>
+                </AppStartupGate>
+              </AppConfigProvider>
             </AuthProvider>
           </RegionalPreferenceProvider>
         </LocalePreferenceProvider>

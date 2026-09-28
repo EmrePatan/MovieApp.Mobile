@@ -223,6 +223,26 @@ const stage1En = {
     viewOnMovieCave: 'View on Movie Cave',
     openInMovieCave: 'Open in Movie Cave',
   },
+  appConfig: {
+    optionalUpdate: {
+      title: 'A new version is available',
+      updateButton: 'Update',
+      laterButton: 'Later',
+      updateButtonAccessibility: 'Update Movie Cave from the store',
+    },
+    forcedUpdate: {
+      title: 'Update required',
+      body: 'Please update Movie Cave to continue using the app.',
+      updateButton: 'Update',
+      updateButtonAccessibility: 'Update Movie Cave from the store',
+    },
+    maintenance: {
+      title: 'Movie Cave is under maintenance',
+      body: 'We are making improvements. Please try again in a little while.',
+      retryButton: 'Try again',
+      retryButtonAccessibility: 'Try loading Movie Cave again',
+    },
+  },
 };
 
 export const en = {

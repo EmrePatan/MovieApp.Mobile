@@ -23,6 +23,13 @@ jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock('@/features/app-config/hooks/useAppConfig', () => ({
+  useAppConfig: jest.fn(() => ({
+    isStartupResolved: true,
+    blocking: 'none',
+  })),
+}));
+
 jest.mock('@/bootstrap/startup-readiness', () => {
   const actual = jest.requireActual<typeof import('@/bootstrap/startup-readiness')>(
     '@/bootstrap/startup-readiness',

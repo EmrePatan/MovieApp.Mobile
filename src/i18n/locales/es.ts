@@ -224,6 +224,26 @@ const stage1Es = {
     viewOnMovieCave: 'Ver en Movie Cave',
     openInMovieCave: 'Abrir en Movie Cave',
   },
+  appConfig: {
+    optionalUpdate: {
+      title: 'Nueva versión disponible',
+      updateButton: 'Actualizar',
+      laterButton: 'Más tarde',
+      updateButtonAccessibility: 'Actualizar Movie Cave desde la tienda',
+    },
+    forcedUpdate: {
+      title: 'Actualización obligatoria',
+      body: 'Actualiza Movie Cave para seguir usando la aplicación.',
+      updateButton: 'Actualizar',
+      updateButtonAccessibility: 'Actualizar Movie Cave desde la tienda',
+    },
+    maintenance: {
+      title: 'Movie Cave en mantenimiento',
+      body: 'Estamos mejorando la app. Vuelve a intentarlo en un momento.',
+      retryButton: 'Reintentar',
+      retryButtonAccessibility: 'Intentar cargar Movie Cave de nuevo',
+    },
+  },
 };
 
 export const es = {

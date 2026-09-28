@@ -9,6 +9,7 @@ import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference
 import { useReviewTranslation } from '../hooks/useReviewTranslation';
 import type { ReviewResponse } from '../types';
 import { shouldShowReviewTranslationAction } from '../utils/review-locale';
+import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 
@@ -22,6 +23,7 @@ export function ReviewTranslationControls({
   numberOfLines,
 }: ReviewTranslationControlsProps) {
   const { t } = useTranslation();
+  const { config } = useAppConfig();
   const { language } = useLocalePreference();
   const currentContentLocale = getUiFormatLocaleTag();
   const [showTranslated, setShowTranslated] = useState(false);
@@ -80,6 +82,14 @@ export function ReviewTranslationControls({
     shouldShowAction &&
     !translationQuery.isFetching &&
     !translationQuery.isError;
+
+  if (!config.features.reviewTranslation) {
+    return (
+      <AppText variant="bodySmall" style={styles.content} numberOfLines={numberOfLines}>
+        {review.content.trim()}
+      </AppText>
+    );
+  }
 
   if (!shouldShowAction && !translationQuery.isFetching && !translationQuery.data) {
     return (

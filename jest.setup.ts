@@ -63,6 +63,41 @@ jest.mock('@/features/locale/hooks/useLocalePreference', () => ({
   })),
 }));
 
+jest.mock('@/features/app-config/hooks/useAppConfig', () => ({
+  useAppConfig: jest.fn(() => ({
+    isStartupResolved: true,
+    blocking: 'none',
+    evaluation: {
+      blocking: 'none',
+      updatePrompt: 'none',
+      storeUrl: 'https://apps.apple.com/app/id6814454427',
+    },
+    config: {
+      maintenance: { enabled: false },
+      versions: {
+        ios: {
+          minimumBuild: 9,
+          latestBuild: 9,
+          storeUrl: 'https://apps.apple.com/app/id6814454427',
+        },
+        android: {
+          minimumBuild: 2,
+          latestBuild: 2,
+          storeUrl: 'https://play.google.com/store/apps/details?id=com.movieapp.mobile',
+        },
+      },
+      features: {
+        aiRecommendations: true,
+        reviewTranslation: true,
+      },
+    },
+    refreshConfig: jest.fn(),
+    isRefreshing: false,
+    markOptionalUpdateShownThisSession: jest.fn(),
+    optionalUpdateSessionSuppressed: false,
+  })),
+}));
+
 beforeAll(async () => {
   const { ensureI18nInitialized } = require('@/i18n') as typeof import('@/i18n');
   await ensureI18nInitialized('en');
