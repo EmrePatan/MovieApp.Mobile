@@ -1409,4 +1409,22 @@ export const stage2Pt = {
       },
     },
   },
+  watchlistShare: {
+    messageIntro: 'Vê a minha lista no Movie Cave:',
+    shareButton: 'Partilhar lista',
+    manageTitle: 'Partilha da lista',
+    shareLink: 'Partilhar link',
+    createNewLink: 'Criar novo link',
+    disableSharing: 'Deixar de partilhar',
+    errorTitle: 'Não foi possível partilhar',
+    errorMessage:
+      'A partilha já está ativa. Cria um novo link para obter um URL.',
+    publicTitleGeneric: 'Lista partilhada',
+    publicTitleNamed: 'Lista de {{name}}',
+    publicItemCount: '{{count}} títulos',
+    publicEmptyTitle: 'Lista vazia',
+    publicEmptyMessage: 'Esta lista partilhada ainda não tem títulos.',
+    publicRevokedTitle: 'Lista indisponível',
+    publicRevokedMessage: 'Esta lista já não está partilhada.',
+  },
 } as const;

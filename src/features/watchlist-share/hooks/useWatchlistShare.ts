@@ -26,7 +26,7 @@ export function useWatchlistShareMutations() {
   };
 
   const enable = useMutation({
-    mutationFn: enableWatchlistShare,
+    mutationFn: (watchlistId: string) => enableWatchlistShare(watchlistId),
     onSuccess: async (response) => {
       if (response.shareUrl) {
         await SecureStore.setItemAsync(STORED_URL_KEY, response.shareUrl);
@@ -44,7 +44,7 @@ export function useWatchlistShareMutations() {
   });
 
   const rotate = useMutation({
-    mutationFn: rotateWatchlistShare,
+    mutationFn: (watchlistId: string) => rotateWatchlistShare(watchlistId),
     onSuccess: async (response) => {
       await SecureStore.setItemAsync(STORED_URL_KEY, response.shareUrl);
       invalidate();

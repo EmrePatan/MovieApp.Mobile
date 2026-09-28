@@ -34,16 +34,16 @@ export async function getWatchlistShareStatus(signal?: AbortSignal) {
   return api.get<WatchlistShareStatusResponse>(SHARE_PATH, { signal });
 }
 
-export async function enableWatchlistShare() {
-  return api.post<WatchlistShareEnableResponse>(`${SHARE_PATH}/enable`);
+export async function enableWatchlistShare(watchlistId: string) {
+  return api.post<WatchlistShareEnableResponse>(`${SHARE_PATH}/enable`, { watchlistId });
 }
 
 export async function disableWatchlistShare() {
   await api.delete<void>(SHARE_PATH);
 }
 
-export async function rotateWatchlistShare() {
-  return api.post<WatchlistShareRotateResponse>(`${SHARE_PATH}/rotate`);
+export async function rotateWatchlistShare(watchlistId: string) {
+  return api.post<WatchlistShareRotateResponse>(`${SHARE_PATH}/rotate`, { watchlistId });
 }
 
 export async function getPublicWatchlistShare(token: string, signal?: AbortSignal) {

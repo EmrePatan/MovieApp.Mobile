@@ -1409,4 +1409,22 @@ export const stage2Fr = {
       },
     },
   },
+  watchlistShare: {
+    messageIntro: 'Découvre ma liste sur Movie Cave :',
+    shareButton: 'Partager la liste',
+    manageTitle: 'Partage de liste',
+    shareLink: 'Partager le lien',
+    createNewLink: 'Créer un nouveau lien',
+    disableSharing: 'Arrêter le partage',
+    errorTitle: 'Partage impossible',
+    errorMessage:
+      'Le partage est déjà activé. Crée un nouveau lien pour obtenir une URL.',
+    publicTitleGeneric: 'Liste partagée',
+    publicTitleNamed: 'Liste de {{name}}',
+    publicItemCount: '{{count}} titres',
+    publicEmptyTitle: 'Liste vide',
+    publicEmptyMessage: 'Cette liste partagée ne contient encore aucun titre.',
+    publicRevokedTitle: 'Liste indisponible',
+    publicRevokedMessage: 'Cette liste n’est plus partagée.',
+  },
 } as const;

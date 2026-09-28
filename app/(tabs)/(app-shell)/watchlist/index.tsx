@@ -203,7 +203,10 @@ export default function WatchlistScreen() {
     <View style={styles.header}>
       <View style={styles.titleRow}>
         <AppText variant="title">{t('common.watchlist')}</AppText>
-        <WatchlistShareButton isAuthenticated={isAuthenticated} />
+        <WatchlistShareButton
+          isAuthenticated={isAuthenticated}
+          watchlistId={selectedWatchlistId}
+        />
       </View>
       <WatchlistSelector
         watchlists={watchlists}

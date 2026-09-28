@@ -14,22 +14,27 @@ import {
 
 interface WatchlistShareButtonProps {
   isAuthenticated: boolean;
+  watchlistId: string | null;
 }
 
-export function WatchlistShareButton({ isAuthenticated }: WatchlistShareButtonProps) {
+export function WatchlistShareButton({ isAuthenticated, watchlistId }: WatchlistShareButtonProps) {
   const { t } = useTranslation();
   const statusQuery = useWatchlistShareStatus(isAuthenticated);
   const { enable, disable, rotate } = useWatchlistShareMutations();
 
   const shareUrl = useCallback(async (): Promise<string | null> => {
+    if (!watchlistId) {
+      return null;
+    }
+
     const stored = await getStoredWatchlistShareUrl();
     if (stored) {
       return stored;
     }
 
-    const enabled = await enable.mutateAsync();
+    const enabled = await enable.mutateAsync(watchlistId);
     return enabled.shareUrl;
-  }, [enable]);
+  }, [enable, watchlistId]);
 
   const openShareSheet = useCallback(
     async (url: string) => {
@@ -40,6 +45,10 @@ export function WatchlistShareButton({ isAuthenticated }: WatchlistShareButtonPr
   );
 
   const handlePress = useCallback(() => {
+    if (!watchlistId) {
+      return;
+    }
+
     void (async () => {
       if (!statusQuery.data?.isSharingEnabled) {
         const url = await shareUrl();
@@ -69,7 +78,7 @@ export function WatchlistShareButton({ isAuthenticated }: WatchlistShareButtonPr
           text: t('watchlistShare.createNewLink'),
           onPress: () => {
             void (async () => {
-              const rotated = await rotate.mutateAsync();
+              const rotated = await rotate.mutateAsync(watchlistId);
               await openShareSheet(rotated.shareUrl);
             })();
           },
@@ -84,9 +93,9 @@ export function WatchlistShareButton({ isAuthenticated }: WatchlistShareButtonPr
         { text: t('common.cancel'), style: 'cancel' },
       ]);
     })();
-  }, [disable, openShareSheet, rotate, shareUrl, statusQuery.data?.isSharingEnabled, t]);
+  }, [disable, openShareSheet, rotate, shareUrl, statusQuery.data?.isSharingEnabled, t, watchlistId]);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !watchlistId) {
     return null;
   }
 

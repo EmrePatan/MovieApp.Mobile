@@ -1409,4 +1409,22 @@ export const stage2It = {
       },
     },
   },
+  watchlistShare: {
+    messageIntro: 'Guarda la mia lista su Movie Cave:',
+    shareButton: 'Condividi lista',
+    manageTitle: 'Condivisione lista',
+    shareLink: 'Condividi link',
+    createNewLink: 'Crea nuovo link',
+    disableSharing: 'Interrompi condivisione',
+    errorTitle: 'Impossibile condividere',
+    errorMessage:
+      'La condivisione è già attiva. Crea un nuovo link per ottenere un URL.',
+    publicTitleGeneric: 'Lista condivisa',
+    publicTitleNamed: 'Lista di {{name}}',
+    publicItemCount: '{{count}} titoli',
+    publicEmptyTitle: 'Lista vuota',
+    publicEmptyMessage: 'Questa lista condivisa non ha ancora titoli.',
+    publicRevokedTitle: 'Lista non disponibile',
+    publicRevokedMessage: 'Questa lista non è più condivisa.',
+  },
 } as const;

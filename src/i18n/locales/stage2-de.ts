@@ -1409,4 +1409,22 @@ export const stage2De = {
       },
     },
   },
+  watchlistShare: {
+    messageIntro: 'Schau dir meine Watchlist in Movie Cave an:',
+    shareButton: 'Watchlist teilen',
+    manageTitle: 'Watchlist-Freigabe',
+    shareLink: 'Link teilen',
+    createNewLink: 'Neuen Link erstellen',
+    disableSharing: 'Freigabe beenden',
+    errorTitle: 'Teilen fehlgeschlagen',
+    errorMessage:
+      'Die Watchlist-Freigabe ist bereits aktiv. Erstelle einen neuen Link, um eine URL zu erhalten.',
+    publicTitleGeneric: 'Geteilte Watchlist',
+    publicTitleNamed: 'Watchlist von {{name}}',
+    publicItemCount: '{{count}} Titel',
+    publicEmptyTitle: 'Leere Watchlist',
+    publicEmptyMessage: 'Diese geteilte Watchlist enthält noch keine Titel.',
+    publicRevokedTitle: 'Watchlist nicht verfügbar',
+    publicRevokedMessage: 'Diese Watchlist wird nicht mehr geteilt.',
+  },
 } as const;
