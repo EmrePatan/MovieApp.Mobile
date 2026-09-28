@@ -6,6 +6,7 @@ import {
   getWatchlistShareStatus,
   rotateWatchlistShare,
 } from '../api/watchlist-share-api';
+import { pickWatchlistShareUrl } from '../pick-watchlist-share-url';
 import { activeWatchlistSharesQueryKey } from './useActiveWatchlistShares';
 
 const statusKey = (watchlistId: string) => ['watchlist-share', 'status', watchlistId] as const;
@@ -35,8 +36,9 @@ export function useWatchlistShareMutations(watchlistId: string | null) {
   const enable = useMutation({
     mutationFn: () => enableWatchlistShare(watchlistId!),
     onSuccess: async (response) => {
-      if (watchlistId && response.shareUrl) {
-        await SecureStore.setItemAsync(storedUrlKey(watchlistId), response.shareUrl);
+      const shareUrl = pickWatchlistShareUrl(response);
+      if (watchlistId && shareUrl) {
+        await SecureStore.setItemAsync(storedUrlKey(watchlistId), shareUrl);
       }
       invalidate();
     },
@@ -55,8 +57,9 @@ export function useWatchlistShareMutations(watchlistId: string | null) {
   const rotate = useMutation({
     mutationFn: () => rotateWatchlistShare(watchlistId!),
     onSuccess: async (response) => {
-      if (watchlistId) {
-        await SecureStore.setItemAsync(storedUrlKey(watchlistId), response.shareUrl);
+      const shareUrl = pickWatchlistShareUrl(response);
+      if (watchlistId && shareUrl) {
+        await SecureStore.setItemAsync(storedUrlKey(watchlistId), shareUrl);
       }
       invalidate();
     },

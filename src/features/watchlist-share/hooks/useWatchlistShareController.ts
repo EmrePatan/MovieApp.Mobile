@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
-import { Alert, InteractionManager, Share } from 'react-native';
+import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { buildWatchlistShareMessage } from '../build-watchlist-share-message';
-import { getStoredWatchlistShareUrl, useWatchlistShareMutations } from './useWatchlistShare';
+import { getWatchlistShareStatus } from '../api/watchlist-share-api';
+import { ensureWatchlistShareUrlForNativeSheet } from '../ensure-watchlist-share-url-for-native-sheet';
+import { openNativeWatchlistShare } from '../open-native-watchlist-share';
+import { waitForShareSheetHost } from '../wait-for-share-sheet-host';
+import { useWatchlistShareMutations } from './useWatchlistShare';
 
 export function useWatchlistShareController(
   watchlistId: string | null,
@@ -15,86 +18,17 @@ export function useWatchlistShareController(
     Alert.alert(t('watchlistShare.errorTitle'), t('watchlistShare.errorMessage'));
   }, [t]);
 
-  const showLinkRecoveryHint = useCallback(() => {
-    Alert.alert(t('watchlistShare.errorTitle'), t('watchlistShare.linkRecoveryHint'));
-  }, [t]);
-
-  const openNativeShare = useCallback(
-    async (url: string) => {
-      const message = buildWatchlistShareMessage(url, t);
-      try {
-        await Share.share({ message, title: t('common.watchlist') });
-      } catch {
-        showShareError();
-      }
-    },
-    [showShareError, t],
-  );
-
-  const waitForShareSheetHost = useCallback(
-    () =>
-      new Promise<void>((resolve) => {
-        InteractionManager.runAfterInteractions(() => {
-          setTimeout(resolve, 320);
-        });
-      }),
-    [],
-  );
-
-  const recoverShareUrlViaRotate = useCallback(async (): Promise<string | null> => {
-    try {
-      const rotated = await rotate.mutateAsync();
-      return rotated.shareUrl || null;
-    } catch {
-      return null;
-    }
-  }, [rotate]);
-
-  const resolveShareUrl = useCallback(async (): Promise<string | null> => {
+  const obtainShareUrlForNativeSheet = useCallback(async (): Promise<string> => {
     if (!watchlistId) {
-      return null;
+      throw new Error('watchlist-share-missing-watchlist-id');
     }
 
-    const stored = await getStoredWatchlistShareUrl(watchlistId);
-    if (stored) {
-      return stored;
-    }
-
-    try {
-      const enabled = await enable.mutateAsync();
-      if (enabled.shareUrl) {
-        return enabled.shareUrl;
-      }
-
-      const storedAfterEnable = await getStoredWatchlistShareUrl(watchlistId);
-      if (storedAfterEnable) {
-        return storedAfterEnable;
-      }
-
-      // Sharing may already be enabled (POST returns empty URL). Profile screen uses rotate here.
-      const rotatedUrl = await recoverShareUrlViaRotate();
-      if (rotatedUrl) {
-        return rotatedUrl;
-      }
-
-      showLinkRecoveryHint();
-      return null;
-    } catch {
-      const rotatedUrl = await recoverShareUrlViaRotate();
-      if (rotatedUrl) {
-        return rotatedUrl;
-      }
-
-      showShareError();
-      return null;
-    }
-  }, [
-    enable,
-    recoverShareUrlViaRotate,
-    showLinkRecoveryHint,
-    showShareError,
-    watchlistId,
-  ]);
+    return ensureWatchlistShareUrlForNativeSheet(watchlistId, {
+      getStatus: getWatchlistShareStatus,
+      enableShare: async () => enable.mutateAsync(),
+      rotateShare: async () => rotate.mutateAsync(),
+    });
+  }, [enable, rotate, watchlistId]);
 
   const startShare = useCallback(() => {
     if (!watchlistId || !isAuthenticated) {
@@ -102,16 +36,26 @@ export function useWatchlistShareController(
     }
 
     void (async () => {
-      const url = await resolveShareUrl();
-      if (!url) {
-        return;
+      try {
+        await waitForShareSheetHost();
+        const url = await obtainShareUrlForNativeSheet();
+        await openNativeWatchlistShare(url, t);
+      } catch {
+        showShareError();
       }
-
-      // Options sheet is a Modal; Share.share while it dismisses often never shows the OS picker.
-      await waitForShareSheetHost();
-      await openNativeShare(url);
     })();
-  }, [isAuthenticated, openNativeShare, resolveShareUrl, waitForShareSheetHost, watchlistId]);
+  }, [isAuthenticated, obtainShareUrlForNativeSheet, showShareError, t, watchlistId]);
 
-  return { startShare, resolveShareUrl, openNativeShare };
+  const openNativeShare = useCallback(
+    async (url: string) => {
+      try {
+        await openNativeWatchlistShare(url, t);
+      } catch {
+        showShareError();
+      }
+    },
+    [showShareError, t],
+  );
+
+  return { startShare, openNativeShare, obtainShareUrlForNativeSheet };
 }

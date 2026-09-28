@@ -82,7 +82,6 @@ function WatchlistListOptionsSheetContent({
   };
 
   const handleShare = () => {
-    onClose();
     onShare?.();
   };
 

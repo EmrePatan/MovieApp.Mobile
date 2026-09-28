@@ -105,6 +105,7 @@ export function LibraryWatchlistDetailContent({
   }, [watchlist]);
 
   const handleShareFromMenu = useCallback(() => {
+    setOptionsSheetVisible(false);
     watchlistShare.startShare();
   }, [watchlistShare]);
 

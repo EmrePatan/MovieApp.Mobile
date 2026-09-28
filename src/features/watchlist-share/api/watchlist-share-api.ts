@@ -1,4 +1,6 @@
 import { api } from '@/api/client';
+import { pickWatchlistShareStatusEnabled } from '../ensure-watchlist-share-url-for-native-sheet';
+import { pickWatchlistShareUrl } from '../pick-watchlist-share-url';
 
 
 
@@ -91,9 +93,14 @@ function sharePath(watchlistId: string) {
 
 
 export async function getWatchlistShareStatus(watchlistId: string, signal?: AbortSignal) {
+  const raw = await api.get<WatchlistShareStatusResponse & { IsSharingEnabled?: boolean }>(
+    sharePath(watchlistId),
+    { signal },
+  );
 
-  return api.get<WatchlistShareStatusResponse>(sharePath(watchlistId), { signal });
-
+  return {
+    isSharingEnabled: pickWatchlistShareStatusEnabled(raw),
+  };
 }
 
 
@@ -107,9 +114,14 @@ export async function listActiveWatchlistShares(signal?: AbortSignal) {
 
 
 export async function enableWatchlistShare(watchlistId: string) {
+  const raw = await api.post<
+    WatchlistShareEnableResponse & { ShareUrl?: string | null; CreatedNewLink?: boolean }
+  >(sharePath(watchlistId));
 
-  return api.post<WatchlistShareEnableResponse>(sharePath(watchlistId));
-
+  return {
+    shareUrl: pickWatchlistShareUrl(raw),
+    createdNewLink: raw.createdNewLink ?? raw.CreatedNewLink ?? false,
+  };
 }
 
 
@@ -123,9 +135,16 @@ export async function disableWatchlistShare(watchlistId: string) {
 
 
 export async function rotateWatchlistShare(watchlistId: string) {
+  const raw = await api.post<WatchlistShareRotateResponse & { ShareUrl?: string }>(
+    `${sharePath(watchlistId)}/rotate`,
+  );
+  const shareUrl = pickWatchlistShareUrl(raw);
 
-  return api.post<WatchlistShareRotateResponse>(`${sharePath(watchlistId)}/rotate`);
+  if (!shareUrl) {
+    throw new Error('watchlist-share-rotate-missing-url');
+  }
 
+  return { shareUrl };
 }
 
 
