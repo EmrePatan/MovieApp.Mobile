@@ -38,13 +38,18 @@ export default function PublicWatchlistScreen() {
   }, [query.data?.items]);
 
   const heading = useMemo(() => {
-    const name = query.data?.ownerDisplayName?.trim();
-    if (name) {
-      return t('watchlistShare.publicTitleNamed', { name });
+    const listName = query.data?.watchlistName?.trim();
+    if (listName) {
+      return listName;
+    }
+
+    const ownerName = query.data?.ownerDisplayName?.trim();
+    if (ownerName) {
+      return t('watchlistShare.publicTitleNamed', { name: ownerName });
     }
 
     return t('watchlistShare.publicTitleGeneric');
-  }, [query.data?.ownerDisplayName, t]);
+  }, [query.data?.ownerDisplayName, query.data?.watchlistName, t]);
 
   const handleItemPress = useCallback(
     (item: LibraryItem) => {

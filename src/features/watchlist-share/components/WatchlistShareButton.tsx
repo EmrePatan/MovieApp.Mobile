@@ -28,20 +28,20 @@ export function WatchlistShareButton({
   appearance = 'icon',
 }: WatchlistShareButtonProps) {
   const { t } = useTranslation();
-  const statusQuery = useWatchlistShareStatus(isAuthenticated);
-  const { enable, disable, rotate } = useWatchlistShareMutations();
+  const statusQuery = useWatchlistShareStatus(watchlistId, isAuthenticated);
+  const { enable, disable, rotate } = useWatchlistShareMutations(watchlistId);
 
   const shareUrl = useCallback(async (): Promise<string | null> => {
     if (!watchlistId) {
       return null;
     }
 
-    const stored = await getStoredWatchlistShareUrl();
+    const stored = await getStoredWatchlistShareUrl(watchlistId);
     if (stored) {
       return stored;
     }
 
-    const enabled = await enable.mutateAsync(watchlistId);
+    const enabled = await enable.mutateAsync();
     return enabled.shareUrl;
   }, [enable, watchlistId]);
 
@@ -70,7 +70,7 @@ export function WatchlistShareButton({
         return;
       }
 
-      const currentUrl = await getStoredWatchlistShareUrl();
+      const currentUrl = await getStoredWatchlistShareUrl(watchlistId);
       Alert.alert(t('watchlistShare.manageTitle'), undefined, [
         {
           text: t('watchlistShare.shareLink'),
@@ -87,7 +87,7 @@ export function WatchlistShareButton({
           text: t('watchlistShare.createNewLink'),
           onPress: () => {
             void (async () => {
-              const rotated = await rotate.mutateAsync(watchlistId);
+              const rotated = await rotate.mutateAsync();
               await openShareSheet(rotated.shareUrl);
             })();
           },

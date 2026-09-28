@@ -7,46 +7,55 @@ import {
   rotateWatchlistShare,
 } from '../api/watchlist-share-api';
 
-const STATUS_KEY = ['watchlist-share', 'status'] as const;
-const STORED_URL_KEY = 'moviecave.watchlist-share-url';
+const statusKey = (watchlistId: string) => ['watchlist-share', 'status', watchlistId] as const;
 
-export function useWatchlistShareStatus(enabled: boolean) {
+function storedUrlKey(watchlistId: string) {
+  return `moviecave.watchlist-share-url.${watchlistId}`;
+}
+
+export function useWatchlistShareStatus(watchlistId: string | null, enabled: boolean) {
   return useQuery({
-    queryKey: STATUS_KEY,
-    queryFn: ({ signal }) => getWatchlistShareStatus(signal),
-    enabled,
+    queryKey: watchlistId ? statusKey(watchlistId) : ['watchlist-share', 'status', 'none'],
+    queryFn: ({ signal }) => getWatchlistShareStatus(watchlistId!, signal),
+    enabled: enabled && Boolean(watchlistId),
   });
 }
 
-export function useWatchlistShareMutations() {
+export function useWatchlistShareMutations(watchlistId: string | null) {
   const queryClient = useQueryClient();
 
   const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: STATUS_KEY });
+    if (watchlistId) {
+      void queryClient.invalidateQueries({ queryKey: statusKey(watchlistId) });
+    }
   };
 
   const enable = useMutation({
-    mutationFn: (watchlistId: string) => enableWatchlistShare(watchlistId),
+    mutationFn: () => enableWatchlistShare(watchlistId!),
     onSuccess: async (response) => {
-      if (response.shareUrl) {
-        await SecureStore.setItemAsync(STORED_URL_KEY, response.shareUrl);
+      if (watchlistId && response.shareUrl) {
+        await SecureStore.setItemAsync(storedUrlKey(watchlistId), response.shareUrl);
       }
       invalidate();
     },
   });
 
   const disable = useMutation({
-    mutationFn: disableWatchlistShare,
+    mutationFn: () => disableWatchlistShare(watchlistId!),
     onSuccess: async () => {
-      await SecureStore.deleteItemAsync(STORED_URL_KEY);
+      if (watchlistId) {
+        await SecureStore.deleteItemAsync(storedUrlKey(watchlistId));
+      }
       invalidate();
     },
   });
 
   const rotate = useMutation({
-    mutationFn: (watchlistId: string) => rotateWatchlistShare(watchlistId),
+    mutationFn: () => rotateWatchlistShare(watchlistId!),
     onSuccess: async (response) => {
-      await SecureStore.setItemAsync(STORED_URL_KEY, response.shareUrl);
+      if (watchlistId) {
+        await SecureStore.setItemAsync(storedUrlKey(watchlistId), response.shareUrl);
+      }
       invalidate();
     },
   });
@@ -54,6 +63,6 @@ export function useWatchlistShareMutations() {
   return { enable, disable, rotate };
 }
 
-export async function getStoredWatchlistShareUrl(): Promise<string | null> {
-  return SecureStore.getItemAsync(STORED_URL_KEY);
+export async function getStoredWatchlistShareUrl(watchlistId: string): Promise<string | null> {
+  return SecureStore.getItemAsync(storedUrlKey(watchlistId));
 }
