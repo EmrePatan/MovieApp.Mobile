@@ -93,7 +93,7 @@ jest.mock('@/features/app-config/hooks/useAppConfig', () => ({
     },
     refreshConfig: jest.fn(),
     isRefreshing: false,
-    markOptionalUpdateShownThisSession: jest.fn(),
+    suppressOptionalUpdateForSession: jest.fn(),
     optionalUpdateSessionSuppressed: false,
   })),
 }));

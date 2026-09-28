@@ -28,7 +28,8 @@ export interface AppConfigContextValue {
   config: RemoteAppConfig;
   refreshConfig: () => Promise<void>;
   isRefreshing: boolean;
-  markOptionalUpdateShownThisSession: () => void;
+  /** Session-only hide (Update, navigation elsewhere, or X — does not write 24h storage). */
+  suppressOptionalUpdateForSession: () => void;
   optionalUpdateSessionSuppressed: boolean;
 }
 
@@ -135,7 +136,7 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
     await resolveConfig();
   }, [resolveConfig]);
 
-  const markOptionalUpdateShownThisSession = useCallback(() => {
+  const suppressOptionalUpdateForSession = useCallback(() => {
     setOptionalUpdateSessionSuppressed(true);
   }, []);
 
@@ -147,7 +148,7 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
       config,
       refreshConfig,
       isRefreshing,
-      markOptionalUpdateShownThisSession,
+      suppressOptionalUpdateForSession,
       optionalUpdateSessionSuppressed,
     }),
     [
@@ -156,7 +157,7 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
       evaluation,
       isRefreshing,
       isStartupResolved,
-      markOptionalUpdateShownThisSession,
+      suppressOptionalUpdateForSession,
       optionalUpdateSessionSuppressed,
       refreshConfig,
     ],

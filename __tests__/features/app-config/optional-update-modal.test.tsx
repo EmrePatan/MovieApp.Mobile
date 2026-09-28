@@ -1,15 +1,22 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { OptionalUpdateModal } from '@/features/app-config/components/OptionalUpdateModal';
+import { saveOptionalUpdateDismissal } from '@/features/app-config/optional-update-dismissal-storage';
+import type { AppConfigEvaluation } from '@/features/app-config/types';
 
 const mockOpenURL = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('expo-linking', () => ({
   openURL: (...args: unknown[]) => mockOpenURL(...args),
 }));
-import type { AppConfigEvaluation } from '@/features/app-config/types';
 
-const mockMarkOptionalUpdateShownThisSession = jest.fn();
+let mockPathname = '/home';
+
+jest.mock('expo-router', () => ({
+  usePathname: () => mockPathname,
+}));
+
+const mockSuppressOptionalUpdateForSession = jest.fn();
 let mockEvaluation: AppConfigEvaluation = {
   blocking: 'none',
   updatePrompt: 'optional',
@@ -40,7 +47,10 @@ jest.mock('@/features/app-config/hooks/useAppConfig', () => ({
     },
     refreshConfig: jest.fn(),
     isRefreshing: false,
-    markOptionalUpdateShownThisSession: mockMarkOptionalUpdateShownThisSession,
+    suppressOptionalUpdateForSession: () => {
+      mockSuppressOptionalUpdateForSession();
+      mockSessionSuppressed = true;
+    },
     optionalUpdateSessionSuppressed: mockSessionSuppressed,
   }),
 }));
@@ -55,6 +65,7 @@ jest.mock('@/features/app-config/optional-update-dismissal-storage', () => ({
 describe('OptionalUpdateModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPathname = '/home';
     mockSessionSuppressed = false;
     mockEvaluation = {
       blocking: 'none',
@@ -64,13 +75,13 @@ describe('OptionalUpdateModal', () => {
     mockOpenURL.mockClear();
   });
 
-  it('opens when optional update is available', async () => {
+  it('opens when optional update is eligible', async () => {
     render(<OptionalUpdateModal />);
 
     await waitFor(() => {
       expect(screen.getByText('New version available')).toBeTruthy();
     });
-    expect(mockMarkOptionalUpdateShownThisSession).toHaveBeenCalledTimes(1);
+    expect(mockSuppressOptionalUpdateForSession).not.toHaveBeenCalled();
   });
 
   it('stays visible after session suppression flips while already open', async () => {
@@ -86,7 +97,7 @@ describe('OptionalUpdateModal', () => {
     expect(screen.getByText('New version available')).toBeTruthy();
   });
 
-  it('closes when the close button is pressed', async () => {
+  it('persists Later dismissal and suppresses session when X is pressed', async () => {
     render(<OptionalUpdateModal />);
 
     await waitFor(() => {
@@ -98,9 +109,12 @@ describe('OptionalUpdateModal', () => {
     await waitFor(() => {
       expect(screen.queryByText('New version available')).toBeNull();
     });
+
+    expect(saveOptionalUpdateDismissal).toHaveBeenCalledWith(12);
+    expect(mockSuppressOptionalUpdateForSession).toHaveBeenCalledTimes(1);
   });
 
-  it('does not reopen in the same session after dismiss', async () => {
+  it('does not reopen in the same session after X', async () => {
     const view = render(<OptionalUpdateModal />);
 
     await waitFor(() => {
@@ -113,10 +127,68 @@ describe('OptionalUpdateModal', () => {
       expect(screen.queryByText('New version available')).toBeNull();
     });
 
-    mockSessionSuppressed = false;
     view.rerender(<OptionalUpdateModal />);
 
     expect(screen.queryByText('New version available')).toBeNull();
+  });
+
+  it('opens store, hides banner, and suppresses session without 24h persistence on Update', async () => {
+    render(<OptionalUpdateModal />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Update Movie Cave from the store')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByLabelText('Update Movie Cave from the store'));
+
+    expect(mockOpenURL).toHaveBeenCalledWith('https://apps.apple.com/app/id6814454427');
+    expect(mockSuppressOptionalUpdateForSession).toHaveBeenCalledTimes(1);
+    expect(saveOptionalUpdateDismissal).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(screen.queryByText('New version available')).toBeNull();
+    });
+  });
+
+  it('hides for the session on navigation without 24h persistence', async () => {
+    const view = render(<OptionalUpdateModal />);
+
+    await waitFor(() => {
+      expect(screen.getByText('New version available')).toBeTruthy();
+    });
+
+    mockPathname = '/discover';
+    view.rerender(<OptionalUpdateModal />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('New version available')).toBeNull();
+    });
+
+    expect(mockSuppressOptionalUpdateForSession).toHaveBeenCalledTimes(1);
+    expect(saveOptionalUpdateDismissal).not.toHaveBeenCalled();
+  });
+
+  it('can show again when session is fresh and no Later dismissal exists', async () => {
+    const view = render(<OptionalUpdateModal />);
+
+    await waitFor(() => {
+      expect(screen.getByText('New version available')).toBeTruthy();
+    });
+
+    mockPathname = '/discover';
+    view.rerender(<OptionalUpdateModal />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('New version available')).toBeNull();
+    });
+
+    mockSessionSuppressed = false;
+    mockPathname = '/home';
+    view.rerender(<OptionalUpdateModal />);
+
+    await waitFor(() => {
+      expect(screen.getByText('New version available')).toBeTruthy();
+    });
   });
 
   it('closes when evaluation changes away from optional', async () => {
@@ -157,16 +229,28 @@ describe('OptionalUpdateModal', () => {
     });
   });
 
-  it('opens store URL and closes when update is pressed', async () => {
+  it('does not open under forced update evaluation', async () => {
+    mockEvaluation = {
+      blocking: 'forced',
+      updatePrompt: 'none',
+      storeUrl: 'https://apps.apple.com/app/id6814454427',
+    };
+
     render(<OptionalUpdateModal />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Update Movie Cave from the store')).toBeTruthy();
+      expect(screen.queryByText('New version available')).toBeNull();
     });
+  });
 
-    fireEvent.press(screen.getByLabelText('Update Movie Cave from the store'));
+  it('does not open under maintenance evaluation', async () => {
+    mockEvaluation = {
+      blocking: 'maintenance',
+      updatePrompt: 'none',
+      storeUrl: 'https://apps.apple.com/app/id6814454427',
+    };
 
-    expect(mockOpenURL).toHaveBeenCalledWith('https://apps.apple.com/app/id6814454427');
+    render(<OptionalUpdateModal />);
 
     await waitFor(() => {
       expect(screen.queryByText('New version available')).toBeNull();

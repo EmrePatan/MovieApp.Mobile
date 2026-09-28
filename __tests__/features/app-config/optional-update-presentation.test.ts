@@ -60,4 +60,17 @@ describe('optional update presentation', () => {
       }),
     ).toBe(false);
   });
+
+  it('blocks opening when persisted Later dismissal is within 24h', () => {
+    expect(
+      canOpenOptionalUpdate({
+        updatePrompt: 'optional',
+        storeUrl: 'https://example.com',
+        isAlreadyVisible: false,
+        dismissedThisSession: false,
+        sessionSuppressed: false,
+        persistedAllowsShow: false,
+      }),
+    ).toBe(false);
+  });
 });
