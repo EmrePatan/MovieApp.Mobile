@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,6 +21,7 @@ import { useAppConfig } from '../hooks/useAppConfig';
 
 export function OptionalUpdateModal() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { evaluation, config, markOptionalUpdateShownThisSession, optionalUpdateSessionSuppressed } =
     useAppConfig();
   const [visible, setVisible] = useState(false);
@@ -108,6 +109,8 @@ export function OptionalUpdateModal() {
     return null;
   }
 
+  const title = t('appConfig.optionalUpdate.title');
+
   return (
     <Modal
       visible={visible}
@@ -117,47 +120,55 @@ export function OptionalUpdateModal() {
       accessibilityViewIsModal
     >
       <View style={styles.host} pointerEvents="box-none">
-        <SafeAreaView edges={['top']} style={styles.safeArea} pointerEvents="box-none">
+        <View
+          pointerEvents="box-none"
+          style={[styles.anchor, { paddingTop: insets.top + spacing.xs }]}
+        >
           <View
             style={styles.card}
             accessibilityRole="alert"
-            accessibilityLabel={`${t('appConfig.optionalUpdate.title')}. ${t('appConfig.optionalUpdate.subtitle')}`}
+            accessibilityLabel={title}
           >
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('appConfig.optionalUpdate.closeButtonAccessibility')}
-              onPress={handleClose}
-              hitSlop={8}
-              style={styles.closeButton}
+            <View
+              style={styles.iconWrap}
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
             >
-              <Ionicons name="close" size={18} color={colors.textSecondary} />
-            </Pressable>
-
-            <View style={styles.iconWrap} accessible={false} importantForAccessibility="no-hide-descendants">
-              <Ionicons name="arrow-down-circle-outline" size={22} color={colors.accent} />
+              <Ionicons name="arrow-down-circle-outline" size={18} color={colors.accent} />
             </View>
 
-            <View style={styles.copy}>
-              <AppText variant="bodySmall" style={styles.title} numberOfLines={2}>
-                {t('appConfig.optionalUpdate.title')}
-              </AppText>
-              <AppText variant="caption" muted numberOfLines={2}>
-                {t('appConfig.optionalUpdate.subtitle')}
-              </AppText>
-            </View>
+            <AppText
+              variant="bodySmall"
+              style={styles.title}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </AppText>
 
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('appConfig.optionalUpdate.updateButtonAccessibility')}
               onPress={handleUpdate}
+              hitSlop={6}
               style={({ pressed }) => [styles.updateButton, pressed && styles.updateButtonPressed]}
             >
-              <AppText variant="caption" style={styles.updateLabel}>
+              <AppText variant="caption" style={styles.updateLabel} numberOfLines={1}>
                 {t('appConfig.optionalUpdate.updateButton')}
               </AppText>
             </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('appConfig.optionalUpdate.closeButtonAccessibility')}
+              onPress={handleClose}
+              hitSlop={10}
+              style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
+            >
+              <Ionicons name="close" size={16} color={colors.textSecondary} />
+            </Pressable>
           </View>
-        </SafeAreaView>
+        </View>
       </View>
     </Modal>
   );
@@ -168,67 +179,54 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
   },
-  safeArea: {
+  anchor: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    paddingLeft: spacing.sm,
-    paddingRight: spacing.md,
+    gap: spacing.xs,
+    minHeight: 44,
+    paddingVertical: spacing.xs,
+    paddingLeft: spacing.xs,
+    paddingRight: spacing.xs,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.accentSurface,
     borderWidth: 1,
     borderColor: colors.borderAccent,
     shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: spacing.xs,
-    right: spacing.xs,
-    minWidth: interaction.touchTarget,
-    minHeight: interaction.touchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 6,
   },
   iconWrap: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.accentTint18,
     borderWidth: 1,
     borderColor: colors.borderAccent,
-    marginTop: spacing.sm,
-  },
-  copy: {
-    flex: 1,
-    gap: 2,
-    paddingRight: spacing.lg,
-    paddingTop: spacing.xs,
+    flexShrink: 0,
   },
   title: {
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
     fontWeight: '600',
     color: colors.textPrimary,
   },
   updateButton: {
-    minHeight: interaction.touchTarget,
-    minWidth: 72,
-    paddingHorizontal: spacing.md,
+    flexShrink: 0,
+    minHeight: 32,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
   },
   updateButtonPressed: {
     opacity: interaction.pressedOpacity,
@@ -236,5 +234,16 @@ const styles = StyleSheet.create({
   updateLabel: {
     color: colors.textPrimary,
     fontWeight: '700',
+  },
+  closeButton: {
+    flexShrink: 0,
+    width: interaction.touchTarget,
+    height: interaction.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: -spacing.xs,
+  },
+  closeButtonPressed: {
+    opacity: interaction.pressedOpacity,
   },
 });

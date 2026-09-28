@@ -227,9 +227,7 @@ const stage1Es = {
   appConfig: {
     optionalUpdate: {
       title: 'Nueva versión disponible',
-      subtitle: 'Descarga la última versión de Movie Cave.',
       updateButton: 'Actualizar',
-      laterButton: 'Más tarde',
       updateButtonAccessibility: 'Actualizar Movie Cave desde la tienda',
       closeButtonAccessibility: 'Cerrar aviso de nueva versión',
     },

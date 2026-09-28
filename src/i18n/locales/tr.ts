@@ -224,10 +224,8 @@ const stage1Tr = {
   },
   appConfig: {
     optionalUpdate: {
-      title: 'Yeni sürüm mevcut',
-      subtitle: "Movie Cave'in en yeni sürümünü indir.",
+      title: 'Yeni bir sürüm hazır',
       updateButton: 'Güncelle',
-      laterButton: 'Sonra',
       updateButtonAccessibility: "Movie Cave'i mağazadan güncelle",
       closeButtonAccessibility: 'Yeni sürüm bildirimini kapat',
     },
