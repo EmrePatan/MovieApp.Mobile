@@ -318,16 +318,14 @@ export function OptionalUpdateModal() {
 
   return (
     <View style={styles.overlayHost} pointerEvents="box-none" accessibilityViewIsModal>
-      <View style={styles.host} pointerEvents="box-none">
-        <View
-          pointerEvents="box-none"
-
-          style={[
-            styles.anchor,
-            { paddingTop: insets.top + optionalUpdateBannerMetrics.topInsetExtra },
-          ]}
-        >
-          <View style={styles.card} accessibilityRole="alert" accessibilityLabel={title}>
+      <View
+        pointerEvents="box-none"
+        style={[
+          styles.anchor,
+          { paddingTop: insets.top + optionalUpdateBannerMetrics.topInsetExtra },
+        ]}
+      >
+        <View style={styles.card} accessibilityRole="alert" accessibilityLabel={title}>
             <View
               style={styles.iconSlot}
 
@@ -383,7 +381,6 @@ export function OptionalUpdateModal() {
                 color={colors.textSecondary}
               />
             </Pressable>
-          </View>
         </View>
       </View>
     </View>
@@ -392,18 +389,20 @@ export function OptionalUpdateModal() {
 
 const styles = StyleSheet.create({
   overlayHost: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+
+    top: 0,
+
+    left: 0,
+
+    right: 0,
 
     zIndex: 30,
-
-    justifyContent: 'flex-start',
-  },
-
-  host: {
-    justifyContent: 'flex-start',
   },
 
   anchor: {
+    width: '100%',
+
     paddingHorizontal: spacing.md,
   },
 
