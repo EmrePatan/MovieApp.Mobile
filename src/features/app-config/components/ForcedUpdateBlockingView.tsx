@@ -16,6 +16,7 @@ export function ForcedUpdateBlockingView() {
 
   return (
     <AppBlockingState
+      presentation="forcedUpdate"
       icon="arrow-up-circle-outline"
       title={t('appConfig.forcedUpdate.title')}
       body={t('appConfig.forcedUpdate.body')}
