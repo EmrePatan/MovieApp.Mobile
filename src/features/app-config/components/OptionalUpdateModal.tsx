@@ -221,10 +221,12 @@ const styles = StyleSheet.create({
   updateButton: {
     flexShrink: 0,
     minHeight: 32,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
     backgroundColor: colors.accent,
+    borderWidth: 1,
+    borderColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -232,8 +234,8 @@ const styles = StyleSheet.create({
     opacity: interaction.pressedOpacity,
   },
   updateLabel: {
-    color: colors.textPrimary,
-    fontWeight: '700',
+    color: colors.background,
+    fontWeight: '600',
   },
   closeButton: {
     flexShrink: 0,
