@@ -227,9 +227,11 @@ const stage1De = {
   appConfig: {
     optionalUpdate: {
       title: 'Neue Version verfügbar',
+      subtitle: 'Lade die neueste Version von Movie Cave herunter.',
       updateButton: 'Aktualisieren',
       laterButton: 'Später',
       updateButtonAccessibility: 'Movie Cave im Store aktualisieren',
+      closeButtonAccessibility: 'Hinweis zur neuen Version schließen',
     },
     forcedUpdate: {
       title: 'Update erforderlich',

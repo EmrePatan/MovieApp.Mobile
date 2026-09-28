@@ -10,8 +10,10 @@ const locales = { en, tr, de, es, fr, it: itLocale, pt };
 
 const requiredPaths = [
   'appConfig.optionalUpdate.title',
+  'appConfig.optionalUpdate.subtitle',
   'appConfig.optionalUpdate.updateButton',
   'appConfig.optionalUpdate.laterButton',
+  'appConfig.optionalUpdate.closeButtonAccessibility',
   'appConfig.forcedUpdate.title',
   'appConfig.forcedUpdate.body',
   'appConfig.forcedUpdate.updateButton',
