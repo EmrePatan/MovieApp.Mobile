@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Share } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { buildWatchlistShareMessage } from '../build-watchlist-share-message';
@@ -140,7 +141,10 @@ export function WatchlistShareButton({
 
 const styles = StyleSheet.create({
   button: {
-    padding: spacing.xs,
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowAction: {
     flexDirection: 'row',

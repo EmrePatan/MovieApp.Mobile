@@ -2,8 +2,10 @@ import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/auth/useAuth';
 import { AppText } from '@/components/common/AppText';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
+import { WatchlistShareButton } from '@/features/watchlist-share/components/WatchlistShareButton';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -11,6 +13,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 interface LibraryWatchlistDetailHeaderProps {
   title: string;
   subtitle?: string;
+  watchlistId?: string | null;
   onOverflowPress?: () => void;
   overflowAccessibilityLabel?: string;
   children?: ReactNode;
@@ -19,11 +22,13 @@ interface LibraryWatchlistDetailHeaderProps {
 export function LibraryWatchlistDetailHeader({
   title,
   subtitle,
+  watchlistId = null,
   onOverflowPress,
   overflowAccessibilityLabel,
   children,
 }: LibraryWatchlistDetailHeaderProps) {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const resolvedOverflowLabel =
     overflowAccessibilityLabel ?? t('library.watchlistDetail.overflowAccessibility');
 
@@ -44,19 +49,26 @@ export function LibraryWatchlistDetailHeader({
           ) : null}
         </View>
         <View style={styles.trailingSlot}>
-          {onOverflowPress ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={resolvedOverflowLabel}
-              hitSlop={8}
-              onPress={onOverflowPress}
-              style={({ pressed }) => [styles.overflowButton, pressed && styles.pressed]}
-            >
-              <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
-            </Pressable>
-          ) : (
-            <View style={styles.overflowPlaceholder} />
-          )}
+          <View style={styles.trailingActions}>
+            <WatchlistShareButton
+              appearance="icon"
+              isAuthenticated={isAuthenticated}
+              watchlistId={watchlistId}
+            />
+            {onOverflowPress ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={resolvedOverflowLabel}
+                hitSlop={8}
+                onPress={onOverflowPress}
+                style={({ pressed }) => [styles.overflowButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
+              </Pressable>
+            ) : (
+              <View style={styles.overflowPlaceholder} />
+            )}
+          </View>
         </View>
       </View>
       {children}
@@ -90,6 +102,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-end',
     justifyContent: 'center',
+  },
+  trailingActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   title: {
     fontWeight: '600',
