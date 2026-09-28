@@ -122,7 +122,7 @@ export function OptionalUpdateModal() {
       <View style={styles.host} pointerEvents="box-none">
         <View
           pointerEvents="box-none"
-          style={[styles.anchor, { paddingTop: insets.top + spacing.xs }]}
+          style={[styles.anchor, { paddingTop: insets.top + spacing.sm }]}
         >
           <View
             style={styles.card}
