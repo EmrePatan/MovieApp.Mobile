@@ -23,7 +23,10 @@ import { JustWatchAttribution } from '@/features/discovery/components/JustWatchA
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
-import { listAllStreamingHubProviders } from '@/features/discovery/streaming-platform-hub-types';
+import {
+  listStreamingHubProvidersWithFallback,
+  resolveDiscoveryWatchProvider,
+} from '@/features/discovery/streaming-platform-hub-types';
 import type { StreamingDiscoverState } from '@/features/discovery/streaming-discover-types';
 import { serializeStreamingDiscoverRoute } from '@/features/discovery/utils/streaming-discover-params';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
@@ -63,13 +66,14 @@ export function StreamingPlatformScreen({
   );
 
   const hubProviders = useMemo(
-    () => listAllStreamingHubProviders(providersQuery.data?.providers ?? []),
+    () => listStreamingHubProvidersWithFallback(providersQuery.data?.providers),
     [providersQuery.data?.providers],
   );
 
-  const activeProvider = providersQuery.data?.providers.find(
-    (p) => p.providerId === primaryProviderId,
-  );
+  const activeProvider =
+    primaryProviderId == null
+      ? undefined
+      : resolveDiscoveryWatchProvider(primaryProviderId, providersQuery.data?.providers);
 
   const platformState = useMemo(
     () =>
@@ -262,10 +266,23 @@ export function StreamingPlatformScreen({
     }
   }, [resultsQuery]);
 
-  if (primaryProviderId == null || !activeProvider) {
+  if (primaryProviderId == null) {
     return (
       <View style={commonStyles.screen} testID="streaming-discover-screen">
         {pickerHeader}
+      </View>
+    );
+  }
+
+  if (!activeProvider) {
+    return (
+      <View style={commonStyles.screen} testID="streaming-discover-screen">
+        <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
+          <DetailBackButton contentInset={false} />
+          <View style={styles.headerContent}>
+            <SearchLoadingState />
+          </View>
+        </SafeAreaView>
       </View>
     );
   }

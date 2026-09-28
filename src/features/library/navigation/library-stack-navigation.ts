@@ -11,6 +11,8 @@ export function isLibraryStackRoute(segments: readonly string[]): boolean {
     || root === 'following'
     || root === 'favorites'
     || root === 'discover-browse'
+    || root === 'streaming-discover'
+    || root === 'streaming-platforms'
     || root === 'watch-history'
     || root === 'notifications'
     || root === 'watchlist'

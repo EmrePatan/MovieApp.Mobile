@@ -6,6 +6,7 @@ import {
 } from '@/features/discovery/streaming-platform-hub-types';
 import { useStreamingProviderSpotlight } from '@/features/discovery/hooks/useStreamingProviderSpotlight';
 import { createStreamingDiscoverHref } from '@/features/discovery/utils/streaming-discover-params';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { DiscoveryWatchProvider } from '@/features/discovery/watch-provider-types';
 import { interaction } from '@/theme/interaction';
 import {
@@ -40,7 +41,8 @@ export function StreamingProviderPosterCard({
     spotlight && spotlight.type !== 'person' ? spotlight.posterUrl : null;
 
   const openPlatform = () => {
-    router.push(
+    openLibraryStackScreen(
+      router,
       createStreamingDiscoverHref(
         {
           watchProviderIds: [provider.providerId],
@@ -51,6 +53,7 @@ export function StreamingProviderPosterCard({
         },
         watchRegion,
       ),
+      '/discover',
     );
   };
 

@@ -15,7 +15,7 @@ import { StreamingProviderPosterCard } from '@/features/discovery/components/Str
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import {
   DEFAULT_STREAMING_HUB_MEDIA_TYPE,
-  listAllStreamingHubProviders,
+  listStreamingHubProvidersWithFallback,
 } from '@/features/discovery/streaming-platform-hub-types';
 import type { DiscoveryWatchProvider } from '@/features/discovery/watch-provider-types';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
@@ -37,7 +37,7 @@ export function StreamingPlatformsDirectoryScreen() {
   );
 
   const providers = useMemo(
-    () => listAllStreamingHubProviders(providersQuery.data?.providers ?? []),
+    () => listStreamingHubProvidersWithFallback(providersQuery.data?.providers),
     [providersQuery.data?.providers],
   );
 

@@ -23,6 +23,8 @@ interface DetailBackButtonProps {
   variant?: 'inline' | 'overlay';
   contentInset?: boolean;
   showLabel?: boolean;
+  /** Icon-only back aligned to the leading edge (no extra horizontal padding). */
+  iconOnlyLeading?: boolean;
 }
 
 export function DetailBackButton({
@@ -31,6 +33,7 @@ export function DetailBackButton({
   variant = 'inline',
   contentInset = true,
   showLabel = true,
+  iconOnlyLeading = false,
 }: DetailBackButtonProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -85,7 +88,11 @@ export function DetailBackButton({
       onPress={handleBack}
       style={({ pressed }) => [
         styles.inlineButton,
-        contentInset ? styles.inlineButtonContentInset : styles.inlineButtonStandalone,
+        iconOnlyLeading
+          ? styles.inlineButtonIconOnlyLeading
+          : contentInset
+            ? styles.inlineButtonContentInset
+            : styles.inlineButtonStandalone,
         pressed && styles.pressed,
       ]}
     >
@@ -111,6 +118,11 @@ const styles = StyleSheet.create({
   },
   inlineButtonStandalone: {
     paddingHorizontal: spacing.lg,
+  },
+  inlineButtonIconOnlyLeading: {
+    paddingLeft: 0,
+    paddingRight: 0,
+    minWidth: interaction.touchTarget,
   },
   overlayButton: {
     position: 'absolute',

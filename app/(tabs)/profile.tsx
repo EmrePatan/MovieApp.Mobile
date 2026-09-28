@@ -17,6 +17,7 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { getRegionLabel } from '@/features/regions/region-options';
 import { getLanguageLabel } from '@/i18n/locale-tags';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export default function ProfileScreen() {
@@ -65,9 +66,11 @@ export default function ProfileScreen() {
   }
 
   return (
-    <Screen>
+    <Screen padded={false}>
       <ScrollView
+        style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={createIosRefreshControl({
           refreshing: isRefreshing,
           onRefresh: handleRefresh,
@@ -134,8 +137,13 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
   scrollContent: {
     gap: spacing.lg,
+    paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingTop: layout.screenPaddingVertical,
     paddingBottom: spacing.xxl,
   },
   loadingContainer: {

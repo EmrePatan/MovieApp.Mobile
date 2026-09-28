@@ -7,8 +7,9 @@ import { AppText } from '@/components/common/AppText';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import {
   DEFAULT_STREAMING_HUB_MEDIA_TYPE,
-  pickStreamingHubProviders,
+  resolveStreamingHubRailProviders,
 } from '@/features/discovery/streaming-platform-hub-types';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { StreamingProviderPosterCard } from './StreamingProviderPosterCard';
 import { colors } from '@/theme/colors';
@@ -33,12 +34,12 @@ export function StreamingPlatformsHubSection() {
   );
 
   const railProviders = useMemo(
-    () => pickStreamingHubProviders(providersQuery.data?.providers ?? []),
+    () => resolveStreamingHubRailProviders(providersQuery.data?.providers),
     [providersQuery.data?.providers],
   );
 
   const openDirectory = useCallback(() => {
-    router.push(STREAMING_PLATFORMS_DIRECTORY_ROUTE);
+    openLibraryStackScreen(router, STREAMING_PLATFORMS_DIRECTORY_ROUTE, '/discover');
   }, [router]);
 
   const hubTileSize = useMemo(() => {
@@ -54,10 +55,6 @@ export function StreamingPlatformsHubSection() {
   }, [windowWidth]);
 
   if (!isHydrated) {
-    return null;
-  }
-
-  if (!providersQuery.isLoading && railProviders.length === 0) {
     return null;
   }
 

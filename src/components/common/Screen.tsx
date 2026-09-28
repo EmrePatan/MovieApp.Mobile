@@ -18,7 +18,7 @@ export function Screen({
   ...props
 }: ScreenProps) {
   const content = (
-    <View style={[padded && styles.padded, style]} {...props}>
+    <View style={[styles.container, padded && styles.padded, style]} {...props}>
       {children}
     </View>
   );
@@ -41,8 +41,10 @@ export function Screen({
 }
 
 const styles = StyleSheet.create({
-  padded: {
+  container: {
     flex: 1,
+  },
+  padded: {
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: layout.screenPaddingVertical,
   },

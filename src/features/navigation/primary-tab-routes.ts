@@ -21,6 +21,7 @@ const DISCOVER_ROUTE_PREFIXES = [
   '/discover-browse',
   '/advanced-discover',
   '/streaming-discover',
+  '/streaming-platforms',
   '/world-cinema',
   '/now-in-theaters',
   '/on-tv-this-week',

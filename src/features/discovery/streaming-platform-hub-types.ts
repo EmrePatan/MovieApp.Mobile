@@ -25,6 +25,37 @@ export const STREAMING_GLOBAL_POPULARITY_ORDER: readonly number[] = [
   2, // Apple TV (legacy id in some regions)
 ];
 
+/** Bundled hub tiles — keep the Discover rail visible when TMDB catalog is empty or unavailable. */
+const CURATED_STREAMING_HUB_PROVIDER_NAMES: Partial<Record<number, string>> = {
+  8: 'Netflix',
+  119: 'Prime Video',
+  337: 'Disney+',
+  350: 'Apple TV+',
+  1899: 'Max',
+  531: 'Paramount+',
+  283: 'Crunchyroll',
+};
+
+export function getCuratedStreamingHubFallbackProviders(): DiscoveryWatchProvider[] {
+  return STREAMING_GLOBAL_POPULARITY_ORDER.map((providerId, index) => ({
+    providerId,
+    name: CURATED_STREAMING_HUB_PROVIDER_NAMES[providerId] ?? `Provider ${providerId}`,
+    logoPath: null,
+    displayPriority: index,
+  }));
+}
+
+export function resolveStreamingHubRailProviders(
+  apiProviders: DiscoveryWatchProvider[] | undefined,
+): DiscoveryWatchProvider[] {
+  const fromApi = pickStreamingHubProviders(apiProviders ?? []);
+  if (fromApi.length > 0) {
+    return fromApi;
+  }
+
+  return pickStreamingHubProviders(getCuratedStreamingHubFallbackProviders());
+}
+
 function curatedPopularityRank(providerId: number): number {
   const index = STREAMING_GLOBAL_POPULARITY_ORDER.indexOf(providerId);
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
@@ -56,4 +87,29 @@ export function listAllStreamingHubProviders(
   providers: DiscoveryWatchProvider[],
 ): DiscoveryWatchProvider[] {
   return sortStreamingHubProviders(providers);
+}
+
+export function listStreamingHubProvidersWithFallback(
+  apiProviders: DiscoveryWatchProvider[] | undefined,
+): DiscoveryWatchProvider[] {
+  const fromApi = listAllStreamingHubProviders(apiProviders ?? []);
+  if (fromApi.length > 0) {
+    return fromApi;
+  }
+
+  return listAllStreamingHubProviders(getCuratedStreamingHubFallbackProviders());
+}
+
+export function resolveDiscoveryWatchProvider(
+  providerId: number,
+  apiProviders: DiscoveryWatchProvider[] | undefined,
+): DiscoveryWatchProvider | undefined {
+  const fromApi = apiProviders?.find((provider) => provider.providerId === providerId);
+  if (fromApi) {
+    return fromApi;
+  }
+
+  return getCuratedStreamingHubFallbackProviders().find(
+    (provider) => provider.providerId === providerId,
+  );
 }

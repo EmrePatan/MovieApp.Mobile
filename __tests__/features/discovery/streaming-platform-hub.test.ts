@@ -1,5 +1,6 @@
 import {
   pickStreamingHubProviders,
+  resolveStreamingHubRailProviders,
   sortStreamingHubProviders,
 } from '@/features/discovery/streaming-platform-hub-types';
 import { getIsoWeekId } from '@/features/discovery/utils/iso-week-id';
@@ -39,6 +40,22 @@ describe('sortStreamingHubProviders', () => {
     const input = [provider(103, 30), provider(101, 10), provider(102, 20)];
 
     expect(sortStreamingHubProviders(input).map((p) => p.providerId)).toEqual([101, 102, 103]);
+  });
+});
+
+describe('resolveStreamingHubRailProviders', () => {
+  it('uses curated majors when the API returns no providers', () => {
+    const resolved = resolveStreamingHubRailProviders([]);
+
+    expect(resolved.length).toBeGreaterThan(0);
+    expect(resolved[0]?.providerId).toBe(8);
+    expect(resolved[0]?.name).toBe('Netflix');
+  });
+
+  it('prefers API providers when available', () => {
+    const resolved = resolveStreamingHubRailProviders([provider(999, 1, 'Regional')]);
+
+    expect(resolved.map((p) => p.providerId)).toEqual([999]);
   });
 });
 

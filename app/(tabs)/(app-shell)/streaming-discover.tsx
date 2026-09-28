@@ -43,6 +43,11 @@ export default function StreamingDiscoverScreen() {
       providersQuery.data.providers,
     );
 
+    // Keep hub-selected IDs when TMDB returns an empty/partial catalog (curated rail tiles).
+    if (reconciled.length === 0 && discoverState.watchProviderIds.length > 0) {
+      return;
+    }
+
     if (reconciled.length !== discoverState.watchProviderIds.length) {
       setDiscoveryRouteParams(
         router,
