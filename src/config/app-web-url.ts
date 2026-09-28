@@ -1,12 +1,17 @@
 import { getAppEnvironment, validateApiBaseUrl } from '@/api/environment';
+import { getCatalogShareCanonicalHost } from '@/config/catalog-share-hosts';
 
 function normalizeWebBaseUrl(url: string): string {
   return url.replace(/\/+$/, '');
 }
 
+function defaultPublicShareWebBaseUrl(): string {
+  return `https://${getCatalogShareCanonicalHost()}`;
+}
+
 /**
  * Public HTTPS origin for catalog share links (for example https://moviecaveapp.com).
- * Falls back to the API base URL in development when unset.
+ * Development may fall back to EXPO_PUBLIC_API_URL for local testing only.
  */
 export function getAppWebBaseUrl(): string {
   const configured = process.env.EXPO_PUBLIC_APP_WEB_URL?.trim();
@@ -20,6 +25,11 @@ export function getAppWebBaseUrl(): string {
     }
 
     return normalizeWebBaseUrl(configured);
+  }
+
+  const environment = getAppEnvironment();
+  if (environment === 'production' || environment === 'preview') {
+    return defaultPublicShareWebBaseUrl();
   }
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL?.trim();

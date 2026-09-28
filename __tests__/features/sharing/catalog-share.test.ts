@@ -40,6 +40,30 @@ describe('catalog share URL builder', () => {
     expect(message).toContain('Reacher (2022)');
     expect(message).toContain('View on Movie Cave');
     expect(message).not.toContain('movieapp://');
+    const httpsMatches = message.match(/https:\/\/[^\s]+/g) ?? [];
+    expect(httpsMatches).toHaveLength(1);
+    expect(httpsMatches[0]).toBe(url);
+  });
+});
+
+describe('catalog share public web base URL', () => {
+  it('uses moviecaveapp.com in production when EXPO_PUBLIC_APP_WEB_URL is unset', () => {
+    delete process.env.EXPO_PUBLIC_APP_WEB_URL;
+    process.env.EXPO_PUBLIC_APP_ENV = 'production';
+    process.env.EXPO_PUBLIC_API_URL = 'https://movieapp-fpkg.onrender.com';
+
+    jest.isolateModules(() => {
+      const { getAppWebBaseUrl } = require('@/config/app-web-url');
+      const { buildCatalogShareUrl } = require('@/features/sharing/build-catalog-share-url');
+
+      expect(getAppWebBaseUrl()).toBe('https://moviecaveapp.com');
+      expect(buildCatalogShareUrl({ contentType: 'movie', contentId: MOVIE_ID })).toContain(
+        'https://moviecaveapp.com/movie/',
+      );
+      expect(buildCatalogShareUrl({ contentType: 'movie', contentId: MOVIE_ID })).not.toContain(
+        'onrender.com',
+      );
+    });
   });
 });
 

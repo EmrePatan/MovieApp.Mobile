@@ -32,11 +32,16 @@ describe('DetailShareButton', () => {
     expect(screen.getByTestId('detail-share-button')).toBeTruthy();
     fireEvent.press(screen.getByTestId('detail-share-button'));
 
-    expect(Share.share).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: expect.stringMatching(/^https:\/\/moviecaveapp\.com\/movie\//),
-        message: expect.stringContaining('https://moviecaveapp.com/movie/'),
-      }),
-    );
+    expect(Share.share).toHaveBeenCalledTimes(1);
+    const payload = (Share.share as jest.Mock).mock.calls[0][0] as {
+      message?: string;
+      url?: string;
+      title?: string;
+    };
+    expect(payload.url).toBeUndefined();
+    expect(payload.title).toBe('Inception');
+    expect(payload.message).toContain('https://moviecaveapp.com/movie/');
+    const urlOccurrences = payload.message?.match(/https:\/\/[^\s]+/g) ?? [];
+    expect(urlOccurrences).toHaveLength(1);
   });
 });
