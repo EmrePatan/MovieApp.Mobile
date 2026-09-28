@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.xs,
     paddingRight: spacing.xs,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.accentSurface,
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
     borderColor: colors.borderAccent,
     shadowColor: '#000',
