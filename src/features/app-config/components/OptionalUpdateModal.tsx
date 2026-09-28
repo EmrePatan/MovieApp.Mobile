@@ -5,6 +5,8 @@ import * as Linking from 'expo-linking';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
+import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
+import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -110,6 +112,8 @@ export function OptionalUpdateModal() {
   }
 
   const title = t('appConfig.optionalUpdate.title');
+  const cardRadius = borderRadius.lg;
+  const cardInnerRadius = Math.max(0, cardRadius - DETAIL_DIRECTIONAL_FRAME_BORDER);
 
   return (
     <Modal
@@ -124,50 +128,57 @@ export function OptionalUpdateModal() {
           pointerEvents="box-none"
           style={[styles.anchor, { paddingTop: insets.top + spacing.sm }]}
         >
-          <View
-            style={styles.card}
-            accessibilityRole="alert"
-            accessibilityLabel={title}
+          <DetailDirectionalFrame
+            variant="gold"
+            borderRadius={cardRadius}
+            glow
+            style={styles.cardFrame}
           >
             <View
-              style={styles.iconWrap}
-              accessible={false}
-              importantForAccessibility="no-hide-descendants"
+              style={[styles.card, { borderRadius: cardInnerRadius }]}
+              accessibilityRole="alert"
+              accessibilityLabel={title}
             >
-              <Ionicons name="arrow-down-circle-outline" size={18} color={colors.accent} />
-            </View>
+              <View
+                style={styles.iconWrap}
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+              >
+                <Ionicons name="arrow-down-circle-outline" size={18} color={colors.accent} />
+              </View>
 
-            <AppText
-              variant="bodySmall"
-              style={styles.title}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {title}
-            </AppText>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('appConfig.optionalUpdate.updateButtonAccessibility')}
-              onPress={handleUpdate}
-              hitSlop={6}
-              style={({ pressed }) => [styles.updateButton, pressed && styles.updateButtonPressed]}
-            >
-              <AppText variant="caption" style={styles.updateLabel} numberOfLines={1}>
-                {t('appConfig.optionalUpdate.updateButton')}
+              <AppText
+                variant="bodySmall"
+                style={styles.title}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {title}
               </AppText>
-            </Pressable>
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('appConfig.optionalUpdate.closeButtonAccessibility')}
-              onPress={handleClose}
-              hitSlop={10}
-              style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
-            >
-              <Ionicons name="close" size={16} color={colors.textSecondary} />
-            </Pressable>
-          </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('appConfig.optionalUpdate.updateButtonAccessibility')}
+                onPress={handleUpdate}
+                hitSlop={6}
+                style={({ pressed }) => [styles.updateButton, pressed && styles.updateButtonPressed]}
+              >
+                <AppText variant="caption" style={styles.updateLabel} numberOfLines={1}>
+                  {t('appConfig.optionalUpdate.updateButton')}
+                </AppText>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('appConfig.optionalUpdate.closeButtonAccessibility')}
+                onPress={handleClose}
+                hitSlop={10}
+                style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
+              >
+                <Ionicons name="close" size={16} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+          </DetailDirectionalFrame>
         </View>
       </View>
     </Modal>
@@ -182,6 +193,10 @@ const styles = StyleSheet.create({
   anchor: {
     paddingHorizontal: spacing.md,
   },
+  cardFrame: {
+    alignSelf: 'stretch',
+    width: '100%',
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -190,15 +205,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingLeft: spacing.xs,
     paddingRight: spacing.xs,
-    borderRadius: borderRadius.lg,
     backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
-    shadowColor: '#000',
-    shadowOpacity: 0.28,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 6,
+    overflow: 'hidden',
   },
   iconWrap: {
     width: 32,
