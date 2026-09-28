@@ -219,6 +219,11 @@ const stage1Pt = {
     authNetwork:
       'Não foi possível contatar o servidor. Verifique sua conexão e tente novamente.',
   },
+  sharing: {
+    share: 'Partilhar',
+    viewOnMovieCave: 'Ver no Movie Cave',
+    openInMovieCave: 'Abrir no Movie Cave',
+  },
 };
 
 export const pt = {

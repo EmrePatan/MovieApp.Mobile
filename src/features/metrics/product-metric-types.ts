@@ -17,6 +17,8 @@ export const PRODUCT_METRICS = {
   libraryOpened: 'library_opened',
   libraryFilterSelected: 'library_filter_selected',
   insightsOpened: 'insights_opened',
+  detailShareOpened: 'detail_share_opened',
+  sharedContentLinkOpened: 'shared_content_link_opened',
 } as const;
 
 export type ProductMetricName = (typeof PRODUCT_METRICS)[keyof typeof PRODUCT_METRICS];

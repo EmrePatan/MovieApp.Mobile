@@ -217,6 +217,11 @@ const stage1Tr = {
     authCredentialsValidation: 'E-posta ve şifreni kontrol edip tekrar dene.',
     authNetwork: 'Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.',
   },
+  sharing: {
+    share: 'Paylaş',
+    viewOnMovieCave: "Movie Cave'de incele",
+    openInMovieCave: "Movie Cave'de Aç",
+  },
 };
 
 export const tr = {

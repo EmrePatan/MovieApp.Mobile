@@ -219,6 +219,11 @@ const stage1Fr = {
     authNetwork:
       'Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.',
   },
+  sharing: {
+    share: 'Partager',
+    viewOnMovieCave: 'Voir sur Movie Cave',
+    openInMovieCave: 'Ouvrir dans Movie Cave',
+  },
 };
 
 export const fr = {

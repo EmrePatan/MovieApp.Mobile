@@ -219,6 +219,11 @@ const stage1De = {
     authNetwork:
       'Server nicht erreichbar. Überprüfe deine Verbindung und versuche es erneut.',
   },
+  sharing: {
+    share: 'Teilen',
+    viewOnMovieCave: 'Auf Movie Cave ansehen',
+    openInMovieCave: 'In Movie Cave öffnen',
+  },
 };
 
 export const de = {

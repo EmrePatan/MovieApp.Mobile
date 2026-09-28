@@ -14,6 +14,7 @@ import { shouldShowOriginalTitle } from '@/utils/format';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import type { CatalogShareContentType } from '@/features/sharing/build-catalog-share-url';
 
 export interface DetailHeroProps {
   title: string;
@@ -32,6 +33,12 @@ export interface DetailHeroProps {
     contentType: 'movie' | 'tv';
     contentId: string;
   };
+  share?: {
+    contentType: CatalogShareContentType;
+    contentId: string;
+    releaseDate?: string | null;
+    firstAirDate?: string | null;
+  };
 }
 
 export const DetailHero = memo(function DetailHero({
@@ -48,6 +55,7 @@ export const DetailHero = memo(function DetailHero({
   identityAccessory,
   posterFooter,
   trailer,
+  share,
 }: DetailHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -115,6 +123,17 @@ export const DetailHero = memo(function DetailHero({
         heroHeight={heroHeight}
         topOffset={insets.top + spacing.sm}
         trailer={trailer}
+        share={
+          share
+            ? {
+                contentType: share.contentType,
+                contentId: share.contentId,
+                title,
+                releaseDate: share.releaseDate,
+                firstAirDate: share.firstAirDate,
+              }
+            : undefined
+        }
       />
 
       <View style={styles.content}>

@@ -218,6 +218,11 @@ const stage1En = {
     authNetwork:
       'Unable to reach the server. Check your connection and try again.',
   },
+  sharing: {
+    share: 'Share',
+    viewOnMovieCave: 'View on Movie Cave',
+    openInMovieCave: 'Open in Movie Cave',
+  },
 };
 
 export const en = {

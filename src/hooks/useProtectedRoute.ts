@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { isAuthEntryScreen, isTokenAuthFlowScreen } from '@/auth/auth-route-policy';
 import { isAuthDeepLinkRestorePending } from '@/auth/pending-auth-deep-link';
+import { consumePendingCatalogDeepLinkPath } from '@/auth/pending-catalog-deep-link';
 import { traceAuthDeepLink } from '@/auth/auth-deep-link-trace';
 import { useAuth } from '@/auth/useAuth';
 
@@ -34,6 +35,14 @@ export function useProtectedRoute(): void {
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
       return;
+    }
+
+    if (isAuthenticated) {
+      const pendingCatalogPath = consumePendingCatalogDeepLinkPath();
+      if (pendingCatalogPath) {
+        router.replace(pendingCatalogPath);
+        return;
+      }
     }
 
     if (isAuthenticated && inAuthGroup && isAuthEntryScreen(authScreen)) {

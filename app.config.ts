@@ -10,6 +10,21 @@ const APP_IDENTITY = {
   easProjectId: '87854bea-c475-4d4d-85f2-dfc1ecb52997',
 };
 
+function resolveUniversalLinkHost(): string {
+  const configured = process.env.EXPO_PUBLIC_APP_WEB_URL?.trim();
+  if (configured) {
+    try {
+      return new URL(configured).hostname;
+    } catch {
+      // fall through to default public marketing host
+    }
+  }
+
+  return 'moviecaveapp.com';
+}
+
+const UNIVERSAL_LINK_HOST = resolveUniversalLinkHost();
+
 const config: ExpoConfig = {
   name: 'Movie Cave',
   slug: 'movieapp-mobile',
@@ -33,6 +48,7 @@ const config: ExpoConfig = {
     bundleIdentifier: APP_IDENTITY.iosBundleIdentifier,
     buildNumber: '8',
     usesAppleSignIn: true,
+    associatedDomains: [`applinks:${UNIVERSAL_LINK_HOST}`],
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
@@ -47,6 +63,25 @@ const config: ExpoConfig = {
     versionCode: 1,
     predictiveBackGestureEnabled: false,
     softwareKeyboardLayoutMode: 'resize',
+    intentFilters: [
+      {
+        action: 'VIEW',
+        autoVerify: true,
+        data: [
+          {
+            scheme: 'https',
+            host: UNIVERSAL_LINK_HOST,
+            pathPrefix: '/movie',
+          },
+          {
+            scheme: 'https',
+            host: UNIVERSAL_LINK_HOST,
+            pathPrefix: '/tv',
+          },
+        ],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+    ],
   },
   web: {
     favicon: './assets/favicon.png',

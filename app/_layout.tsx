@@ -11,6 +11,7 @@ import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProv
 import { RegionalPreferenceProvider } from '@/features/regions/RegionalPreferenceProvider';
 import { queryClient } from '@/api/query-client';
 import { useAuthDeepLinkNavigation } from '@/hooks/useAuthDeepLinkNavigation';
+import { useCatalogDeepLinkNavigation } from '@/hooks/useCatalogDeepLinkNavigation';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
@@ -26,6 +27,7 @@ function RootNavigator() {
   const { t } = useTranslation();
   const { isLoading } = useAuth();
   useAuthDeepLinkNavigation();
+  useCatalogDeepLinkNavigation();
   useProtectedRoute();
 
   if (isLoading) {

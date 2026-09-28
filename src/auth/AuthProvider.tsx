@@ -40,9 +40,11 @@ import {
   unregisterKnownPushDeviceAsync,
 } from '@/features/follows/services/push-device-service';
 import { ensureAuthDeepLinkListener } from '@/auth/pending-auth-deep-link';
+import { ensureCatalogDeepLinkListener } from '@/auth/pending-catalog-deep-link';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 
 ensureAuthDeepLinkListener();
+ensureCatalogDeepLinkListener();
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 

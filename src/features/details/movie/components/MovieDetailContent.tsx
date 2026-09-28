@@ -42,6 +42,11 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         genres={movie.genres}
         posterAccessibilityLabel={t('common.posterAccessibility', { title: movie.title })}
         trailer={{ contentType: 'movie', contentId: movie.id }}
+        share={{
+          contentType: 'movie',
+          contentId: movie.id,
+          releaseDate: movie.releaseDate,
+        }}
       />
       <DetailUltraThinRatingRail
         contentType="movie"
