@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Share } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
+import { interaction } from '@/theme/interaction';
 import { buildWatchlistShareMessage } from '../build-watchlist-share-message';
 import {
   getStoredWatchlistShareUrl,
@@ -13,7 +14,7 @@ import {
   useWatchlistShareStatus,
 } from '../hooks/useWatchlistShare';
 
-type WatchlistShareButtonAppearance = 'icon' | 'list';
+type WatchlistShareButtonAppearance = 'icon' | 'row';
 
 interface WatchlistShareButtonProps {
   isAuthenticated: boolean;
@@ -107,19 +108,19 @@ export function WatchlistShareButton({
     return null;
   }
 
-  const shareLabel = t('watchlistShare.shareThisList');
+  const shareAccessibilityLabel = t('watchlistShare.shareThisList');
 
-  if (appearance === 'list') {
+  if (appearance === 'row') {
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={shareLabel}
+        accessibilityLabel={shareAccessibilityLabel}
         onPress={handlePress}
-        style={({ pressed }) => [styles.listAction, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.rowAction, pressed && styles.pressed]}
       >
-        <Ionicons name="share-outline" size={16} color={colors.accent} />
-        <AppText variant="caption" numberOfLines={2} style={styles.listLabel}>
-          {shareLabel}
+        <Ionicons name="share-outline" size={17} color={colors.textSecondary} />
+        <AppText variant="caption" numberOfLines={1} style={styles.rowLabel}>
+          {t('watchlistShare.shareRow')}
         </AppText>
       </Pressable>
     );
@@ -141,20 +142,23 @@ const styles = StyleSheet.create({
   button: {
     padding: spacing.xs,
   },
-  listAction: {
+  rowAction: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
-    maxWidth: 88,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.xs,
+    gap: spacing.xs,
+    minHeight: 32,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceElevated,
   },
-  listLabel: {
-    color: colors.accent,
-    textAlign: 'center',
+  rowLabel: {
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: interaction.pressedOpacity,
   },
 });

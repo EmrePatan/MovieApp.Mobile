@@ -1422,6 +1422,7 @@ export const stage2Tr = {
     messageIntro: "Movie Cave'deki watchlist'ime göz at:",
     shareButton: 'Watchlist paylaş',
     shareThisList: 'Bu listeyi paylaş',
+    shareRow: 'Paylaş',
     manageTitle: 'Watchlist paylaşımı',
     shareLink: 'Linki paylaş',
     createNewLink: 'Yeni link oluştur',

@@ -1413,6 +1413,7 @@ export const stage2Es = {
     messageIntro: 'Mira mi lista en Movie Cave:',
     shareButton: 'Compartir lista',
     shareThisList: 'Compartir esta lista',
+    shareRow: 'Compartir',
     manageTitle: 'Compartir lista',
     shareLink: 'Compartir enlace',
     createNewLink: 'Crear nuevo enlace',

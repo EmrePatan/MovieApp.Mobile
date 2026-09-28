@@ -1413,6 +1413,7 @@ export const stage2It = {
     messageIntro: 'Guarda la mia lista su Movie Cave:',
     shareButton: 'Condividi lista',
     shareThisList: 'Condividi questa lista',
+    shareRow: 'Condividi',
     manageTitle: 'Condivisione lista',
     shareLink: 'Condividi link',
     createNewLink: 'Crea nuovo link',

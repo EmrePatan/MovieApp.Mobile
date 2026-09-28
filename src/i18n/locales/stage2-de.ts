@@ -1413,6 +1413,7 @@ export const stage2De = {
     messageIntro: 'Schau dir meine Watchlist in Movie Cave an:',
     shareButton: 'Watchlist teilen',
     shareThisList: 'Diese Liste teilen',
+    shareRow: 'Teilen',
     manageTitle: 'Watchlist-Freigabe',
     shareLink: 'Link teilen',
     createNewLink: 'Neuen Link erstellen',

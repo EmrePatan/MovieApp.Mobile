@@ -37,20 +37,30 @@ export const LibraryWatchlistCard = memo(function LibraryWatchlistCard({
           <Ionicons name="bookmark" size={20} color={colors.libraryWatchlist} />
         </View>
         <View style={styles.meta}>
-          <AppText variant="body" numberOfLines={2} style={styles.title}>
+          <AppText variant="body" numberOfLines={1} style={styles.title}>
             {watchlist.name}
           </AppText>
           <AppText variant="caption" muted>
             {itemCountLabel}
           </AppText>
         </View>
+      </Pressable>
+      {isAuthenticated ? (
+        <WatchlistShareButton
+          appearance="row"
+          isAuthenticated={isAuthenticated}
+          watchlistId={watchlist.id}
+        />
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${watchlist.name}, ${itemCountLabel}`}
+        onPress={() => onPress(watchlist.id)}
+        hitSlop={8}
+        style={({ pressed }) => [styles.chevronHit, pressed && styles.pressed]}
+      >
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Pressable>
-      <WatchlistShareButton
-        appearance="list"
-        isAuthenticated={isAuthenticated}
-        watchlistId={watchlist.id}
-      />
     </View>
   );
 });
@@ -59,11 +69,10 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
     minHeight: layout.touchTarget,
     paddingVertical: spacing.sm,
-    paddingLeft: spacing.sm + 2,
-    paddingRight: spacing.xs,
+    paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.border,
@@ -74,7 +83,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    minWidth: 0,
     minHeight: layout.touchTarget,
+  },
+  chevronHit: {
+    minWidth: layout.touchTarget,
+    minHeight: layout.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pressed: {
     opacity: 0.85,
