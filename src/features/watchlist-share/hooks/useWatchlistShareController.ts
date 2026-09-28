@@ -37,8 +37,10 @@ export function useWatchlistShareController(
 
     void (async () => {
       try {
-        await waitForShareSheetHost();
-        const url = await obtainShareUrlForNativeSheet();
+        const [, url] = await Promise.all([
+          waitForShareSheetHost(),
+          obtainShareUrlForNativeSheet(),
+        ]);
         await openNativeWatchlistShare(url, t);
       } catch {
         showShareError();
