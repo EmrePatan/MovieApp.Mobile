@@ -16,7 +16,9 @@ export function redirectSystemPath({
 }): string {
   const catalogPath = resolveCatalogDeepLinkRouterPath(path);
   if (catalogPath) {
-    captureCatalogDeepLink(path);
+    if (initial) {
+      captureCatalogDeepLink(path, { initial: true });
+    }
     return catalogPath;
   }
 

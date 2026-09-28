@@ -88,7 +88,7 @@ export default function WatchlistScreen() {
   const displayItems = useStableFetchedItems(
     items,
     itemsQuery.isFetching,
-    selectedWatchlistId ?? 'none',
+    `${selectedWatchlistId ?? 'none'}:${typeFilter}:${sort}`,
   );
 
   const handleSignIn = useCallback(() => {

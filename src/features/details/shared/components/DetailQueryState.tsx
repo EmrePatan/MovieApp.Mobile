@@ -35,7 +35,9 @@ interface DetailQueryStateProps<TData> {
   query: Pick<
     UseQueryResult<TData>,
     'data' | 'error' | 'isLoading' | 'isError' | 'isFetching' | 'refetch'
-  >;
+  > & {
+    isPending?: boolean;
+  };
 
   invalidParamsMessage?: string;
 
@@ -103,7 +105,7 @@ export function DetailQueryState<TData>({
     invalidRequestTitle ?? t('details.queryState.invalidRequestTitle');
   const resolvedInvalidRequestMessage =
     invalidRequestMessage ?? t('details.queryState.invalidRequestMessage');
-  const { data, error, isLoading, isError, isFetching, refetch } = query;
+  const { data, error, isLoading, isError, isFetching, isPending, refetch } = query;
   const navigation = useNavigation();
 
   const scrollRef = useRef<ScrollView>(null);
@@ -150,7 +152,7 @@ export function DetailQueryState<TData>({
 
 
 
-  if ((isLoading || isFetching) && !data) {
+  if (!data && (isLoading || isFetching || isPending)) {
 
     return (
 

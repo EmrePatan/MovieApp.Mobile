@@ -155,7 +155,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
       return;
     }
 
-    const nextItem = items[activeIndex + 1];
+    const nextItem = items[(activeIndex + 1) % items.length];
     if (!nextItem) {
       return;
     }
@@ -289,7 +289,6 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         getItemLayout={getItemLayout}
-        extraData={activeIndex}
         initialScrollIndex={HERO_CAROUSEL_LOOP_HEAD_INDEX}
         onScroll={handleScroll}
         scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}

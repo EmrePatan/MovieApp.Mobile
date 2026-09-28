@@ -13,6 +13,7 @@ import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
+import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
@@ -68,7 +69,11 @@ export function LibraryHubContent() {
     () => flattenLibraryPages(libraryQuery.data?.pages ?? []),
     [libraryQuery.data?.pages],
   );
-  const displayItems = useStableFetchedItems(items, libraryQuery.isFetching, category);
+  const displayItems = useStableFetchedItems(
+    items,
+    libraryQuery.isFetching,
+    `${category}:${effectiveMediaType}`,
+  );
 
   const handleCategoryChange = useCallback((nextCategory: LibraryCategory) => {
     if (nextCategory === category) {
@@ -76,6 +81,7 @@ export function LibraryHubContent() {
     }
 
     setCategory(nextCategory);
+    scrollFlatListToTop(listRef, false);
     trackProductMetric(PRODUCT_METRICS.libraryFilterSelected);
   }, [category]);
 
@@ -85,6 +91,7 @@ export function LibraryHubContent() {
     }
 
     setMediaType(nextMediaType);
+    scrollFlatListToTop(listRef, false);
     trackProductMetric(PRODUCT_METRICS.libraryFilterSelected);
   }, [mediaType]);
 
@@ -243,6 +250,12 @@ export function LibraryHubContent() {
         ) : null
       }
       contentContainerStyle={styles.listContent}
+      refreshControl={
+        <MovieAppRefreshControl
+          refreshing={libraryQuery.isRefetching && !libraryQuery.isFetchingNextPage}
+          onRefresh={handleRefresh}
+        />
+      }
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.4}
       initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}

@@ -83,6 +83,7 @@ jest.mock('expo-router', () => ({
     return undefined;
   }),
   useSegments: jest.fn(() => []),
+  usePathname: jest.fn(() => ''),
   Redirect: 'Redirect',
   Stack: 'Stack',
   Tabs: 'Tabs',

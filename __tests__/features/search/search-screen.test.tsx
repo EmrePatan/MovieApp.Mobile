@@ -154,7 +154,7 @@ describe('SearchScreen', () => {
     render(<SearchScreen />);
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), '   ');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
-    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all', { enabled: false });
     expect(trackProductMetric).not.toHaveBeenCalled();
   });
 
@@ -205,7 +205,7 @@ describe('SearchScreen', () => {
     Keyboard.dismiss();
 
     expect(screen.getByDisplayValue('inte')).toBeTruthy();
-    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all', { enabled: false });
     expect(screen.getByLabelText('Search for Interstellar, Movie')).toBeTruthy();
   });
 
@@ -378,7 +378,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(input, 'interste');
     fireEvent(input, 'submitEditing', { nativeEvent: { text: 'interstellar' } });
 
-    expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all');
+    expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all', { enabled: true });
     expect(screen.getByTestId('search-results-list')).toBeTruthy();
     expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
     expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
@@ -575,7 +575,7 @@ describe('SearchScreen', () => {
     render(<SearchScreen />);
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'leo');
 
-    expect(screen.getByLabelText('Search for Leonardo DiCaprio, Person · Acting')).toBeTruthy();
+    expect(screen.getByLabelText('Search for Leonardo DiCaprio, Person · Actor')).toBeTruthy();
     expect(screen.getByLabelText('Person suggestion')).toBeTruthy();
   });
 
@@ -669,7 +669,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'leo');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Acting'));
+    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Actor'));
     expect(mockOpenPersonDetail).toHaveBeenCalledWith(
       expect.objectContaining({ push: mockPush }),
       6193,
@@ -707,7 +707,21 @@ describe('SearchScreen', () => {
     fireEvent.press(screen.getByLabelText('Clear search'));
 
     expect(screen.getByDisplayValue('')).toBeTruthy();
-    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all', { enabled: false });
+  });
+
+  it('stops the submitted results query while the user edits the query', () => {
+    render(<SearchScreen />);
+    const input = screen.getByLabelText('Search movies, TV shows, and people');
+
+    fireEvent.changeText(input, 'interstellar');
+    fireEvent(input, 'submitEditing');
+    fireEvent.changeText(
+      screen.getByLabelText('Search movies, TV shows, and people'),
+      'inter',
+    );
+
+    expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all', { enabled: false });
   });
 
   it('changes search type filter after submitting', () => {
@@ -717,9 +731,9 @@ describe('SearchScreen', () => {
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
     fireEvent.press(screen.getByLabelText('Filter TV Shows'));
 
-    expect(useSearchResults).toHaveBeenLastCalledWith('star', 'tv');
+    expect(useSearchResults).toHaveBeenLastCalledWith('star', 'tv', { enabled: true });
     fireEvent.press(screen.getByLabelText('Filter People'));
-    expect(useSearchResults).toHaveBeenLastCalledWith('star', 'person');
+    expect(useSearchResults).toHaveBeenLastCalledWith('star', 'person', { enabled: true });
   });
 
   it('focuses the search input when the screen opens', async () => {
@@ -742,7 +756,7 @@ describe('SearchScreen', () => {
     render(<SearchScreen />);
 
     expect(mockReplace).toHaveBeenCalledWith('/search');
-    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all');
+    expect(useSearchResults).toHaveBeenLastCalledWith('', 'all', { enabled: false });
   });
 
   it('returns to Discover when back is pressed with a discover origin', () => {

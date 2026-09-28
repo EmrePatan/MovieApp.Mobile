@@ -39,13 +39,13 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
-    useDetailActionStatusBatch();
+  const { batchFailed } = useDetailActionStatusBatch();
+  // A successful GET /api/library/actions seeds this cache. Fetch the per-title
+  // status endpoint only when that batch failed (or the user is signed out).
   const shouldQueryStatus =
     !favoriteStatusResolved &&
     !favoriteStatusPending &&
-    !deferIndividualStatusQueries &&
-    (batchHydrated || batchFailed || !isAuthenticated);
+    (batchFailed || !isAuthenticated);
   const { data: queriedIsFavorited, isLoading: isStatusLoading } = useFavoriteStatus(
     contentType,
     contentId,

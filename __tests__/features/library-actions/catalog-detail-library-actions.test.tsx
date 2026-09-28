@@ -1,13 +1,22 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, screen, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DetailActionBar } from '@/features/details/shared/components/DetailActionBar';
 import { getLibraryActionStatus } from '@/features/library-actions/api/library-actions-api';
+import { getMovieFavoriteStatus } from '@/features/favorites/api/favorites-api';
 import { favoriteStatusQueryKey } from '@/features/favorites/hooks/favorite-query-keys';
-import { useFavoriteStatus } from '@/features/favorites/hooks/useFavoriteStatus';
 
 jest.mock('@/features/library-actions/api/library-actions-api', () => ({
   getLibraryActionStatus: jest.fn(),
+}));
+
+jest.mock('@/features/favorites/api/favorites-api', () => ({
+  getMovieFavoriteStatus: jest.fn(),
+  getTvFavoriteStatus: jest.fn(),
+  addMovieFavorite: jest.fn(),
+  removeMovieFavorite: jest.fn(),
+  addTvFavorite: jest.fn(),
+  removeTvFavorite: jest.fn(),
 }));
 
 jest.mock('@/hooks/useRequireAuth', () => ({
@@ -61,11 +70,6 @@ jest.mock('@/features/watchlists/components/WatchlistPickerModal', () => ({
   WatchlistPickerModal: () => null,
 }));
 
-function FavoriteProbe() {
-  useFavoriteStatus('movie', '7c9e6679-7425-40de-944b-e07fc1f90ae7');
-  return null;
-}
-
 const movieId = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
 
 describe('DetailActionBar library actions integration', () => {
@@ -93,8 +97,7 @@ describe('DetailActionBar library actions integration', () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <DetailActionBar contentType="movie" contentId={movieId} showWatched />
-        <FavoriteProbe />
+        <DetailActionBar contentType="movie" contentId={movieId} showWatched showReleaseAlert />
       </QueryClientProvider>,
     );
 
@@ -104,8 +107,10 @@ describe('DetailActionBar library actions integration', () => {
 
     await waitFor(() => {
       expect(queryClient.getQueryData(favoriteStatusQueryKey('movie', movieId))).toBe(true);
+      expect(screen.getByLabelText('Remove from favorites')).toBeTruthy();
     });
 
     expect(getLibraryActionStatus).toHaveBeenCalledWith('movie', movieId, expect.any(AbortSignal));
+    expect(getMovieFavoriteStatus).not.toHaveBeenCalled();
   });
 });

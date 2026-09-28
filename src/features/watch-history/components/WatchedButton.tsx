@@ -54,12 +54,8 @@ export function WatchedButton({
 }: WatchedButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
-    useDetailActionStatusBatch();
-  const movieWatchStatusEnabled =
-    target.type === 'movie' &&
-    !deferIndividualStatusQueries &&
-    (batchHydrated || batchFailed);
+  const { batchFailed } = useDetailActionStatusBatch();
+  const movieWatchStatusEnabled = target.type === 'movie' && batchFailed;
   const movieStatus = useMovieWatchStatus(target.type === 'movie' ? target.contentId : '', {
     enabled: movieWatchStatusEnabled,
   });

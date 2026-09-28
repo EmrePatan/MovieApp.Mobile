@@ -23,10 +23,8 @@ export function MovieFollowButton({ movieId }: MovieFollowButtonProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
-    useDetailActionStatusBatch();
-  const followStatusEnabled =
-    !deferIndividualStatusQueries && (batchHydrated || batchFailed);
+  const { batchFailed } = useDetailActionStatusBatch();
+  const followStatusEnabled = batchFailed;
   const { data: status } = useMovieFollowStatus(movieId, {
     enabled: followStatusEnabled,
   });

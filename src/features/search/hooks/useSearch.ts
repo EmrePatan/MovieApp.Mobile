@@ -8,9 +8,10 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../types';
 export function useSearchResults(
   submittedQuery: string,
   typeFilter: SearchTypeFilter,
+  options?: { enabled?: boolean },
 ) {
   const normalizedQuery = normalizeSearchQuery(submittedQuery);
-  const enabled = isValidSearchQuery(normalizedQuery);
+  const enabled = (options?.enabled ?? true) && isValidSearchQuery(normalizedQuery);
 
   return useInfiniteQuery({
     queryKey: searchQueryKey(normalizedQuery, typeFilter, DEFAULT_SEARCH_PAGE_SIZE),

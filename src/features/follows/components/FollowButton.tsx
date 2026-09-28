@@ -27,10 +27,8 @@ interface FollowButtonProps {
 export function FollowButton({ tvShowId }: FollowButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
-    useDetailActionStatusBatch();
-  const followStatusEnabled =
-    !deferIndividualStatusQueries && (batchHydrated || batchFailed);
+  const { batchFailed } = useDetailActionStatusBatch();
+  const followStatusEnabled = batchFailed;
   const { data: status } = useTvShowFollowStatus(tvShowId, {
     enabled: followStatusEnabled,
   });

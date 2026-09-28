@@ -6,6 +6,7 @@ import { getTvShowDetails } from '@/features/details/tv/api/tv-api';
 import { externalRatingsQueryKey } from '@/features/external-ratings/hooks/external-ratings-query-keys';
 import { getExternalRatings } from '@/features/external-ratings/api/external-ratings-api';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
+import { getLibraryActionStatus } from '@/features/library-actions/api/library-actions-api';
 import { getMovieFavoriteStatus, getTvFavoriteStatus } from '@/features/favorites/api/favorites-api';
 import { favoriteStatusQueryKey } from '@/features/favorites/hooks/favorite-query-keys';
 import { getMovieFollowStatus } from '@/features/follows/api/movie-follow-api';
@@ -28,6 +29,10 @@ jest.mock('@/features/details/movie/api/movie-api', () => ({
 
 jest.mock('@/features/details/tv/api/tv-api', () => ({
   getTvShowDetails: jest.fn(),
+}));
+
+jest.mock('@/features/library-actions/api/library-actions-api', () => ({
+  getLibraryActionStatus: jest.fn(),
 }));
 
 jest.mock('@/features/favorites/api/favorites-api', () => ({
@@ -72,6 +77,21 @@ describe('prefetchCatalogDetail', () => {
     (getMovieFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
     (getTvShowFollowStatus as jest.Mock).mockResolvedValue({ isFollowing: false });
     (getExternalRatings as jest.Mock).mockResolvedValue({ ratings: [] });
+    (getLibraryActionStatus as jest.Mock).mockImplementation(
+      async (mediaType: 'movie' | 'tv', contentId: string) => ({
+        mediaType,
+        contentId,
+        isFavorited: mediaType === 'movie',
+        isInWatchlist: false,
+        watchlistIds: [],
+        isFollowing: false,
+        notifyNewSeasons: false,
+        notifyNewEpisodes: false,
+        baselineEstablished: false,
+        isWatched: false,
+        watchedAt: null,
+      }),
+    );
     api.setTokenGetter(() => null);
     api.setAcceptLanguageGetter(() => 'en-US');
   });
@@ -139,8 +159,11 @@ describe('prefetchCatalogDetail', () => {
       queryClient.getQueryData(watchlistMembershipQueryKey('movie', movieId)),
     ).toEqual({});
     expect(queryClient.getQueryData(movieWatchStatusQueryKey(movieId))).toEqual({
+      movieId,
       isWatched: false,
+      watchedAt: null,
     });
+    expect(getMovieFavoriteStatus).not.toHaveBeenCalled();
     expect(queryClient.getQueryData(movieFollowStatusQueryKey(movieId))).toEqual({
       isFollowing: false,
     });
@@ -165,7 +188,11 @@ describe('prefetchCatalogDetail', () => {
     });
     expect(queryClient.getQueryData(tvShowFollowStatusQueryKey(tvShowId))).toEqual({
       isFollowing: false,
+      notifyNewSeasons: false,
+      notifyNewEpisodes: false,
+      baselineEstablished: false,
     });
+    expect(getTvFavoriteStatus).not.toHaveBeenCalled();
   });
 
   it('does not warm action-bar status caches when unauthenticated', async () => {

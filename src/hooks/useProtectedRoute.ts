@@ -1,10 +1,22 @@
 import { useEffect } from 'react';
-import { useRouter, useSegments } from 'expo-router';
+import { usePathname, useRouter, useSegments } from 'expo-router';
 import { isAuthEntryScreen, isTokenAuthFlowScreen } from '@/auth/auth-route-policy';
 import { isAuthDeepLinkRestorePending } from '@/auth/pending-auth-deep-link';
 import { consumePendingCatalogDeepLinkPath } from '@/auth/pending-catalog-deep-link';
 import { traceAuthDeepLink } from '@/auth/auth-deep-link-trace';
 import { useAuth } from '@/auth/useAuth';
+
+function catalogPathsMatch(currentPath: string, pendingPath: string): boolean {
+  const normalize = (value: string) => {
+    try {
+      return decodeURIComponent(value).replace(/\/+$/, '');
+    } catch {
+      return value.replace(/\/+$/, '');
+    }
+  };
+
+  return normalize(currentPath) === normalize(pendingPath);
+}
 
 /**
  * Central route protection for authenticated vs unauthenticated flows.
@@ -12,6 +24,7 @@ import { useAuth } from '@/auth/useAuth';
 export function useProtectedRoute(): void {
   const { isAuthenticated, isLoading } = useAuth();
   const segments = useSegments();
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
@@ -40,7 +53,9 @@ export function useProtectedRoute(): void {
     if (isAuthenticated) {
       const pendingCatalogPath = consumePendingCatalogDeepLinkPath();
       if (pendingCatalogPath) {
-        router.replace(pendingCatalogPath);
+        if (!catalogPathsMatch(pathname, pendingCatalogPath)) {
+          router.replace(pendingCatalogPath);
+        }
         return;
       }
     }
@@ -48,5 +63,5 @@ export function useProtectedRoute(): void {
     if (isAuthenticated && inAuthGroup && isAuthEntryScreen(authScreen)) {
       router.replace('/(tabs)/home');
     }
-  }, [isAuthenticated, isLoading, router, segments]);
+  }, [isAuthenticated, isLoading, pathname, router, segments]);
 }

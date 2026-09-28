@@ -29,12 +29,8 @@ export function AddToWatchlistButton({
 }: AddToWatchlistButtonProps) {
   const { t } = useTranslation();
   const { isAuthenticated, requireAuth } = useRequireAuth();
-  const { deferIndividualStatusQueries, batchHydrated, batchFailed } =
-    useDetailActionStatusBatch();
-  const membershipQueryEnabled =
-    isAuthenticated &&
-    !deferIndividualStatusQueries &&
-    (batchHydrated || batchFailed);
+  const { batchFailed } = useDetailActionStatusBatch();
+  const membershipQueryEnabled = isAuthenticated && batchFailed;
   const { data: membership = {}, isLoading: isMembershipLoading } = useWatchlistMembership(
     contentType,
     contentId,

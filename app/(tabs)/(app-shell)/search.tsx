@@ -100,7 +100,9 @@ export default function SearchScreen() {
   });
   const hasActiveSearch = displayMode === 'results';
 
-  const searchQuery = useSearchResults(submittedQuery, typeFilter);
+  const searchQuery = useSearchResults(submittedQuery, typeFilter, {
+    enabled: hasActiveSearch,
+  });
   const showAutocomplete = displayMode === 'autocomplete';
   const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
   const historyQuery = useSearchHistory({ enabled: !hasActiveSearch });

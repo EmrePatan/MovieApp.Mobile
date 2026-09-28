@@ -24,7 +24,6 @@ import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
-import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 import { performHomeSilentReselectRefresh } from '@/features/navigation/home-tab-reselect';
@@ -318,7 +317,6 @@ export default function HomeScreen() {
       initialNumToRender={layout.verticalList.initialNumToRender}
       maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
       windowSize={layout.verticalList.windowSize}
-      getItemLayout={getHomeSectionRowLayout}
       removeClippedSubviews
     />
   );

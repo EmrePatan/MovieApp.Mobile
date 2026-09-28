@@ -5,7 +5,6 @@ import type { HomeItem, HomeSection as HomeSectionModel } from '../types';
 import { HomeComingUpCard } from './HomeComingUpCard';
 import { HomeSectionHeader } from './HomeSectionHeader';
 import { homeComingUpItemKeyExtractor } from '../utils/home-list-keys';
-import { getHomeRailItemLayout } from '../utils/home-list-layout';
 import { resolveHomeSectionTitle } from '../utils/resolve-home-section-title';
 import { layout } from '@/theme/layout';
 
@@ -49,7 +48,6 @@ export const HomeComingUpSection = memo(function HomeComingUpSection({
         initialNumToRender={layout.horizontalList.initialNumToRender}
         maxToRenderPerBatch={layout.horizontalList.maxToRenderPerBatch}
         windowSize={layout.horizontalList.windowSize}
-        getItemLayout={getHomeRailItemLayout}
         nestedScrollEnabled
       />
     </View>

@@ -19,16 +19,6 @@ export function useCatalogDeepLinkNavigation(): void {
       return;
     }
 
-    const openPending = () => {
-      const pendingPath = consumePendingCatalogDeepLinkPath();
-      if (pendingPath && isAuthenticated) {
-        trackProductMetric(PRODUCT_METRICS.sharedContentLinkOpened);
-        router.push(pendingPath);
-      }
-    };
-
-    openPending();
-
     const subscription = Linking.addEventListener('url', ({ url }) => {
       const path = resolveCatalogDeepLinkRouterPath(url);
       if (!path) {
@@ -40,6 +30,9 @@ export function useCatalogDeepLinkNavigation(): void {
         return;
       }
 
+      // The module-level listener may have queued this same URL. Clear it so
+      // the auth route guard does not navigate a second time.
+      consumePendingCatalogDeepLinkPath();
       trackProductMetric(PRODUCT_METRICS.sharedContentLinkOpened);
       router.push(path);
     });
