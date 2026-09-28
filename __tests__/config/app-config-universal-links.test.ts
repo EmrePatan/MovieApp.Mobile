@@ -13,8 +13,10 @@ describe('production Expo universal link config', () => {
     expect(source).toContain("pathPrefix: '/tv'");
     expect(source).toContain('UNIVERSAL_LINK_HOSTS.flatMap');
 
+    expect(source).toContain('./config/catalog-share-hosts.js');
+
     const hostsSource = readFileSync(
-      path.join(process.cwd(), 'src/config/catalog-share-hosts.ts'),
+      path.join(process.cwd(), 'config/catalog-share-hosts.js'),
       'utf8',
     );
     expect(hostsSource).toContain('EXPO_PUBLIC_APP_WEB_URL');

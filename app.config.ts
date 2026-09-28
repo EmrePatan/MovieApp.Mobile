@@ -1,5 +1,5 @@
 import type { ExpoConfig } from 'expo/config';
-import { getCatalogShareUniversalLinkHosts } from './src/config/catalog-share-hosts';
+import { getCatalogShareUniversalLinkHosts } from './config/catalog-share-hosts.js';
 
 const VERSION = '1.0.0';
 
