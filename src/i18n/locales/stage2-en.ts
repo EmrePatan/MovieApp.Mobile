@@ -1396,6 +1396,7 @@ export const stage2En = {
   watchlistShare: {
     messageIntro: 'Check out my Watchlist on Movie Cave:',
     shareButton: 'Share watchlist',
+    shareThisList: 'Share this list',
     manageTitle: 'Watchlist sharing',
     shareLink: 'Share link',
     createNewLink: 'Create new link',
