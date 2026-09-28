@@ -14,7 +14,8 @@ export const queryClient = new QueryClient({
             error.kind === 'not_found' ||
             error.kind === 'validation' ||
             error.kind === 'conflict' ||
-            error.kind === 'cancelled'
+            error.kind === 'cancelled' ||
+            error.kind === 'rate_limited'
           ) {
             return false;
           }
