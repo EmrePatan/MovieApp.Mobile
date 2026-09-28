@@ -2,6 +2,7 @@ import { resolveAuthDeepLinkRouterPath } from '@/auth/auth-deep-link-route';
 import { traceAuthDeepLink } from '@/auth/auth-deep-link-trace';
 import { resolveCatalogDeepLinkRouterPath } from '@/auth/catalog-deep-link-route';
 import { captureCatalogDeepLink } from '@/auth/pending-catalog-deep-link';
+import { resolveWatchlistShareDeepLinkRouterPath } from '@/auth/watchlist-share-deep-link-route';
 
 /**
  * Expo Router entry point for standalone iOS/Android cold-start URLs.
@@ -14,6 +15,11 @@ export function redirectSystemPath({
   path: string;
   initial: boolean;
 }): string {
+  const watchlistSharePath = resolveWatchlistShareDeepLinkRouterPath(path);
+  if (watchlistSharePath) {
+    return watchlistSharePath;
+  }
+
   const catalogPath = resolveCatalogDeepLinkRouterPath(path);
   if (catalogPath) {
     captureCatalogDeepLink(path);

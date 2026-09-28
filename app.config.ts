@@ -66,6 +66,11 @@ const config: ExpoConfig = {
             host,
             pathPrefix: '/tv',
           },
+          {
+            scheme: 'https',
+            host,
+            pathPrefix: '/watchlist',
+          },
         ]),
         category: ['BROWSABLE', 'DEFAULT'],
       },

@@ -1418,4 +1418,22 @@ export const stage2Tr = {
       },
     },
   },
+  watchlistShare: {
+    messageIntro: "Movie Cave'deki watchlist'ime göz at:",
+    shareButton: 'Watchlist paylaş',
+    manageTitle: 'Watchlist paylaşımı',
+    shareLink: 'Linki paylaş',
+    createNewLink: 'Yeni link oluştur',
+    disableSharing: 'Paylaşımı kapat',
+    errorTitle: 'Paylaşılamadı',
+    errorMessage:
+      'Watchlist paylaşımı zaten açık. Yeni bir paylaşım linki için yeni link oluştur.',
+    publicTitleGeneric: 'Paylaşılan Watchlist',
+    publicTitleNamed: '{{name}} Watchlist',
+    publicItemCount: '{{count}} içerik',
+    publicEmptyTitle: 'Boş watchlist',
+    publicEmptyMessage: 'Bu paylaşılan watchlist henüz boş.',
+    publicRevokedTitle: 'Watchlist kullanılamıyor',
+    publicRevokedMessage: 'Bu watchlist artık paylaşılmıyor.',
+  },
 } as const;

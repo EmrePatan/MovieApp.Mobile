@@ -23,6 +23,7 @@ import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infin
 import { getAvailableSortOptions } from '@/features/library/utils/library-sort';
 import type { CatalogMediaFilter, LibrarySortOption } from '@/features/library/types';
 import { LibraryMediaFilterControl } from '@/features/library/components/LibraryMediaFilterControl';
+import { WatchlistShareButton } from '@/features/watchlist-share/components/WatchlistShareButton';
 import { CreateWatchlistModal } from '@/features/watchlists/components/CreateWatchlistModal';
 import { WatchlistSelector } from '@/features/watchlists/components/WatchlistSelector';
 import {
@@ -200,7 +201,10 @@ export default function WatchlistScreen() {
 
   const listHeader = (
     <View style={styles.header}>
-      <AppText variant="title">{t('common.watchlist')}</AppText>
+      <View style={styles.titleRow}>
+        <AppText variant="title">{t('common.watchlist')}</AppText>
+        <WatchlistShareButton isAuthenticated={isAuthenticated} />
+      </View>
       <WatchlistSelector
         watchlists={watchlists}
         selectedWatchlistId={selectedWatchlistId}
@@ -381,6 +385,12 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: spacing.md,
     gap: spacing.sm,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   controls: {
     gap: spacing.sm,
