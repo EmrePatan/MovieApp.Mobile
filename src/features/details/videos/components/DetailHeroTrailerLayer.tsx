@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   closeOverlay: {
     position: 'absolute',
     right: spacing.md,
-    zIndex: 12,
+    zIndex: 20,
   },
   closeButtonPressed: {
     opacity: interaction.subtlePressedOpacity,

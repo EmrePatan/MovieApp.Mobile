@@ -50,10 +50,22 @@ describe('catalog deep links', () => {
     ).toBe(`/movie/${MOVIE_ID}`);
   });
 
+  it('maps open-subdomain HTTPS movie link to movie detail route', () => {
+    expect(
+      resolveCatalogDeepLinkRouterPath(`https://open.moviecaveapp.com/movie/${MOVIE_ID}`),
+    ).toBe(`/movie/${MOVIE_ID}`);
+  });
+
   it('maps HTTPS tv link to tv detail route', () => {
     expect(resolveCatalogDeepLinkRouterPath(`https://moviecaveapp.com/tv/${TV_ID}`)).toBe(
       `/tv/${TV_ID}`,
     );
+  });
+
+  it('maps open-subdomain HTTPS tv link to tv detail route', () => {
+    expect(
+      resolveCatalogDeepLinkRouterPath(`https://open.moviecaveapp.com/tv/${TV_ID}`),
+    ).toBe(`/tv/${TV_ID}`);
   });
 
   it('maps custom scheme movie link', () => {

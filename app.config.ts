@@ -1,4 +1,5 @@
 import type { ExpoConfig } from 'expo/config';
+import { getCatalogShareUniversalLinkHosts } from './src/config/catalog-share-hosts';
 
 const VERSION = '1.0.0';
 
@@ -10,20 +11,7 @@ const APP_IDENTITY = {
   easProjectId: '87854bea-c475-4d4d-85f2-dfc1ecb52997',
 };
 
-function resolveUniversalLinkHost(): string {
-  const configured = process.env.EXPO_PUBLIC_APP_WEB_URL?.trim();
-  if (configured) {
-    try {
-      return new URL(configured).hostname;
-    } catch {
-      // fall through to default public marketing host
-    }
-  }
-
-  return 'moviecaveapp.com';
-}
-
-const UNIVERSAL_LINK_HOST = resolveUniversalLinkHost();
+const UNIVERSAL_LINK_HOSTS = getCatalogShareUniversalLinkHosts();
 
 const config: ExpoConfig = {
   name: 'Movie Cave',
@@ -48,7 +36,7 @@ const config: ExpoConfig = {
     bundleIdentifier: APP_IDENTITY.iosBundleIdentifier,
     buildNumber: '8',
     usesAppleSignIn: true,
-    associatedDomains: [`applinks:${UNIVERSAL_LINK_HOST}`],
+    associatedDomains: UNIVERSAL_LINK_HOSTS.map((host) => `applinks:${host}`),
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
@@ -67,18 +55,18 @@ const config: ExpoConfig = {
       {
         action: 'VIEW',
         autoVerify: true,
-        data: [
+        data: UNIVERSAL_LINK_HOSTS.flatMap((host) => [
           {
             scheme: 'https',
-            host: UNIVERSAL_LINK_HOST,
+            host,
             pathPrefix: '/movie',
           },
           {
             scheme: 'https',
-            host: UNIVERSAL_LINK_HOST,
+            host,
             pathPrefix: '/tv',
           },
-        ],
+        ]),
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],

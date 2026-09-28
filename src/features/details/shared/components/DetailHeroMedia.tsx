@@ -73,7 +73,7 @@ export function DetailHeroMedia({
         />
       ) : null}
       <DetailBackButton variant="overlay" topOffset={topOffset} />
-      {share ? (
+      {share && !isTrailerPlaying ? (
         <DetailShareButton
           contentType={share.contentType}
           contentId={share.contentId}
