@@ -404,7 +404,7 @@ export default function SignInSecurityScreen() {
 
             accessibilityLabel={emailAccessibilityLabel}
 
-            icon="mail-outline"
+            icon="mail"
 
             title={t('profile.email')}
 
@@ -440,7 +440,7 @@ export default function SignInSecurityScreen() {
 
             accessibilityLabel={passwordAccessibilityLabel}
 
-            icon="lock-closed-outline"
+            icon="lock-closed"
 
             title={t('profile.password')}
 
@@ -512,7 +512,11 @@ export default function SignInSecurityScreen() {
 
                 <View style={styles.providerRow} accessibilityLabel={statusAccessibility}>
 
-                  <SocialAuthProviderIcon provider={provider} size={22} />
+                  <View style={styles.rowIconSlot}>
+
+                    <SocialAuthProviderIcon provider={provider} size={22} />
+
+                  </View>
 
                   <View style={styles.providerText}>
 
@@ -640,9 +644,9 @@ function AccountNavRow({
 
     >
 
-      <View style={styles.iconContainer}>
+      <View style={styles.rowIconSlot}>
 
-        <Ionicons name={icon} size={18} color={colors.accent} />
+        <Ionicons name={icon} size={20} color={colors.textSecondary} />
 
       </View>
 
@@ -740,15 +744,11 @@ const styles = StyleSheet.create({
 
   },
 
-  iconContainer: {
+  rowIconSlot: {
 
-    width: 32,
+    width: 22,
 
-    height: 32,
-
-    borderRadius: borderRadius.sm,
-
-    backgroundColor: colors.accentTint12,
+    height: 22,
 
     alignItems: 'center',
 
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
 
     backgroundColor: colors.border,
 
-    marginLeft: spacing.md + 32 + spacing.sm,
+    marginLeft: spacing.md + 22 + spacing.sm,
 
   },
 
