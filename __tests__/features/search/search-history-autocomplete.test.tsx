@@ -7,14 +7,12 @@ describe('search history and autocomplete UI', () => {
     const { toJSON } = render(
       <SearchHistorySection
         items={[]}
-        isLoading={false}
-        isError={false}
         isClearing={false}
         deletingId={null}
-        onSelect={jest.fn()}
+        onSelectQuery={jest.fn()}
+        onSelectEntity={jest.fn()}
         onDelete={jest.fn()}
         onClearAll={jest.fn()}
-        onRetry={jest.fn()}
       />,
     );
 
@@ -22,30 +20,29 @@ describe('search history and autocomplete UI', () => {
   });
 
   it('selects a history item', () => {
-    const onSelect = jest.fn();
+    const onSelectQuery = jest.fn();
 
     render(
       <SearchHistorySection
         items={[
           {
             id: 'history-1',
+            kind: 'query',
             query: 'interstellar',
-            searchedAt: '2026-09-11T14:30:00Z',
+            accessedAt: Date.now(),
           },
         ]}
-        isLoading={false}
-        isError={false}
         isClearing={false}
         deletingId={null}
-        onSelect={onSelect}
+        onSelectQuery={onSelectQuery}
+        onSelectEntity={jest.fn()}
         onDelete={jest.fn()}
         onClearAll={jest.fn()}
-        onRetry={jest.fn()}
       />,
     );
 
     fireEvent.press(screen.getByLabelText('Search for interstellar'));
-    expect(onSelect).toHaveBeenCalledWith('interstellar');
+    expect(onSelectQuery).toHaveBeenCalledWith('interstellar');
   });
 
   it('deletes a history item', () => {
@@ -56,18 +53,17 @@ describe('search history and autocomplete UI', () => {
         items={[
           {
             id: 'history-1',
+            kind: 'query',
             query: 'breaking bad',
-            searchedAt: '2026-09-11T14:30:00Z',
+            accessedAt: Date.now(),
           },
         ]}
-        isLoading={false}
-        isError={false}
         isClearing={false}
         deletingId={null}
-        onSelect={jest.fn()}
+        onSelectQuery={jest.fn()}
+        onSelectEntity={jest.fn()}
         onDelete={onDelete}
         onClearAll={jest.fn()}
-        onRetry={jest.fn()}
       />,
     );
 

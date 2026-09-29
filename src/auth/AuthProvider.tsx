@@ -33,6 +33,7 @@ import type { AuthContextValue } from './auth-types';
 import type { UserProfile } from '@/models/api/auth';
 import { queryClient } from '@/api/query-client';
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
+import { clearRecentSearchesForUser } from '@/features/search/recent-searches/recent-search-storage';
 import {
   ensurePushDeviceRegisteredAsync,
   forgetKnownPushDeviceAsync,
@@ -273,8 +274,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [endAuthenticatedSession]);
 
   const completeAccountDeletion = useCallback(async () => {
+    const userId = user?.id;
+    if (userId) {
+      try {
+        await clearRecentSearchesForUser(userId);
+      } catch {
+        // Account teardown should continue if local history cleanup fails.
+      }
+    }
+
     await endAuthenticatedSession({ resetPushPermission: true, accountDeleted: true });
-  }, [endAuthenticatedSession]);
+  }, [endAuthenticatedSession, user]);
 
   const updateSession = useCallback(
     async (accessToken: string, refreshToken: string, profile: UserProfile) => {

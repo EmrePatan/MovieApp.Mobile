@@ -336,6 +336,8 @@ export const stage2En = {
       retry: 'Retry',
       searchFor: 'Search for {{query}}',
       deleteItem: 'Delete {{query}} from history',
+      deleteEntity: 'Delete {{title}} from recent searches',
+      openEntity: 'Open {{title}}, {{type}}',
     },
     suggestions: {
       loading: 'Loading suggestions',

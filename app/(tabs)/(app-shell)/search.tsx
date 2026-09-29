@@ -33,11 +33,12 @@ import { SearchScreenHeader } from '@/features/search/components/SearchScreenHea
 import { SearchSuggestionList } from '@/features/search/components/SearchSuggestionList';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
+import { useRecentSearches } from '@/features/search/hooks/useRecentSearches';
 import {
-  useClearSearchHistory,
-  useDeleteSearchHistoryItem,
-  useSearchHistory,
-} from '@/features/search/hooks/useSearchHistory';
+  mapAutocompleteToRecentEntity,
+  mapSearchResultToRecentEntity,
+} from '@/features/search/recent-searches/map-to-recent-entity';
+import type { RecentSearchStoredItem } from '@/features/search/recent-searches/recent-search-types';
 import {
   isPersonSearchResult,
   type SearchAutocompleteItem,
@@ -53,7 +54,6 @@ import { resolveSearchDisplayMode } from '@/features/search/utils/search-display
 import { isValidSearchQuery, normalizeSearchQuery } from '@/features/search/utils/search-query';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
-import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -65,7 +65,6 @@ export default function SearchScreen() {
   const queryClient = useQueryClient();
   const { explore, from } = useLocalSearchParams<{ explore?: string; from?: string }>();
   const searchReturnOrigin = parseSearchReturnOrigin(from);
-  const { isAuthenticated } = useAuth();
   const [inputText, setInputText] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<SearchTypeFilter>('all');
@@ -103,29 +102,40 @@ export default function SearchScreen() {
   const searchQuery = useSearchResults(submittedQuery, typeFilter);
   const showAutocomplete = displayMode === 'autocomplete';
   const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
-  const historyQuery = useSearchHistory({ enabled: !hasActiveSearch });
-  const deleteHistoryItem = useDeleteSearchHistoryItem();
-  const clearHistory = useClearSearchHistory();
+  const {
+    items: recentSearchItems,
+    isLoading: isRecentSearchesLoading,
+    recordQuery: recordRecentQuery,
+    recordEntity: recordRecentEntity,
+    removeItem: removeRecentSearchItem,
+    clearAll: clearRecentSearches,
+  } = useRecentSearches();
 
   const results = useMemo(
     () => flattenDedupedSearchResultPages(searchQuery.data?.pages),
     [searchQuery.data?.pages],
   );
 
-  const historyItems = historyQuery.data?.items ?? [];
   const showExplore = !hasActiveSearch && !showAutocomplete;
 
-  const submitSearch = useCallback((query: string) => {
-    const normalized = normalizeSearchQuery(query);
-    if (!isValidSearchQuery(normalized)) {
-      return;
-    }
+  const submitSearch = useCallback(
+    (query: string, options?: { skipRecentQuery?: boolean }) => {
+      const normalized = normalizeSearchQuery(query);
+      if (!isValidSearchQuery(normalized)) {
+        return;
+      }
 
-    Keyboard.dismiss();
-    setInputText(normalized);
-    setSubmittedQuery(normalized);
-    trackProductMetric(PRODUCT_METRICS.searchSubmitted);
-  }, []);
+      Keyboard.dismiss();
+      setInputText(normalized);
+      setSubmittedQuery(normalized);
+      trackProductMetric(PRODUCT_METRICS.searchSubmitted);
+
+      if (!options?.skipRecentQuery) {
+        void recordRecentQuery(normalized);
+      }
+    },
+    [recordRecentQuery],
+  );
 
   const handleSubmit = useCallback(
     (submittedText?: string) => {
@@ -185,6 +195,11 @@ export default function SearchScreen() {
     (suggestion: SearchAutocompleteItem) => {
       Keyboard.dismiss();
 
+      const recentEntity = mapAutocompleteToRecentEntity(suggestion);
+      if (recentEntity) {
+        void recordRecentEntity(recentEntity);
+      }
+
       if (suggestion.type === 'person' && suggestion.tmdbId) {
         openPersonDetail(router, suggestion.tmdbId);
         return;
@@ -197,19 +212,47 @@ export default function SearchScreen() {
 
       submitSearch(suggestion.title);
     },
-    [queryClient, router, submitSearch],
+    [queryClient, recordRecentEntity, router, submitSearch],
   );
 
-  const handleHistorySelect = useCallback(
+  const handleRecentQuerySelect = useCallback(
     (query: string) => {
-      submitSearch(query);
+      submitSearch(query, { skipRecentQuery: true });
+      void recordRecentQuery(query);
     },
-    [submitSearch],
+    [recordRecentQuery, submitSearch],
+  );
+
+  const handleRecentEntitySelect = useCallback(
+    (item: Extract<RecentSearchStoredItem, { kind: 'entity' }>) => {
+      Keyboard.dismiss();
+      void recordRecentEntity(item);
+
+      if (item.entityType === 'person' && item.tmdbId) {
+        openPersonDetail(router, item.tmdbId);
+        return;
+      }
+
+      if (
+        (item.entityType === 'movie' || item.entityType === 'tv') &&
+        item.catalogId
+      ) {
+        openCatalogDetailFromTab(router, item.catalogId, item.entityType, 'search', {
+          queryClient,
+        });
+      }
+    },
+    [queryClient, recordRecentEntity, router],
   );
 
   const handleResultPress = useCallback(
     (item: SearchResultItem) => {
       Keyboard.dismiss();
+
+      const recentEntity = mapSearchResultToRecentEntity(item);
+      if (recentEntity) {
+        void recordRecentEntity(recentEntity);
+      }
 
       if (isPersonSearchResult(item)) {
         openPersonDetail(router, item.tmdbId);
@@ -218,32 +261,31 @@ export default function SearchScreen() {
 
       openCatalogDetailFromTab(router, item.id, item.type, 'search', { queryClient });
     },
-    [queryClient, router],
+    [queryClient, recordRecentEntity, router],
   );
 
-  const handleDeleteHistoryItem = useCallback(
+  const handleDeleteRecentSearchItem = useCallback(
     (id: string) => {
-      if (deleteHistoryItem.isPending) {
-        return;
-      }
-
       setDeletingHistoryId(id);
-      deleteHistoryItem.mutate(id, {
-        onSettled: () => {
-          setDeletingHistoryId(null);
-        },
+      void removeRecentSearchItem(id).finally(() => {
+        setDeletingHistoryId(null);
       });
     },
-    [deleteHistoryItem],
+    [removeRecentSearchItem],
   );
 
-  const handleClearHistory = useCallback(() => {
-    if (clearHistory.isPending) {
+  const [isClearingRecentSearches, setIsClearingRecentSearches] = useState(false);
+
+  const handleClearRecentSearches = useCallback(() => {
+    if (isClearingRecentSearches) {
       return;
     }
 
-    clearHistory.mutate();
-  }, [clearHistory]);
+    setIsClearingRecentSearches(true);
+    void clearRecentSearches().finally(() => {
+      setIsClearingRecentSearches(false);
+    });
+  }, [clearRecentSearches, isClearingRecentSearches]);
 
   const {
     hasNextPage,
@@ -384,17 +426,15 @@ export default function SearchScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {isAuthenticated && showExplore ? (
+        {showExplore && !isRecentSearchesLoading ? (
           <SearchHistorySection
-            items={historyItems}
-            isLoading={historyQuery.isLoading}
-            isError={historyQuery.isError}
-            isClearing={clearHistory.isPending}
+            items={recentSearchItems}
+            isClearing={isClearingRecentSearches}
             deletingId={deletingHistoryId}
-            onSelect={handleHistorySelect}
-            onDelete={handleDeleteHistoryItem}
-            onClearAll={handleClearHistory}
-            onRetry={() => void historyQuery.refetch()}
+            onSelectQuery={handleRecentQuerySelect}
+            onSelectEntity={handleRecentEntitySelect}
+            onDelete={handleDeleteRecentSearchItem}
+            onClearAll={handleClearRecentSearches}
           />
         ) : null}
         {showExplore ? <SearchExploreLanding /> : null}

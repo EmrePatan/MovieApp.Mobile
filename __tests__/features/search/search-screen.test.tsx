@@ -4,11 +4,7 @@ import SearchScreen from '../../../app/(tabs)/(app-shell)/search';
 import { t } from '../../i18n/i18n-test-utils';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
-import {
-  useClearSearchHistory,
-  useDeleteSearchHistoryItem,
-  useSearchHistory,
-} from '@/features/search/hooks/useSearchHistory';
+import { useRecentSearches } from '@/features/search/hooks/useRecentSearches';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
 
 const mockPush = jest.fn();
@@ -46,11 +42,14 @@ jest.mock('@/features/search/hooks/useAutocomplete', () => ({
   useAutocomplete: jest.fn(),
 }));
 
-jest.mock('@/features/search/hooks/useSearchHistory', () => ({
-  useSearchHistory: jest.fn(),
-  useDeleteSearchHistoryItem: jest.fn(),
-  useClearSearchHistory: jest.fn(),
+jest.mock('@/features/search/hooks/useRecentSearches', () => ({
+  useRecentSearches: jest.fn(),
 }));
+
+const mockRecordQuery = jest.fn().mockResolvedValue([]);
+const mockRecordEntity = jest.fn().mockResolvedValue([]);
+const mockRemoveRecentItem = jest.fn().mockResolvedValue([]);
+const mockClearRecentSearches = jest.fn().mockResolvedValue([]);
 
 jest.mock('@/hooks/useDebouncedValue', () => ({
   useDebouncedValue: (value: string) => value,
@@ -121,21 +120,13 @@ describe('SearchScreen', () => {
       isLoading: false,
     });
 
-    (useSearchHistory as jest.Mock).mockReturnValue({
-      data: { items: [] },
+    (useRecentSearches as jest.Mock).mockReturnValue({
+      items: [],
       isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-    });
-
-    (useDeleteSearchHistoryItem as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
-      isPending: false,
-    });
-
-    (useClearSearchHistory as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
-      isPending: false,
+      recordQuery: mockRecordQuery,
+      recordEntity: mockRecordEntity,
+      removeItem: mockRemoveRecentItem,
+      clearAll: mockClearRecentSearches,
     });
   });
 
@@ -241,19 +232,20 @@ describe('SearchScreen', () => {
   });
 
   it('hides recent searches while autocomplete is active', () => {
-    (useSearchHistory as jest.Mock).mockReturnValue({
-      data: {
-        items: [
-          {
-            id: 'history-1',
-            query: 'inception',
-            searchedAt: '2026-09-11T14:30:00Z',
-          },
-        ],
-      },
+    (useRecentSearches as jest.Mock).mockReturnValue({
+      items: [
+        {
+          id: 'history-1',
+          kind: 'query',
+          query: 'inception',
+          accessedAt: Date.now(),
+        },
+      ],
       isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
+      recordQuery: mockRecordQuery,
+      recordEntity: mockRecordEntity,
+      removeItem: mockRemoveRecentItem,
+      clearAll: mockClearRecentSearches,
     });
 
     (useAutocomplete as jest.Mock).mockReturnValue({
@@ -575,7 +567,7 @@ describe('SearchScreen', () => {
     render(<SearchScreen />);
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'leo');
 
-    expect(screen.getByLabelText('Search for Leonardo DiCaprio, Person · Acting')).toBeTruthy();
+    expect(screen.getByLabelText('Search for Leonardo DiCaprio, Person · Actor')).toBeTruthy();
     expect(screen.getByLabelText('Person suggestion')).toBeTruthy();
   });
 
@@ -669,7 +661,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'leo');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Acting'));
+    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Actor'));
     expect(mockOpenPersonDetail).toHaveBeenCalledWith(
       expect.objectContaining({ push: mockPush }),
       6193,
@@ -678,19 +670,20 @@ describe('SearchScreen', () => {
   });
 
   it('renders recent searches when history exists', () => {
-    (useSearchHistory as jest.Mock).mockReturnValue({
-      data: {
-        items: [
-          {
-            id: 'history-1',
-            query: 'inception',
-            searchedAt: '2026-09-11T14:30:00Z',
-          },
-        ],
-      },
+    (useRecentSearches as jest.Mock).mockReturnValue({
+      items: [
+        {
+          id: 'history-1',
+          kind: 'query',
+          query: 'inception',
+          accessedAt: Date.now(),
+        },
+      ],
       isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
+      recordQuery: mockRecordQuery,
+      recordEntity: mockRecordEntity,
+      removeItem: mockRemoveRecentItem,
+      clearAll: mockClearRecentSearches,
     });
 
     render(<SearchScreen />);

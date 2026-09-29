@@ -338,6 +338,8 @@ export const stage2Pt = {
       retry: 'Tentar novamente',
       searchFor: 'Buscar {{query}}',
       deleteItem: 'Excluir {{query}} do histórico',
+      deleteEntity: 'Remover {{title}} das pesquisas recentes',
+      openEntity: 'Abrir {{title}}, {{type}}',
     },
     suggestions: {
       loading: 'Carregando sugestões',

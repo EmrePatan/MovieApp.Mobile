@@ -338,6 +338,8 @@ export const stage2Fr = {
       retry: 'Réessayer',
       searchFor: 'Rechercher {{query}}',
       deleteItem: 'Supprimer {{query}} de l\'historique',
+      deleteEntity: 'Supprimer {{title}} des recherches récentes',
+      openEntity: 'Ouvrir {{title}}, {{type}}',
     },
     suggestions: {
       loading: 'Chargement des suggestions',

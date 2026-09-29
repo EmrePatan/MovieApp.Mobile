@@ -338,6 +338,8 @@ export const stage2De = {
       retry: 'Erneut versuchen',
       searchFor: 'Nach {{query}} suchen',
       deleteItem: '{{query}} aus Verlauf löschen',
+      deleteEntity: '{{title}} aus letzten Suchen entfernen',
+      openEntity: '{{title}} öffnen, {{type}}',
     },
     suggestions: {
       loading: 'Vorschläge werden geladen',

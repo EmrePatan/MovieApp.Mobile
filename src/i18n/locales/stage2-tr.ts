@@ -338,6 +338,8 @@ export const stage2Tr = {
       retry: 'Tekrar Dene',
       searchFor: '{{query}} ara',
       deleteItem: '{{query}} geçmişten sil',
+      deleteEntity: '{{title}} son aramalardan sil',
+      openEntity: '{{title}} aç, {{type}}',
     },
     suggestions: {
       loading: 'Öneriler yükleniyor',

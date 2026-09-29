@@ -2,69 +2,50 @@ import { memo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
-import type { SearchHistoryItem } from '../types';
+import { PosterImage } from '@/components/common/PosterImage';
+import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import type { RecentSearchStoredItem } from '../recent-searches/recent-search-types';
+import { formatContentType } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
+const ENTITY_THUMB_WIDTH = 36;
+const ENTITY_THUMB_HEIGHT = 54;
+const PERSON_THUMB_SIZE = 36;
+
 interface SearchHistorySectionProps {
-  items: SearchHistoryItem[];
-  isLoading: boolean;
-  isError: boolean;
+  items: RecentSearchStoredItem[];
   isClearing: boolean;
   deletingId: string | null;
-  onSelect: (query: string) => void;
+  onSelectQuery: (query: string) => void;
+  onSelectEntity: (item: Extract<RecentSearchStoredItem, { kind: 'entity' }>) => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;
-  onRetry: () => void;
 }
 
-function formatSearchedAt(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
+function formatEntityMetadata(
+  item: Extract<RecentSearchStoredItem, { kind: 'entity' }>,
+): string {
+  if (item.entityType === 'person') {
+    return formatContentType('person');
   }
 
-  return date.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatContentType(item.entityType);
 }
 
 export const SearchHistorySection = memo(function SearchHistorySection({
   items,
-  isLoading,
-  isError,
   isClearing,
   deletingId,
-  onSelect,
+  onSelectQuery,
+  onSelectEntity,
   onDelete,
   onClearAll,
-  onRetry,
 }: SearchHistorySectionProps) {
   const { t } = useTranslation();
-
-  if (isLoading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator color={colors.accent} size="small" />
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <View style={styles.section}>
-        <AppText variant="bodySmall" muted>
-          {t('search.history.loadError')}
-        </AppText>
-        <AppButton title={t('search.history.retry')} variant="ghost" onPress={onRetry} />
-      </View>
-    );
-  }
 
   if (items.length === 0) {
     return null;
@@ -93,25 +74,77 @@ export const SearchHistorySection = memo(function SearchHistorySection({
             key={item.id}
             style={[styles.row, index < items.length - 1 && styles.rowBorder]}
           >
+            {item.kind === 'query' ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('search.history.searchFor', { query: item.query })}
+                onPress={() => onSelectQuery(item.query)}
+                style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="time-outline" size={16} color={colors.textMuted} />
+                <View style={styles.historyMeta}>
+                  <AppText variant="bodySmall" numberOfLines={1}>
+                    {item.query}
+                  </AppText>
+                </View>
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('search.history.openEntity', {
+                  title: item.title,
+                  type: formatEntityMetadata(item),
+                })}
+                onPress={() => onSelectEntity(item)}
+                style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}
+              >
+                {item.entityType === 'person' ? (
+                  item.posterUrl ? (
+                    <CatalogImage
+                      path={item.posterUrl}
+                      width={PERSON_THUMB_SIZE}
+                      height={PERSON_THUMB_SIZE}
+                      rounded
+                      accessibilityLabel={t('details.sections.personPortrait', { name: item.title })}
+                    />
+                  ) : (
+                    <View style={styles.personLeadingIcon}>
+                      <Ionicons name="person-outline" size={18} color={colors.textMuted} />
+                    </View>
+                  )
+                ) : item.posterUrl ? (
+                  <PosterImage
+                    uri={item.posterUrl}
+                    width={ENTITY_THUMB_WIDTH}
+                    height={ENTITY_THUMB_HEIGHT}
+                    accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
+                  />
+                ) : (
+                  <View style={styles.leadingIcon}>
+                    <Ionicons
+                      name={item.entityType === 'tv' ? 'tv-outline' : 'film-outline'}
+                      size={18}
+                      color={colors.textMuted}
+                    />
+                  </View>
+                )}
+                <View style={styles.historyMeta}>
+                  <AppText variant="bodySmall" numberOfLines={1}>
+                    {item.title}
+                  </AppText>
+                  <AppText variant="caption" muted numberOfLines={1}>
+                    {formatEntityMetadata(item)}
+                  </AppText>
+                </View>
+              </Pressable>
+            )}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t('search.history.searchFor', { query: item.query })}
-              onPress={() => onSelect(item.query)}
-              style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}
-            >
-              <Ionicons name="time-outline" size={16} color={colors.textMuted} />
-              <View style={styles.historyMeta}>
-                <AppText variant="bodySmall" numberOfLines={1}>
-                  {item.query}
-                </AppText>
-                <AppText variant="caption" muted>
-                  {formatSearchedAt(item.searchedAt)}
-                </AppText>
-              </View>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('search.history.deleteItem', { query: item.query })}
+              accessibilityLabel={
+                item.kind === 'query'
+                  ? t('search.history.deleteItem', { query: item.query })
+                  : t('search.history.deleteEntity', { title: item.title })
+              }
               disabled={deletingId === item.id}
               onPress={() => onDelete(item.id)}
               hitSlop={8}
@@ -175,6 +208,22 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  leadingIcon: {
+    width: ENTITY_THUMB_WIDTH,
+    height: ENTITY_THUMB_HEIGHT,
+    borderRadius: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceElevated,
+  },
+  personLeadingIcon: {
+    width: PERSON_THUMB_SIZE,
+    height: PERSON_THUMB_SIZE,
+    borderRadius: PERSON_THUMB_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceElevated,
+  },
   deleteButton: {
     minWidth: 40,
     minHeight: 48,
@@ -184,9 +233,5 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: interaction.subtlePressedOpacity,
-  },
-  loading: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
   },
 });
