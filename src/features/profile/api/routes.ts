@@ -14,6 +14,18 @@ export function buildChangePasswordPath(): string {
   return '/api/users/me/password';
 }
 
+export function buildCreatePasswordPath(): string {
+  return '/api/users/me/password';
+}
+
+export function buildLinkProviderPath(): string {
+  return '/api/users/me/linked-providers';
+}
+
+export function buildUnlinkProviderPath(provider: string): string {
+  return `/api/users/me/linked-providers/${provider}`;
+}
+
 export function buildProfileStatisticsPath(timeZone?: string): string {
   if (!timeZone) {
     return '/api/users/me/statistics';

@@ -12,6 +12,7 @@ import type {
   ChangeEmailRequest,
   ChangePasswordRequest,
   DeleteAccountRequest,
+  MessageResponse,
   UpdateProfileRequest,
   UserProfileAuthResponse,
   UserProfileResponse,
@@ -28,10 +29,8 @@ export async function updateProfile(
   return api.put<UserProfileResponse>(buildUpdateProfilePath(), payload);
 }
 
-export async function changeEmail(
-  payload: ChangeEmailRequest,
-): Promise<UserProfileAuthResponse> {
-  return api.put<UserProfileAuthResponse>(buildChangeEmailPath(), payload);
+export async function changeEmail(payload: ChangeEmailRequest): Promise<MessageResponse> {
+  return api.put<MessageResponse>(buildChangeEmailPath(), payload);
 }
 
 export async function changePassword(

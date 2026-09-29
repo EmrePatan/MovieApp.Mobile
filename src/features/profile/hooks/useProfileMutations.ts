@@ -1,6 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
+  createPassword,
+  linkExternalLogin,
+  unlinkExternalLogin,
+} from '../api/credential-api';
+import {
   changeEmail,
   changePassword,
   deleteAccount,
@@ -10,7 +15,10 @@ import { currentProfileQueryKey, profileStatisticsQueryKey } from './profile-que
 import type {
   ChangeEmailRequest,
   ChangePasswordRequest,
+  CreatePasswordRequest,
   DeleteAccountRequest,
+  LinkExternalLoginRequest,
+  UnlinkExternalLoginRequest,
   UpdateProfileRequest,
 } from '../types';
 
@@ -35,10 +43,49 @@ export function useUpdateProfileMutation() {
 
 export function useChangeEmailMutation() {
   const queryClient = useQueryClient();
-  const { updateSession } = useAuth();
 
   return useMutation({
     mutationFn: (payload: ChangeEmailRequest) => changeEmail(payload),
+    onSuccess: async () => {
+      invalidateProfileQueries(queryClient);
+    },
+  });
+}
+
+export function useLinkExternalLoginMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: LinkExternalLoginRequest) => linkExternalLogin(payload),
+    onSuccess: async (profile) => {
+      queryClient.setQueryData(currentProfileQueryKey(), profile);
+      invalidateProfileQueries(queryClient);
+    },
+  });
+}
+
+export function useUnlinkExternalLoginMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      provider,
+      ...payload
+    }: UnlinkExternalLoginRequest & { provider: string }) =>
+      unlinkExternalLogin(provider, payload),
+    onSuccess: async (profile) => {
+      queryClient.setQueryData(currentProfileQueryKey(), profile);
+      invalidateProfileQueries(queryClient);
+    },
+  });
+}
+
+export function useCreatePasswordMutation() {
+  const queryClient = useQueryClient();
+  const { updateSession } = useAuth();
+
+  return useMutation({
+    mutationFn: (payload: CreatePasswordRequest) => createPassword(payload),
     onSuccess: async (response) => {
       queryClient.setQueryData(currentProfileQueryKey(), response.user);
       await updateSession(response.accessToken, response.refreshToken, response.user);

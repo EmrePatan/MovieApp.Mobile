@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SocialAuthProviderIcon } from './SocialAuthProviderIcon';
 import { useAuth } from '@/auth/useAuth';
-import { getUserMessageForAuthError, isApiError } from '@/api/errors';
+import { getDisplayMessageForApiError, isApiError } from '@/api/errors';
 import {
   SocialAuthCancelledError,
   SocialAuthConfigurationError,
@@ -74,9 +74,7 @@ export function SocialAuthSection({ onError }: SocialAuthSectionProps) {
         }
 
         if (isApiError(error)) {
-          onError?.(
-            error.detail ?? getUserMessageForAuthError(error.kind, 'social'),
-          );
+          onError?.(getDisplayMessageForApiError(error, 'social'));
           return;
         }
 

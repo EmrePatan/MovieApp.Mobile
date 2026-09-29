@@ -113,6 +113,15 @@ export function getProblemCode(responseBody: unknown): string | null {
 
 export const EMAIL_NOT_VERIFIED_CODE = 'email_not_verified';
 
+export const ACCOUNT_EXISTS_DIFFERENT_SIGN_IN_METHOD_CODE =
+  'ACCOUNT_EXISTS_DIFFERENT_SIGN_IN_METHOD';
+
+export const FINAL_SIGN_IN_METHOD_CANNOT_BE_REMOVED_CODE =
+  'FINAL_SIGN_IN_METHOD_CANNOT_BE_REMOVED';
+
+export const PASSWORD_LOGIN_REQUIRES_VERIFIED_EMAIL_CODE =
+  'PASSWORD_LOGIN_REQUIRES_VERIFIED_EMAIL';
+
 export function isEmailNotVerifiedError(error: unknown): boolean {
   return isApiError(error) && getProblemCode(error.responseBody) === EMAIL_NOT_VERIFIED_CODE;
 }
@@ -138,10 +147,6 @@ export function getUserMessageForAuthError(
 
   if (kind === 'conflict' && context === 'register') {
     return i18n.t('errors.authRegisterConflict');
-  }
-
-  if (kind === 'conflict' && context === 'social') {
-    return i18n.t('errors.authSocialConflict');
   }
 
   if (kind === 'unauthorized' && context === 'social') {
@@ -181,6 +186,53 @@ export function getUserMessageForAuthError(
 
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
+}
+
+export function getLocalizedMessageForApiErrorCode(
+  code: string | null | undefined,
+  context: 'social' | 'profile' = 'profile',
+): string | null {
+  if (!code) {
+    return null;
+  }
+
+  if (code === ACCOUNT_EXISTS_DIFFERENT_SIGN_IN_METHOD_CODE) {
+    return i18n.t('errors.authAccountExistsDifferentSignInMethod');
+  }
+
+  if (code === FINAL_SIGN_IN_METHOD_CANNOT_BE_REMOVED_CODE) {
+    return i18n.t('profile.cannotRemoveLastSignInMethod');
+  }
+
+  if (code === PASSWORD_LOGIN_REQUIRES_VERIFIED_EMAIL_CODE) {
+    return i18n.t('profile.createPasswordRequiresVerifiedEmail');
+  }
+
+  if (context === 'social' && code === 'CONFLICT') {
+    return i18n.t('errors.authSocialConflict');
+  }
+
+  return null;
+}
+
+export function getDisplayMessageForApiError(
+  error: ApiError,
+  context: 'login' | 'register' | 'forgot-password' | 'reset-password' | 'verify-email' | 'resend-verification' | 'social' | 'profile',
+): string {
+  const codeMessage = getLocalizedMessageForApiErrorCode(getProblemCode(error.responseBody), context);
+  if (codeMessage) {
+    return codeMessage;
+  }
+
+  if (context === 'social') {
+    return getUserMessageForAuthError(error.kind, 'social');
+  }
+
+  if (context === 'profile') {
+    return error.userMessage;
+  }
+
+  return getUserMessageForAuthError(error.kind, context);
 }
 
 export function getErrorMessage(error: unknown, fallback = i18n.t('errors.generic')): string {

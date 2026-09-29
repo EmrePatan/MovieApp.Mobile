@@ -94,12 +94,12 @@ describe('SocialAuthSection', () => {
     expect(onError.mock.calls.some(([message]) => message !== null)).toBe(false);
   });
 
-  it('reports backend failures', async () => {
+  it('reports localized fallback for unauthorized social failures without known code', async () => {
     const { ApiError } = require('@/api/errors');
     mockSignInWithSocial.mockRejectedValueOnce(
       new ApiError({
         kind: 'unauthorized',
-        detail: 'Google identity token is invalid.',
+        title: 'Authentication failed.',
       }),
     );
     const onError = jest.fn();
@@ -108,7 +108,28 @@ describe('SocialAuthSection', () => {
     fireEvent.press(screen.getByLabelText('Continue with Google'));
 
     await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith('Google identity token is invalid.');
+      expect(onError).toHaveBeenCalledWith('Social sign-in failed. Please try again.');
+    });
+  });
+
+  it('maps account collision code to localized product copy', async () => {
+    const { ApiError, ACCOUNT_EXISTS_DIFFERENT_SIGN_IN_METHOD_CODE } = require('@/api/errors');
+    mockSignInWithSocial.mockRejectedValueOnce(
+      new ApiError({
+        kind: 'unauthorized',
+        detail: 'Social authentication failed.',
+        responseBody: { code: ACCOUNT_EXISTS_DIFFERENT_SIGN_IN_METHOD_CODE },
+      }),
+    );
+    const onError = jest.fn();
+
+    render(<SocialAuthSection onError={onError} />);
+    fireEvent.press(screen.getByLabelText('Continue with Google'));
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith(
+        'An account with this email already exists. Sign in using your existing method, then link this account from Sign-in & Security.',
+      );
     });
   });
 
@@ -130,26 +151,4 @@ describe('SocialAuthSection', () => {
     });
   });
 
-  it('shows the backend conflict message for existing password accounts', async () => {
-    const { ApiError } = require('@/api/errors');
-    mockSignInWithSocial.mockRejectedValueOnce(
-      new ApiError({
-        kind: 'conflict',
-        status: 409,
-        title: 'Social authentication conflict.',
-        detail:
-          'An account with this email already exists. Sign in with your password to continue.',
-      }),
-    );
-    const onError = jest.fn();
-
-    render(<SocialAuthSection onError={onError} />);
-    fireEvent.press(screen.getByLabelText('Continue with Google'));
-
-    await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        'An account with this email already exists. Sign in with your password to continue.',
-      );
-    });
-  });
 });

@@ -61,7 +61,9 @@ describe('profile api client', () => {
   });
 
   it('changes email and password', async () => {
-    (api.put as jest.Mock).mockResolvedValue({ accessToken: 'token', user: {} });
+    (api.put as jest.Mock)
+      .mockResolvedValueOnce({ message: 'ok' })
+      .mockResolvedValueOnce({ accessToken: 'token', user: {} });
     await changeEmail({ email: 'new@example.com', currentPassword: 'password' });
     await changePassword({ currentPassword: 'password', newPassword: 'newpassword' });
     expect(api.put).toHaveBeenCalledWith('/api/users/me/email', {

@@ -112,12 +112,9 @@ export default function ProfileScreen() {
             onPress={() => router.push('/profile/edit')}
           />
           <ProfileMenuRow
-            label={t('profile.changeEmail')}
-            onPress={() => router.push('/profile/email')}
-          />
-          <ProfileMenuRow
-            label={t('profile.changePassword')}
-            onPress={() => router.push('/profile/password')}
+            label={t('profile.signInSecurityTitle')}
+            subtitle={t('profile.signInSecurityMenuSubtitle')}
+            onPress={() => router.push('/profile/security')}
           />
           <ProfileMenuRow
             label={t('profile.deleteAccount')}

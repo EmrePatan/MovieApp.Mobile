@@ -170,6 +170,11 @@ const stage1Fr = {
     aboutDescription:
       'Votre compagnon cinéma sélectionné pour découvrir des films, suivre des séries et créer vos listes de visionnage.',
     aboutVersion: 'Version {{version}}',
+    signInSecurityTitle: 'Connexion et sécurité',
+    signInSecurityMenuSubtitle: 'E-mail, mot de passe et comptes connectés',
+    cannotRemoveLastSignInMethod: 'Conservez au moins une méthode de connexion sur votre compte.',
+    createPasswordRequiresVerifiedEmail:
+      'Ajoutez et vérifiez une adresse e-mail avant de créer un mot de passe.',
   },
   validation: {
     emailRequired: 'L’e-mail est requis.',
@@ -209,6 +214,8 @@ const stage1Fr = {
     authRegisterConflict: 'Un compte avec cet e-mail existe déjà.',
     authSocialConflict:
       'Un compte avec cet e-mail existe déjà. Connectez-vous avec votre mot de passe pour continuer.',
+    authAccountExistsDifferentSignInMethod:
+      'Un compte avec cet e-mail existe déjà. Connectez-vous avec votre méthode habituelle, puis associez ce compte depuis Connexion et sécurité.',
     authSocialFailed: 'Échec de la connexion sociale. Veuillez réessayer.',
     authRateLimited: 'Trop de tentatives. Veuillez réessayer plus tard.',
     authResetTokenInvalid: 'Jeton de réinitialisation invalide ou expiré.',

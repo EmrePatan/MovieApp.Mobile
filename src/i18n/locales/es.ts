@@ -170,6 +170,11 @@ const stage1Es = {
     aboutDescription:
       'Tu compañero de cine seleccionado para descubrir películas, seguir series y crear listas de seguimiento.',
     aboutVersion: 'Versión {{version}}',
+    signInSecurityTitle: 'Inicio de sesión y seguridad',
+    signInSecurityMenuSubtitle: 'Correo, contraseña y cuentas conectadas',
+    cannotRemoveLastSignInMethod: 'Mantén al menos un método de inicio de sesión en tu cuenta.',
+    createPasswordRequiresVerifiedEmail:
+      'Añade y verifica un correo antes de crear una contraseña.',
   },
   validation: {
     emailRequired: 'El correo es obligatorio.',
@@ -209,6 +214,8 @@ const stage1Es = {
     authRegisterConflict: 'Ya existe una cuenta con este correo.',
     authSocialConflict:
       'Ya existe una cuenta con este correo. Inicia sesión con tu contraseña para continuar.',
+    authAccountExistsDifferentSignInMethod:
+      'Ya existe una cuenta con este correo. Inicia sesión con tu método habitual y luego vincula esta cuenta desde Inicio de sesión y seguridad.',
     authSocialFailed: 'El inicio de sesión social falló. Inténtalo de nuevo.',
     authRateLimited: 'Demasiados intentos. Inténtalo más tarde.',
     authResetTokenInvalid: 'Token de restablecimiento no válido o caducado.',

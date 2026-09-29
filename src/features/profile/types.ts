@@ -16,7 +16,33 @@ export interface UpdateProfileRequest {
 
 export interface ChangeEmailRequest {
   email: string;
-  currentPassword: string;
+  currentPassword?: string;
+  reauthProvider?: SocialAuthProvider;
+  reauthIdentityToken?: string;
+}
+
+export interface LinkExternalLoginRequest {
+  currentPassword?: string;
+  reauthProvider?: SocialAuthProvider;
+  reauthIdentityToken?: string;
+  targetProvider: SocialAuthProvider;
+  targetIdentityToken: string;
+}
+
+export interface UnlinkExternalLoginRequest {
+  currentPassword?: string;
+  reauthProvider?: SocialAuthProvider;
+  reauthIdentityToken?: string;
+}
+
+export interface CreatePasswordRequest {
+  newPassword: string;
+  provider: SocialAuthProvider;
+  identityToken: string;
+}
+
+export interface MessageResponse {
+  message: string;
 }
 
 export interface ChangePasswordRequest {

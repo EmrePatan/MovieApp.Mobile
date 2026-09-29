@@ -170,6 +170,11 @@ const stage1Pt = {
     aboutDescription:
       'Seu companheiro de cinema selecionado para descobrir filmes, acompanhar séries e criar suas listas de assistir.',
     aboutVersion: 'Versão {{version}}',
+    signInSecurityTitle: 'Entrada e segurança',
+    signInSecurityMenuSubtitle: 'E-mail, senha e contas conectadas',
+    cannotRemoveLastSignInMethod: 'Mantenha pelo menos um método de entrada na sua conta.',
+    createPasswordRequiresVerifiedEmail:
+      'Adicione e verifique um e-mail antes de criar uma senha.',
   },
   validation: {
     emailRequired: 'O e-mail é obrigatório.',
@@ -209,6 +214,8 @@ const stage1Pt = {
     authRegisterConflict: 'Já existe uma conta com este e-mail.',
     authSocialConflict:
       'Já existe uma conta com este e-mail. Entre com sua senha para continuar.',
+    authAccountExistsDifferentSignInMethod:
+      'Já existe uma conta com este e-mail. Entre com seu método habitual e depois vincule esta conta em Entrada e segurança.',
     authSocialFailed: 'Falha no login social. Tente novamente.',
     authRateLimited: 'Muitas tentativas. Tente novamente mais tarde.',
     authResetTokenInvalid: 'Token de redefinição inválido ou expirado.',

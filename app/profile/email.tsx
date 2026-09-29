@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { isApiError } from '@/api/errors';
+import {
+  getDisplayMessageForApiError,
+  isApiError,
+} from '@/api/errors';
+import {
+  requestSocialIdentityToken,
+  SocialAuthCancelledError,
+} from '@/auth/social-auth-service';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -24,43 +31,70 @@ export default function ChangeEmailScreen() {
   const { t } = useTranslation();
   const profileQuery = useCurrentProfile();
   const changeEmail = useChangeEmailMutation();
+  const profile = profileQuery.data;
   const [email, setEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<ChangeEmailFormErrors>({});
   const [feedback, setFeedback] = useState<{ message: string; tone: 'success' | 'error' } | null>(
     null,
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    const errors = validateChangeEmail(email, currentPassword);
+  const handleSubmit = async () => {
+    const errors = validateChangeEmail(
+      email,
+      profile?.hasPassword ? currentPassword : 'social-reauth',
+    );
+    if (!profile?.hasPassword) {
+      delete errors.currentPassword;
+    }
     setFieldErrors(errors);
 
-    if (hasProfileValidationErrors(errors)) {
+    if (hasProfileValidationErrors(errors) || !profile) {
       return;
     }
 
-    changeEmail.mutate(
-      { email: email.trim(), currentPassword },
-      {
-        onSuccess: (_, variables) => {
-          setCurrentPassword('');
-          router.push({
-            pathname: '/(auth)/check-email',
-            params: { email: variables.email.trim() },
-          });
-        },
-        onError: (error) => {
-          setFeedback({
-            message: isApiError(error)
-              ? error.kind === 'conflict'
-                ? t('profile.emailInUse')
-                : error.userMessage
-              : t('profile.emailChangeFailed'),
-            tone: 'error',
-          });
-        },
-      },
-    );
+    setIsSubmitting(true);
+    setFeedback(null);
+
+    try {
+      let payload = { email: email.trim(), currentPassword: profile.hasPassword ? currentPassword : undefined };
+
+      if (!profile.hasPassword) {
+        const reauthProvider = profile.linkedProviders[0];
+        if (!reauthProvider) {
+          setFeedback({ message: t('profile.emailChangeReauthRequired'), tone: 'error' });
+          return;
+        }
+        const identityToken = await requestSocialIdentityToken(reauthProvider);
+        payload = {
+          email: email.trim(),
+          reauthProvider,
+          reauthIdentityToken: identityToken,
+        };
+      }
+
+      await changeEmail.mutateAsync(payload);
+      setCurrentPassword('');
+      router.push({
+        pathname: '/(auth)/check-email',
+        params: { email: email.trim() },
+      });
+    } catch (error) {
+      if (error instanceof SocialAuthCancelledError) {
+        return;
+      }
+      setFeedback({
+        message: isApiError(error)
+          ? error.kind === 'conflict'
+            ? t('profile.emailInUse')
+            : getDisplayMessageForApiError(error, 'profile')
+          : t('profile.emailChangeFailed'),
+        tone: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -72,7 +106,7 @@ export default function ChangeEmailScreen() {
         <DetailBackButton />
         <AppText variant="title">{t('profile.changeEmailTitle')}</AppText>
         <AppText variant="bodySmall" muted>
-          {t('profile.currentEmail', { email: profileQuery.data?.email ?? '—' })}
+          {t('profile.currentEmail', { email: profile?.email ?? '—' })}
         </AppText>
         <AppText variant="bodySmall" muted>
           {t('profile.changeEmailVerificationHint')}
@@ -95,19 +129,23 @@ export default function ChangeEmailScreen() {
             keyboardType="email-address"
             textContentType="emailAddress"
           />
-          <PasswordInput
-            label={t('profile.currentPassword')}
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-            error={fieldErrors.currentPassword}
-            autoComplete="password"
-            textContentType="password"
-          />
+          {profile?.hasPassword ? (
+            <PasswordInput
+              label={t('profile.currentPassword')}
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+              error={fieldErrors.currentPassword}
+              autoComplete="password"
+              textContentType="password"
+            />
+          ) : (
+            <AppText variant="bodySmall" muted>{t('profile.emailChangeSocialReauthHint')}</AppText>
+          )}
           <AppButton
             title={t('profile.updateEmail')}
-            loading={changeEmail.isPending}
-            disabled={changeEmail.isPending}
-            onPress={handleSubmit}
+            loading={changeEmail.isPending || isSubmitting}
+            disabled={changeEmail.isPending || isSubmitting}
+            onPress={() => void handleSubmit()}
           />
         </View>
       </KeyboardAvoidingView>
