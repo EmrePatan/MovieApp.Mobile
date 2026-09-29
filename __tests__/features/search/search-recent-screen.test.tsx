@@ -123,17 +123,36 @@ describe('SearchScreen recent searches', () => {
     expect(screen.getByText('inception')).toBeTruthy();
   });
 
-  it('records query on submit only', () => {
+  it('stores submitted query text and not typing alone', () => {
     render(<SearchScreen />);
 
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inte');
     expect(mockRecordQuery).not.toHaveBeenCalled();
 
-    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inception');
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inter');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    expect(mockRecordQuery).toHaveBeenCalledWith('inception');
+    expect(mockRecordQuery).toHaveBeenCalledWith('inter');
+    expect(mockRecordQuery).not.toHaveBeenCalledWith('Interstellar');
     expect(trackProductMetric).toHaveBeenCalledWith('search_submitted');
+  });
+
+  it('stores current input text when selecting autocomplete, not the suggestion title', () => {
+    (useAutocomplete as jest.Mock).mockReturnValue({
+      data: {
+        items: [{ id: '1', type: 'movie', title: 'Interstellar', posterUrl: null }],
+      },
+      isLoading: false,
+    });
+
+    render(<SearchScreen />);
+    fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inter');
+    fireEvent.press(screen.getByLabelText('Search for Interstellar, Movie'));
+
+    expect(mockRecordQuery).toHaveBeenCalledTimes(1);
+    expect(mockRecordQuery).toHaveBeenCalledWith('inter');
+    expect(mockRecordQuery).not.toHaveBeenCalledWith('Interstellar');
+    expect(mockOpenCatalogDetailFromTab).toHaveBeenCalled();
   });
 
   it('does not record recent search when tapping a result', () => {

@@ -185,23 +185,34 @@ export default function SearchScreen() {
     }, [canNavigateBack, handleBack]),
   );
 
+  const recordAutocompleteInputAsRecent = useCallback(() => {
+    const normalized = normalizeSearchQuery(inputText);
+    if (!isValidSearchQuery(normalized)) {
+      return;
+    }
+
+    void recordRecentQuery(normalized);
+  }, [inputText, recordRecentQuery]);
+
   const handleSuggestionSelect = useCallback(
     (suggestion: SearchAutocompleteItem) => {
       Keyboard.dismiss();
 
       if (suggestion.type === 'person' && suggestion.tmdbId) {
+        recordAutocompleteInputAsRecent();
         openPersonDetail(router, suggestion.tmdbId);
         return;
       }
 
       if (suggestion.type === 'movie' || suggestion.type === 'tv') {
+        recordAutocompleteInputAsRecent();
         openCatalogDetailFromTab(router, suggestion.id, suggestion.type, 'search', { queryClient });
         return;
       }
 
       submitSearch(suggestion.title);
     },
-    [queryClient, router, submitSearch],
+    [queryClient, recordAutocompleteInputAsRecent, router, submitSearch],
   );
 
   const handleRecentQuerySelect = useCallback(
