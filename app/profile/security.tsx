@@ -67,6 +67,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 
 
 const PROVIDERS: SocialAuthProvider[] = ['google', 'apple'];
+const PROVIDER_ICON_SIZE = 24;
 
 
 
@@ -512,9 +513,9 @@ export default function SignInSecurityScreen() {
 
                 <View style={styles.providerRow} accessibilityLabel={statusAccessibility}>
 
-                  <View style={styles.rowIconSlot}>
+                  <View style={styles.providerRowIconSlot}>
 
-                    <SocialAuthProviderIcon provider={provider} size={22} />
+                    <SocialAuthProviderIcon provider={provider} size={PROVIDER_ICON_SIZE} />
 
                   </View>
 
@@ -749,6 +750,18 @@ const styles = StyleSheet.create({
     width: 22,
 
     height: 22,
+
+    alignItems: 'center',
+
+    justifyContent: 'center',
+
+  },
+
+  providerRowIconSlot: {
+
+    width: PROVIDER_ICON_SIZE,
+
+    height: PROVIDER_ICON_SIZE,
 
     alignItems: 'center',
 
