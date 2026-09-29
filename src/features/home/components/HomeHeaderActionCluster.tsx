@@ -57,7 +57,7 @@ export function HomeHeaderActionCluster({ overlay = false }: HomeHeaderActionClu
           pressed && { opacity: interaction.subtlePressedOpacity },
         ]}
       >
-        <Ionicons name="search-outline" size={iconSize} color={headerActionIconColor} />
+        <Ionicons name="search-outline" size={iconSize} color={colors.textPrimary} />
         <AppText variant="bodySmall" numberOfLines={1} style={homeHeaderStyles.searchPlaceholder}>
           {t('home.search.placeholder')}
         </AppText>
