@@ -22,6 +22,7 @@ import {
 import {
   canUnlinkProvider,
   getConnectableProviders,
+  getUnlinkReauthProvider,
   isProviderLinked,
 } from '@/features/profile/utils/sign-in-methods';
 import type { SocialAuthProvider } from '@/models/api/auth';
@@ -117,10 +118,16 @@ export default function SignInSecurityScreen() {
           return;
         }
 
-        const reauthToken = await requestSocialIdentityToken(provider);
+        const reauthProvider = getUnlinkReauthProvider(profile, provider);
+        if (!reauthProvider) {
+          setFeedback(t('profile.linkProviderReauthRequired'));
+          return;
+        }
+
+        const reauthToken = await requestSocialIdentityToken(reauthProvider);
         await unlinkProvider.mutateAsync({
           provider,
-          reauthProvider: provider,
+          reauthProvider,
           reauthIdentityToken: reauthToken,
         });
       } catch (error) {

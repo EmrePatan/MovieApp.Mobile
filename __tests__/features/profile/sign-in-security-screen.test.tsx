@@ -160,18 +160,51 @@ describe('SignInSecurityScreen', () => {
       expect(screen.getAllByText('Disconnect')).toHaveLength(2);
     });
 
-    it('unlinks with fresh provider re-auth when disconnecting', async () => {
+    it('disconnects Google using fresh Apple re-auth', async () => {
+      (requestSocialIdentityToken as jest.Mock).mockResolvedValueOnce('apple-reauth-token');
+
       renderSecurity(profile);
       fireEvent.press(screen.getAllByText('Disconnect')[0]);
 
       await waitFor(() => {
-        expect(requestSocialIdentityToken).toHaveBeenCalledWith('google');
+        expect(requestSocialIdentityToken).toHaveBeenCalledWith('apple');
+        expect(requestSocialIdentityToken).not.toHaveBeenCalledWith('google');
         expect(mockUnlinkMutateAsync).toHaveBeenCalledWith({
           provider: 'google',
-          reauthProvider: 'google',
-          reauthIdentityToken: 'mock-token',
+          reauthProvider: 'apple',
+          reauthIdentityToken: 'apple-reauth-token',
         });
       });
+    });
+
+    it('disconnects Apple using fresh Google re-auth', async () => {
+      (requestSocialIdentityToken as jest.Mock).mockResolvedValueOnce('google-reauth-token');
+
+      renderSecurity(profile);
+      fireEvent.press(screen.getAllByText('Disconnect')[1]);
+
+      await waitFor(() => {
+        expect(requestSocialIdentityToken).toHaveBeenCalledWith('google');
+        expect(requestSocialIdentityToken).not.toHaveBeenCalledWith('apple');
+        expect(mockUnlinkMutateAsync).toHaveBeenCalledWith({
+          provider: 'apple',
+          reauthProvider: 'google',
+          reauthIdentityToken: 'google-reauth-token',
+        });
+      });
+    });
+
+    it('does not unlink when remaining-provider re-auth is cancelled', async () => {
+      const { SocialAuthCancelledError } = require('@/auth/social-auth-service');
+      (requestSocialIdentityToken as jest.Mock).mockRejectedValueOnce(new SocialAuthCancelledError());
+
+      renderSecurity(profile);
+      fireEvent.press(screen.getAllByText('Disconnect')[0]);
+
+      await waitFor(() => {
+        expect(requestSocialIdentityToken).toHaveBeenCalledWith('apple');
+      });
+      expect(mockUnlinkMutateAsync).not.toHaveBeenCalled();
     });
 
     it('links Apple with target and reauth tokens without routing tokens', async () => {
@@ -208,6 +241,25 @@ describe('SignInSecurityScreen', () => {
         expect(requestSocialIdentityToken).toHaveBeenCalled();
       });
       expect(mockLinkMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('does not link when Google re-auth is cancelled after Apple target token succeeds', async () => {
+      const { SocialAuthCancelledError } = require('@/auth/social-auth-service');
+      (requestSocialIdentityToken as jest.Mock)
+        .mockResolvedValueOnce('apple-target-token')
+        .mockRejectedValueOnce(new SocialAuthCancelledError());
+
+      renderSecurity(baseProfile({ linkedProviders: ['google'] }));
+      fireEvent.press(screen.getByText('Connect'));
+
+      await waitFor(() => {
+        expect(requestSocialIdentityToken).toHaveBeenNthCalledWith(1, 'apple');
+        expect(requestSocialIdentityToken).toHaveBeenNthCalledWith(2, 'google');
+      });
+      expect(mockLinkMutateAsync).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/profile/link-provider' }),
+      );
     });
   });
 });

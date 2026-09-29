@@ -2,6 +2,7 @@ import {
   canUnlinkProvider,
   countUsableSignInMethods,
   getConnectableProviders,
+  getUnlinkReauthProvider,
 } from '@/features/profile/utils/sign-in-methods';
 import type { UserProfileResponse } from '@/features/profile/types';
 
@@ -39,6 +40,21 @@ describe('sign-in method policy', () => {
     expect(
       getConnectableProviders({ ...baseProfile, linkedProviders: ['google', 'apple'] }),
     ).toEqual([]);
+  });
+
+  it('picks the remaining linked provider for social-only unlink re-auth', () => {
+    expect(
+      getUnlinkReauthProvider({ ...baseProfile, linkedProviders: ['google', 'apple'] }, 'google'),
+    ).toBe('apple');
+    expect(
+      getUnlinkReauthProvider({ ...baseProfile, linkedProviders: ['google', 'apple'] }, 'apple'),
+    ).toBe('google');
+    expect(
+      getUnlinkReauthProvider(
+        { ...baseProfile, hasPassword: true, linkedProviders: ['google'] },
+        'google',
+      ),
+    ).toBeNull();
   });
 
   it('allows unlink when password or another provider remains', () => {

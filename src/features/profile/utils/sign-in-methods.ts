@@ -24,3 +24,16 @@ export function isProviderLinked(profile: UserProfileResponse, provider: SocialA
 export function getConnectableProviders(profile: UserProfileResponse): SocialAuthProvider[] {
   return SOCIAL_PROVIDERS.filter((provider) => !profile.linkedProviders.includes(provider));
 }
+
+/** For social-only accounts, unlink re-auth must use a linked provider that stays on the account. */
+export function getUnlinkReauthProvider(
+  profile: UserProfileResponse,
+  providerToUnlink: SocialAuthProvider,
+): SocialAuthProvider | null {
+  if (profile.hasPassword) {
+    return null;
+  }
+
+  const remainingProviders = profile.linkedProviders.filter((entry) => entry !== providerToUnlink);
+  return remainingProviders[0] ?? null;
+}
