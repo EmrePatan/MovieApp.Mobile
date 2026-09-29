@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { Image } from 'react-native';
+import { act, render, screen, fireEvent } from '@testing-library/react-native';
 import { HomeHero } from '@/features/home/components/HomeHero';
 import type { HomeItem } from '@/features/home/types';
 
@@ -30,9 +31,25 @@ function renderHero(item: HomeItem = createItem()) {
   );
 }
 
+function exhaustImageLoad(image: { props: { onError?: () => void } }) {
+  act(() => {
+    image.props.onError?.();
+  });
+  act(() => {
+    screen.UNSAFE_getByType(Image).props.onError?.();
+  });
+}
+
 describe('HomeHero', () => {
+  const originalImageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+  });
+
+  afterEach(() => {
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;
   });
 
   it('renders compact metadata with content type, year, and rating', () => {
@@ -121,5 +138,68 @@ describe('HomeHero', () => {
         'Featured, An Extraordinarily Long Movie Title That Should Be Clamped To Multiple Lines Without Breaking Layout, Movie',
       ),
     ).toBeTruthy();
+  });
+
+  it('loads a w1280 backdrop and covers the hero card', () => {
+    renderHero(
+      createItem({
+        backdropUrl: '/backdrop.jpg',
+        posterUrl: '/poster.jpg',
+      }),
+    );
+
+    const image = screen.UNSAFE_getByType(Image);
+    expect(image.props.source).toEqual({
+      uri: 'https://image.tmdb.org/t/p/w1280/backdrop.jpg',
+    });
+    expect(image.props.resizeMode).toBe('cover');
+  });
+
+  it('uses a w780 poster when the hero has no backdrop', () => {
+    renderHero(
+      createItem({
+        backdropUrl: null,
+        posterUrl: '/poster.jpg',
+      }),
+    );
+
+    expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
+      uri: 'https://image.tmdb.org/t/p/w780/poster.jpg',
+    });
+  });
+
+  it('falls back to the poster after the backdrop fails, then to the placeholder', () => {
+    renderHero(
+      createItem({
+        backdropUrl: '/missing-backdrop.jpg',
+        posterUrl: '/poster.jpg',
+      }),
+    );
+
+    exhaustImageLoad(screen.UNSAFE_getByType(Image));
+
+    expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
+      uri: 'https://image.tmdb.org/t/p/w780/poster.jpg',
+    });
+    expect(screen.UNSAFE_getByType(Image).props.resizeMode).toBe('cover');
+
+    exhaustImageLoad(screen.UNSAFE_getByType(Image));
+
+    expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+    expect(screen.getByLabelText('film-outline')).toBeTruthy();
+  });
+
+  it('shows the placeholder when a backdrop fails and there is no poster', () => {
+    renderHero(
+      createItem({
+        backdropUrl: '/missing-backdrop.jpg',
+        posterUrl: null,
+      }),
+    );
+
+    exhaustImageLoad(screen.UNSAFE_getByType(Image));
+
+    expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+    expect(screen.getByLabelText('film-outline')).toBeTruthy();
   });
 });

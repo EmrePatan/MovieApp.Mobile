@@ -16,7 +16,7 @@ function getEffectiveImageBase(): string {
   return getImageBaseUrl() ?? DEFAULT_TMDB_IMAGE_BASE;
 }
 
-export type ImageSize = 'w92' | 'w300' | 'w500' | 'original';
+export type ImageSize = 'w92' | 'w300' | 'w500' | 'w780' | 'w1280' | 'original';
 
 /**
  * Normalizes raw catalog image paths before URL resolution.

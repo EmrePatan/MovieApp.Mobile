@@ -139,6 +139,8 @@ describe('HomeHeroCarousel', () => {
   });
 
   it('prefetches the next backdrop without loading detail or action-bar queries', () => {
+    const originalImageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
     const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
     const items = [
       createItem({ id: 'hero-1', backdropUrl: '/backdrop-a.jpg' }),
@@ -150,7 +152,9 @@ describe('HomeHeroCarousel', () => {
     );
     const list = UNSAFE_getByType(FlatList);
 
-    expect(prefetchSpy).toHaveBeenCalled();
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      'https://image.tmdb.org/t/p/w1280/backdrop-b.jpg',
+    );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
 
     act(() => {
@@ -160,6 +164,7 @@ describe('HomeHeroCarousel', () => {
 
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
     prefetchSpy.mockRestore();
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;
   });
 
   it('keeps the indicator on the current slide below 50% manual drag', () => {

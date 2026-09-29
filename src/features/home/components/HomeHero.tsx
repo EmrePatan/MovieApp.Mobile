@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,17 +6,20 @@ import {
   getHomeHeroCardWidth,
   getHomeHeroHeight,
 } from '../utils/home-hero-layout';
+import {
+  resolveHomeHeroBackdropUri,
+  resolveHomeHeroPosterUri,
+} from '../utils/home-hero-image';
 import { HOME_HERO_CARD_TILT, HOME_HERO_PERSPECTIVE } from './home-hero-perspective';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { BackdropImage } from '@/features/details/shared/components/CatalogImage';
 import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
 import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
 import type { HomeItem } from '../types';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
-import { resolveImageUri } from '@/utils/image-url';
+import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -31,22 +34,31 @@ interface HomeHeroProps {
 const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
 const HERO_INFO_BAND_MIN_HEIGHT = 96;
 
-function HeroPosterFallback({
+function HeroCoverImage({
   uri,
+  imageKey,
   height,
   onError,
+  onLoad,
+  onLoadEnd,
 }: {
   uri: string;
+  imageKey: string;
   height: number;
   onError: () => void;
+  onLoad: () => void;
+  onLoadEnd: () => void;
 }) {
   return (
     <Image
+      key={imageKey}
       source={{ uri }}
       style={[styles.media, { height }]}
       resizeMode="cover"
       accessibilityIgnoresInvertColors
       onError={onError}
+      onLoad={onLoad}
+      onLoadEnd={onLoadEnd}
     />
   );
 }
@@ -78,13 +90,14 @@ export const HomeHero = memo(function HomeHero({
 }: HomeHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const [posterFailed, setPosterFailed] = useState(false);
-  const [posterFailedItemId, setPosterFailedItemId] = useState(item.id);
-
-  if (posterFailedItemId !== item.id) {
-    setPosterFailedItemId(item.id);
-    setPosterFailed(false);
-  }
+  const backdropUri = resolveHomeHeroBackdropUri(item.backdropUrl);
+  const posterUri = resolveHomeHeroPosterUri(item.posterUrl);
+  const backdropLoad = useRemoteImageLoadState(
+    backdropUri ? `${item.id}:backdrop:${backdropUri}` : null,
+  );
+  const posterLoad = useRemoteImageLoadState(
+    posterUri ? `${item.id}:poster:${posterUri}` : null,
+  );
 
   const heroHeight = useMemo(
     () => heroHeightProp ?? getHomeHeroHeight(width),
@@ -101,10 +114,6 @@ export const HomeHero = memo(function HomeHero({
     item.voteAverage > 0
       ? t('common.ratingAccessibility', { rating: formatRating(item.voteAverage) })
       : null;
-  const hasBackdrop = Boolean(resolveImageUri(item.backdropUrl));
-  const posterUri = resolveImageUri(item.posterUrl);
-  const showPosterFallback = !hasBackdrop && Boolean(posterUri) && !posterFailed;
-
   const accessibilityLabel = [
     t('home.featured'),
     item.title,
@@ -141,13 +150,23 @@ export const HomeHero = memo(function HomeHero({
         ]}
       >
         <View style={[styles.mediaLayer, { height: innerHeight }]} pointerEvents="none">
-          {hasBackdrop ? (
-            <BackdropImage path={item.backdropUrl} height={innerHeight} />
-          ) : showPosterFallback ? (
-            <HeroPosterFallback
-              uri={posterUri!}
+          {backdropUri != null && !backdropLoad.hasError ? (
+            <HeroCoverImage
+              uri={backdropUri}
+              imageKey={backdropLoad.imageKey}
               height={innerHeight}
-              onError={() => setPosterFailed(true)}
+              onError={backdropLoad.onImageError}
+              onLoad={backdropLoad.onImageLoad}
+              onLoadEnd={backdropLoad.onImageLoadEnd}
+            />
+          ) : posterUri != null && !posterLoad.hasError ? (
+            <HeroCoverImage
+              uri={posterUri}
+              imageKey={posterLoad.imageKey}
+              height={innerHeight}
+              onError={posterLoad.onImageError}
+              onLoad={posterLoad.onImageLoad}
+              onLoadEnd={posterLoad.onImageLoadEnd}
             />
           ) : (
             <HeroMediaPlaceholder height={innerHeight} />

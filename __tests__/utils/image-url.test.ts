@@ -90,7 +90,7 @@ describe('resolveImageUri', () => {
     name: string;
     base: string;
     path: string;
-    size?: 'w300' | 'w500' | 'original';
+    size?: 'w300' | 'w500' | 'w780' | 'w1280' | 'original';
     expected: string;
   }> = [
     {
@@ -123,6 +123,20 @@ describe('resolveImageUri', () => {
       path: '/poster.jpg',
       size: 'w300',
       expected: 'https://image.tmdb.org/t/p/w300/poster.jpg',
+    },
+    {
+      name: 'hero backdrop size override',
+      base: 'https://image.tmdb.org/t/p/w500',
+      path: '/backdrop.jpg',
+      size: 'w1280',
+      expected: 'https://image.tmdb.org/t/p/w1280/backdrop.jpg',
+    },
+    {
+      name: 'hero poster size override',
+      base: 'https://image.tmdb.org/t/p/w500',
+      path: '/poster.jpg',
+      size: 'w780',
+      expected: 'https://image.tmdb.org/t/p/w780/poster.jpg',
     },
     {
       name: 'original size override',
