@@ -824,13 +824,7 @@ export const stage2Es = {
       photos: 'Fotos',
     },
     watchProviders: {
-      groups: {
-        flatrate: 'Incluido con suscripción',
-        free: 'Gratis',
-        ads: 'Con anuncios',
-        rent: 'Alquilar',
-        buy: 'Comprar',
-      },
+      noSubscriptionStreaming: 'No disponible actualmente con una suscripción de streaming.',
     },
     metadata: {
       seasonDetail: 'Temporada {{number}}',

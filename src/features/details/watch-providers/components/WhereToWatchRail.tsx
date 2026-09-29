@@ -8,23 +8,11 @@ import { getCatalogDetailWatchRegion } from '@/features/details/shared/navigatio
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { useMovieWatchProviders, useTvShowWatchProviders } from '../hooks/useWatchProviders';
 import type { WatchProvider } from '../types';
-import {
-  groupWatchProvidersByMonetization,
-  type WatchProviderMonetizationType,
-} from '../utils/group-watch-providers-by-monetization';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const PROVIDER_LOGO_SIZE = 54;
-
-const MONETIZATION_LABEL_KEYS: Record<WatchProviderMonetizationType, string> = {
-  flatrate: 'details.watchProviders.groups.flatrate',
-  free: 'details.watchProviders.groups.free',
-  ads: 'details.watchProviders.groups.ads',
-  rent: 'details.watchProviders.groups.rent',
-  buy: 'details.watchProviders.groups.buy',
-};
 
 interface WhereToWatchRailProps {
   contentType: 'movie' | 'tv';
@@ -32,49 +20,16 @@ interface WhereToWatchRailProps {
   region?: string;
 }
 
-function WatchProviderRow({
-  providers,
-  monetizationType,
-}: {
-  providers: WatchProvider[];
-  monetizationType: WatchProviderMonetizationType;
-}) {
-  const { t } = useTranslation();
+function selectFlatrateProviders(providers: WatchProvider[]): WatchProvider[] {
+  return providers
+    .filter((provider) => provider.availabilityTypes.includes('flatrate'))
+    .sort((left, right) => {
+      if (left.displayPriority !== right.displayPriority) {
+        return left.displayPriority - right.displayPriority;
+      }
 
-  return (
-    <View style={styles.group} testID={`where-to-watch-group-${monetizationType}`}>
-      <AppText variant="caption" style={styles.groupLabel}>
-        {t(MONETIZATION_LABEL_KEYS[monetizationType])}
-      </AppText>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      >
-        {providers.map((provider) => (
-          <View
-            key={`${monetizationType}-${provider.providerId}`}
-            style={styles.providerItem}
-            accessibilityRole="text"
-            accessibilityLabel={provider.name}
-            testID={`watch-provider-${monetizationType}-${provider.providerId}`}
-          >
-            <View style={styles.logoCircle}>
-              <ProviderLogoImage
-                name={provider.name}
-                logoPath={provider.logoPath}
-                size={PROVIDER_LOGO_SIZE}
-                testID={`watch-provider-logo-${monetizationType}-${provider.providerId}`}
-              />
-            </View>
-            <AppText variant="caption" style={styles.providerName} numberOfLines={2}>
-              {provider.name}
-            </AppText>
-          </View>
-        ))}
-      </ScrollView>
-    </View>
-  );
+      return left.name.localeCompare(right.name, undefined, { sensitivity: 'base' });
+    });
 }
 
 export function WhereToWatchRail({
@@ -120,25 +75,52 @@ export function WhereToWatchRail({
     );
   }
 
-  if (query.isError || !query.data?.providers?.length) {
+  if (query.isError || !query.data) {
     return null;
   }
 
-  const groups = groupWatchProvidersByMonetization(query.data.providers);
-  if (groups.length === 0) {
-    return null;
-  }
+  const flatrateProviders = selectFlatrateProviders(query.data.providers);
 
   return (
     <View style={styles.container} testID="where-to-watch-rail">
       <HomeSectionHeader title={t('details.sections.whereToWatch')} />
-      {groups.map((group) => (
-        <WatchProviderRow
-          key={group.type}
-          monetizationType={group.type}
-          providers={group.providers}
-        />
-      ))}
+      {flatrateProviders.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        >
+          {flatrateProviders.map((provider) => (
+            <View
+              key={provider.providerId}
+              style={styles.providerItem}
+              accessibilityRole="text"
+              accessibilityLabel={provider.name}
+              testID={`watch-provider-${provider.providerId}`}
+            >
+              <View style={styles.logoCircle}>
+                <ProviderLogoImage
+                  name={provider.name}
+                  logoPath={provider.logoPath}
+                  size={PROVIDER_LOGO_SIZE}
+                  testID={`watch-provider-logo-${provider.providerId}`}
+                />
+              </View>
+              <AppText variant="caption" style={styles.providerName} numberOfLines={2}>
+                {provider.name}
+              </AppText>
+            </View>
+          ))}
+        </ScrollView>
+      ) : (
+        <AppText
+          variant="body"
+          style={styles.emptyMessage}
+          testID="where-to-watch-empty-subscription"
+        >
+          {t('details.watchProviders.noSubscriptionStreaming')}
+        </AppText>
+      )}
       <AppText variant="caption" style={styles.attribution} testID="where-to-watch-attribution">
         {t('common.dataProvidedByJustWatch')}
       </AppText>
@@ -150,18 +132,6 @@ const styles = StyleSheet.create({
   container: {
     marginTop: spacing.md,
     marginBottom: spacing.sm,
-  },
-  group: {
-    marginBottom: spacing.sm,
-  },
-  groupLabel: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xs,
   },
   listContent: {
     paddingHorizontal: spacing.lg,
@@ -190,6 +160,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 11,
     lineHeight: 14,
+  },
+  emptyMessage: {
+    color: colors.textSecondary,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.xs,
   },
   attribution: {
     color: colors.textMuted,

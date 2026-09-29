@@ -806,13 +806,7 @@ export const stage2En = {
       photos: 'Photos',
     },
     watchProviders: {
-      groups: {
-        flatrate: 'Included with Subscription',
-        free: 'Free',
-        ads: 'With Ads',
-        rent: 'Rent',
-        buy: 'Buy',
-      },
+      noSubscriptionStreaming: 'Not currently available with a streaming subscription.',
     },
     metadata: {
       seasonDetail: 'Season {{number}}',

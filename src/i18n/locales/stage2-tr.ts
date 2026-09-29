@@ -824,13 +824,8 @@ export const stage2Tr = {
       photos: 'Fotoğraflar',
     },
     watchProviders: {
-      groups: {
-        flatrate: 'Abonelikle İzle',
-        free: 'Ücretsiz',
-        ads: 'Reklamlı',
-        rent: 'Kirala',
-        buy: 'Satın Al',
-      },
+      noSubscriptionStreaming:
+        'Şu anda abonelikle izlenebileceği bir platform bulunamadı.',
     },
     metadata: {
       seasonDetail: 'Sezon {{number}}',

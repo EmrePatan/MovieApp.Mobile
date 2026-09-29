@@ -824,13 +824,7 @@ export const stage2De = {
       photos: 'Fotos',
     },
     watchProviders: {
-      groups: {
-        flatrate: 'Im Abo enthalten',
-        free: 'Kostenlos',
-        ads: 'Mit Werbung',
-        rent: 'Leihen',
-        buy: 'Kaufen',
-      },
+      noSubscriptionStreaming: 'Derzeit bei keinem Streaming-Abo verfügbar.',
     },
     metadata: {
       seasonDetail: 'Staffel {{number}}',
