@@ -86,6 +86,29 @@ export function validateChangePassword(
   return errors;
 }
 
+export function validateCreatePasswordForm(
+  newPassword: string,
+  confirmPassword: string,
+): ChangePasswordFormErrors {
+  const errors: ChangePasswordFormErrors = {};
+
+  if (!newPassword) {
+    errors.newPassword = i18n.t('validation.newPasswordRequired');
+  } else if (newPassword.length < 8) {
+    errors.newPassword = i18n.t('validation.newPasswordTooShort');
+  } else if (newPassword.length > 128) {
+    errors.newPassword = i18n.t('validation.newPasswordTooLong');
+  }
+
+  if (!confirmPassword) {
+    errors.confirmPassword = i18n.t('validation.confirmNewPasswordRequired');
+  } else if (newPassword !== confirmPassword) {
+    errors.confirmPassword = i18n.t('validation.passwordsDoNotMatch');
+  }
+
+  return errors;
+}
+
 export function validateDeleteAccount(currentPassword: string): DeleteAccountFormErrors {
   const errors: DeleteAccountFormErrors = {};
 

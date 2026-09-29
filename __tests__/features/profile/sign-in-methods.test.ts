@@ -33,5 +33,20 @@ describe('sign-in method policy', () => {
 
   it('lists connectable providers', () => {
     expect(getConnectableProviders(baseProfile)).toEqual(['apple']);
+    expect(getConnectableProviders({ ...baseProfile, linkedProviders: ['apple'] })).toEqual([
+      'google',
+    ]);
+    expect(
+      getConnectableProviders({ ...baseProfile, linkedProviders: ['google', 'apple'] }),
+    ).toEqual([]);
+  });
+
+  it('allows unlink when password or another provider remains', () => {
+    expect(
+      canUnlinkProvider({ ...baseProfile, hasPassword: true, linkedProviders: ['google'] }, 'google'),
+    ).toBe(true);
+    expect(
+      canUnlinkProvider({ ...baseProfile, linkedProviders: ['google', 'apple'] }, 'apple'),
+    ).toBe(true);
   });
 });

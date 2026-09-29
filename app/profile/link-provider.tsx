@@ -3,6 +3,11 @@ import { StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { getDisplayMessageForApiError, isApiError } from '@/api/errors';
+import {
+  requestSocialIdentityToken,
+  SocialAuthCancelledError,
+  SocialAuthConfigurationError,
+} from '@/auth/social-auth-service';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { PasswordInput } from '@/components/inputs/PasswordInput';
@@ -17,35 +22,46 @@ export default function LinkProviderScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{
-    targetProvider: SocialAuthProvider;
-    targetIdentityToken: string;
+    targetProvider?: SocialAuthProvider;
   }>();
+  const targetProvider = params.targetProvider;
   const linkProvider = useLinkExternalLoginMutation();
   const [currentPassword, setCurrentPassword] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!params.targetProvider || !params.targetIdentityToken) {
+  const handleSubmit = async () => {
+    if (!targetProvider || isSubmitting || linkProvider.isPending) {
       return;
     }
 
-    linkProvider.mutate(
-      {
-        targetProvider: params.targetProvider,
-        targetIdentityToken: params.targetIdentityToken,
+    setIsSubmitting(true);
+    setFeedback(null);
+
+    try {
+      const targetIdentityToken = await requestSocialIdentityToken(targetProvider);
+      await linkProvider.mutateAsync({
+        targetProvider,
+        targetIdentityToken,
         currentPassword,
-      },
-      {
-        onSuccess: () => router.replace('/profile/security'),
-        onError: (error) => {
-          setFeedback(
-            isApiError(error)
-              ? getDisplayMessageForApiError(error, 'profile')
-              : t('profile.linkProviderFailed'),
-          );
-        },
-      },
-    );
+      });
+      router.replace('/profile/security');
+    } catch (error) {
+      if (error instanceof SocialAuthCancelledError) {
+        return;
+      }
+      if (error instanceof SocialAuthConfigurationError) {
+        setFeedback(error.message);
+        return;
+      }
+      setFeedback(
+        isApiError(error)
+          ? getDisplayMessageForApiError(error, 'profile')
+          : t('profile.linkProviderFailed'),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -62,8 +78,9 @@ export default function LinkProviderScreen() {
         />
         <AppButton
           title={t('profile.confirmLinkProvider')}
-          loading={linkProvider.isPending}
-          onPress={handleSubmit}
+          loading={isSubmitting || linkProvider.isPending}
+          disabled={!targetProvider || isSubmitting || linkProvider.isPending}
+          onPress={() => void handleSubmit()}
         />
       </View>
     </Screen>

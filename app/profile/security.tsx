@@ -49,37 +49,29 @@ export default function SignInSecurityScreen() {
       setActiveProvider(targetProvider);
 
       try {
-        const targetToken = await requestSocialIdentityToken(targetProvider);
-        let reauthProvider: SocialAuthProvider | undefined;
-        let reauthToken: string | undefined;
-        let currentPassword: string | undefined;
-
         if (profile.hasPassword) {
           router.push({
             pathname: '/profile/link-provider',
-            params: {
-              targetProvider,
-              targetIdentityToken: targetToken,
-            },
+            params: { targetProvider },
           });
           return;
         }
 
+        const targetToken = await requestSocialIdentityToken(targetProvider);
         const reauthCandidates = profile.linkedProviders;
         if (reauthCandidates.length === 0) {
           setFeedback(t('profile.linkProviderReauthRequired'));
           return;
         }
 
-        reauthProvider = reauthCandidates[0];
-        reauthToken = await requestSocialIdentityToken(reauthProvider);
+        const reauthProvider = reauthCandidates[0];
+        const reauthToken = await requestSocialIdentityToken(reauthProvider);
 
         await linkProvider.mutateAsync({
           targetProvider,
           targetIdentityToken: targetToken,
           reauthProvider,
           reauthIdentityToken: reauthToken,
-          currentPassword,
         });
         setFeedback(t('profile.providerLinked'));
       } catch (error) {

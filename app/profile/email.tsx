@@ -24,6 +24,7 @@ import {
   validateChangeEmail,
   type ChangeEmailFormErrors,
 } from '@/features/profile/utils/profile-validation';
+import type { ChangeEmailRequest } from '@/features/profile/types';
 import { spacing } from '@/theme/spacing';
 
 export default function ChangeEmailScreen() {
@@ -58,7 +59,10 @@ export default function ChangeEmailScreen() {
     setFeedback(null);
 
     try {
-      let payload = { email: email.trim(), currentPassword: profile.hasPassword ? currentPassword : undefined };
+      let payload: ChangeEmailRequest = {
+        email: email.trim(),
+        currentPassword: profile.hasPassword ? currentPassword : undefined,
+      };
 
       if (!profile.hasPassword) {
         const reauthProvider = profile.linkedProviders[0];

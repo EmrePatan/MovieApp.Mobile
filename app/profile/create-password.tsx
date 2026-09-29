@@ -17,7 +17,7 @@ import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useCreatePasswordMutation } from '@/features/profile/hooks/useProfileMutations';
 import {
   hasProfileValidationErrors,
-  validateChangePassword,
+  validateCreatePasswordForm,
 } from '@/features/profile/utils/profile-validation';
 import type { SocialAuthProvider } from '@/models/api/auth';
 import { spacing } from '@/theme/spacing';
@@ -40,9 +40,9 @@ export default function CreatePasswordScreen() {
       return;
     }
 
-    const errors = validateChangePassword('', newPassword, confirmPassword);
+    const errors = validateCreatePasswordForm(newPassword, confirmPassword);
     if (hasProfileValidationErrors(errors)) {
-      setFeedback(t('validation.newPasswordTooShort'));
+      setFeedback(errors.newPassword ?? errors.confirmPassword ?? t('profile.createPasswordFailed'));
       return;
     }
 

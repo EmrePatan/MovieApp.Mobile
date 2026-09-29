@@ -171,10 +171,42 @@ const stage1Fr = {
       'Votre compagnon cinéma sélectionné pour découvrir des films, suivre des séries et créer vos listes de visionnage.',
     aboutVersion: 'Version {{version}}',
     signInSecurityTitle: 'Connexion et sécurité',
+    signInSecuritySubtitle: 'Gérez la façon dont vous vous connectez à Movie Cave.',
     signInSecurityMenuSubtitle: 'E-mail, mot de passe et comptes connectés',
-    cannotRemoveLastSignInMethod: 'Conservez au moins une méthode de connexion sur votre compte.',
+    email: 'E-mail',
+    password: 'Mot de passe',
+    passwordSet: 'Mot de passe défini',
+    passwordNotSet: 'Non défini',
+    createPassword: 'Créer un mot de passe',
+    createPasswordTitle: 'Créer un mot de passe',
+    createPasswordHint:
+      'Confirmez avec un fournisseur lié, puis choisissez un mot de passe pour la connexion par e-mail.',
+    createPasswordAction: 'Créer un mot de passe',
+    createPasswordFailed: 'Impossible de créer le mot de passe. Veuillez réessayer.',
     createPasswordRequiresVerifiedEmail:
       'Ajoutez et vérifiez une adresse e-mail avant de créer un mot de passe.',
+    connectedAccounts: 'Comptes connectés',
+    providerConnected: 'Connecté',
+    providerNotConnected: 'Non connecté',
+    connectProvider: 'Connecter',
+    disconnectProvider: 'Déconnecter',
+    providerLinked: 'Compte connecté avec succès.',
+    linkProviderFailed: 'Impossible de connecter ce compte. Veuillez réessayer.',
+    unlinkProviderFailed: 'Impossible de déconnecter ce compte. Veuillez réessayer.',
+    cannotRemoveLastSignInMethod: 'Conservez au moins une méthode de connexion sur votre compte.',
+    linkProviderTitle: 'Confirmer la connexion',
+    linkProviderPasswordHint:
+      'Saisissez votre mot de passe actuel pour lier ce fournisseur.',
+    confirmLinkProvider: 'Lier le compte',
+    unlinkProviderTitle: 'Déconnecter le compte',
+    unlinkProviderPasswordHint:
+      'Saisissez votre mot de passe actuel pour déconnecter ce fournisseur.',
+    confirmUnlinkProvider: 'Déconnecter',
+    linkProviderReauthRequired: 'Connectez-vous avec un fournisseur lié pour continuer.',
+    emailChangeSocialReauthHint:
+      'Vous confirmera avec un fournisseur lié lors de l’envoi de cette modification.',
+    emailChangeReauthRequired:
+      'Liez un fournisseur de connexion avant de modifier votre e-mail.',
   },
   validation: {
     emailRequired: 'L’e-mail est requis.',
