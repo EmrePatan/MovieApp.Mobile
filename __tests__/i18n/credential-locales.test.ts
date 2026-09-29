@@ -9,6 +9,8 @@ import { pt } from '@/i18n/locales/pt';
 const credentialProfileKeys = [
   'signInSecurityTitle',
   'signInSecuritySubtitle',
+  'signInMethods',
+  'passwordStatusSet',
   'passwordSet',
   'passwordNotSet',
   'createPassword',
