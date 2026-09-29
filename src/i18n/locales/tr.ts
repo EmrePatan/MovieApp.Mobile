@@ -106,6 +106,7 @@ const stage1Tr = {
     account: 'Hesap',
     editProfile: 'Profili düzenle',
     changeEmail: 'E-postayı değiştir',
+    emailVerificationPendingFor: '{{email}} için doğrulama bekleniyor',
     changePassword: 'Şifreyi değiştir',
     deleteAccount: 'Hesabı sil',
     signOut: 'Çıkış yap',

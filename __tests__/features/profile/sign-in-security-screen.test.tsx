@@ -54,6 +54,45 @@ function renderSecurity(profile: UserProfileResponse) {
   return render(<SignInSecurityScreen />);
 }
 
+describe('pending email from server profile', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLinkMutateAsync.mockResolvedValue({});
+    mockUnlinkMutateAsync.mockResolvedValue({});
+  });
+
+  it('routes email row to change email when pendingEmail is absent', () => {
+    renderSecurity(baseProfile({ hasPassword: true, pendingEmail: null }));
+    fireEvent.press(screen.getByText('user@example.com'));
+
+    expect(mockPush).toHaveBeenCalledWith('/profile/email');
+    expect(screen.getByText('Change email')).toBeTruthy();
+  });
+
+  it('shows pending state and routes to email-pending when pendingEmail is set', () => {
+    renderSecurity(
+      baseProfile({
+        hasPassword: true,
+        email: 'current@example.com',
+        pendingEmail: 'new@example.com',
+      }),
+    );
+
+    expect(screen.getByText('current@example.com')).toBeTruthy();
+    expect(screen.getByText('Verification pending for new@example.com')).toBeTruthy();
+
+    fireEvent.press(screen.getByText('current@example.com'));
+    expect(mockPush).toHaveBeenCalledWith('/profile/email-pending');
+    expect(mockPush).not.toHaveBeenCalledWith('/profile/email');
+  });
+
+  it('uses only server profile pendingEmail, not route params', () => {
+    renderSecurity(baseProfile({ pendingEmail: 'server@example.com' }));
+    expect(screen.getByText('Verification pending for server@example.com')).toBeTruthy();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+});
+
 describe('SignInSecurityScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();

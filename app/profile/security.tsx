@@ -160,6 +160,7 @@ export default function SignInSecurityScreen() {
   }
 
   const connectable = getConnectableProviders(profile);
+  const pendingEmail = profile.pendingEmail?.trim() || null;
 
   return (
     <Screen scrollable>
@@ -184,8 +185,14 @@ export default function SignInSecurityScreen() {
       <ProfileSection title={t('profile.email')}>
         <ProfileMenuRow
           label={profile.email}
-          subtitle={t('profile.changeEmail')}
-          onPress={() => router.push('/profile/email')}
+          subtitle={
+            pendingEmail
+              ? t('profile.emailVerificationPendingFor', { email: pendingEmail })
+              : t('profile.changeEmail')
+          }
+          onPress={() =>
+            router.push(pendingEmail ? '/profile/email-pending' : '/profile/email')
+          }
         />
       </ProfileSection>
 

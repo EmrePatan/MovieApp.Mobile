@@ -106,6 +106,7 @@ const stage1Pt = {
     account: 'Conta',
     editProfile: 'Editar perfil',
     changeEmail: 'Alterar e-mail',
+    emailVerificationPendingFor: 'Verificação pendente para {{email}}',
     changePassword: 'Alterar senha',
     deleteAccount: 'Excluir conta',
     signOut: 'Sair',

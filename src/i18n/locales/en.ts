@@ -105,6 +105,7 @@ const stage1En = {
     account: 'Account',
     editProfile: 'Edit profile',
     changeEmail: 'Change email',
+    emailVerificationPendingFor: 'Verification pending for {{email}}',
     changePassword: 'Change password',
     deleteAccount: 'Delete account',
     signOut: 'Sign out',
