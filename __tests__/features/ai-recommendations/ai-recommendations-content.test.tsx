@@ -153,8 +153,10 @@ describe('AiRecommendationsContent', () => {
     expect(screen.getByDisplayValue('mind-bending sci-fi with emotional stakes')).toBeTruthy();
     expect(screen.queryByTestId('ai-recommendations-collapsed-prompt')).toBeNull();
     expect(screen.queryByText('Start Fresh')).toBeNull();
-    expect(screen.getByText('1 of up to 10 picks · 2 requests left today')).toBeTruthy();
-    expect(screen.getByText('Each request returns up to 10 catalog matches.')).toBeTruthy();
+    expect(screen.getByText('Picked for you by AI')).toBeTruthy();
+    expect(
+      screen.queryByLabelText('Use prompt: A cozy mystery for a rainy night'),
+    ).toBeNull();
     expect(postAiRecommendations).toHaveBeenCalledWith({
       message: 'mind-bending sci-fi with emotional stakes',
       sessionId: null,
@@ -292,9 +294,35 @@ describe('AiRecommendationsContent', () => {
 
     expect(screen.getByLabelText('AI recommendation prompt')).toBeTruthy();
     expect(screen.getByDisplayValue('feel-good comedy under two hours')).toBeTruthy();
+    expect(screen.getByLabelText('AI recommendation prompt').props.editable).toBe(false);
     expect(screen.getByLabelText('Get Recommendations').props.accessibilityState?.disabled).toBe(
       true,
     );
+  });
+
+  it('hides suggested prompts after a completed response', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue({
+      ...successResponse,
+      returnedCount: 0,
+      recommendations: [],
+    });
+
+    renderScreen();
+    await waitForQuotaHydration();
+
+    fireEvent.changeText(
+      screen.getByLabelText('AI recommendation prompt'),
+      'mind-bending sci-fi with emotional stakes',
+    );
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-empty')).toBeTruthy();
+    });
+
+    expect(
+      screen.queryByLabelText('Use prompt: A cozy mystery for a rainy night'),
+    ).toBeNull();
   });
 
   it('shows generic empty state with composer available', async () => {

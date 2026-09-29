@@ -4,7 +4,7 @@ export const AI_RECOMMENDATION_MIN_MESSAGE_LENGTH = 3;
 export const AI_RECOMMENDATION_DAILY_LIMIT = 3;
 export const AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST = 10;
 
-export const AI_RECOMMENDATION_MAX_MESSAGE_LENGTH = 500;
+export const AI_RECOMMENDATION_MAX_MESSAGE_LENGTH = 150;
 
 export interface AiRecommendationRequest {
   message: string;

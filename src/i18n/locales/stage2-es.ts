@@ -1308,9 +1308,7 @@ export const stage2Es = {
     emptyTitle: 'Sin recomendaciones esta vez',
     emptyMessage:
       'No encontramos recomendaciones adecuadas esta vez. Edita tu solicitud e inténtalo de nuevo.',
-    yourPicks: 'Tus selecciones',
-    resultsSummary: '{{returned}} de hasta {{max}} selecciones · {{remaining}} solicitudes restantes hoy',
-    maxPicksPerRequest: 'Cada solicitud devuelve hasta {{count}} coincidencias del catálogo.',
+    yourPicks: 'Elegidas para ti por la IA',
     whyItFits: 'Por qué encaja',
     validationMinLength: 'Describe lo que buscas con al menos {{count}} caracteres.',
     validationMaxLength: 'Mantén tu solicitud por debajo de {{count}} caracteres.',

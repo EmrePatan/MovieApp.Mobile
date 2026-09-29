@@ -1308,9 +1308,7 @@ export const stage2It = {
     emptyTitle: 'Nessun consiglio questa volta',
     emptyMessage:
       'Non abbiamo trovato consigli adatti questa volta. Modifica la richiesta e riprova.',
-    yourPicks: 'Le tue scelte',
-    resultsSummary: '{{returned}} su un massimo di {{max}} scelte · {{remaining}} richieste rimaste oggi',
-    maxPicksPerRequest: 'Ogni richiesta restituisce fino a {{count}} corrispondenze nel catalogo.',
+    yourPicks: 'Scelte per te dall\'IA',
     whyItFits: 'Perché fa per te',
     validationMinLength: 'Descrivi cosa cerchi con almeno {{count}} caratteri.',
     validationMaxLength: 'Mantieni la richiesta sotto i {{count}} caratteri.',

@@ -1,7 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Dimensions,
+  InputAccessoryView,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,7 +32,6 @@ import { useAiRecommendationQuota } from '../hooks/useAiRecommendationQuota';
 import {
   AI_RECOMMENDATION_DAILY_LIMIT,
   AI_RECOMMENDATION_MAX_MESSAGE_LENGTH,
-  AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
   AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS,
 } from '../types';
 import { mapAiRecommendationToRecommendationItem } from '../utils/map-ai-recommendation-item';
@@ -40,6 +42,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
 const RETURN_ROUTE = '/ai-recommendations';
+const AI_RECOMMENDATIONS_SUBMIT_ACCESSORY_ID = 'ai-recommendations-submit-accessory';
 
 export function AiRecommendationsContent() {
   const { t } = useTranslation();
@@ -50,11 +53,86 @@ export function AiRecommendationsContent() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [quotaOverride, setQuotaOverride] = useState<number | undefined>(undefined);
+  const promptInputRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollContentRef = useRef<View>(null);
+  const composerRef = useRef<View>(null);
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const quotaQuery = useAiRecommendationQuota();
   const recommendationsMutation = useAiRecommendations();
   const quotaRemaining = quotaOverride ?? quotaQuery.data?.remaining ?? null;
 
   const trimmedMessage = message.trim();
+  const hasCompletedResponse = recommendationsMutation.data !== undefined;
+  const showSuggestedPrompts = !hasCompletedResponse;
+
+  const dismissPromptKeyboard = useCallback(() => {
+    promptInputRef.current?.blur();
+    Keyboard.dismiss();
+  }, []);
+
+  const scrollComposerAboveKeyboard = useCallback((keyboardHeight = 0) => {
+    const composer = composerRef.current;
+    const scrollContent = scrollContentRef.current;
+    if (!composer || !scrollContent) {
+      return;
+    }
+
+    composer.measureLayout(
+      scrollContent,
+      (_left, top, _width, height) => {
+        const windowHeight = Dimensions.get('window').height;
+        const keyboardOverlap =
+          Platform.OS === 'ios'
+            ? keyboardHeight > 0
+              ? keyboardHeight
+              : keyboardInset
+            : 0;
+        const viewportHeight = windowHeight - insets.top - keyboardOverlap;
+        const scrollY = Math.max(0, top + height - viewportHeight + spacing.lg);
+
+        scrollRef.current?.scrollTo({ y: scrollY, animated: true });
+      },
+      () => {},
+    );
+  }, [insets.top, keyboardInset]);
+
+  const handlePromptFocus = useCallback(() => {
+    requestAnimationFrame(() => {
+      scrollComposerAboveKeyboard();
+    });
+  }, [scrollComposerAboveKeyboard]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, (event) => {
+      if (Platform.OS === 'ios') {
+        setIsKeyboardVisible(true);
+        return;
+      }
+
+      setKeyboardInset(spacing.lg);
+      requestAnimationFrame(() => {
+        scrollComposerAboveKeyboard(event.endCoordinates.height);
+      });
+    });
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      if (Platform.OS === 'ios') {
+        setIsKeyboardVisible(false);
+        return;
+      }
+
+      setKeyboardInset(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [insets.bottom, scrollComposerAboveKeyboard]);
 
   const handleSubmit = useCallback(() => {
     const error = validateAiRecommendationMessage(message);
@@ -64,6 +142,8 @@ export function AiRecommendationsContent() {
       return;
     }
 
+    dismissPromptKeyboard();
+
     recommendationsMutation.mutate(
       {
         message: trimmedMessage,
@@ -71,6 +151,7 @@ export function AiRecommendationsContent() {
       },
       {
         onSuccess: (response) => {
+          dismissPromptKeyboard();
           setSessionId(response.sessionId);
           setQuotaOverride(response.quotaRemaining);
           void queryClient.invalidateQueries({ queryKey: ['ai-recommendations', 'quota'] });
@@ -85,7 +166,14 @@ export function AiRecommendationsContent() {
         },
       },
     );
-  }, [message, queryClient, recommendationsMutation, sessionId, trimmedMessage]);
+  }, [
+    dismissPromptKeyboard,
+    message,
+    queryClient,
+    recommendationsMutation,
+    sessionId,
+    trimmedMessage,
+  ]);
 
   const handlePromptPress = useCallback((prompt: string) => {
     setMessage(prompt);
@@ -112,6 +200,7 @@ export function AiRecommendationsContent() {
   const isQuotaExhausted = isQuotaHydrated && quotaRemaining <= 0;
   const isSubmitDisabled =
     recommendationsMutation.isPending || isQuotaExhausted || !isQuotaHydrated;
+  const isComposerLocked = isQuotaExhausted || !isQuotaHydrated;
 
   const resultItems = useMemo(() => {
     const response = recommendationsMutation.data;
@@ -188,23 +277,9 @@ export function AiRecommendationsContent() {
 
     return (
       <View style={styles.resultsSection} testID="ai-recommendations-results">
-        <View style={styles.resultsHeader}>
-          <AppText variant="subtitle" accessibilityRole="header">
-            {t('aiRecommendations.yourPicks')}
-          </AppText>
-          <AppText variant="caption" muted>
-            {t('aiRecommendations.resultsSummary', {
-              returned: response.returnedCount,
-              max: response.requestedCount,
-              remaining: response.quotaRemaining,
-            })}
-          </AppText>
-          <AppText variant="caption" muted>
-            {t('aiRecommendations.maxPicksPerRequest', {
-              count: AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
-            })}
-          </AppText>
-        </View>
+        <AppText variant="subtitle" accessibilityRole="header">
+          {t('aiRecommendations.yourPicks')}
+        </AppText>
 
         <View style={styles.resultsList}>
           {resultItems.map((item) => (
@@ -224,18 +299,28 @@ export function AiRecommendationsContent() {
     t,
   ]);
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
-    >
+  const submitButton = (
+    <AppButton
+      title={t('aiRecommendations.getRecommendations')}
+      onPress={handleSubmit}
+      disabled={isSubmitDisabled}
+      loading={recommendationsMutation.isPending}
+      style={showSuggestedPrompts ? styles.submitAfterTips : undefined}
+    />
+  );
+
+  const scrollBody = (
       <ScrollView
+        ref={scrollRef}
         style={styles.flex}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={{
+          paddingBottom: Math.max(insets.bottom, spacing.xxl) + keyboardInset,
+        }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
+        <View ref={scrollContentRef} style={styles.content} collapsable={false}>
         <View style={styles.header}>
           <DetailBackButton />
           <View style={styles.headerCopy}>
@@ -259,13 +344,15 @@ export function AiRecommendationsContent() {
           </View>
         </View>
 
-        <View style={styles.composerSection}>
+        <View ref={composerRef} style={styles.composerSection} collapsable={false}>
           <AppText variant="bodySmall" style={styles.composerLabel}>
             {t('aiRecommendations.composerLabel')}
           </AppText>
           <TextInput
+            ref={promptInputRef}
             accessibilityLabel={t('aiRecommendations.promptAccessibility')}
             multiline
+            editable={!isComposerLocked}
             value={message}
             onChangeText={(next) => {
               if (next.length > AI_RECOMMENDATION_MAX_MESSAGE_LENGTH) {
@@ -279,8 +366,16 @@ export function AiRecommendationsContent() {
             }}
             placeholder={t('aiRecommendations.promptPlaceholder')}
             placeholderTextColor={colors.textMuted}
-            style={[styles.promptInput, validationError && styles.promptInputError]}
+            style={[
+              styles.promptInput,
+              validationError && styles.promptInputError,
+              isComposerLocked && styles.promptInputDisabled,
+            ]}
             textAlignVertical="top"
+            onFocus={Platform.OS === 'android' ? handlePromptFocus : undefined}
+            inputAccessoryViewID={
+              Platform.OS === 'ios' ? AI_RECOMMENDATIONS_SUBMIT_ACCESSORY_ID : undefined
+            }
           />
           <View style={styles.composerMetaRow}>
             <AppText variant="caption" muted>
@@ -293,40 +388,58 @@ export function AiRecommendationsContent() {
             ) : null}
           </View>
 
-          <View style={styles.promptChipRow}>
-            {AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS.map((promptKey) => {
-              const prompt = t(promptKey);
-              return (
-                <Pressable
-                  key={promptKey}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('aiRecommendations.usePromptAccessibility', { prompt })}
-                  onPress={() => handlePromptPress(prompt)}
-                  style={({ pressed }) => [styles.promptChip, pressed && styles.promptChipPressed]}
-                >
-                  <AppText variant="caption" style={styles.promptChipText}>
-                    {prompt}
-                  </AppText>
-                </Pressable>
-              );
-            })}
-          </View>
+          {showSuggestedPrompts ? (
+            <View style={styles.promptChipRow}>
+              {AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS.map((promptKey) => {
+                const prompt = t(promptKey);
+                return (
+                  <Pressable
+                    key={promptKey}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('aiRecommendations.usePromptAccessibility', { prompt })}
+                    onPress={() => handlePromptPress(prompt)}
+                    disabled={isComposerLocked}
+                    style={({ pressed }) => [
+                      styles.promptChip,
+                      isComposerLocked && styles.promptChipDisabled,
+                      pressed && !isComposerLocked && styles.promptChipPressed,
+                    ]}
+                  >
+                    <AppText variant="caption" style={styles.promptChipText}>
+                      {prompt}
+                    </AppText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+
+          {Platform.OS === 'ios' && isKeyboardVisible ? null : submitButton}
         </View>
 
         {statusContent}
+        </View>
       </ScrollView>
+  );
 
-      <View
-        style={[styles.composerFooter, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
-      >
-        <AppButton
-          title={t('aiRecommendations.getRecommendations')}
-          onPress={handleSubmit}
-          disabled={isSubmitDisabled}
-          loading={recommendationsMutation.isPending}
-        />
-      </View>
-    </KeyboardAvoidingView>
+  return (
+    <View style={styles.flex}>
+      {Platform.OS === 'android' ? (
+        <KeyboardAvoidingView style={styles.flex} behavior="height">
+          {scrollBody}
+        </KeyboardAvoidingView>
+      ) : (
+        scrollBody
+      )}
+
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={AI_RECOMMENDATIONS_SUBMIT_ACCESSORY_ID}>
+          {isKeyboardVisible ? (
+            <View style={styles.inputAccessoryBar}>{submitButton}</View>
+          ) : null}
+        </InputAccessoryView>
+      ) : null}
+    </View>
   );
 }
 
@@ -335,7 +448,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: spacing.xxl,
     gap: spacing.lg,
   },
   header: {
@@ -353,13 +465,6 @@ const styles = StyleSheet.create({
   composerSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
-  },
-  composerFooter: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.background,
   },
   composerLabel: {
     color: colors.textSecondary,
@@ -379,6 +484,9 @@ const styles = StyleSheet.create({
   },
   promptInputError: {
     borderColor: colors.error,
+  },
+  promptInputDisabled: {
+    opacity: 0.55,
   },
   composerMetaRow: {
     flexDirection: 'row',
@@ -408,8 +516,22 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     borderColor: colors.borderAccent,
   },
+  promptChipDisabled: {
+    opacity: 0.45,
+  },
   promptChipText: {
     color: colors.textSecondary,
+  },
+  submitAfterTips: {
+    marginTop: spacing.sm,
+  },
+  inputAccessoryBar: {
+    backgroundColor: colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   stateContainer: {
     paddingHorizontal: spacing.lg,
@@ -432,9 +554,6 @@ const styles = StyleSheet.create({
   resultsSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
-  },
-  resultsHeader: {
-    gap: spacing.xs,
   },
   resultsList: {
     gap: spacing.sm,

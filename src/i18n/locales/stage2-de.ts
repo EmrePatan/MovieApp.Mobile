@@ -1308,9 +1308,7 @@ export const stage2De = {
     emptyTitle: 'Diesmal keine Empfehlungen',
     emptyMessage:
       'Diesmal haben wir keine passenden Empfehlungen gefunden. Bearbeite deine Anfrage und versuche es erneut.',
-    yourPicks: 'Deine Vorschläge',
-    resultsSummary: '{{returned}} von bis zu {{max}} Vorschlägen · {{remaining}} Anfragen heute übrig',
-    maxPicksPerRequest: 'Jede Anfrage liefert bis zu {{count}} Treffer im Katalog.',
+    yourPicks: 'Von der KI für dich ausgewählt',
     whyItFits: 'Warum es passt',
     validationMinLength: 'Beschreibe deinen Wunsch in mindestens {{count}} Zeichen.',
     validationMaxLength: 'Halte deine Anfrage unter {{count}} Zeichen.',

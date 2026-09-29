@@ -1286,9 +1286,7 @@ export const stage2En = {
     emptyTitle: 'No recommendations this time',
     emptyMessage:
       "We couldn't find suitable recommendations this time. Edit your request and try again.",
-    yourPicks: 'Your picks',
-    resultsSummary: '{{returned}} of up to {{max}} picks · {{remaining}} requests left today',
-    maxPicksPerRequest: 'Each request returns up to {{count}} catalog matches.',
+    yourPicks: 'Picked for you by AI',
     whyItFits: 'Why it fits',
     validationMinLength: 'Describe what you want in at least {{count}} characters.',
     validationMaxLength: 'Keep your request under {{count}} characters.',

@@ -1308,9 +1308,7 @@ export const stage2Pt = {
     emptyTitle: 'Nenhuma recomendação desta vez',
     emptyMessage:
       'Não encontramos recomendações adequadas desta vez. Edite sua solicitação e tente novamente.',
-    yourPicks: 'Suas escolhas',
-    resultsSummary: '{{returned}} de até {{max}} escolhas · {{remaining}} solicitações restantes hoje',
-    maxPicksPerRequest: 'Cada solicitação retorna até {{count}} correspondências no catálogo.',
+    yourPicks: 'Escolhidas para você pela IA',
     whyItFits: 'Por que combina',
     validationMinLength: 'Descreva o que você quer com pelo menos {{count}} caracteres.',
     validationMaxLength: 'Mantenha sua solicitação com menos de {{count}} caracteres.',

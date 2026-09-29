@@ -9,7 +9,7 @@ export default function AiRecommendationsScreen() {
   useTrackProductMetricOnFocus(PRODUCT_METRICS.aiRecommendationsOpened);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <AiRecommendationsContent />
     </SafeAreaView>
   );

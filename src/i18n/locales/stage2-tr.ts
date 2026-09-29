@@ -1310,10 +1310,7 @@ export const stage2Tr = {
     generateError: 'AI önerileri şu anda oluşturulamıyor.',
     emptyTitle: 'Bu sefer öneri yok',
     emptyMessage: 'Bu sefer uygun öneriler bulamadık. İsteğini düzenleyip tekrar dene.',
-    yourPicks: 'Senin seçimlerin',
-    resultsSummary:
-      'En fazla {{max}} öneriden {{returned}} · bugün {{remaining}} istek kaldı',
-    maxPicksPerRequest: 'Her istek en fazla {{count}} katalog eşleşmesi döndürür.',
+    yourPicks: 'Yapay zekanın senin için seçtikleri',
     whyItFits: 'Neden uyuyor',
     validationMinLength: 'Ne istediğini en az {{count}} karakterle anlat.',
     validationMaxLength: 'İsteğini {{count}} karakterin altında tut.',

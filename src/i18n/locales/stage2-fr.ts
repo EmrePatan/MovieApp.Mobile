@@ -1308,9 +1308,7 @@ export const stage2Fr = {
     emptyTitle: 'Aucune recommandation cette fois',
     emptyMessage:
       'Nous n\'avons pas trouvé de recommandations adaptées cette fois. Modifiez votre demande et réessayez.',
-    yourPicks: 'Vos sélections',
-    resultsSummary: '{{returned}} sur {{max}} sélections · {{remaining}} requêtes restantes aujourd\'hui',
-    maxPicksPerRequest: 'Chaque requête renvoie jusqu\'à {{count}} correspondances du catalogue.',
+    yourPicks: 'Sélectionnées pour vous par l\'IA',
     whyItFits: 'Pourquoi ça vous convient',
     validationMinLength: 'Décrivez ce que vous recherchez en au moins {{count}} caractères.',
     validationMaxLength: 'Limitez votre requête à {{count}} caractères.',
