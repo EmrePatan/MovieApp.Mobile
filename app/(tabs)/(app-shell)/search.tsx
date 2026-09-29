@@ -35,11 +35,6 @@ import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
 import { useRecentSearches } from '@/features/search/hooks/useRecentSearches';
 import {
-  mapAutocompleteToRecentEntity,
-  mapSearchResultToRecentEntity,
-} from '@/features/search/recent-searches/map-to-recent-entity';
-import type { RecentSearchStoredItem } from '@/features/search/recent-searches/recent-search-types';
-import {
   isPersonSearchResult,
   type SearchAutocompleteItem,
   type SearchResultItem,
@@ -106,7 +101,6 @@ export default function SearchScreen() {
     items: recentSearchItems,
     isLoading: isRecentSearchesLoading,
     recordQuery: recordRecentQuery,
-    recordEntity: recordRecentEntity,
     removeItem: removeRecentSearchItem,
     clearAll: clearRecentSearches,
   } = useRecentSearches();
@@ -195,11 +189,6 @@ export default function SearchScreen() {
     (suggestion: SearchAutocompleteItem) => {
       Keyboard.dismiss();
 
-      const recentEntity = mapAutocompleteToRecentEntity(suggestion);
-      if (recentEntity) {
-        void recordRecentEntity(recentEntity);
-      }
-
       if (suggestion.type === 'person' && suggestion.tmdbId) {
         openPersonDetail(router, suggestion.tmdbId);
         return;
@@ -212,7 +201,7 @@ export default function SearchScreen() {
 
       submitSearch(suggestion.title);
     },
-    [queryClient, recordRecentEntity, router, submitSearch],
+    [queryClient, router, submitSearch],
   );
 
   const handleRecentQuerySelect = useCallback(
@@ -223,36 +212,9 @@ export default function SearchScreen() {
     [recordRecentQuery, submitSearch],
   );
 
-  const handleRecentEntitySelect = useCallback(
-    (item: Extract<RecentSearchStoredItem, { kind: 'entity' }>) => {
-      Keyboard.dismiss();
-      void recordRecentEntity(item);
-
-      if (item.entityType === 'person' && item.tmdbId) {
-        openPersonDetail(router, item.tmdbId);
-        return;
-      }
-
-      if (
-        (item.entityType === 'movie' || item.entityType === 'tv') &&
-        item.catalogId
-      ) {
-        openCatalogDetailFromTab(router, item.catalogId, item.entityType, 'search', {
-          queryClient,
-        });
-      }
-    },
-    [queryClient, recordRecentEntity, router],
-  );
-
   const handleResultPress = useCallback(
     (item: SearchResultItem) => {
       Keyboard.dismiss();
-
-      const recentEntity = mapSearchResultToRecentEntity(item);
-      if (recentEntity) {
-        void recordRecentEntity(recentEntity);
-      }
 
       if (isPersonSearchResult(item)) {
         openPersonDetail(router, item.tmdbId);
@@ -261,7 +223,7 @@ export default function SearchScreen() {
 
       openCatalogDetailFromTab(router, item.id, item.type, 'search', { queryClient });
     },
-    [queryClient, recordRecentEntity, router],
+    [queryClient, router],
   );
 
   const handleDeleteRecentSearchItem = useCallback(
@@ -431,8 +393,7 @@ export default function SearchScreen() {
             items={recentSearchItems}
             isClearing={isClearingRecentSearches}
             deletingId={deletingHistoryId}
-            onSelectQuery={handleRecentQuerySelect}
-            onSelectEntity={handleRecentEntitySelect}
+            onSelect={handleRecentQuerySelect}
             onDelete={handleDeleteRecentSearchItem}
             onClearAll={handleClearRecentSearches}
           />

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import SearchScreen from '../../../app/(tabs)/(app-shell)/search';
 import { useAutocomplete } from '@/features/search/hooks/useAutocomplete';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
@@ -7,7 +7,6 @@ import { trackProductMetric } from '@/features/metrics/track-product-metric';
 
 const mockPush = jest.fn();
 const mockRecordQuery = jest.fn().mockResolvedValue([]);
-const mockRecordEntity = jest.fn().mockResolvedValue([]);
 const mockRemoveItem = jest.fn().mockResolvedValue([]);
 const mockClearAll = jest.fn().mockResolvedValue([]);
 
@@ -74,16 +73,6 @@ jest.mock('@/features/metrics/track-product-metric', () => ({
   trackProductMetric: jest.fn(),
 }));
 
-const recentEntity = {
-  id: 'recent-entity-1',
-  kind: 'entity' as const,
-  entityType: 'movie' as const,
-  catalogId: 'movie-id',
-  title: 'Inception',
-  posterUrl: null,
-  accessedAt: Date.now(),
-};
-
 describe('SearchScreen recent searches', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -108,7 +97,6 @@ describe('SearchScreen recent searches', () => {
       items: [],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveItem,
       clearAll: mockClearAll,
     });
@@ -119,14 +107,12 @@ describe('SearchScreen recent searches', () => {
       items: [
         {
           id: 'recent-query-1',
-          kind: 'query',
           query: 'inception',
           accessedAt: Date.now(),
         },
       ],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveItem,
       clearAll: mockClearAll,
     });
@@ -150,7 +136,7 @@ describe('SearchScreen recent searches', () => {
     expect(trackProductMetric).toHaveBeenCalledWith('search_submitted');
   });
 
-  it('records entity on result press before navigation', async () => {
+  it('does not record recent search when tapping a result', () => {
     (useSearchResults as jest.Mock).mockReturnValue({
       data: {
         pages: [
@@ -189,35 +175,31 @@ describe('SearchScreen recent searches', () => {
 
     fireEvent.press(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.0'));
 
-    await waitFor(() => {
-      expect(mockRecordEntity).toHaveBeenCalledWith(
-        expect.objectContaining({
-          entityType: 'movie',
-          catalogId: 'movie-id',
-          title: 'Inception',
-        }),
-      );
-    });
-
+    expect(mockRecordQuery).toHaveBeenCalledTimes(1);
     expect(mockOpenCatalogDetailFromTab).toHaveBeenCalled();
   });
 
-  it('navigates from recent entity rows', () => {
+  it('submits search when a recent query row is tapped', () => {
     (useRecentSearches as jest.Mock).mockReturnValue({
-      items: [recentEntity],
+      items: [
+        {
+          id: 'recent-query-1',
+          query: 'nolan',
+          accessedAt: Date.now(),
+        },
+      ],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveItem,
       clearAll: mockClearAll,
     });
 
     render(<SearchScreen />);
 
-    fireEvent.press(screen.getByLabelText('Open Inception, Movie'));
+    fireEvent.press(screen.getByLabelText('Search for nolan'));
 
-    expect(mockRecordEntity).toHaveBeenCalled();
-    expect(mockOpenCatalogDetailFromTab).toHaveBeenCalled();
+    expect(useSearchResults).toHaveBeenLastCalledWith('nolan', 'all');
+    expect(mockRecordQuery).toHaveBeenCalledWith('nolan');
   });
 
   it('clears and deletes recent items', () => {
@@ -225,14 +207,12 @@ describe('SearchScreen recent searches', () => {
       items: [
         {
           id: 'recent-query-1',
-          kind: 'query',
           query: 'inception',
           accessedAt: Date.now(),
         },
       ],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveItem,
       clearAll: mockClearAll,
     });

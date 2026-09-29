@@ -47,7 +47,6 @@ jest.mock('@/features/search/hooks/useRecentSearches', () => ({
 }));
 
 const mockRecordQuery = jest.fn().mockResolvedValue([]);
-const mockRecordEntity = jest.fn().mockResolvedValue([]);
 const mockRemoveRecentItem = jest.fn().mockResolvedValue([]);
 const mockClearRecentSearches = jest.fn().mockResolvedValue([]);
 
@@ -124,7 +123,6 @@ describe('SearchScreen', () => {
       items: [],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveRecentItem,
       clearAll: mockClearRecentSearches,
     });
@@ -236,14 +234,12 @@ describe('SearchScreen', () => {
       items: [
         {
           id: 'history-1',
-          kind: 'query',
           query: 'inception',
           accessedAt: Date.now(),
         },
       ],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveRecentItem,
       clearAll: mockClearRecentSearches,
     });
@@ -674,14 +670,12 @@ describe('SearchScreen', () => {
       items: [
         {
           id: 'history-1',
-          kind: 'query',
           query: 'inception',
           accessedAt: Date.now(),
         },
       ],
       isLoading: false,
       recordQuery: mockRecordQuery,
-      recordEntity: mockRecordEntity,
       removeItem: mockRemoveRecentItem,
       clearAll: mockClearRecentSearches,
     });

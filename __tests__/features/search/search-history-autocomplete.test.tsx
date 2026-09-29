@@ -9,8 +9,7 @@ describe('search history and autocomplete UI', () => {
         items={[]}
         isClearing={false}
         deletingId={null}
-        onSelectQuery={jest.fn()}
-        onSelectEntity={jest.fn()}
+        onSelect={jest.fn()}
         onDelete={jest.fn()}
         onClearAll={jest.fn()}
       />,
@@ -20,29 +19,27 @@ describe('search history and autocomplete UI', () => {
   });
 
   it('selects a history item', () => {
-    const onSelectQuery = jest.fn();
+    const onSelect = jest.fn();
 
     render(
       <SearchHistorySection
         items={[
           {
             id: 'history-1',
-            kind: 'query',
             query: 'interstellar',
             accessedAt: Date.now(),
           },
         ]}
         isClearing={false}
         deletingId={null}
-        onSelectQuery={onSelectQuery}
-        onSelectEntity={jest.fn()}
+        onSelect={onSelect}
         onDelete={jest.fn()}
         onClearAll={jest.fn()}
       />,
     );
 
     fireEvent.press(screen.getByLabelText('Search for interstellar'));
-    expect(onSelectQuery).toHaveBeenCalledWith('interstellar');
+    expect(onSelect).toHaveBeenCalledWith('interstellar');
   });
 
   it('deletes a history item', () => {
@@ -53,15 +50,13 @@ describe('search history and autocomplete UI', () => {
         items={[
           {
             id: 'history-1',
-            kind: 'query',
             query: 'breaking bad',
             accessedAt: Date.now(),
           },
         ]}
         isClearing={false}
         deletingId={null}
-        onSelectQuery={jest.fn()}
-        onSelectEntity={jest.fn()}
+        onSelect={jest.fn()}
         onDelete={onDelete}
         onClearAll={jest.fn()}
       />,

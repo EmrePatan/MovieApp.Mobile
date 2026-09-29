@@ -1,6 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
 import {
-  addRecentEntity,
   addRecentQuery,
   clearRecentSearches,
   loadRecentSearches,
@@ -38,15 +37,10 @@ describe('recent-search-storage', () => {
     const userItems = await loadRecentSearches('user-a');
 
     expect(guestItems).toHaveLength(1);
-    expect(guestItems[0].kind).toBe('query');
-    if (guestItems[0].kind === 'query') {
-      expect(guestItems[0].query).toBe('guest-query');
-    }
+    expect(guestItems[0].query).toBe('guest-query');
 
     expect(userItems).toHaveLength(1);
-    if (userItems[0].kind === 'query') {
-      expect(userItems[0].query).toBe('user-query');
-    }
+    expect(userItems[0].query).toBe('user-query');
   });
 
   it('removes and clears within the active namespace', async () => {
@@ -56,11 +50,7 @@ describe('recent-search-storage', () => {
     const afterRemove = await removeRecentSearchItem(null, id);
     expect(afterRemove).toHaveLength(0);
 
-    await addRecentEntity(null, {
-      entityType: 'tv',
-      catalogId: 'tv-1',
-      title: 'Severance',
-    });
+    await addRecentQuery(null, 'two');
 
     const cleared = await clearRecentSearches(null);
     expect(cleared).toHaveLength(0);

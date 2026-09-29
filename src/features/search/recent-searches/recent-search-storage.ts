@@ -1,6 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
 import {
-  applyAddRecentEntity,
   applyAddRecentQuery,
   applyClearRecentSearches,
   applyRemoveRecentSearchItem,
@@ -8,7 +7,7 @@ import {
   parseStoredRecentSearches,
   resolveRecentSearchNamespace,
 } from './recent-search-logic';
-import type { RecentSearchEntityPayload, RecentSearchStoredItem } from './recent-search-types';
+import type { RecentSearchStoredItem } from './recent-search-types';
 
 const writeQueues = new Map<string, Promise<unknown>>();
 
@@ -51,21 +50,6 @@ export async function addRecentQuery(
   return enqueueWrite(namespace, async () => {
     const current = await readItems(namespace);
     const next = applyAddRecentQuery(current, query, accessedAt);
-    await writeItems(namespace, next);
-    return next;
-  });
-}
-
-export async function addRecentEntity(
-  userId: string | null | undefined,
-  entity: Omit<RecentSearchEntityPayload, 'accessedAt'>,
-): Promise<RecentSearchStoredItem[]> {
-  const namespace = resolveRecentSearchNamespace(userId);
-  const accessedAt = Date.now();
-
-  return enqueueWrite(namespace, async () => {
-    const current = await readItems(namespace);
-    const next = applyAddRecentEntity(current, entity, accessedAt);
     await writeItems(namespace, next);
     return next;
   });

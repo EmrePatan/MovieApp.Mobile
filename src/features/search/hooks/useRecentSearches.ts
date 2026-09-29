@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/auth/useAuth';
 import {
-  addRecentEntity,
   addRecentQuery,
   clearRecentSearches,
   loadRecentSearches,
   removeRecentSearchItem,
 } from '../recent-searches/recent-search-storage';
-import type {
-  RecentSearchEntityPayload,
-  RecentSearchStoredItem,
-} from '../recent-searches/recent-search-types';
+import type { RecentSearchStoredItem } from '../recent-searches/recent-search-types';
 
 export function useRecentSearches() {
   const { user } = useAuth();
@@ -43,15 +39,6 @@ export function useRecentSearches() {
     [userId],
   );
 
-  const recordEntity = useCallback(
-    async (entity: Omit<RecentSearchEntityPayload, 'accessedAt'>) => {
-      const next = await addRecentEntity(userId, entity);
-      setItems(next);
-      return next;
-    },
-    [userId],
-  );
-
   const removeItem = useCallback(
     async (id: string) => {
       const next = await removeRecentSearchItem(userId, id);
@@ -71,7 +58,6 @@ export function useRecentSearches() {
     items,
     isLoading,
     recordQuery,
-    recordEntity,
     removeItem,
     clearAll,
   };

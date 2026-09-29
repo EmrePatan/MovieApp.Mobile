@@ -1,5 +1,4 @@
 import {
-  applyAddRecentEntity,
   applyAddRecentQuery,
   applyClearRecentSearches,
   applyRemoveRecentSearchItem,
@@ -21,7 +20,6 @@ describe('recent-search-logic', () => {
   it('persists and promotes queries', () => {
     const first = applyAddRecentQuery([], 'Inception', t0);
     expect(first).toHaveLength(1);
-    expect(first[0].kind).toBe('query');
     expect(first[0].query).toBe('Inception');
 
     const second = applyAddRecentQuery(first, 'inception', t1);
@@ -30,55 +28,19 @@ describe('recent-search-logic', () => {
     expect(second[0].accessedAt).toBe(t1);
   });
 
-  it('persists and promotes entities', () => {
-    const first = applyAddRecentEntity(
-      [],
-      {
-        entityType: 'movie',
-        catalogId: 'movie-1',
-        title: 'Interstellar',
-      },
-      t0,
-    );
-
-    const second = applyAddRecentEntity(
-      first,
-      {
-        entityType: 'movie',
-        catalogId: 'movie-1',
-        title: 'Interstellar',
-      },
-      t1,
-    );
-
-    expect(second).toHaveLength(1);
-    expect(second[0].id).toBe(first[0].id);
-    expect(second[0].accessedAt).toBe(t1);
-  });
-
-  it('replaces redundant query when entity title matches', () => {
-    const withQuery = applyAddRecentQuery([], 'Interstellar', t0);
-    const withEntity = applyAddRecentEntity(
-      withQuery,
-      {
-        entityType: 'movie',
-        catalogId: 'movie-1',
-        title: 'Interstellar',
-      },
-      t1,
-    );
-
-    expect(withEntity).toHaveLength(1);
-    expect(withEntity[0].kind).toBe('entity');
-  });
-
-  it('enforces max item count', () => {
-    let items = applyAddRecentQuery([], 'first', t0);
-    for (let index = 0; index < MAX_RECENT_SEARCHES + 5; index += 1) {
-      items = applyAddRecentQuery(items, `query-${index}`, t0 + index);
-    }
-
+  it('enforces max item count and drops oldest on sixth unique query', () => {
+    let items = applyAddRecentQuery([], 'q1', t0);
+    items = applyAddRecentQuery(items, 'q2', t0 + 1);
+    items = applyAddRecentQuery(items, 'q3', t0 + 2);
+    items = applyAddRecentQuery(items, 'q4', t0 + 3);
+    items = applyAddRecentQuery(items, 'q5', t0 + 4);
     expect(items).toHaveLength(MAX_RECENT_SEARCHES);
+    expect(items[0].query).toBe('q5');
+
+    items = applyAddRecentQuery(items, 'q6', t0 + 5);
+    expect(items).toHaveLength(MAX_RECENT_SEARCHES);
+    expect(items[0].query).toBe('q6');
+    expect(items.map((item) => item.query)).not.toContain('q1');
   });
 
   it('removes one item and clears all', () => {
@@ -94,26 +56,26 @@ describe('recent-search-logic', () => {
     expect(parseStoredRecentSearches('{"bad":true}')).toEqual([]);
   });
 
-  it('parses valid stored entities with catalogId', () => {
+  it('ignores legacy entity rows when parsing', () => {
     const raw = JSON.stringify([
       {
         id: 'row-1',
         kind: 'entity',
         entityType: 'person',
-        catalogId: 'person-1',
-        tmdbId: 42,
         title: 'Ada',
         accessedAt: t0,
+      },
+      {
+        id: 'row-2',
+        kind: 'query',
+        query: 'nolan',
+        accessedAt: t1,
       },
     ]);
 
     const parsed = parseStoredRecentSearches(raw);
     expect(parsed).toHaveLength(1);
-    expect(parsed[0].kind).toBe('entity');
-    if (parsed[0].kind === 'entity') {
-      expect(parsed[0].catalogId).toBe('person-1');
-      expect(parsed[0].tmdbId).toBe(42);
-    }
+    expect(parsed[0].query).toBe('nolan');
   });
 
   it('isolates namespaces', () => {
