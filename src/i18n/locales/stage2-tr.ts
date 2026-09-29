@@ -823,6 +823,15 @@ export const stage2Tr = {
       opensPortraitFullscreen: 'Tam ekran portreyi açar',
       photos: 'Fotoğraflar',
     },
+    watchProviders: {
+      groups: {
+        flatrate: 'Abonelikle İzle',
+        free: 'Ücretsiz',
+        ads: 'Reklamlı',
+        rent: 'Kirala',
+        buy: 'Satın Al',
+      },
+    },
     metadata: {
       seasonDetail: 'Sezon {{number}}',
       episodeDetail: 'S{{season}} B{{episode}}',

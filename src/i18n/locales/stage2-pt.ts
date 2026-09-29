@@ -823,6 +823,15 @@ export const stage2Pt = {
       opensPortraitFullscreen: 'Abre retrato em tela cheia',
       photos: 'Fotos',
     },
+    watchProviders: {
+      groups: {
+        flatrate: 'Incluído na assinatura',
+        free: 'Grátis',
+        ads: 'Com anúncios',
+        rent: 'Alugar',
+        buy: 'Comprar',
+      },
+    },
     metadata: {
       seasonDetail: 'Temporada {{number}}',
       episodeDetail: 'T{{season}} E{{episode}}',

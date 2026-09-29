@@ -45,6 +45,19 @@ describe('catalog-detail-navigation watchRegion context', () => {
     expect(router.push).toHaveBeenCalledTimes(1);
   });
 
+  it('clears contextual watchRegion when opening another detail from a detail screen', () => {
+    const router = { push: jest.fn() };
+
+    openCatalogDetailFromLibraryStack(router, 'movie-1', 'movie', 'discover', {
+      watchRegion: 'US',
+    });
+    expect(getCatalogDetailWatchRegion()).toBe('US');
+
+    openCatalogDetailFromDetail(router, 'movie-2', 'movie');
+
+    expect(getCatalogDetailWatchRegion()).toBeNull();
+  });
+
   it('pushes one detail entry per recommendation tap burst from a detail screen', () => {
     const router = { push: jest.fn() };
 

@@ -51,6 +51,8 @@ export async function openCatalogDetailFromFilmography(
   entry: PersonFilmographyEntry,
   options?: OpenCatalogDetailOptions,
 ): Promise<string> {
+  lastCatalogDetailWatchRegion = options?.watchRegion ?? null;
+
   if (entry.catalogId) {
     const href = buildCatalogDetailRoute(entry.catalogId, entry.mediaType);
     if (options?.queryClient) {
@@ -104,6 +106,7 @@ export function openCatalogDetailFromDetail(
   id: string,
   type: 'movie' | 'tv',
 ): void {
+  lastCatalogDetailWatchRegion = null;
   pushCatalogDetailRoute(router, buildCatalogDetailRoute(id, type), `${type}:${id}`);
 }
 

@@ -60,7 +60,52 @@ describe('WhereToWatchRail', () => {
     expect(screen.getByText('Where to Watch')).toBeTruthy();
     expect(screen.queryByTestId('where-to-watch-region')).toBeNull();
     expect(screen.queryByText('US')).toBeNull();
-    expect(screen.getByTestId('watch-provider-logo-8')).toBeTruthy();
+    expect(screen.getByTestId('watch-provider-logo-flatrate-8')).toBeTruthy();
+    expect(screen.getByTestId('where-to-watch-group-flatrate')).toBeTruthy();
+    expect(screen.getByText('Included with Subscription')).toBeTruthy();
+    expect(screen.queryByTestId('where-to-watch-group-rent')).toBeNull();
+  });
+
+  it('renders providers in separate monetization groups', () => {
+    (useRegionalPreference as jest.Mock).mockReturnValue({
+      region: 'TR',
+      isHydrated: true,
+    });
+    (useMovieWatchProviders as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: {
+        region: 'TR',
+        attributionLink: null,
+        providers: [
+          {
+            providerId: 2,
+            name: 'Apple TV',
+            logoPath: '/apple.png',
+            displayPriority: 1,
+            availabilityTypes: ['rent', 'buy'],
+            link: null,
+          },
+          {
+            providerId: 8,
+            name: 'Netflix',
+            logoPath: '/netflix.png',
+            displayPriority: 2,
+            availabilityTypes: ['flatrate'],
+            link: null,
+          },
+        ],
+      },
+    });
+
+    render(<WhereToWatchRail contentType="movie" contentId={movieId} />);
+
+    expect(screen.getByTestId('where-to-watch-group-flatrate')).toBeTruthy();
+    expect(screen.getByTestId('where-to-watch-group-rent')).toBeTruthy();
+    expect(screen.getByTestId('where-to-watch-group-buy')).toBeTruthy();
+    expect(screen.getAllByTestId('watch-provider-rent-2')).toHaveLength(1);
+    expect(screen.getAllByTestId('watch-provider-buy-2')).toHaveLength(1);
+    expect(screen.queryByTestId('where-to-watch-group-free')).toBeNull();
   });
 
   it('waits for hydration before fetching with user region', () => {
