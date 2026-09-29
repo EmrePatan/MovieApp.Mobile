@@ -27,7 +27,7 @@ import {
 } from '../utils/home-hero-layout';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
-import { resolveImageUri } from '@/utils/image-url';
+import { resolveHomeHeroPrefetchUri } from '../utils/home-hero-image';
 import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 6000;
@@ -160,7 +160,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
       return;
     }
 
-    const nextUri = resolveImageUri(nextItem.backdropUrl ?? nextItem.posterUrl);
+    const nextUri = resolveHomeHeroPrefetchUri(nextItem);
     if (nextUri) {
       void Image.prefetch(nextUri);
     }
