@@ -215,7 +215,7 @@ export function AiRecommendationsContent() {
 
     return (
       <View style={styles.resultsSection} testID="ai-recommendations-results">
-        {response.partialResults ? (
+        {response.partialResults && rejectedCount > 0 ? (
           <View style={styles.infoBanner}>
             <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
             <AppText variant="caption" style={styles.infoBannerText}>
@@ -264,17 +264,6 @@ export function AiRecommendationsContent() {
         <View style={styles.actionsSection}>
           <View style={styles.actionBlock}>
             <AppButton
-              title={t('aiRecommendations.getMorePicks')}
-              variant="secondary"
-              onPress={handleSubmit}
-              disabled={isQuotaExhausted}
-            />
-            <AppText variant="caption" muted center style={styles.actionHint}>
-              {t('aiRecommendations.getMorePicksHint')}
-            </AppText>
-          </View>
-          <View style={styles.actionBlock}>
-            <AppButton
               title={t('aiRecommendations.startFresh')}
               variant="ghost"
               onPress={handleStartOver}
@@ -290,8 +279,6 @@ export function AiRecommendationsContent() {
     handleItemPress,
     handleRetry,
     handleStartOver,
-    handleSubmit,
-    isQuotaExhausted,
     recommendationsMutation.data,
     recommendationsMutation.error,
     recommendationsMutation.isError,

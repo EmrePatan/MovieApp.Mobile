@@ -63,7 +63,7 @@ const successResponse = {
   sessionId: 'session-1',
   isAiGenerated: true,
   partialResults: false,
-  requestedCount: 5,
+  requestedCount: 10,
   returnedCount: 1,
   quotaRemaining: 2,
   recommendations: [
@@ -146,15 +146,12 @@ describe('AiRecommendationsContent', () => {
     expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
       '2 of 3 requests left today',
     );
-    expect(screen.getByText('1 of up to 5 picks · 2 requests left today')).toBeTruthy();
-    expect(screen.getByText('Each request returns up to 5 catalog matches.')).toBeTruthy();
+    expect(screen.getByText('1 of up to 10 picks · 2 requests left today')).toBeTruthy();
+    expect(screen.getByText('Each request returns up to 10 catalog matches.')).toBeTruthy();
     expect(screen.getByText('Why it fits')).toBeTruthy();
     expect(screen.getByTestId('ai-recommendations-collapsed-prompt')).toBeTruthy();
     expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
-    expect(screen.getByText('Get More Picks')).toBeTruthy();
-    expect(
-      screen.getByText('Get new picks with the same prompt · Uses 1 request'),
-    ).toBeTruthy();
+    expect(screen.queryByText('Get More Picks')).toBeNull();
     expect(screen.getByText('Start Fresh')).toBeTruthy();
     expect(screen.queryByText('Refine This Session')).toBeNull();
     expect(postAiRecommendations).toHaveBeenCalledWith({
@@ -162,50 +159,6 @@ describe('AiRecommendationsContent', () => {
       sessionId: null,
     });
     expect(trackProductMetric).toHaveBeenCalledWith('ai_recommendations_generated');
-  });
-
-  it('requests more picks in the same session from results actions', async () => {
-    (postAiRecommendations as jest.Mock).mockResolvedValue(successResponse);
-
-    renderScreen();
-    await waitForQuotaHydration();
-
-    fireEvent.changeText(
-      screen.getByLabelText('AI recommendation prompt'),
-      'mind-bending sci-fi with emotional stakes',
-    );
-    fireEvent.press(screen.getByText('Get Recommendations'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
-    });
-
-    (postAiRecommendations as jest.Mock).mockResolvedValue({
-      ...successResponse,
-      returnedCount: 2,
-      quotaRemaining: 1,
-      recommendations: [
-        ...successResponse.recommendations,
-        {
-          ...successResponse.recommendations[0],
-          id: 'movie-2',
-          title: 'Interstellar',
-        },
-      ],
-    });
-
-    fireEvent.press(screen.getByText('Get More Picks'));
-
-    await waitFor(() => {
-      expect(postAiRecommendations).toHaveBeenLastCalledWith({
-        message: 'mind-bending sci-fi with emotional stakes',
-        sessionId: 'session-1',
-      });
-      expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
-        '1 of 3 requests left today',
-      );
-      expect(screen.getByText('2 of up to 5 picks · 1 requests left today')).toBeTruthy();
-    });
   });
 
   it('shows quota exceeded state for rate limited responses', async () => {
@@ -273,6 +226,38 @@ describe('AiRecommendationsContent', () => {
     expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
   });
 
+  it('does not show catalog mismatch banner when partialResults is true but nothing was rejected', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue({
+      ...successResponse,
+      partialResults: true,
+      returnedCount: 1,
+      validationSummary: {
+        geminiSuggestionCount: 1,
+        validatedCount: 1,
+        rejectedCount: 0,
+      },
+    });
+
+    renderScreen();
+    await waitForQuotaHydration();
+
+    fireEvent.changeText(
+      screen.getByLabelText('AI recommendation prompt'),
+      'mind-bending sci-fi with emotional stakes',
+    );
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
+    });
+
+    expect(
+      screen.queryByText(
+        '0 suggestions could not be matched to the Movie Cave catalog. Showing what we found.',
+      ),
+    ).toBeNull();
+  });
+
   it('shows low-yield guidance when fewer picks match than requested', async () => {
     (postAiRecommendations as jest.Mock).mockResolvedValue({
       ...successResponse,
@@ -296,7 +281,7 @@ describe('AiRecommendationsContent', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          'Only 1 of up to 5 picks matched the catalog. 2 suggestions were filtered out.',
+          'Only 1 of up to 10 picks matched the catalog. 2 suggestions were filtered out.',
         ),
       ).toBeTruthy();
     });

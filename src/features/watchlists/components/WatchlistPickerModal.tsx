@@ -261,15 +261,15 @@ function WatchlistPickerBody({
   );
 
   return (
-    <AppBottomSheetChrome
-      onClose={handleClose}
-      title={t('common.addToWatchlist')}
-      align="stretch"
-      testID="watchlist-picker-sheet"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.keyboardAvoidRoot}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardAvoid}
+      <AppBottomSheetChrome
+        onClose={handleClose}
+        title={t('common.addToWatchlist')}
+        align="stretch"
+        testID="watchlist-picker-sheet"
       >
         {errorMessage ? (
           <FeedbackMessage
@@ -370,15 +370,15 @@ function WatchlistPickerBody({
                 </Pressable>
               </View>
         </View>
-      </KeyboardAvoidingView>
-    </AppBottomSheetChrome>
+      </AppBottomSheetChrome>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoid: {
-    width: '100%',
-    gap: spacing.sm,
+  keyboardAvoidRoot: {
+    flex: 1,
+    justifyContent: 'flex-end',
   },
   listsSection: {
     gap: spacing.xs,

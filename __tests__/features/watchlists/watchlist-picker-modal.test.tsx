@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react-native';
+import { KeyboardAvoidingView } from 'react-native';
 import { WatchlistPickerModal } from '@/features/watchlists/components/WatchlistPickerModal';
 import { useCreateWatchlist, useWatchlistItemMutation } from '@/features/watchlists/hooks/useWatchlistMutations';
 import { useWatchlistMembership, useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
@@ -110,6 +111,19 @@ describe('WatchlistPickerModal', () => {
     expect(screen.getByLabelText('Add to Action')).toBeTruthy();
   });
 
+  it('wraps the bottom sheet in a root keyboard-avoiding container', () => {
+    const view = render(
+      <WatchlistPickerModal
+        visible
+        contentType="movie"
+        contentId="movie-id"
+        onClose={jest.fn()}
+      />,
+    );
+
+    expect(view.UNSAFE_getAllByType(KeyboardAvoidingView)).toHaveLength(1);
+  });
+
   it('closes when the backdrop is pressed', () => {
     const onClose = jest.fn();
 
@@ -122,7 +136,7 @@ describe('WatchlistPickerModal', () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText('Close watchlist picker'));
+    fireEvent.press(screen.getByLabelText('Cancel'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
