@@ -15,7 +15,7 @@ export function buildRecentSearchStorageKey(namespace: string): string {
 
 export function resolveRecentSearchNamespace(userId: string | null | undefined): string {
   if (userId) {
-    return `user:${userId}`;
+    return `user.${userId}`;
   }
 
   return 'guest';

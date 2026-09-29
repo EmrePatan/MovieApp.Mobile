@@ -3,6 +3,7 @@ import {
   applyAddRecentQuery,
   applyClearRecentSearches,
   applyRemoveRecentSearchItem,
+  buildRecentSearchStorageKey,
   normalizeRecentQueryIdentity,
   parseStoredRecentSearches,
   resolveRecentSearchNamespace,
@@ -117,6 +118,14 @@ describe('recent-search-logic', () => {
 
   it('isolates namespaces', () => {
     expect(resolveRecentSearchNamespace(null)).toBe('guest');
-    expect(resolveRecentSearchNamespace('abc')).toBe('user:abc');
+    expect(resolveRecentSearchNamespace('abc')).toBe('user.abc');
+  });
+
+  it('builds SecureStore-safe storage keys without colon', () => {
+    expect(buildRecentSearchStorageKey('guest')).toBe('search-recent-guest');
+
+    const authenticatedKey = buildRecentSearchStorageKey(resolveRecentSearchNamespace('abc'));
+    expect(authenticatedKey).toBe('search-recent-user.abc');
+    expect(authenticatedKey).not.toContain(':');
   });
 });
