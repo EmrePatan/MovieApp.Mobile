@@ -39,6 +39,7 @@ export function HomeHeaderActionCluster({ overlay = false }: HomeHeaderActionClu
       ? t('common.openNotifications')
       : t('common.openNotificationsUnread', { count: badgeLabel });
   const iconSize = overlay ? 20 : 23;
+  const headerActionIconColor = overlay ? colors.accentStrong : colors.accent;
 
   return (
     <View
@@ -56,7 +57,7 @@ export function HomeHeaderActionCluster({ overlay = false }: HomeHeaderActionClu
           pressed && { opacity: interaction.subtlePressedOpacity },
         ]}
       >
-        <Ionicons name="search-outline" size={iconSize} color={colors.textPrimary} />
+        <Ionicons name="search-outline" size={iconSize} color={headerActionIconColor} />
         <AppText variant="bodySmall" numberOfLines={1} style={homeHeaderStyles.searchPlaceholder}>
           {t('home.search.placeholder')}
         </AppText>
@@ -69,7 +70,7 @@ export function HomeHeaderActionCluster({ overlay = false }: HomeHeaderActionClu
         compact
         onPress={() => openLibraryStackScreen(router, '/notifications', '/(tabs)/home')}
       >
-        <Ionicons name="notifications-outline" size={iconSize} color={colors.textPrimary} />
+        <Ionicons name="notifications-outline" size={iconSize} color={headerActionIconColor} />
       </HomeHeaderIconButton>
       <View style={homeHeaderStyles.actionDivider} />
       <HomeHeaderProfileAvatar
