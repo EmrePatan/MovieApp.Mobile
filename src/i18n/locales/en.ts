@@ -203,6 +203,21 @@ const stage1En = {
     emailChangeSocialReauthHint:
       'You will confirm with a linked provider when you submit this change.',
     emailChangeReauthRequired: 'Link a sign-in provider before changing your email.',
+    emailUnchanged: 'The new email address must be different from your current email.',
+    noPendingEmailChange: 'There is no pending email change on your account.',
+    chooseReauthProviderHint: 'Choose how to confirm your Movie Cave account.',
+    emailPendingTitle: 'Verify your new email',
+    emailPendingDescription:
+      'We sent a verification link to {{email}}. Your current email stays active until you confirm this change.',
+    emailPendingCurrentEmailNote: 'Current email: {{email}}',
+    resendEmailVerification: 'Resend verification email',
+    emailVerificationResent: 'Verification email sent again.',
+    changeEmailAddress: 'Change email address',
+    backToSignInSecurity: 'Back to Sign-in & Security',
+    providerAlreadyLinked: 'This provider is already linked to your account.',
+    providerNotLinked: 'This provider is not linked to your account.',
+    targetProviderLinkedToAnotherUser:
+      'This sign-in provider is already linked to another Movie Cave account.',
   },
   validation: {
     emailRequired: 'Email is required.',

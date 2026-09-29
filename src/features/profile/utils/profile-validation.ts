@@ -37,6 +37,7 @@ export function validateUpdateProfile(displayName: string): UpdateProfileFormErr
 export function validateChangeEmail(
   email: string,
   currentPassword: string,
+  currentEmail?: string,
 ): ChangeEmailFormErrors {
   const errors: ChangeEmailFormErrors = {};
   const trimmedEmail = email.trim();
@@ -47,6 +48,11 @@ export function validateChangeEmail(
     errors.email = i18n.t('validation.emailInvalid');
   } else if (trimmedEmail.length > 320) {
     errors.email = i18n.t('validation.emailTooLong');
+  } else if (
+    currentEmail &&
+    trimmedEmail.localeCompare(currentEmail.trim(), undefined, { sensitivity: 'accent' }) === 0
+  ) {
+    errors.email = i18n.t('profile.emailUnchanged');
   }
 
   if (!currentPassword) {

@@ -12,8 +12,10 @@ jest.mock('expo-router', () => ({
 
 let mockProfileData: UserProfileResponse | undefined;
 
+const mockRefetch = jest.fn().mockResolvedValue(undefined);
+
 jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
-  useCurrentProfile: () => ({ data: mockProfileData }),
+  useCurrentProfile: () => ({ data: mockProfileData, refetch: mockRefetch, isSuccess: true }),
 }));
 
 jest.mock('@/features/details/shared/components/DetailScreenScaffold', () => ({
@@ -32,6 +34,7 @@ jest.mock('@/features/profile/hooks/useProfileMutations', () => ({
 describe('ChangeEmailScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRefetch.mockResolvedValue(undefined);
     mockChangeEmail.mockResolvedValue({ message: 'ok' });
     (requestSocialIdentityToken as jest.Mock).mockResolvedValue('social-reauth-token');
   });
@@ -58,10 +61,7 @@ describe('ChangeEmailScreen', () => {
         currentPassword: 'pass1234',
       });
       expect(requestSocialIdentityToken).not.toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: '/(auth)/check-email',
-        params: { email: 'new@example.com' },
-      });
+      expect(mockPush).toHaveBeenCalledWith('/profile/email-pending');
     });
   });
 
@@ -88,10 +88,7 @@ describe('ChangeEmailScreen', () => {
         reauthProvider: 'apple',
         reauthIdentityToken: 'social-reauth-token',
       });
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: '/(auth)/check-email',
-        params: { email: 'new@example.com' },
-      });
+      expect(mockPush).toHaveBeenCalledWith('/profile/email-pending');
     });
   });
 

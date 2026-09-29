@@ -8,6 +8,7 @@ export interface UserProfileResponse {
   createdAt: string;
   hasPassword: boolean;
   linkedProviders: SocialAuthProvider[];
+  pendingEmail?: string | null;
 }
 
 export interface UpdateProfileRequest {

@@ -10,6 +10,10 @@ export function buildChangeEmailPath(): string {
   return '/api/users/me/email';
 }
 
+export function buildResendPendingEmailChangePath(): string {
+  return '/api/users/me/email/pending/resend';
+}
+
 export function buildChangePasswordPath(): string {
   return '/api/users/me/password';
 }

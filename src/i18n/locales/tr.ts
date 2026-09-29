@@ -204,6 +204,21 @@ const stage1Tr = {
     emailChangeSocialReauthHint:
       'Bu değişikliği gönderdiğinde bağlı bir sağlayıcıyla doğrulama istenecek.',
     emailChangeReauthRequired: 'E-postayı değiştirmeden önce bir giriş sağlayıcısı bağla.',
+    emailUnchanged: 'Yeni e-posta adresi mevcut e-posta adresinden farklı olmalı.',
+    noPendingEmailChange: 'Hesabında bekleyen bir e-posta değişikliği yok.',
+    chooseReauthProviderHint: 'Movie Cave hesabını nasıl doğrulayacağını seç.',
+    emailPendingTitle: 'Yeni e-postanı doğrula',
+    emailPendingDescription:
+      '{{email}} adresine bir doğrulama bağlantısı gönderdik. Bu değişikliği onaylayana kadar mevcut e-posta aktif kalır.',
+    emailPendingCurrentEmailNote: 'Mevcut e-posta: {{email}}',
+    resendEmailVerification: 'Doğrulama e-postasını yeniden gönder',
+    emailVerificationResent: 'Doğrulama e-postası yeniden gönderildi.',
+    changeEmailAddress: 'E-posta adresini değiştir',
+    backToSignInSecurity: 'Giriş ve Güvenliğe dön',
+    providerAlreadyLinked: 'Bu sağlayıcı zaten hesabına bağlı.',
+    providerNotLinked: 'Bu sağlayıcı hesabına bağlı değil.',
+    targetProviderLinkedToAnotherUser:
+      'Bu giriş sağlayıcısı başka bir Movie Cave hesabına bağlı.',
   },
   validation: {
     emailRequired: 'E-posta gerekli.',

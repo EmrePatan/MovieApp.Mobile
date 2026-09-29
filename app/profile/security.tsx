@@ -19,6 +19,9 @@ import {
   useLinkExternalLoginMutation,
   useUnlinkExternalLoginMutation,
 } from '@/features/profile/hooks/useProfileMutations';
+import { useLinkedProviderReauthChoice } from '@/features/profile/hooks/useLinkedProviderReauthChoice';
+import { LinkedProviderReauthPicker } from '@/features/profile/components/LinkedProviderReauthPicker';
+import { obtainLinkedProviderReauth } from '@/features/profile/utils/linked-provider-reauth';
 import {
   canUnlinkProvider,
   getConnectableProviders,
@@ -37,6 +40,8 @@ export default function SignInSecurityScreen() {
   const unlinkProvider = useUnlinkExternalLoginMutation();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [activeProvider, setActiveProvider] = useState<SocialAuthProvider | null>(null);
+  const { pendingProviders, chooseProvider, selectProvider, cancelChoice } =
+    useLinkedProviderReauthChoice();
 
   const profile = profileQuery.data;
 
@@ -65,8 +70,8 @@ export default function SignInSecurityScreen() {
           return;
         }
 
-        const reauthProvider = reauthCandidates[0];
-        const reauthToken = await requestSocialIdentityToken(reauthProvider);
+        const { provider: reauthProvider, identityToken: reauthToken } =
+          await obtainLinkedProviderReauth(reauthCandidates, chooseProvider);
 
         await linkProvider.mutateAsync({
           targetProvider,
@@ -92,7 +97,7 @@ export default function SignInSecurityScreen() {
         setActiveProvider(null);
       }
     },
-    [activeProvider, linkProvider, profile, router, t],
+    [activeProvider, chooseProvider, linkProvider, profile, router, t],
   );
 
   const handleUnlink = useCallback(
@@ -167,6 +172,14 @@ export default function SignInSecurityScreen() {
         tone="error"
         onDismiss={() => setFeedback(null)}
       />
+
+      {pendingProviders ? (
+        <LinkedProviderReauthPicker
+          providers={pendingProviders}
+          onSelect={selectProvider}
+          onCancel={cancelChoice}
+        />
+      ) : null}
 
       <ProfileSection title={t('profile.email')}>
         <ProfileMenuRow

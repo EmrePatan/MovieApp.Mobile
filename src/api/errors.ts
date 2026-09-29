@@ -122,6 +122,17 @@ export const FINAL_SIGN_IN_METHOD_CANNOT_BE_REMOVED_CODE =
 export const PASSWORD_LOGIN_REQUIRES_VERIFIED_EMAIL_CODE =
   'PASSWORD_LOGIN_REQUIRES_VERIFIED_EMAIL';
 
+export const EMAIL_UNCHANGED_CODE = 'EMAIL_UNCHANGED';
+
+export const NO_PENDING_EMAIL_CHANGE_CODE = 'NO_PENDING_EMAIL_CHANGE';
+
+export const PROVIDER_ALREADY_LINKED_CODE = 'PROVIDER_ALREADY_LINKED';
+
+export const PROVIDER_NOT_LINKED_CODE = 'PROVIDER_NOT_LINKED';
+
+export const TARGET_PROVIDER_LINKED_TO_ANOTHER_USER_CODE =
+  'TARGET_PROVIDER_LINKED_TO_ANOTHER_USER';
+
 export function isEmailNotVerifiedError(error: unknown): boolean {
   return isApiError(error) && getProblemCode(error.responseBody) === EMAIL_NOT_VERIFIED_CODE;
 }
@@ -206,6 +217,26 @@ export function getLocalizedMessageForApiErrorCode(
 
   if (code === PASSWORD_LOGIN_REQUIRES_VERIFIED_EMAIL_CODE) {
     return i18n.t('profile.createPasswordRequiresVerifiedEmail');
+  }
+
+  if (code === EMAIL_UNCHANGED_CODE) {
+    return i18n.t('profile.emailUnchanged');
+  }
+
+  if (code === NO_PENDING_EMAIL_CHANGE_CODE) {
+    return i18n.t('profile.noPendingEmailChange');
+  }
+
+  if (code === PROVIDER_ALREADY_LINKED_CODE) {
+    return i18n.t('profile.providerAlreadyLinked');
+  }
+
+  if (code === PROVIDER_NOT_LINKED_CODE) {
+    return i18n.t('profile.providerNotLinked');
+  }
+
+  if (code === TARGET_PROVIDER_LINKED_TO_ANOTHER_USER_CODE) {
+    return i18n.t('profile.targetProviderLinkedToAnotherUser');
   }
 
   if (context === 'social' && code === 'CONFLICT') {

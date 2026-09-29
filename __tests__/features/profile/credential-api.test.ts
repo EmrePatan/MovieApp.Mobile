@@ -2,11 +2,13 @@ import { api } from '@/api/client';
 import {
   createPassword,
   linkExternalLogin,
+  resendPendingEmailChange,
   unlinkExternalLogin,
 } from '@/features/profile/api/credential-api';
 import {
   buildCreatePasswordPath,
   buildLinkProviderPath,
+  buildResendPendingEmailChangePath,
   buildUnlinkProviderPath,
 } from '@/features/profile/api/routes';
 
@@ -46,6 +48,12 @@ describe('credential api client', () => {
       reauthProvider: 'google',
       reauthIdentityToken: 'token',
     });
+  });
+
+  it('posts resend pending email change', async () => {
+    (api.post as jest.Mock).mockResolvedValue({ message: 'ok' });
+    await resendPendingEmailChange();
+    expect(api.post).toHaveBeenCalledWith(buildResendPendingEmailChangePath());
   });
 
   it('posts create password payload', async () => {

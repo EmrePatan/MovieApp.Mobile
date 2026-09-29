@@ -205,6 +205,21 @@ const stage1Pt = {
     emailChangeSocialReauthHint:
       'Ao enviar a alteração, você confirmará com um provedor vinculado.',
     emailChangeReauthRequired: 'Vincule um provedor de entrada antes de alterar o e-mail.',
+    emailUnchanged: 'O novo e-mail deve ser diferente do e-mail atual.',
+    noPendingEmailChange: 'Não há alteração de e-mail pendente na sua conta.',
+    chooseReauthProviderHint: 'Escolha como confirmar sua conta Movie Cave.',
+    emailPendingTitle: 'Verifique seu novo e-mail',
+    emailPendingDescription:
+      'Enviamos um link de verificação para {{email}}. Seu e-mail atual permanece ativo até você confirmar a alteração.',
+    emailPendingCurrentEmailNote: 'E-mail atual: {{email}}',
+    resendEmailVerification: 'Reenviar e-mail de verificação',
+    emailVerificationResent: 'E-mail de verificação reenviado.',
+    changeEmailAddress: 'Alterar endereço de e-mail',
+    backToSignInSecurity: 'Voltar para Entrada e segurança',
+    providerAlreadyLinked: 'Este provedor já está vinculado à sua conta.',
+    providerNotLinked: 'Este provedor não está vinculado à sua conta.',
+    targetProviderLinkedToAnotherUser:
+      'Este provedor de entrada já está vinculado a outra conta Movie Cave.',
   },
   validation: {
     emailRequired: 'O e-mail é obrigatório.',

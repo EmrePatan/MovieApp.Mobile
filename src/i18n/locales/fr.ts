@@ -207,6 +207,21 @@ const stage1Fr = {
       'Vous confirmera avec un fournisseur lié lors de l’envoi de cette modification.',
     emailChangeReauthRequired:
       'Liez un fournisseur de connexion avant de modifier votre e-mail.',
+    emailUnchanged: 'La nouvelle adresse e-mail doit être différente de l’adresse actuelle.',
+    noPendingEmailChange: 'Aucun changement d’e-mail en attente sur votre compte.',
+    chooseReauthProviderHint: 'Choisissez comment confirmer votre compte Movie Cave.',
+    emailPendingTitle: 'Vérifiez votre nouvelle adresse e-mail',
+    emailPendingDescription:
+      'Nous avons envoyé un lien de vérification à {{email}}. Votre e-mail actuel reste actif jusqu’à confirmation.',
+    emailPendingCurrentEmailNote: 'E-mail actuel : {{email}}',
+    resendEmailVerification: 'Renvoyer l’e-mail de vérification',
+    emailVerificationResent: 'E-mail de vérification renvoyé.',
+    changeEmailAddress: 'Modifier l’adresse e-mail',
+    backToSignInSecurity: 'Retour à Connexion et sécurité',
+    providerAlreadyLinked: 'Ce fournisseur est déjà lié à votre compte.',
+    providerNotLinked: 'Ce fournisseur n’est pas lié à votre compte.',
+    targetProviderLinkedToAnotherUser:
+      'Ce fournisseur de connexion est déjà lié à un autre compte Movie Cave.',
   },
   validation: {
     emailRequired: 'L’e-mail est requis.',

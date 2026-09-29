@@ -3,6 +3,7 @@ import { useAuth } from '@/auth/useAuth';
 import {
   createPassword,
   linkExternalLogin,
+  resendPendingEmailChange,
   unlinkExternalLogin,
 } from '../api/credential-api';
 import {
@@ -46,6 +47,17 @@ export function useChangeEmailMutation() {
 
   return useMutation({
     mutationFn: (payload: ChangeEmailRequest) => changeEmail(payload),
+    onSuccess: async () => {
+      invalidateProfileQueries(queryClient);
+    },
+  });
+}
+
+export function useResendPendingEmailChangeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => resendPendingEmailChange(),
     onSuccess: async () => {
       invalidateProfileQueries(queryClient);
     },

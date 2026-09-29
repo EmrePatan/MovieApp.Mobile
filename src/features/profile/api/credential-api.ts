@@ -2,6 +2,7 @@ import { api } from '@/api/client';
 import {
   buildCreatePasswordPath,
   buildLinkProviderPath,
+  buildResendPendingEmailChangePath,
   buildUnlinkProviderPath,
 } from './routes';
 import type {
@@ -10,6 +11,7 @@ import type {
   UnlinkExternalLoginRequest,
   UserProfileAuthResponse,
   UserProfileResponse,
+  MessageResponse,
 } from '../types';
 
 export async function linkExternalLogin(
@@ -29,4 +31,8 @@ export async function createPassword(
   payload: CreatePasswordRequest,
 ): Promise<UserProfileAuthResponse> {
   return api.post<UserProfileAuthResponse>(buildCreatePasswordPath(), payload);
+}
+
+export async function resendPendingEmailChange(): Promise<MessageResponse> {
+  return api.post<MessageResponse>(buildResendPendingEmailChangePath());
 }

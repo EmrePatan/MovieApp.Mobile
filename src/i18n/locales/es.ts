@@ -205,6 +205,21 @@ const stage1Es = {
     emailChangeSocialReauthHint:
       'Al enviar el cambio, confirmarás con un proveedor vinculado.',
     emailChangeReauthRequired: 'Vincula un proveedor de inicio de sesión antes de cambiar el correo.',
+    emailUnchanged: 'La nueva dirección de correo debe ser distinta de la actual.',
+    noPendingEmailChange: 'No hay ningún cambio de correo pendiente en tu cuenta.',
+    chooseReauthProviderHint: 'Elige cómo confirmar tu cuenta de Movie Cave.',
+    emailPendingTitle: 'Verifica tu nuevo correo',
+    emailPendingDescription:
+      'Enviamos un enlace de verificación a {{email}}. Tu correo actual sigue activo hasta que confirmes el cambio.',
+    emailPendingCurrentEmailNote: 'Correo actual: {{email}}',
+    resendEmailVerification: 'Reenviar correo de verificación',
+    emailVerificationResent: 'Correo de verificación enviado de nuevo.',
+    changeEmailAddress: 'Cambiar dirección de correo',
+    backToSignInSecurity: 'Volver a Inicio de sesión y seguridad',
+    providerAlreadyLinked: 'Este proveedor ya está vinculado a tu cuenta.',
+    providerNotLinked: 'Este proveedor no está vinculado a tu cuenta.',
+    targetProviderLinkedToAnotherUser:
+      'Este proveedor de inicio de sesión ya está vinculado a otra cuenta de Movie Cave.',
   },
   validation: {
     emailRequired: 'El correo es obligatorio.',
