@@ -14,7 +14,14 @@ import { borderRadius, spacing } from '@/theme/spacing';
 
 const DEFAULT_BLOCKING_ICON_GLYPH_SIZE = 32;
 const FORCED_UPDATE_ICON_GLYPH_SIZE = 36;
-const FORCED_UPDATE_PRIMARY_BUTTON_WIDTH_RATIO = 0.82;
+const COMPACT_BLOCKING_PRIMARY_BUTTON_WIDTH_RATIO = 0.82;
+
+function getCompactPrimaryButtonWidth(contentWidth: number): number {
+  return Math.max(
+    interaction.touchTarget,
+    Math.min(360, Math.round(contentWidth * COMPACT_BLOCKING_PRIMARY_BUTTON_WIDTH_RATIO)),
+  );
+}
 
 type BlockingIconName = keyof typeof Ionicons.glyphMap;
 
@@ -28,8 +35,8 @@ interface AppBlockingStateProps {
   primaryLoading?: boolean;
   footer?: ReactNode;
   preventHardwareBack?: boolean;
-  /** Forced-update polish: tighter logo/icon group, compact CTA, slightly larger glyph. */
-  presentation?: 'default' | 'forcedUpdate';
+  /** Blocking-screen layout variants (default = legacy stretch CTA). */
+  presentation?: 'default' | 'forcedUpdate' | 'maintenance';
 }
 
 function getLogoWidth(screenWidth: number): number {
@@ -54,14 +61,13 @@ export function AppBlockingState({
   const logoHeight = getMovieCaveLogoHeight(logoWidth);
   const contentWidth = width - layout.screenPaddingHorizontal * 2;
   const isForcedUpdatePresentation = presentation === 'forcedUpdate';
+  const usesCompactPrimaryButton =
+    presentation === 'forcedUpdate' || presentation === 'maintenance';
   const iconGlyphSize = isForcedUpdatePresentation
     ? FORCED_UPDATE_ICON_GLYPH_SIZE
     : DEFAULT_BLOCKING_ICON_GLYPH_SIZE;
-  const primaryButtonWidth = isForcedUpdatePresentation
-    ? Math.max(
-        interaction.touchTarget,
-        Math.min(360, Math.round(contentWidth * FORCED_UPDATE_PRIMARY_BUTTON_WIDTH_RATIO)),
-      )
+  const primaryButtonWidth = usesCompactPrimaryButton
+    ? getCompactPrimaryButtonWidth(contentWidth)
     : undefined;
 
   useEffect(() => {

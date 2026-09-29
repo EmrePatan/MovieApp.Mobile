@@ -8,6 +8,7 @@ export function MaintenanceBlockingView() {
 
   return (
     <AppBlockingState
+      presentation="maintenance"
       icon="construct-outline"
       title={t('appConfig.maintenance.title')}
       body={t('appConfig.maintenance.body')}
