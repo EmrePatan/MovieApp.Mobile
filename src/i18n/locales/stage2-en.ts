@@ -1278,32 +1278,18 @@ export const stage2En = {
     promptPlaceholder: 'e.g. A slow-burn thriller with a strong female lead',
     usePromptAccessibility: 'Use prompt: {{prompt}}',
     getRecommendations: 'Get Recommendations',
-    getMorePicks: 'Get More Picks',
     loading: 'Curating picks from your taste profile...',
     dailyLimitTitle: 'Daily limit reached',
     dailyLimitFallback:
       "You've used all {{limit}} AI recommendation requests for today. Try again tomorrow.",
     generateError: 'Unable to generate AI recommendations right now.',
-    emptyTitle: 'No matches this time',
+    emptyTitle: 'No recommendations this time',
     emptyMessage:
-      'We could not match any AI suggestions to titles in the Movie Cave catalog for this prompt.',
-    emptyRejectedHint:
-      '{{count}} suggestions could not be verified in our catalog. Try broadening your request.',
-    emptyDiversityHint:
-      'Vary genre, era, or tone—each request can return up to {{count}} catalog matches.',
-    tryAnotherPrompt: 'Start Fresh',
-    partialResults:
-      '{{count}} suggestions could not be matched to the Movie Cave catalog. Showing what we found.',
-    lowYieldResults:
-      'Only {{returned}} of up to {{max}} picks matched the catalog. {{count}} suggestions were filtered out.',
+      "We couldn't find suitable recommendations this time. Edit your request and try again.",
     yourPicks: 'Your picks',
     resultsSummary: '{{returned}} of up to {{max}} picks · {{remaining}} requests left today',
     maxPicksPerRequest: 'Each request returns up to {{count}} catalog matches.',
-    sessionPromptLabel: 'Your prompt',
     whyItFits: 'Why it fits',
-    getMorePicksHint: 'Get new picks with the same prompt · Uses 1 request',
-    startFreshHint: 'Clear results and write a new mood, genre, or vibe.',
-    startFresh: 'Start Fresh',
     validationMinLength: 'Describe what you want in at least {{count}} characters.',
     validationMaxLength: 'Keep your request under {{count}} characters.',
     suggestedPrompts: {

@@ -90,6 +90,16 @@ const successResponse = {
   },
 };
 
+const validationHeavyResponse = {
+  ...successResponse,
+  partialResults: true,
+  validationSummary: {
+    geminiSuggestionCount: 3,
+    validatedCount: 1,
+    rejectedCount: 2,
+  },
+};
+
 describe('AiRecommendationsContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -125,8 +135,75 @@ describe('AiRecommendationsContent', () => {
     expect(postAiRecommendations).not.toHaveBeenCalled();
   });
 
-  it('renders successful AI recommendations', async () => {
+  it('renders successful AI recommendations with composer still visible', async () => {
     (postAiRecommendations as jest.Mock).mockResolvedValue(successResponse);
+
+    renderScreen();
+    await waitForQuotaHydration();
+
+    const promptInput = screen.getByLabelText('AI recommendation prompt');
+    fireEvent.changeText(promptInput, 'mind-bending sci-fi with emotional stakes');
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
+    });
+
+    expect(screen.getByText('Arrival')).toBeTruthy();
+    expect(screen.getByDisplayValue('mind-bending sci-fi with emotional stakes')).toBeTruthy();
+    expect(screen.queryByTestId('ai-recommendations-collapsed-prompt')).toBeNull();
+    expect(screen.queryByText('Start Fresh')).toBeNull();
+    expect(screen.getByText('1 of up to 10 picks · 2 requests left today')).toBeTruthy();
+    expect(screen.getByText('Each request returns up to 10 catalog matches.')).toBeTruthy();
+    expect(postAiRecommendations).toHaveBeenCalledWith({
+      message: 'mind-bending sci-fi with emotional stakes',
+      sessionId: null,
+    });
+    expect(trackProductMetric).toHaveBeenCalledWith('ai_recommendations_generated');
+  });
+
+  it('allows editing the prompt and submitting again with the same session', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue(successResponse);
+
+    renderScreen();
+    await waitForQuotaHydration();
+
+    const promptInput = screen.getByLabelText('AI recommendation prompt');
+    fireEvent.changeText(promptInput, 'mind-bending sci-fi with emotional stakes');
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
+    });
+
+    (postAiRecommendations as jest.Mock).mockResolvedValue({
+      ...successResponse,
+      returnedCount: 2,
+      quotaRemaining: 1,
+      recommendations: [
+        ...successResponse.recommendations,
+        {
+          ...successResponse.recommendations[0],
+          id: 'movie-2',
+          title: 'Interstellar',
+        },
+      ],
+    });
+
+    fireEvent.changeText(promptInput, 'more emotional sci-fi epics');
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(postAiRecommendations).toHaveBeenLastCalledWith({
+        message: 'more emotional sci-fi epics',
+        sessionId: 'session-1',
+      });
+      expect(screen.getByText('Interstellar')).toBeTruthy();
+    });
+  });
+
+  it('does not render catalog validation messaging on results', async () => {
+    (postAiRecommendations as jest.Mock).mockResolvedValue(validationHeavyResponse);
 
     renderScreen();
     await waitForQuotaHydration();
@@ -141,24 +218,52 @@ describe('AiRecommendationsContent', () => {
       expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
     });
 
-    expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
-    expect(screen.getByText('Arrival')).toBeTruthy();
-    expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
-      '2 of 3 requests left today',
+    expect(
+      screen.queryByText(
+        '2 suggestions could not be matched to the Movie Cave catalog. Showing what we found.',
+      ),
+    ).toBeNull();
+    expect(
+      screen.queryByText(
+        'Only 1 of up to 10 picks matched the catalog. 2 suggestions were filtered out.',
+      ),
+    ).toBeNull();
+  });
+
+  it('disables submit while a request is pending', async () => {
+    let resolveRequest: (value: typeof successResponse) => void = () => {};
+    (postAiRecommendations as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        }),
     );
-    expect(screen.getByText('1 of up to 10 picks · 2 requests left today')).toBeTruthy();
-    expect(screen.getByText('Each request returns up to 10 catalog matches.')).toBeTruthy();
-    expect(screen.getByText('Why it fits')).toBeTruthy();
-    expect(screen.getByTestId('ai-recommendations-collapsed-prompt')).toBeTruthy();
-    expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
-    expect(screen.queryByText('Get More Picks')).toBeNull();
-    expect(screen.getByText('Start Fresh')).toBeTruthy();
-    expect(screen.queryByText('Refine This Session')).toBeNull();
-    expect(postAiRecommendations).toHaveBeenCalledWith({
-      message: 'mind-bending sci-fi with emotional stakes',
-      sessionId: null,
+
+    renderScreen();
+    await waitForQuotaHydration();
+
+    fireEvent.changeText(
+      screen.getByLabelText('AI recommendation prompt'),
+      'mind-bending sci-fi with emotional stakes',
+    );
+    fireEvent.press(screen.getByText('Get Recommendations'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-loading')).toBeTruthy();
     });
-    expect(trackProductMetric).toHaveBeenCalledWith('ai_recommendations_generated');
+
+    expect(screen.getByLabelText('Get Recommendations').props.accessibilityState?.disabled).toBe(
+      true,
+    );
+    expect(screen.getByLabelText('AI recommendation prompt').props.value).toBe(
+      'mind-bending sci-fi with emotional stakes',
+    );
+
+    resolveRequest(successResponse);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
+    });
   });
 
   it('shows quota exceeded state for rate limited responses', async () => {
@@ -185,18 +290,14 @@ describe('AiRecommendationsContent', () => {
       expect(screen.getByTestId('ai-recommendations-quota-exceeded')).toBeTruthy();
     });
 
-    expect(screen.getByText('Daily limit reached')).toBeTruthy();
-    expect(
-      screen.getByText(
-        "You've used all 3 AI recommendation requests for today. Try again tomorrow.",
-      ),
-    ).toBeTruthy();
-    expect(screen.getByTestId('ai-recommendations-quota-remaining')).toHaveTextContent(
-      '0 of 3 requests left today',
+    expect(screen.getByLabelText('AI recommendation prompt')).toBeTruthy();
+    expect(screen.getByDisplayValue('feel-good comedy under two hours')).toBeTruthy();
+    expect(screen.getByLabelText('Get Recommendations').props.accessibilityState?.disabled).toBe(
+      true,
     );
   });
 
-  it('shows empty state when the API returns zero validated results', async () => {
+  it('shows generic empty state with composer available', async () => {
     (postAiRecommendations as jest.Mock).mockResolvedValue({
       ...successResponse,
       returnedCount: 0,
@@ -221,70 +322,16 @@ describe('AiRecommendationsContent', () => {
       expect(screen.getByTestId('ai-recommendations-empty')).toBeTruthy();
     });
 
-    expect(screen.getByText('No matches this time')).toBeTruthy();
-    expect(screen.getByTestId('ai-recommendations-collapsed-prompt')).toBeTruthy();
-    expect(screen.queryByLabelText('AI recommendation prompt')).toBeNull();
-  });
-
-  it('does not show catalog mismatch banner when partialResults is true but nothing was rejected', async () => {
-    (postAiRecommendations as jest.Mock).mockResolvedValue({
-      ...successResponse,
-      partialResults: true,
-      returnedCount: 1,
-      validationSummary: {
-        geminiSuggestionCount: 1,
-        validatedCount: 1,
-        rejectedCount: 0,
-      },
-    });
-
-    renderScreen();
-    await waitForQuotaHydration();
-
-    fireEvent.changeText(
-      screen.getByLabelText('AI recommendation prompt'),
-      'mind-bending sci-fi with emotional stakes',
-    );
-    fireEvent.press(screen.getByText('Get Recommendations'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('ai-recommendations-results')).toBeTruthy();
-    });
-
+    expect(screen.getByText('No recommendations this time')).toBeTruthy();
     expect(
-      screen.queryByText(
-        '0 suggestions could not be matched to the Movie Cave catalog. Showing what we found.',
+      screen.getByText(
+        "We couldn't find suitable recommendations this time. Edit your request and try again.",
       ),
-    ).toBeNull();
-  });
-
-  it('shows low-yield guidance when fewer picks match than requested', async () => {
-    (postAiRecommendations as jest.Mock).mockResolvedValue({
-      ...successResponse,
-      partialResults: false,
-      validationSummary: {
-        geminiSuggestionCount: 3,
-        validatedCount: 1,
-        rejectedCount: 2,
-      },
-    });
-
-    renderScreen();
-    await waitForQuotaHydration();
-
-    fireEvent.changeText(
-      screen.getByLabelText('AI recommendation prompt'),
-      'mind-bending sci-fi with emotional stakes',
-    );
-    fireEvent.press(screen.getByText('Get Recommendations'));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          'Only 1 of up to 10 picks matched the catalog. 2 suggestions were filtered out.',
-        ),
-      ).toBeTruthy();
-    });
+    ).toBeTruthy();
+    expect(screen.queryByText(/could not be verified/i)).toBeNull();
+    expect(screen.queryByText('Start Fresh')).toBeNull();
+    expect(screen.getByLabelText('AI recommendation prompt')).toBeTruthy();
+    expect(screen.getByDisplayValue('impossible match request')).toBeTruthy();
   });
 
   it('does not track ai_recommendations_generated when generation returns no picks', async () => {

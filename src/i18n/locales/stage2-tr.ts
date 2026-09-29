@@ -1303,33 +1303,18 @@ export const stage2Tr = {
     promptPlaceholder: 'ör. Güçlü bir kadın karakterli yavaş tempolu bir gerilim',
     usePromptAccessibility: 'İstemi kullan: {{prompt}}',
     getRecommendations: 'Önerileri Al',
-    getMorePicks: 'Daha Fazla Öneri Al',
     loading: 'Zevk profiline göre öneriler hazırlanıyor...',
     dailyLimitTitle: 'Günlük limit doldu',
     dailyLimitFallback:
       'Bugün {{limit}} AI öneri isteğinin tamamını kullandın. Yarın tekrar dene.',
     generateError: 'AI önerileri şu anda oluşturulamıyor.',
-    emptyTitle: 'Bu sefer eşleşme yok',
-    emptyMessage:
-      'Bu istem için AI önerilerinden hiçbiri Movie Cave kataloğundaki başlıklarla eşleşmedi.',
-    emptyRejectedHint:
-      '{{count}} öneri kataloğumuzda doğrulanamadı. İsteğini biraz genişletmeyi dene.',
-    emptyDiversityHint:
-      'Tür, dönem veya tonu değiştir—her istek en fazla {{count}} katalog eşleşmesi döndürür.',
-    tryAnotherPrompt: 'Yeniden Başla',
-    partialResults:
-      '{{count}} öneri Movie Cave kataloğunda eşleşmedi. Bulduklarımızı gösteriyoruz.',
-    lowYieldResults:
-      'En fazla {{max}} öneriden yalnızca {{returned}} katalogda eşleşti. {{count}} öneri elendi.',
+    emptyTitle: 'Bu sefer öneri yok',
+    emptyMessage: 'Bu sefer uygun öneriler bulamadık. İsteğini düzenleyip tekrar dene.',
     yourPicks: 'Senin seçimlerin',
     resultsSummary:
       'En fazla {{max}} öneriden {{returned}} · bugün {{remaining}} istek kaldı',
     maxPicksPerRequest: 'Her istek en fazla {{count}} katalog eşleşmesi döndürür.',
-    sessionPromptLabel: 'İstemin',
     whyItFits: 'Neden uyuyor',
-    getMorePicksHint: 'Aynı istemle yeni öneriler alır · 1 istek hakkı kullanır',
-    startFreshHint: 'Sonuçları temizle ve yeni bir ruh hâli, tür veya hava yaz.',
-    startFresh: 'Yeniden Başla',
     validationMinLength: 'Ne istediğini en az {{count}} karakterle anlat.',
     validationMaxLength: 'İsteğini {{count}} karakterin altında tut.',
     suggestedPrompts: {

@@ -107,17 +107,11 @@ export function AiRecommendationsContent() {
     handleSubmit();
   }, [handleSubmit, recommendationsMutation]);
 
-  const handleStartOver = useCallback(() => {
-    setMessage('');
-    setSessionId(null);
-    setValidationError(null);
-    setQuotaOverride(undefined);
-    recommendationsMutation.reset();
-  }, [recommendationsMutation]);
-
   const quotaLimit = quotaQuery.data?.limit ?? AI_RECOMMENDATION_DAILY_LIMIT;
   const isQuotaHydrated = quotaRemaining !== null;
   const isQuotaExhausted = isQuotaHydrated && quotaRemaining <= 0;
+  const isSubmitDisabled =
+    recommendationsMutation.isPending || isQuotaExhausted || !isQuotaHydrated;
 
   const resultItems = useMemo(() => {
     const response = recommendationsMutation.data;
@@ -182,61 +176,18 @@ export function AiRecommendationsContent() {
     }
 
     if (response.returnedCount === 0) {
-      const rejectedCount = response.validationSummary.rejectedCount;
-
       return (
         <View style={styles.stateContainer} testID="ai-recommendations-empty">
           <SearchEmptyState
             title={t('aiRecommendations.emptyTitle')}
             message={t('aiRecommendations.emptyMessage')}
           />
-          {rejectedCount > 0 ? (
-            <AppText variant="caption" muted center style={styles.stateMessage}>
-              {t('aiRecommendations.emptyRejectedHint', { count: rejectedCount })}
-            </AppText>
-          ) : null}
-          <AppText variant="caption" muted center style={styles.stateMessage}>
-            {t('aiRecommendations.emptyDiversityHint', {
-              count: AI_RECOMMENDATION_MAX_PICKS_PER_REQUEST,
-            })}
-          </AppText>
-          <AppButton
-            title={t('aiRecommendations.tryAnotherPrompt')}
-            variant="secondary"
-            onPress={handleStartOver}
-          />
         </View>
       );
     }
 
-    const rejectedCount = response.validationSummary.rejectedCount;
-    const showLowYieldBanner =
-      response.returnedCount < response.requestedCount && rejectedCount > 0;
-
     return (
       <View style={styles.resultsSection} testID="ai-recommendations-results">
-        {response.partialResults && rejectedCount > 0 ? (
-          <View style={styles.infoBanner}>
-            <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
-            <AppText variant="caption" style={styles.infoBannerText}>
-              {t('aiRecommendations.partialResults', { count: rejectedCount })}
-            </AppText>
-          </View>
-        ) : null}
-
-        {showLowYieldBanner && !response.partialResults ? (
-          <View style={styles.infoBanner}>
-            <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
-            <AppText variant="caption" style={styles.infoBannerText}>
-              {t('aiRecommendations.lowYieldResults', {
-                returned: response.returnedCount,
-                max: response.requestedCount,
-                count: rejectedCount,
-              })}
-            </AppText>
-          </View>
-        ) : null}
-
         <View style={styles.resultsHeader}>
           <AppText variant="subtitle" accessibilityRole="header">
             {t('aiRecommendations.yourPicks')}
@@ -260,25 +211,11 @@ export function AiRecommendationsContent() {
             <AiRecommendationResultCard key={item.id} item={item} onPress={handleItemPress} />
           ))}
         </View>
-
-        <View style={styles.actionsSection}>
-          <View style={styles.actionBlock}>
-            <AppButton
-              title={t('aiRecommendations.startFresh')}
-              variant="ghost"
-              onPress={handleStartOver}
-            />
-            <AppText variant="caption" muted center style={styles.actionHint}>
-              {t('aiRecommendations.startFreshHint')}
-            </AppText>
-          </View>
-        </View>
       </View>
     );
   }, [
     handleItemPress,
     handleRetry,
-    handleStartOver,
     recommendationsMutation.data,
     recommendationsMutation.error,
     recommendationsMutation.isError,
@@ -286,17 +223,6 @@ export function AiRecommendationsContent() {
     resultItems,
     t,
   ]);
-
-  const response = recommendationsMutation.data;
-  const hasCompletedAttempt = !!response && !recommendationsMutation.isPending;
-  const showFullComposer =
-    !recommendationsMutation.isPending &&
-    (!hasCompletedAttempt || recommendationsMutation.isError);
-  const showCollapsedPrompt =
-    !recommendationsMutation.isPending &&
-    hasCompletedAttempt &&
-    !recommendationsMutation.isError &&
-    trimmedMessage.length > 0;
 
   return (
     <KeyboardAvoidingView
@@ -333,56 +259,44 @@ export function AiRecommendationsContent() {
           </View>
         </View>
 
-        {showCollapsedPrompt ? (
-          <View style={styles.collapsedPromptSection} testID="ai-recommendations-collapsed-prompt">
-            <AppText variant="caption" muted style={styles.collapsedPromptLabel}>
-              {t('aiRecommendations.sessionPromptLabel')}
-            </AppText>
-            <AppText variant="bodySmall" numberOfLines={4} style={styles.collapsedPromptText}>
-              {trimmedMessage}
-            </AppText>
-          </View>
-        ) : null}
+        <View style={styles.composerSection}>
+          <AppText variant="bodySmall" style={styles.composerLabel}>
+            {t('aiRecommendations.composerLabel')}
+          </AppText>
+          <TextInput
+            accessibilityLabel={t('aiRecommendations.promptAccessibility')}
+            multiline
+            value={message}
+            onChangeText={(next) => {
+              if (next.length > AI_RECOMMENDATION_MAX_MESSAGE_LENGTH) {
+                return;
+              }
 
-        {showFullComposer ? (
-          <View style={styles.composerSection}>
-            <AppText variant="bodySmall" style={styles.composerLabel}>
-              {t('aiRecommendations.composerLabel')}
+              setMessage(next);
+              if (validationError) {
+                setValidationError(null);
+              }
+            }}
+            placeholder={t('aiRecommendations.promptPlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            style={[styles.promptInput, validationError && styles.promptInputError]}
+            textAlignVertical="top"
+          />
+          <View style={styles.composerMetaRow}>
+            <AppText variant="caption" muted>
+              {trimmedMessage.length}/{AI_RECOMMENDATION_MAX_MESSAGE_LENGTH}
             </AppText>
-            <TextInput
-              accessibilityLabel={t('aiRecommendations.promptAccessibility')}
-              multiline
-              value={message}
-              onChangeText={(next) => {
-                if (next.length > AI_RECOMMENDATION_MAX_MESSAGE_LENGTH) {
-                  return;
-                }
-
-                setMessage(next);
-                if (validationError) {
-                  setValidationError(null);
-                }
-              }}
-              placeholder={t('aiRecommendations.promptPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              style={[styles.promptInput, validationError && styles.promptInputError]}
-              textAlignVertical="top"
-            />
-            <View style={styles.composerMetaRow}>
-              <AppText variant="caption" muted>
-                {trimmedMessage.length}/{AI_RECOMMENDATION_MAX_MESSAGE_LENGTH}
+            {validationError ? (
+              <AppText variant="caption" style={styles.validationError} accessibilityRole="alert">
+                {validationError}
               </AppText>
-              {validationError ? (
-                <AppText variant="caption" style={styles.validationError} accessibilityRole="alert">
-                  {validationError}
-                </AppText>
-              ) : null}
-            </View>
+            ) : null}
+          </View>
 
-            <View style={styles.promptChipRow}>
-              {AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS.map((promptKey) => {
-                const prompt = t(promptKey);
-                return (
+          <View style={styles.promptChipRow}>
+            {AI_RECOMMENDATION_SUGGESTED_PROMPT_KEYS.map((promptKey) => {
+              const prompt = t(promptKey);
+              return (
                 <Pressable
                   key={promptKey}
                   accessibilityRole="button"
@@ -395,26 +309,23 @@ export function AiRecommendationsContent() {
                   </AppText>
                 </Pressable>
               );
-              })}
-            </View>
-
+            })}
           </View>
-        ) : null}
+        </View>
 
         {statusContent}
       </ScrollView>
 
-      {showFullComposer ? (
-        <View
-          style={[styles.composerFooter, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
-        >
-          <AppButton
-            title={t('aiRecommendations.getRecommendations')}
-            onPress={handleSubmit}
-            disabled={recommendationsMutation.isPending || isQuotaExhausted || !isQuotaHydrated}
-          />
-        </View>
-      ) : null}
+      <View
+        style={[styles.composerFooter, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
+      >
+        <AppButton
+          title={t('aiRecommendations.getRecommendations')}
+          onPress={handleSubmit}
+          disabled={isSubmitDisabled}
+          loading={recommendationsMutation.isPending}
+        />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -438,25 +349,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-  },
-  collapsedPromptSection: {
-    marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    gap: spacing.xs,
-  },
-  collapsedPromptLabel: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    fontSize: 10,
-    lineHeight: 14,
-  },
-  collapsedPromptText: {
-    color: colors.textSecondary,
   },
   composerSection: {
     paddingHorizontal: spacing.lg,
@@ -541,35 +433,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
-  infoBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.accentTint12,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  infoBannerText: {
-    color: colors.accent,
-    flex: 1,
-    lineHeight: 18,
-  },
   resultsHeader: {
     gap: spacing.xs,
   },
   resultsList: {
     gap: spacing.sm,
-  },
-  actionsSection: {
-    gap: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  actionBlock: {
-    gap: spacing.xs,
-  },
-  actionHint: {
-    maxWidth: 320,
-    alignSelf: 'center',
   },
 });
