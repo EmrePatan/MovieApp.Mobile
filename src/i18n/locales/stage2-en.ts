@@ -90,7 +90,6 @@ export const stage2En = {
     unableToLoadMoreNotifications: 'Unable to load more notifications. Please try again.',
     unableToLoadMoreUpcoming: 'Unable to load more upcoming titles. Please try again.',
     unableToLoadMoreFollowing: 'Unable to load more followed titles. Please try again.',
-    dataProvidedByJustWatch: 'Data provided by JustWatch',
     notRated: 'Not rated',
     unknown: 'Unknown',
     bornDate: 'Born {{date}}',

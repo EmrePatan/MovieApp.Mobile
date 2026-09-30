@@ -90,7 +90,6 @@ export const stage2Pt = {
     unableToLoadMoreNotifications: 'Não foi possível carregar mais notificações. Tente novamente.',
     unableToLoadMoreUpcoming: 'Não foi possível carregar mais estreias. Tente novamente.',
     unableToLoadMoreFollowing: 'Não foi possível carregar mais títulos seguidos. Tente novamente.',
-    dataProvidedByJustWatch: 'Dados fornecidos pela JustWatch',
     notRated: 'Sem avaliação',
     unknown: 'Desconhecido',
     bornDate: 'Nascido em {{date}}',

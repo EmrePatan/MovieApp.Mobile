@@ -90,7 +90,6 @@ export const stage2Fr = {
     unableToLoadMoreNotifications: 'Impossible de charger plus de notifications. Veuillez réessayer.',
     unableToLoadMoreUpcoming: 'Impossible de charger plus de prochaines sorties. Veuillez réessayer.',
     unableToLoadMoreFollowing: 'Impossible de charger plus de titres suivis. Veuillez réessayer.',
-    dataProvidedByJustWatch: 'Données fournies par JustWatch',
     notRated: 'Non noté',
     unknown: 'Inconnu',
     bornDate: 'Né le {{date}}',

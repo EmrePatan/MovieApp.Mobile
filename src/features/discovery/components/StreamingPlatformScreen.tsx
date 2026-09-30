@@ -21,7 +21,6 @@ import { ADVANCED_DISCOVER_SORT_OPTIONS } from '@/features/discovery/advanced-di
 import type { AdvancedDiscoverSort } from '@/features/discovery/advanced-discover-types';
 import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
 import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
-import { JustWatchAttribution } from '@/features/discovery/components/JustWatchAttribution';
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
@@ -172,7 +171,6 @@ export function StreamingPlatformScreen({
                 />
               ))}
             </View>
-            <JustWatchAttribution />
           </View>
         </SafeAreaView>
       </View>
@@ -204,7 +202,6 @@ export function StreamingPlatformScreen({
         <AppText variant="bodySmall" muted>
           {t('discovery.streamingPlatform.catalogSubtitle')}
         </AppText>
-        <JustWatchAttribution />
       </View>
     );
   }, [activeProvider, platformState, t]);

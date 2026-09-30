@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
-import { JustWatchAttribution } from '@/features/discovery/components/JustWatchAttribution';
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
 import {
@@ -86,15 +85,6 @@ export function StreamingPlatformsDirectoryScreen() {
     [isHydrated, tileSize, watchRegion],
   );
 
-  const listFooter = useMemo(
-    () => (
-      <View style={styles.footer}>
-        <JustWatchAttribution testID="streaming-directory-justwatch" />
-      </View>
-    ),
-    [],
-  );
-
   return (
     <StackListScreen
       testID="streaming-platforms-directory"
@@ -116,7 +106,6 @@ export function StreamingPlatformsDirectoryScreen() {
           keyExtractor={(item) => String(item.providerId)}
           renderItem={renderItem}
           ListHeaderComponent={listHeader}
-          ListFooterComponent={listFooter}
           columnWrapperStyle={styles.row}
           contentContainerStyle={[
             styles.listContent,
@@ -144,10 +133,6 @@ const styles = StyleSheet.create({
   },
   row: {
     gap: GRID_GAP,
-  },
-  footer: {
-    paddingTop: spacing.lg,
-    alignItems: 'flex-end',
   },
   loading: {
     flex: 1,

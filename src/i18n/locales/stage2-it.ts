@@ -90,7 +90,6 @@ export const stage2It = {
     unableToLoadMoreNotifications: 'Impossibile caricare altre notifiche. Riprova.',
     unableToLoadMoreUpcoming: 'Impossibile caricare altre prossime uscite. Riprova.',
     unableToLoadMoreFollowing: 'Impossibile caricare altri titoli seguiti. Riprova.',
-    dataProvidedByJustWatch: 'Dati forniti da JustWatch',
     notRated: 'Non valutato',
     unknown: 'Sconosciuto',
     bornDate: 'Nato il {{date}}',

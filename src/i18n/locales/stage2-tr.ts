@@ -90,7 +90,6 @@ export const stage2Tr = {
     unableToLoadMoreNotifications: 'Daha fazla bildirim yüklenemedi. Lütfen tekrar dene.',
     unableToLoadMoreUpcoming: 'Daha fazla yaklaşan başlık yüklenemedi. Lütfen tekrar dene.',
     unableToLoadMoreFollowing: 'Daha fazla takip edilen başlık yüklenemedi. Lütfen tekrar dene.',
-    dataProvidedByJustWatch: 'Veriler JustWatch tarafından sağlanır',
     notRated: 'Puanlanmadı',
     unknown: 'Bilinmiyor',
     bornDate: 'Doğum: {{date}}',

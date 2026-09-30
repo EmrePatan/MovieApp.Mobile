@@ -90,7 +90,6 @@ export const stage2De = {
     unableToLoadMoreNotifications: 'Weitere Benachrichtigungen konnten nicht geladen werden. Bitte versuche es erneut.',
     unableToLoadMoreUpcoming: 'Weitere kommende Titel konnten nicht geladen werden. Bitte versuche es erneut.',
     unableToLoadMoreFollowing: 'Weitere gefolgte Titel konnten nicht geladen werden. Bitte versuche es erneut.',
-    dataProvidedByJustWatch: 'Daten bereitgestellt von JustWatch',
     notRated: 'Nicht bewertet',
     unknown: 'Unbekannt',
     bornDate: 'Geboren am {{date}}',

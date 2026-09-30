@@ -9,7 +9,6 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { useMovieWatchProviders, useTvShowWatchProviders } from '../hooks/useWatchProviders';
 import type { WatchProvider } from '../types';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const PROVIDER_LOGO_SIZE = 54;
@@ -121,9 +120,6 @@ export function WhereToWatchRail({
           {t('details.watchProviders.noSubscriptionStreaming')}
         </AppText>
       )}
-      <AppText variant="caption" style={styles.attribution} testID="where-to-watch-attribution">
-        {t('common.dataProvidedByJustWatch')}
-      </AppText>
     </View>
   );
 }
@@ -165,14 +161,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.xs,
-  },
-  attribution: {
-    color: colors.textMuted,
-    fontSize: 10,
-    fontWeight: '400',
-    textAlign: 'right',
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    marginTop: spacing.sm,
   },
   logoSkeleton: {
     borderRadius: PROVIDER_LOGO_SIZE / 2,
