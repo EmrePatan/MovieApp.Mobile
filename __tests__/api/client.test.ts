@@ -1,3 +1,7 @@
+jest.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
 import { api } from '@/api/client';
 import { ApiError } from '@/api/errors';
 import { queryClient } from '@/api/query-client';
@@ -59,7 +63,11 @@ describe('api client', () => {
 
   it('passes FormData POST bodies through without setting Content-Type', async () => {
     const formData = new FormData();
-    formData.append('file', new Blob(['avatar']), 'avatar.jpg');
+    formData.append('file', {
+      uri: '/cache/avatar.jpg',
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    } as unknown as Blob);
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,

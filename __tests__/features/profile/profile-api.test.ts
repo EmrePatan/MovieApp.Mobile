@@ -1,3 +1,7 @@
+jest.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
 import {
   buildChangeEmailPath,
   buildChangePasswordPath,
@@ -13,6 +17,7 @@ import {
   getCurrentProfile,
   getProfileStatistics,
   updateProfile,
+  uploadAvatar,
 } from '@/features/profile/api/profile-api';
 import { api } from '@/api/client';
 
@@ -25,7 +30,12 @@ jest.mock('@/api/client', () => ({
     get: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
+    postFormData: jest.fn(),
   },
+}));
+
+jest.mock('@/api/dev-network-log', () => ({
+  logAvatarUploadAttempt: jest.fn(),
 }));
 
 describe('profile api routes', () => {
@@ -89,5 +99,31 @@ describe('profile api client', () => {
       provider: 'google',
       identityToken: 'google-id-token',
     });
+  });
+
+  it('uploads avatar as React Native multipart FormData', async () => {
+    const appendSpy = jest.spyOn(FormData.prototype, 'append');
+    (api.postFormData as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+    await uploadAvatar({
+      uri: 'file:///cache/avatar.jpg',
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    });
+
+    expect(api.postFormData).toHaveBeenCalledWith(
+      '/api/users/me/avatar',
+      expect.any(FormData),
+    );
+
+    const formData = (api.postFormData as jest.Mock).mock.calls[0][1] as FormData;
+    expect(formData).toBeInstanceOf(FormData);
+    expect(appendSpy).toHaveBeenCalledWith('file', {
+      uri: '/cache/avatar.jpg',
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    });
+
+    appendSpy.mockRestore();
   });
 });

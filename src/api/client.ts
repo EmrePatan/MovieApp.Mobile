@@ -1,4 +1,5 @@
 import { getApiBaseUrl, API_REQUEST_TIMEOUT_MS } from './config';
+import { logFetchNetworkFailure } from './dev-network-log';
 import { ApiError, mapStatusToErrorKind, type ProblemDetails } from './errors';
 
 function isAbortError(error: unknown): boolean {
@@ -207,6 +208,13 @@ class ApiClient {
 
         throw new ApiError({ kind: 'timeout' });
       }
+
+      logFetchNetworkFailure({
+        method,
+        url,
+        bodyIsFormData: body instanceof FormData,
+        error,
+      });
 
       throw new ApiError({ kind: 'network' });
     } finally {

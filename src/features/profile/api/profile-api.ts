@@ -1,4 +1,6 @@
 import { api } from '@/api/client';
+import { buildAvatarUploadFormData } from '@/api/form-data-file';
+import { logAvatarUploadAttempt } from '@/api/dev-network-log';
 import {
   buildChangeEmailPath,
   buildChangePasswordPath,
@@ -35,8 +37,8 @@ export async function uploadAvatar(file: {
   name: string;
   type: string;
 }): Promise<UserProfileResponse> {
-  const formData = new FormData();
-  formData.append('file', file as unknown as Blob);
+  logAvatarUploadAttempt(file);
+  const formData = buildAvatarUploadFormData(file);
   return api.postFormData<UserProfileResponse>(buildUploadAvatarPath(), formData);
 }
 
