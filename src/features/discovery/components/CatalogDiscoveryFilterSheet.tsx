@@ -7,8 +7,8 @@ import { translateGenreName } from '@/i18n/catalog-labels';
 import {
   CatalogChipRow,
   CatalogFilterSheetShell,
-  CatalogKeywordSelector,
-  CatalogOptionSelector,
+  CatalogKeywordSelectorPanel,
+  CatalogOptionList,
   ExpandableAdvancedFilters,
   FilterSelectorRow,
 } from '@/features/catalog/components';
@@ -231,6 +231,251 @@ function CatalogDiscoveryFilterSheetBody({
     defaultOriginCountry: config.defaultOriginCountry ?? null,
   });
 
+  const selectorTitle = (() => {
+    switch (selector) {
+      case 'genre':
+        return t('common.genre');
+      case 'year':
+        return t('common.year');
+      case 'rating':
+        return t('common.minimumRating');
+      case 'language':
+        return t('common.originalLanguage');
+      case 'country':
+        return t('common.originCountry');
+      case 'runtime':
+        return t('discovery.catalogFilters.runtime');
+      case 'voteCount':
+        return t('discovery.catalogFilters.minVoteCount');
+      case 'keywords':
+        return t('discovery.catalogFilters.keywords');
+      case 'tvStatus':
+        return t('discovery.catalogFilters.tvStatus');
+      default:
+        return t('discovery.catalogFilters.title');
+    }
+  })();
+
+  const renderSelectorContent = () => {
+    switch (selector) {
+      case 'genre':
+        return (
+          <>
+            {genresQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
+            <CatalogOptionList
+              multi
+              values={draft.genreIds}
+              options={genres.map((genre) => ({
+                value: genre.id,
+                label: translateGenreName(genre.name),
+              }))}
+              onChange={(genreIds) => updateDraft({ genreIds })}
+              testID="catalog-genre-selector"
+            />
+          </>
+        );
+      case 'rating':
+        return (
+          <CatalogOptionList
+            values={[String(draft.minRating ?? '')]}
+            options={CATALOG_MIN_RATING_OPTIONS.map((rating) => ({
+              value: rating == null ? '' : String(rating),
+              label:
+                rating == null
+                  ? anyLabel
+                  : t('discovery.catalogFilters.ratingOption', { rating }),
+            }))}
+            onChange={(values) => {
+              const raw = values[0];
+              updateDraft({
+                minRating: raw && raw.length > 0 ? Number.parseFloat(raw) : null,
+              });
+            }}
+            onSingleSelectComplete={() => setSelector(null)}
+          />
+        );
+      case 'language':
+        return (
+          <CatalogOptionList
+            values={draft.originalLanguage ? [draft.originalLanguage] : []}
+            options={[
+              { value: '', label: anyLabel },
+              ...CATALOG_LANGUAGE_OPTIONS.map((option) => ({
+                value: option.code,
+                label: t(`discovery.catalogFilters.languageNames.${option.labelKey}`),
+              })),
+            ]}
+            onChange={(values) =>
+              updateDraft({
+                originalLanguage: values[0] && values[0].length > 0 ? values[0] : null,
+              })
+            }
+            onSingleSelectComplete={() => setSelector(null)}
+          />
+        );
+      case 'country':
+        return (
+          <CatalogOptionList
+            values={draft.originCountry ? [draft.originCountry] : []}
+            options={[
+              ...(config.defaultOriginCountry ? [] : [{ value: '', label: anyLabel }]),
+              ...countryOptions.map((option) => ({
+                value: option.code,
+                label: option.label,
+              })),
+            ]}
+            onChange={(values) => {
+              const next = values[0] && values[0].length > 0 ? values[0] : null;
+              updateDraft({
+                originCountry: next ?? config.defaultOriginCountry ?? null,
+              });
+            }}
+            onSingleSelectComplete={() => setSelector(null)}
+          />
+        );
+      case 'tvStatus':
+        return (
+          <CatalogOptionList
+            multi
+            values={draft.tvStatuses}
+            options={TV_DISCOVER_STATUS_OPTIONS.map((status) => ({
+              value: status,
+              label: t(`discovery.catalogFilters.tvStatusOptions.${status}`),
+            }))}
+            onChange={(tvStatuses) => updateDraft({ tvStatuses: tvStatuses as TvDiscoverStatus[] })}
+          />
+        );
+      case 'voteCount':
+        return (
+          <CatalogOptionList
+            values={[String(draft.minVoteCount ?? '')]}
+            options={CATALOG_VOTE_COUNT_OPTIONS.map((count) => ({
+              value: count == null ? '' : String(count),
+              label:
+                count == null
+                  ? anyLabel
+                  : t('discovery.catalogFilters.voteCountOption', { count }),
+            }))}
+            onChange={(values) => {
+              const raw = values[0];
+              updateDraft({
+                minVoteCount: raw && raw.length > 0 ? Number.parseInt(raw, 10) : null,
+              });
+            }}
+            onSingleSelectComplete={() => setSelector(null)}
+          />
+        );
+      case 'keywords':
+        return (
+          <CatalogKeywordSelectorPanel
+            active
+            selectedIds={draft.keywordIds}
+            selectedLabels={draft.keywordLabels}
+            onChange={({ ids, labels }) => updateDraft({ keywordIds: ids, keywordLabels: labels })}
+            testID="catalog-keyword-selector"
+          />
+        );
+      case 'year':
+        return (
+          <>
+            <CatalogChipRow
+              options={[
+                ...CATALOG_YEAR_PRESETS.map((preset) => ({
+                  value: preset.key,
+                  label:
+                    preset.key === 'any'
+                      ? anyLabel
+                      : t(`discovery.catalogFilters.yearPresets.${preset.key}`),
+                })),
+                {
+                  value: 'custom' as CatalogYearPresetKey,
+                  label: t('discovery.catalogFilters.customRange'),
+                },
+              ]}
+              value={yearMode}
+              onChange={(key) => {
+                setYearMode(key);
+                if (key === 'custom') {
+                  updateDraft({ year: null });
+                  return;
+                }
+
+                const preset = CATALOG_YEAR_PRESETS.find((item) => item.key === key);
+                if (!preset) {
+                  return;
+                }
+
+                updateDraft({
+                  year: preset.year,
+                  yearFrom: preset.yearFrom,
+                  yearTo: preset.yearTo,
+                });
+              }}
+            />
+            {yearMode === 'custom' ? (
+              <View style={styles.rangeInputs}>
+                <AppInput
+                  label={t('common.from')}
+                  value={draft.yearFrom != null ? String(draft.yearFrom) : ''}
+                  onChangeText={(text) => {
+                    const trimmed = text.trim();
+                    updateDraft({
+                      year: null,
+                      yearFrom: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
+                    });
+                  }}
+                  placeholder={t('common.placeholderYearFromExample')}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                />
+                <AppInput
+                  label={t('common.to')}
+                  value={draft.yearTo != null ? String(draft.yearTo) : ''}
+                  onChangeText={(text) => {
+                    const trimmed = text.trim();
+                    updateDraft({
+                      year: null,
+                      yearTo: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
+                    });
+                  }}
+                  placeholder={t('common.placeholderYearToExample')}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                />
+              </View>
+            ) : null}
+          </>
+        );
+      case 'runtime':
+        return (
+          <CatalogChipRow
+            options={CATALOG_RUNTIME_PRESETS.map((preset) => ({
+              value: preset.key,
+              label:
+                preset.key === 'any'
+                  ? anyLabel
+                  : t(`discovery.advancedDiscover.runtimePresets.${preset.key}`),
+            }))}
+            value={runtimeMode === 'custom' ? 'any' : runtimeMode}
+            onChange={(key) => {
+              setRuntimeMode(key);
+              const preset = CATALOG_RUNTIME_PRESETS.find((item) => item.key === key);
+              if (!preset) {
+                return;
+              }
+
+              updateDraft({
+                minRuntimeMinutes: preset.minRuntimeMinutes,
+                maxRuntimeMinutes: preset.maxRuntimeMinutes,
+              });
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderField = (field: CatalogFilterField) => {
     switch (field) {
       case 'contentType':
@@ -340,294 +585,76 @@ function CatalogDiscoveryFilterSheetBody({
     }
   };
 
+  const inSelector = selector != null;
+  const showSelectorFooter = selector === 'year' || selector === 'runtime';
+
+  const handleHeaderAction = () => {
+    if (inSelector) {
+      setSelector(null);
+      return;
+    }
+
+    onClose();
+  };
+
   return (
-    <>
-      <CatalogFilterSheetShell
-        visible={visible}
-        title={t('discovery.catalogFilters.title')}
-        closeLabel={t('common.close')}
-        resetLabel={t('discovery.catalogFilters.reset')}
-        applyLabel={t('discovery.catalogFilters.showResults')}
-        onClose={onClose}
-        onReset={onReset}
-        onApply={() => {
-          onApply(clearTvStatusesIfNeeded(draft));
-          onClose();
-        }}
-        testID={testID}
-      >
-        {config.primaryFields.map(renderField)}
-
-        {visibleAdvancedFields.length > 0 ? (
-          <ExpandableAdvancedFilters
-            title={t('discovery.catalogFilters.advancedFilters')}
-            expanded={advancedExpanded}
-            hasActiveFilters={advancedActive}
-            onToggle={() => setAdvancedExpanded((current) => !current)}
-          >
-            {visibleAdvancedFields.map(renderField)}
-          </ExpandableAdvancedFilters>
-        ) : null}
-      </CatalogFilterSheetShell>
-
-      <CatalogOptionSelector
-        visible={selector === 'genre'}
-        title={t('common.genre')}
-        closeLabel={t('common.close')}
-        multi
-        values={draft.genreIds}
-        options={genres.map((genre) => ({
-          value: genre.id,
-          label: translateGenreName(genre.name),
-        }))}
-        onChange={(genreIds) => updateDraft({ genreIds })}
-        onClose={() => setSelector(null)}
-        testID="catalog-genre-selector"
-      />
-
-      <CatalogOptionSelector
-        visible={selector === 'language'}
-        title={t('common.originalLanguage')}
-        closeLabel={t('common.close')}
-        values={draft.originalLanguage ? [draft.originalLanguage] : []}
-        options={[
-          { value: '', label: anyLabel },
-          ...CATALOG_LANGUAGE_OPTIONS.map((option) => ({
-            value: option.code,
-            label: t(`discovery.catalogFilters.languageNames.${option.labelKey}`),
-          })),
-        ]}
-        onChange={(values) =>
-          updateDraft({
-            originalLanguage: values[0] && values[0].length > 0 ? values[0] : null,
-          })
-        }
-        onClose={() => setSelector(null)}
-      />
-
-      <CatalogOptionSelector
-        visible={selector === 'country'}
-        title={t('common.originCountry')}
-        closeLabel={t('common.close')}
-        values={draft.originCountry ? [draft.originCountry] : []}
-        options={[
-          ...(config.defaultOriginCountry
-            ? []
-            : [{ value: '', label: anyLabel }]),
-          ...countryOptions.map((option) => ({
-            value: option.code,
-            label: option.label,
-          })),
-        ]}
-        onChange={(values) => {
-          const next = values[0] && values[0].length > 0 ? values[0] : null;
-          updateDraft({
-            originCountry: next ?? config.defaultOriginCountry ?? null,
-          });
-        }}
-        onClose={() => setSelector(null)}
-      />
-
-      <CatalogOptionSelector
-        visible={selector === 'tvStatus'}
-        title={t('discovery.catalogFilters.tvStatus')}
-        closeLabel={t('common.close')}
-        multi
-        values={draft.tvStatuses}
-        options={TV_DISCOVER_STATUS_OPTIONS.map((status) => ({
-          value: status,
-          label: t(`discovery.catalogFilters.tvStatusOptions.${status}`),
-        }))}
-        onChange={(tvStatuses) => updateDraft({ tvStatuses: tvStatuses as TvDiscoverStatus[] })}
-        onClose={() => setSelector(null)}
-      />
-
-      {selector === 'keywords' ? (
-        <CatalogKeywordSelector
-          visible
-          selectedIds={draft.keywordIds}
-          selectedLabels={draft.keywordLabels}
-          onChange={({ ids, labels }) => updateDraft({ keywordIds: ids, keywordLabels: labels })}
-          onClose={() => setSelector(null)}
-        />
-      ) : null}
-
-      {selector === 'rating' ? (
-        <CatalogOptionSelector
-          visible
-          title={t('common.minimumRating')}
-          closeLabel={t('common.close')}
-          values={[String(draft.minRating ?? '')]}
-          options={CATALOG_MIN_RATING_OPTIONS.map((rating) => ({
-            value: rating == null ? '' : String(rating),
-            label:
-              rating == null
-                ? anyLabel
-                : t('discovery.catalogFilters.ratingOption', { rating }),
-          }))}
-          onChange={(values) => {
-            const raw = values[0];
-            updateDraft({
-              minRating: raw && raw.length > 0 ? Number.parseFloat(raw) : null,
-            });
-          }}
-          onClose={() => setSelector(null)}
-        />
-      ) : null}
-
-      {selector === 'voteCount' ? (
-        <CatalogOptionSelector
-          visible
-          title={t('discovery.catalogFilters.minVoteCount')}
-          closeLabel={t('common.close')}
-          values={[String(draft.minVoteCount ?? '')]}
-          options={CATALOG_VOTE_COUNT_OPTIONS.map((count) => ({
-            value: count == null ? '' : String(count),
-            label:
-              count == null
-                ? anyLabel
-                : t('discovery.catalogFilters.voteCountOption', { count }),
-          }))}
-          onChange={(values) => {
-            const raw = values[0];
-            updateDraft({
-              minVoteCount: raw && raw.length > 0 ? Number.parseInt(raw, 10) : null,
-            });
-          }}
-          onClose={() => setSelector(null)}
-        />
-      ) : null}
-
-      {selector === 'year' ? (
-        <CatalogFilterSheetShell
-          visible
-          title={t('common.year')}
-          closeLabel={t('common.close')}
-          resetLabel={t('discovery.catalogFilters.any')}
-          applyLabel={t('discovery.catalogFilters.done')}
-          onClose={() => setSelector(null)}
-          onReset={() => {
-            setYearMode('any');
-            updateDraft({ year: null, yearFrom: null, yearTo: null });
-            setSelector(null);
-          }}
-          onApply={() => setSelector(null)}
-        >
-          <CatalogChipRow
-            options={[
-              ...CATALOG_YEAR_PRESETS.map((preset) => ({
-                value: preset.key,
-                label:
-                  preset.key === 'any'
-                    ? anyLabel
-                    : t(`discovery.catalogFilters.yearPresets.${preset.key}`),
-              })),
-              {
-                value: 'custom' as CatalogYearPresetKey,
-                label: t('discovery.catalogFilters.customRange'),
-              },
-            ]}
-            value={yearMode}
-            onChange={(key) => {
-              setYearMode(key);
-              if (key === 'custom') {
-                updateDraft({ year: null });
-                return;
+    <CatalogFilterSheetShell
+      visible={visible}
+      title={selectorTitle}
+      headerAction={inSelector ? 'back' : 'close'}
+      headerActionLabel={inSelector ? t('common.back') : t('common.close')}
+      onHeaderAction={handleHeaderAction}
+      resetLabel={
+        showSelectorFooter ? t('discovery.catalogFilters.any') : t('discovery.catalogFilters.reset')
+      }
+      applyLabel={
+        showSelectorFooter
+          ? t('discovery.catalogFilters.done')
+          : t('discovery.catalogFilters.showResults')
+      }
+      onReset={
+        showSelectorFooter
+          ? () => {
+              if (selector === 'year') {
+                setYearMode('any');
+                updateDraft({ year: null, yearFrom: null, yearTo: null });
+              } else if (selector === 'runtime') {
+                setRuntimeMode('any');
+                updateDraft({ minRuntimeMinutes: null, maxRuntimeMinutes: null });
               }
+            }
+          : onReset
+      }
+      onApply={
+        showSelectorFooter
+          ? () => setSelector(null)
+          : () => {
+              onApply(clearTvStatusesIfNeeded(draft));
+              onClose();
+            }
+      }
+      showFooterActions
+      testID={testID}
+    >
+      {inSelector ? (
+        renderSelectorContent()
+      ) : (
+        <>
+          {config.primaryFields.map(renderField)}
 
-              const preset = CATALOG_YEAR_PRESETS.find((item) => item.key === key);
-              if (!preset) {
-                return;
-              }
-
-              updateDraft({
-                year: preset.year,
-                yearFrom: preset.yearFrom,
-                yearTo: preset.yearTo,
-              });
-            }}
-          />
-          {yearMode === 'custom' ? (
-            <View style={styles.rangeInputs}>
-              <AppInput
-                label={t('common.from')}
-                value={draft.yearFrom != null ? String(draft.yearFrom) : ''}
-                onChangeText={(text) => {
-                  const trimmed = text.trim();
-                  updateDraft({
-                    year: null,
-                    yearFrom: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                  });
-                }}
-                placeholder={t('common.placeholderYearFromExample')}
-                keyboardType="number-pad"
-                maxLength={4}
-              />
-              <AppInput
-                label={t('common.to')}
-                value={draft.yearTo != null ? String(draft.yearTo) : ''}
-                onChangeText={(text) => {
-                  const trimmed = text.trim();
-                  updateDraft({
-                    year: null,
-                    yearTo: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                  });
-                }}
-                placeholder={t('common.placeholderYearToExample')}
-                keyboardType="number-pad"
-                maxLength={4}
-              />
-            </View>
+          {visibleAdvancedFields.length > 0 ? (
+            <ExpandableAdvancedFilters
+              title={t('discovery.catalogFilters.advancedFilters')}
+              expanded={advancedExpanded}
+              hasActiveFilters={advancedActive}
+              onToggle={() => setAdvancedExpanded((current) => !current)}
+            >
+              {visibleAdvancedFields.map(renderField)}
+            </ExpandableAdvancedFilters>
           ) : null}
-        </CatalogFilterSheetShell>
-      ) : null}
-
-      {selector === 'runtime' ? (
-        <CatalogFilterSheetShell
-          visible
-          title={t('discovery.catalogFilters.runtime')}
-          closeLabel={t('common.close')}
-          resetLabel={t('discovery.catalogFilters.any')}
-          applyLabel={t('discovery.catalogFilters.done')}
-          onClose={() => setSelector(null)}
-          onReset={() => {
-            setRuntimeMode('any');
-            updateDraft({ minRuntimeMinutes: null, maxRuntimeMinutes: null });
-            setSelector(null);
-          }}
-          onApply={() => setSelector(null)}
-        >
-          <CatalogChipRow
-            options={CATALOG_RUNTIME_PRESETS.map((preset) => ({
-              value: preset.key,
-              label:
-                preset.key === 'any'
-                  ? anyLabel
-                  : t(`discovery.advancedDiscover.runtimePresets.${preset.key}`),
-            }))}
-            value={runtimeMode === 'custom' ? 'any' : runtimeMode}
-            onChange={(key) => {
-              setRuntimeMode(key);
-              const preset = CATALOG_RUNTIME_PRESETS.find((item) => item.key === key);
-              if (!preset) {
-                return;
-              }
-
-              updateDraft({
-                minRuntimeMinutes: preset.minRuntimeMinutes,
-                maxRuntimeMinutes: preset.maxRuntimeMinutes,
-              });
-            }}
-          />
-        </CatalogFilterSheetShell>
-      ) : null}
-
-      {genresQuery.isLoading && selector === 'genre' ? (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator color={colors.accent} />
-        </View>
-      ) : null}
-    </>
+        </>
+      )}
+    </CatalogFilterSheetShell>
   );
 }
 
@@ -641,10 +668,5 @@ const styles = StyleSheet.create({
   },
   rangeInputs: {
     gap: spacing.sm,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

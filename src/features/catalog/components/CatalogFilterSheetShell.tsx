@@ -7,55 +7,81 @@ import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
+export type CatalogFilterSheetHeaderAction = 'close' | 'back';
+
 interface CatalogFilterSheetShellProps {
   visible: boolean;
   title: string;
-  closeLabel: string;
-  resetLabel: string;
-  applyLabel: string;
+  headerAction: CatalogFilterSheetHeaderAction;
+  headerActionLabel: string;
+  onHeaderAction: () => void;
   children: ReactNode;
-  onClose: () => void;
-  onReset: () => void;
-  onApply: () => void;
+  resetLabel?: string;
+  applyLabel?: string;
+  onReset?: () => void;
+  onApply?: () => void;
+  showFooterActions?: boolean;
   testID?: string;
 }
 
 export function CatalogFilterSheetShell({
   visible,
   title,
-  closeLabel,
+  headerAction,
+  headerActionLabel,
+  onHeaderAction,
+  children,
   resetLabel,
   applyLabel,
-  children,
-  onClose,
   onReset,
   onApply,
+  showFooterActions = true,
   testID,
 }: CatalogFilterSheetShellProps) {
+  const headerIcon = headerAction === 'back' ? 'chevron-back' : 'close';
+
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onHeaderAction}>
       <View style={styles.overlay}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityRole="button" accessibilityLabel={closeLabel} />
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onHeaderAction}
+          accessibilityRole="button"
+          accessibilityLabel={headerActionLabel}
+        />
         <SafeAreaView style={styles.sheet} edges={['bottom']} testID={testID}>
           <View style={styles.header}>
-            <AppText variant="subtitle">{title}</AppText>
-            <Pressable accessibilityRole="button" accessibilityLabel={closeLabel} onPress={onClose}>
-              <Ionicons name="close" size={24} color={colors.textPrimary} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={headerActionLabel}
+              onPress={onHeaderAction}
+              hitSlop={8}
+              style={styles.headerIconButton}
+              testID={testID ? `${testID}-header-action` : undefined}
+            >
+              <Ionicons name={headerIcon} size={24} color={colors.textPrimary} />
             </Pressable>
+            <AppText variant="subtitle" style={styles.headerTitle} numberOfLines={1}>
+              {title}
+            </AppText>
+            <View style={styles.headerIconButton} />
           </View>
 
           <ScrollView
             style={styles.scroll}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             {children}
           </ScrollView>
 
-          <View style={styles.actions}>
-            <AppButton title={resetLabel} variant="secondary" onPress={onReset} />
-            <AppButton title={applyLabel} onPress={onApply} />
-          </View>
+          {showFooterActions && resetLabel && applyLabel && onReset && onApply ? (
+            <View style={styles.actions}>
+              <AppButton title={resetLabel} variant="secondary" onPress={onReset} />
+              <AppButton title={applyLabel} onPress={onApply} />
+            </View>
+          ) : null}
         </SafeAreaView>
       </View>
     </Modal>
@@ -69,28 +95,41 @@ const styles = StyleSheet.create({
     backgroundColor: colors.overlay,
   },
   sheet: {
-    maxHeight: '90%',
+    maxHeight: '85%',
     backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  headerIconButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
   },
   scroll: {
     flexGrow: 0,
+    flexShrink: 1,
   },
   scrollContent: {
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingBottom: spacing.sm,
   },
   actions: {
     gap: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderSubtle,
   },
 });

@@ -1,13 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -18,27 +10,25 @@ import type { DiscoveryKeywordItem } from '@/features/discovery/keyword-types';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-interface CatalogKeywordSelectorProps {
-  visible: boolean;
+interface CatalogKeywordSelectorPanelProps {
   selectedIds: string[];
   selectedLabels: Record<string, string>;
   onChange: (next: { ids: string[]; labels: Record<string, string> }) => void;
-  onClose: () => void;
+  active: boolean;
   testID?: string;
 }
 
-export function CatalogKeywordSelector({
-  visible,
+export function CatalogKeywordSelectorPanel({
   selectedIds,
   selectedLabels,
   onChange,
-  onClose,
+  active,
   testID,
-}: CatalogKeywordSelectorProps) {
+}: CatalogKeywordSelectorPanelProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
-  const keywordsQuery = useDiscoveryKeywords(debouncedQuery, visible);
+  const keywordsQuery = useDiscoveryKeywords(debouncedQuery, active);
 
   const selectedItems = useMemo(
     () =>
@@ -48,11 +38,6 @@ export function CatalogKeywordSelector({
       })),
     [selectedIds, selectedLabels],
   );
-
-  const handleClose = () => {
-    setQuery('');
-    onClose();
-  };
 
   const toggleKeyword = (item: DiscoveryKeywordItem) => {
     if (selectedIds.includes(item.id)) {
@@ -70,158 +55,124 @@ export function CatalogKeywordSelector({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={styles.overlay}>
-        <SafeAreaView style={styles.sheet} edges={['bottom']} testID={testID}>
-          <View style={styles.header}>
+    <View testID={testID}>
+      <AppInput
+        label={t('discovery.catalogFilters.keywordSearchLabel')}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('discovery.catalogFilters.keywordSearchPlaceholder')}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+
+      {selectedItems.length > 0 ? (
+        <View style={styles.selectedSection}>
+          <AppText variant="bodySmall" muted>
+            {t('discovery.catalogFilters.selectedKeywords')}
+          </AppText>
+          {selectedItems.map((item) => (
             <Pressable
+              key={item.id}
               accessibilityRole="button"
-              accessibilityLabel={t('common.close')}
-              onPress={handleClose}
-              style={styles.backButton}
+              accessibilityState={{ selected: true }}
+              accessibilityLabel={item.name}
+              onPress={() => toggleKeyword(item)}
+              style={styles.optionRowSelected}
             >
-              <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
+              <AppText variant="body" style={styles.optionLabelSelected}>
+                {item.name}
+              </AppText>
+              <Ionicons name="checkmark" size={20} color={colors.accent} />
             </Pressable>
-            <AppText variant="subtitle" style={styles.title}>
-              {t('discovery.catalogFilters.keywords')}
-            </AppText>
-            <View style={styles.backButton} />
-          </View>
+          ))}
+        </View>
+      ) : null}
 
-          <AppInput
-            label={t('discovery.catalogFilters.keywordSearchLabel')}
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t('discovery.catalogFilters.keywordSearchPlaceholder')}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+      <View style={styles.content}>
+        {keywordsQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
 
-          {selectedItems.length > 0 ? (
-            <View style={styles.selectedSection}>
-              <AppText variant="bodySmall" muted>
-                {t('discovery.catalogFilters.selectedKeywords')}
+        {keywordsQuery.isError ? (
+          <AppText variant="bodySmall" muted>
+            {t('discovery.catalogFilters.keywordSearchError')}
+          </AppText>
+        ) : null}
+
+        {!keywordsQuery.isLoading &&
+        !keywordsQuery.isError &&
+        debouncedQuery.trim().length > 0 &&
+        (keywordsQuery.data?.items.length ?? 0) === 0 ? (
+          <AppText variant="bodySmall" muted>
+            {t('discovery.catalogFilters.keywordSearchEmpty')}
+          </AppText>
+        ) : null}
+
+        {(keywordsQuery.data?.items ?? []).map((item) => {
+          const selected = selectedIds.includes(item.id);
+
+          return (
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={item.name}
+              onPress={() => toggleKeyword(item)}
+              style={({ pressed }) => [
+                styles.optionRow,
+                selected && styles.optionRowSelected,
+                pressed && styles.pressed,
+              ]}
+            >
+              <AppText variant="body" style={selected ? styles.optionLabelSelected : undefined}>
+                {item.name}
               </AppText>
-              {selectedItems.map((item) => (
-                <Pressable
-                  key={item.id}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: true }}
-                  accessibilityLabel={item.name}
-                  onPress={() => toggleKeyword(item)}
-                  style={styles.optionRowSelected}
-                >
-                  <AppText variant="body" style={styles.optionLabelSelected}>
-                    {item.name}
-                  </AppText>
-                  <Ionicons name="checkmark" size={20} color={colors.accent} />
-                </Pressable>
-              ))}
-            </View>
-          ) : null}
-
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            {keywordsQuery.isLoading ? (
-              <ActivityIndicator color={colors.accent} />
-            ) : null}
-
-            {keywordsQuery.isError ? (
-              <AppText variant="bodySmall" muted>
-                {t('discovery.catalogFilters.keywordSearchError')}
-              </AppText>
-            ) : null}
-
-            {!keywordsQuery.isLoading &&
-            !keywordsQuery.isError &&
-            debouncedQuery.trim().length > 0 &&
-            (keywordsQuery.data?.items.length ?? 0) === 0 ? (
-              <AppText variant="bodySmall" muted>
-                {t('discovery.catalogFilters.keywordSearchEmpty')}
-              </AppText>
-            ) : null}
-
-            {(keywordsQuery.data?.items ?? []).map((item) => {
-              const selected = selectedIds.includes(item.id);
-
-              return (
-                <Pressable
-                  key={item.id}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={item.name}
-                  onPress={() => toggleKeyword(item)}
-                  style={({ pressed }) => [
-                    styles.optionRow,
-                    selected && styles.optionRowSelected,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <AppText variant="body" style={selected ? styles.optionLabelSelected : undefined}>
-                    {item.name}
-                  </AppText>
-                  {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </SafeAreaView>
+              {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
+            </Pressable>
+          );
+        })}
       </View>
-    </Modal>
+    </View>
   );
 }
 
+/** @deprecated Use CatalogKeywordSelectorPanel inside CatalogFilterSheetShell. */
+export function CatalogKeywordSelector(
+  props: CatalogKeywordSelectorPanelProps & {
+    visible: boolean;
+    onClose: () => void;
+  },
+) {
+  const { visible, onClose, ...panelProps } = props;
+  if (!visible) {
+    return null;
+  }
+
+  return <CatalogKeywordSelectorPanel {...panelProps} active={visible} />;
+}
+
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  sheet: {
-    maxHeight: '92%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    minWidth: 44,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-  },
   selectedSection: {
     gap: spacing.xs,
+    marginTop: spacing.sm,
   },
   content: {
     gap: spacing.xs,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.xs,
+    marginTop: spacing.sm,
   },
   optionRow: {
-    minHeight: 48,
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.md,
   },
   optionRowSelected: {
-    minHeight: 48,
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.md,
     backgroundColor: colors.accentTint12,
   },

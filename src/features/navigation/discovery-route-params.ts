@@ -1,5 +1,23 @@
 import type { ImperativeRouter } from 'expo-router';
 
+export const BROWSE_DISCOVER_PARAM_KEYS = [
+  'mode',
+  'type',
+  'genres',
+  'year',
+  'yearFrom',
+  'yearTo',
+  'minRating',
+  'minVoteCount',
+  'minRuntime',
+  'maxRuntime',
+  'language',
+  'originCountry',
+  'keywords',
+  'tvStatus',
+  'sort',
+] as const;
+
 export const STREAMING_DISCOVER_PARAM_KEYS = [
   'mediaType',
   'watchRegion',

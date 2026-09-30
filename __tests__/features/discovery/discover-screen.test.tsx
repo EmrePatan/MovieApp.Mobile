@@ -7,9 +7,10 @@ import DiscoverScreen from '../../../app/(tabs)/(app-shell)/discover-browse';
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSetParams = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace, setParams: mockSetParams }),
   useLocalSearchParams: jest.fn(() => ({})),
   useSegments: jest.fn(() => ['discover-browse']),
   usePathname: jest.fn(() => '/discover-browse'),
@@ -187,13 +188,17 @@ describe('DiscoverScreen', () => {
     expect(screen.getByText('Advanced Filters')).toBeTruthy();
     expect(screen.queryByText('Sort by')).toBeNull();
 
-    fireEvent.press(screen.getByText('Genre'));
+    fireEvent.press(screen.getByLabelText('Genre, Any'));
     fireEvent.press(screen.getByLabelText('Action'));
-    fireEvent.press(screen.getByTestId('catalog-genre-selector-back'));
+    fireEvent.press(screen.getByTestId('discover-browse-filter-sheet-header-action'));
     fireEvent.press(screen.getByText('Show Results'));
 
-    expect(mockReplace).toHaveBeenCalledWith(
-      '/discover-browse?mode=trending&type=all&genres=genre-1',
+    expect(mockSetParams).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'trending',
+        type: 'all',
+        genres: 'genre-1',
+      }),
     );
   });
 
@@ -204,7 +209,12 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByLabelText('Content type Movies'));
     fireEvent.press(screen.getByText('Show Results'));
 
-    expect(mockReplace).toHaveBeenCalledWith('/discover-browse?mode=trending&type=movie');
+    expect(mockSetParams).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'trending',
+        type: 'movie',
+      }),
+    );
   });
 
   it('exposes separate sort and filter header actions without chips or badges', () => {
@@ -229,8 +239,13 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByLabelText('Sort'));
     fireEvent.press(screen.getByLabelText('Highest Rated'));
 
-    expect(mockReplace).toHaveBeenCalledWith(
-      '/discover-browse?mode=trending&type=all&genres=genre-1&sort=rating_desc',
+    expect(mockSetParams).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'trending',
+        type: 'all',
+        genres: 'genre-1',
+        sort: 'rating_desc',
+      }),
     );
   });
 
@@ -281,7 +296,13 @@ describe('DiscoverScreen', () => {
 
     expect(screen.getByText('No titles match your filters')).toBeTruthy();
     fireEvent.press(screen.getByText('Clear filters'));
-    expect(mockReplace).toHaveBeenCalledWith('/discover-browse?mode=trending&type=all');
+    expect(mockSetParams).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'trending',
+        type: 'all',
+        genres: undefined,
+      }),
+    );
   });
 
   it('renders error state with retry', () => {

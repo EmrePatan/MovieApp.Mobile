@@ -3,6 +3,6 @@ export { CatalogSortSheet } from './CatalogSortSheet';
 export { CatalogFilterSheetShell } from './CatalogFilterSheetShell';
 export { FilterSelectorRow } from './FilterSelectorRow';
 export { ExpandableAdvancedFilters } from './ExpandableAdvancedFilters';
-export { CatalogOptionSelector } from './CatalogOptionSelector';
-export { CatalogKeywordSelector } from './CatalogKeywordSelector';
+export { CatalogOptionList, CatalogOptionSelector } from './CatalogOptionSelector';
+export { CatalogKeywordSelector, CatalogKeywordSelectorPanel } from './CatalogKeywordSelector';
 export { CatalogChipRow } from './CatalogChipRow';

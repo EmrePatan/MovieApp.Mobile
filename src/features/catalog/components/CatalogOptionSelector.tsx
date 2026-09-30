@@ -1,5 +1,4 @@
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -10,133 +9,95 @@ export interface CatalogOptionItem<T extends string> {
   label: string;
 }
 
-interface CatalogOptionSelectorProps<T extends string> {
-  visible: boolean;
-  title: string;
-  closeLabel: string;
+interface CatalogOptionListProps<T extends string> {
   options: CatalogOptionItem<T>[];
   values: T[];
   multi?: boolean;
   onChange: (values: T[]) => void;
-  onClose: () => void;
+  onSingleSelectComplete?: () => void;
   testID?: string;
 }
 
-export function CatalogOptionSelector<T extends string>({
-  visible,
-  title,
-  closeLabel,
+/** Presentational option list for in-sheet drill-down (no Modal). */
+export function CatalogOptionList<T extends string>({
   options,
   values,
   multi = false,
   onChange,
-  onClose,
+  onSingleSelectComplete,
   testID,
-}: CatalogOptionSelectorProps<T>) {
+}: CatalogOptionListProps<T>) {
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <SafeAreaView style={styles.sheet} edges={['bottom']} testID={testID}>
-          <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={closeLabel}
-              onPress={onClose}
-              style={styles.backButton}
-              testID={testID ? `${testID}-back` : undefined}
-            >
-              <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-            </Pressable>
-            <AppText variant="subtitle" style={styles.title}>
-              {title}
+    <View style={styles.content} testID={testID}>
+      {options.map((option) => {
+        const selected = values.includes(option.value);
+
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            accessibilityLabel={option.label}
+            onPress={() => {
+              if (multi) {
+                onChange(
+                  selected
+                    ? values.filter((value) => value !== option.value)
+                    : [...values, option.value],
+                );
+                return;
+              }
+
+              onChange(selected ? [] : [option.value]);
+              onSingleSelectComplete?.();
+            }}
+            style={({ pressed }) => [
+              styles.optionRow,
+              selected && styles.optionRowSelected,
+              pressed && styles.pressed,
+            ]}
+          >
+            <AppText variant="body" style={selected ? styles.optionLabelSelected : undefined}>
+              {option.label}
             </AppText>
-            <View style={styles.backButton} />
-          </View>
+            {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            {options.map((option) => {
-              const selected = values.includes(option.value);
+/** @deprecated Use CatalogOptionList inside CatalogFilterSheetShell drill-down. */
+export function CatalogOptionSelector<T extends string>(props: CatalogOptionListProps<T> & {
+  visible: boolean;
+  title: string;
+  closeLabel: string;
+  onClose: () => void;
+}) {
+  const { visible, onClose, closeLabel, ...listProps } = props;
+  if (!visible) {
+    return null;
+  }
 
-              return (
-                <Pressable
-                  key={option.value}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={option.label}
-                  onPress={() => {
-                    if (multi) {
-                      onChange(
-                        selected
-                          ? values.filter((value) => value !== option.value)
-                          : [...values, option.value],
-                      );
-                      return;
-                    }
-
-                    onChange(selected ? [] : [option.value]);
-                    onClose();
-                  }}
-                  style={({ pressed }) => [
-                    styles.optionRow,
-                    selected && styles.optionRowSelected,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <AppText variant="body" style={selected ? styles.optionLabelSelected : undefined}>
-                    {option.label}
-                  </AppText>
-                  {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </SafeAreaView>
-      </View>
-    </Modal>
+  return (
+    <View accessibilityLabel={closeLabel}>
+      <CatalogOptionList {...listProps} onSingleSelectComplete={onClose} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  sheet: {
-    maxHeight: '88%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    minWidth: 44,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-  },
   content: {
     gap: spacing.xs,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.xs,
   },
   optionRow: {
-    minHeight: 48,
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.md,
   },
   optionRowSelected: {

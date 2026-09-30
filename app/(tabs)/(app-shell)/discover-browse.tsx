@@ -40,8 +40,13 @@ import {
 } from '@/features/discovery/utils/browse-filter-adapters';
 import {
   parseDiscoverParams,
+  serializeDiscoverParams,
   serializeDiscoverRoute,
 } from '@/features/discovery/utils/discover-params';
+import {
+  BROWSE_DISCOVER_PARAM_KEYS,
+  setDiscoveryRouteParams,
+} from '@/features/navigation/discovery-route-params';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
@@ -85,7 +90,11 @@ export default function DiscoverScreen() {
 
   const replaceBrowseState = useCallback(
     (next: DiscoveryBrowseState) => {
-      router.replace(serializeDiscoverRoute(next));
+      setDiscoveryRouteParams(
+        router,
+        serializeDiscoverParams(next),
+        BROWSE_DISCOVER_PARAM_KEYS,
+      );
     },
     [router],
   );
