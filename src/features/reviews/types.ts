@@ -18,6 +18,7 @@ export interface ReviewsQueryOptions {
 export interface ReviewAuthorResponse {
   id: string;
   displayName: string;
+  effectiveAvatarUrl?: string | null;
 }
 
 export interface ReviewResponse {

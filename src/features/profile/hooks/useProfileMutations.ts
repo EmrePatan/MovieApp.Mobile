@@ -10,7 +10,9 @@ import {
   changeEmail,
   changePassword,
   deleteAccount,
+  removeAvatar,
   updateProfile,
+  uploadAvatar,
 } from '../api/profile-api';
 import { currentProfileQueryKey, profileStatisticsQueryKey } from './profile-query-keys';
 import type {
@@ -26,6 +28,7 @@ import type {
 function invalidateProfileQueries(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: currentProfileQueryKey() });
   void queryClient.invalidateQueries({ queryKey: profileStatisticsQueryKey() });
+  void queryClient.invalidateQueries({ queryKey: ['reviews'] });
 }
 
 export function useUpdateProfileMutation() {
@@ -34,6 +37,34 @@ export function useUpdateProfileMutation() {
 
   return useMutation({
     mutationFn: (payload: UpdateProfileRequest) => updateProfile(payload),
+    onSuccess: async (profile) => {
+      queryClient.setQueryData(currentProfileQueryKey(), profile);
+      invalidateProfileQueries(queryClient);
+      await refreshUser();
+    },
+  });
+}
+
+export function useUploadAvatarMutation() {
+  const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
+
+  return useMutation({
+    mutationFn: (file: { uri: string; name: string; type: string }) => uploadAvatar(file),
+    onSuccess: async (profile) => {
+      queryClient.setQueryData(currentProfileQueryKey(), profile);
+      invalidateProfileQueries(queryClient);
+      await refreshUser();
+    },
+  });
+}
+
+export function useRemoveAvatarMutation() {
+  const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
+
+  return useMutation({
+    mutationFn: () => removeAvatar(),
     onSuccess: async (profile) => {
       queryClient.setQueryData(currentProfileQueryKey(), profile);
       invalidateProfileQueries(queryClient);

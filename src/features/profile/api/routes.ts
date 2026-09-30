@@ -6,6 +6,10 @@ export function buildUpdateProfilePath(): string {
   return '/api/users/me/profile';
 }
 
+export function buildUploadAvatarPath(): string {
+  return '/api/users/me/avatar';
+}
+
 export function buildChangeEmailPath(): string {
   return '/api/users/me/email';
 }

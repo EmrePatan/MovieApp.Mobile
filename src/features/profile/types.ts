@@ -1,5 +1,7 @@
 import type { SocialAuthProvider } from '@/models/api/auth';
 
+export type UserAvatarKind = 'custom' | 'provider' | 'initials';
+
 export interface UserProfileResponse {
   id: string;
   email: string;
@@ -9,6 +11,10 @@ export interface UserProfileResponse {
   hasPassword: boolean;
   linkedProviders: SocialAuthProvider[];
   pendingEmail?: string | null;
+  customAvatarUrl?: string | null;
+  providerAvatarUrl?: string | null;
+  effectiveAvatarUrl?: string | null;
+  avatarKind?: UserAvatarKind;
 }
 
 export interface UpdateProfileRequest {

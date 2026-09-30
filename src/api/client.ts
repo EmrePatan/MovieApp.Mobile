@@ -101,6 +101,10 @@ class ApiClient {
     return this.request<T>('DELETE', path, body, options);
   }
 
+  postFormData<T>(path: string, formData: FormData, options?: RequestOptions): Promise<T> {
+    return this.request<T>('POST', path, formData, options);
+  }
+
   private async request<T>(
     method: string,
     path: string,
@@ -120,7 +124,7 @@ class ApiClient {
       requestHeaders['Accept-Language'] = acceptLanguage;
     }
 
-    if (body !== undefined) {
+    if (body !== undefined && !(body instanceof FormData)) {
       requestHeaders['Content-Type'] = 'application/json';
     }
 

@@ -4,10 +4,8 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import type { ReviewResponse } from '../types';
-import {
-  formatReviewDateLabel,
-  getAuthorInitials,
-} from '../utils/review-format';
+import { UserAvatar } from '@/components/common/UserAvatar';
+import { formatReviewDateLabel } from '../utils/review-format';
 import {
   likelyExceedsCollapsedLines,
   REVIEW_LIST_COLLAPSED_LINE_COUNT,
@@ -63,16 +61,15 @@ export const ReviewCard = memo(function ReviewCard({
       testID={isOwnReview ? 'review-card-own' : 'review-card'}
     >
       <View style={styles.header}>
-        <View
-          style={[styles.avatar, isOwnReview && styles.avatarOwn]}
+        <UserAvatar
+          displayName={review.user.displayName}
+          effectiveAvatarUrl={review.user.effectiveAvatarUrl}
+          size={AVATAR_SIZE}
+          variant={isOwnReview ? 'accent' : 'default'}
           accessibilityLabel={t('profile.avatarAccessibility', {
             name: review.user.displayName,
           })}
-        >
-          <AppText variant="caption" style={styles.avatarText}>
-            {getAuthorInitials(review.user.displayName)}
-          </AppText>
-        </View>
+        />
 
         <View style={styles.meta}>
           <View style={styles.nameRow}>
@@ -198,26 +195,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
     alignItems: 'flex-start',
-  },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  avatarOwn: {
-    backgroundColor: colors.accentTint12,
-    borderColor: colors.accentTint18,
-  },
-  avatarText: {
-    color: colors.textSecondary,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    fontSize: 12,
   },
   meta: {
     flex: 1,

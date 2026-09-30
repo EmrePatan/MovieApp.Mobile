@@ -17,6 +17,7 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { getRegionLabel } from '@/features/regions/region-options';
 import { getLanguageLabel } from '@/i18n/locale-tags';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
+import { useProfileAvatarEditor } from '@/features/profile/hooks/useProfileAvatarEditor';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -30,6 +31,7 @@ export default function ProfileScreen() {
 
   const profile = profileQuery.data;
   const isRefreshing = profileQuery.isRefetching && !profileQuery.isLoading;
+  const { openAvatarActions, isAvatarBusy } = useProfileAvatarEditor(profile);
 
   const handleRefresh = useCallback(() => {
     void profileQuery.refetch();
@@ -77,7 +79,13 @@ export default function ProfileScreen() {
         })}
       >
         <DetailBackButton />
-        {profile ? <ProfileHero profile={profile} /> : null}
+        {profile ? (
+          <ProfileHero
+            profile={profile}
+            onEditAvatar={openAvatarActions}
+            isAvatarBusy={isAvatarBusy}
+          />
+        ) : null}
 
         <ProfileSection title={t('profile.preferences')}>
           <ProfileMenuRow

@@ -6,6 +6,7 @@ import {
   buildDeleteAccountPath,
   buildProfileStatisticsPath,
   buildUpdateProfilePath,
+  buildUploadAvatarPath,
 } from './routes';
 import { getProfileStatisticsTimeZone } from '../utils/profile-timezone';
 import type {
@@ -27,6 +28,20 @@ export async function updateProfile(
   payload: UpdateProfileRequest,
 ): Promise<UserProfileResponse> {
   return api.put<UserProfileResponse>(buildUpdateProfilePath(), payload);
+}
+
+export async function uploadAvatar(file: {
+  uri: string;
+  name: string;
+  type: string;
+}): Promise<UserProfileResponse> {
+  const formData = new FormData();
+  formData.append('file', file as unknown as Blob);
+  return api.postFormData<UserProfileResponse>(buildUploadAvatarPath(), formData);
+}
+
+export async function removeAvatar(): Promise<UserProfileResponse> {
+  return api.delete<UserProfileResponse>(buildUploadAvatarPath());
 }
 
 export async function changeEmail(payload: ChangeEmailRequest): Promise<MessageResponse> {

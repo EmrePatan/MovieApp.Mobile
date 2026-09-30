@@ -6,6 +6,7 @@ export interface UserProfile {
   userName: string;
   displayName: string;
   createdAt: string;
+  effectiveAvatarUrl?: string | null;
 }
 
 export interface AuthResponse {
