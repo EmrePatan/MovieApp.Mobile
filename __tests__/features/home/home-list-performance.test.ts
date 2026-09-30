@@ -1,4 +1,5 @@
 import { layout } from '@/theme/layout';
+import { HOME_RECOMMENDED_LOADING_SECTION_TYPE } from '@/features/home/utils/build-home-list-sections';
 import {
   homeComingUpItemKeyExtractor,
   homeItemKeyExtractor,
@@ -40,6 +41,14 @@ describe('home list performance helpers', () => {
     const section = createSection({ type: 'Genre', displayOrder: 4 });
 
     expect(homeSectionKeyExtractor(section)).toBe('Genre-4');
+  });
+
+  it('uses a stable key for the Recommended For You loading placeholder row', () => {
+    expect(
+      homeSectionKeyExtractor(
+        createSection({ type: HOME_RECOMMENDED_LOADING_SECTION_TYPE, displayOrder: 0 }),
+      ),
+    ).toBe(HOME_RECOMMENDED_LOADING_SECTION_TYPE);
   });
 
   it('builds stable item keys from content type and id', () => {

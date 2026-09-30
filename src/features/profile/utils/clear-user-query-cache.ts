@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import { clearHomePersonalizedCacheForUser } from '@/features/home/storage/home-personalized-cache';
 
 const USER_QUERY_PREFIXES = [
   ['profile'],
@@ -22,8 +23,12 @@ const USER_QUERY_PREFIXES = [
   ['tv-show-follow-status'],
 ] as const;
 
-export function clearUserQueryCache(queryClient: QueryClient) {
+export function clearUserQueryCache(queryClient: QueryClient, userId?: string) {
   for (const queryKey of USER_QUERY_PREFIXES) {
     void queryClient.removeQueries({ queryKey: [...queryKey] });
+  }
+
+  if (userId) {
+    void clearHomePersonalizedCacheForUser(userId);
   }
 }

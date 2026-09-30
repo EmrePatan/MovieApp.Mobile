@@ -27,7 +27,7 @@ jest.mock('@/features/follows/utils/home-coming-up-cache', () => ({
   removeFollowedCatalogFromHomeCaches: jest.fn(),
 }));
 
-const homePersonalizedKey = homePersonalizedQueryKey('all', 10, 'TR');
+const homePersonalizedKey = homePersonalizedQueryKey('user-1', 'all', 10, 'TR');
 
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: { children: React.ReactNode }) {

@@ -28,6 +28,11 @@ jest.mock('@/features/upcoming/api/upcoming-api', () => ({
   getUpcomingCatalog: jest.fn(),
 }));
 
+jest.mock('@/features/home/storage/home-personalized-cache', () => ({
+  readHomePersonalizedCache: jest.fn().mockResolvedValue(null),
+  writeHomePersonalizedCache: jest.fn(),
+}));
+
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
   useRegionalPreference: () => ({
     region: 'TR',

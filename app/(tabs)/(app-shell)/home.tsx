@@ -25,6 +25,11 @@ import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
+import {
+  buildHomeListSections,
+  isHomeRecommendedLoadingSection,
+} from '@/features/home/utils/build-home-list-sections';
+import { shouldShowPersonalizedLoadingSlot } from '@/features/home/utils/home-personalized-loading';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 import { performHomeSilentReselectRefresh } from '@/features/navigation/home-tab-reselect';
@@ -68,12 +73,20 @@ export default function HomeScreen() {
     refetch,
   } = useHomeFeed('all', DEFAULT_HOME_SECTION_SIZE, { screenActive: isHomeFocused });
 
-  const { sections, heroItems, showColdWelcome } = useMemo(() => {
+  const showPersonalizedLoadingSlot = shouldShowPersonalizedLoadingSlot(
+    personalization,
+    personalized,
+  );
+
+  const { sections: presentedSections, heroItems, showColdWelcome } = useMemo(() => {
     const nonEmptySections = mergedSections.filter((section) => section.items.length > 0);
     return presentHomeSections(nonEmptySections, personalization);
   }, [mergedSections, personalization]);
 
-  const showPersonalizedLoadingSlot = personalization === 'unknown' && !personalized.isError;
+  const sections = useMemo(
+    () => buildHomeListSections(presentedSections, showPersonalizedLoadingSlot),
+    [presentedSections, showPersonalizedLoadingSlot],
+  );
 
   const hasVisibleBrowseContent = heroItems.length > 0 || sections.length > 0;
 
@@ -183,6 +196,10 @@ export default function HomeScreen() {
 
   const renderSection = useCallback(
     ({ item }: { item: HomeSectionModel }) => {
+      if (isHomeRecommendedLoadingSection(item)) {
+        return <HomePersonalizedLoadingSlot />;
+      }
+
       if (item.type === 'ComingUp') {
         return (
           <HomeComingUpSection
@@ -259,11 +276,6 @@ export default function HomeScreen() {
     [androidPullToRefresh.RefreshHeader, listHeader],
   );
 
-  const listFooter = useMemo(
-    () => (showPersonalizedLoadingSlot ? <HomePersonalizedLoadingSlot /> : null),
-    [showPersonalizedLoadingSlot],
-  );
-
   if (isInitialBrowseLoading) {
     return (
       <HomeScreenShell>
@@ -308,7 +320,6 @@ export default function HomeScreen() {
       keyExtractor={homeSectionKeyExtractor}
       renderItem={renderSection}
       ListHeaderComponent={mergedListHeader}
-      ListFooterComponent={listFooter}
       ListEmptyComponent={showColdWelcome ? null : HomeEmptyState}
       contentContainerStyle={listContentStyle}
       refreshControl={refreshControl}

@@ -1,7 +1,12 @@
 import type { HomeItem, HomeSection } from '../types';
+import { HOME_RECOMMENDED_LOADING_SECTION_TYPE } from './build-home-list-sections';
 import { createHomeContentKey } from './selectHeroCandidates';
 
 export function homeSectionKeyExtractor(section: HomeSection): string {
+  if (section.type === HOME_RECOMMENDED_LOADING_SECTION_TYPE) {
+    return HOME_RECOMMENDED_LOADING_SECTION_TYPE;
+  }
+
   return `${section.type}-${section.displayOrder}`;
 }
 

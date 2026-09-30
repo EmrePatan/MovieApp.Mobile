@@ -1,4 +1,9 @@
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
+import { clearHomePersonalizedCacheForUser } from '@/features/home/storage/home-personalized-cache';
+
+jest.mock('@/features/home/storage/home-personalized-cache', () => ({
+  clearHomePersonalizedCacheForUser: jest.fn(),
+}));
 
 describe('clear user query cache', () => {
   it('removes user-specific query prefixes', () => {
@@ -15,6 +20,15 @@ describe('clear user query cache', () => {
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['search-history'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['home'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['notifications'] });
+  });
+
+  it('clears persisted personalized home cache for the signing-out user', () => {
+    const removeQueries = jest.fn();
+    const queryClient = { removeQueries } as never;
+
+    clearUserQueryCache(queryClient, 'user-42');
+
+    expect(clearHomePersonalizedCacheForUser).toHaveBeenCalledWith('user-42');
   });
 
   it('removes personalized library, insights, recommendation and follow caches', () => {

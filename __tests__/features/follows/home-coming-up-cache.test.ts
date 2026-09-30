@@ -62,7 +62,7 @@ const homeData: HomePersonalizedResponse = {
 describe('removeFollowedCatalogFromHomeCaches', () => {
   it('removes the unfollowed item from Coming Up and drops the section when empty', () => {
     const queryClient = new QueryClient();
-    const queryKey = homePersonalizedQueryKey('all', 10, 'TR');
+    const queryKey = homePersonalizedQueryKey('user-1', 'all', 10, 'TR');
     queryClient.setQueryData(queryKey, homeData);
 
     removeFollowedCatalogFromHomeCaches(queryClient, 'movie-id');
@@ -76,7 +76,7 @@ describe('removeFollowedCatalogFromHomeCaches', () => {
 
   it('removes Coming Up entirely when the last item is unfollowed', () => {
     const queryClient = new QueryClient();
-    const queryKey = homePersonalizedQueryKey('all', 10, 'TR');
+    const queryKey = homePersonalizedQueryKey('user-1', 'all', 10, 'TR');
     queryClient.setQueryData(queryKey, {
       ...homeData,
       sections: [

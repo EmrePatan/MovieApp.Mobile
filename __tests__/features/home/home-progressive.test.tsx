@@ -163,6 +163,28 @@ describe('Home progressive feed', () => {
     expect(screen.queryByLabelText('Loading personalized home content')).toBeNull();
   });
 
+  it('places the personalized loading slot ahead of browse rails before disk hydration', () => {
+    mockUseHomeFeed.mockImplementation(() =>
+      createHomeFeedMockReturnValue({
+        data: {
+          sections: [browseSection],
+          isPersonalized: false,
+        },
+        personalizedLoading: true,
+        personalization: 'unknown',
+        refetch: mockRefetch,
+      }),
+    );
+
+    const { UNSAFE_getAllByType } = render(<HomeScreen />);
+    const { FlatList } = require('react-native');
+    const list = UNSAFE_getAllByType(FlatList)[0];
+    const rows = list.props.data as Array<{ type: string }>;
+
+    expect(rows[0]?.type).toBe('__HomeRecommendedForYouLoading__');
+    expect(rows[1]?.type).toBe('Trending');
+  });
+
   it('marks first meaningful render when browse content is visible', () => {
     mockUseHomeFeed.mockReturnValue(
       createHomeFeedMockReturnValue({

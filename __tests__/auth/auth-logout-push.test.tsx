@@ -32,6 +32,7 @@ jest.mock('@/api/client', () => ({
   api: {
     setTokenGetter: jest.fn(),
     setUnauthorizedHandler: jest.fn(),
+    setSessionRefreshHandler: jest.fn(),
   },
 }));
 

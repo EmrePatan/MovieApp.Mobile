@@ -99,11 +99,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSessionRestored, setIsSessionRestored] = useState(false);
   const tokenRef = useRef<string | null>(null);
+  const userIdRef = useRef<string | undefined>(undefined);
 
   const syncToken = useCallback((nextToken: string | null) => {
     tokenRef.current = nextToken;
     setToken(nextToken);
   }, []);
+
+  useEffect(() => {
+    userIdRef.current = user?.id;
+  }, [user?.id]);
 
   const clearSession = useCallback(async () => {
     await removeAccessToken();
@@ -156,7 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         resetPushPermissionRequestState();
       }
 
-      clearUserQueryCache(queryClient);
+      clearUserQueryCache(queryClient, userIdRef.current);
       await clearSession();
     },
     [clearSession],
