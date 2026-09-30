@@ -52,29 +52,42 @@ export function CatalogKeywordSelectorPanel({
     return () => clearTimeout(focusTimer);
   }, [active]);
 
+  const uniqueSelectedIds = useMemo(
+    () => Array.from(new Set(selectedIds.filter((id) => id.length > 0))),
+    [selectedIds],
+  );
+
   const selectedItems = useMemo(
     () =>
-      selectedIds.map((id) => ({
+      uniqueSelectedIds.map((id) => ({
         id,
         name: selectedLabels[id] ?? id,
       })),
-    [selectedIds, selectedLabels],
+    [uniqueSelectedIds, selectedLabels],
   );
 
   const toggleKeyword = (item: DiscoveryKeywordItem) => {
-    if (selectedIds.includes(item.id)) {
-      const nextIds = selectedIds.filter((id) => id !== item.id);
+    const canonicalId = item.id;
+
+    if (uniqueSelectedIds.includes(canonicalId)) {
+      const nextIds = uniqueSelectedIds.filter((id) => id !== canonicalId);
       const nextLabels = { ...selectedLabels };
-      delete nextLabels[item.id];
+      delete nextLabels[canonicalId];
       onChange({ ids: nextIds, labels: nextLabels });
       return;
     }
 
     onChange({
-      ids: [...selectedIds, item.id],
-      labels: { ...selectedLabels, [item.id]: item.name },
+      ids: [...uniqueSelectedIds, canonicalId],
+      labels: { ...selectedLabels, [canonicalId]: item.name },
     });
   };
+
+  const visibleSearchResults = useMemo(() => {
+    const items = keywordsQuery.data?.items ?? [];
+    const selected = new Set(uniqueSelectedIds);
+    return items.filter((item) => !selected.has(item.id));
+  }, [keywordsQuery.data?.items, uniqueSelectedIds]);
 
   return (
     <KeyboardAvoidingView
@@ -141,29 +154,18 @@ export function CatalogKeywordSelectorPanel({
           </AppText>
         ) : null}
 
-        {(keywordsQuery.data?.items ?? []).map((item) => {
-          const selected = selectedIds.includes(item.id);
-
-          return (
-            <Pressable
-              key={item.id}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              accessibilityLabel={item.name}
-              onPress={() => toggleKeyword(item)}
-              style={({ pressed }) => [
-                styles.optionRow,
-                selected && styles.optionRowSelected,
-                pressed && styles.pressed,
-              ]}
-            >
-              <AppText variant="body" style={selected ? styles.optionLabelSelected : undefined}>
-                {item.name}
-              </AppText>
-              {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
-            </Pressable>
-          );
-        })}
+        {visibleSearchResults.map((item) => (
+          <Pressable
+            key={item.id}
+            accessibilityRole="button"
+            accessibilityState={{ selected: false }}
+            accessibilityLabel={item.name}
+            onPress={() => toggleKeyword(item)}
+            style={({ pressed }) => [styles.optionRow, pressed && styles.pressed]}
+          >
+            <AppText variant="body">{item.name}</AppText>
+          </Pressable>
+        ))}
       </ScrollView>
     </KeyboardAvoidingView>
   );
