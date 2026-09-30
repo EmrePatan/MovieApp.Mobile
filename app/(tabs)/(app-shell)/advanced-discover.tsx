@@ -24,6 +24,7 @@ import { DetailBackButton } from '@/features/details/shared/components/DetailScr
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
+import { catalogBrowseListStyles } from '@/features/catalog/catalog-browse-list-styles';
 import { catalogItemKeyExtractor } from '@/features/catalog/utils/catalog-list-keys';
 import { ActiveFilterChips } from '@/features/discovery/components/ActiveFilterChips';
 import { AdvancedDiscoverFilterSheet } from '@/features/discovery/components/AdvancedDiscoverFilterSheet';
@@ -222,7 +223,7 @@ export default function AdvancedDiscoverScreen() {
 
   const pageHeader = useMemo(
     () => (
-      <View style={styles.header}>
+      <View style={[catalogBrowseListStyles.listHeader, styles.header]}>
         <AppText variant="title" accessibilityRole="header">
           {translateAdvancedDiscoverTitle()}
         </AppText>
@@ -261,7 +262,7 @@ export default function AdvancedDiscoverScreen() {
   );
 
   const topBar = (
-    <View style={styles.topBar}>
+    <View style={catalogBrowseListStyles.topBar}>
       <DetailBackButton />
     </View>
   );
@@ -273,7 +274,7 @@ export default function AdvancedDiscoverScreen() {
 
     if (hasActiveAdvancedDiscoverFilters(filters, mediaType)) {
       return (
-        <View style={styles.emptyWithAction}>
+        <View style={catalogBrowseListStyles.emptyWithAction}>
           <SearchEmptyState
             title={t('discovery.browseScreen.noTitlesMatchFiltersTitle')}
             message={t('discovery.browseScreen.noTitlesMatchFiltersMessage')}
@@ -300,7 +301,7 @@ export default function AdvancedDiscoverScreen() {
   if (shouldFetchResults && discoverQuery.isLoading && items.length === 0) {
     return (
       <StackListScreen topBar={topBar}>
-        <View style={styles.listContent}>
+        <View style={catalogBrowseListStyles.listContent}>
           {pageHeader}
           <SearchLoadingState />
         </View>
@@ -316,7 +317,7 @@ export default function AdvancedDiscoverScreen() {
 
     return (
       <StackListScreen topBar={topBar}>
-        <View style={styles.listContent}>
+        <View style={catalogBrowseListStyles.listContent}>
           {pageHeader}
           <View style={styles.errorContainer}>
             <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
@@ -339,12 +340,12 @@ export default function AdvancedDiscoverScreen() {
         ListEmptyComponent={emptyState}
         ListFooterComponent={
           discoverQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
+            <View style={catalogBrowseListStyles.footerLoading}>
               <ActivityIndicator color={colors.accent} />
             </View>
           ) : null
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={catalogBrowseListStyles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
       />
@@ -354,9 +355,6 @@ export default function AdvancedDiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    paddingHorizontal: spacing.lg,
-  },
   header: {
     gap: spacing.sm,
     paddingBottom: spacing.md,
@@ -394,15 +392,6 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.85,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    flexGrow: 1,
-  },
-  emptyWithAction: {
-    gap: spacing.md,
-    alignItems: 'center',
   },
   errorContainer: {
     flex: 1,

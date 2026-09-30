@@ -18,6 +18,7 @@ import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/nav
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
+import { catalogBrowseListStyles } from '@/features/catalog/catalog-browse-list-styles';
 import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
 import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { useWorldCinema } from '@/features/discovery/hooks/useWorldCinema';
@@ -120,9 +121,9 @@ export default function WorldCinemaScreen() {
 
   const listHeaderContent = useMemo(
     () => (
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <AppText variant="title" accessibilityRole="header" style={styles.title}>
+      <View style={catalogBrowseListStyles.listHeader}>
+        <View style={catalogBrowseListStyles.titleRow}>
+          <AppText variant="title" accessibilityRole="header" style={catalogBrowseListStyles.title}>
             {t('discovery.worldCinemaScreen.title')}
           </AppText>
           <CatalogListActions
@@ -135,9 +136,6 @@ export default function WorldCinemaScreen() {
             testID="world-cinema-actions"
           />
         </View>
-        <AppText variant="bodySmall" muted>
-          {t('discovery.worldCinemaScreen.subtitle')}
-        </AppText>
       </View>
     ),
     [discoverState, t],
@@ -156,7 +154,7 @@ export default function WorldCinemaScreen() {
         : t('discovery.worldCinemaScreen.loadError');
 
       return (
-        <View style={styles.errorContainer}>
+        <View style={catalogBrowseListStyles.errorContainer}>
           <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
@@ -177,7 +175,7 @@ export default function WorldCinemaScreen() {
   return (
     <StackListScreen
       topBar={
-        <View style={styles.topBar}>
+        <View style={catalogBrowseListStyles.topBar}>
           <DetailBackButton />
         </View>
       }
@@ -203,7 +201,7 @@ export default function WorldCinemaScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={catalogBrowseListStyles.listContent}
       />
       <CatalogSortSheet
         visible={sortSheetVisible}
@@ -234,30 +232,6 @@ export default function WorldCinemaScreen() {
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    paddingHorizontal: spacing.lg,
-  },
-  header: {
-    gap: spacing.sm,
-    paddingBottom: spacing.lg,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  title: {
-    flex: 1,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    flexGrow: 1,
-  },
-  errorContainer: {
-    paddingVertical: spacing.lg,
-  },
   footerLoader: {
     paddingVertical: spacing.lg,
   },

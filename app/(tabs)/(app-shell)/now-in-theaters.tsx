@@ -15,6 +15,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
+import { catalogBrowseListStyles } from '@/features/catalog/catalog-browse-list-styles';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
@@ -79,12 +80,9 @@ export default function NowInTheatersScreen() {
 
   const listHeader = useMemo(
     () => (
-      <View style={styles.header}>
+      <View style={catalogBrowseListStyles.listHeader}>
         <AppText variant="title" accessibilityRole="header">
           {t('discover.hub.nowInTheaters.title')}
-        </AppText>
-        <AppText variant="bodySmall" muted>
-          {t('discover.hub.nowInTheaters.subtitle')}
         </AppText>
       </View>
     ),
@@ -102,7 +100,7 @@ export default function NowInTheatersScreen() {
         : t('discovery.browseScreen.loadError');
 
       return (
-        <View style={styles.errorContainer}>
+        <View style={catalogBrowseListStyles.errorContainer}>
           <ErrorView message={message} onRetry={() => void resultsQuery.refetch()} retryLabel={t('common.tryAgain')} />
         </View>
       );
@@ -123,7 +121,7 @@ export default function NowInTheatersScreen() {
   return (
     <StackListScreen
       topBar={
-        <View style={styles.topBar}>
+        <View style={catalogBrowseListStyles.topBar}>
           <DetailBackButton />
         </View>
       }
@@ -149,28 +147,13 @@ export default function NowInTheatersScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={catalogBrowseListStyles.listContent}
       />
     </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    paddingHorizontal: spacing.lg,
-  },
-  header: {
-    gap: spacing.md,
-    paddingBottom: spacing.lg,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    flexGrow: 1,
-  },
-  errorContainer: {
-    paddingVertical: spacing.lg,
-  },
   footerLoader: {
     paddingVertical: spacing.lg,
   },

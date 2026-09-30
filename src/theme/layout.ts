@@ -37,6 +37,10 @@ export const layout = {
     maxToRenderPerBatch: 2,
     windowSize: 5,
   },
+  /** Gap between catalog list title row and first result (matches discover-browse). */
+  catalogBrowseListHeader: {
+    paddingBottom: spacing.sm,
+  },
   detailHero: {
     minHeight: 220,
     maxHeight: 320,

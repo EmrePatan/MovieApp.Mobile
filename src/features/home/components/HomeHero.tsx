@@ -33,6 +33,8 @@ interface HomeHeroProps {
 
 const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
 const HERO_INFO_BAND_MIN_HEIGHT = 96;
+/** Extra fade above the text band so the scrim blends into the artwork (avoids a hard horizontal seam). */
+const HERO_SCRIM_FADE_ABOVE_BAND = spacing.xxl + spacing.lg;
 
 function HeroCoverImage({
   uri,
@@ -175,9 +177,13 @@ export const HomeHero = memo(function HomeHero({
 
         <View style={styles.infoBand} pointerEvents="none">
           <LinearGradient
-            colors={['rgba(10, 10, 15, 0)', 'rgba(10, 10, 15, 0.9)']}
-            locations={[0, 1]}
-            style={styles.infoFade}
+            colors={[
+              'rgba(10, 10, 15, 0)',
+              'rgba(10, 10, 15, 0.25)',
+              'rgba(10, 10, 15, 0.88)',
+            ]}
+            locations={[0, 0.45, 1]}
+            style={styles.infoScrim}
             pointerEvents="none"
           />
           <View style={styles.infoContent}>
@@ -266,16 +272,16 @@ const styles = StyleSheet.create({
     bottom: 0,
     minHeight: HERO_INFO_BAND_MIN_HEIGHT,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(10, 10, 15, 0.82)',
   },
-  infoFade: {
+  infoScrim: {
     position: 'absolute',
     left: 0,
     right: 0,
-    top: -spacing.xl * 2,
-    height: spacing.xl * 2,
+    bottom: 0,
+    top: -HERO_SCRIM_FADE_ABOVE_BAND,
   },
   infoContent: {
+    zIndex: 1,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.lg,

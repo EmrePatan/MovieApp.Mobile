@@ -17,6 +17,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
+import { catalogBrowseListStyles } from '@/features/catalog/catalog-browse-list-styles';
 import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
 import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
@@ -56,7 +57,6 @@ import {
 } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { commonStyles } from '@/theme/theme';
 
@@ -178,9 +178,9 @@ export default function DiscoverScreen() {
       <View>
         <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
           <DetailBackButton contentInset={false} />
-          <View style={styles.header}>
-            <View style={styles.titleRow}>
-              <AppText variant="title" style={styles.title}>
+          <View style={[catalogBrowseListStyles.listHeader, catalogBrowseListStyles.listHeaderWithGap]}>
+            <View style={catalogBrowseListStyles.titleRow}>
+              <AppText variant="title" style={catalogBrowseListStyles.title}>
                 {getDiscoverTitle(mode)}
               </AppText>
               <CatalogListActions
@@ -203,7 +203,7 @@ export default function DiscoverScreen() {
   const emptyState = useMemo(() => {
     if (hasActiveDiscoveryUserFilters(filters, typeFilter)) {
       return (
-        <View style={styles.emptyWithAction}>
+        <View style={catalogBrowseListStyles.emptyWithAction}>
           <SearchEmptyState
             title={t('discovery.browseScreen.noTitlesMatchFiltersTitle')}
             message={t('discovery.browseScreen.noTitlesMatchFiltersMessage')}
@@ -227,7 +227,7 @@ export default function DiscoverScreen() {
         : t('discovery.browseScreen.loadError');
 
       return (
-        <View style={styles.errorContainer}>
+        <View style={catalogBrowseListStyles.errorContainer}>
           <ErrorView message={message} onRetry={handleRefresh} retryLabel={t('common.tryAgain')} />
         </View>
       );
@@ -241,7 +241,7 @@ export default function DiscoverScreen() {
   }, [browseQuery.error, browseQuery.isError, browseQuery.isLoading, emptyState, handleRefresh, items.length, t]);
 
   const listFooter = browseQuery.isFetchingNextPage ? (
-    <View style={styles.footerLoading}>
+    <View style={catalogBrowseListStyles.footerLoading}>
       <ActivityIndicator color={colors.accent} />
     </View>
   ) : null;
@@ -265,7 +265,11 @@ export default function DiscoverScreen() {
         ListHeaderComponent={listHeader}
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooter}
-        contentContainerStyle={items.length === 0 ? styles.emptyListContent : styles.listContent}
+        contentContainerStyle={
+          items.length === 0
+            ? catalogBrowseListStyles.listContentEmpty
+            : catalogBrowseListStyles.listContent
+        }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
         showsVerticalScrollIndicator={false}
@@ -310,41 +314,5 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   headerSafeArea: {
     backgroundColor: colors.background,
-  },
-  header: {
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  title: {
-    flex: 1,
-  },
-  listContent: {
-    paddingBottom: spacing.xxl,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-    paddingBottom: spacing.xxl,
-  },
-  emptyWithAction: {
-    gap: spacing.md,
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xl,
-  },
-  footerLoading: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
   },
 });

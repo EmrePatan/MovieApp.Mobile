@@ -19,6 +19,7 @@ import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/nav
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { ADVANCED_DISCOVER_SORT_OPTIONS } from '@/features/discovery/advanced-discover-types';
 import type { AdvancedDiscoverSort } from '@/features/discovery/advanced-discover-types';
+import { catalogBrowseListStyles } from '@/features/catalog/catalog-browse-list-styles';
 import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
 import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
@@ -184,9 +185,9 @@ export function StreamingPlatformScreen({
     }
 
     return (
-      <View style={styles.catalogHeader} testID="streaming-platform-header">
-        <View style={styles.titleRow}>
-          <AppText variant="title" accessibilityRole="header" style={styles.title}>
+      <View style={catalogBrowseListStyles.listHeader} testID="streaming-platform-header">
+        <View style={catalogBrowseListStyles.titleRow}>
+          <AppText variant="title" accessibilityRole="header" style={catalogBrowseListStyles.title}>
             {activeProvider.name}
           </AppText>
           <CatalogListActions
@@ -199,9 +200,6 @@ export function StreamingPlatformScreen({
             testID="streaming-platform-actions"
           />
         </View>
-        <AppText variant="bodySmall" muted>
-          {t('discovery.streamingPlatform.catalogSubtitle')}
-        </AppText>
       </View>
     );
   }, [activeProvider, platformState, t]);
@@ -246,7 +244,7 @@ export function StreamingPlatformScreen({
   }, [items.length, primaryProviderId, resultsQuery, t]);
 
   const listFooter = resultsQuery.isFetchingNextPage ? (
-    <View style={styles.footerLoading}>
+    <View style={catalogBrowseListStyles.footerLoading}>
       <ActivityIndicator color={colors.accent} />
     </View>
   ) : null;
@@ -289,7 +287,7 @@ export function StreamingPlatformScreen({
     <StackListScreen
       testID="streaming-discover-screen"
       topBar={
-        <View style={styles.topBar}>
+        <View style={catalogBrowseListStyles.topBar}>
           <DetailBackButton />
         </View>
       }
@@ -305,8 +303,8 @@ export function StreamingPlatformScreen({
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooter}
         contentContainerStyle={[
-          styles.catalogListContent,
-          items.length === 0 && styles.emptyListContent,
+          catalogBrowseListStyles.listContent,
+          items.length === 0 && catalogBrowseListStyles.listContentEmpty,
         ]}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
@@ -345,9 +343,6 @@ export function StreamingPlatformScreen({
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    paddingHorizontal: spacing.lg,
-  },
   headerSafeArea: {
     backgroundColor: colors.background,
   },
@@ -356,37 +351,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
-  catalogHeader: {
-    gap: spacing.md,
-    paddingBottom: spacing.lg,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  title: {
-    flex: 1,
-  },
   posterRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  catalogListContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-  },
   errorContainer: {
     paddingVertical: spacing.xl,
-    paddingHorizontal: spacing.lg,
-  },
-  footerLoading: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
 });
