@@ -1,6 +1,7 @@
 import type { SearchContentType } from '@/models/api/pagination';
 import type { SearchResponse } from '@/features/search/types';
 import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
+import type { TvDiscoverStatus } from './tv-discover-status';
 
 export type DiscoveryTypeFilter = SearchContentType;
 
@@ -30,8 +31,16 @@ export interface ExplorePreviewResponse {
 export interface DiscoveryBrowseFilters {
   genreIds: string[];
   year: number | null;
+  yearFrom: number | null;
+  yearTo: number | null;
   minRating: number | null;
+  minVoteCount: number | null;
+  minRuntimeMinutes: number | null;
+  maxRuntimeMinutes: number | null;
   language: string | null;
+  originCountry: string | null;
+  keywordIds: string[];
+  tvStatuses: TvDiscoverStatus[];
   sort: DiscoverySort | null;
 }
 
@@ -93,8 +102,16 @@ export function createDefaultDiscoveryFilters(
   return {
     genreIds: [],
     year: null,
+    yearFrom: null,
+    yearTo: null,
     minRating: null,
+    minVoteCount: null,
+    minRuntimeMinutes: null,
+    maxRuntimeMinutes: null,
     language: null,
+    originCountry: null,
+    keywordIds: [],
+    tvStatuses: [],
     sort: getDefaultSortForMode(mode),
   };
 }
@@ -107,9 +124,9 @@ export function createDefaultDiscoveryState(): DiscoveryBrowseState {
   };
 }
 
-export function countActiveDiscoveryFilters(
+/** User filters only — sort is never counted here. */
+export function countActiveDiscoveryUserFilters(
   filters: DiscoveryBrowseFilters,
-  mode: DiscoveryBrowseMode,
   type: DiscoveryTypeFilter = 'all',
 ): number {
   let count = 0;
@@ -119,10 +136,10 @@ export function countActiveDiscoveryFilters(
   }
 
   if (filters.genreIds.length > 0) {
-    count += filters.genreIds.length;
+    count += 1;
   }
 
-  if (filters.year != null) {
+  if (filters.year != null || filters.yearFrom != null || filters.yearTo != null) {
     count += 1;
   }
 
@@ -130,11 +147,56 @@ export function countActiveDiscoveryFilters(
     count += 1;
   }
 
+  if (filters.minVoteCount != null) {
+    count += 1;
+  }
+
+  if (filters.minRuntimeMinutes != null || filters.maxRuntimeMinutes != null) {
+    count += 1;
+  }
+
   if (filters.language) {
     count += 1;
   }
 
-  if (filters.sort && filters.sort !== getDefaultSortForMode(mode)) {
+  if (filters.originCountry) {
+    count += 1;
+  }
+
+  if (filters.keywordIds.length > 0) {
+    count += 1;
+  }
+
+  if (filters.tvStatuses.length > 0) {
+    count += 1;
+  }
+
+  return count;
+}
+
+export function hasActiveDiscoveryUserFilters(
+  filters: DiscoveryBrowseFilters,
+  type: DiscoveryTypeFilter = 'all',
+): boolean {
+  return countActiveDiscoveryUserFilters(filters, type) > 0;
+}
+
+export function hasNonDefaultDiscoverySort(
+  filters: DiscoveryBrowseFilters,
+  mode: DiscoveryBrowseMode,
+): boolean {
+  return Boolean(filters.sort && filters.sort !== getDefaultSortForMode(mode));
+}
+
+/** @deprecated Prefer hasActiveDiscoveryUserFilters — includes sort historically. */
+export function countActiveDiscoveryFilters(
+  filters: DiscoveryBrowseFilters,
+  mode: DiscoveryBrowseMode,
+  type: DiscoveryTypeFilter = 'all',
+): number {
+  let count = countActiveDiscoveryUserFilters(filters, type);
+
+  if (hasNonDefaultDiscoverySort(filters, mode)) {
     count += 1;
   }
 
@@ -147,4 +209,14 @@ export function hasActiveDiscoveryFilters(
   type: DiscoveryTypeFilter = 'all',
 ): boolean {
   return countActiveDiscoveryFilters(filters, mode, type) > 0;
+}
+
+export function clearDiscoveryUserFilters(
+  filters: DiscoveryBrowseFilters,
+  mode: DiscoveryBrowseMode,
+): DiscoveryBrowseFilters {
+  return {
+    ...createDefaultDiscoveryFilters(mode),
+    sort: filters.sort ?? getDefaultSortForMode(mode),
+  };
 }

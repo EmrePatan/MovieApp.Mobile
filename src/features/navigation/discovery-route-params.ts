@@ -5,7 +5,18 @@ export const STREAMING_DISCOVER_PARAM_KEYS = [
   'watchRegion',
   'watchProviderId',
   'watchMonetizationType',
+  'genres',
+  'year',
+  'yearFrom',
+  'yearTo',
   'minRating',
+  'minVoteCount',
+  'minRuntime',
+  'maxRuntime',
+  'language',
+  'originCountry',
+  'keywords',
+  'tvStatus',
   'sort',
 ] as const;
 
@@ -29,12 +40,31 @@ export const ADVANCED_DISCOVER_PARAM_KEYS = [
   'watchRegion',
   'watchProviderId',
   'watchMonetizationType',
+  'keywords',
+  'tvStatus',
   'sort',
 ] as const;
 
 export const NOW_IN_THEATERS_PARAM_KEYS = ['releaseRegion'] as const;
 
-export const WORLD_CINEMA_PARAM_KEYS = ['mediaType', 'originCountry', 'sort'] as const;
+export const WORLD_CINEMA_PARAM_KEYS = [
+  'mediaType',
+  'originCountry',
+  'sort',
+  'genres',
+  'genreMatch',
+  'year',
+  'yearFrom',
+  'yearTo',
+  'minRating',
+  'maxRating',
+  'minVoteCount',
+  'minRuntime',
+  'maxRuntime',
+  'language',
+  'keywords',
+  'tvStatus',
+] as const;
 
 export function setDiscoveryRouteParams(
   router: Pick<ImperativeRouter, 'setParams'>,

@@ -9,6 +9,7 @@ import {
   type DiscoverReleaseType,
   type GenreMatchMode,
 } from '../advanced-discover-types';
+import { parseTvDiscoverStatuses } from '../tv-discover-status';
 import type { WatchMonetizationType } from '../watch-provider-types';
 
 const MEDIA_TYPES = new Set<AdvancedDiscoverMediaType>(['movie', 'tv']);
@@ -217,6 +218,9 @@ export function parseAdvancedDiscoverParams(
     watchRegion: parseWatchRegion(readParam(params.watchRegion)),
     watchProviderIds: parseWatchProviderIds(params.watchProviderId),
     watchMonetizationTypes: parseWatchMonetizationTypes(params.watchMonetizationType),
+    keywordIds: parseGenreIds(params.keywords ?? params.keywordId),
+    tvStatuses:
+      mediaType === 'tv' ? parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses) : [],
     sort: parseSort(readParam(params.sort)),
   };
 
@@ -304,6 +308,14 @@ export function serializeAdvancedDiscoverParams(
 
   if (filters.watchMonetizationTypes.length > 0) {
     params.watchMonetizationType = filters.watchMonetizationTypes.join(',');
+  }
+
+  if (filters.keywordIds.length > 0) {
+    params.keywords = filters.keywordIds.join(',');
+  }
+
+  if (state.mediaType === 'tv' && filters.tvStatuses.length > 0) {
+    params.tvStatus = filters.tvStatuses.join(',');
   }
 
   if (filters.sort && filters.sort !== 'popularity_desc') {

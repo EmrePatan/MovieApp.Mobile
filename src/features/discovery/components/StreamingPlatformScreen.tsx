@@ -1,10 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { translateAdvancedDiscoverMediaType } from '@/i18n/catalog-labels';
+import { translateAdvancedDiscoverSort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
@@ -18,7 +17,10 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
-import { ADVANCED_DISCOVER_MEDIA_OPTIONS } from '@/features/discovery/advanced-discover-types';
+import { ADVANCED_DISCOVER_SORT_OPTIONS } from '@/features/discovery/advanced-discover-types';
+import type { AdvancedDiscoverSort } from '@/features/discovery/advanced-discover-types';
+import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
+import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { JustWatchAttribution } from '@/features/discovery/components/JustWatchAttribution';
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
@@ -27,7 +29,17 @@ import {
   listStreamingHubProvidersWithFallback,
   resolveDiscoveryWatchProvider,
 } from '@/features/discovery/streaming-platform-hub-types';
-import type { StreamingDiscoverState } from '@/features/discovery/streaming-discover-types';
+import {
+  clearStreamingUserFilters,
+  hasActiveStreamingUserFilters,
+  hasNonDefaultStreamingSort,
+  type StreamingDiscoverState,
+} from '@/features/discovery/streaming-discover-types';
+import {
+  filterDraftToStreamingPatch,
+  STREAMING_FILTER_SHEET_CONFIG,
+  streamingStateToFilterDraft,
+} from '@/features/discovery/utils/streaming-filter-adapters';
 import { serializeStreamingDiscoverRoute } from '@/features/discovery/utils/streaming-discover-params';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
@@ -38,7 +50,7 @@ import {
 } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { commonStyles } from '@/theme/theme';
 
@@ -56,6 +68,8 @@ export function StreamingPlatformScreen({
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [sortSheetVisible, setSortSheetVisible] = useState(false);
 
   const primaryProviderId = discoverState.watchProviderIds[0] ?? null;
 
@@ -83,7 +97,6 @@ export function StreamingPlatformScreen({
             ...discoverState,
             watchProviderIds: [primaryProviderId],
             watchMonetizationTypes: ['stream'] as StreamingDiscoverState['watchMonetizationTypes'],
-            sort: 'popularity_desc' as const,
           },
     [discoverState, primaryProviderId],
   );
@@ -106,16 +119,11 @@ export function StreamingPlatformScreen({
         ...discoverState,
         ...patch,
         watchProviderIds: primaryProviderId != null ? [primaryProviderId] : discoverState.watchProviderIds,
+        watchMonetizationTypes:
+          primaryProviderId != null ? ['stream'] : discoverState.watchMonetizationTypes,
       });
     },
     [discoverState, onReplaceState, primaryProviderId],
-  );
-
-  const setMediaType = useCallback(
-    (mediaType: StreamingDiscoverState['mediaType']) => {
-      replacePlatformState({ mediaType });
-    },
-    [replacePlatformState],
   );
 
   const handleResultPress = useCallback(
@@ -131,6 +139,15 @@ export function StreamingPlatformScreen({
       });
     },
     [currentRoute, discoverState.watchRegion, queryClient, router],
+  );
+
+  const sortOptions = useMemo(
+    () =>
+      ADVANCED_DISCOVER_SORT_OPTIONS.map((value) => ({
+        value,
+        label: translateAdvancedDiscoverSort(value),
+      })),
+    [],
   );
 
   const pickerHeader = useMemo(
@@ -170,43 +187,27 @@ export function StreamingPlatformScreen({
 
     return (
       <View style={styles.catalogHeader} testID="streaming-platform-header">
-        <AppText variant="title" accessibilityRole="header">
-          {activeProvider.name}
-        </AppText>
+        <View style={styles.titleRow}>
+          <AppText variant="title" accessibilityRole="header" style={styles.title}>
+            {activeProvider.name}
+          </AppText>
+          <CatalogListActions
+            sortActive={hasNonDefaultStreamingSort(platformState)}
+            filterActive={hasActiveStreamingUserFilters(platformState)}
+            sortAccessibilityLabel={t('discovery.catalogFilters.sortAction')}
+            filterAccessibilityLabel={t('discovery.catalogFilters.filterAction')}
+            onPressSort={() => setSortSheetVisible(true)}
+            onPressFilter={() => setFilterSheetVisible(true)}
+            testID="streaming-platform-actions"
+          />
+        </View>
         <AppText variant="bodySmall" muted>
           {t('discovery.streamingPlatform.catalogSubtitle')}
         </AppText>
-
-        <View style={styles.mediaRow}>
-          {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
-            const selected = discoverState.mediaType === mediaType;
-            const label = translateAdvancedDiscoverMediaType(mediaType);
-
-            return (
-              <Pressable
-                key={mediaType}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                accessibilityLabel={label}
-                onPress={() => setMediaType(mediaType)}
-                style={({ pressed }) => [
-                  styles.mediaChip,
-                  selected && styles.mediaChipSelected,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <AppText variant="bodySmall" style={selected ? styles.mediaChipSelectedText : undefined}>
-                  {label}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </View>
-
         <JustWatchAttribution />
       </View>
     );
-  }, [activeProvider, discoverState.mediaType, setMediaType, t]);
+  }, [activeProvider, platformState, t]);
 
   const renderPlatformHeader = useCallback(() => platformHeader, [platformHeader]);
 
@@ -318,6 +319,30 @@ export function StreamingPlatformScreen({
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <CatalogSortSheet
+        visible={sortSheetVisible}
+        title={t('discovery.catalogFilters.sort')}
+        closeLabel={t('common.close')}
+        options={sortOptions}
+        value={platformState.sort ?? 'popularity_desc'}
+        onSelect={(sort: AdvancedDiscoverSort) => replacePlatformState({ sort })}
+        onClose={() => setSortSheetVisible(false)}
+        testID="streaming-platform-sort-sheet"
+      />
+      <CatalogDiscoveryFilterSheet
+        visible={filterSheetVisible}
+        draft={streamingStateToFilterDraft(platformState)}
+        config={STREAMING_FILTER_SHEET_CONFIG}
+        onClose={() => setFilterSheetVisible(false)}
+        onApply={(draft) => {
+          onReplaceState(filterDraftToStreamingPatch(draft, platformState));
+        }}
+        onReset={() => {
+          onReplaceState(clearStreamingUserFilters(platformState));
+          setFilterSheetVisible(false);
+        }}
+        testID="streaming-platform-filter-sheet"
+      />
     </StackListScreen>
   );
 }
@@ -338,30 +363,14 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingBottom: spacing.lg,
   },
-  mediaRow: {
+  titleRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
-  mediaChip: {
-    minHeight: 44,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-  },
-  mediaChipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
-  },
-  mediaChipSelectedText: {
-    color: colors.accent,
-    fontWeight: '600',
-  },
-  pressed: {
-    opacity: 0.85,
+  title: {
+    flex: 1,
   },
   posterRow: {
     flexDirection: 'row',

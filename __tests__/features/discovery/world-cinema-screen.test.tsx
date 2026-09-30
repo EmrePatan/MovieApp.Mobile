@@ -22,6 +22,14 @@ jest.mock('@/features/discovery/hooks/useWorldCinema', () => ({
   useWorldCinema: jest.fn(),
 }));
 
+jest.mock('@/features/discovery/hooks/useGenres', () => ({
+  useGenres: jest.fn(() => ({
+    data: [{ id: 'genre-1', name: 'Drama' }],
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
   useRegionalPreference: jest.fn(() => ({
     region: 'TR',
@@ -76,33 +84,36 @@ describe('WorldCinemaScreen', () => {
     });
   });
 
-  it('renders world cinema header and movie results', () => {
+  it('renders world cinema header and movie results without inline controls', () => {
     render(<WorldCinemaScreen />);
 
     expect(screen.getByText('World Cinema')).toBeTruthy();
     expect(screen.getByText('Parasite')).toBeTruthy();
-    expect(
-      screen.getByLabelText(
-        `${t('common.originCountry')} ${t('discover.worldCinemaHub.countryLabels.KR')}`,
-      ),
-    ).toBeTruthy();
+    expect(screen.getByTestId('world-cinema-actions-sort')).toBeTruthy();
+    expect(screen.getByTestId('world-cinema-actions-filter')).toBeTruthy();
+    expect(screen.queryByTestId('origin-country-selector')).toBeNull();
     expect(screen.queryByText('Korean Cinema')).toBeNull();
   });
 
-  it('switches media type and sort via setParams', () => {
+  it('applies sort immediately via setParams', () => {
     render(<WorldCinemaScreen />);
 
-    fireEvent.press(screen.getByLabelText(t('discovery.advancedDiscover.mediaOptions.tv')));
+    fireEvent.press(screen.getByLabelText(t('discovery.catalogFilters.sortAction')));
     fireEvent.press(
-      screen.getByLabelText(
-        t('common.sortByLabel', { label: t('discovery.worldCinemaScreen.sortOptions.rating_desc') }),
-      ),
+      screen.getByLabelText(t('discovery.worldCinemaScreen.sortOptions.rating_desc')),
     );
 
     expect(mockSetParams).toHaveBeenCalled();
-    expect(mockSetParams.mock.calls.some(([params]) => params.mediaType === 'tv')).toBe(true);
     expect(mockSetParams.mock.calls.some(([params]) => params.sort === 'rating_desc')).toBe(true);
     expect(mockReplace).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('opens filter sheet with country as a primary field', () => {
+    render(<WorldCinemaScreen />);
+
+    fireEvent.press(screen.getByLabelText(t('discovery.catalogFilters.filterAction')));
+    expect(screen.getByText(t('common.originCountry'))).toBeTruthy();
+    expect(screen.getByText(t('discovery.catalogFilters.advancedFilters'))).toBeTruthy();
   });
 });

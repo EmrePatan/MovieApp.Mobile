@@ -1,7 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import type { AdvancedDiscoverMediaType } from '../advanced-discover-types';
 import { getWorldCinema } from '../api/discovery-api';
-import { DEFAULT_WORLD_CINEMA_SORT, WORLD_CINEMA_PREVIEW_SIZE } from '../world-cinema-types';
+import {
+  createDefaultWorldCinemaFilters,
+  DEFAULT_WORLD_CINEMA_SORT,
+  WORLD_CINEMA_PREVIEW_SIZE,
+} from '../world-cinema-types';
 import { worldCinemaPreviewQueryKey } from './discovery-query-keys';
 
 export function useWorldCinemaPreview(
@@ -13,6 +17,7 @@ export function useWorldCinemaPreview(
     queryFn: ({ signal }) =>
       getWorldCinema(
         {
+          ...createDefaultWorldCinemaFilters(),
           mediaType,
           originCountry,
           sort: DEFAULT_WORLD_CINEMA_SORT,

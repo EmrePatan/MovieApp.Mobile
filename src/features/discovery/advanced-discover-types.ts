@@ -1,4 +1,5 @@
 import type { WatchMonetizationType } from './watch-provider-types';
+import type { TvDiscoverStatus } from './tv-discover-status';
 
 export type AdvancedDiscoverMediaType = 'movie' | 'tv';
 
@@ -37,6 +38,8 @@ export interface AdvancedDiscoverFilters {
   watchRegion: string | null;
   watchProviderIds: number[];
   watchMonetizationTypes: WatchMonetizationType[];
+  keywordIds: string[];
+  tvStatuses: TvDiscoverStatus[];
   sort: AdvancedDiscoverSort | null;
 }
 
@@ -66,10 +69,10 @@ export const ADVANCED_DISCOVER_SORT_OPTIONS: AdvancedDiscoverSort[] = [
 
 export const ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS: (number | null)[] = [
   null,
-  50,
   100,
   500,
   1000,
+  5000,
 ];
 
 export const ADVANCED_DISCOVER_RUNTIME_PRESETS: {
@@ -103,6 +106,8 @@ export function createDefaultAdvancedDiscoverFilters(): AdvancedDiscoverFilters 
     watchRegion: null,
     watchProviderIds: [],
     watchMonetizationTypes: [],
+    keywordIds: [],
+    tvStatuses: [],
     sort: 'popularity_desc',
   };
 }
@@ -181,6 +186,14 @@ export function countActiveAdvancedDiscoverFilters(
 
   if (filters.watchMonetizationTypes.length > 0) {
     count += filters.watchMonetizationTypes.length;
+  }
+
+  if (filters.keywordIds.length > 0) {
+    count += 1;
+  }
+
+  if (filters.tvStatuses.length > 0) {
+    count += 1;
   }
 
   if (filters.sort && filters.sort !== 'popularity_desc') {

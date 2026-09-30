@@ -184,8 +184,12 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByLabelText('Filters'));
     expect(screen.getByText('Content Type')).toBeTruthy();
     expect(screen.getByText('Show Results')).toBeTruthy();
+    expect(screen.getByText('Advanced Filters')).toBeTruthy();
+    expect(screen.queryByText('Sort by')).toBeNull();
 
-    fireEvent.press(screen.getByLabelText('Genre Action'));
+    fireEvent.press(screen.getByText('Genre'));
+    fireEvent.press(screen.getByLabelText('Action'));
+    fireEvent.press(screen.getByTestId('catalog-genre-selector-back'));
     fireEvent.press(screen.getByText('Show Results'));
 
     expect(mockReplace).toHaveBeenCalledWith(
@@ -201,6 +205,33 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByText('Show Results'));
 
     expect(mockReplace).toHaveBeenCalledWith('/discover-browse?mode=trending&type=movie');
+  });
+
+  it('exposes separate sort and filter header actions without chips or badges', () => {
+    render(<DiscoverScreen />);
+
+    expect(screen.getByTestId('discover-browse-actions-sort')).toBeTruthy();
+    expect(screen.getByTestId('discover-browse-actions-filter')).toBeTruthy();
+    expect(screen.queryByText('Filters')).toBeNull();
+    expect(screen.queryByText('1')).toBeNull();
+  });
+
+  it('applies sort immediately without changing filters', () => {
+    const useLocalSearchParams = jest.requireMock('expo-router').useLocalSearchParams as jest.Mock;
+    useLocalSearchParams.mockReturnValue({
+      mode: 'trending',
+      type: 'all',
+      genres: 'genre-1',
+    });
+
+    render(<DiscoverScreen />);
+
+    fireEvent.press(screen.getByLabelText('Sort'));
+    fireEvent.press(screen.getByLabelText('Highest Rated'));
+
+    expect(mockReplace).toHaveBeenCalledWith(
+      '/discover-browse?mode=trending&type=all&genres=genre-1&sort=rating_desc',
+    );
   });
 
   it('loads more results when pagination is available', () => {

@@ -28,6 +28,14 @@ jest.mock('@/features/discovery/hooks/useStreamingDiscover', () => ({
   useStreamingDiscover: jest.fn(),
 }));
 
+jest.mock('@/features/discovery/hooks/useGenres', () => ({
+  useGenres: jest.fn(() => ({
+    data: [{ id: 'genre-1', name: 'Action' }],
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
 jest.mock('@/features/discovery/hooks/useStreamingProviderSpotlight', () => ({
   useStreamingProviderSpotlight: jest.fn(() => ({
     data: { items: [] },
@@ -131,6 +139,30 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByText('Netflix')).toBeTruthy();
     expect(screen.getByText(t('discovery.streamingPlatform.catalogSubtitle'))).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
+    expect(screen.getByTestId('streaming-platform-actions-sort')).toBeTruthy();
+    expect(screen.getByTestId('streaming-platform-actions-filter')).toBeTruthy();
+  });
+
+  it('honors user sort instead of forcing popularity_desc', () => {
+    const { useLocalSearchParams } = jest.requireMock('expo-router');
+    useLocalSearchParams.mockReturnValue({
+      watchProviderId: '8',
+      sort: 'rating_desc',
+      genres: 'genre-1',
+    });
+
+    render(<StreamingDiscoverScreen />);
+
+    expect(useStreamingDiscover).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: 'rating_desc',
+        genreIds: ['genre-1'],
+        watchProviderIds: [8],
+        watchMonetizationTypes: ['stream'],
+      }),
+      undefined,
+      true,
+    );
   });
 
   it('loads providers using the user region by default', () => {

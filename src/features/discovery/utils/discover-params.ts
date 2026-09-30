@@ -10,20 +10,21 @@ import {
   type DiscoverySort,
   type DiscoveryTypeFilter,
 } from '../types';
+import { parseTvDiscoverStatuses } from '../tv-discover-status';
+import {
+  parseCommaSeparatedIds,
+  parseLanguageCodeParam,
+  parseOriginCountryParam,
+  parseRatingParam,
+  parseRuntimeParam,
+  parseVoteCountParam,
+  parseYearParam,
+  readRouteParam,
+} from './parse-route-helpers';
 
-const BROWSE_MODES = new Set<DiscoveryBrowseMode>(
-  DISCOVERY_BROWSE_MODES,
-);
+const BROWSE_MODES = new Set<DiscoveryBrowseMode>(DISCOVERY_BROWSE_MODES);
 const TYPE_FILTERS = new Set<DiscoveryTypeFilter>(['all', 'movie', 'tv']);
 const SORT_VALUES = new Set<DiscoverySort>(DISCOVERY_SORT_VALUES);
-
-function readParam(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-
-  return value;
-}
 
 function parseBrowseMode(value: string | undefined): DiscoveryBrowseMode {
   if (value && BROWSE_MODES.has(value as DiscoveryBrowseMode)) {
@@ -49,64 +50,29 @@ function parseSort(value: string | undefined, mode: DiscoveryBrowseMode): Discov
   return getDefaultSortForMode(mode);
 }
 
-function parseGenreIds(value: string | string[] | undefined): string[] {
-  const rawValues = Array.isArray(value) ? value : value ? [value] : [];
-  const ids = rawValues
-    .flatMap((entry) => entry.split(','))
-    .map((entry) => entry.trim())
-    .filter((entry) => entry.length > 0);
-
-  return Array.from(new Set(ids));
-}
-
-function parseYear(value: string | undefined): number | null {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed) || parsed < 1888 || parsed > 2100) {
-    return null;
-  }
-
-  return parsed;
-}
-
-function parseMinRating(value: string | undefined): number | null {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 10) {
-    return null;
-  }
-
-  return parsed;
-}
-
-function parseLanguage(value: string | undefined): string | null {
-  if (!value) {
-    return null;
-  }
-
-  const trimmed = value.trim().toLowerCase();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
 type DiscoverRouteParams = Record<string, string | string[] | undefined>;
 
 export function parseDiscoverParams(params: DiscoverRouteParams): DiscoveryBrowseState {
-  const mode = parseBrowseMode(readParam(params.mode));
-  const type = parseTypeFilter(readParam(params.type));
+  const mode = parseBrowseMode(readRouteParam(params.mode));
+  const type = parseTypeFilter(readRouteParam(params.type));
+  const tvStatuses =
+    type === 'movie' ? [] : parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses);
 
   const filters: DiscoveryBrowseFilters = {
     ...createDefaultDiscoveryFilters(mode),
-    genreIds: parseGenreIds(params.genres),
-    year: parseYear(readParam(params.year)),
-    minRating: parseMinRating(readParam(params.minRating)),
-    language: parseLanguage(readParam(params.language)),
-    sort: parseSort(readParam(params.sort), mode),
+    genreIds: parseCommaSeparatedIds(params.genres),
+    year: parseYearParam(readRouteParam(params.year)),
+    yearFrom: parseYearParam(readRouteParam(params.yearFrom)),
+    yearTo: parseYearParam(readRouteParam(params.yearTo)),
+    minRating: parseRatingParam(readRouteParam(params.minRating)),
+    minVoteCount: parseVoteCountParam(readRouteParam(params.minVoteCount)),
+    minRuntimeMinutes: parseRuntimeParam(readRouteParam(params.minRuntime)),
+    maxRuntimeMinutes: parseRuntimeParam(readRouteParam(params.maxRuntime)),
+    language: parseLanguageCodeParam(readRouteParam(params.language)),
+    originCountry: parseOriginCountryParam(readRouteParam(params.originCountry)),
+    keywordIds: parseCommaSeparatedIds(params.keywords ?? params.keywordId),
+    tvStatuses,
+    sort: parseSort(readRouteParam(params.sort), mode),
   };
 
   return { mode, type, filters };
@@ -126,12 +92,44 @@ export function serializeDiscoverParams(state: DiscoveryBrowseState): Record<str
     params.year = String(state.filters.year);
   }
 
+  if (state.filters.yearFrom != null) {
+    params.yearFrom = String(state.filters.yearFrom);
+  }
+
+  if (state.filters.yearTo != null) {
+    params.yearTo = String(state.filters.yearTo);
+  }
+
   if (state.filters.minRating != null) {
     params.minRating = String(state.filters.minRating);
   }
 
+  if (state.filters.minVoteCount != null) {
+    params.minVoteCount = String(state.filters.minVoteCount);
+  }
+
+  if (state.filters.minRuntimeMinutes != null) {
+    params.minRuntime = String(state.filters.minRuntimeMinutes);
+  }
+
+  if (state.filters.maxRuntimeMinutes != null) {
+    params.maxRuntime = String(state.filters.maxRuntimeMinutes);
+  }
+
   if (state.filters.language) {
     params.language = state.filters.language;
+  }
+
+  if (state.filters.originCountry) {
+    params.originCountry = state.filters.originCountry;
+  }
+
+  if (state.filters.keywordIds.length > 0) {
+    params.keywords = state.filters.keywordIds.join(',');
+  }
+
+  if (state.type !== 'movie' && state.filters.tvStatuses.length > 0) {
+    params.tvStatus = state.filters.tvStatuses.join(',');
   }
 
   const defaultSort = getDefaultSortForMode(state.mode);

@@ -1,13 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  translateAdvancedDiscoverMediaType,
-  translateWorldCinemaSort,
-} from '@/i18n/catalog-labels';
+import { translateWorldCinemaSort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
@@ -22,7 +18,8 @@ import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/nav
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { useTrackProductMetricOnFocus } from '@/features/metrics/use-track-product-metric-on-focus';
-import { OriginCountrySelector } from '@/features/regions/components/OriginCountrySelector';
+import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
+import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { useWorldCinema } from '@/features/discovery/hooks/useWorldCinema';
 import {
   parseWorldCinemaParams,
@@ -30,12 +27,22 @@ import {
   serializeWorldCinemaRoute,
 } from '@/features/discovery/utils/world-cinema-params';
 import {
+  filterDraftToWorldCinemaPatch,
+  WORLD_CINEMA_FILTER_SHEET_CONFIG,
+  worldCinemaStateToFilterDraft,
+} from '@/features/discovery/utils/world-cinema-filter-adapters';
+import {
   setDiscoveryRouteParams,
   WORLD_CINEMA_PARAM_KEYS,
 } from '@/features/navigation/discovery-route-params';
-import { ADVANCED_DISCOVER_MEDIA_OPTIONS } from '@/features/discovery/advanced-discover-types';
-import { WORLD_CINEMA_SORT_OPTIONS } from '@/features/discovery/world-cinema-types';
-import type { WorldCinemaState } from '@/features/discovery/world-cinema-types';
+import {
+  clearWorldCinemaUserFilters,
+  hasActiveWorldCinemaUserFilters,
+  hasNonDefaultWorldCinemaSort,
+  WORLD_CINEMA_SORT_OPTIONS,
+  type WorldCinemaState,
+} from '@/features/discovery/world-cinema-types';
+import type { AdvancedDiscoverSort } from '@/features/discovery/advanced-discover-types';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
@@ -45,14 +52,15 @@ import {
 } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 export default function WorldCinemaScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
-  const [countryExpanded, setCountryExpanded] = useState(false);
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [sortSheetVisible, setSortSheetVisible] = useState(false);
   useTrackProductMetricOnFocus(PRODUCT_METRICS.worldCinemaOpened);
 
   const discoverState = useMemo(
@@ -101,81 +109,38 @@ export default function WorldCinemaScreen() {
     [currentRoute, queryClient, router],
   );
 
+  const sortOptions = useMemo(
+    () =>
+      WORLD_CINEMA_SORT_OPTIONS.map((value) => ({
+        value,
+        label: translateWorldCinemaSort(value),
+      })),
+    [],
+  );
+
   const listHeaderContent = useMemo(
     () => (
       <View style={styles.header}>
-        <AppText variant="title" accessibilityRole="header">
-          {t('discovery.worldCinemaScreen.title')}
-        </AppText>
+        <View style={styles.titleRow}>
+          <AppText variant="title" accessibilityRole="header" style={styles.title}>
+            {t('discovery.worldCinemaScreen.title')}
+          </AppText>
+          <CatalogListActions
+            sortActive={hasNonDefaultWorldCinemaSort(discoverState)}
+            filterActive={hasActiveWorldCinemaUserFilters(discoverState)}
+            sortAccessibilityLabel={t('discovery.catalogFilters.sortAction')}
+            filterAccessibilityLabel={t('discovery.catalogFilters.filterAction')}
+            onPressSort={() => setSortSheetVisible(true)}
+            onPressFilter={() => setFilterSheetVisible(true)}
+            testID="world-cinema-actions"
+          />
+        </View>
         <AppText variant="bodySmall" muted>
           {t('discovery.worldCinemaScreen.subtitle')}
         </AppText>
-
-        <View style={styles.toggleRow}>
-          {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaType) => {
-            const selected = discoverState.mediaType === mediaType;
-            const label = translateAdvancedDiscoverMediaType(mediaType);
-
-            return (
-              <Pressable
-                key={mediaType}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                accessibilityLabel={label}
-                onPress={() => replaceState({ ...discoverState, mediaType })}
-                style={({ pressed }) => [
-                  styles.toggleChip,
-                  selected && styles.toggleChipSelected,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <AppText variant="bodySmall" style={selected ? styles.toggleLabelSelected : undefined}>
-                  {label}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <OriginCountrySelector
-          value={discoverState.originCountry}
-          expanded={countryExpanded}
-          onToggleExpanded={() => setCountryExpanded((current) => !current)}
-          onSelect={(originCountry) => {
-            setCountryExpanded(false);
-            replaceState({ ...discoverState, originCountry });
-          }}
-          testID="origin-country-selector"
-        />
-
-        <View style={styles.sortRow}>
-          {WORLD_CINEMA_SORT_OPTIONS.map((sort) => {
-            const selected = discoverState.sort === sort;
-            const label = translateWorldCinemaSort(sort);
-
-            return (
-              <Pressable
-                key={sort}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                accessibilityLabel={t('common.sortByLabel', { label })}
-                onPress={() => replaceState({ ...discoverState, sort })}
-                style={({ pressed }) => [
-                  styles.sortChip,
-                  selected && styles.sortChipSelected,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <AppText variant="bodySmall" style={selected ? styles.sortLabelSelected : undefined}>
-                  {label}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </View>
       </View>
     ),
-    [countryExpanded, discoverState, replaceState, t],
+    [discoverState, t],
   );
 
   const renderListHeader = useCallback(() => listHeaderContent, [listHeaderContent]);
@@ -240,6 +205,30 @@ export default function WorldCinemaScreen() {
         onEndReachedThreshold={0.4}
         contentContainerStyle={styles.listContent}
       />
+      <CatalogSortSheet
+        visible={sortSheetVisible}
+        title={t('discovery.catalogFilters.sort')}
+        closeLabel={t('common.close')}
+        options={sortOptions}
+        value={discoverState.sort}
+        onSelect={(sort: AdvancedDiscoverSort) => replaceState({ ...discoverState, sort })}
+        onClose={() => setSortSheetVisible(false)}
+        testID="world-cinema-sort-sheet"
+      />
+      <CatalogDiscoveryFilterSheet
+        visible={filterSheetVisible}
+        draft={worldCinemaStateToFilterDraft(discoverState)}
+        config={WORLD_CINEMA_FILTER_SHEET_CONFIG}
+        onClose={() => setFilterSheetVisible(false)}
+        onApply={(draft) => {
+          replaceState(filterDraftToWorldCinemaPatch(draft, discoverState));
+        }}
+        onReset={() => {
+          replaceState(clearWorldCinemaUserFilters(discoverState));
+          setFilterSheetVisible(false);
+        }}
+        testID="world-cinema-filter-sheet"
+      />
     </StackListScreen>
   );
 }
@@ -249,51 +238,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   header: {
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingBottom: spacing.lg,
   },
-  toggleRow: {
+  titleRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
-  toggleChip: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    justifyContent: 'center',
-  },
-  toggleChipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
-  },
-  toggleLabelSelected: {
-    color: colors.accent,
-    fontWeight: '600',
-  },
-  sortRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  sortChip: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    justifyContent: 'center',
-  },
-  sortChipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
-  },
-  sortLabelSelected: {
-    color: colors.accent,
-    fontWeight: '600',
+  title: {
+    flex: 1,
   },
   listContent: {
     paddingHorizontal: spacing.lg,
@@ -305,8 +260,5 @@ const styles = StyleSheet.create({
   },
   footerLoader: {
     paddingVertical: spacing.lg,
-  },
-  pressed: {
-    opacity: 0.85,
   },
 });

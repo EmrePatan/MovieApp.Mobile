@@ -20,6 +20,7 @@ import { translateGenreName } from '@/i18n/catalog-labels';
 import { AppInput } from '@/components/inputs/AppInput';
 import { useGenres } from '../hooks/useGenres';
 import {
+  createDefaultDiscoveryFilters,
   DISCOVERY_SORT_OPTIONS,
   DISCOVERY_TYPE_OPTIONS,
   getDefaultSortForMode,
@@ -205,10 +206,7 @@ export function DiscoverFilterSheet({
 
   const handleClear = () => {
     const cleared: DiscoveryBrowseFilters = {
-      genreIds: [],
-      year: null,
-      minRating: null,
-      language: null,
+      ...createDefaultDiscoveryFilters(mode),
       sort: getDefaultSortForMode(mode),
     };
 

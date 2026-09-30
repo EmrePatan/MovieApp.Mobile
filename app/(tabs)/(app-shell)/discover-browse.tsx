@@ -1,20 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  translateDiscoverySort,
-  translateDiscoveryTypeFilter,
-} from '@/i18n/catalog-labels';
+import { translateDiscoverySort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
-  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
 import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -22,24 +17,27 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { prefetchCatalogDetail } from '@/features/details/shared/navigation/prefetch-catalog-detail';
 import { openCatalogDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
-import {
-  ActiveFilterChips,
-  buildActiveFilterChips,
-} from '@/features/discovery/components/ActiveFilterChips';
-import { DiscoverFilterSheet } from '@/features/discovery/components/DiscoverFilterSheet';
+import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/components';
+import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { useDiscoveryBrowse } from '@/features/discovery/hooks/useDiscoveryBrowse';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
-import { useGenres } from '@/features/discovery/hooks/useGenres';
 import {
-  countActiveDiscoveryFilters,
-  createDefaultDiscoveryFilters,
+  clearDiscoveryUserFilters,
+  DISCOVERY_SORT_OPTIONS,
   getDefaultSortForMode,
   getDiscoverTitle,
-  hasActiveDiscoveryFilters,
+  hasActiveDiscoveryUserFilters,
+  hasNonDefaultDiscoverySort,
   type DiscoveryBrowseFilters,
   type DiscoveryBrowseState,
+  type DiscoverySort,
   type DiscoveryTypeFilter,
 } from '@/features/discovery/types';
+import {
+  BROWSE_FILTER_SHEET_CONFIG,
+  browseStateToFilterDraft,
+  filterDraftToBrowsePatch,
+} from '@/features/discovery/utils/browse-filter-adapters';
 import {
   parseDiscoverParams,
   serializeDiscoverRoute,
@@ -53,17 +51,9 @@ import {
 } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { commonStyles } from '@/theme/theme';
-
-function getTypeLabel(type: DiscoveryTypeFilter): string | null {
-  if (type === 'all') {
-    return null;
-  }
-
-  return translateDiscoveryTypeFilter(type);
-}
 
 export default function DiscoverScreen() {
   const { t } = useTranslation();
@@ -71,11 +61,11 @@ export default function DiscoverScreen() {
   const queryClient = useQueryClient();
   const rawParams = useLocalSearchParams();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [sortSheetVisible, setSortSheetVisible] = useState(false);
 
   const browseState = useMemo(() => parseDiscoverParams(rawParams), [rawParams]);
   const { mode, type: typeFilter, filters } = browseState;
 
-  const genresQuery = useGenres();
   const browseQuery = useDiscoveryBrowse(mode, typeFilter, filters);
 
   const items = useMemo(
@@ -83,9 +73,14 @@ export default function DiscoverScreen() {
     [browseQuery.data?.pages],
   );
 
-  const activeFilterCount = useMemo(
-    () => countActiveDiscoveryFilters(filters, mode, typeFilter),
-    [filters, mode, typeFilter],
+  const filterActive = useMemo(
+    () => hasActiveDiscoveryUserFilters(filters, typeFilter),
+    [filters, typeFilter],
+  );
+
+  const sortActive = useMemo(
+    () => hasNonDefaultDiscoverySort(filters, mode),
+    [filters, mode],
   );
 
   const replaceBrowseState = useCallback(
@@ -106,9 +101,20 @@ export default function DiscoverScreen() {
     replaceBrowseState({
       mode,
       type: 'all',
-      filters: createDefaultDiscoveryFilters(mode),
+      filters: clearDiscoveryUserFilters(filters, mode),
     });
-  }, [mode, replaceBrowseState]);
+  }, [filters, mode, replaceBrowseState]);
+
+  const applySort = useCallback(
+    (sort: DiscoverySort) => {
+      replaceBrowseState({
+        mode,
+        type: typeFilter,
+        filters: { ...filters, sort },
+      });
+    },
+    [filters, mode, replaceBrowseState, typeFilter],
+  );
 
   const openCatalogDetail = useCallback(
     (id: string, itemType: 'movie' | 'tv') => {
@@ -149,60 +155,13 @@ export default function DiscoverScreen() {
     void refetchBrowse();
   }, [refetchBrowse]);
 
-  const sortLabel = useMemo(() => {
-    if (!filters.sort || filters.sort === getDefaultSortForMode(mode)) {
-      return null;
-    }
-
-    return translateDiscoverySort(filters.sort);
-  }, [filters.sort, mode]);
-
-  const activeFilterChips = useMemo(
+  const sortOptions = useMemo(
     () =>
-      buildActiveFilterChips(
-        {
-          typeLabel: getTypeLabel(typeFilter),
-          genreIds: filters.genreIds,
-          year: filters.year,
-          minRating: filters.minRating,
-          language: filters.language,
-          sortLabel,
-        },
-        genresQuery.data ?? [],
-        {
-          onRemoveType: () => replaceBrowseState({ mode, type: 'all', filters }),
-          onRemoveGenre: (genreId) =>
-            replaceBrowseState({
-              mode,
-              type: typeFilter,
-              filters: {
-                ...filters,
-                genreIds: filters.genreIds.filter((id) => id !== genreId),
-              },
-            }),
-          onRemoveYear: () =>
-            replaceBrowseState({ mode, type: typeFilter, filters: { ...filters, year: null } }),
-          onRemoveMinRating: () =>
-            replaceBrowseState({
-              mode,
-              type: typeFilter,
-              filters: { ...filters, minRating: null },
-            }),
-          onRemoveLanguage: () =>
-            replaceBrowseState({
-              mode,
-              type: typeFilter,
-              filters: { ...filters, language: null },
-            }),
-          onRemoveSort: () =>
-            replaceBrowseState({
-              mode,
-              type: typeFilter,
-              filters: { ...filters, sort: getDefaultSortForMode(mode) },
-            }),
-        },
-      ),
-    [filters, genresQuery.data, mode, replaceBrowseState, sortLabel, typeFilter],
+      DISCOVERY_SORT_OPTIONS.map((value) => ({
+        value,
+        label: translateDiscoverySort(value),
+      })),
+    [],
   );
 
   const listHeader = useMemo(
@@ -211,41 +170,29 @@ export default function DiscoverScreen() {
         <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
           <DetailBackButton contentInset={false} />
           <View style={styles.header}>
-            <AppText variant="title">{getDiscoverTitle(mode)}</AppText>
-            <View style={styles.filtersRow}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
-                  activeFilterCount > 0
-                    ? t('common.filtersActive', { count: activeFilterCount })
-                    : t('discovery.browseScreen.filters')
-                }
-                onPress={() => setFilterSheetVisible(true)}
-                style={({ pressed }) => [styles.filtersButton, pressed && styles.pressed]}
-              >
-                <Ionicons name="options-outline" size={18} color={colors.textPrimary} />
-                <AppText variant="bodySmall" style={styles.filtersButtonText}>
-                  {t('discovery.browseScreen.filters')}
-                </AppText>
-                {activeFilterCount > 0 ? (
-                  <View style={styles.filterBadge}>
-                    <AppText variant="caption" style={styles.filterBadgeText}>
-                      {activeFilterCount}
-                    </AppText>
-                  </View>
-                ) : null}
-              </Pressable>
+            <View style={styles.titleRow}>
+              <AppText variant="title" style={styles.title}>
+                {getDiscoverTitle(mode)}
+              </AppText>
+              <CatalogListActions
+                sortActive={sortActive}
+                filterActive={filterActive}
+                sortAccessibilityLabel={t('discovery.catalogFilters.sortAction')}
+                filterAccessibilityLabel={t('discovery.catalogFilters.filterAction')}
+                onPressSort={() => setSortSheetVisible(true)}
+                onPressFilter={() => setFilterSheetVisible(true)}
+                testID="discover-browse-actions"
+              />
             </View>
-            <ActiveFilterChips chips={activeFilterChips} />
           </View>
         </SafeAreaView>
       </View>
     ),
-    [activeFilterChips, activeFilterCount, mode, t],
+    [filterActive, mode, sortActive, t],
   );
 
   const emptyState = useMemo(() => {
-    if (hasActiveDiscoveryFilters(filters, mode, typeFilter)) {
+    if (hasActiveDiscoveryUserFilters(filters, typeFilter)) {
       return (
         <View style={styles.emptyWithAction}>
           <SearchEmptyState
@@ -258,7 +205,7 @@ export default function DiscoverScreen() {
     }
 
     return <SearchEmptyState title={t('discovery.browseScreen.noTitlesForMode')} />;
-  }, [clearFilters, filters, mode, t, typeFilter]);
+  }, [clearFilters, filters, t, typeFilter]);
 
   const listEmptyComponent = useMemo(() => {
     if (browseQuery.isLoading && items.length === 0) {
@@ -290,18 +237,6 @@ export default function DiscoverScreen() {
     </View>
   ) : null;
 
-  const filterSheet = (
-    <DiscoverFilterSheet
-      visible={filterSheetVisible}
-      mode={mode}
-      type={typeFilter}
-      filters={filters}
-      onClose={() => setFilterSheetVisible(false)}
-      onApply={applyFilters}
-      onClear={clearFilters}
-    />
-  );
-
   const renderItem = useCallback(
     ({ item }: { item: SearchResultItem }) => (
       <SearchResultCard item={item} onPress={handleResultPress} />
@@ -309,7 +244,7 @@ export default function DiscoverScreen() {
     [handleResultPress],
   );
 
-  const productionScreen = (
+  return (
     <View style={commonStyles.screen} testID="discover-browse-screen">
       <PlatformRefreshFlatList
         testID="discover-browse-list"
@@ -330,11 +265,37 @@ export default function DiscoverScreen() {
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
-      {filterSheetVisible ? filterSheet : null}
+      <CatalogSortSheet
+        visible={sortSheetVisible}
+        title={t('discovery.catalogFilters.sort')}
+        closeLabel={t('common.close')}
+        options={sortOptions}
+        value={filters.sort ?? getDefaultSortForMode(mode)}
+        onSelect={applySort}
+        onClose={() => setSortSheetVisible(false)}
+        testID="discover-browse-sort-sheet"
+      />
+      <CatalogDiscoveryFilterSheet
+        visible={filterSheetVisible}
+        draft={browseStateToFilterDraft(typeFilter, filters)}
+        config={BROWSE_FILTER_SHEET_CONFIG}
+        onClose={() => setFilterSheetVisible(false)}
+        onApply={(draft) => {
+          const patch = filterDraftToBrowsePatch(draft);
+          applyFilters(patch.type, {
+            ...filters,
+            ...patch.filters,
+            sort: filters.sort ?? getDefaultSortForMode(mode),
+          });
+        }}
+        onReset={() => {
+          clearFilters();
+          setFilterSheetVisible(false);
+        }}
+        testID="discover-browse-filter-sheet"
+      />
     </View>
   );
-
-  return productionScreen;
 }
 
 const styles = StyleSheet.create({
@@ -346,39 +307,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
   },
-  filtersRow: {
-    paddingHorizontal: 0,
-  },
-  filtersButton: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: spacing.xs,
-    minHeight: 36,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
-  filtersButtonText: {
-    fontWeight: '600',
-  },
-  filterBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-  },
-  filterBadgeText: {
-    color: colors.textPrimary,
-    fontWeight: '700',
-  },
-  pressed: {
-    opacity: 0.85,
+  title: {
+    flex: 1,
   },
   listContent: {
     paddingBottom: spacing.xxl,

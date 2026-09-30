@@ -2,6 +2,7 @@ import {
   createWorldCinemaHref,
   parseWorldCinemaParams,
 } from '@/features/discovery/utils/world-cinema-params';
+import { createDefaultWorldCinemaFilters } from '@/features/discovery/world-cinema-types';
 
 describe('world-cinema-params', () => {
   it('parses valid world cinema params', () => {
@@ -12,6 +13,7 @@ describe('world-cinema-params', () => {
     });
 
     expect(state).toEqual({
+      ...createDefaultWorldCinemaFilters(),
       mediaType: 'tv',
       originCountry: 'FR',
       sort: 'rating_desc',
@@ -37,5 +39,21 @@ describe('world-cinema-params', () => {
         originCountry: 'JP',
       }),
     ).toBe('/world-cinema?mediaType=movie&originCountry=JP');
+  });
+
+  it('round-trips genre and year filters', () => {
+    const state = parseWorldCinemaParams({
+      mediaType: 'movie',
+      originCountry: 'KR',
+      genres: 'g1,g2',
+      yearFrom: '2010',
+      yearTo: '2019',
+      keywords: 'kw-1',
+    });
+
+    expect(state.genreIds).toEqual(['g1', 'g2']);
+    expect(state.yearFrom).toBe(2010);
+    expect(state.yearTo).toBe(2019);
+    expect(state.keywordIds).toEqual(['kw-1']);
   });
 });

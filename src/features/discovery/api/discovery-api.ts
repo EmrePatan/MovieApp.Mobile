@@ -3,6 +3,7 @@ import type { SearchResponse } from '@/features/search/types';
 import {
   buildAdvancedDiscoverPath,
   buildBrowsePath,
+  buildDiscoveryKeywordsPath,
   buildDiscoveryWatchProvidersPath,
   buildExplorePreviewPath,
   buildGenresPath,
@@ -17,6 +18,7 @@ import type { OnTvThisWeekRequest } from '../on-tv-this-week-types';
 import type { WorldCinemaRequest } from '../world-cinema-types';
 import type { AdvancedDiscoverMediaType, AdvancedDiscoverRequest } from '../advanced-discover-types';
 import type { DiscoveryBrowseRequest, ExplorePreviewResponse, Genre } from '../types';
+import type { DiscoveryKeywordsRequest, DiscoveryKeywordsResponse } from '../keyword-types';
 import type { DiscoveryWatchProvidersResponse } from '../watch-provider-types';
 
 export async function getDiscoveryWatchProviders(
@@ -31,6 +33,16 @@ export async function getDiscoveryWatchProviders(
       signal,
     },
   );
+}
+
+export async function getDiscoveryKeywords(
+  criteria: DiscoveryKeywordsRequest,
+  signal?: AbortSignal,
+): Promise<DiscoveryKeywordsResponse> {
+  return api.get<DiscoveryKeywordsResponse>(buildDiscoveryKeywordsPath(criteria), {
+    authenticated: false,
+    signal,
+  });
 }
 
 export async function getAdvancedDiscover(
