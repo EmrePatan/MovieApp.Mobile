@@ -40,6 +40,41 @@ describe('api client', () => {
     );
   });
 
+  it('serializes object POST bodies as JSON with Content-Type application/json', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ ok: true }),
+    }) as unknown as typeof fetch;
+
+    await api.post('/api/auth/login', { email: 'a@b.com', password: 'secret' }, {
+      authenticated: false,
+    });
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0] as [string, RequestInit];
+    expect(init.body).toBe(JSON.stringify({ email: 'a@b.com', password: 'secret' }));
+    expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/json');
+  });
+
+  it('passes FormData POST bodies through without setting Content-Type', async () => {
+    const formData = new FormData();
+    formData.append('file', new Blob(['avatar']), 'avatar.jpg');
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ id: 'user-1' }),
+    }) as unknown as typeof fetch;
+
+    await api.postFormData('/api/users/me/avatar', formData);
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0] as [string, RequestInit];
+    expect(init.body).toBe(formData);
+    expect((init.headers as Record<string, string>)['Content-Type']).toBeUndefined();
+  });
+
   it('sends JSON requests with authorization header', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
