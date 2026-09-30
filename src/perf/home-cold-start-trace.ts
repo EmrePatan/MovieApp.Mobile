@@ -1,4 +1,4 @@
-import { getAppEnvironment } from '@/api/environment';
+import { isPerfTracingEnabled } from '@/perf/perf-tracing-policy';
 
 type HomePerfEvent =
   | 'login_start'
@@ -18,8 +18,7 @@ let traceId: string | null = null;
 let originMs = 0;
 
 export function isHomePerfTracingEnabled(): boolean {
-  const isDevBuild = typeof __DEV__ !== 'undefined' && __DEV__;
-  return isDevBuild && getAppEnvironment() !== 'production';
+  return isPerfTracingEnabled();
 }
 
 export function beginHomeColdStartTrace(): string | null {

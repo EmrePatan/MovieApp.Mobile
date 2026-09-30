@@ -1,4 +1,4 @@
-import { getAppEnvironment } from '@/api/environment';
+import { isPerfTracingEnabled } from '@/perf/perf-tracing-policy';
 
 type InsightsPerfEvent =
   | 'insights_mount'
@@ -12,8 +12,7 @@ let originMs = 0;
 let firstMeaningfulRenderLogged = false;
 
 export function isInsightsPerfTracingEnabled(): boolean {
-  const isDevBuild = typeof __DEV__ !== 'undefined' && __DEV__;
-  return isDevBuild && getAppEnvironment() !== 'production';
+  return isPerfTracingEnabled();
 }
 
 export function beginInsightsTrace(): void {
