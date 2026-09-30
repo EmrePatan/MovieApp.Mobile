@@ -94,11 +94,19 @@ export function ReviewsDetailContent({
       return null;
     }
 
+    const effectiveAvatarUrl =
+      review.user.effectiveAvatarUrl ?? user?.effectiveAvatarUrl ?? null;
+
     return {
       ...review,
       userRating: myRatingQuery.data?.score ?? review.userRating ?? null,
+      user: {
+        ...review.user,
+        displayName: review.user.displayName || user?.displayName || '',
+        effectiveAvatarUrl,
+      },
     };
-  }, [myRatingQuery.data, myReviewQuery.data]);
+  }, [myRatingQuery.data, myReviewQuery.data, user]);
 
   const totalCount = reviewsQuery.data?.totalCount ?? 0;
   const totalPages = reviewsQuery.data?.totalPages ?? 0;

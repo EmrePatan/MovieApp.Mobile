@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { UserAvatar } from '@/components/common/UserAvatar';
 import { ReviewAuthorRating } from './ReviewAuthorRating';
 import type { ReviewResponse } from '../types';
 import {
@@ -12,6 +13,8 @@ import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
+
+const AVATAR_SIZE = 40;
 
 interface ReviewsOwnReviewBarProps {
   review: ReviewResponse;
@@ -27,24 +30,37 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
   return (
     <View style={styles.wrapper} testID="reviews-own-review-bar">
       <View style={styles.card}>
-        <View style={styles.headerRow}>
-          <View style={styles.labelRow}>
-            <AppText variant="caption" style={styles.label}>
-              {t('reviews.yourReview')}
-            </AppText>
-            <ReviewAuthorRating userRating={review.userRating} variant="inline" />
+        <View style={styles.header}>
+          <UserAvatar
+            displayName={review.user.displayName}
+            effectiveAvatarUrl={review.user.effectiveAvatarUrl}
+            size={AVATAR_SIZE}
+            variant="accent"
+            accessibilityLabel={t('profile.avatarAccessibility', {
+              name: review.user.displayName,
+            })}
+          />
+          <View style={styles.headerMeta}>
+            <View style={styles.headerRow}>
+              <View style={styles.labelRow}>
+                <AppText variant="caption" style={styles.label}>
+                  {t('reviews.yourReview')}
+                </AppText>
+                <ReviewAuthorRating userRating={review.userRating} variant="inline" />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('reviews.editReview')}
+                onPress={onEdit}
+                hitSlop={8}
+                style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+              >
+                <AppText variant="caption" style={styles.editLabel}>
+                  {t('reviews.edit')}
+                </AppText>
+              </Pressable>
+            </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('reviews.editReview')}
-            onPress={onEdit}
-            hitSlop={8}
-            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
-          >
-            <AppText variant="caption" style={styles.editLabel}>
-              {t('reviews.edit')}
-            </AppText>
-          </Pressable>
         </View>
 
         <AppText
@@ -81,7 +97,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
   },
   card: {
-    gap: spacing.xs,
+    gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.lg,
@@ -90,6 +106,16 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
     borderLeftWidth: 3,
     borderLeftColor: colors.accentMuted,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  headerMeta: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: 1,
   },
   headerRow: {
     flexDirection: 'row',

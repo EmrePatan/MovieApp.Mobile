@@ -6,7 +6,11 @@ import { initI18nForTests, t } from '../../i18n/i18n-test-utils';
 
 const ownReview: ReviewResponse = {
   id: 'own-review',
-  user: { id: 'me', displayName: 'Jane Doe' },
+  user: {
+    id: 'me',
+    displayName: 'Jane Doe',
+    effectiveAvatarUrl: 'https://cdn.example.com/me.webp',
+  },
   content: 'bence çok güzeldiii.',
   createdAt: '2026-01-02T00:00:00.000Z',
   updatedAt: '2026-01-02T00:00:00.000Z',
@@ -24,6 +28,7 @@ describe('Reviews premium UI', () => {
     render(<ReviewsOwnReviewBar review={ownReview} onEdit={onEdit} />);
 
     expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
+    expect(screen.getByLabelText(t('profile.avatarAccessibility', { name: 'Jane Doe' }))).toBeTruthy();
     expect(screen.getByText(t('reviews.yourReview'))).toBeTruthy();
     expect(screen.getByText('4.0')).toBeTruthy();
     expect(screen.getByText('bence çok güzeldiii.')).toBeTruthy();
