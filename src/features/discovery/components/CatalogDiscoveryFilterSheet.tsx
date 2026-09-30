@@ -23,6 +23,7 @@ import {
 } from '../catalog-filter-presets';
 import { CATALOG_LANGUAGE_OPTIONS } from '../catalog-language-options';
 import { useGenres } from '../hooks/useGenres';
+import { countryCodeToFlagEmoji } from '../utils/country-flag';
 import { getOriginCountryOptions } from '../world-cinema-collections';
 import { TV_DISCOVER_STATUS_OPTIONS, type TvDiscoverStatus } from '../tv-discover-status';
 import {
@@ -56,6 +57,20 @@ interface CatalogDiscoveryFilterSheetProps {
   onApply: (draft: CatalogFilterDraft) => void;
   onReset: () => void;
   testID?: string;
+}
+
+function flagEmojiForOriginCountry(code: string | null | undefined): string | undefined {
+  if (!code) {
+    return undefined;
+  }
+
+  const normalized = code.trim().toUpperCase();
+  if (normalized.length !== 2) {
+    return undefined;
+  }
+
+  const emoji = countryCodeToFlagEmoji(normalized);
+  return emoji.length > 0 ? emoji : undefined;
 }
 
 function formatList(values: string[], fallback: string): string {
@@ -314,6 +329,7 @@ function CatalogDiscoveryFilterSheetBody({
               ...countryOptions.map((option) => ({
                 value: option.code,
                 label: option.label,
+                flagEmoji: flagEmojiForOriginCountry(option.code),
               })),
             ]}
             onChange={(values) => {
@@ -529,6 +545,7 @@ function CatalogDiscoveryFilterSheetBody({
             key={field}
             label={t('common.originCountry')}
             valueLabel={countrySummary()}
+            valueFlagEmoji={flagEmojiForOriginCountry(draft.originCountry)}
             onPress={() => setSelector('country')}
           />
         );

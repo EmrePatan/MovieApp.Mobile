@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -7,6 +8,8 @@ import { borderRadius, spacing } from '@/theme/spacing';
 export interface CatalogOptionItem<T extends string> {
   value: T;
   label: string;
+  /** ISO 3166-1 alpha-2 country flag emoji for origin-country rows */
+  flagEmoji?: string;
 }
 
 interface CatalogOptionListProps<T extends string> {
@@ -57,9 +60,15 @@ export function CatalogOptionList<T extends string>({
               pressed && styles.pressed,
             ]}
           >
-            <AppText variant="body" style={selected ? styles.optionLabelSelected : undefined}>
-              {option.label}
-            </AppText>
+            <View style={styles.labelRow}>
+              {option.flagEmoji ? <CircularFlagBadge emoji={option.flagEmoji} /> : null}
+              <AppText
+                variant="body"
+                style={[styles.optionLabel, selected && styles.optionLabelSelected]}
+              >
+                {option.label}
+              </AppText>
+            </View>
             {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
           </Pressable>
         );
@@ -91,6 +100,16 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing.xs,
     paddingBottom: spacing.xs,
+  },
+  labelRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingRight: spacing.sm,
+  },
+  optionLabel: {
+    flexShrink: 1,
   },
   optionRow: {
     minHeight: 44,

@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -7,6 +8,7 @@ import { spacing } from '@/theme/spacing';
 interface FilterSelectorRowProps {
   label: string;
   valueLabel: string;
+  valueFlagEmoji?: string;
   onPress: () => void;
   accessibilityLabel?: string;
   testID?: string;
@@ -15,6 +17,7 @@ interface FilterSelectorRowProps {
 export function FilterSelectorRow({
   label,
   valueLabel,
+  valueFlagEmoji,
   onPress,
   accessibilityLabel,
   testID,
@@ -29,6 +32,7 @@ export function FilterSelectorRow({
     >
       <AppText variant="body">{label}</AppText>
       <View style={styles.valueRow}>
+        {valueFlagEmoji ? <CircularFlagBadge emoji={valueFlagEmoji} /> : null}
         <AppText variant="bodySmall" muted numberOfLines={1} style={styles.value}>
           {valueLabel}
         </AppText>
