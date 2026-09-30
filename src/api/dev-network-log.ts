@@ -35,23 +35,26 @@ export function logFetchNetworkFailure(details: {
   });
 }
 
-export function logAvatarUploadAttempt(file: {
-  uri: string;
-  name: string;
-  type: string;
+export function logAvatarUploadFormDataPart(details: {
+  sourceUriScheme: string;
+  fileName: string;
+  mimeType: string;
+  partKind: string;
+  partFileName: string;
+  partMimeType: string;
+  fileExists: boolean;
 }): void {
   if (!isDevBuild) {
     return;
   }
 
   console.info('[AvatarUpload] Starting multipart upload', {
-    uriScheme: describeUriSchemeForLog(file.uri),
-    fileName: file.name,
-    mimeType: file.type,
+    uriScheme: details.sourceUriScheme,
+    fileName: details.fileName,
+    mimeType: details.mimeType,
+    partKind: details.partKind,
+    partFileName: details.partFileName,
+    partMimeType: details.partMimeType,
+    fileExists: details.fileExists,
   });
-}
-
-function describeUriSchemeForLog(uri: string): string {
-  const match = /^([a-z][a-z0-9+.-]*):/i.exec(uri.trim());
-  return match?.[1] ?? 'unknown';
 }

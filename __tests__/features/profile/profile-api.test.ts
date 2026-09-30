@@ -2,6 +2,31 @@ jest.mock('react-native', () => ({
   Platform: { OS: 'ios' },
 }));
 
+jest.mock('expo-file-system', () => {
+  class MockExpoFile extends Blob {
+    exists = true;
+    type = 'image/jpeg';
+    readonly fileUri: string;
+
+    constructor(fileUri: string) {
+      super([], { type: 'image/jpeg' });
+      this.fileUri = fileUri;
+    }
+
+    get name() {
+      return 'avatar.jpg';
+    }
+
+    rename(): void {}
+  }
+
+  return { File: MockExpoFile };
+});
+
+jest.mock('@/api/dev-network-log', () => ({
+  logAvatarUploadFormDataPart: jest.fn(),
+}));
+
 import {
   buildChangeEmailPath,
   buildChangePasswordPath,
@@ -20,6 +45,7 @@ import {
   uploadAvatar,
 } from '@/features/profile/api/profile-api';
 import { api } from '@/api/client';
+import { isLegacyReactNativeFormDataFilePart } from '@/api/form-data-file';
 
 jest.mock('@/features/profile/utils/profile-timezone', () => ({
   getProfileStatisticsTimeZone: () => 'Europe/Istanbul',
@@ -32,10 +58,6 @@ jest.mock('@/api/client', () => ({
     delete: jest.fn(),
     postFormData: jest.fn(),
   },
-}));
-
-jest.mock('@/api/dev-network-log', () => ({
-  logAvatarUploadAttempt: jest.fn(),
 }));
 
 describe('profile api routes', () => {
@@ -101,7 +123,7 @@ describe('profile api client', () => {
     });
   });
 
-  it('uploads avatar as React Native multipart FormData', async () => {
+  it('uploads avatar using expo-file-system File multipart parts', async () => {
     const appendSpy = jest.spyOn(FormData.prototype, 'append');
     (api.postFormData as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
@@ -118,11 +140,10 @@ describe('profile api client', () => {
 
     const formData = (api.postFormData as jest.Mock).mock.calls[0][1] as FormData;
     expect(formData).toBeInstanceOf(FormData);
-    expect(appendSpy).toHaveBeenCalledWith('file', {
-      uri: '/cache/avatar.jpg',
-      name: 'avatar.jpg',
-      type: 'image/jpeg',
-    });
+    expect(appendSpy).toHaveBeenCalledWith('file', expect.any(Blob), 'avatar.jpg');
+
+    const [, part] = appendSpy.mock.calls[0] as [string, unknown, string];
+    expect(isLegacyReactNativeFormDataFilePart(part)).toBe(false);
 
     appendSpy.mockRestore();
   });

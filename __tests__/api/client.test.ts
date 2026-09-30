@@ -63,11 +63,8 @@ describe('api client', () => {
 
   it('passes FormData POST bodies through without setting Content-Type', async () => {
     const formData = new FormData();
-    formData.append('file', {
-      uri: '/cache/avatar.jpg',
-      name: 'avatar.jpg',
-      type: 'image/jpeg',
-    } as unknown as Blob);
+    const filePart = new Blob(['jpeg-bytes'], { type: 'image/jpeg' });
+    formData.append('file', filePart, 'avatar.jpg');
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
