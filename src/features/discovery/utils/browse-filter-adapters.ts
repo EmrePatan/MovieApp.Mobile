@@ -7,8 +7,11 @@ import {
 
 export const BROWSE_FILTER_SHEET_CONFIG: CatalogFilterSheetConfig = {
   contentTypeOptions: ['all', 'movie', 'tv'],
-  primaryFields: ['contentType', 'genre', 'year', 'minRating'],
-  advancedFields: [
+  fields: [
+    'contentType',
+    'genre',
+    'year',
+    'minRating',
     'originalLanguage',
     'originCountry',
     'runtime',

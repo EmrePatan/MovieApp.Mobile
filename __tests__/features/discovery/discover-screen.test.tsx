@@ -185,7 +185,7 @@ describe('DiscoverScreen', () => {
     fireEvent.press(screen.getByLabelText('Filters'));
     expect(screen.getByText('Content Type')).toBeTruthy();
     expect(screen.getByText('Show Results')).toBeTruthy();
-    expect(screen.getByText('Advanced Filters')).toBeTruthy();
+    expect(screen.getByLabelText('Minimum Vote Count, Any')).toBeTruthy();
     expect(screen.queryByText('Sort by')).toBeNull();
 
     fireEvent.press(screen.getByLabelText('Genre, Any'));

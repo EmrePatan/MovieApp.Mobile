@@ -36,6 +36,7 @@ describe('discovery catalog filter routes', () => {
       yearFrom: 2010,
       yearTo: 2019,
       minRating: 7,
+      minVoteCount: 500,
       originalLanguage: 'ko',
       keywordIds: ['kw-1'],
       page: 1,
@@ -46,6 +47,7 @@ describe('discovery catalog filter routes', () => {
     expect(path).toContain('yearFrom=2010');
     expect(path).toContain('yearTo=2019');
     expect(path).toContain('minRating=7');
+    expect(path).toContain('minVoteCount=500');
     expect(path).toContain('originalLanguage=ko');
     expect(path).toContain('keywordId=kw-1');
   });

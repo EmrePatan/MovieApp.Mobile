@@ -11,8 +11,18 @@ import {
 
 export const WORLD_CINEMA_FILTER_SHEET_CONFIG: CatalogFilterSheetConfig = {
   contentTypeOptions: ['movie', 'tv'],
-  primaryFields: ['contentType', 'originCountry', 'genre', 'year', 'minRating'],
-  advancedFields: ['originalLanguage', 'runtime', 'minVoteCount', 'keywords', 'tvStatus'],
+  fields: [
+    'contentType',
+    'originCountry',
+    'genre',
+    'year',
+    'minRating',
+    'originalLanguage',
+    'runtime',
+    'minVoteCount',
+    'keywords',
+    'tvStatus',
+  ],
   defaultOriginCountry: DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY,
   defaultContentType: DEFAULT_WORLD_CINEMA_MEDIA_TYPE,
 };

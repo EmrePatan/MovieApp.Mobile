@@ -114,6 +114,6 @@ describe('WorldCinemaScreen', () => {
 
     fireEvent.press(screen.getByLabelText(t('discovery.catalogFilters.filterAction')));
     expect(screen.getByText(t('common.originCountry'))).toBeTruthy();
-    expect(screen.getByText(t('discovery.catalogFilters.advancedFilters'))).toBeTruthy();
+    expect(screen.getByLabelText(`${t('discovery.catalogFilters.minVoteCount')}, ${t('discovery.catalogFilters.any')}`)).toBeTruthy();
   });
 });

@@ -33,9 +33,8 @@ export type CatalogFilterField =
 
 export interface CatalogFilterSheetConfig {
   contentTypeOptions: CatalogContentType[];
-  primaryFields: CatalogFilterField[];
-  advancedFields: CatalogFilterField[];
-  /** When set, origin country matching this value is treated as context (not "active advanced"). */
+  fields: CatalogFilterField[];
+  /** When set, origin country matching this value is treated as screen context (not a user filter). */
   defaultOriginCountry?: string | null;
   defaultContentType?: CatalogContentType;
 }
@@ -73,50 +72,3 @@ export function shouldShowTvStatus(contentType: CatalogContentType): boolean {
   return contentType === 'tv' || contentType === 'all';
 }
 
-export function hasAdvancedCatalogFiltersActive(
-  draft: CatalogFilterDraft,
-  advancedFields: CatalogFilterField[],
-  config?: Pick<CatalogFilterSheetConfig, 'defaultOriginCountry'>,
-): boolean {
-  for (const field of advancedFields) {
-    switch (field) {
-      case 'originalLanguage':
-        if (draft.originalLanguage) {
-          return true;
-        }
-        break;
-      case 'originCountry':
-        if (
-          draft.originCountry &&
-          draft.originCountry !== (config?.defaultOriginCountry ?? null)
-        ) {
-          return true;
-        }
-        break;
-      case 'runtime':
-        if (draft.minRuntimeMinutes != null || draft.maxRuntimeMinutes != null) {
-          return true;
-        }
-        break;
-      case 'minVoteCount':
-        if (draft.minVoteCount != null) {
-          return true;
-        }
-        break;
-      case 'keywords':
-        if (draft.keywordIds.length > 0) {
-          return true;
-        }
-        break;
-      case 'tvStatus':
-        if (draft.tvStatuses.length > 0) {
-          return true;
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  return false;
-}

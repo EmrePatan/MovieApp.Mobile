@@ -50,4 +50,24 @@ describe('CatalogDiscoveryFilterSheet drill-down', () => {
       }),
     );
   });
+
+  it('shows selected minimum vote count summary after drill-down', () => {
+    render(
+      <CatalogDiscoveryFilterSheet
+        visible
+        draft={createEmptyCatalogFilterDraft()}
+        config={BROWSE_FILTER_SHEET_CONFIG}
+        onClose={jest.fn()}
+        onApply={jest.fn()}
+        onReset={jest.fn()}
+        testID="catalog-filter-sheet"
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText('Minimum Vote Count, Any'));
+    fireEvent.press(screen.getByLabelText('500+'));
+    fireEvent.press(screen.getByTestId('catalog-filter-sheet-header-action'));
+
+    expect(screen.getByLabelText('Minimum Vote Count, 500+')).toBeTruthy();
+  });
 });

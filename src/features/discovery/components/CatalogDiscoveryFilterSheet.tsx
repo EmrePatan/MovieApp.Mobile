@@ -9,7 +9,6 @@ import {
   CatalogFilterSheetShell,
   CatalogKeywordSelectorPanel,
   CatalogOptionList,
-  ExpandableAdvancedFilters,
   FilterSelectorRow,
 } from '@/features/catalog/components';
 import {
@@ -28,7 +27,6 @@ import { getOriginCountryOptions } from '../world-cinema-collections';
 import { TV_DISCOVER_STATUS_OPTIONS, type TvDiscoverStatus } from '../tv-discover-status';
 import {
   clearTvStatusesIfNeeded,
-  hasAdvancedCatalogFiltersActive,
   shouldShowTvStatus,
   type CatalogContentType,
   type CatalogFilterDraft,
@@ -93,7 +91,6 @@ function CatalogDiscoveryFilterSheetBody({
   const genresQuery = useGenres();
   const wasVisibleRef = useRef(false);
   const [draft, setDraft] = useState<CatalogFilterDraft>(appliedDraft);
-  const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [selector, setSelector] = useState<SelectorKind>(null);
   const [yearMode, setYearMode] = useState<CatalogYearPresetKey>('any');
   const [runtimeMode, setRuntimeMode] = useState<CatalogRuntimePresetKey>('any');
@@ -101,7 +98,6 @@ function CatalogDiscoveryFilterSheetBody({
   useEffect(() => {
     if (visible && !wasVisibleRef.current) {
       setDraft(appliedDraft);
-      setAdvancedExpanded(false);
       setSelector(null);
       setYearMode(resolveCatalogYearPresetKey(appliedDraft));
       setRuntimeMode(resolveCatalogRuntimePresetKey(appliedDraft));
@@ -219,16 +215,12 @@ function CatalogDiscoveryFilterSheetBody({
       anyLabel,
     );
 
-  const visibleAdvancedFields = config.advancedFields.filter((field) => {
+  const visibleFields = config.fields.filter((field) => {
     if (field === 'tvStatus') {
       return shouldShowTvStatus(draft.contentType);
     }
 
     return true;
-  });
-
-  const advancedActive = hasAdvancedCatalogFiltersActive(draft, visibleAdvancedFields, {
-    defaultOriginCountry: config.defaultOriginCountry ?? null,
   });
 
   const selectorTitle = (() => {
@@ -639,20 +631,7 @@ function CatalogDiscoveryFilterSheetBody({
       {inSelector ? (
         renderSelectorContent()
       ) : (
-        <>
-          {config.primaryFields.map(renderField)}
-
-          {visibleAdvancedFields.length > 0 ? (
-            <ExpandableAdvancedFilters
-              title={t('discovery.catalogFilters.advancedFilters')}
-              expanded={advancedExpanded}
-              hasActiveFilters={advancedActive}
-              onToggle={() => setAdvancedExpanded((current) => !current)}
-            >
-              {visibleAdvancedFields.map(renderField)}
-            </ExpandableAdvancedFilters>
-          ) : null}
-        </>
+        visibleFields.map(renderField)
       )}
     </CatalogFilterSheetShell>
   );

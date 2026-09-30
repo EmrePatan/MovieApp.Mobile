@@ -95,6 +95,53 @@ describe('discovery api routes', () => {
     expect(advancedPath).toContain('genreMatch=any');
     expect(advancedPath).toContain('certification=PG-13');
     expect(advancedPath).toContain('releaseType=theatrical');
+    expect(advancedPath).toContain('minVoteCount=50');
+  });
+
+  it('includes minVoteCount on browse, world cinema, and advanced paths', () => {
+    const browse500 = buildBrowsePath({
+      mode: 'trending',
+      type: 'movie',
+      page: 1,
+      pageSize: 20,
+      genreIds: [],
+      year: null,
+      yearFrom: null,
+      yearTo: null,
+      minRating: null,
+      minVoteCount: 500,
+      minRuntimeMinutes: null,
+      maxRuntimeMinutes: null,
+      language: null,
+      originCountry: null,
+      keywordIds: [],
+      tvStatuses: [],
+      sort: 'popularity_desc',
+    });
+
+    expect(browse500).toContain('minVoteCount=500');
+
+    const browse5000 = buildBrowsePath({
+      mode: 'trending',
+      type: 'tv',
+      page: 1,
+      pageSize: 20,
+      genreIds: [],
+      year: null,
+      yearFrom: null,
+      yearTo: null,
+      minRating: null,
+      minVoteCount: 5000,
+      minRuntimeMinutes: null,
+      maxRuntimeMinutes: null,
+      language: null,
+      originCountry: null,
+      keywordIds: [],
+      tvStatuses: [],
+      sort: 'popularity_desc',
+    });
+
+    expect(browse5000).toContain('minVoteCount=5000');
   });
 });
 

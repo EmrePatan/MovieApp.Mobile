@@ -10,8 +10,11 @@ import {
 
 export const STREAMING_FILTER_SHEET_CONFIG: CatalogFilterSheetConfig = {
   contentTypeOptions: ['movie', 'tv'],
-  primaryFields: ['contentType', 'genre', 'year', 'minRating'],
-  advancedFields: [
+  fields: [
+    'contentType',
+    'genre',
+    'year',
+    'minRating',
     'originalLanguage',
     'originCountry',
     'runtime',
