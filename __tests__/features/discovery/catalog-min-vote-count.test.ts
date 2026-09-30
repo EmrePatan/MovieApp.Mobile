@@ -1,3 +1,5 @@
+import { buildBrowsePath } from '@/features/discovery/api/routes';
+import { discoveryBrowseInfiniteQueryKey } from '@/features/discovery/hooks/discovery-query-keys';
 import { serializeDiscoverParams, parseDiscoverParams } from '@/features/discovery/utils/discover-params';
 import {
   browseStateToFilterDraft,
@@ -32,5 +34,44 @@ describe('catalog minVoteCount draft and route round-trip', () => {
 
     const patch = filterDraftToBrowsePatch({ ...draft, minVoteCount: 5000 });
     expect(patch.filters.minVoteCount).toBe(5000);
+  });
+
+  it('keeps popularity_asc and minVoteCount together in route and query key', () => {
+    const filters = {
+      ...createDefaultDiscoveryFilters('trending'),
+      sort: 'popularity_asc' as const,
+      minVoteCount: 5000,
+    };
+
+    const serialized = serializeDiscoverParams({
+      mode: 'trending',
+      type: 'all',
+      filters,
+    });
+
+    expect(serialized.sort).toBe('popularity_asc');
+    expect(serialized.minVoteCount).toBe('5000');
+
+    const parsed = parseDiscoverParams(serialized);
+    expect(parsed.filters.sort).toBe('popularity_asc');
+    expect(parsed.filters.minVoteCount).toBe(5000);
+
+    const path = buildBrowsePath({
+      mode: 'trending',
+      type: 'all',
+      page: 1,
+      pageSize: 20,
+      ...filters,
+    });
+    expect(path).toContain('sort=popularity_asc');
+    expect(path).toContain('minVoteCount=5000');
+
+    const withoutVote = discoveryBrowseInfiniteQueryKey('trending', 'all', {
+      ...createDefaultDiscoveryFilters('trending'),
+      sort: 'popularity_asc',
+      minVoteCount: null,
+    });
+    const withVote = discoveryBrowseInfiniteQueryKey('trending', 'all', filters);
+    expect(withoutVote).not.toEqual(withVote);
   });
 });

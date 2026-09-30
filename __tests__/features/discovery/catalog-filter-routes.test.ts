@@ -13,6 +13,22 @@ describe('discovery catalog filter routes', () => {
     ).toBe('/api/discovery/keywords?query=time&page=1&pageSize=20');
   });
 
+  it('browse trending least popular with minVoteCount 5000 sends sort and vote floor', () => {
+    const path = buildBrowsePath({
+      mode: 'trending',
+      type: 'all',
+      page: 1,
+      pageSize: 20,
+      ...createDefaultDiscoveryFilters('trending'),
+      sort: 'popularity_asc',
+      minVoteCount: 5000,
+    });
+
+    expect(path).toContain('mode=trending');
+    expect(path).toContain('sort=popularity_asc');
+    expect(path).toContain('minVoteCount=5000');
+  });
+
   it('appends keyword and tv status params on browse', () => {
     const path = buildBrowsePath({
       mode: 'trending',

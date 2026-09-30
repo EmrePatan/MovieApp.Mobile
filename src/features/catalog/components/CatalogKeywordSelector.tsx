@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -55,7 +55,7 @@ export function CatalogKeywordSelectorPanel({
   };
 
   return (
-    <View testID={testID}>
+    <View style={styles.root} testID={testID}>
       <AppInput
         label={t('discovery.catalogFilters.keywordSearchLabel')}
         value={query}
@@ -88,7 +88,13 @@ export function CatalogKeywordSelectorPanel({
         </View>
       ) : null}
 
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.resultsScroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled
+        showsVerticalScrollIndicator
+      >
         {keywordsQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
 
         {keywordsQuery.isError ? (
@@ -129,7 +135,7 @@ export function CatalogKeywordSelectorPanel({
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -150,6 +156,15 @@ export function CatalogKeywordSelector(
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    minHeight: 0,
+  },
+  resultsScroll: {
+    flex: 1,
+    minHeight: 0,
+    marginTop: spacing.sm,
+  },
   selectedSection: {
     gap: spacing.xs,
     marginTop: spacing.sm,

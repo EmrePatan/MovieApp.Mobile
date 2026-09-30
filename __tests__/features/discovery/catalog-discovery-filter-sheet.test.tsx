@@ -70,4 +70,26 @@ describe('CatalogDiscoveryFilterSheet drill-down', () => {
 
     expect(screen.getByLabelText('Minimum Vote Count, 500+')).toBeTruthy();
   });
+
+  it('shows the applied vote count as selected in the drill-down', () => {
+    render(
+      <CatalogDiscoveryFilterSheet
+        visible
+        draft={{
+          ...createEmptyCatalogFilterDraft(),
+          minVoteCount: 5000,
+        }}
+        config={BROWSE_FILTER_SHEET_CONFIG}
+        onClose={jest.fn()}
+        onApply={jest.fn()}
+        onReset={jest.fn()}
+        testID="catalog-filter-sheet"
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText('Minimum Vote Count, 5000+'));
+
+    const selectedOption = screen.getByLabelText('5000+');
+    expect(selectedOption.props.accessibilityState?.selected).toBe(true);
+  });
 });

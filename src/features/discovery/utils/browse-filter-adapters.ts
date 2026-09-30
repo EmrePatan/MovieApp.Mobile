@@ -42,7 +42,7 @@ export function browseStateToFilterDraft(
     originalLanguage: filters.language,
     originCountry: filters.originCountry,
     keywordIds: filters.keywordIds,
-    keywordLabels: {},
+    keywordLabels: filters.keywordLabels,
     tvStatuses: contentType === 'movie' ? [] : filters.tvStatuses,
   };
 }
@@ -65,6 +65,7 @@ export function filterDraftToBrowsePatch(draft: CatalogFilterDraft): {
       language: draft.originalLanguage,
       originCountry: draft.originCountry,
       keywordIds: draft.keywordIds,
+      keywordLabels: draft.keywordLabels,
       tvStatuses: draft.contentType === 'movie' ? [] : draft.tvStatuses,
     },
   };

@@ -14,6 +14,7 @@ export const BROWSE_DISCOVER_PARAM_KEYS = [
   'language',
   'originCountry',
   'keywords',
+  'keywordLabels',
   'tvStatus',
   'sort',
 ] as const;

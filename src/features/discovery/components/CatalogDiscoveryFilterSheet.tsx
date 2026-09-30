@@ -289,7 +289,7 @@ function CatalogDiscoveryFilterSheetBody({
       case 'language':
         return (
           <CatalogOptionList
-            values={draft.originalLanguage ? [draft.originalLanguage] : []}
+            values={[draft.originalLanguage ?? '']}
             options={[
               { value: '', label: anyLabel },
               ...CATALOG_LANGUAGE_OPTIONS.map((option) => ({
@@ -308,7 +308,7 @@ function CatalogDiscoveryFilterSheetBody({
       case 'country':
         return (
           <CatalogOptionList
-            values={draft.originCountry ? [draft.originCountry] : []}
+            values={[draft.originCountry ?? config.defaultOriginCountry ?? '']}
             options={[
               ...(config.defaultOriginCountry ? [] : [{ value: '', label: anyLabel }]),
               ...countryOptions.map((option) => ({
@@ -579,6 +579,7 @@ function CatalogDiscoveryFilterSheetBody({
 
   const inSelector = selector != null;
   const showSelectorFooter = selector === 'year' || selector === 'runtime';
+  const keywordSelectorActive = selector === 'keywords';
 
   const handleHeaderAction = () => {
     if (inSelector) {
@@ -626,6 +627,8 @@ function CatalogDiscoveryFilterSheetBody({
             }
       }
       showFooterActions
+      keyboardAvoiding={keywordSelectorActive}
+      flexContent={keywordSelectorActive}
       testID={testID}
     >
       {inSelector ? (

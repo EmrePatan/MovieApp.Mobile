@@ -52,6 +52,50 @@ function parseSort(value: string | undefined, mode: DiscoveryBrowseMode): Discov
 
 type DiscoverRouteParams = Record<string, string | string[] | undefined>;
 
+function parseKeywordLabelsParam(raw: string | undefined): Record<string, string> {
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') {
+      return {};
+    }
+
+    const labels: Record<string, string> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === 'string' && value.length > 0) {
+        labels[key] = value;
+      }
+    }
+
+    return labels;
+  } catch {
+    return {};
+  }
+}
+
+function serializeKeywordLabelsParam(labels: Record<string, string>, keywordIds: string[]): string | undefined {
+  if (keywordIds.length === 0) {
+    return undefined;
+  }
+
+  const subset: Record<string, string> = {};
+  for (const id of keywordIds) {
+    const label = labels[id];
+    if (label) {
+      subset[id] = label;
+    }
+  }
+
+  if (Object.keys(subset).length === 0) {
+    return undefined;
+  }
+
+  return JSON.stringify(subset);
+}
+
 export function parseDiscoverParams(params: DiscoverRouteParams): DiscoveryBrowseState {
   const mode = parseBrowseMode(readRouteParam(params.mode));
   const type = parseTypeFilter(readRouteParam(params.type));
@@ -71,6 +115,7 @@ export function parseDiscoverParams(params: DiscoverRouteParams): DiscoveryBrows
     language: parseLanguageCodeParam(readRouteParam(params.language)),
     originCountry: parseOriginCountryParam(readRouteParam(params.originCountry)),
     keywordIds: parseCommaSeparatedIds(params.keywords ?? params.keywordId),
+    keywordLabels: parseKeywordLabelsParam(readRouteParam(params.keywordLabels)),
     tvStatuses,
     sort: parseSort(readRouteParam(params.sort), mode),
   };
@@ -126,6 +171,13 @@ export function serializeDiscoverParams(state: DiscoveryBrowseState): Record<str
 
   if (state.filters.keywordIds.length > 0) {
     params.keywords = state.filters.keywordIds.join(',');
+    const keywordLabels = serializeKeywordLabelsParam(
+      state.filters.keywordLabels,
+      state.filters.keywordIds,
+    );
+    if (keywordLabels) {
+      params.keywordLabels = keywordLabels;
+    }
   }
 
   if (state.type !== 'movie' && state.filters.tvStatuses.length > 0) {

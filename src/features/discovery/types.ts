@@ -40,6 +40,8 @@ export interface DiscoveryBrowseFilters {
   language: string | null;
   originCountry: string | null;
   keywordIds: string[];
+  /** Display labels for keywordIds (client route state only; not sent to browse API). */
+  keywordLabels: Record<string, string>;
   tvStatuses: TvDiscoverStatus[];
   sort: DiscoverySort | null;
 }
@@ -111,6 +113,7 @@ export function createDefaultDiscoveryFilters(
     language: null,
     originCountry: null,
     keywordIds: [],
+    keywordLabels: {},
     tvStatuses: [],
     sort: getDefaultSortForMode(mode),
   };
