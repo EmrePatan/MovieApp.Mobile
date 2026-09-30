@@ -192,7 +192,7 @@ describe('SearchScreen recent searches', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'inception');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.0'));
+    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010, 8.0'));
 
     expect(mockRecordQuery).toHaveBeenCalledTimes(1);
     expect(mockOpenCatalogDetailFromTab).toHaveBeenCalled();

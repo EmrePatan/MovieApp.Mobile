@@ -77,7 +77,7 @@ describe('search UI components', () => {
     expect(screen.getByText('Try a title like Inception or Breaking Bad')).toBeTruthy();
   });
 
-  it('renders result card with compact metadata', () => {
+  it('renders catalog result card without synopsis', () => {
     const item: SearchResultItem = {
       id: 'movie-id',
       type: 'movie',
@@ -96,8 +96,10 @@ describe('search UI components', () => {
     render(<SearchResultCard item={item} onPress={onPress} />);
 
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
+    expect(screen.getByText('Movie · 2014')).toBeTruthy();
+    expect(screen.getByText('★ 8.4')).toBeTruthy();
+    expect(screen.queryByText('A team travels through a wormhole.')).toBeNull();
+    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014, 8.4'));
     expect(onPress).toHaveBeenCalledWith(item);
   });
 
@@ -115,8 +117,8 @@ describe('search UI components', () => {
     render(<SearchResultCard item={item} onPress={onPress} />);
 
     expect(screen.getByText('Leonardo DiCaprio')).toBeTruthy();
-    expect(screen.getByText('Person · Acting')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Acting'));
+    expect(screen.getByText('Person · Actor')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Leonardo DiCaprio, Person · Actor'));
     expect(onPress).toHaveBeenCalledWith(item);
   });
 });

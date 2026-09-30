@@ -138,7 +138,7 @@ describe('StreamingDiscoverScreen', () => {
     expect(screen.getByTestId('streaming-platform-header')).toBeTruthy();
     expect(screen.getByText('Netflix')).toBeTruthy();
     expect(screen.getByText(t('discovery.streamingPlatform.catalogSubtitle'))).toBeTruthy();
-    expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
+    expect(screen.getByLabelText('Inception, Movie · 2010, 8.8')).toBeTruthy();
     expect(screen.getByTestId('streaming-platform-actions-sort')).toBeTruthy();
     expect(screen.getByTestId('streaming-platform-actions-filter')).toBeTruthy();
   });
@@ -177,7 +177,7 @@ describe('StreamingDiscoverScreen', () => {
 
     render(<StreamingDiscoverScreen />);
 
-    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8'));
+    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010, 8.8'));
 
     expect(openCatalogDetailFromLibraryStack).toHaveBeenCalledWith(
       expect.anything(),

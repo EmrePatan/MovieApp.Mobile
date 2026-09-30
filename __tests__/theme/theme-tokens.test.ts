@@ -9,6 +9,8 @@ describe('theme tokens', () => {
     expect(layout.posterCarousel.height).toBe(180);
     expect(layout.posterList.width).toBe(72);
     expect(layout.posterList.height).toBe(108);
+    expect(layout.posterCatalogRow.width).toBe(88);
+    expect(layout.posterCatalogRow.height).toBe(132);
     expect(layout.posterCarousel.height / layout.posterCarousel.width).toBe(1.5);
   });
 

@@ -369,7 +369,7 @@ describe('SearchScreen', () => {
     expect(useSearchResults).toHaveBeenLastCalledWith('interstellar', 'all');
     expect(screen.getByTestId('search-results-list')).toBeTruthy();
     expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
-    expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
+    expect(screen.getByLabelText('Interstellar, Movie · 2014, 8.4')).toBeTruthy();
   });
 
   it('renders submitted results with the search header outside the results scroll', () => {
@@ -403,7 +403,7 @@ describe('SearchScreen', () => {
 
     expect(screen.getByTestId('search-results-list')).toBeTruthy();
     expect(screen.getByDisplayValue('interstellar')).toBeTruthy();
-    expect(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4')).toBeTruthy();
+    expect(screen.getByLabelText('Interstellar, Movie · 2014, 8.4')).toBeTruthy();
   });
 
   it('keeps the search input mounted while submitted search is loading', () => {
@@ -533,7 +533,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'interstellar');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014 · ★ 8.4'));
+    fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014, 8.4'));
     expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
       expect.objectContaining({ push: mockPush }),
       'movie-id',
@@ -607,7 +607,7 @@ describe('SearchScreen', () => {
     fireEvent.changeText(screen.getByLabelText('Search movies, TV shows, and people'), 'breaking');
     fireEvent(screen.getByLabelText('Search movies, TV shows, and people'), 'submitEditing');
 
-    fireEvent.press(screen.getByLabelText('Breaking Bad, TV · 2008 · ★ 8.9'));
+    fireEvent.press(screen.getByLabelText('Breaking Bad, TV · 2008, 8.9'));
     expect(mockOpenCatalogDetailFromTab).toHaveBeenCalledWith(
       expect.objectContaining({ push: mockPush }),
       'tv-id',

@@ -124,7 +124,9 @@ describe('DiscoverScreen', () => {
 
     expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
     expect(screen.getByText('Trending')).toBeTruthy();
-    expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
+    expect(screen.getByLabelText('Inception, Movie · 2010, 8.8')).toBeTruthy();
+    expect(screen.getByText('★ 8.8')).toBeTruthy();
+    expect(screen.getByText('Movie · 2010')).toBeTruthy();
   });
 
   it('renders dynamic browse title and results without top-level mode/type controls', () => {
@@ -135,7 +137,7 @@ describe('DiscoverScreen', () => {
     expect(screen.queryByText('Browse movies and shows')).toBeNull();
     expect(screen.queryByLabelText('Top Rated')).toBeNull();
     expect(screen.queryByLabelText('Filter Movies')).toBeNull();
-    expect(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8')).toBeTruthy();
+    expect(screen.getByLabelText('Inception, Movie · 2010, 8.8')).toBeTruthy();
   });
 
   it('renders top rated title from mode deep link', () => {
@@ -325,7 +327,7 @@ describe('DiscoverScreen', () => {
   it('navigates to catalog detail on result press', () => {
     render(<DiscoverScreen />);
 
-    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010 · ★ 8.8'));
+    fireEvent.press(screen.getByLabelText('Inception, Movie · 2010, 8.8'));
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-1');
   });
 });

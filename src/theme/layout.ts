@@ -21,6 +21,11 @@ export const layout = {
     width: 72,
     height: 108,
   },
+  /** Vertical discover/catalog result rows (poster-forward list). */
+  posterCatalogRow: {
+    width: 88,
+    height: 132,
+  },
   avatarSm: 36,
   horizontalList: {
     initialNumToRender: 4,

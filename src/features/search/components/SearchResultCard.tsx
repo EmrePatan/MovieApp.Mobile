@@ -1,22 +1,16 @@
-import { memo, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { PosterImage } from '@/components/common/PosterImage';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { CatalogResultRow } from '@/features/catalog/components/CatalogResultRow';
 import {
   isPersonSearchResult,
   type CatalogSearchResultItem,
   type PersonSearchResultItem,
   type SearchResultItem,
 } from '../types';
-import {
-  formatCatalogYear,
-  formatContentType,
-  formatKnownForDepartment,
-  formatRating,
-} from '@/utils/format';
+import { formatContentType, formatKnownForDepartment } from '@/utils/format';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
@@ -45,7 +39,7 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.personCard, pressed && styles.pressed]}
     >
       <View
         style={[
@@ -80,17 +74,17 @@ const PersonSearchResultCard = memo(function PersonSearchResultCard({
           </View>
         )}
       </View>
-      <View style={styles.meta}>
-        <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
+      <View style={styles.personMeta}>
+        <AppText variant="bodySmall" numberOfLines={2} style={styles.personTitle}>
           {item.title}
         </AppText>
         {metadataLine ? (
-          <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
+          <AppText variant="caption" muted numberOfLines={1}>
             {metadataLine}
           </AppText>
         ) : null}
         {item.overview ? (
-          <AppText variant="caption" muted numberOfLines={2} style={styles.overview}>
+          <AppText variant="caption" muted numberOfLines={2}>
             {item.overview}
           </AppText>
         ) : null}
@@ -106,50 +100,18 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
   item: CatalogSearchResultItem;
   onPress?: (item: SearchResultItem) => void;
 }) {
-  const { t } = useTranslation();
-  const year = formatCatalogYear(item.releaseDate, item.year);
-
-  const metadataLine = useMemo(() => {
-    const parts = [
-      formatContentType(item.type),
-      year,
-      item.voteAverage > 0 ? `★ ${formatRating(item.voteAverage)}` : null,
-    ].filter(Boolean);
-
-    return parts.join(' · ');
-  }, [item.type, item.voteAverage, year]);
-
-  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.type)}`;
+  const mediaType = item.type === 'tv' ? 'tv' : 'movie';
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+    <CatalogResultRow
+      title={item.title}
+      posterUrl={item.posterUrl}
+      mediaType={mediaType}
+      releaseDate={item.releaseDate}
+      year={item.year}
+      voteAverage={item.voteAverage}
       onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-    >
-      <PosterImage
-        uri={item.posterUrl}
-        width={layout.posterList.width}
-        height={layout.posterList.height}
-        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-      />
-      <View style={styles.meta}>
-        <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
-          {item.title}
-        </AppText>
-        {metadataLine ? (
-          <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
-            {metadataLine}
-          </AppText>
-        ) : null}
-        {item.overview ? (
-          <AppText variant="caption" muted numberOfLines={2} style={styles.overview}>
-            {item.overview}
-          </AppText>
-        ) : null}
-      </View>
-    </Pressable>
+    />
   );
 });
 
@@ -165,7 +127,7 @@ export const SearchResultCard = memo(function SearchResultCard({
 });
 
 const styles = StyleSheet.create({
-  card: {
+  personCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
@@ -189,20 +151,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.surfaceElevated,
   },
-  meta: {
+  personMeta: {
     flex: 1,
     gap: spacing.xs,
     paddingTop: spacing.xs,
     minHeight: PERSON_PORTRAIT_SIZE,
     justifyContent: 'center',
   },
-  title: {
+  personTitle: {
     color: colors.textPrimary,
-  },
-  metadata: {
-    letterSpacing: 0.1,
-  },
-  overview: {
-    lineHeight: 16,
   },
 });
