@@ -3,21 +3,23 @@ jest.mock('react-native', () => ({
 }));
 
 jest.mock('expo-file-system', () => {
-  class MockExpoFile extends Blob {
+  class MockExpoFile {
     exists = true;
-    type = 'image/jpeg';
     readonly fileUri: string;
 
     constructor(fileUri: string) {
-      super([], { type: 'image/jpeg' });
       this.fileUri = fileUri;
     }
 
-    get name() {
-      return 'avatar.jpg';
+    get name(): string {
+      throw new Error('expo-file-system File.name must not be read for avatar uploads');
     }
 
     rename(): void {}
+
+    bytes(): Promise<Uint8Array> {
+      return Promise.resolve(new Uint8Array([1, 2, 3]));
+    }
   }
 
   return { File: MockExpoFile };
@@ -150,9 +152,14 @@ describe('profile api client', () => {
 
     const formData = (api.postFormData as jest.Mock).mock.calls[0][1] as FormData;
     expect(formData).toBeInstanceOf(FormData);
-    expect(appendSpy).toHaveBeenCalledWith('file', expect.any(Blob), 'avatar.jpg');
-
-    const [, part] = appendSpy.mock.calls[0] as [string, unknown, string];
+    const [, part] = appendSpy.mock.calls[0] as [string, unknown];
+    expect(part).toEqual(
+      expect.objectContaining({
+        name: 'avatar.jpg',
+        type: 'image/jpeg',
+      }),
+    );
+    expect(typeof (part as { bytes?: unknown }).bytes).toBe('function');
     expect(isLegacyReactNativeFormDataFilePart(part)).toBe(false);
 
     appendSpy.mockRestore();

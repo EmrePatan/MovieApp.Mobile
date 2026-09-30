@@ -1,5 +1,6 @@
 const mockPlatform = { os: 'ios' as 'ios' | 'android' | 'web' };
 const mockRename = jest.fn();
+const mockBytes = jest.fn(() => Promise.resolve(new Uint8Array([0xff, 0xd8, 0xff])));
 
 jest.mock('react-native', () => ({
   Platform: {
@@ -24,30 +25,24 @@ jest.mock('@/api/dev-network-log', () => ({
 }));
 
 jest.mock('expo-file-system', () => {
-  class MockExpoFile extends Blob {
+  class MockExpoFile {
     exists = true;
-    private _name: string;
     readonly fileUri: string;
-    type = 'image/jpeg';
 
     constructor(fileUri: string) {
-      super([], { type: 'image/jpeg' });
       this.fileUri = fileUri;
-      const basename = fileUri.split('/').pop() ?? 'avatar.jpg';
-      this._name = basename;
     }
 
-    get name() {
-      return this._name;
+    get name(): string {
+      throw new Error('expo-file-system File.name must not be read for avatar uploads');
     }
 
     rename(newName: string): void {
       mockRename(newName);
-      this._name = newName;
     }
 
-    bytes(): Uint8Array {
-      return new Uint8Array([0xff, 0xd8, 0xff]);
+    bytes(): Promise<Uint8Array> {
+      return mockBytes();
     }
   }
 
@@ -57,7 +52,7 @@ jest.mock('expo-file-system', () => {
 import {
   assertExpoSupportedFormDataPart,
   buildAvatarUploadFormData,
-  createAvatarUploadFilePart,
+  createAvatarMultipartUploadPart,
   isLegacyReactNativeFormDataFilePart,
 } from '@/api/form-data-file';
 import {
@@ -66,43 +61,56 @@ import {
   logAvatarUploadFormDataCreated,
 } from '@/api/dev-network-log';
 
-const { File: MockExpoFile } = jest.requireMock<{ File: typeof Blob }>('expo-file-system');
-
 describe('form-data-file', () => {
   beforeEach(() => {
     mockPlatform.os = 'ios';
     mockRename.mockClear();
+    mockBytes.mockClear();
     mockLogAvatarUploadFormDataAppendFailed.mockClear();
   });
 
-  it('creates an expo-file-system File from the manipulated image URI without stripping file:// on iOS', () => {
+  it('creates a bytes-backed multipart part without reading expo File.name or renaming', () => {
     const fileUri = 'file:///var/mobile/Containers/Data/avatar-cache.jpg';
-    const part = createAvatarUploadFilePart({
+    const { fileExists, uploadPart } = createAvatarMultipartUploadPart({
       uri: fileUri,
       name: 'avatar.jpg',
       type: 'image/jpeg',
     });
 
-    expect(part).toBeInstanceOf(MockExpoFile);
-    expect((part as InstanceType<typeof MockExpoFile>).fileUri).toBe(fileUri);
-    expect(isLegacyReactNativeFormDataFilePart(part)).toBe(false);
-    expect(mockRename).toHaveBeenCalledWith('avatar.jpg');
+    expect(fileExists).toBe(true);
+    expect(mockRename).not.toHaveBeenCalled();
+    expect(uploadPart.name).toBe('avatar.jpg');
+    expect(uploadPart.type).toBe('image/jpeg');
+    expect(typeof uploadPart.bytes).toBe('function');
+    expect(isLegacyReactNativeFormDataFilePart(uploadPart)).toBe(false);
+    assertExpoSupportedFormDataPart(uploadPart);
   });
 
-  it('prefixes bare Android paths with file:// for expo File', () => {
+  it('delegates bytes() to expo-file-system File without legacy uri descriptor', async () => {
+    const { uploadPart } = createAvatarMultipartUploadPart({
+      uri: 'file:///cache/manipulated.jpg',
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    });
+
+    await expect(uploadPart.bytes()).resolves.toEqual(new Uint8Array([0xff, 0xd8, 0xff]));
+    expect(mockBytes).toHaveBeenCalledTimes(1);
+    expect(isLegacyReactNativeFormDataFilePart(uploadPart)).toBe(false);
+  });
+
+  it('prefixes bare Android paths with file:// for expo File construction', () => {
     mockPlatform.os = 'android';
-    const part = createAvatarUploadFilePart({
+    const { uploadPart } = createAvatarMultipartUploadPart({
       uri: '/data/user/0/cache/ImageManipulator/avatar.jpg',
       name: 'avatar.jpg',
       type: 'image/jpeg',
     });
 
-    expect((part as InstanceType<typeof MockExpoFile>).fileUri).toBe(
-      'file:///data/user/0/cache/ImageManipulator/avatar.jpg',
-    );
+    expect(uploadPart.name).toBe('avatar.jpg');
+    expect(mockRename).not.toHaveBeenCalled();
   });
 
-  it('builds avatar upload FormData with expo File instead of legacy RN descriptor', () => {
+  it('builds avatar upload FormData with bytes-backed part instead of expo File or legacy descriptor', () => {
     const appendSpy = jest.spyOn(FormData.prototype, 'append');
     const file = {
       uri: 'file:///cache/manipulated.jpg',
@@ -114,15 +122,22 @@ describe('form-data-file', () => {
 
     expect(formData).toBeInstanceOf(FormData);
     expect(appendSpy).toHaveBeenCalledTimes(1);
-    expect(appendSpy).toHaveBeenCalledWith('file', expect.any(MockExpoFile), 'avatar.jpg');
+    expect(mockRename).not.toHaveBeenCalled();
+
+    const [, part] = appendSpy.mock.calls[0] as [string, unknown];
+    expect(part).toEqual(
+      expect.objectContaining({
+        name: 'avatar.jpg',
+        type: 'image/jpeg',
+      }),
+    );
+    expect(typeof (part as { bytes?: unknown }).bytes).toBe('function');
+    expect(isLegacyReactNativeFormDataFilePart(part)).toBe(false);
+    assertExpoSupportedFormDataPart(part);
+
     expect(logAvatarUploadFormDataCreated).toHaveBeenCalled();
     expect(logAvatarUploadAppendingFilePart).toHaveBeenCalled();
     expect(logAvatarUploadFilePartAppended).toHaveBeenCalled();
-
-    const [, part] = appendSpy.mock.calls[0] as [string, unknown, string];
-    expect(isLegacyReactNativeFormDataFilePart(part)).toBe(false);
-    expect(part).toBeInstanceOf(Blob);
-    assertExpoSupportedFormDataPart(part);
 
     appendSpy.mockRestore();
   });
@@ -143,7 +158,10 @@ describe('form-data-file', () => {
 
     expect(mockLogAvatarUploadFormDataAppendFailed).toHaveBeenCalledWith(
       appendError,
-      expect.any(MockExpoFile),
+      expect.objectContaining({
+        name: 'avatar.jpg',
+        type: 'image/jpeg',
+      }),
     );
   });
 

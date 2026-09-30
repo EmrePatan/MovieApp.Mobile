@@ -17,6 +17,16 @@ export type FormDataFileDescriptor = {
   type: string;
 };
 
+/**
+ * Multipart part for Expo winter fetch: plain metadata + bytes() backed by expo-file-system File.
+ * Not a legacy React Native `{ uri, name, type }` descriptor.
+ */
+export type AvatarMultipartUploadPart = {
+  name: string;
+  type: string;
+  bytes: () => ReturnType<File['bytes']>;
+};
+
 function normalizeFileUriForExpoFile(uri: string): string {
   const trimmed = uri.trim();
   if (!trimmed) {
@@ -32,15 +42,6 @@ function normalizeFileUriForExpoFile(uri: string): string {
   }
 
   return trimmed;
-}
-
-function ensureUploadFilename(file: File, desiredName: string): File {
-  if (file.name === desiredName) {
-    return file;
-  }
-
-  file.rename(desiredName);
-  return file;
 }
 
 /** @internal Exported for regression tests against legacy RN multipart descriptors. */
@@ -81,34 +82,57 @@ export function assertExpoSupportedFormDataPart(entry: unknown): void {
   throw new Error('Unsupported FormDataPart implementation');
 }
 
-export function createAvatarUploadFilePart(descriptor: FormDataFileDescriptor): File {
-  const uploadFile = new File(normalizeFileUriForExpoFile(descriptor.uri));
+export function createAvatarMultipartUploadPart(descriptor: FormDataFileDescriptor): {
+  fileExists: boolean;
+  uploadPart: AvatarMultipartUploadPart;
+} {
+  const sourceFile = new File(normalizeFileUriForExpoFile(descriptor.uri));
 
-  if (!uploadFile.exists) {
+  if (!sourceFile.exists) {
     throw new Error('Avatar image file is not available.');
   }
 
-  return ensureUploadFilename(uploadFile, descriptor.name);
+  const uploadPart: AvatarMultipartUploadPart = {
+    name: descriptor.name,
+    type: descriptor.type,
+    bytes: () => sourceFile.bytes(),
+  };
+
+  return {
+    fileExists: sourceFile.exists,
+    uploadPart,
+  };
+}
+
+/**
+ * Expo's patched FormData.append stores objects with bytes(); DOM typings only list Blob/string.
+ */
+function appendAvatarMultipartPart(
+  formData: FormData,
+  fieldName: string,
+  part: AvatarMultipartUploadPart,
+): void {
+  formData.append(fieldName, part as unknown as Blob);
 }
 
 export function buildAvatarUploadFormData(file: FormDataFileDescriptor): FormData {
-  const uploadPart = createAvatarUploadFilePart(file);
+  const { fileExists, uploadPart } = createAvatarMultipartUploadPart(file);
 
   logAvatarUploadFormDataPart({
     sourceUriScheme: describeUriScheme(file.uri),
     fileName: file.name,
     mimeType: file.type,
-    partKind: uploadPart.constructor.name,
-    partFileName: uploadPart.name,
-    partMimeType: uploadPart.type,
-    fileExists: uploadPart.exists,
+    partKind: 'AvatarMultipartUploadPart',
+    partFileName: file.name,
+    partMimeType: file.type,
+    fileExists,
   });
 
   logAvatarUploadBeforeFormDataConstruction({
-    partKind: uploadPart.constructor.name,
-    partFileName: uploadPart.name,
-    partMimeType: uploadPart.type,
-    fileExists: uploadPart.exists,
+    partKind: 'AvatarMultipartUploadPart',
+    partFileName: file.name,
+    partMimeType: file.type,
+    fileExists,
   });
 
   const formData = new FormData();
@@ -119,12 +143,12 @@ export function buildAvatarUploadFormData(file: FormDataFileDescriptor): FormDat
     fieldName: 'file',
     multipartFileName: file.name,
     ...partDiagnostics,
-    partFileName: partDiagnostics.partFileName ?? uploadPart.name,
-    partMimeType: partDiagnostics.partMimeType ?? uploadPart.type,
+    partFileName: file.name,
+    partMimeType: file.type,
   });
 
   try {
-    formData.append('file', uploadPart, file.name);
+    appendAvatarMultipartPart(formData, 'file', uploadPart);
   } catch (error) {
     logAvatarUploadFormDataAppendFailed(error, uploadPart);
     throw error;
