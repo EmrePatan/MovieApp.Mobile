@@ -1,16 +1,6 @@
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
-import {
-  describeUploadPartForDiagnostics,
-  logAvatarUploadAppendingFilePart,
-  logAvatarUploadBeforeFormDataConstruction,
-  logAvatarUploadFilePartAppended,
-  logAvatarUploadFormDataAppendFailed,
-  logAvatarUploadFormDataCreated,
-  logAvatarUploadFormDataPart,
-} from './dev-network-log';
-
 export type FormDataFileDescriptor = {
   uri: string;
   name: string;
@@ -116,49 +106,8 @@ function appendAvatarMultipartPart(
 }
 
 export function buildAvatarUploadFormData(file: FormDataFileDescriptor): FormData {
-  const { fileExists, uploadPart } = createAvatarMultipartUploadPart(file);
-
-  logAvatarUploadFormDataPart({
-    sourceUriScheme: describeUriScheme(file.uri),
-    fileName: file.name,
-    mimeType: file.type,
-    partKind: 'AvatarMultipartUploadPart',
-    partFileName: file.name,
-    partMimeType: file.type,
-    fileExists,
-  });
-
-  logAvatarUploadBeforeFormDataConstruction({
-    partKind: 'AvatarMultipartUploadPart',
-    partFileName: file.name,
-    partMimeType: file.type,
-    fileExists,
-  });
-
+  const { uploadPart } = createAvatarMultipartUploadPart(file);
   const formData = new FormData();
-  logAvatarUploadFormDataCreated();
-
-  const partDiagnostics = describeUploadPartForDiagnostics(uploadPart);
-  logAvatarUploadAppendingFilePart({
-    fieldName: 'file',
-    multipartFileName: file.name,
-    ...partDiagnostics,
-    partFileName: file.name,
-    partMimeType: file.type,
-  });
-
-  try {
-    appendAvatarMultipartPart(formData, 'file', uploadPart);
-  } catch (error) {
-    logAvatarUploadFormDataAppendFailed(error, uploadPart);
-    throw error;
-  }
-
-  logAvatarUploadFilePartAppended();
+  appendAvatarMultipartPart(formData, 'file', uploadPart);
   return formData;
-}
-
-export function describeUriScheme(uri: string): string {
-  const match = /^([a-z][a-z0-9+.-]*):/i.exec(uri.trim());
-  return match?.[1] ?? 'unknown';
 }

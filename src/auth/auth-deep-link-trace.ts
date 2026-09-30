@@ -28,10 +28,6 @@ function pushTrace(detail: AuthDeepLinkTraceDetail): void {
   if (traceBuffer.length > MAX_TRACE_ENTRIES) {
     traceBuffer.shift();
   }
-
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.info('[auth-deep-link]', detail);
-  }
 }
 
 export function traceAuthDeepLink(

@@ -1,10 +1,4 @@
 import { getApiBaseUrl, API_REQUEST_TIMEOUT_MS } from './config';
-import {
-  logApiClientAvatarCallingFetch,
-  logApiClientAvatarRequestEntered,
-  logApiClientAvatarResponseReceived,
-  logFetchNetworkFailure,
-} from './dev-network-log';
 import { ApiError, mapStatusToErrorKind, type ProblemDetails } from './errors';
 
 function isAbortError(error: unknown): boolean {
@@ -120,7 +114,6 @@ class ApiClient {
     const { signal, authenticated = true, headers = {} } = options;
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${getApiBaseUrl()}${normalizedPath}`;
-    const isAvatarMultipartUpload = body instanceof FormData && normalizedPath.includes('/avatar');
 
     const requestHeaders: Record<string, string> = {
       Accept: 'application/json',
@@ -154,21 +147,6 @@ class ApiClient {
         throw new ApiError({ kind: 'cancelled' });
       }
 
-      if (isAvatarMultipartUpload) {
-        logApiClientAvatarRequestEntered({
-          method,
-          path: normalizedPath,
-          bodyIsFormData: true,
-        });
-      }
-
-      if (isAvatarMultipartUpload) {
-        logApiClientAvatarCallingFetch({
-          method,
-          path: normalizedPath,
-        });
-      }
-
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
@@ -180,15 +158,6 @@ class ApiClient {
             : undefined,
         signal: controller.signal,
       });
-
-      if (isAvatarMultipartUpload) {
-        logApiClientAvatarResponseReceived({
-          method,
-          path: normalizedPath,
-          status: response.status,
-          ok: response.ok,
-        });
-      }
 
       if (response.status === 204) {
         return undefined as T;
@@ -239,13 +208,6 @@ class ApiClient {
 
         throw new ApiError({ kind: 'timeout' });
       }
-
-      logFetchNetworkFailure({
-        method,
-        url,
-        bodyIsFormData: body instanceof FormData,
-        error,
-      });
 
       throw new ApiError({ kind: 'network' });
     } finally {
