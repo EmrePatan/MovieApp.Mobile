@@ -9,8 +9,18 @@ jest.mock('react-native', () => ({
   },
 }));
 
+const mockLogAvatarUploadFormDataAppendFailed = jest.fn();
+
 jest.mock('@/api/dev-network-log', () => ({
   logAvatarUploadFormDataPart: jest.fn(),
+  logAvatarUploadBeforeFormDataConstruction: jest.fn(),
+  logAvatarUploadFormDataCreated: jest.fn(),
+  logAvatarUploadAppendingFilePart: jest.fn(),
+  logAvatarUploadFilePartAppended: jest.fn(),
+  logAvatarUploadFormDataAppendFailed: (...args: unknown[]) =>
+    mockLogAvatarUploadFormDataAppendFailed(...args),
+  describeUploadPartForDiagnostics: jest.requireActual('@/api/dev-network-log')
+    .describeUploadPartForDiagnostics,
 }));
 
 jest.mock('expo-file-system', () => {
@@ -50,6 +60,11 @@ import {
   createAvatarUploadFilePart,
   isLegacyReactNativeFormDataFilePart,
 } from '@/api/form-data-file';
+import {
+  logAvatarUploadAppendingFilePart,
+  logAvatarUploadFilePartAppended,
+  logAvatarUploadFormDataCreated,
+} from '@/api/dev-network-log';
 
 const { File: MockExpoFile } = jest.requireMock<{ File: typeof Blob }>('expo-file-system');
 
@@ -57,6 +72,7 @@ describe('form-data-file', () => {
   beforeEach(() => {
     mockPlatform.os = 'ios';
     mockRename.mockClear();
+    mockLogAvatarUploadFormDataAppendFailed.mockClear();
   });
 
   it('creates an expo-file-system File from the manipulated image URI without stripping file:// on iOS', () => {
@@ -99,6 +115,9 @@ describe('form-data-file', () => {
     expect(formData).toBeInstanceOf(FormData);
     expect(appendSpy).toHaveBeenCalledTimes(1);
     expect(appendSpy).toHaveBeenCalledWith('file', expect.any(MockExpoFile), 'avatar.jpg');
+    expect(logAvatarUploadFormDataCreated).toHaveBeenCalled();
+    expect(logAvatarUploadAppendingFilePart).toHaveBeenCalled();
+    expect(logAvatarUploadFilePartAppended).toHaveBeenCalled();
 
     const [, part] = appendSpy.mock.calls[0] as [string, unknown, string];
     expect(isLegacyReactNativeFormDataFilePart(part)).toBe(false);
@@ -106,6 +125,26 @@ describe('form-data-file', () => {
     assertExpoSupportedFormDataPart(part);
 
     appendSpy.mockRestore();
+  });
+
+  it('logs and rethrows when FormData.append fails', () => {
+    const appendError = new Error('append rejected native part');
+    jest.spyOn(FormData.prototype, 'append').mockImplementation(() => {
+      throw appendError;
+    });
+
+    expect(() =>
+      buildAvatarUploadFormData({
+        uri: 'file:///cache/manipulated.jpg',
+        name: 'avatar.jpg',
+        type: 'image/jpeg',
+      }),
+    ).toThrow(appendError);
+
+    expect(mockLogAvatarUploadFormDataAppendFailed).toHaveBeenCalledWith(
+      appendError,
+      expect.any(MockExpoFile),
+    );
   });
 
   it('rejects legacy React Native multipart descriptors like Expo winter fetch', () => {

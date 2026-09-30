@@ -1,7 +1,15 @@
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
-import { logAvatarUploadFormDataPart } from './dev-network-log';
+import {
+  describeUploadPartForDiagnostics,
+  logAvatarUploadAppendingFilePart,
+  logAvatarUploadBeforeFormDataConstruction,
+  logAvatarUploadFilePartAppended,
+  logAvatarUploadFormDataAppendFailed,
+  logAvatarUploadFormDataCreated,
+  logAvatarUploadFormDataPart,
+} from './dev-network-log';
 
 export type FormDataFileDescriptor = {
   uri: string;
@@ -96,8 +104,33 @@ export function buildAvatarUploadFormData(file: FormDataFileDescriptor): FormDat
     fileExists: uploadPart.exists,
   });
 
+  logAvatarUploadBeforeFormDataConstruction({
+    partKind: uploadPart.constructor.name,
+    partFileName: uploadPart.name,
+    partMimeType: uploadPart.type,
+    fileExists: uploadPart.exists,
+  });
+
   const formData = new FormData();
-  formData.append('file', uploadPart, file.name);
+  logAvatarUploadFormDataCreated();
+
+  const partDiagnostics = describeUploadPartForDiagnostics(uploadPart);
+  logAvatarUploadAppendingFilePart({
+    fieldName: 'file',
+    multipartFileName: file.name,
+    ...partDiagnostics,
+    partFileName: partDiagnostics.partFileName ?? uploadPart.name,
+    partMimeType: partDiagnostics.partMimeType ?? uploadPart.type,
+  });
+
+  try {
+    formData.append('file', uploadPart, file.name);
+  } catch (error) {
+    logAvatarUploadFormDataAppendFailed(error, uploadPart);
+    throw error;
+  }
+
+  logAvatarUploadFilePartAppended();
   return formData;
 }
 

@@ -25,6 +25,14 @@ jest.mock('expo-file-system', () => {
 
 jest.mock('@/api/dev-network-log', () => ({
   logAvatarUploadFormDataPart: jest.fn(),
+  logAvatarUploadBeforeFormDataConstruction: jest.fn(),
+  logAvatarUploadFormDataCreated: jest.fn(),
+  logAvatarUploadAppendingFilePart: jest.fn(),
+  logAvatarUploadFilePartAppended: jest.fn(),
+  logAvatarUploadFormDataAppendFailed: jest.fn(),
+  logAvatarUploadCallingApiClient: jest.fn(),
+  describeUploadPartForDiagnostics: jest.requireActual('@/api/dev-network-log')
+    .describeUploadPartForDiagnostics,
 }));
 
 import {
@@ -45,6 +53,7 @@ import {
   uploadAvatar,
 } from '@/features/profile/api/profile-api';
 import { api } from '@/api/client';
+import { logAvatarUploadCallingApiClient } from '@/api/dev-network-log';
 import { isLegacyReactNativeFormDataFilePart } from '@/api/form-data-file';
 
 jest.mock('@/features/profile/utils/profile-timezone', () => ({
@@ -133,6 +142,7 @@ describe('profile api client', () => {
       type: 'image/jpeg',
     });
 
+    expect(logAvatarUploadCallingApiClient).toHaveBeenCalledWith('/api/users/me/avatar');
     expect(api.postFormData).toHaveBeenCalledWith(
       '/api/users/me/avatar',
       expect.any(FormData),

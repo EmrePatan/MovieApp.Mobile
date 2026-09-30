@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
+import { logAvatarUploadMutationError } from '@/api/dev-network-log';
 import { isApiError } from '@/api/errors';
 import {
   useRemoveAvatarMutation,
@@ -52,6 +53,7 @@ export function useProfileAvatarEditor(profile: UserProfileResponse | undefined)
       await uploadAvatar.mutateAsync(file);
       Alert.alert(t('profile.avatarUploadSuccess'));
     } catch (error) {
+      logAvatarUploadMutationError(error);
       Alert.alert(
         isApiError(error) ? error.userMessage : t('profile.avatarUploadFailed'),
       );

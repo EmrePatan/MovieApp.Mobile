@@ -1,4 +1,5 @@
 import { api } from '@/api/client';
+import { logAvatarUploadCallingApiClient } from '@/api/dev-network-log';
 import { buildAvatarUploadFormData } from '@/api/form-data-file';
 import {
   buildChangeEmailPath,
@@ -37,7 +38,9 @@ export async function uploadAvatar(file: {
   type: string;
 }): Promise<UserProfileResponse> {
   const formData = buildAvatarUploadFormData(file);
-  return api.postFormData<UserProfileResponse>(buildUploadAvatarPath(), formData);
+  const path = buildUploadAvatarPath();
+  logAvatarUploadCallingApiClient(path);
+  return api.postFormData<UserProfileResponse>(path, formData);
 }
 
 export async function removeAvatar(): Promise<UserProfileResponse> {
