@@ -1,5 +1,14 @@
-import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppInput } from '@/components/inputs/AppInput';
@@ -27,8 +36,21 @@ export function CatalogKeywordSelectorPanel({
 }: CatalogKeywordSelectorPanelProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const searchInputRef = useRef<TextInput>(null);
   const debouncedQuery = useDebouncedValue(query, 300);
   const keywordsQuery = useDiscoveryKeywords(debouncedQuery, active);
+
+  useEffect(() => {
+    if (!active) {
+      return;
+    }
+
+    const focusTimer = setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 400);
+
+    return () => clearTimeout(focusTimer);
+  }, [active]);
 
   const selectedItems = useMemo(
     () =>
@@ -55,15 +77,22 @@ export function CatalogKeywordSelectorPanel({
   };
 
   return (
-    <View style={styles.root} testID={testID}>
-      <AppInput
-        label={t('discovery.catalogFilters.keywordSearchLabel')}
-        value={query}
-        onChangeText={setQuery}
-        placeholder={t('discovery.catalogFilters.keywordSearchPlaceholder')}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
+    >
+      <View style={styles.searchBlock} testID={testID}>
+        <AppInput
+          ref={searchInputRef}
+          label={t('discovery.catalogFilters.keywordSearchLabel')}
+          value={query}
+          onChangeText={setQuery}
+          placeholder={t('discovery.catalogFilters.keywordSearchPlaceholder')}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </View>
 
       {selectedItems.length > 0 ? (
         <View style={styles.selectedSection}>
@@ -92,7 +121,7 @@ export function CatalogKeywordSelectorPanel({
         style={styles.resultsScroll}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        nestedScrollEnabled
+        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator
       >
         {keywordsQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
@@ -136,7 +165,7 @@ export function CatalogKeywordSelectorPanel({
           );
         })}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -160,19 +189,22 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
   },
+  searchBlock: {
+    flexShrink: 0,
+  },
+  selectedSection: {
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    flexShrink: 0,
+  },
   resultsScroll: {
     flex: 1,
     minHeight: 0,
     marginTop: spacing.sm,
   },
-  selectedSection: {
-    gap: spacing.xs,
-    marginTop: spacing.sm,
-  },
   content: {
     gap: spacing.xs,
-    paddingBottom: spacing.xs,
-    marginTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   optionRow: {
     minHeight: 44,

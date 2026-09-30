@@ -627,8 +627,7 @@ function CatalogDiscoveryFilterSheetBody({
             }
       }
       showFooterActions
-      keyboardAvoiding={keywordSelectorActive}
-      flexContent={keywordSelectorActive}
+      keywordDrillDown={keywordSelectorActive}
       testID={testID}
     >
       {inSelector ? (
