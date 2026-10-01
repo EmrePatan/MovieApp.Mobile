@@ -26,7 +26,7 @@ import {
   clearDiscoveryUserFilters,
   DISCOVERY_SORT_OPTIONS,
   getDefaultSortForMode,
-  getDiscoverTitle,
+  getDiscoverBrowseScreenTitle,
   hasActiveDiscoveryUserFilters,
   hasNonDefaultDiscoverySort,
   type DiscoveryBrowseFilters,
@@ -181,7 +181,7 @@ export default function DiscoverScreen() {
           <View style={[catalogBrowseListStyles.listHeader, catalogBrowseListStyles.listHeaderWithGap]}>
             <View style={catalogBrowseListStyles.titleRow}>
               <AppText variant="title" style={catalogBrowseListStyles.title}>
-                {getDiscoverTitle(mode)}
+                {getDiscoverBrowseScreenTitle(mode, filters)}
               </AppText>
               <CatalogListActions
                 sortActive={sortActive}
@@ -197,7 +197,7 @@ export default function DiscoverScreen() {
         </SafeAreaView>
       </View>
     ),
-    [filterActive, mode, sortActive, t],
+    [filterActive, filters, mode, sortActive, t],
   );
 
   const emptyState = useMemo(() => {

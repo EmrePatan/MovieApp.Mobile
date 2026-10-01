@@ -198,6 +198,21 @@ export function serializeDiscoverRoute(state: DiscoveryBrowseState): string {
   return search.length > 0 ? `/discover-browse?${search}` : '/discover-browse';
 }
 
+export function createKeywordDiscoverHref(keyword: { id: string; name: string }): string {
+  const mode: DiscoveryBrowseMode = 'trending';
+  const filters: DiscoveryBrowseFilters = {
+    ...createDefaultDiscoveryFilters(mode),
+    keywordIds: [keyword.id],
+    keywordLabels: { [keyword.id]: keyword.name },
+  };
+
+  return serializeDiscoverRoute({
+    mode,
+    type: 'all',
+    filters,
+  });
+}
+
 export function createDiscoverHref(
   overrides: {
     mode?: DiscoveryBrowseMode;

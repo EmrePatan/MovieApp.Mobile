@@ -836,7 +836,7 @@ export const stage2En = {
     sections: {
       overview: 'Overview',
       genres: 'Genres',
-      keywords: 'Keywords / Themes',
+      keywords: 'Themes',
       showMoreKeywords: 'Show {{count}} more',
       whereToWatch: 'Where to Watch',
       otherRatings: 'Other Ratings',

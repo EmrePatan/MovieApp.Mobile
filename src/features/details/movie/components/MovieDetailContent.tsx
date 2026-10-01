@@ -71,7 +71,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       </DetailPersonalRatingProvider>
       </DetailHeaderStack>
       <DetailOverview overview={movie.overview} compactTop />
-      <DetailKeywords keywords={movie.keywords ?? []} />
+      <DetailKeywords keywords={movie.keywords} />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}

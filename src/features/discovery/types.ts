@@ -98,6 +98,20 @@ export function getDiscoverTitle(mode: DiscoveryBrowseMode): string {
   return translateDiscoveryBrowseMode(mode);
 }
 
+export function getDiscoverBrowseScreenTitle(
+  mode: DiscoveryBrowseMode,
+  filters: DiscoveryBrowseFilters,
+): string {
+  if (filters.keywordIds.length === 1) {
+    const label = filters.keywordLabels[filters.keywordIds[0]];
+    if (label) {
+      return label;
+    }
+  }
+
+  return getDiscoverTitle(mode);
+}
+
 export function createDefaultDiscoveryFilters(
   mode: DiscoveryBrowseMode = 'trending',
 ): DiscoveryBrowseFilters {

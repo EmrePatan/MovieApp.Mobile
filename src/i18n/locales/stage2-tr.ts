@@ -854,7 +854,7 @@ export const stage2Tr = {
     sections: {
       overview: 'Özet',
       genres: 'Türler',
-      keywords: 'Anahtar kelimeler / temalar',
+      keywords: 'Temalar',
       showMoreKeywords: '{{count}} tane daha göster',
       whereToWatch: 'Nerede İzlenir',
       otherRatings: 'Diğer Puanlar',

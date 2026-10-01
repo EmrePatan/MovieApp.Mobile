@@ -67,7 +67,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       </DetailPersonalRatingProvider>
       </DetailHeaderStack>
       <DetailOverview overview={show.overview} compactTop />
-      <DetailKeywords keywords={show.keywords ?? []} />
+      <DetailKeywords keywords={show.keywords} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow
         contentType="tv"

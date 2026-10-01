@@ -1,4 +1,5 @@
 import type { CollectionSummary } from '../collection/types';
+import type { DetailKeywordsApiPayload } from '../shared/types/catalog-keyword';
 import type { ExternalIdsResponse } from '../shared/types';
 
 export interface MovieDetailsResponse {
@@ -15,7 +16,7 @@ export interface MovieDetailsResponse {
   voteAverage: number;
   voteCount: number;
   genres: string[];
-  keywords: string[];
+  keywords?: DetailKeywordsApiPayload;
   collection: CollectionSummary | null;
   isReleased: boolean;
   canFollowForRelease: boolean;
