@@ -13,7 +13,10 @@ import {
   isDiscoverableDetailKeyword,
   normalizeDetailKeywords,
 } from '../utils/normalize-detail-keywords';
-import { limitKeywordsForDetailRail } from '../utils/detail-keyword-rail';
+import {
+  layoutDetailKeywordRailRows,
+  limitKeywordsForDetailRail,
+} from '../utils/detail-keyword-rail';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -93,6 +96,16 @@ export function DetailKeywords({ keywords }: DetailKeywordsProps) {
     [keywords],
   );
 
+  const limited = useMemo(
+    () => limitKeywordsForDetailRail(normalizedKeywords),
+    [normalizedKeywords],
+  );
+
+  const railRows = useMemo(
+    () => layoutDetailKeywordRailRows(limited),
+    [limited],
+  );
+
   const handleKeywordPress = useCallback(
     (keyword: CatalogKeywordSummary) => {
       openKeywordDiscoverBrowse(router, keyword);
@@ -104,8 +117,6 @@ export function DetailKeywords({ keywords }: DetailKeywordsProps) {
     return null;
   }
 
-  const limited = limitKeywordsForDetailRail(normalizedKeywords);
-
   return (
     <View style={styles.section} testID="detail-keywords-section">
       <HomeSectionHeader title={t('details.sections.keywords')} />
@@ -115,11 +126,26 @@ export function DetailKeywords({ keywords }: DetailKeywordsProps) {
         contentContainerStyle={styles.scrollContent}
         testID="detail-keywords-scroll"
       >
-        <KeywordRow
-          keywords={limited}
-          onPress={handleKeywordPress}
-          testID="detail-keywords-row"
-        />
+        {railRows.mode === 'single' ? (
+          <KeywordRow
+            keywords={railRows.rowOne}
+            onPress={handleKeywordPress}
+            testID="detail-keywords-row"
+          />
+        ) : (
+          <View style={styles.rowsBlock} testID="detail-keywords-rows">
+            <KeywordRow
+              keywords={railRows.rowOne}
+              onPress={handleKeywordPress}
+              testID="detail-keywords-row-1"
+            />
+            <KeywordRow
+              keywords={railRows.rowTwo}
+              onPress={handleKeywordPress}
+              testID="detail-keywords-row-2"
+            />
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -128,10 +154,13 @@ export function DetailKeywords({ keywords }: DetailKeywordsProps) {
 const styles = StyleSheet.create({
   section: {
     marginTop: spacing.md,
-    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
+  },
+  rowsBlock: {
+    gap: spacing.sm,
   },
   row: {
     flexDirection: 'row',

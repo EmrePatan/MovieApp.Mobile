@@ -70,7 +70,7 @@ describe('DetailKeywords', () => {
 
 
 
-  it('uses one horizontal scroll container with a single row of chips', () => {
+  it('uses one horizontal scroll and a single row for a small keyword set', () => {
 
     const keywords = [
 
@@ -101,6 +101,38 @@ describe('DetailKeywords', () => {
     const scrollViews = UNSAFE_getAllByType(ScrollView);
 
     expect(scrollViews).toHaveLength(1);
+
+  });
+
+
+
+  it('uses two balanced rows inside one horizontal scroll for larger sets', () => {
+
+    const keywords = Array.from({ length: 10 }, (_, index) => ({
+
+      id: `11111111-1111-4111-8111-${String(index).padStart(12, '0')}`,
+
+      name: `Keyword ${index}`,
+
+    }));
+
+
+
+    const { getByTestId, UNSAFE_getAllByType } = render(
+
+      <DetailKeywords keywords={keywords} />,
+
+    );
+
+
+
+    expect(getByTestId('detail-keywords-rows')).toBeTruthy();
+
+    expect(getByTestId('detail-keywords-row-1')).toBeTruthy();
+
+    expect(getByTestId('detail-keywords-row-2')).toBeTruthy();
+
+    expect(UNSAFE_getAllByType(ScrollView)).toHaveLength(1);
 
   });
 
