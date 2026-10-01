@@ -12,15 +12,19 @@ import {
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import type { ImageSize } from '@/utils/image-url';
 
 interface HomeContentCardProps {
   item: HomeItem;
   onPress?: (item: HomeItem) => void;
+  /** Override the default w500 poster profile (Home trending uses w780). */
+  posterSize?: ImageSize;
 }
 
 export const HomeContentCard = memo(function HomeContentCard({
   item,
   onPress,
+  posterSize,
 }: HomeContentCardProps) {
   const { t } = useTranslation();
   const metadataLine = useMemo(() => {
@@ -47,6 +51,7 @@ export const HomeContentCard = memo(function HomeContentCard({
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
         accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
+        size={posterSize}
       />
       <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>

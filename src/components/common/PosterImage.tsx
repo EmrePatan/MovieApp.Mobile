@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
 import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
-import { resolveImageUri } from '@/utils/image-url';
+import { resolveImageUri, type ImageSize } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
 import { shadows } from '@/theme/shadows';
@@ -19,6 +19,8 @@ interface PosterImageProps {
   directionalFrameGlow?: boolean;
   /** Stable identity for recycled list cells; defaults to resolved URI. */
   imageStateKey?: string;
+  /** TMDB size profile. Defaults to w500, matching catalog and New Releases rows. */
+  size?: ImageSize;
 }
 
 export const PosterImage = memo(function PosterImage({
@@ -30,8 +32,9 @@ export const PosterImage = memo(function PosterImage({
   directionalFrame = false,
   directionalFrameGlow = false,
   imageStateKey,
+  size,
 }: PosterImageProps) {
-  const resolvedUri = resolveImageUri(uri);
+  const resolvedUri = resolveImageUri(uri, size);
   const stateKey = imageStateKey ?? resolvedUri;
   const { hasError, imageKey, onImageError, onImageLoad, onImageLoadEnd } =
     useRemoteImageLoadState(stateKey);

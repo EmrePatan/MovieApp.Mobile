@@ -138,13 +138,21 @@ describe('HomeHeroCarousel', () => {
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
   });
 
-  it('prefetches the next backdrop without loading detail or action-bar queries', () => {
+  it('prefetches the next poster, or the backdrop when the poster is missing', () => {
     const originalImageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
     const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
     const items = [
-      createItem({ id: 'hero-1', backdropUrl: '/backdrop-a.jpg' }),
-      createItem({ id: 'hero-2', backdropUrl: '/backdrop-b.jpg' }),
+      createItem({
+        id: 'hero-1',
+        posterUrl: '/poster-a.jpg',
+        backdropUrl: '/backdrop-a.jpg',
+      }),
+      createItem({
+        id: 'hero-2',
+        posterUrl: '/poster-b.jpg',
+        backdropUrl: '/backdrop-b.jpg',
+      }),
     ];
 
     const { UNSAFE_getByType } = render(
@@ -152,6 +160,18 @@ describe('HomeHeroCarousel', () => {
     );
     const list = UNSAFE_getByType(FlatList);
 
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      'https://image.tmdb.org/t/p/original/poster-b.jpg',
+    );
+    prefetchSpy.mockClear();
+
+    const backdropOnly = [
+      createItem({ id: 'hero-1', backdropUrl: '/backdrop-a.jpg' }),
+      createItem({ id: 'hero-2', backdropUrl: '/backdrop-b.jpg' }),
+    ];
+    render(
+      <HomeHeroCarousel items={backdropOnly} filterKey="movie" onItemPress={jest.fn()} />,
+    );
     expect(prefetchSpy).toHaveBeenCalledWith(
       'https://image.tmdb.org/t/p/w1280/backdrop-b.jpg',
     );
