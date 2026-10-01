@@ -137,7 +137,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     const list = UNSAFE_getByType(FlatList);
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 1);
 
@@ -168,7 +168,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     const list = UNSAFE_getByType(FlatList);
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 1);
 
@@ -248,7 +248,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 1);
 

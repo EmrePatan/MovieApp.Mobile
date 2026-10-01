@@ -93,7 +93,7 @@ describe('HomeHeroCarousel', () => {
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 1);
 
@@ -102,7 +102,7 @@ describe('HomeHeroCarousel', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 0);
 
@@ -123,7 +123,7 @@ describe('HomeHeroCarousel', () => {
     const list = UNSAFE_getByType(FlatList);
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 1);
 
@@ -178,7 +178,7 @@ describe('HomeHeroCarousel', () => {
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(4000);
     });
     advanceCarouselToActiveIndex(list, 1);
 
@@ -219,6 +219,47 @@ describe('HomeHeroCarousel', () => {
     scrollCarouselToOffset(list, slideWidth + slideWidth * 0.55);
 
     expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
+  });
+
+  it('rewrites loop clone offsets on momentum end so scroll position matches the real slide', () => {
+    const items = [
+      createItem({ id: 'hero-1' }),
+      createItem({ id: 'hero-2' }),
+      createItem({ id: 'hero-3' }),
+    ];
+    const scrollToOffset = jest.fn();
+    const originalScrollToOffset = FlatList.prototype.scrollToOffset;
+    FlatList.prototype.scrollToOffset = scrollToOffset;
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
+    const slideWidth = getCarouselSlideWidth(list);
+
+    fireEvent(list, 'momentumScrollEnd', {
+      nativeEvent: { contentOffset: { x: 0, y: 0 } },
+    });
+
+    expect(getByLabelText('Slide 3 of 3')).toBeTruthy();
+    expect(scrollToOffset).toHaveBeenCalledWith({
+      offset: items.length * slideWidth,
+      animated: false,
+    });
+
+    scrollToOffset.mockClear();
+
+    fireEvent(list, 'momentumScrollEnd', {
+      nativeEvent: { contentOffset: { x: (items.length + 1) * slideWidth, y: 0 } },
+    });
+
+    expect(getByLabelText('Slide 1 of 3')).toBeTruthy();
+    expect(scrollToOffset).toHaveBeenCalledWith({
+      offset: slideWidth,
+      animated: false,
+    });
+
+    FlatList.prototype.scrollToOffset = originalScrollToOffset;
   });
 
   it('returns the indicator when dragging back below the 50% threshold', () => {

@@ -15,10 +15,11 @@ import { HomeHeroMetadata } from './HomeHeroMetadata';
 import { HomeHeroPaginationDots } from './HomeHeroPaginationDots';
 import type { HomeItem, HomeTypeFilter } from '../types';
 import {
-  getActiveIndexFromScrollIndex,
   getHeroCarouselActiveIndexFromOffset,
   getScrollIndexForActiveIndex,
+  getScrollIndexFromOffset,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
+  resolveHeroCarouselLoopSettledOffset,
 } from '../utils/home-hero-carousel-index';
 import { HOME_HERO_SEARCH_BREATHING_ROOM } from '../utils/home-hero-layout';
 import { useHomeHeroCarouselLayout } from '../hooks/useHomeHeroCarouselLayout';
@@ -27,7 +28,7 @@ import { createHomeContentKey } from '../utils/selectHeroCandidates';
 import { resolveHomeHeroPrefetchUri } from '../utils/home-hero-image';
 import { spacing } from '@/theme/spacing';
 
-const AUTO_ADVANCE_MS = 6000;
+const AUTO_ADVANCE_MS = 4000;
 const SCROLL_EVENT_THROTTLE_MS = 16;
 
 const AnimatedFlatList = Animated.FlatList<HomeItem>;
@@ -80,6 +81,9 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     useHomeHeroCarouselLayout(includePaginationDots);
   const listRef = useRef<Animated.FlatList<HomeItem>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [centeredScrollIndex, setCenteredScrollIndex] = useState(
+    HERO_CAROUSEL_LOOP_HEAD_INDEX,
+  );
   const [isInteracting, setIsInteracting] = useState(false);
   const [isAppActive, setIsAppActive] = useState(AppState.currentState === 'active');
   const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -111,6 +115,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
 
     previousCarouselKeyRef.current = nextCarouselKey;
     setActiveIndex(0);
+    setCenteredScrollIndex(HERO_CAROUSEL_LOOP_HEAD_INDEX);
     setIsInteracting(false);
     const nextOffset = items.length > 1 ? snapInterval * HERO_CAROUSEL_LOOP_HEAD_INDEX : 0;
     scrollX.setValue(nextOffset);
@@ -180,27 +185,20 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
       }
 
       const offsetX = event.nativeEvent.contentOffset.x;
-      scrollX.setValue(offsetX);
+      const { activeIndex: nextActiveIndex, settledOffsetX, needsScrollCorrection } =
+        resolveHeroCarouselLoopSettledOffset(offsetX, snapInterval, items.length);
+      const settledScrollIndex = getScrollIndexFromOffset(settledOffsetX, snapInterval);
 
-      const scrollIndex = Math.round(offsetX / snapInterval);
-      const nextActiveIndex = getActiveIndexFromScrollIndex(scrollIndex, items.length);
-      setActiveIndex(nextActiveIndex);
-
-      if (scrollIndex === 0) {
-        const loopOffset = items.length * snapInterval;
-        scrollX.setValue(loopOffset);
+      if (needsScrollCorrection) {
         listRef.current?.scrollToOffset({
-          offset: loopOffset,
-          animated: false,
-        });
-      } else if (scrollIndex === items.length + 1) {
-        const loopOffset = HERO_CAROUSEL_LOOP_HEAD_INDEX * snapInterval;
-        scrollX.setValue(loopOffset);
-        listRef.current?.scrollToOffset({
-          offset: loopOffset,
+          offset: settledOffsetX,
           animated: false,
         });
       }
+
+      scrollX.setValue(settledOffsetX);
+      setCenteredScrollIndex(settledScrollIndex);
+      setActiveIndex(nextActiveIndex);
 
       setIsInteracting(false);
     },
@@ -213,10 +211,16 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         return;
       }
 
+      const offsetX = event.nativeEvent.contentOffset.x;
+      const nextScrollIndex = getScrollIndexFromOffset(offsetX, snapInterval);
       const nextActiveIndex = getHeroCarouselActiveIndexFromOffset(
-        event.nativeEvent.contentOffset.x,
+        offsetX,
         snapInterval,
         items.length,
+      );
+
+      setCenteredScrollIndex((previous) =>
+        previous === nextScrollIndex ? previous : nextScrollIndex,
       );
       setActiveIndex((previous) => (previous === nextActiveIndex ? previous : nextActiveIndex));
     },
@@ -259,14 +263,14 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         heroHeight={heroHeight}
         cardWidth={cardWidth}
         embedded
-        isActive={index === getScrollIndexForActiveIndex(activeIndex)}
+        isActive={index === centeredScrollIndex}
         scrollX={scrollX}
         slideIndex={index}
         snapInterval={snapInterval}
         onPress={onItemPress}
       />
     ),
-    [activeIndex, cardWidth, heroHeight, onItemPress, scrollX, snapInterval],
+    [centeredScrollIndex, cardWidth, heroHeight, onItemPress, scrollX, snapInterval],
   );
 
   if (items.length === 0) {
@@ -310,7 +314,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           getItemLayout={getItemLayout}
-          extraData={activeIndex}
+          extraData={`${activeIndex}:${centeredScrollIndex}`}
           initialScrollIndex={HERO_CAROUSEL_LOOP_HEAD_INDEX}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -320,9 +324,10 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
           onScrollBeginDrag={handleScrollBeginDrag}
           onScrollEndDrag={handleScrollEndDrag}
           onMomentumScrollEnd={handleScrollSettled}
-          initialNumToRender={Math.min(loopedItems.length, 3)}
-          maxToRenderPerBatch={2}
-          windowSize={3}
+          initialNumToRender={loopedItems.length}
+          maxToRenderPerBatch={loopedItems.length}
+          windowSize={loopedItems.length}
+          removeClippedSubviews={false}
           accessibilityRole="adjustable"
           accessibilityLabel={t('home.slideOf', { current: activeIndex + 1, total: items.length })}
           accessibilityHint={t('home.featuredCarousel')}
