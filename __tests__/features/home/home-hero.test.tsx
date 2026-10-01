@@ -140,7 +140,7 @@ describe('HomeHero', () => {
     ).toBeTruthy();
   });
 
-  it('loads a w1280 backdrop and covers the hero card', () => {
+  it('loads an original poster with cover even when a backdrop exists', () => {
     renderHero(
       createItem({
         backdropUrl: '/backdrop.jpg',
@@ -150,38 +150,53 @@ describe('HomeHero', () => {
 
     const image = screen.UNSAFE_getByType(Image);
     expect(image.props.source).toEqual({
-      uri: 'https://image.tmdb.org/t/p/w1280/backdrop.jpg',
+      uri: 'https://image.tmdb.org/t/p/original/poster.jpg',
     });
     expect(image.props.resizeMode).toBe('cover');
   });
 
-  it('uses a w780 poster when the hero has no backdrop', () => {
+  it('uses a w1280 backdrop when the hero has no poster', () => {
     renderHero(
       createItem({
-        backdropUrl: null,
-        posterUrl: '/poster.jpg',
+        backdropUrl: '/backdrop.jpg',
+        posterUrl: null,
       }),
     );
 
     expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
-      uri: 'https://image.tmdb.org/t/p/w780/poster.jpg',
+      uri: 'https://image.tmdb.org/t/p/w1280/backdrop.jpg',
     });
+    expect(screen.UNSAFE_getByType(Image).props.resizeMode).toBe('cover');
   });
 
-  it('falls back to the poster after the backdrop fails, then to the placeholder', () => {
+  it('falls back to the backdrop after the poster fails, then to the placeholder', () => {
     renderHero(
       createItem({
-        backdropUrl: '/missing-backdrop.jpg',
-        posterUrl: '/poster.jpg',
+        backdropUrl: '/backdrop.jpg',
+        posterUrl: '/missing-poster.jpg',
       }),
     );
 
     exhaustImageLoad(screen.UNSAFE_getByType(Image));
 
     expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
-      uri: 'https://image.tmdb.org/t/p/w780/poster.jpg',
+      uri: 'https://image.tmdb.org/t/p/w1280/backdrop.jpg',
     });
     expect(screen.UNSAFE_getByType(Image).props.resizeMode).toBe('cover');
+
+    exhaustImageLoad(screen.UNSAFE_getByType(Image));
+
+    expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+    expect(screen.getByLabelText('film-outline')).toBeTruthy();
+  });
+
+  it('shows the placeholder when a poster fails and there is no backdrop', () => {
+    renderHero(
+      createItem({
+        backdropUrl: null,
+        posterUrl: '/missing-poster.jpg',
+      }),
+    );
 
     exhaustImageLoad(screen.UNSAFE_getByType(Image));
 

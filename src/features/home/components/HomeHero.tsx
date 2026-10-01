@@ -152,16 +152,8 @@ export const HomeHero = memo(function HomeHero({
         ]}
       >
         <View style={[styles.mediaLayer, { height: innerHeight }]} pointerEvents="none">
-          {backdropUri != null && !backdropLoad.hasError ? (
-            <HeroCoverImage
-              uri={backdropUri}
-              imageKey={backdropLoad.imageKey}
-              height={innerHeight}
-              onError={backdropLoad.onImageError}
-              onLoad={backdropLoad.onImageLoad}
-              onLoadEnd={backdropLoad.onImageLoadEnd}
-            />
-          ) : posterUri != null && !posterLoad.hasError ? (
+          {/* Poster first (original). Backdrop only if the poster is missing or fails. Cover crops a wide card. */}
+          {posterUri != null && !posterLoad.hasError ? (
             <HeroCoverImage
               uri={posterUri}
               imageKey={posterLoad.imageKey}
@@ -169,6 +161,15 @@ export const HomeHero = memo(function HomeHero({
               onError={posterLoad.onImageError}
               onLoad={posterLoad.onImageLoad}
               onLoadEnd={posterLoad.onImageLoadEnd}
+            />
+          ) : backdropUri != null && !backdropLoad.hasError ? (
+            <HeroCoverImage
+              uri={backdropUri}
+              imageKey={backdropLoad.imageKey}
+              height={innerHeight}
+              onError={backdropLoad.onImageError}
+              onLoad={backdropLoad.onImageLoad}
+              onLoadEnd={backdropLoad.onImageLoadEnd}
             />
           ) : (
             <HeroMediaPlaceholder height={innerHeight} />

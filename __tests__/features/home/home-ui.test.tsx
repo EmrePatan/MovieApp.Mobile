@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { HomeContentCard } from '@/features/home/components/HomeContentCard';
 import { HomeTypeFilterControl } from '@/features/home/components/HomeTypeFilterControl';
@@ -20,6 +21,52 @@ describe('Home UI components', () => {
     render(<HomeEmptyState />);
 
     expect(screen.getByText('Nothing to watch yet')).toBeTruthy();
+  });
+
+  it('requests w780 posters on the trending rail and w500 on other rails', () => {
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+    const item = {
+      id: 'unabomber',
+      contentType: 'tv' as const,
+      title: 'Unabomber',
+      originalTitle: 'Manhunt: Unabomber',
+      posterUrl: '/unabomber.jpg',
+      backdropUrl: '/unabomber-backdrop.jpg',
+      releaseDate: '2017-08-01',
+      voteAverage: 8,
+      voteCount: 100,
+    };
+
+    const { unmount } = render(
+      <HomeSection
+        section={{
+          type: 'Trending',
+          title: 'Trending',
+          displayOrder: 1,
+          items: [item],
+        }}
+      />,
+    );
+
+    expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
+      uri: 'https://image.tmdb.org/t/p/w780/unabomber.jpg',
+    });
+    unmount();
+
+    render(
+      <HomeSection
+        section={{
+          type: 'TopRated',
+          title: 'Top Rated',
+          displayOrder: 2,
+          items: [item],
+        }}
+      />,
+    );
+
+    expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
+      uri: 'https://image.tmdb.org/t/p/w500/unabomber.jpg',
+    });
   });
 
   it('renders a section with cards', () => {

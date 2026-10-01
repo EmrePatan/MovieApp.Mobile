@@ -9,6 +9,7 @@ import { getHomeRailItemLayout } from '../utils/home-list-layout';
 import { getHomeSectionVariant } from '../utils/home-section-variant';
 import { resolveHomeSectionTitle } from '../utils/resolve-home-section-title';
 import { layout } from '@/theme/layout';
+import { HOME_TRENDING_POSTER_SIZE } from '../utils/home-hero-image';
 
 interface HomeSectionProps {
   section: HomeSectionModel;
@@ -39,11 +40,13 @@ export const HomeSection = memo(function HomeSection({
   const variant = getHomeSectionVariant(section.type);
   const localizedTitle = resolveHomeSectionTitle(section.type, section.title, t);
 
+  const posterSize = section.type === 'Trending' ? HOME_TRENDING_POSTER_SIZE : undefined;
+
   const renderItem = useCallback(
     ({ item }: { item: HomeItem }) => (
-      <HomeContentCard item={item} onPress={onItemPress} />
+      <HomeContentCard item={item} onPress={onItemPress} posterSize={posterSize} />
     ),
-    [onItemPress],
+    [onItemPress, posterSize],
   );
 
   const listContentStyle = useMemo(
