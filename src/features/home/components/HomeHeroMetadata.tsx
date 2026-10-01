@@ -5,6 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import type { ContentType } from '@/models/api/pagination';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { colors } from '@/theme/colors';
+import { HOME_HERO_RATING_CHIP_HEIGHT } from '../utils/home-hero-metadata-metrics';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface HomeHeroMetadataProps {
@@ -22,33 +23,33 @@ export function HomeHeroMetadata({
   const year = formatCatalogYear(releaseDate, null);
   const typeLabel = formatContentType(contentType);
   const hasRating = voteAverage > 0;
-
-  const detailParts = [typeLabel, year].filter(Boolean);
+  const ratingLabel = hasRating
+    ? t('common.ratingAccessibility', { rating: formatRating(voteAverage) })
+    : null;
+  const accessibilityParts = [typeLabel, ratingLabel, year].filter(Boolean);
 
   return (
-    <View style={styles.row}>
-      {detailParts.length > 0 ? (
-        <AppText
-          variant="bodySmall"
-          style={styles.detail}
-          numberOfLines={1}
-          accessibilityLabel={detailParts.join(', ')}
-        >
-          {detailParts.join('  •  ')}
+    <View
+      style={styles.row}
+      accessibilityLabel={accessibilityParts.length > 0 ? accessibilityParts.join(', ') : undefined}
+    >
+      {typeLabel ? (
+        <AppText variant="bodySmall" style={styles.detail} numberOfLines={1}>
+          {typeLabel}
         </AppText>
       ) : null}
-      {hasRating ? (
-        <View
-          style={styles.ratingChip}
-          accessibilityLabel={t('common.ratingAccessibility', {
-            rating: formatRating(voteAverage),
-          })}
-        >
-          <Ionicons name="star" size={12} color={colors.accent} />
+      <View style={styles.ratingChip} accessibilityLabel={ratingLabel ?? undefined}>
+        <Ionicons name="star" size={12} color={colors.accent} />
+        {hasRating ? (
           <AppText variant="caption" style={styles.ratingText}>
             {formatRating(voteAverage)}
           </AppText>
-        </View>
+        ) : null}
+      </View>
+      {year ? (
+        <AppText variant="bodySmall" style={styles.detail} numberOfLines={1}>
+          {year}
+        </AppText>
       ) : null}
     </View>
   );
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexWrap: 'wrap',
     gap: spacing.sm,
+    minHeight: HOME_HERO_RATING_CHIP_HEIGHT,
   },
   detail: {
     color: colors.textSecondary,
@@ -70,6 +72,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    minHeight: HOME_HERO_RATING_CHIP_HEIGHT,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: borderRadius.full,

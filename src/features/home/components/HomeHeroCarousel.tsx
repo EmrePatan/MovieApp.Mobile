@@ -8,10 +8,8 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   StyleSheet,
-  useWindowDimensions,
   View,
 } from 'react-native';
-import { AppText } from '@/components/common/AppText';
 import { HomeHero } from './HomeHero';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
 import { HomeHeroPaginationDots } from './HomeHeroPaginationDots';
@@ -22,18 +20,12 @@ import {
   getScrollIndexForActiveIndex,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
 } from '../utils/home-hero-carousel-index';
-import {
-  getHomeHeroCardWidth,
-  getHomeHeroCarouselHorizontalPadding,
-  getHomeHeroHeight,
-  getHomeHeroSnapInterval,
-  HOME_HERO_SEARCH_BREATHING_ROOM,
-} from '../utils/home-hero-layout';
+import { HOME_HERO_SEARCH_BREATHING_ROOM } from '../utils/home-hero-layout';
+import { useHomeHeroCarouselLayout } from '../hooks/useHomeHeroCarouselLayout';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
 import { resolveHomeHeroPrefetchUri } from '../utils/home-hero-image';
 import { spacing } from '@/theme/spacing';
-import { colors } from '@/theme/colors';
 
 const AUTO_ADVANCE_MS = 6000;
 const SCROLL_EVENT_THROTTLE_MS = 16;
@@ -83,14 +75,9 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   isScreenFocused = true,
 }: HomeHeroCarouselProps) {
   const { t } = useTranslation();
-  const { width } = useWindowDimensions();
-  const heroHeight = useMemo(() => getHomeHeroHeight(width), [width]);
-  const cardWidth = useMemo(() => getHomeHeroCardWidth(width), [width]);
-  const snapInterval = useMemo(() => getHomeHeroSnapInterval(width), [width]);
-  const horizontalPadding = useMemo(
-    () => getHomeHeroCarouselHorizontalPadding(width),
-    [width],
-  );
+  const includePaginationDots = items.length > 1;
+  const { heroHeight, cardWidth, snapInterval, horizontalPadding } =
+    useHomeHeroCarouselLayout(includePaginationDots);
   const listRef = useRef<Animated.FlatList<HomeItem>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -347,9 +334,6 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
           releaseDate={activeItem.releaseDate}
           voteAverage={activeItem.voteAverage}
         />
-        <AppText variant="title" numberOfLines={2} style={styles.title}>
-          {activeItem.title}
-        </AppText>
         <HomeHeroPaginationDots count={items.length} activeIndex={activeIndex} />
       </View>
     </View>
@@ -380,9 +364,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     gap: 6,
-  },
-  title: {
-    color: colors.textPrimary,
-    textAlign: 'center',
   },
 });

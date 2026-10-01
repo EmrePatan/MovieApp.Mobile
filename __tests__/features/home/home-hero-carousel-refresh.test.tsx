@@ -50,7 +50,8 @@ describe('HomeHeroCarousel visual refresh', () => {
       />,
     );
 
-    expect(screen.getByText('Dune')).toBeTruthy();
+    expect(screen.queryByText('Dune')).toBeNull();
+    expect(screen.getByText('2021')).toBeTruthy();
     expect(screen.getByLabelText('Rating 9.1')).toBeTruthy();
   });
 });

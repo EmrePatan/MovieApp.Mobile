@@ -52,11 +52,12 @@ describe('HomeHero', () => {
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;
   });
 
-  it('renders compact metadata with content type, year, and rating', () => {
+  it('renders compact metadata with content type, rating, and year', () => {
     renderHero();
 
-    expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByText('Movie  •  2014')).toBeTruthy();
+    expect(screen.queryByText('Interstellar')).toBeNull();
+    expect(screen.getByText('Movie')).toBeTruthy();
+    expect(screen.getByText('2014')).toBeTruthy();
     expect(screen.getByLabelText('Rating 8.4')).toBeTruthy();
   });
 
@@ -64,6 +65,26 @@ describe('HomeHero', () => {
     const item = createItem();
 
     renderHero(item);
+    fireEvent.press(screen.getByLabelText('Open Interstellar'));
+
+    expect(mockOnPress).toHaveBeenCalledWith(item);
+  });
+
+  it('does not expose a press target on inactive embedded carousel slides', () => {
+    const item = createItem();
+
+    render(
+      <HomeHero item={item} embedded isActive={false} onPress={mockOnPress} slideIndex={0} />,
+    );
+
+    expect(screen.queryByLabelText('Open Interstellar')).toBeNull();
+    expect(mockOnPress).not.toHaveBeenCalled();
+  });
+
+  it('keeps the active embedded carousel slide pressable', () => {
+    const item = createItem();
+
+    render(<HomeHero item={item} embedded isActive onPress={mockOnPress} slideIndex={1} />);
     fireEvent.press(screen.getByLabelText('Open Interstellar'));
 
     expect(mockOnPress).toHaveBeenCalledWith(item);
@@ -81,7 +102,8 @@ describe('HomeHero', () => {
     );
 
     expect(screen.getByLabelText('Featured, Breaking Bad, TV, 2008, Rating 8.9')).toBeTruthy();
-    expect(screen.getByText('TV  •  2008')).toBeTruthy();
+    expect(screen.getByText('TV')).toBeTruthy();
+    expect(screen.getByText('2008')).toBeTruthy();
     expect(screen.getByLabelText('Rating 8.9')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Open Breaking Bad'));
     expect(mockOnPress).toHaveBeenCalledWith(
@@ -97,7 +119,6 @@ describe('HomeHero', () => {
       }),
     );
 
-    expect(screen.getByText('Interstellar')).toBeTruthy();
     expect(screen.getByLabelText('Featured, Interstellar, Movie, 2014, Rating 8.4')).toBeTruthy();
   });
 
@@ -111,12 +132,11 @@ describe('HomeHero', () => {
       />,
     );
 
-    expect(screen.getByText('Dune')).toBeTruthy();
-    expect(screen.getByText('Movie  •  2021')).toBeTruthy();
+    expect(screen.getByText('2021')).toBeTruthy();
     expect(screen.getByLabelText('Rating 9.1')).toBeTruthy();
   });
 
-  it('handles long titles and missing metadata', () => {
+  it('handles missing metadata without showing a title', () => {
     renderHero(
       createItem({
         title:
@@ -127,11 +147,11 @@ describe('HomeHero', () => {
     );
 
     expect(
-      screen.getByText(
+      screen.queryByText(
         'An Extraordinarily Long Movie Title That Should Be Clamped To Multiple Lines Without Breaking Layout',
       ),
-    ).toBeTruthy();
-    expect(screen.queryByText('★')).toBeNull();
+    ).toBeNull();
+    expect(screen.queryByLabelText(/Rating/)).toBeNull();
     expect(screen.getByText('Movie')).toBeTruthy();
     expect(
       screen.getByLabelText(

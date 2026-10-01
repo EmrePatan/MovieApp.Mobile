@@ -19,7 +19,6 @@ import {
 } from '../utils/home-hero-layout';
 import { resolveHomeHeroPosterUri } from '../utils/home-hero-image';
 import { Ionicons } from '@expo/vector-icons';
-import { AppText } from '@/components/common/AppText';
 import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
 import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
@@ -158,14 +157,18 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
     <Animated.View style={[styles.posterShell, animatedStyle]}>{framedCard}</Animated.View>
   );
 
-  if (!pressable || !onPress) {
+  if (!onPress) {
     return content;
   }
 
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t('common.openTitle', { title: item.title })}
+      accessibilityRole={pressable ? 'button' : undefined}
+      accessibilityLabel={
+        pressable ? t('common.openTitle', { title: item.title }) : undefined
+      }
+      accessibilityState={{ disabled: !pressable }}
+      disabled={!pressable}
       unstable_pressDelay={HERO_EMBEDDED_PRESS_DELAY_MS}
       onPress={handlePress}
       style={styles.pressable}
@@ -285,6 +288,8 @@ export const HomeHero = memo(function HomeHero({
     };
   }, [isActive, scrollX, slideIndex, snapInterval]);
 
+  const isPosterPressable = Boolean(onPress) && isActive;
+
   const poster = (
     <HomeHeroPosterCard
       item={item}
@@ -293,7 +298,7 @@ export const HomeHero = memo(function HomeHero({
       posterHeight={posterHeight}
       glow={isActive}
       animatedStyle={animatedStyle}
-      pressable={Boolean(onPress)}
+      pressable={isPosterPressable}
     />
   );
 
@@ -305,8 +310,11 @@ export const HomeHero = memo(function HomeHero({
           { width: snapInterval ?? posterWidth },
           isActive ? styles.embeddedSlideActive : styles.embeddedSlideInactive,
         ]}
+        pointerEvents={isActive ? 'auto' : 'none'}
         accessibilityRole="summary"
         accessibilityLabel={accessibilityLabel}
+        importantForAccessibility={isActive ? 'auto' : 'no-hide-descendants'}
+        accessibilityElementsHidden={!isActive}
       >
         {poster}
       </View>
@@ -322,9 +330,6 @@ export const HomeHero = memo(function HomeHero({
           releaseDate={item.releaseDate}
           voteAverage={item.voteAverage}
         />
-        <AppText variant="title" numberOfLines={2} style={styles.title}>
-          {item.title}
-        </AppText>
         {paginationCount != null && paginationIndex != null ? (
           <HomeHeroPaginationDots count={paginationCount} activeIndex={paginationIndex} />
         ) : null}
@@ -379,9 +384,5 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     gap: 6,
     width: '100%',
-  },
-  title: {
-    color: colors.textPrimary,
-    textAlign: 'center',
   },
 });
