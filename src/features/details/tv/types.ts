@@ -24,6 +24,7 @@ export interface TvShowDetailsResponse {
   voteCount: number;
   status: string;
   genres: string[];
+  keywords: string[];
   seasons: SeasonSummaryResponse[];
   canFollow: boolean;
 }

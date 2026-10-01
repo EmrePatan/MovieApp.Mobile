@@ -12,6 +12,7 @@ export interface CatalogItem {
   voteAverage: number;
   voteCount: number;
   year: number | null;
+  genres?: string[];
 }
 
 export interface HomeCatalogItem {

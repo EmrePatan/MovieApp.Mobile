@@ -2,6 +2,21 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { CatalogResultRow } from '@/features/catalog/components/CatalogResultRow';
 
 describe('CatalogResultRow', () => {
+  it('renders localized genre labels between metadata and rating', () => {
+    render(
+      <CatalogResultRow
+        title="Inception"
+        posterUrl={null}
+        mediaType="movie"
+        year={2010}
+        voteAverage={8.8}
+        genres={['Science Fiction', 'Action']}
+      />,
+    );
+
+    expect(screen.getByText('Science Fiction · Action')).toBeTruthy();
+  });
+
   it('renders title, metadata, and rating on separate lines', () => {
     render(
       <CatalogResultRow

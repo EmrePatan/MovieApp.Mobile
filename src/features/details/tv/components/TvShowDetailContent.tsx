@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHeaderStack } from '../../shared/components/DetailHeaderStack';
 import { DetailHero } from '../../shared/components/DetailHero';
-import { DetailOverview } from '../../shared/components/DetailSections';
+import { DetailKeywords, DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
 import { DetailPersonalRatingProvider } from '../../shared/components/DetailPersonalRatingExperience';
 import { CastRail } from '@/features/details/credits/components/CastRail';
@@ -67,6 +67,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       </DetailPersonalRatingProvider>
       </DetailHeaderStack>
       <DetailOverview overview={show.overview} compactTop />
+      <DetailKeywords keywords={show.keywords ?? []} />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow
         contentType="tv"

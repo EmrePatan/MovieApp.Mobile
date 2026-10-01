@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHeaderStack } from '../../shared/components/DetailHeaderStack';
 import { DetailHero } from '../../shared/components/DetailHero';
-import { DetailOverview } from '../../shared/components/DetailSections';
+import { DetailKeywords, DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
 import {
   DetailPersonalRatingProvider,
@@ -71,6 +71,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       </DetailPersonalRatingProvider>
       </DetailHeaderStack>
       <DetailOverview overview={movie.overview} compactTop />
+      <DetailKeywords keywords={movie.keywords ?? []} />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}

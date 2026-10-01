@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
+import { translateGenreNames } from '@/i18n/catalog-labels';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
@@ -17,6 +18,7 @@ export interface CatalogResultRowProps {
   releaseDate?: string | null;
   year?: number | null;
   voteAverage?: number;
+  genres?: string[];
   onPress?: () => void;
   testID?: string;
 }
@@ -40,6 +42,7 @@ export const CatalogResultRow = memo(function CatalogResultRow({
   releaseDate,
   year,
   voteAverage = 0,
+  genres = [],
   onPress,
   testID,
 }: CatalogResultRowProps) {
@@ -48,15 +51,17 @@ export const CatalogResultRow = memo(function CatalogResultRow({
   const metadataLine = buildMetadataLine(mediaType, yearLabel);
   const showRating = voteAverage > 0;
   const ratingLabel = showRating ? `★ ${formatRating(voteAverage)}` : null;
+  const genreLabels = useMemo(() => translateGenreNames(genres), [genres]);
+  const genreLine = genreLabels.length > 0 ? genreLabels.join(' · ') : null;
 
   const accessibilityLabel = useMemo(() => {
-    const parts = [title, metadataLine];
+    const parts = [title, metadataLine, genreLine];
     if (showRating) {
       parts.push(formatRating(voteAverage));
     }
 
     return parts.filter(Boolean).join(', ');
-  }, [metadataLine, showRating, title, voteAverage]);
+  }, [genreLine, metadataLine, showRating, title, voteAverage]);
 
   const posterWidth = layout.posterCatalogRow.width;
   const posterHeight = layout.posterCatalogRow.height;
@@ -84,6 +89,12 @@ export const CatalogResultRow = memo(function CatalogResultRow({
         {metadataLine ? (
           <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
             {metadataLine}
+          </AppText>
+        ) : null}
+
+        {genreLine ? (
+          <AppText variant="caption" muted numberOfLines={1} style={styles.genres}>
+            {genreLine}
           </AppText>
         ) : null}
 
@@ -130,6 +141,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   metadata: {
+    letterSpacing: 0.1,
+  },
+  genres: {
     letterSpacing: 0.1,
   },
   rating: {

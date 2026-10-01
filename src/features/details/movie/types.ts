@@ -15,6 +15,7 @@ export interface MovieDetailsResponse {
   voteAverage: number;
   voteCount: number;
   genres: string[];
+  keywords: string[];
   collection: CollectionSummary | null;
   isReleased: boolean;
   canFollowForRelease: boolean;

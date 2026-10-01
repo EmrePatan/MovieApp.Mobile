@@ -853,6 +853,8 @@ export const stage2Fr = {
     sections: {
       overview: 'Synopsis',
       genres: 'Genres',
+      keywords: 'Mots-clés / Thèmes',
+      showMoreKeywords: 'Afficher {{count}} de plus',
       whereToWatch: 'Où regarder',
       otherRatings: 'Autres notes',
       castAndCrew: 'Distribution et équipe',

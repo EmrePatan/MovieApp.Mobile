@@ -110,6 +110,7 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
       releaseDate={item.releaseDate}
       year={item.year}
       voteAverage={item.voteAverage}
+      genres={item.genres}
       onPress={() => onPress?.(item)}
     />
   );
