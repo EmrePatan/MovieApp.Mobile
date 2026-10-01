@@ -1,30 +1,33 @@
 import {
   getHomeHeroCardWidth,
+  getHomeHeroCarouselHorizontalPadding,
   getHomeHeroHeight,
   getHomeHeroSnapInterval,
-  HERO_CAROUSEL_SIDE_INSET,
+  HOME_HERO_POSTER_ASPECT_RATIO,
 } from '@/features/home/utils/home-hero-layout';
-import { spacing } from '@/theme/spacing';
 
 describe('getHomeHeroHeight', () => {
-  it('uses a modest responsive height for common phone widths', () => {
-    expect(getHomeHeroHeight(390)).toBe(310);
-    expect(getHomeHeroHeight(428)).toBe(310);
+  it('uses portrait poster height for common phone widths', () => {
+    const width390 = getHomeHeroCardWidth(390);
+    expect(getHomeHeroHeight(390)).toBe(Math.round(width390 * HOME_HERO_POSTER_ASPECT_RATIO));
+    expect(getHomeHeroHeight(390)).toBeLessThan(310);
+
+    const width428 = getHomeHeroCardWidth(428);
+    expect(getHomeHeroHeight(428)).toBe(Math.round(width428 * HOME_HERO_POSTER_ASPECT_RATIO));
   });
 
-  it('scales up on wider layouts without exceeding the cap', () => {
-    expect(getHomeHeroHeight(600)).toBe(384);
-    expect(getHomeHeroHeight(900)).toBe(480);
+  it('caps active poster width on wider layouts', () => {
+    expect(getHomeHeroCardWidth(900)).toBe(196);
+    expect(getHomeHeroHeight(900)).toBe(Math.round(196 * HOME_HERO_POSTER_ASPECT_RATIO));
   });
 });
 
-describe('getHomeHeroCardWidth', () => {
-  it('insets carousel cards from the screen edges', () => {
-    expect(getHomeHeroCardWidth(390)).toBe(390 - HERO_CAROUSEL_SIDE_INSET * 2);
-    expect(HERO_CAROUSEL_SIDE_INSET).toBe(spacing.md);
-  });
-
-  it('uses card width as the carousel snap interval', () => {
-    expect(getHomeHeroSnapInterval(390)).toBe(getHomeHeroCardWidth(390));
+describe('getHomeHeroSnapInterval', () => {
+  it('uses a stride smaller than the active poster for side peek', () => {
+    const width = 390;
+    const activeWidth = getHomeHeroCardWidth(width);
+    expect(getHomeHeroSnapInterval(width)).toBeLessThan(activeWidth);
+    expect(getHomeHeroSnapInterval(width)).toBe(Math.round(activeWidth * 0.64));
+    expect(getHomeHeroCarouselHorizontalPadding(width)).toBeGreaterThan(0);
   });
 });

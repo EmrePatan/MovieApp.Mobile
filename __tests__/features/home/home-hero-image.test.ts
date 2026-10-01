@@ -49,7 +49,7 @@ describe('home hero image urls', () => {
     ).toBe('https://image.tmdb.org/t/p/original/poster.jpg');
   });
 
-  it('uses the backdrop only when the poster is missing', () => {
+  it('returns null when the poster is missing', () => {
     delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
 
     expect(
@@ -57,7 +57,7 @@ describe('home hero image urls', () => {
         backdropUrl: '/backdrop.jpg',
         posterUrl: null,
       }),
-    ).toBe('https://image.tmdb.org/t/p/w1280/backdrop.jpg');
+    ).toBeNull();
 
     expect(
       resolveHomeHeroPrimaryUri({

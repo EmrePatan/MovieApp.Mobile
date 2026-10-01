@@ -39,31 +39,16 @@ export function resolveHomeTrendingPosterUri(
   return resolveImageUri(path, HOME_TRENDING_POSTER_SIZE);
 }
 
-/**
- * Poster first, then backdrop.
- *
- * Layout tradeoff: `getHomeHeroHeight` clamps the card, so the frame is often
- * wider than a 2:3 poster (phone ~1.2:1, large windows can pass 16:9 because
- * height stops at 480). `resizeMode="cover"` crops the poster instead of
- * letterboxing. That crop stays sharper than a weak TMDB backdrop for the same
- * title (Unabomber’s poster reads better than its backdrop). A backdrop is used
- * only when `posterUrl` is missing, or after the poster fails to load — not
- * because the card is wide.
- */
+/** Poster-only URI for the home hero carousel. */
 export function resolveHomeHeroPrimaryUri(item: {
-  backdropUrl?: string | null;
   posterUrl?: string | null;
 }): string | null {
-  return (
-    resolveHomeHeroPosterUri(item.posterUrl) ??
-    resolveHomeHeroBackdropUri(item.backdropUrl)
-  );
+  return resolveHomeHeroPosterUri(item.posterUrl);
 }
 
-/** Prefetch the same URI the hero will paint: poster, then backdrop. */
+/** Prefetch the poster the hero will paint. */
 export function resolveHomeHeroPrefetchUri(item: {
-  backdropUrl?: string | null;
   posterUrl?: string | null;
 }): string | null {
-  return resolveHomeHeroPrimaryUri(item);
+  return resolveHomeHeroPosterUri(item.posterUrl);
 }

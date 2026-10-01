@@ -1,21 +1,29 @@
 import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import {
   getHomeHeroCardWidth,
   getHomeHeroHeight,
+  HERO_CAROUSEL_INACTIVE_OPACITY,
+  HERO_CAROUSEL_INACTIVE_PEEK_TRANSLATE,
+  HERO_CAROUSEL_INACTIVE_SCALE,
 } from '../utils/home-hero-layout';
-import {
-  resolveHomeHeroBackdropUri,
-  resolveHomeHeroPosterUri,
-} from '../utils/home-hero-image';
-import { HOME_HERO_CARD_TILT, HOME_HERO_PERSPECTIVE } from './home-hero-perspective';
+import { resolveHomeHeroPosterUri } from '../utils/home-hero-image';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
 import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { HomeHeroMetadata } from './HomeHeroMetadata';
+import { HomeHeroPaginationDots } from './HomeHeroPaginationDots';
 import type { HomeItem } from '../types';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
@@ -29,16 +37,20 @@ interface HomeHeroProps {
   heroHeight?: number;
   cardWidth?: number;
   embedded?: boolean;
+  isActive?: boolean;
+  scrollX?: Animated.Value;
+  slideIndex?: number;
+  snapInterval?: number;
+  paginationCount?: number;
+  paginationIndex?: number;
 }
 
 const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
-const HERO_INFO_BAND_MIN_HEIGHT = 96;
-/** Extra fade above the text band so the scrim blends into the artwork (avoids a hard horizontal seam). */
-const HERO_SCRIM_FADE_ABOVE_BAND = spacing.xxl + spacing.lg;
 
-function HeroCoverImage({
+function HeroPosterImage({
   uri,
   imageKey,
+  width,
   height,
   onError,
   onLoad,
@@ -46,6 +58,7 @@ function HeroCoverImage({
 }: {
   uri: string;
   imageKey: string;
+  width: number;
   height: number;
   onError: () => void;
   onLoad: () => void;
@@ -55,8 +68,8 @@ function HeroCoverImage({
     <Image
       key={imageKey}
       source={{ uri }}
-      style={[styles.media, { height }]}
-      resizeMode="cover"
+      style={{ width, height }}
+      resizeMode="contain"
       accessibilityIgnoresInvertColors
       onError={onError}
       onLoad={onLoad}
@@ -65,13 +78,102 @@ function HeroCoverImage({
   );
 }
 
-function HeroMediaPlaceholder({ height }: { height: number }) {
+function HeroMediaPlaceholder({ width, height }: { width: number; height: number }) {
   return (
-    <View style={[styles.mediaPlaceholder, { height }]} accessibilityRole="image">
+    <View
+      style={[styles.mediaPlaceholder, { width, height }]}
+      accessibilityRole="image"
+    >
       <Ionicons name="film-outline" size={40} color={colors.textMuted} />
     </View>
   );
 }
+
+export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
+  item,
+  onPress,
+  posterWidth,
+  posterHeight,
+  glow = true,
+  animatedStyle,
+  pressable = true,
+}: {
+  item: HomeItem;
+  onPress?: (item: HomeItem) => void;
+  posterWidth: number;
+  posterHeight: number;
+  glow?: boolean;
+  animatedStyle?: StyleProp<ViewStyle>;
+  pressable?: boolean;
+}) {
+  const { t } = useTranslation();
+  const posterUri = resolveHomeHeroPosterUri(item.posterUrl);
+  const posterLoad = useRemoteImageLoadState(
+    posterUri ? `${item.id}:poster:${posterUri}` : null,
+  );
+
+  const innerWidth = posterWidth - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
+  const innerHeight = posterHeight - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
+  const innerRadius = borderRadius.lg - DETAIL_DIRECTIONAL_FRAME_BORDER;
+
+  const handlePress = useCallback(() => {
+    onPress?.(item);
+  }, [item, onPress]);
+
+  const framedCard = (
+    <DetailDirectionalFrame
+      variant="gold"
+      borderRadius={borderRadius.lg}
+      glow={glow}
+      style={{ width: posterWidth, height: posterHeight }}
+    >
+      <View
+        style={[
+          styles.cardInner,
+          {
+            width: innerWidth,
+            height: innerHeight,
+            borderRadius: innerRadius,
+          },
+        ]}
+      >
+        {posterUri != null && !posterLoad.hasError ? (
+          <HeroPosterImage
+            uri={posterUri}
+            imageKey={posterLoad.imageKey}
+            width={innerWidth}
+            height={innerHeight}
+            onError={posterLoad.onImageError}
+            onLoad={posterLoad.onImageLoad}
+            onLoadEnd={posterLoad.onImageLoadEnd}
+          />
+        ) : (
+          <HeroMediaPlaceholder width={innerWidth} height={innerHeight} />
+        )}
+      </View>
+    </DetailDirectionalFrame>
+  );
+
+  const content = (
+    <Animated.View style={[styles.posterShell, animatedStyle]}>{framedCard}</Animated.View>
+  );
+
+  if (!pressable || !onPress) {
+    return content;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('common.openTitle', { title: item.title })}
+      unstable_pressDelay={HERO_EMBEDDED_PRESS_DELAY_MS}
+      onPress={handlePress}
+      style={styles.pressable}
+    >
+      {content}
+    </Pressable>
+  );
+});
 
 function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): boolean {
   return (
@@ -79,7 +181,12 @@ function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): bo
     previous.onPress === next.onPress &&
     previous.heroHeight === next.heroHeight &&
     previous.cardWidth === next.cardWidth &&
-    previous.embedded === next.embedded
+    previous.embedded === next.embedded &&
+    previous.isActive === next.isActive &&
+    previous.slideIndex === next.slideIndex &&
+    previous.snapInterval === next.snapInterval &&
+    previous.paginationCount === next.paginationCount &&
+    previous.paginationIndex === next.paginationIndex
   );
 }
 
@@ -89,24 +196,22 @@ export const HomeHero = memo(function HomeHero({
   heroHeight: heroHeightProp,
   cardWidth: cardWidthProp,
   embedded = false,
+  isActive = true,
+  scrollX,
+  slideIndex,
+  snapInterval,
+  paginationCount,
+  paginationIndex,
 }: HomeHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const backdropUri = resolveHomeHeroBackdropUri(item.backdropUrl);
-  const posterUri = resolveHomeHeroPosterUri(item.posterUrl);
-  const backdropLoad = useRemoteImageLoadState(
-    backdropUri ? `${item.id}:backdrop:${backdropUri}` : null,
-  );
-  const posterLoad = useRemoteImageLoadState(
-    posterUri ? `${item.id}:poster:${posterUri}` : null,
-  );
 
-  const heroHeight = useMemo(
+  const posterHeight = useMemo(
     () => heroHeightProp ?? getHomeHeroHeight(width),
     [heroHeightProp, width],
   );
 
-  const cardWidth = useMemo(
+  const posterWidth = useMemo(
     () => cardWidthProp ?? getHomeHeroCardWidth(width),
     [cardWidthProp, width],
   );
@@ -126,99 +231,104 @@ export const HomeHero = memo(function HomeHero({
     .filter(Boolean)
     .join(', ');
 
-  const handleHeroPress = useCallback(() => {
-    onPress?.(item);
-  }, [item, onPress]);
+  const animatedStyle = useMemo(() => {
+    if (scrollX == null || slideIndex == null || snapInterval == null || snapInterval <= 0) {
+      if (!isActive) {
+        return {
+          opacity: HERO_CAROUSEL_INACTIVE_OPACITY,
+          transform: [{ scale: HERO_CAROUSEL_INACTIVE_SCALE }],
+        };
+      }
+      return undefined;
+    }
 
-  const innerWidth = cardWidth - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
-  const innerHeight = heroHeight - DETAIL_DIRECTIONAL_FRAME_BORDER * 2;
-  const innerRadius = borderRadius.xl - DETAIL_DIRECTIONAL_FRAME_BORDER;
+    const inputRange = [
+      (slideIndex - 1) * snapInterval,
+      slideIndex * snapInterval,
+      (slideIndex + 1) * snapInterval,
+    ];
 
-  const framedCard = (
-    <DetailDirectionalFrame
-      variant="gold"
-      borderRadius={borderRadius.xl}
-      glow
-      style={{ width: cardWidth, height: heroHeight }}
-    >
-      <View
-        style={[
-          styles.cardInner,
-          {
-            width: innerWidth,
-            height: innerHeight,
-            borderRadius: innerRadius,
-          },
-        ]}
-      >
-        <View style={[styles.mediaLayer, { height: innerHeight }]} pointerEvents="none">
-          {/* Poster first (original). Backdrop only if the poster is missing or fails. Cover crops a wide card. */}
-          {posterUri != null && !posterLoad.hasError ? (
-            <HeroCoverImage
-              uri={posterUri}
-              imageKey={posterLoad.imageKey}
-              height={innerHeight}
-              onError={posterLoad.onImageError}
-              onLoad={posterLoad.onImageLoad}
-              onLoadEnd={posterLoad.onImageLoadEnd}
-            />
-          ) : backdropUri != null && !backdropLoad.hasError ? (
-            <HeroCoverImage
-              uri={backdropUri}
-              imageKey={backdropLoad.imageKey}
-              height={innerHeight}
-              onError={backdropLoad.onImageError}
-              onLoad={backdropLoad.onImageLoad}
-              onLoadEnd={backdropLoad.onImageLoadEnd}
-            />
-          ) : (
-            <HeroMediaPlaceholder height={innerHeight} />
-          )}
-        </View>
+    return {
+      opacity: scrollX.interpolate({
+        inputRange,
+        outputRange: [
+          HERO_CAROUSEL_INACTIVE_OPACITY,
+          1,
+          HERO_CAROUSEL_INACTIVE_OPACITY,
+        ],
+        extrapolate: 'clamp',
+      }),
+      transform: [
+        {
+          translateX: scrollX.interpolate({
+            inputRange,
+            outputRange: [
+              -HERO_CAROUSEL_INACTIVE_PEEK_TRANSLATE,
+              0,
+              HERO_CAROUSEL_INACTIVE_PEEK_TRANSLATE,
+            ],
+            extrapolate: 'clamp',
+          }),
+        },
+        {
+          scale: scrollX.interpolate({
+            inputRange,
+            outputRange: [
+              HERO_CAROUSEL_INACTIVE_SCALE,
+              1,
+              HERO_CAROUSEL_INACTIVE_SCALE,
+            ],
+            extrapolate: 'clamp',
+          }),
+        },
+      ],
+    };
+  }, [isActive, scrollX, slideIndex, snapInterval]);
 
-        <View style={styles.infoBand} pointerEvents="none">
-          <LinearGradient
-            colors={[
-              'rgba(10, 10, 15, 0)',
-              'rgba(10, 10, 15, 0.25)',
-              'rgba(10, 10, 15, 0.88)',
-            ]}
-            locations={[0, 0.45, 1]}
-            style={styles.infoScrim}
-            pointerEvents="none"
-          />
-          <View style={styles.infoContent}>
-            <HomeHeroMetadata
-              contentType={item.contentType}
-              releaseDate={item.releaseDate}
-              voteAverage={item.voteAverage}
-            />
-            <AppText variant="title" numberOfLines={2} style={styles.title}>
-              {item.title}
-            </AppText>
-          </View>
-        </View>
-      </View>
-    </DetailDirectionalFrame>
+  const poster = (
+    <HomeHeroPosterCard
+      item={item}
+      onPress={onPress}
+      posterWidth={posterWidth}
+      posterHeight={posterHeight}
+      glow={isActive}
+      animatedStyle={animatedStyle}
+      pressable={Boolean(onPress)}
+    />
   );
 
-  return (
-    <View
-      style={[styles.container, embedded && styles.containerEmbedded]}
-      accessibilityRole="summary"
-      accessibilityLabel={accessibilityLabel}
-    >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('common.openTitle', { title: item.title })}
-        unstable_pressDelay={embedded ? HERO_EMBEDDED_PRESS_DELAY_MS : undefined}
-        onPress={handleHeroPress}
-        style={styles.pressable}
+  if (embedded) {
+    return (
+      <View
+        style={[
+          styles.embeddedSlide,
+          { width: snapInterval ?? posterWidth },
+          isActive ? styles.embeddedSlideActive : styles.embeddedSlideInactive,
+        ]}
+        accessibilityRole="summary"
+        accessibilityLabel={accessibilityLabel}
       >
-        <View style={[styles.perspectiveHost, { width: cardWidth, height: heroHeight }]}>
-          <View style={styles.cardTilt}>{framedCard}</View>
-        </View>
-      </Pressable>
+        {poster}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container} accessibilityRole="summary" accessibilityLabel={accessibilityLabel}>
+      <View style={[styles.stage, { height: posterHeight }]}>{poster}</View>
+      <View style={styles.footer}>
+        <HomeHeroMetadata
+          contentType={item.contentType}
+          releaseDate={item.releaseDate}
+          voteAverage={item.voteAverage}
+        />
+        <AppText variant="title" numberOfLines={2} style={styles.title}>
+          {item.title}
+        </AppText>
+        {paginationCount != null && paginationIndex != null ? (
+          <HomeHeroPaginationDots count={paginationCount} activeIndex={paginationIndex} />
+        ) : null}
+      </View>
     </View>
   );
 }, areHomeHeroPropsEqual);
@@ -227,68 +337,51 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.sm,
     alignItems: 'center',
-    paddingVertical: spacing.sm,
   },
-  containerEmbedded: {
-    marginBottom: 0,
+  embeddedSlide: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  embeddedSlideActive: {
+    zIndex: 2,
+    elevation: 6,
+  },
+  embeddedSlideInactive: {
+    zIndex: 0,
+    elevation: 0,
+  },
+  stage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   pressable: {
     alignItems: 'center',
   },
-  perspectiveHost: {
-    transform: [{ perspective: HOME_HERO_PERSPECTIVE }],
-  },
-  cardTilt: {
-    transform: [
-      { rotateX: HOME_HERO_CARD_TILT.rotateX },
-      { rotateY: HOME_HERO_CARD_TILT.rotateY },
-      { scale: HOME_HERO_CARD_TILT.scale },
-    ],
-    shadowColor: '#000000',
-    shadowOffset: { width: 16, height: 20 },
-    shadowOpacity: 0.45,
-    shadowRadius: 22,
-    elevation: 12,
+  posterShell: {
+    alignItems: 'center',
   },
   cardInner: {
     overflow: 'hidden',
     backgroundColor: colors.surfaceElevated,
-  },
-  mediaLayer: {
-    width: '100%',
-  },
-  media: {
-    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mediaPlaceholder: {
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceElevated,
   },
-  infoBand: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    minHeight: HERO_INFO_BAND_MIN_HEIGHT,
-    justifyContent: 'flex-end',
-  },
-  infoScrim: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: -HERO_SCRIM_FADE_ABOVE_BAND,
-  },
-  infoContent: {
-    zIndex: 1,
+  footer: {
+    alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
-    gap: 2,
+    gap: 6,
+    width: '100%',
   },
   title: {
     color: colors.textPrimary,
+    textAlign: 'center',
   },
 });

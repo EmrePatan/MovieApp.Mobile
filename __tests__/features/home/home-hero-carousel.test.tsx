@@ -165,15 +165,15 @@ describe('HomeHeroCarousel', () => {
     );
     prefetchSpy.mockClear();
 
-    const backdropOnly = [
-      createItem({ id: 'hero-1', backdropUrl: '/backdrop-a.jpg' }),
-      createItem({ id: 'hero-2', backdropUrl: '/backdrop-b.jpg' }),
+    const posterOnly = [
+      createItem({ id: 'hero-1', posterUrl: '/poster-a.jpg' }),
+      createItem({ id: 'hero-2', posterUrl: '/poster-b.jpg' }),
     ];
     render(
-      <HomeHeroCarousel items={backdropOnly} filterKey="movie" onItemPress={jest.fn()} />,
+      <HomeHeroCarousel items={posterOnly} filterKey="movie" onItemPress={jest.fn()} />,
     );
     expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w1280/backdrop-b.jpg',
+      'https://image.tmdb.org/t/p/original/poster-b.jpg',
     );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
 

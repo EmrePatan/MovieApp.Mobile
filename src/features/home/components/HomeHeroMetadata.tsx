@@ -58,15 +58,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
   detail: {
-    color: 'rgba(245, 245, 247, 0.9)',
+    color: colors.textSecondary,
     letterSpacing: 0.25,
-    textShadowColor: 'rgba(0, 0, 0, 0.45)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
   ratingChip: {
     flexDirection: 'row',
@@ -75,7 +73,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: borderRadius.full,
-    backgroundColor: 'rgba(10, 10, 15, 0.55)',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
     borderColor: colors.borderAccent,
   },
