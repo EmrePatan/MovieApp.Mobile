@@ -316,6 +316,9 @@ export const stage2It = {
     },
   },
   search: {
+    library: {
+      idleHint: 'Cerca titoli in In corso, Visti e Preferiti.',
+    },
     bar: {
       placeholder: 'Cerca film, serie e persone',
       accessibility: 'Cerca film, serie e persone',
@@ -731,6 +734,11 @@ export const stage2It = {
     hub: {
       title: 'La mia libreria',
       subtitle: 'La tua collezione personale',
+      searchPlaceholder: 'Cerca nella tua libreria',
+      searchLoading: 'Ricerca nella tua libreria…',
+      searchError: 'Impossibile cercare nella tua libreria.',
+      searchEmptyTitle: 'Nessun risultato per «{{query}}»',
+      searchEmptyMessage: 'Prova un\'altra ortografia o un termine più breve.',
       signInCopy: 'Accedi per salvare titoli, tracciare i progressi e creare la tua collezione.',
       signInButton: 'Accedi',
       loadError: 'Impossibile caricare la tua libreria.',

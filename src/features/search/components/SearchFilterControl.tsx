@@ -5,7 +5,8 @@ import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
-const FILTERS: SearchTypeFilter[] = ['all', 'movie', 'tv', 'person'];
+const CATALOG_FILTERS: SearchTypeFilter[] = ['all', 'movie', 'tv', 'person'];
+const LIBRARY_FILTERS: SearchTypeFilter[] = ['all', 'movie', 'tv'];
 
 function getFilterLabel(filter: SearchTypeFilter, t: (key: string) => string): string {
   if (filter === 'all') {
@@ -26,14 +27,20 @@ function getFilterLabel(filter: SearchTypeFilter, t: (key: string) => string): s
 interface SearchFilterControlProps {
   value: SearchTypeFilter;
   onChange: (value: SearchTypeFilter) => void;
+  variant?: 'catalog' | 'library';
 }
 
-export function SearchFilterControl({ value, onChange }: SearchFilterControlProps) {
+export function SearchFilterControl({
+  value,
+  onChange,
+  variant = 'catalog',
+}: SearchFilterControlProps) {
   const { t } = useTranslation();
+  const filters = variant === 'library' ? LIBRARY_FILTERS : CATALOG_FILTERS;
 
   return (
     <View style={styles.container} accessibilityRole="tablist">
-      {FILTERS.map((filter) => {
+      {filters.map((filter) => {
         const selected = value === filter;
         const label = getFilterLabel(filter, t);
 

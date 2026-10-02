@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { LibraryHubContent } from '@/features/library/components/LibraryHubContent';
+import { LibraryHubSearchProvider } from '@/features/library/context/LibraryHubSearchContext';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
 
 const mockPush = jest.fn();
@@ -48,6 +49,19 @@ jest.mock('@/features/library/components/LibraryWatchlistsOverview', () => ({
       </View>
     );
   },
+}));
+
+jest.mock('@/features/library/hooks/useLibraryHubSearchResults', () => ({
+  useLibraryHubSearchResults: jest.fn(() => ({
+    data: { pages: [] },
+    isLoading: false,
+    isError: false,
+    isFetchingNextPage: false,
+    isFetchNextPageError: false,
+    hasNextPage: false,
+    refetch: jest.fn(),
+    fetchNextPage: jest.fn(),
+  })),
 }));
 
 jest.mock('@/features/library/hooks/useLibrary', () => ({
@@ -102,6 +116,14 @@ jest.mock('@/features/library/hooks/useLibrary', () => ({
 const { useLibrary } = jest.requireMock('@/features/library/hooks/useLibrary') as {
   useLibrary: jest.Mock;
 };
+
+function renderLibraryHub() {
+  return render(
+    <LibraryHubSearchProvider>
+      <LibraryHubContent />
+    </LibraryHubSearchProvider>,
+  );
+}
 
 function flattenStyle(style: unknown): Record<string, unknown> {
   if (!style) {
@@ -170,32 +192,31 @@ describe('LibraryHubContent', () => {
   });
 
   it('left-aligns a single library item in the three-column grid', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     expect(screen.getByTestId('library-grid-three-column')).toBeTruthy();
     expect(screen.queryByTestId('library-grid-single-item')).toBeNull();
   });
 
   it('lets the multi-column grid measure rows instead of supplying fixed item layouts', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     // FlatList passes row indexes to getItemLayout and the list header height is dynamic.
     expect(screen.getByTestId('library-grid-three-column').props.getItemLayout).toBeUndefined();
   });
 
-  it('does not double-pad the My Library heading inside the grid list', () => {
-    render(<LibraryHubContent />);
+  it('does not double-pad the library hub header inside the grid list', () => {
+    renderLibraryHub();
 
     const header = screen.getByTestId('library-hub-header');
 
     expect(flattenStyle(header.props.style).paddingHorizontal).toBeUndefined();
-    expect(screen.getByText('My Library')).toBeTruthy();
+    expect(screen.getByLabelText('Watching category')).toBeTruthy();
   });
 
   it('defaults to Watching category and renders the grid item', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
-    expect(screen.getByText('My Library')).toBeTruthy();
     expect(screen.getByLabelText('Watching category')).toBeTruthy();
     expect(
       screen.getByLabelText('In Progress Show, S2 · E4 · Episode Four, 40% watched'),
@@ -206,7 +227,7 @@ describe('LibraryHubContent', () => {
   });
 
   it('tracks filter metric when category changes', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     fireEvent.press(screen.getByLabelText('Favorites category'));
 
@@ -215,7 +236,7 @@ describe('LibraryHubContent', () => {
   });
 
   it('hides media filter on Watching and always queries all media types', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     expect(screen.queryByLabelText('Filter Movies')).toBeNull();
     expect(screen.queryByLabelText('Filter All')).toBeNull();
@@ -223,7 +244,7 @@ describe('LibraryHubContent', () => {
   });
 
   it('shows media filter on other categories and tracks media type changes', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     fireEvent.press(screen.getByLabelText('Favorites category'));
     fireEvent.press(screen.getByLabelText('Filter Movies'));
@@ -233,7 +254,7 @@ describe('LibraryHubContent', () => {
   });
 
   it('navigates to catalog detail from grid item', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     fireEvent.press(
       screen.getByLabelText('In Progress Show, S2 · E4 · Episode Four, 40% watched'),
@@ -249,7 +270,7 @@ describe('LibraryHubContent', () => {
   });
 
   it('renders watchlists overview instead of library grid', () => {
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     fireEvent.press(screen.getByLabelText('Watchlists category'));
 
@@ -273,7 +294,7 @@ describe('LibraryHubContent', () => {
       fetchNextPage: mockFetchNextPage,
     }));
 
-    render(<LibraryHubContent />);
+    renderLibraryHub();
 
     expect(screen.getByText('Nothing in progress')).toBeTruthy();
     fireEvent.press(screen.getByText('Browse Discover'));

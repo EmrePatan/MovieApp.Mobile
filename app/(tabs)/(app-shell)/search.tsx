@@ -10,14 +10,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { AppText } from '@/components/common/AppText';
 import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { useQueryClient } from '@tanstack/react-query';
 import { StackListScreen } from '@/components/layout/StackListScreen';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   parseSearchReturnOrigin,
+  parseSearchScope,
   returnFromSearch,
 } from '@/features/navigation/search-navigation';
+import { useLibrarySearchResults } from '@/features/library/hooks/useLibrarySearchResults';
 import { isApiError } from '@/api/errors';
 import { ErrorView } from '@/components/common/ErrorView';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -61,8 +64,14 @@ export default function SearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { explore, from } = useLocalSearchParams<{ explore?: string; from?: string }>();
+  const { explore, from, scope } = useLocalSearchParams<{
+    explore?: string;
+    from?: string;
+    scope?: string;
+  }>();
   const searchReturnOrigin = parseSearchReturnOrigin(from);
+  const searchScope = parseSearchScope(scope);
+  const isLibrarySearch = searchScope === 'library';
   const [inputText, setInputText] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<SearchTypeFilter>('all');
@@ -100,9 +109,17 @@ export default function SearchScreen() {
   });
   const hasActiveSearch = displayMode === 'results';
 
-  const searchQuery = useSearchResults(submittedQuery, typeFilter);
-  const showAutocomplete = displayMode === 'autocomplete';
+  const catalogSearchQuery = useSearchResults(submittedQuery, typeFilter);
+  const librarySearchQuery = useLibrarySearchResults(submittedQuery, typeFilter);
+  const activeSearchQuery = isLibrarySearch ? librarySearchQuery : catalogSearchQuery;
+  const showAutocomplete = !isLibrarySearch && displayMode === 'autocomplete';
   const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
+
+  useEffect(() => {
+    if (isLibrarySearch && typeFilter === 'person') {
+      setTypeFilter('all');
+    }
+  }, [isLibrarySearch, typeFilter]);
   const {
     items: recentSearchItems,
     isLoading: isRecentSearchesLoading,
@@ -111,12 +128,15 @@ export default function SearchScreen() {
     clearAll: clearRecentSearches,
   } = useRecentSearches();
 
-  const results = useMemo(
-    () => flattenDedupedSearchResultPages(searchQuery.data?.pages),
-    [searchQuery.data?.pages],
-  );
+  const results = useMemo(() => {
+    if (isLibrarySearch) {
+      return librarySearchQuery.data ?? [];
+    }
 
-  const showExplore = !hasActiveSearch && !showAutocomplete;
+    return flattenDedupedSearchResultPages(catalogSearchQuery.data?.pages);
+  }, [catalogSearchQuery.data?.pages, isLibrarySearch, librarySearchQuery.data]);
+
+  const showExplore = !isLibrarySearch && !hasActiveSearch && !showAutocomplete;
 
   const submitSearch = useCallback(
     (query: string, options?: { skipRecentQuery?: boolean }) => {
@@ -130,11 +150,11 @@ export default function SearchScreen() {
       setSubmittedQuery(normalized);
       trackProductMetric(PRODUCT_METRICS.searchSubmitted);
 
-      if (!options?.skipRecentQuery) {
+      if (!options?.skipRecentQuery && !isLibrarySearch) {
         void recordRecentQuery(normalized);
       }
     },
-    [recordRecentQuery],
+    [isLibrarySearch, recordRecentQuery],
   );
 
   const handleSubmit = useCallback(
@@ -238,9 +258,15 @@ export default function SearchScreen() {
         return;
       }
 
-      openCatalogDetailFromTab(router, item.id, item.type, 'search', { queryClient });
+      openCatalogDetailFromTab(
+        router,
+        item.id,
+        item.type,
+        isLibrarySearch ? 'library' : 'search',
+        { queryClient },
+      );
     },
-    [queryClient, router],
+    [isLibrarySearch, queryClient, router],
   );
 
   const handleDeleteRecentSearchItem = useCallback(
@@ -272,38 +298,42 @@ export default function SearchScreen() {
     fetchNextPage,
     refetch,
     isRefetching,
-  } = searchQuery;
+  } = catalogSearchQuery;
 
   const handleLoadMore = useCallback(() => {
+    if (isLibrarySearch) {
+      return;
+    }
+
     if (!shouldRequestNextInfinitePage({ hasNextPage, isFetchingNextPage })) {
       return;
     }
 
     void fetchNextPage();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isLibrarySearch]);
 
   const handleRefresh = useCallback(() => {
-    void refetch();
-  }, [refetch]);
+    void activeSearchQuery.refetch();
+  }, [activeSearchQuery]);
 
-  const searchErrorMessage = searchQuery.isError
-    ? isApiError(searchQuery.error)
-      ? searchQuery.error.userMessage
+  const searchErrorMessage = activeSearchQuery.isError
+    ? isApiError(activeSearchQuery.error)
+      ? activeSearchQuery.error.userMessage
       : t('search.results.error')
     : null;
 
-  const resultsFooter = searchQuery.isFetchingNextPage ? (
+  const resultsFooter = !isLibrarySearch && catalogSearchQuery.isFetchingNextPage ? (
     <View style={styles.footerLoading}>
       <ActivityIndicator color={colors.accent} />
     </View>
   ) : null;
 
   const listEmptyComponent = useMemo(() => {
-    if (searchQuery.isLoading && results.length === 0) {
+    if (activeSearchQuery.isLoading && results.length === 0) {
       return <SearchLoadingState />;
     }
 
-    if (searchQuery.isError && results.length === 0) {
+    if (activeSearchQuery.isError && results.length === 0) {
       return (
         <View style={styles.errorContainer}>
           <ErrorView
@@ -330,8 +360,8 @@ export default function SearchScreen() {
     normalizedSubmittedQuery,
     results.length,
     searchErrorMessage,
-    searchQuery.isError,
-    searchQuery.isLoading,
+    activeSearchQuery.isError,
+    activeSearchQuery.isLoading,
     t,
   ]);
 
@@ -353,7 +383,11 @@ export default function SearchScreen() {
       autoFocus
     >
       {hasActiveSearch ? (
-        <SearchFilterControl value={typeFilter} onChange={setTypeFilter} />
+        <SearchFilterControl
+          value={typeFilter}
+          onChange={setTypeFilter}
+          variant={isLibrarySearch ? 'library' : 'catalog'}
+        />
       ) : null}
     </SearchScreenHeader>
   );
@@ -365,7 +399,7 @@ export default function SearchScreen() {
         <PlatformRefreshFlatList
           ref={resultsListRef}
           testID="search-results-list"
-          refreshing={isRefetching && !isFetchingNextPage}
+          refreshing={activeSearchQuery.isRefetching && !catalogSearchQuery.isFetchingNextPage}
           onRefresh={handleRefresh}
           data={results}
           keyExtractor={searchResultKeyExtractor}
@@ -422,6 +456,13 @@ export default function SearchScreen() {
           />
         ) : null}
         {showExplore ? <SearchExploreLanding /> : null}
+        {isLibrarySearch && !hasActiveSearch && !showAutocomplete ? (
+          <View style={styles.libraryIdleHint}>
+            <AppText variant="bodySmall" muted center>
+              {t('search.library.idleHint')}
+            </AppText>
+          </View>
+        ) : null}
       </ScrollView>
     </StackListScreen>
   );
@@ -453,5 +494,9 @@ const styles = StyleSheet.create({
   footerLoading: {
     paddingVertical: spacing.lg,
     alignItems: 'center',
+  },
+  libraryIdleHint: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
 });

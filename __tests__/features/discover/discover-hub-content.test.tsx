@@ -138,28 +138,15 @@ jest.mock('@/features/library/navigation/library-stack-navigation', () => ({
   openLibraryStackScreen: (...args: unknown[]) => mockOpenLibraryStackScreen(...args),
 }));
 
-jest.mock('@/features/navigation/components/GlobalSearchEntry', () => ({
-  GlobalSearchEntry: ({ origin }: { origin: string }) => {
-    const React = require('react');
-    const { Pressable, Text } = require('react-native');
-    return React.createElement(
-      Pressable,
-      { accessibilityLabel: `Global search from ${origin}` },
-      React.createElement(Text, null, 'Search movies, shows & people'),
-    );
-  },
-}));
-
 describe('DiscoverHubContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the discover hub search entry and D1 filters entry', () => {
+  it('renders the discover hub feature entries without a duplicate title header', () => {
     render(<DiscoverHubContent />);
 
-    expect(screen.getByText('Discover')).toBeTruthy();
-    expect(screen.getByLabelText('Global search from discover')).toBeTruthy();
+    expect(screen.queryByText('Discover')).toBeNull();
     expect(screen.getByLabelText('Advanced Discover')).toBeTruthy();
     expect(screen.getByText('Advanced Discover')).toBeTruthy();
     expect(screen.getByText('Genre · Year · Rating · Runtime · Country')).toBeTruthy();

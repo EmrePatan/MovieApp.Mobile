@@ -7,12 +7,18 @@ export function buildLibraryPath(
   page: number,
   pageSize: number,
   cursor?: string | null,
+  query?: string | null,
 ): string {
   const params = new URLSearchParams({
     category,
     mediaType,
     pageSize: String(pageSize),
   });
+
+  const normalizedQuery = query?.trim();
+  if (normalizedQuery) {
+    params.set('q', normalizedQuery);
+  }
 
   if (cursor) {
     params.set('cursor', cursor);
@@ -22,4 +28,20 @@ export function buildLibraryPath(
   }
 
   return `/api/library?${params.toString()}`;
+}
+
+export function buildLibrarySearchPath(
+  query: string,
+  mediaType: CatalogMediaFilter,
+  page: number,
+  pageSize: number,
+): string {
+  const params = new URLSearchParams({
+    q: query.trim(),
+    mediaType,
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  return `/api/library/search?${params.toString()}`;
 }

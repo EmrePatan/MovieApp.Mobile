@@ -20,6 +20,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { CatalogMediaFilter } from '../types';
 import type { LibraryCategory, LibraryItem } from '../types/library';
 import { useLibrary } from '../hooks/useLibrary';
+import { useLibraryHubSearchResults } from '../hooks/useLibraryHubSearchResults';
+import { useLibraryHubSearch } from '../context/LibraryHubSearchContext';
 import { useStableFetchedItems } from '../hooks/useStableFetchedItems';
 import { flattenLibraryPages } from '../utils/flatten-library-pages';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
@@ -50,12 +52,15 @@ export function LibraryHubContent() {
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState<LibraryCategory>(DEFAULT_CATEGORY);
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>(DEFAULT_MEDIA_FILTER);
+  const { debouncedSearch, isSearchActive, clearSearch } = useLibraryHubSearch();
   const isWatchlistsCategory = category === 'watchlist';
   const effectiveMediaType = category === 'watching' ? 'all' : mediaType;
+  const searchMediaType = mediaType;
 
   const libraryQuery = useLibrary(category, effectiveMediaType, {
-    enabled: !isWatchlistsCategory,
+    enabled: !isWatchlistsCategory && !isSearchActive,
   });
+  const librarySearchQuery = useLibraryHubSearchResults(debouncedSearch, searchMediaType);
   const watchlistsQuery = useWatchlists(isWatchlistsCategory);
   const listRef = useRef<FlatList>(null);
   const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
@@ -72,6 +77,11 @@ export function LibraryHubContent() {
     [libraryQuery.data?.pages],
   );
   const displayItems = useStableFetchedItems(items, libraryQuery.isFetching, category);
+  const searchItems = useMemo(
+    () => flattenLibraryPages(librarySearchQuery.data?.pages ?? []),
+    [librarySearchQuery.data?.pages],
+  );
+  const gridItems = isSearchActive ? searchItems : displayItems;
 
   const handleCategoryChange = useCallback((nextCategory: LibraryCategory) => {
     if (nextCategory === category) {
@@ -96,13 +106,27 @@ export function LibraryHubContent() {
   }, [libraryQuery]);
 
   const refreshLibraryHub = useCallback(() => {
+    clearSearch();
+
     if (isWatchlistsCategory) {
       void watchlistsQuery.refetch();
       return;
     }
 
+    if (isSearchActive) {
+      void librarySearchQuery.refetch();
+      return;
+    }
+
     void libraryQuery.refetch();
-  }, [isWatchlistsCategory, libraryQuery, watchlistsQuery]);
+  }, [
+    clearSearch,
+    isSearchActive,
+    isWatchlistsCategory,
+    libraryQuery,
+    librarySearchQuery,
+    watchlistsQuery,
+  ]);
 
   usePrimaryTabReselectHandler('library', {
     scrollToTop,
@@ -110,12 +134,21 @@ export function LibraryHubContent() {
   });
 
   const handleLoadMore = useCallback(() => {
+    if (isSearchActive) {
+      if (!shouldRequestNextInfinitePage(librarySearchQuery)) {
+        return;
+      }
+
+      void librarySearchQuery.fetchNextPage();
+      return;
+    }
+
     if (!shouldRequestNextInfinitePage(libraryQuery)) {
       return;
     }
 
     void libraryQuery.fetchNextPage();
-  }, [libraryQuery]);
+  }, [isSearchActive, libraryQuery, librarySearchQuery]);
 
   const handleBrowseDiscover = useCallback(() => {
     router.push('/(tabs)/discover');
@@ -134,20 +167,26 @@ export function LibraryHubContent() {
     [queryClient, router],
   );
 
+  const resolveGridCategory = useCallback(
+    (item: LibraryItem): LibraryCategory =>
+      isSearchActive ? item.collectionStatus : category,
+    [category, isSearchActive],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: LibraryItem }) => (
       <LibraryGridCard
         item={item}
-        category={category}
+        category={resolveGridCategory(item)}
         width={itemWidth}
         height={itemHeight}
         onPress={handleItemPress}
       />
     ),
-    [category, handleItemPress, itemHeight, itemWidth],
+    [handleItemPress, itemHeight, itemWidth, resolveGridCategory],
   );
 
-  const listHeader = (
+  const listHeader = isSearchActive ? null : (
     <LibraryHubHeader
       category={category}
       mediaType={mediaType}
@@ -168,11 +207,39 @@ export function LibraryHubContent() {
     );
   }
 
-  if (isWatchlistsCategory) {
+  if (isWatchlistsCategory && !isSearchActive) {
     return <LibraryWatchlistsOverview listHeader={listHeader} listRef={listRef} />;
   }
 
-  if (libraryQuery.isLoading && displayItems.length === 0) {
+  if (isSearchActive && librarySearchQuery.isLoading && gridItems.length === 0) {
+    return (
+      <View style={[styles.screen, styles.screenPadding]}>
+        <View style={styles.centered}>
+          <ActivityIndicator color={colors.accent} />
+          <AppText variant="bodySmall" muted>{t('library.hub.searchLoading')}</AppText>
+        </View>
+      </View>
+    );
+  }
+
+  if (isSearchActive && librarySearchQuery.isError && gridItems.length === 0) {
+    const message = isApiError(librarySearchQuery.error)
+      ? librarySearchQuery.error.userMessage
+      : t('library.hub.searchError');
+
+    return (
+      <View style={[styles.screen, styles.screenPadding]}>
+        <View style={styles.centered}>
+          <ErrorView
+            message={message}
+            onRetry={() => void librarySearchQuery.refetch()}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  if (!isSearchActive && libraryQuery.isLoading && displayItems.length === 0) {
     return (
       <View style={[styles.screen, styles.screenPadding]}>
         {listHeader}
@@ -184,7 +251,7 @@ export function LibraryHubContent() {
     );
   }
 
-  if (libraryQuery.isError && displayItems.length === 0) {
+  if (!isSearchActive && libraryQuery.isError && displayItems.length === 0) {
     const message = isApiError(libraryQuery.error)
       ? libraryQuery.error.userMessage
       : t('library.hub.loadError');
@@ -201,7 +268,12 @@ export function LibraryHubContent() {
 
   const emptyCopy = resolveLibraryEmptyCopy(category, effectiveMediaType);
 
-  const emptyComponent = (
+  const emptyComponent = isSearchActive ? (
+    <LibraryEmptyState
+      title={t('library.hub.searchEmptyTitle', { query: debouncedSearch })}
+      message={t('library.hub.searchEmptyMessage')}
+    />
+  ) : (
     <LibraryEmptyState
       icon={emptyCopy.icon}
       title={emptyCopy.title}
@@ -211,12 +283,16 @@ export function LibraryHubContent() {
     />
   );
 
+  const activeQuery = isSearchActive ? librarySearchQuery : libraryQuery;
+
   return (
     <View style={styles.screen}>
       <FlatList
         ref={listRef}
         testID="library-grid-three-column"
-        data={displayItems}
+        data={gridItems}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         keyExtractor={getLibraryGridItemKey}
         numColumns={GRID_COLUMNS}
         columnWrapperStyle={styles.row}
@@ -225,11 +301,11 @@ export function LibraryHubContent() {
         ListEmptyComponent={emptyComponent}
         removeClippedSubviews
         ListFooterComponent={
-          libraryQuery.isFetchingNextPage ? (
+          activeQuery.isFetchingNextPage ? (
             <View style={styles.footerLoading}>
               <ActivityIndicator color={colors.accent} />
             </View>
-          ) : libraryQuery.isFetchNextPageError ? (
+          ) : activeQuery.isFetchNextPageError ? (
             <View style={styles.footerError}>
               <AppText variant="bodySmall" muted center>
                 {t('common.unableToLoadMore')}
@@ -237,7 +313,7 @@ export function LibraryHubContent() {
               <AppButton
                 title={t('common.retry')}
                 variant="secondary"
-                onPress={() => void libraryQuery.fetchNextPage()}
+                onPress={() => void activeQuery.fetchNextPage()}
               />
             </View>
           ) : null

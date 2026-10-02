@@ -4,7 +4,6 @@ import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/common/AppText';
-import { GlobalSearchEntry } from '@/features/navigation/components/GlobalSearchEntry';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
 import { useExplorePreview } from '@/features/discovery/hooks/useExplorePreview';
@@ -120,16 +119,10 @@ export function DiscoverHubContent() {
   return (
     <ScrollView
       ref={scrollRef}
+      style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <AppText variant="title" accessibilityRole="header">
-          {t('discover.hub.title')}
-        </AppText>
-        <GlobalSearchEntry origin="discover" variant="discover" />
-      </View>
-
       <View style={styles.featureSection}>
         <AppText variant="bodySmall" muted style={styles.sectionEyebrow}>
           {t('discover.hub.eyebrow')}
@@ -214,14 +207,13 @@ export function DiscoverHubContent() {
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
   content: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.xxl,
     gap: spacing.lg,
-  },
-  header: {
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
   },
   featureSection: {
     paddingHorizontal: spacing.lg,

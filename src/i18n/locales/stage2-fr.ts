@@ -316,6 +316,9 @@ export const stage2Fr = {
     },
   },
   search: {
+    library: {
+      idleHint: 'Recherche les titres en cours, vus et favoris.',
+    },
     bar: {
       placeholder: 'Rechercher films, séries et personnes',
       accessibility: 'Rechercher films, séries et personnes',
@@ -731,6 +734,11 @@ export const stage2Fr = {
     hub: {
       title: 'Ma bibliothèque',
       subtitle: 'Votre collection personnelle',
+      searchPlaceholder: 'Rechercher dans votre bibliothèque',
+      searchLoading: 'Recherche dans votre bibliothèque…',
+      searchError: 'Impossible de rechercher dans votre bibliothèque.',
+      searchEmptyTitle: 'Aucun résultat pour « {{query}} »',
+      searchEmptyMessage: 'Essayez une autre orthographe ou un terme plus court.',
       signInCopy: 'Connectez-vous pour enregistrer des titres, suivre votre progression et constituer votre collection.',
       signInButton: 'Se connecter',
       loadError: 'Impossible de charger votre bibliothèque.',

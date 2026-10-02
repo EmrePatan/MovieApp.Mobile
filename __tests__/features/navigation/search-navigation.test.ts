@@ -1,6 +1,7 @@
 import {
   openSearch,
   parseSearchReturnOrigin,
+  parseSearchScope,
   resetSearchNavigationForTests,
   returnFromSearch,
 } from '@/features/navigation/search-navigation';
@@ -13,7 +14,23 @@ describe('search navigation', () => {
   it('parses supported search return origins', () => {
     expect(parseSearchReturnOrigin('home')).toBe('home');
     expect(parseSearchReturnOrigin('discover')).toBe('discover');
+    expect(parseSearchReturnOrigin('library')).toBe('library');
     expect(parseSearchReturnOrigin('search')).toBeNull();
+  });
+
+  it('parses library search scope', () => {
+    expect(parseSearchScope('library')).toBe('library');
+    expect(parseSearchScope('catalog')).toBe('catalog');
+    expect(parseSearchScope(undefined)).toBe('catalog');
+  });
+
+  it('opens library-scoped search with query params', () => {
+    const push = jest.fn();
+    const router = { push } as never;
+
+    openSearch(router, 'library', { scope: 'library' });
+
+    expect(push).toHaveBeenCalledWith('/search?from=library&scope=library');
   });
 
   it('opens search with the origin query param', () => {

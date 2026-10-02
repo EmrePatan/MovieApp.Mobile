@@ -316,6 +316,9 @@ export const stage2Tr = {
     },
   },
   search: {
+    library: {
+      idleHint: 'İzleniyor, İzlendi ve Favoriler\'deki başlıkları ara.',
+    },
     bar: {
       placeholder: 'Film, dizi ve kişi ara',
       accessibility: 'Film, dizi ve kişi ara',
@@ -732,6 +735,11 @@ export const stage2Tr = {
     hub: {
       title: 'Kütüphanem',
       subtitle: 'Kişisel koleksiyonun',
+      searchPlaceholder: 'Kütüphanende ara',
+      searchLoading: 'Kütüphanen aranıyor…',
+      searchError: 'Kütüphane araması yapılamadı.',
+      searchEmptyTitle: '"{{query}}" için sonuç yok',
+      searchEmptyMessage: 'Farklı bir yazım veya daha kısa bir arama dene.',
       signInCopy: 'Başlıkları kaydetmek, ilerlemeyi takip etmek ve koleksiyonunu oluşturmak için giriş yap.',
       signInButton: 'Giriş yap',
       loadError: 'Kütüphanen yüklenemedi.',

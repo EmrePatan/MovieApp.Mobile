@@ -316,6 +316,9 @@ export const stage2Pt = {
     },
   },
   search: {
+    library: {
+      idleHint: 'Busque títulos em Assistindo, Assistidos e Favoritos.',
+    },
     bar: {
       placeholder: 'Buscar filmes, séries e pessoas',
       accessibility: 'Buscar filmes, séries e pessoas',
@@ -731,6 +734,11 @@ export const stage2Pt = {
     hub: {
       title: 'Minha biblioteca',
       subtitle: 'Sua coleção pessoal',
+      searchPlaceholder: 'Buscar na sua biblioteca',
+      searchLoading: 'Buscando na sua biblioteca…',
+      searchError: 'Não foi possível buscar na sua biblioteca.',
+      searchEmptyTitle: 'Nenhum resultado para «{{query}}»',
+      searchEmptyMessage: 'Tente outra grafia ou um termo mais curto.',
       signInCopy: 'Entre para salvar títulos, acompanhar o progresso e montar sua coleção.',
       signInButton: 'Entrar',
       loadError: 'Não foi possível carregar sua biblioteca.',

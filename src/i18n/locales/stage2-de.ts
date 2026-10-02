@@ -316,6 +316,9 @@ export const stage2De = {
     },
   },
   search: {
+    library: {
+      idleHint: 'Suche in deinen Titeln unter „Am Schauen“, „Gesehen“ und „Favoriten“.',
+    },
     bar: {
       placeholder: 'Filme, Serien und Personen suchen',
       accessibility: 'Filme, Serien und Personen suchen',
@@ -731,6 +734,11 @@ export const stage2De = {
     hub: {
       title: 'Meine Bibliothek',
       subtitle: 'Deine persönliche Sammlung',
+      searchPlaceholder: 'In deiner Bibliothek suchen',
+      searchLoading: 'Bibliothek wird durchsucht…',
+      searchError: 'Bibliotheksuche fehlgeschlagen.',
+      searchEmptyTitle: 'Keine Ergebnisse für „{{query}}“',
+      searchEmptyMessage: 'Probiere eine andere Schreibweise oder einen kürzeren Suchbegriff.',
       signInCopy: 'Melde dich an, um Titel zu speichern, Fortschritt zu verfolgen und deine Sammlung aufzubauen.',
       signInButton: 'Anmelden',
       loadError: 'Bibliothek konnte nicht geladen werden.',

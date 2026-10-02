@@ -14,7 +14,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 type GlobalSearchEntryVariant = 'default' | 'discover';
 
 interface GlobalSearchEntryProps {
-  origin: SearchReturnOrigin;
+  origin: Exclude<SearchReturnOrigin, 'library'>;
   variant?: GlobalSearchEntryVariant;
 }
 

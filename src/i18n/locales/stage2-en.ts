@@ -316,6 +316,9 @@ export const stage2En = {
     },
   },
   search: {
+    library: {
+      idleHint: 'Search titles you have saved in Watching, Watched, and Favorites.',
+    },
     bar: {
       placeholder: 'Search movies, TV shows, and people',
       accessibility: 'Search movies, TV shows, and people',
@@ -722,6 +725,11 @@ export const stage2En = {
     hub: {
       title: 'My Library',
       subtitle: 'Your personal collection',
+      searchPlaceholder: 'Search your library',
+      searchLoading: 'Searching your library…',
+      searchError: 'Unable to search your library.',
+      searchEmptyTitle: 'No results for "{{query}}"',
+      searchEmptyMessage: 'Try a different spelling or a shorter search term.',
       signInCopy: 'Sign in to save titles, track progress, and build your collection.',
       signInButton: 'Sign in',
       loadError: 'Unable to load your library.',

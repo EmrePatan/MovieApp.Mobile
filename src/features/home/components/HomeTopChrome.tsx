@@ -1,19 +1,5 @@
-import { View } from 'react-native';
-import { useHomeHeaderLayout } from '../hooks/useHomeHeaderLayout';
-import { HomeHeader } from './HomeHeader';
-import { homeHeaderStyles } from './home-header-styles';
+import { TabTopChrome } from '@/features/navigation/components/TabTopChrome';
 
 export function HomeTopChrome() {
-  const headerLayout = useHomeHeaderLayout();
-
-  return (
-    <View
-      style={[
-        homeHeaderStyles.shell,
-        { marginBottom: -headerLayout.heroOffsetCompensation },
-      ]}
-    >
-      <HomeHeader />
-    </View>
-  );
+  return <TabTopChrome searchOrigin="home" />;
 }
