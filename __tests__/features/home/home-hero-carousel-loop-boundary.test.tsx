@@ -12,13 +12,13 @@ import {
 } from '@/features/home/utils/home-hero-carousel-index';
 import { resolveHomeHeroPosterUri } from '@/features/home/utils/home-hero-image';
 
-const heroRenderLog: Array<{
+const heroRenderLog: {
   slideIndex?: number;
   isActive?: boolean;
   itemId: string;
   posterUrl: string | null;
   imagePriority?: string;
-}> = [];
+}[] = [];
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
