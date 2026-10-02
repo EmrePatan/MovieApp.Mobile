@@ -19,9 +19,11 @@ import {
   TAB_BAR_ICON_SIZE,
   TAB_BAR_LABEL_GAP,
   TAB_BAR_ROW_HEIGHT,
+  TAB_BAR_ROW_HORIZONTAL_INSET,
 } from '@/features/navigation/tab-bar-layout-metrics';
 import { getTabBarStyle, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 type TabConfig = {
   id: PrimaryTabId;
@@ -82,7 +84,15 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
       onLayout={handleTabBarLayout}
       style={[styles.shell, getTabBarStyle(insets)]}
     >
-      <View style={[styles.tabRow, { height: layoutMetrics.rowHeight }]}>
+      <View
+        style={[
+          styles.tabRow,
+          {
+            minHeight: layoutMetrics.rowHeight,
+            paddingHorizontal: TAB_BAR_ROW_HORIZONTAL_INSET,
+          },
+        ]}
+      >
         {PRIMARY_TABS.map((tab) => {
           const isActive = highlightedTab === tab.id;
           const color = isActive ? colors.accent : colors.textMuted;
@@ -97,7 +107,14 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
               style={styles.tabButton}
             >
               <Ionicons name={tab.icon} size={TAB_BAR_ICON_SIZE} color={color} />
-              <AppText style={[tabBarLabelStyle, styles.label, { color }]}>{t(tab.labelKey)}</AppText>
+              <AppText
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
+                style={[tabBarLabelStyle, styles.label, { color }]}
+              >
+                {t(tab.labelKey)}
+              </AppText>
             </Pressable>
           );
         })}
@@ -119,8 +136,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     minHeight: TAB_BAR_ROW_HEIGHT,
+    paddingHorizontal: spacing.xs,
   },
   label: {
     marginTop: TAB_BAR_LABEL_GAP,
+    textAlign: 'center',
   },
 });

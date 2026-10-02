@@ -6,7 +6,7 @@ import {
 import { spacing } from '@/theme/spacing';
 
 const TAB_SHELL_TOP_PADDING = spacing.xs;
-const TAB_ROW_HEIGHT = 40;
+const TAB_ROW_HEIGHT = 42;
 
 describe('resolveIosTabBarVisualBottomSpacing', () => {
   it('maps a large runtime inset to the compact design range', () => {
@@ -26,7 +26,7 @@ describe('resolveIosTabBarVisualBottomSpacing', () => {
     const compactTotal = TAB_SHELL_TOP_PADDING + TAB_ROW_HEIGHT + visual;
     const legacyTotal = TAB_SHELL_TOP_PADDING + TAB_ROW_HEIGHT + 34;
 
-    expect(compactTotal).toBe(58);
+    expect(compactTotal).toBe(60);
     expect(compactTotal).toBeLessThan(legacyTotal);
   });
 });
