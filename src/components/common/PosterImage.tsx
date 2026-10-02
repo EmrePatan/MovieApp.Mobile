@@ -1,13 +1,22 @@
-import { memo, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { memo, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { DetailDirectionalFrame } from '@/features/details/shared/components/DetailDirectionalFrame';
 import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
+import { REMOTE_IMAGE_CACHE_POLICY } from '@/utils/cached-image';
 import { resolveImageUri, type ImageSize } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
 import { shadows } from '@/theme/shadows';
+
+/**
+ * surfaceElevated (#1C1C28) at 40%. A decoded bitmap stays visible while JS
+ * is still waiting on onLoad — an opaque veil is what made cached posters
+ * look like blank cards with spinners.
+ */
+export const POSTER_LOADING_VEIL = 'rgba(28, 28, 40, 0.4)';
 
 interface PosterImageProps {
   uri: string | null | undefined;
@@ -41,6 +50,14 @@ export const PosterImage = memo(function PosterImage({
   const showFallback = !resolvedUri || hasError;
   const [trackedUri, setTrackedUri] = useState(resolvedUri);
   const [isLoading, setIsLoading] = useState(Boolean(resolvedUri));
+  const resolvedUriRef = useRef(resolvedUri);
+  resolvedUriRef.current = resolvedUri;
+
+  const clearLoadingIfCurrent = (uriAtEvent: string | null) => {
+    if (resolvedUriRef.current === uriAtEvent) {
+      setIsLoading(false);
+    }
+  };
 
   const innerWidth = directionalFrame ? width - DETAIL_DIRECTIONAL_FRAME_BORDER * 2 : width;
   const innerHeight = directionalFrame ? height - DETAIL_DIRECTIONAL_FRAME_BORDER * 2 : height;
@@ -53,19 +70,22 @@ export const PosterImage = memo(function PosterImage({
     setIsLoading(Boolean(resolvedUri));
   }
 
-  const handleLoad = () => {
+  const markDisplayed = () => {
+    const uriAtEvent = resolvedUri;
     onImageLoad();
-    setIsLoading(false);
+    clearLoadingIfCurrent(uriAtEvent);
   };
 
   const handleLoadEnd = () => {
+    const uriAtEvent = resolvedUri;
     onImageLoadEnd();
-    setIsLoading(false);
+    clearLoadingIfCurrent(uriAtEvent);
   };
 
   const handleError = () => {
+    const uriAtEvent = resolvedUri;
     onImageError();
-    setIsLoading(false);
+    clearLoadingIfCurrent(uriAtEvent);
   };
 
   const posterBody = (
@@ -85,11 +105,14 @@ export const PosterImage = memo(function PosterImage({
       ) : (
         <>
           <Image
-            key={imageKey}
             source={{ uri: resolvedUri }}
             style={[styles.image, { width: innerWidth, height: innerHeight, borderRadius: innerRadius }]}
-            resizeMode="cover"
-            onLoad={handleLoad}
+            contentFit="cover"
+            cachePolicy={REMOTE_IMAGE_CACHE_POLICY}
+            recyclingKey={imageKey}
+            transition={null}
+            onLoad={markDisplayed}
+            onDisplay={markDisplayed}
             onLoadEnd={handleLoadEnd}
             onError={handleError}
           />
@@ -135,6 +158,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: POSTER_LOADING_VEIL,
   },
 });

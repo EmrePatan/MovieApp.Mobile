@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Animated,
   AppState,
-  Image,
   type ListRenderItemInfo,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -26,6 +25,7 @@ import { useHomeHeroCarouselLayout } from '../hooks/useHomeHeroCarouselLayout';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
 import { resolveHomeHeroNeighborPrefetchUris } from '../utils/home-hero-image';
+import { prefetchCachedImages } from '@/utils/cached-image';
 import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 4000;
@@ -164,9 +164,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   }, []);
 
   useEffect(() => {
-    for (const uri of resolveHomeHeroNeighborPrefetchUris(items, activeIndex)) {
-      void Image.prefetch(uri);
-    }
+    prefetchCachedImages(resolveHomeHeroNeighborPrefetchUris(items, activeIndex));
   }, [activeIndex, items]);
 
   const handleScrollSettled = useCallback(

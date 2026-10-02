@@ -82,6 +82,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    'expo-image',
     'expo-secure-store',
     'expo-notifications',
     [

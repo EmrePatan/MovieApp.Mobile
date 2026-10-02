@@ -1,5 +1,25 @@
 import mockReact from 'react';
 
+jest.mock('expo-image', () => {
+  const React = require('react');
+  const { Image } = require('react-native');
+
+  const ExpoImage = React.forwardRef((props: Record<string, unknown>, ref: unknown) =>
+    React.createElement(Image, {
+      ...props,
+      ref,
+      resizeMode: props.resizeMode ?? props.contentFit,
+    }),
+  );
+  ExpoImage.displayName = 'ExpoImage';
+  ExpoImage.prefetch = jest.fn(async () => true);
+  ExpoImage.clearMemoryCache = jest.fn(async () => true);
+  ExpoImage.clearDiskCache = jest.fn(async () => true);
+  ExpoImage.getCachePathAsync = jest.fn(async () => null);
+
+  return { Image: ExpoImage };
+});
+
 jest.mock('react-native-gesture-handler', () => {
   const mockReact = require('react');
   const { View, Pressable } = require('react-native');

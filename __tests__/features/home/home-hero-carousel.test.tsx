@@ -1,5 +1,6 @@
 import React from 'react';
-import { FlatList, Image } from 'react-native';
+import { Image } from 'expo-image';
+import { FlatList } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
@@ -161,10 +162,11 @@ describe('HomeHeroCarousel', () => {
     const list = UNSAFE_getByType(FlatList);
 
     expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w780/poster-a.jpg',
-    );
-    expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w780/poster-b.jpg',
+      [
+        'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+        'https://image.tmdb.org/t/p/w780/poster-b.jpg',
+      ],
+      { cachePolicy: 'memory-disk' },
     );
     prefetchSpy.mockClear();
 
@@ -176,10 +178,11 @@ describe('HomeHeroCarousel', () => {
       <HomeHeroCarousel items={posterOnly} filterKey="movie" onItemPress={jest.fn()} />,
     );
     expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w780/poster-a.jpg',
-    );
-    expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w780/poster-b.jpg',
+      [
+        'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+        'https://image.tmdb.org/t/p/w780/poster-b.jpg',
+      ],
+      { cachePolicy: 'memory-disk' },
     );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
 
@@ -193,10 +196,11 @@ describe('HomeHeroCarousel', () => {
     });
 
     expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w780/poster-b.jpg',
-    );
-    expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+      [
+        'https://image.tmdb.org/t/p/w780/poster-b.jpg',
+        'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+      ],
+      { cachePolicy: 'memory-disk' },
     );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
     prefetchSpy.mockRestore();

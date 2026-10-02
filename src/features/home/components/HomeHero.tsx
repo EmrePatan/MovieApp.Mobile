@@ -2,7 +2,6 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
-  Image,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -10,6 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Image } from 'expo-image';
 import {
   getHomeHeroCardWidth,
   getHomeHeroHeight,
@@ -27,6 +27,7 @@ import type { HomeItem } from '../types';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
+import { REMOTE_IMAGE_CACHE_POLICY, type RemoteImagePriority } from '@/utils/cached-image';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -48,27 +49,32 @@ const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
 
 function HeroPosterImage({
   uri,
-  imageKey,
+  recyclingKey,
   width,
   height,
+  priority,
   onError,
   onLoad,
   onLoadEnd,
 }: {
   uri: string;
-  imageKey: string;
+  recyclingKey: string;
   width: number;
   height: number;
+  priority: RemoteImagePriority;
   onError: () => void;
   onLoad: () => void;
   onLoadEnd: () => void;
 }) {
   return (
     <Image
-      key={imageKey}
       source={{ uri }}
       style={{ width, height }}
-      resizeMode="contain"
+      contentFit="contain"
+      cachePolicy={REMOTE_IMAGE_CACHE_POLICY}
+      recyclingKey={recyclingKey}
+      priority={priority}
+      transition={null}
       accessibilityIgnoresInvertColors
       onError={onError}
       onLoad={onLoad}
@@ -96,6 +102,7 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
   glow = true,
   animatedStyle,
   pressable = true,
+  priority = 'high',
 }: {
   item: HomeItem;
   onPress?: (item: HomeItem) => void;
@@ -104,6 +111,7 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
   glow?: boolean;
   animatedStyle?: StyleProp<ViewStyle>;
   pressable?: boolean;
+  priority?: RemoteImagePriority;
 }) {
   const { t } = useTranslation();
   const posterUri = resolveHomeHeroPosterUri(item.posterUrl);
@@ -139,9 +147,10 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
         {posterUri != null && !posterLoad.hasError ? (
           <HeroPosterImage
             uri={posterUri}
-            imageKey={posterLoad.imageKey}
+            recyclingKey={posterLoad.imageKey}
             width={innerWidth}
             height={innerHeight}
+            priority={priority}
             onError={posterLoad.onImageError}
             onLoad={posterLoad.onImageLoad}
             onLoadEnd={posterLoad.onImageLoadEnd}
@@ -299,6 +308,7 @@ export const HomeHero = memo(function HomeHero({
       glow={isActive}
       animatedStyle={animatedStyle}
       pressable={isPosterPressable}
+      priority={isActive ? 'high' : 'low'}
     />
   );
 

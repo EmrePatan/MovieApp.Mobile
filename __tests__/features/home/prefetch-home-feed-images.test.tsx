@@ -1,4 +1,4 @@
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 import { prefetchHomeFeedImages } from '@/features/home/utils/prefetch-home-feed-images';
 import type { HomeItem, HomeSection } from '@/features/home/types';
 
@@ -54,13 +54,16 @@ describe('prefetchHomeFeedImages', () => {
 
     prefetchHomeFeedImages(heroItems, sections);
 
-    expect(prefetchSpy.mock.calls.map((call) => call[0])).toEqual([
-      'https://image.tmdb.org/t/p/w780/hero-a.jpg',
-      'https://image.tmdb.org/t/p/w780/hero-b.jpg',
-      'https://image.tmdb.org/t/p/w500/one.jpg',
-      'https://image.tmdb.org/t/p/w500/two.jpg',
-      'https://image.tmdb.org/t/p/w500/three.jpg',
-      'https://image.tmdb.org/t/p/w500/four.jpg',
-    ]);
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      [
+        'https://image.tmdb.org/t/p/w780/hero-a.jpg',
+        'https://image.tmdb.org/t/p/w780/hero-b.jpg',
+        'https://image.tmdb.org/t/p/w500/one.jpg',
+        'https://image.tmdb.org/t/p/w500/two.jpg',
+        'https://image.tmdb.org/t/p/w500/three.jpg',
+        'https://image.tmdb.org/t/p/w500/four.jpg',
+      ],
+      { cachePolicy: 'memory-disk' },
+    );
   });
 });

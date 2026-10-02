@@ -172,7 +172,26 @@ describe('HomeHero', () => {
     expect(image.props.source).toEqual({
       uri: 'https://image.tmdb.org/t/p/w780/poster.jpg',
     });
-    expect(image.props.resizeMode).toBe('contain');
+    expect(image.props.contentFit).toBe('contain');
+    expect(image.props.cachePolicy).toBe('memory-disk');
+    expect(image.props.priority).toBe('high');
+    expect(image.props.recyclingKey).toContain('/w780/poster.jpg');
+    expect(image.props.transition).toBeNull();
+  });
+
+  it('asks the active hero for a high-priority decode and neighbors for a low one', () => {
+    const item = createItem({ posterUrl: '/poster.jpg' });
+
+    const { unmount } = render(
+      <HomeHero item={item} embedded isActive onPress={mockOnPress} slideIndex={1} />,
+    );
+    expect(screen.UNSAFE_getByType(Image).props.priority).toBe('high');
+    unmount();
+
+    render(
+      <HomeHero item={item} embedded isActive={false} onPress={mockOnPress} slideIndex={0} />,
+    );
+    expect(screen.UNSAFE_getByType(Image).props.priority).toBe('low');
   });
 
   it('shows the placeholder when the hero has no poster', () => {

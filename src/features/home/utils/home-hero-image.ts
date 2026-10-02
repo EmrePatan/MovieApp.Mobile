@@ -20,6 +20,24 @@ export const HOME_HERO_POSTER_SIZE: ImageSize = 'w780';
  */
 export const HOME_TRENDING_POSTER_SIZE: ImageSize = 'w780';
 
+/**
+ * Every other home rail, including Recommended For You, paints `w500`.
+ * Prefetch must call `resolveHomeSectionPosterUri` so the warmed URL matches
+ * the `PosterImage` `size` HomeSection passes.
+ */
+export const HOME_DEFAULT_RAIL_POSTER_SIZE: ImageSize = 'w500';
+
+export function resolveHomeSectionPosterSize(sectionType: string): ImageSize {
+  return sectionType === 'Trending' ? HOME_TRENDING_POSTER_SIZE : HOME_DEFAULT_RAIL_POSTER_SIZE;
+}
+
+export function resolveHomeSectionPosterUri(
+  sectionType: string,
+  path: string | null | undefined,
+): string | null {
+  return resolveImageUri(path, resolveHomeSectionPosterSize(sectionType));
+}
+
 export function resolveHomeHeroBackdropUri(
   path: string | null | undefined,
 ): string | null {
@@ -82,7 +100,7 @@ export function resolveHomeHeroNeighborPrefetchUris(
   return uris;
 }
 
-/** First resolvable rail posters at the default catalog size (`w500`). */
+/** First resolvable Recommended For You posters at the size that rail paints. */
 export function resolveHomeRecommendedPrefetchUris(
   items: readonly { posterUrl?: string | null }[],
 ): string[] {
@@ -93,7 +111,7 @@ export function resolveHomeRecommendedPrefetchUris(
       break;
     }
 
-    const uri = resolveImageUri(item.posterUrl);
+    const uri = resolveHomeSectionPosterUri('RecommendedForYou', item.posterUrl);
     if (uri != null && !uris.includes(uri)) {
       uris.push(uri);
     }
