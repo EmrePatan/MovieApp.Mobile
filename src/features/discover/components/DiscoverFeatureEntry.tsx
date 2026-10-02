@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -13,6 +14,8 @@ interface DiscoverFeatureEntryProps {
   disabled?: boolean;
   comingSoon?: boolean;
   accessibilityLabel?: string;
+  backgroundSource?: ImageSourcePropType;
+  backgroundTestID?: string;
 }
 
 export function DiscoverFeatureEntry({
@@ -23,6 +26,8 @@ export function DiscoverFeatureEntry({
   disabled = false,
   comingSoon = false,
   accessibilityLabel,
+  backgroundSource,
+  backgroundTestID,
 }: DiscoverFeatureEntryProps) {
   const { t } = useTranslation();
   const isInteractive = Boolean(onPress) && !disabled && !comingSoon;
@@ -36,10 +41,35 @@ export function DiscoverFeatureEntry({
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
+        backgroundSource ? styles.cardWithArt : null,
         comingSoon && styles.cardMuted,
         pressed && isInteractive && styles.pressed,
       ]}
     >
+      {backgroundSource ? (
+        <>
+          <Image
+            source={backgroundSource}
+            resizeMode="cover"
+            style={styles.backdrop}
+            testID={backgroundTestID}
+            accessible={false}
+          />
+          <LinearGradient
+            pointerEvents="none"
+            colors={[
+              'rgba(8, 8, 12, 0.94)',
+              'rgba(8, 8, 12, 0.78)',
+              'rgba(8, 8, 12, 0.42)',
+              'rgba(8, 8, 12, 0.18)',
+            ]}
+            locations={[0, 0.34, 0.68, 1]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </>
+      ) : null}
       <View style={[styles.iconWrap, comingSoon && styles.iconWrapMuted]}>
         <Ionicons name={icon} size={20} color={comingSoon ? colors.textMuted : colors.accent} />
       </View>
@@ -79,6 +109,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    overflow: 'hidden',
+  },
+  cardWithArt: {
+    paddingVertical: spacing.sm,
+    borderColor: colors.borderAccent,
+    backgroundColor: '#0C0C12',
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    width: '78%',
   },
   cardMuted: {
     opacity: 0.72,

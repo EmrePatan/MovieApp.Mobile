@@ -14,6 +14,7 @@ import { openLibraryStackScreen } from '@/features/library/navigation/library-st
 import type { SearchResultItem } from '@/features/search/types';
 import { GenresHubSection } from '@/features/discovery/components/GenresHubSection';
 import { StreamingPlatformsHubSection } from '@/features/discovery/components/StreamingPlatformsHubSection';
+import { discoverFeatureBackgrounds } from '../discover-feature-backgrounds';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
 import { WorldCinemaHubSection } from './WorldCinemaHubSection';
@@ -96,6 +97,8 @@ export function DiscoverHubContent() {
           icon="options-outline"
           onPress={openAdvancedDiscover}
           accessibilityLabel={t('discover.hub.advancedDiscover.accessibility')}
+          backgroundSource={discoverFeatureBackgrounds.advancedDiscover}
+          backgroundTestID="discover-feature-backdrop-advanced"
         />
         <DiscoverFeatureEntry
           title={t('discover.hub.pickSomething.title')}
@@ -103,6 +106,8 @@ export function DiscoverHubContent() {
           icon="shuffle-outline"
           onPress={openPickSomething}
           accessibilityLabel={t('discover.hub.pickSomething.accessibility')}
+          backgroundSource={discoverFeatureBackgrounds.pickSomething}
+          backgroundTestID="discover-feature-backdrop-pick"
         />
         {config.features.aiRecommendations ? (
           <DiscoverFeatureEntry
@@ -111,42 +116,46 @@ export function DiscoverHubContent() {
             icon="sparkles-outline"
             onPress={openAiRecommendations}
             accessibilityLabel={t('discover.hub.aiRecommendations.accessibility')}
+            backgroundSource={discoverFeatureBackgrounds.aiRecommendations}
+            backgroundTestID="discover-feature-backdrop-ai"
           />
         ) : null}
       </View>
 
-      <StreamingPlatformsHubSection />
-      <GenresHubSection />
-      <WorldCinemaHubSection />
+      <View style={styles.rails}>
+        <StreamingPlatformsHubSection />
+        <GenresHubSection />
+        <WorldCinemaHubSection />
 
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('hidden_gems')}
-        items={hiddenGemsItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('hidden_gems')}
-        testID="discover-rail-hidden-gems"
-      />
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('popular')}
-        items={popularItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('popular')}
-        testID="discover-rail-popular"
-      />
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('new_releases')}
-        items={newReleasesItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('new_releases')}
-        testID="discover-rail-new-releases"
-      />
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('top_rated')}
-        items={topRatedItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('top_rated')}
-        testID="discover-rail-top-rated"
-      />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('hidden_gems')}
+          items={hiddenGemsItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('hidden_gems')}
+          testID="discover-rail-hidden-gems"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('popular')}
+          items={popularItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('popular')}
+          testID="discover-rail-popular"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('new_releases')}
+          items={newReleasesItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('new_releases')}
+          testID="discover-rail-new-releases"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('top_rated')}
+          items={topRatedItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('top_rated')}
+          testID="discover-rail-top-rated"
+        />
+      </View>
     </ScrollView>
   );
 }
@@ -156,13 +165,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
-    gap: spacing.lg,
+    gap: spacing.sm,
   },
   featureSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.xs,
+  },
+  rails: {
+    gap: spacing.lg,
   },
   sectionEyebrow: {
     textTransform: 'uppercase',

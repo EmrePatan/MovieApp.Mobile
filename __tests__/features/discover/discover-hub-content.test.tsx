@@ -217,6 +217,9 @@ describe('DiscoverHubContent', () => {
     expect(screen.getByLabelText('Advanced Discover')).toBeTruthy();
     expect(screen.getByText('Advanced Discover')).toBeTruthy();
     expect(screen.getByText('Genre · Year · Rating · Runtime · Country')).toBeTruthy();
+    expect(screen.getByTestId('discover-feature-backdrop-advanced')).toBeTruthy();
+    expect(screen.getByTestId('discover-feature-backdrop-pick')).toBeTruthy();
+    expect(screen.getByTestId('discover-feature-backdrop-ai')).toBeTruthy();
   });
 
   it('opens advanced discover from Advanced Discover entry', () => {
