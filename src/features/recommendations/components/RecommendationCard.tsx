@@ -1,7 +1,6 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { ContentTypeBadge } from '@/components/content/ContentTypeBadge';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { RecommendationItem } from '../types';
@@ -13,19 +12,31 @@ import { spacing } from '@/theme/spacing';
 interface RecommendationCardProps {
   item: RecommendationItem;
   onPress?: (item: RecommendationItem) => void;
+  showReason?: boolean;
 }
 
 export const RecommendationCard = memo(function RecommendationCard({
   item,
   onPress,
+  showReason = true,
 }: RecommendationCardProps) {
   const { t } = useTranslation();
   const year = formatCatalogYear(item.releaseDate, item.year);
+  const metadataLine = useMemo(() => {
+    const parts = [
+      formatContentType(item.type),
+      year,
+      item.voteAverage > 0 ? `★ ${formatRating(item.voteAverage)}` : null,
+    ].filter(Boolean);
+
+    return parts.join(' · ');
+  }, [item.type, item.voteAverage, year]);
+
   const accessibilityDetails = [
     formatContentType(item.type),
     year,
     t('common.communityRatingAccessibility', { rating: formatRating(item.voteAverage) }),
-    item.reason,
+    showReason ? item.reason : null,
   ]
     .filter(Boolean)
     .join(', ');
@@ -52,18 +63,12 @@ export const RecommendationCard = memo(function RecommendationCard({
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
-        <View style={styles.row}>
-          <ContentTypeBadge type={item.type} />
-          {year ? (
-            <AppText variant="caption" muted>
-              {year}
-            </AppText>
-          ) : null}
-          <AppText variant="caption" muted>
-            ★ {formatRating(item.voteAverage)}
+        {metadataLine ? (
+          <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
+            {metadataLine}
           </AppText>
-        </View>
-        {item.reason ? (
+        ) : null}
+        {showReason && item.reason ? (
           <AppText variant="caption" muted numberOfLines={2}>
             {item.reason}
           </AppText>
@@ -88,12 +93,9 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   title: {
-    minHeight: 40,
+    flexShrink: 1,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+  metadata: {
+    letterSpacing: 0.1,
   },
 });

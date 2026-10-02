@@ -92,6 +92,7 @@ export function SimilarContentSection({
             key={`${item.type}-${item.id}`}
             item={item}
             onPress={handleItemPress}
+            showReason={false}
           />
         ))}
       </ScrollView>

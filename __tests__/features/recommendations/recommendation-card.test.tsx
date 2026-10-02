@@ -23,10 +23,15 @@ describe('RecommendationCard', () => {
     render(<RecommendationCard item={item} />);
 
     expect(screen.getByText('Inception')).toBeTruthy();
-    expect(screen.getByText('Movie')).toBeTruthy();
-    expect(screen.getByText('2010')).toBeTruthy();
-    expect(screen.getByText('★ 8.4')).toBeTruthy();
+    expect(screen.getByText('Movie · 2010 · ★ 8.4')).toBeTruthy();
     expect(screen.getByText('Similar genres and cast')).toBeTruthy();
+  });
+
+  it('hides reason when showReason is false', () => {
+    render(<RecommendationCard item={item} showReason={false} />);
+
+    expect(screen.getByText('Inception')).toBeTruthy();
+    expect(screen.queryByText('Similar genres and cast')).toBeNull();
   });
 
   it('calls onPress', () => {

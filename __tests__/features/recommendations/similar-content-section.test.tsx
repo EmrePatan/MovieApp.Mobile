@@ -53,6 +53,7 @@ describe('SimilarContentSection', () => {
     render(<SimilarContentSection contentType="movie" contentId="movie-id" />);
     expect(screen.getByText('You May Also Like')).toBeTruthy();
     expect(screen.getByText('Interstellar')).toBeTruthy();
+    expect(screen.queryByText('Similar genres')).toBeNull();
   });
 
   it('navigates to movie detail', () => {
