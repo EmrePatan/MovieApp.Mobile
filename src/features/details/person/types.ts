@@ -1,3 +1,5 @@
+import type { PersonFilmographyKnownForCategory } from './known-for-category';
+
 export interface PersonFilmographyEntry {
   mediaType: 'movie' | 'tv';
   catalogId: string | null;
@@ -6,6 +8,8 @@ export interface PersonFilmographyEntry {
   posterPath: string | null;
   character: string | null;
   releaseDate: string | null;
+  popularity?: number;
+  knownForCategory?: PersonFilmographyKnownForCategory | null;
 }
 
 export interface PersonDetailResponse {

@@ -13,6 +13,7 @@ import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader'
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import type { PersonFilmographyEntry } from '../types';
+import { rankFilmographyForKnownForPreview } from '../utils/rank-filmography-for-known-for-preview';
 import { PersonFilmographyPreviewCard } from './PersonFilmographyPreviewCard';
 
 export const FILMOGRAPHY_PREVIEW_LIMIT = 10;
@@ -32,7 +33,10 @@ export function PersonFilmographyPreviewSection({
   const resolvingKeyRef = useRef<string | null>(null);
   const [resolvingKey, setResolvingKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const previewItems = filmography.slice(0, FILMOGRAPHY_PREVIEW_LIMIT);
+  const previewItems = useMemo(
+    () => rankFilmographyForKnownForPreview(filmography).slice(0, FILMOGRAPHY_PREVIEW_LIMIT),
+    [filmography],
+  );
 
   const handlePress = useCallback(
     async (entry: PersonFilmographyEntry) => {
