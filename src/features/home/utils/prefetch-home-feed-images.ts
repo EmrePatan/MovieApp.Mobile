@@ -6,9 +6,29 @@ import {
 } from './home-hero-image';
 
 /**
- * Warm the posters Home is about to show: the visible hero, the previous
- * hero (wrapping to the last slide when the first is centered), the next
- * hero, and the first Recommended For You cards.
+ * Warm only the three on-screen hero posters.
+ * The centered URI is submitted first, then the left wrap and the next slide
+ * together. Heroes that are off-screen are not prefetched.
+ */
+export function prefetchHomeHeroNeighbors(
+  heroItems: readonly HomeItem[],
+  activeIndex: number,
+): void {
+  const uris = resolveHomeHeroNeighborPrefetchUris(heroItems, activeIndex);
+  if (uris.length === 0) {
+    return;
+  }
+
+  prefetchCachedImages(uris.slice(0, 1));
+  if (uris.length > 1) {
+    prefetchCachedImages(uris.slice(1));
+  }
+}
+
+/**
+ * Warm the posters Home is about to show: the centered hero, the previous
+ * hero (the last slide when the first is centered), the next hero, then the
+ * first Recommended For You cards.
  * URIs come from the same builders the views use, and land in the expo-image
  * memory-disk cache those views read.
  */
@@ -19,8 +39,6 @@ export function prefetchHomeFeedImages(
   const recommended =
     sections.find((section) => section.type === 'RecommendedForYou')?.items ?? [];
 
-  prefetchCachedImages([
-    ...resolveHomeHeroNeighborPrefetchUris(heroItems, 0),
-    ...resolveHomeRecommendedPrefetchUris(recommended),
-  ]);
+  prefetchHomeHeroNeighbors(heroItems, 0);
+  prefetchCachedImages(resolveHomeRecommendedPrefetchUris(recommended));
 }

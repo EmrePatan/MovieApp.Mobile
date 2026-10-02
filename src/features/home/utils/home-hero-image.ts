@@ -74,9 +74,10 @@ export function resolveHomeHeroPrefetchUri(item: {
 export const HOME_RECOMMENDED_PREFETCH_COUNT = 4;
 
 /**
- * Posters the centered slide and both peeking neighbors will paint, in
- * `w780` via `resolveHomeHeroPosterUri`. At index 0 the left peek is the
- * last slide, so that wrap is included — not only the next slide.
+ * The only hero posters warmed for the current slide, in paint order:
+ * centered slide, previous slide (the last slide when the first is centered),
+ * next slide. All `w780` via `resolveHomeHeroPosterUri`.
+ * Off-screen heroes are omitted — a 10-item loop prefetches 3 URIs, not 10.
  */
 export function resolveHomeHeroNeighborPrefetchUris(
   items: readonly { posterUrl?: string | null }[],

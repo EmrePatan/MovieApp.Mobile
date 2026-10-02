@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList } from 'react-native';
+import { ScrollView } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
@@ -59,26 +59,12 @@ function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
   };
 }
 
-function pressHeroSlide(list: FlatList<HomeItem>, item: HomeItem, index: number) {
-  const slide = list.props.renderItem({
-    item,
-    index,
-    separators: {
-      highlight: jest.fn(),
-      unhighlight: jest.fn(),
-      updateProps: jest.fn(),
-    },
-  });
-  const slideRender = render(slide);
-  fireEvent.press(slideRender.getByLabelText(`Hero ${item.title}`));
-  slideRender.unmount();
+function getCarouselSlideWidth(list: ScrollView) {
+  const offset = list.props.contentOffset?.x;
+  return offset != null && offset > 0 ? offset : 400;
 }
 
-function getCarouselSlideWidth(list: FlatList<HomeItem>) {
-  return list.props.getItemLayout?.(null, 0).length ?? 400;
-}
-
-function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: number) {
+function advanceCarouselToActiveIndex(list: ScrollView, activeIndex: number) {
   const slideWidth = getCarouselSlideWidth(list);
   fireEvent(list, 'momentumScrollEnd', {
     nativeEvent: {
@@ -87,7 +73,7 @@ function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: num
   });
 }
 
-function swipeCarouselToScrollIndex(list: FlatList<HomeItem>, scrollIndex: number) {
+function swipeCarouselToScrollIndex(list: ScrollView, scrollIndex: number) {
   const slideWidth = getCarouselSlideWidth(list);
   fireEvent(list, 'momentumScrollEnd', {
     nativeEvent: {
@@ -134,7 +120,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={[itemA, itemB]} filterKey="all" onItemPress={onItemPress} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     act(() => {
       jest.advanceTimersByTime(4000);
@@ -145,7 +131,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
       expect(getByLabelText('Slide 2 of 2')).toBeTruthy();
     });
 
-    pressHeroSlide(list, itemB, 1);
+    fireEvent.press(getByLabelText('Hero Hero B'));
 
     expect(onItemPress).toHaveBeenCalledTimes(1);
     expect(onItemPress).toHaveBeenCalledWith(itemB);
@@ -165,7 +151,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
         isScreenFocused={true}
       />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     act(() => {
       jest.advanceTimersByTime(4000);
@@ -194,7 +180,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
       />,
     );
 
-    pressHeroSlide(list, itemB, 1);
+    fireEvent.press(getByLabelText('Hero Hero B'));
 
     expect(onItemPress).toHaveBeenCalledTimes(1);
     expect(onItemPress).toHaveBeenCalledWith(itemB);
@@ -236,7 +222,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
         isScreenFocused={false}
       />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     rerender(
       <HomeHeroCarousel
@@ -265,7 +251,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={[itemA, itemB]} filterKey="all" onItemPress={onItemPress} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     advanceCarouselToActiveIndex(list, 1);
 
@@ -290,7 +276,7 @@ describe('HomeHeroCarousel navigation and focus', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={[itemA, itemB]} filterKey="all" onItemPress={onItemPress} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
 
@@ -309,13 +295,12 @@ describe('HomeHeroCarousel navigation and focus', () => {
       createItem({ id: 'hero-2', contentType: 'tv' }),
     ];
 
-    const { UNSAFE_getByType } = render(
+    const { getByTestId } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
 
-    expect(list.props.keyExtractor(items[0], 0)).toBe('0:movie:hero-1');
-    expect(list.props.keyExtractor(items[1], 1)).toBe('1:tv:hero-2');
+    expect(getByTestId('hero-slot-0:tv:hero-2')).toBeTruthy();
+    expect(getByTestId('hero-slot-1:movie:hero-1')).toBeTruthy();
     expect(createHomeContentKey(items[0])).toBe('movie:hero-1');
     expect(createHomeContentKey(items[1])).toBe('tv:hero-2');
   });

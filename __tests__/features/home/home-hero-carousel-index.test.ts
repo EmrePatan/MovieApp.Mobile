@@ -7,6 +7,7 @@ import {
   HERO_CAROUSEL_RENDER_WINDOW,
   getScrollIndexFromOffset,
   resolveHeroCarouselLoopSettledOffset,
+  shouldMountHeroSlide,
 } from '@/features/home/utils/home-hero-carousel-index';
 
 const SNAP = 358;
@@ -18,10 +19,17 @@ describe('home hero carousel index helpers', () => {
     expect(HERO_CAROUSEL_RENDER_WINDOW).toBe(3);
     expect(getHeroCarouselInitialMountedIndices(loopLength)).toEqual([0, 1, 2]);
     expect(getHeroCarouselInitialMountedIndices(loopLength)[0]).toBe(0);
-    expect(getHeroCarouselImagePriority(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('normal');
+    expect(shouldMountHeroSlide(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(true);
+    expect(shouldMountHeroSlide(1, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(true);
+    expect(shouldMountHeroSlide(2, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(true);
+    expect(shouldMountHeroSlide(3, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(false);
+    expect(shouldMountHeroSlide(loopLength - 1, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(false);
+    expect(getHeroCarouselImagePriority(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('high');
+    expect(getHeroCarouselImagePriority(2, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('high');
     expect(getHeroCarouselImagePriority(HERO_CAROUSEL_LOOP_HEAD_INDEX, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(
       'high',
     );
+    expect(getHeroCarouselImagePriority(4, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('low');
   });
 
   it('maps loop scroll indices to logical active indices', () => {

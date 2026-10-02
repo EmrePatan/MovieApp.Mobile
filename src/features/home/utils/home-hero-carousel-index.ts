@@ -1,35 +1,43 @@
 export const HERO_CAROUSEL_LOOP_HEAD_INDEX = 1;
 
 /**
- * Left peek, centered slide, and right peek. FlatList's first window starts
- * at `initialScrollIndex` and only walks forward, so this many cells mounted
- * from index 0 are the wrap clone plus the first two real slides.
+ * Posters that are on screen at once: left peek, centered slide, right peek.
+ * Slides farther than this stay unmounted until the scroll index reaches them.
  */
 export const HERO_CAROUSEL_RENDER_WINDOW = 3;
 
+const HERO_CAROUSEL_MOUNT_RADIUS = (HERO_CAROUSEL_RENDER_WINDOW - 1) / 2;
+
 /**
- * Cells mounted before any scroll metrics arrive.
- * VirtualizedList does not render the cell before `initialScrollIndex`, and
- * the left peek is that cell (loop index 0, the last slide) when the real
- * first slide is centered. The list therefore starts its render index at 0
- * and uses `contentOffset` to show the centered slide.
+ * Loop indices drawn on first paint when the real first slide is centered:
+ * the leading wrap clone, that slide, and the next slide.
  */
 export function getHeroCarouselInitialMountedIndices(loopLength: number): number[] {
   const count = Math.max(0, Math.min(loopLength, HERO_CAROUSEL_RENDER_WINDOW));
   return Array.from({ length: count }, (_, index) => index);
 }
 
-/** Centered slide first, then the on-screen peeks. Far clones stay low. */
+/**
+ * True when this loop slot is the centered slide or a peek beside it.
+ * Off-screen heroes (items 4–9 while the first slide is centered) stay unmounted.
+ */
+export function shouldMountHeroSlide(
+  slideIndex: number,
+  centeredScrollIndex: number,
+): boolean {
+  return Math.abs(slideIndex - centeredScrollIndex) <= HERO_CAROUSEL_MOUNT_RADIUS;
+}
+
+/**
+ * The three on-screen posters decode at high priority.
+ * Anything farther out is low, and is not mounted until it scrolls near.
+ */
 export function getHeroCarouselImagePriority(
   slideIndex: number,
   centeredScrollIndex: number,
-): 'high' | 'normal' | 'low' {
-  if (slideIndex === centeredScrollIndex) {
+): 'high' | 'low' {
+  if (Math.abs(slideIndex - centeredScrollIndex) <= HERO_CAROUSEL_MOUNT_RADIUS) {
     return 'high';
-  }
-
-  if (Math.abs(slideIndex - centeredScrollIndex) === 1) {
-    return 'normal';
   }
 
   return 'low';

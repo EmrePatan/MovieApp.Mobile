@@ -77,11 +77,16 @@ describe('home hero image urls', () => {
     const ten = Array.from({ length: 10 }, (_, index) => ({
       posterUrl: `/${index}.jpg`,
     }));
-    expect(resolveHomeHeroNeighborPrefetchUris(ten, 0)).toEqual([
+    const firstPaint = resolveHomeHeroNeighborPrefetchUris(ten, 0);
+    expect(firstPaint).toEqual([
       resolveHomeHeroPosterUri('/0.jpg'),
       resolveHomeHeroPosterUri('/9.jpg'),
       resolveHomeHeroPosterUri('/1.jpg'),
     ]);
+    expect(firstPaint).toHaveLength(3);
+    for (const index of [2, 3, 4, 5, 6, 7, 8]) {
+      expect(firstPaint).not.toContain(resolveHomeHeroPosterUri(`/${index}.jpg`));
+    }
   });
 
   it('uses one size builder for the rail that is painted and the rail that is prefetched', () => {

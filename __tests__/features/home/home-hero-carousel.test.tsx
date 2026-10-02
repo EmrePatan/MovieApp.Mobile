@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image } from 'expo-image';
-import { FlatList } from 'react-native';
+import { ScrollView } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
@@ -35,11 +35,12 @@ function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
   };
 }
 
-function getCarouselSlideWidth(list: FlatList<HomeItem>) {
-  return list.props.getItemLayout?.(null, 0).length ?? 400;
+function getCarouselSlideWidth(list: ScrollView) {
+  const offset = list.props.contentOffset?.x;
+  return offset != null && offset > 0 ? offset : 400;
 }
 
-function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: number) {
+function advanceCarouselToActiveIndex(list: ScrollView, activeIndex: number) {
   const slideWidth = getCarouselSlideWidth(list);
   fireEvent(list, 'momentumScrollEnd', {
     nativeEvent: {
@@ -48,7 +49,7 @@ function advanceCarouselToActiveIndex(list: FlatList<HomeItem>, activeIndex: num
   });
 }
 
-function scrollCarouselToOffset(list: FlatList<HomeItem>, offsetX: number) {
+function scrollCarouselToOffset(list: ScrollView, offsetX: number) {
   fireEvent.scroll(list, {
     nativeEvent: {
       contentOffset: { x: offsetX, y: 0 },
@@ -89,7 +90,7 @@ describe('HomeHeroCarousel', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
 
@@ -121,7 +122,7 @@ describe('HomeHeroCarousel', () => {
     const { getByLabelText, UNSAFE_getByType, rerender } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     act(() => {
       jest.advanceTimersByTime(4000);
@@ -152,14 +153,29 @@ describe('HomeHeroCarousel', () => {
 
     render(<HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />);
 
-    expect(prefetchSpy).toHaveBeenCalledWith(
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      1,
+      ['https://image.tmdb.org/t/p/w780/0.jpg'],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      2,
       [
-        'https://image.tmdb.org/t/p/w780/0.jpg',
         'https://image.tmdb.org/t/p/w780/9.jpg',
         'https://image.tmdb.org/t/p/w780/1.jpg',
       ],
       { cachePolicy: 'memory-disk' },
     );
+    const prefetched = prefetchSpy.mock.calls.flatMap((call) => call[0] as string[]);
+    expect(new Set(prefetched)).toEqual(
+      new Set([
+        'https://image.tmdb.org/t/p/w780/0.jpg',
+        'https://image.tmdb.org/t/p/w780/9.jpg',
+        'https://image.tmdb.org/t/p/w780/1.jpg',
+      ]),
+    );
+    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/2.jpg');
+    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/8.jpg');
     prefetchSpy.mockRestore();
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;
   });
@@ -184,13 +200,16 @@ describe('HomeHeroCarousel', () => {
     const { UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
-    expect(prefetchSpy).toHaveBeenCalledWith(
-      [
-        'https://image.tmdb.org/t/p/w780/poster-a.jpg',
-        'https://image.tmdb.org/t/p/w780/poster-b.jpg',
-      ],
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      1,
+      ['https://image.tmdb.org/t/p/w780/poster-a.jpg'],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      2,
+      ['https://image.tmdb.org/t/p/w780/poster-b.jpg'],
       { cachePolicy: 'memory-disk' },
     );
     prefetchSpy.mockClear();
@@ -202,11 +221,14 @@ describe('HomeHeroCarousel', () => {
     render(
       <HomeHeroCarousel items={posterOnly} filterKey="movie" onItemPress={jest.fn()} />,
     );
-    expect(prefetchSpy).toHaveBeenCalledWith(
-      [
-        'https://image.tmdb.org/t/p/w780/poster-a.jpg',
-        'https://image.tmdb.org/t/p/w780/poster-b.jpg',
-      ],
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      1,
+      ['https://image.tmdb.org/t/p/w780/poster-a.jpg'],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      2,
+      ['https://image.tmdb.org/t/p/w780/poster-b.jpg'],
       { cachePolicy: 'memory-disk' },
     );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
@@ -220,11 +242,14 @@ describe('HomeHeroCarousel', () => {
       } as never);
     });
 
-    expect(prefetchSpy).toHaveBeenCalledWith(
-      [
-        'https://image.tmdb.org/t/p/w780/poster-b.jpg',
-        'https://image.tmdb.org/t/p/w780/poster-a.jpg',
-      ],
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      1,
+      ['https://image.tmdb.org/t/p/w780/poster-b.jpg'],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      2,
+      ['https://image.tmdb.org/t/p/w780/poster-a.jpg'],
       { cachePolicy: 'memory-disk' },
     );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
@@ -241,7 +266,7 @@ describe('HomeHeroCarousel', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
 
     scrollCarouselToOffset(list, slideWidth + slideWidth * 0.4);
@@ -258,7 +283,7 @@ describe('HomeHeroCarousel', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
 
     scrollCarouselToOffset(list, slideWidth + slideWidth * 0.55);
@@ -272,14 +297,14 @@ describe('HomeHeroCarousel', () => {
       createItem({ id: 'hero-2' }),
       createItem({ id: 'hero-3' }),
     ];
-    const scrollToOffset = jest.fn();
-    const originalScrollToOffset = FlatList.prototype.scrollToOffset;
-    FlatList.prototype.scrollToOffset = scrollToOffset;
+    const scrollTo = jest.fn();
+    const originalScrollTo = ScrollView.prototype.scrollTo;
+    ScrollView.prototype.scrollTo = scrollTo;
 
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
 
     fireEvent(list, 'momentumScrollEnd', {
@@ -287,24 +312,26 @@ describe('HomeHeroCarousel', () => {
     });
 
     expect(getByLabelText('Slide 3 of 3')).toBeTruthy();
-    expect(scrollToOffset).toHaveBeenCalledWith({
-      offset: items.length * slideWidth,
+    expect(scrollTo).toHaveBeenCalledWith({
+      x: items.length * slideWidth,
+      y: 0,
       animated: false,
     });
 
-    scrollToOffset.mockClear();
+    scrollTo.mockClear();
 
     fireEvent(list, 'momentumScrollEnd', {
       nativeEvent: { contentOffset: { x: (items.length + 1) * slideWidth, y: 0 } },
     });
 
     expect(getByLabelText('Slide 1 of 3')).toBeTruthy();
-    expect(scrollToOffset).toHaveBeenCalledWith({
-      offset: slideWidth,
+    expect(scrollTo).toHaveBeenCalledWith({
+      x: slideWidth,
+      y: 0,
       animated: false,
     });
 
-    FlatList.prototype.scrollToOffset = originalScrollToOffset;
+    ScrollView.prototype.scrollTo = originalScrollTo;
   });
 
   it('returns the indicator when dragging back below the 50% threshold', () => {
@@ -316,7 +343,7 @@ describe('HomeHeroCarousel', () => {
     const { getByLabelText, UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
 
     scrollCarouselToOffset(list, slideWidth + slideWidth * 0.55);

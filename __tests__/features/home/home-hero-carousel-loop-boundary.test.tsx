@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList } from 'react-native';
+import { ScrollView } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
@@ -8,7 +8,6 @@ import {
   getHeroCarouselInitialMountedIndices,
   getScrollIndexForActiveIndex,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
-  HERO_CAROUSEL_RENDER_WINDOW,
 } from '@/features/home/utils/home-hero-carousel-index';
 import { resolveHomeHeroPosterUri } from '@/features/home/utils/home-hero-image';
 
@@ -18,6 +17,7 @@ const heroRenderLog: {
   itemId: string;
   posterUrl: string | null;
   imagePriority?: string;
+  repaintPosterOnLayout?: boolean;
 }[] = [];
 
 jest.mock('@tanstack/react-query', () => ({
@@ -32,11 +32,13 @@ jest.mock('@/features/home/components/HomeHero', () => ({
     slideIndex,
     isActive,
     imagePriority,
+    repaintPosterOnLayout,
   }: {
     item: HomeItem;
     slideIndex?: number;
     isActive?: boolean;
     imagePriority?: string;
+    repaintPosterOnLayout?: boolean;
   }) => {
     heroRenderLog.push({
       slideIndex,
@@ -44,6 +46,7 @@ jest.mock('@/features/home/components/HomeHero', () => ({
       itemId: item.id,
       posterUrl: item.posterUrl,
       imagePriority,
+      repaintPosterOnLayout,
     });
     const React = require('react');
     const { View } = require('react-native');
@@ -68,11 +71,12 @@ function createItem(id: string, posterUrl = `/${id}.jpg`): HomeItem {
   };
 }
 
-function getCarouselSlideWidth(list: FlatList<HomeItem>) {
-  return list.props.getItemLayout?.(null, 0).length ?? 400;
+function getCarouselSlideWidth(list: ScrollView) {
+  const offset = list.props.contentOffset?.x;
+  return offset != null && offset > 0 ? offset : 400;
 }
 
-function emitCarouselScroll(list: FlatList<HomeItem>, offsetX: number) {
+function emitCarouselScroll(list: ScrollView, offsetX: number) {
   act(() => {
     list.props.onScroll?.({
       nativeEvent: { contentOffset: { x: offsetX, y: 0 } },
@@ -96,21 +100,19 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
       createItem('c', '/c.jpg'),
       createItem('last', '/last.jpg'),
     ];
-    const { UNSAFE_getByType, getByLabelText } = render(
+    const { UNSAFE_getByType, getByLabelText, queryByTestId } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
     const loopLength = items.length + 2;
 
     expect(getHeroCarouselInitialMountedIndices(loopLength)).toEqual([0, 1, 2]);
-    expect(list.props.initialScrollIndex).toBe(0);
-    expect(list.props.initialNumToRender).toBe(HERO_CAROUSEL_RENDER_WINDOW);
-    expect(list.props.windowSize).toBe(HERO_CAROUSEL_RENDER_WINDOW);
     expect(list.props.contentOffset).toEqual({
       x: slideWidth * HERO_CAROUSEL_LOOP_HEAD_INDEX,
       y: 0,
     });
+    expect(list.props.removeClippedSubviews).toBe(false);
 
     const mounted = getHeroCarouselInitialMountedIndices(loopLength).map((index) =>
       heroRenderLog.find((entry) => entry.slideIndex === index),
@@ -122,13 +124,26 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
         itemId: 'last',
         posterUrl: '/last.jpg',
         isActive: false,
-        imagePriority: 'normal',
+        imagePriority: 'high',
+        repaintPosterOnLayout: true,
+      }),
+    );
+    expect(mounted[1]).toEqual(
+      expect.objectContaining({
+        repaintPosterOnLayout: false,
+      }),
+    );
+    expect(mounted[2]).toEqual(
+      expect.objectContaining({
+        repaintPosterOnLayout: false,
       }),
     );
     expect(resolveHomeHeroPosterUri(mounted[0]?.posterUrl)).toBe(
       'https://image.tmdb.org/t/p/w780/last.jpg',
     );
-    expect(getHeroCarouselImagePriority(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('normal');
+    expect(getHeroCarouselImagePriority(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('high');
+    expect(queryByTestId('hero-slide-3')).toBeNull();
+    expect(queryByTestId('hero-slide-5')).toBeNull();
     expect(mounted[1]).toEqual(
       expect.objectContaining({
         slideIndex: 1,
@@ -145,22 +160,25 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
     const { UNSAFE_getByType, getByLabelText } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     heroRenderLog.length = 0;
     fireEvent(list, 'momentumScrollEnd', {
       nativeEvent: { contentOffset: { x: 0, y: 0 } },
     });
 
-    // The real last cell sits past the 3-cell startup window in tests, where
-    // list metrics never expand the window. Settle still selects that slide.
     expect(getByLabelText('Slide 3 of 3')).toBeTruthy();
+    expect(getActiveHeroRenders()).toEqual([
+      expect.objectContaining({
+        slideIndex: items.length,
+        isActive: true,
+        itemId: 'c',
+        imagePriority: 'high',
+      }),
+    ]);
     expect(getActiveHeroRenders().some((entry) => entry.slideIndex === 0 && entry.isActive)).toBe(
       false,
     );
-    expect(list.props.initialNumToRender).toBe(3);
-    expect(list.props.maxToRenderPerBatch).toBe(3);
-    expect(list.props.windowSize).toBe(3);
     expect(list.props.removeClippedSubviews).toBe(false);
   });
 
@@ -169,16 +187,22 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
     const { UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
     const tailCloneOffset = (items.length + 1) * slideWidth;
 
     heroRenderLog.length = 0;
     emitCarouselScroll(list, tailCloneOffset);
 
-    // The tail clone is outside the 3-slide window, so it is not mounted yet.
-    // Settling still has to activate the real first slide, which is in the window.
-    expect(getActiveHeroRenders()).toEqual([]);
+    // Scrolling onto the tail clone mounts that slide. It is the first item's clone.
+    expect(getActiveHeroRenders()).toEqual([
+      expect.objectContaining({
+        slideIndex: items.length + 1,
+        isActive: true,
+        itemId: 'a',
+        imagePriority: 'high',
+      }),
+    ]);
 
     heroRenderLog.length = 0;
     fireEvent(list, 'momentumScrollEnd', {
@@ -201,7 +225,7 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
     const { UNSAFE_getByType } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
     const slideWidth = getCarouselSlideWidth(list);
     const middleOffset = getScrollIndexForActiveIndex(1) * slideWidth;
 
