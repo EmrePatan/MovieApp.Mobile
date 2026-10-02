@@ -335,6 +335,63 @@ describe('DiscoverHubContent', () => {
     expect([...indexes].sort((left, right) => left - right)).toEqual(indexes);
   });
 
+  it('renders Türlere Göre when the genres API returns Turkish names', () => {
+    const { useGenres } = jest.requireMock('@/features/discovery/hooks/useGenres') as {
+      useGenres: jest.Mock;
+    };
+    const original = useGenres.getMockImplementation();
+    useGenres.mockImplementation(() => ({
+      data: [
+        { id: 'g-news', name: 'Haber' },
+        { id: 'g-comedy', name: 'Komedi' },
+        { id: 'g-action', name: 'Aksiyon' },
+        { id: 'g-scifi', name: 'Bilim Kurgu' },
+      ],
+      isLoading: false,
+      isError: false,
+    }));
+
+    try {
+      render(<DiscoverHubContent />);
+
+      expect(screen.getByTestId('genres-hub')).toBeTruthy();
+      expect(screen.getByText('By Genre')).toBeTruthy();
+      expect(screen.getByText('Aksiyon')).toBeTruthy();
+      expect(screen.getByText('Komedi')).toBeTruthy();
+      expect(screen.getByText('Bilim Kurgu')).toBeTruthy();
+      expect(screen.queryByText('Haber')).toBeNull();
+
+      const serialized = JSON.stringify(screen.toJSON());
+      const labels = ['Aksiyon', 'Komedi', 'Bilim Kurgu'];
+      const indexes = labels.map((label) => serialized.indexOf(label));
+      expect(indexes.every((index) => index >= 0)).toBe(true);
+      expect([...indexes].sort((left, right) => left - right)).toEqual(indexes);
+    } finally {
+      useGenres.mockImplementation(original);
+    }
+  });
+
+  it('still renders the genres rail when returned names are outside the main set', () => {
+    const { useGenres } = jest.requireMock('@/features/discovery/hooks/useGenres') as {
+      useGenres: jest.Mock;
+    };
+    const original = useGenres.getMockImplementation();
+    useGenres.mockImplementation(() => ({
+      data: [{ id: 'g-local', name: 'Yerel Tür' }],
+      isLoading: false,
+      isError: false,
+    }));
+
+    try {
+      render(<DiscoverHubContent />);
+
+      expect(screen.getByTestId('genres-hub')).toBeTruthy();
+      expect(screen.getByText('Yerel Tür')).toBeTruthy();
+    } finally {
+      useGenres.mockImplementation(original);
+    }
+  });
+
   it('opens a main genre on the popular title list', () => {
     render(<DiscoverHubContent />);
 
