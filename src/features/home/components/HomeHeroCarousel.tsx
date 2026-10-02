@@ -25,11 +25,13 @@ import { HOME_HERO_SEARCH_BREATHING_ROOM } from '../utils/home-hero-layout';
 import { useHomeHeroCarouselLayout } from '../hooks/useHomeHeroCarouselLayout';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
-import { resolveHomeHeroPrefetchUri } from '../utils/home-hero-image';
+import { resolveHomeHeroNeighborPrefetchUris } from '../utils/home-hero-image';
 import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 4000;
 const SCROLL_EVENT_THROTTLE_MS = 16;
+/** Active slide plus the posters peeking beside it. Do not mount the whole loop. */
+const HERO_CAROUSEL_RENDER_WINDOW = 3;
 
 const AnimatedFlatList = Animated.FlatList<HomeItem>;
 
@@ -162,18 +164,8 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   }, []);
 
   useEffect(() => {
-    if (items.length <= 1) {
-      return;
-    }
-
-    const nextItem = items[activeIndex + 1];
-    if (!nextItem) {
-      return;
-    }
-
-    const nextUri = resolveHomeHeroPrefetchUri(nextItem);
-    if (nextUri) {
-      void Image.prefetch(nextUri);
+    for (const uri of resolveHomeHeroNeighborPrefetchUris(items, activeIndex)) {
+      void Image.prefetch(uri);
     }
   }, [activeIndex, items]);
 
@@ -324,9 +316,9 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
           onScrollBeginDrag={handleScrollBeginDrag}
           onScrollEndDrag={handleScrollEndDrag}
           onMomentumScrollEnd={handleScrollSettled}
-          initialNumToRender={loopedItems.length}
-          maxToRenderPerBatch={loopedItems.length}
-          windowSize={loopedItems.length}
+          initialNumToRender={Math.min(loopedItems.length, HERO_CAROUSEL_RENDER_WINDOW)}
+          maxToRenderPerBatch={HERO_CAROUSEL_RENDER_WINDOW}
+          windowSize={HERO_CAROUSEL_RENDER_WINDOW}
           removeClippedSubviews={false}
           accessibilityRole="adjustable"
           accessibilityLabel={t('home.slideOf', { current: activeIndex + 1, total: items.length })}

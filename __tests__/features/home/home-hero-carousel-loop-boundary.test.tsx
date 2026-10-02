@@ -96,7 +96,9 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
         itemId: 'c',
       },
     ]);
-    expect(list.props.initialNumToRender).toBe(items.length + 2);
+    expect(list.props.initialNumToRender).toBe(3);
+    expect(list.props.maxToRenderPerBatch).toBe(3);
+    expect(list.props.windowSize).toBe(3);
     expect(list.props.removeClippedSubviews).toBe(false);
   });
 
@@ -112,10 +114,9 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
     heroRenderLog.length = 0;
     emitCarouselScroll(list, tailCloneOffset);
 
-    const activeWhileOnClone = getActiveHeroRenders();
-    expect(activeWhileOnClone).toEqual([
-      { slideIndex: items.length + 1, isActive: true, itemId: 'a' },
-    ]);
+    // The tail clone is outside the 3-slide window, so it is not mounted yet.
+    // Settling still has to activate the real first slide, which is in the window.
+    expect(getActiveHeroRenders()).toEqual([]);
 
     heroRenderLog.length = 0;
     fireEvent(list, 'momentumScrollEnd', {

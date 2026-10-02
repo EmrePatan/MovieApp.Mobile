@@ -138,7 +138,7 @@ describe('HomeHeroCarousel', () => {
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
   });
 
-  it('prefetches the next poster, or the backdrop when the poster is missing', () => {
+  it('prefetches the visible and next w780 posters and wraps to the first', () => {
     const originalImageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
     const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
@@ -161,7 +161,10 @@ describe('HomeHeroCarousel', () => {
     const list = UNSAFE_getByType(FlatList);
 
     expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/original/poster-b.jpg',
+      'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+    );
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      'https://image.tmdb.org/t/p/w780/poster-b.jpg',
     );
     prefetchSpy.mockClear();
 
@@ -173,15 +176,28 @@ describe('HomeHeroCarousel', () => {
       <HomeHeroCarousel items={posterOnly} filterKey="movie" onItemPress={jest.fn()} />,
     );
     expect(prefetchSpy).toHaveBeenCalledWith(
-      'https://image.tmdb.org/t/p/original/poster-b.jpg',
+      'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+    );
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      'https://image.tmdb.org/t/p/w780/poster-b.jpg',
     );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
 
+    prefetchSpy.mockClear();
     act(() => {
-      jest.advanceTimersByTime(4000);
+      list.props.onMomentumScrollEnd?.({
+        nativeEvent: {
+          contentOffset: { x: getCarouselSlideWidth(list) * 2, y: 0 },
+        },
+      } as never);
     });
-    advanceCarouselToActiveIndex(list, 1);
 
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      'https://image.tmdb.org/t/p/w780/poster-b.jpg',
+    );
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      'https://image.tmdb.org/t/p/w780/poster-a.jpg',
+    );
     expect(mockPrefetchQuery).not.toHaveBeenCalled();
     prefetchSpy.mockRestore();
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;

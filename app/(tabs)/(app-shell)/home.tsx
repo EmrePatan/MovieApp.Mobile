@@ -30,6 +30,7 @@ import {
   isHomeRecommendedLoadingSection,
 } from '@/features/home/utils/build-home-list-sections';
 import { shouldShowPersonalizedLoadingSlot } from '@/features/home/utils/home-personalized-loading';
+import { prefetchHomeFeedImages } from '@/features/home/utils/prefetch-home-feed-images';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
 import { performHomeSilentReselectRefresh } from '@/features/navigation/home-tab-reselect';
@@ -89,6 +90,10 @@ export default function HomeScreen() {
   );
 
   const hasVisibleBrowseContent = heroItems.length > 0 || sections.length > 0;
+
+  useEffect(() => {
+    prefetchHomeFeedImages(heroItems, presentedSections);
+  }, [heroItems, presentedSections]);
 
   useEffect(() => {
     if (hasLoggedMeaningfulRender.current || isInitialBrowseLoading || !hasVisibleBrowseContent) {
