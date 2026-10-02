@@ -5,28 +5,30 @@ import { HomeSection } from '@/features/home/components/HomeSection';
 import type { HomeItem, HomeSection as HomeSectionModel, HomeSectionType } from '@/features/home/types';
 import { initI18nForTests, t } from '../../i18n/i18n-test-utils';
 
-const ICON_RAILS: { type: HomeSectionType; titleKey: string; icon: string }[] = [
-  { type: 'NowInTheaters', titleKey: 'home.sections.nowInTheaters', icon: 'film-outline' },
+const HOME_RAILS: { type: HomeSectionType; titleKey: string; icon: string }[] = [
+  { type: 'RecommendedForYou', titleKey: 'home.sections.recommendedForYou', icon: 'sparkles-outline' },
+  { type: 'Trending', titleKey: 'home.sections.trending', icon: 'flame-outline' },
   { type: 'OnTvThisWeek', titleKey: 'home.sections.onTvThisWeek', icon: 'calendar-outline' },
+  { type: 'NowInTheaters', titleKey: 'home.sections.nowInTheaters', icon: 'film-outline' },
 ];
 
-const PLAIN_RAILS: { type: HomeSectionType; titleKey?: string }[] = [
-  { type: 'Trending', titleKey: 'home.sections.trending' },
-  { type: 'RecommendedForYou', titleKey: 'home.sections.recommendedForYou' },
+const OFF_HOME_RAILS: { type: HomeSectionType; titleKey?: string }[] = [
   { type: 'Popular' },
   { type: 'TopRated', titleKey: 'home.sections.topRated' },
   { type: 'NewReleases', titleKey: 'home.sections.newReleases' },
-  { type: 'ComingUp', titleKey: 'home.sections.comingUp' },
+  { type: 'HotThisWeek', titleKey: 'home.sections.hotThisWeek' },
 ];
 
-function section(type: HomeSectionType, items: HomeItem[] = []): HomeSectionModel {
-  return { type, title: type, items, displayOrder: 1 };
+function section(
+  type: HomeSectionType,
+  items: HomeItem[] = [],
+  comingUpSource?: HomeSectionModel['comingUpSource'],
+): HomeSectionModel {
+  return { type, title: type, items, displayOrder: 1, comingUpSource };
 }
 
-function renderHomeRail(type: HomeSectionType, items: HomeItem[] = []) {
-  return render(
-    <HomeSection section={section(type, items)} onSeeAllPress={jest.fn()} />,
-  );
+function renderHomeRail(type: HomeSectionType) {
+  return render(<HomeSection section={section(type)} onSeeAllPress={jest.fn()} />);
 }
 
 function isNamed(node: ReactTestInstance, name: string): boolean {
@@ -56,17 +58,39 @@ function headerIconsBesideTitle(title: string): string[] {
   return [];
 }
 
+const comingUpItem: HomeItem = {
+  id: 'soon',
+  contentType: 'movie',
+  title: 'Soon',
+  originalTitle: null,
+  posterUrl: '/soon.jpg',
+  backdropUrl: null,
+  releaseDate: '2026-10-03',
+  voteAverage: 0,
+  voteCount: 0,
+};
+
 describe('Home section header icons', () => {
   afterAll(async () => {
     await initI18nForTests('en');
   });
 
+  it('uses a distinct outline icon for each visible Home rail', () => {
+    const icons = [
+      ...HOME_RAILS.map((rail) => rail.icon),
+      'time-outline',
+    ];
+
+    expect(new Set(icons).size).toBe(icons.length);
+    expect(icons.every((icon) => icon.endsWith('-outline'))).toBe(true);
+  });
+
   it.each(['en', 'tr'] as const)(
-    'shows the theaters and on-TV icons beside localized titles (%s)',
+    'shows an icon beside each localized Home rail title (%s)',
     async (language) => {
       await initI18nForTests(language);
 
-      for (const rail of ICON_RAILS) {
+      for (const rail of HOME_RAILS) {
         const view = renderHomeRail(rail.type);
         const title = t(rail.titleKey);
 
@@ -74,32 +98,37 @@ describe('Home section header icons', () => {
         expect(screen.getByLabelText(t('home.seeAllTitle', { title }))).toBeTruthy();
         view.unmount();
       }
+
+      const catalogComingUp = render(
+        <HomeComingUpSection
+          section={section('ComingUp', [comingUpItem], 'upcoming')}
+          onSeeAllPress={jest.fn()}
+        />,
+      );
+      const comingUpTitle = t('home.sections.comingUp');
+      expect(headerIconsBesideTitle(comingUpTitle)).toEqual(['time-outline']);
+      expect(screen.getByLabelText(t('home.seeAllTitle', { title: comingUpTitle }))).toBeTruthy();
+      catalogComingUp.unmount();
+
+      render(
+        <HomeComingUpSection
+          section={section('ComingUp', [comingUpItem], 'personalized')}
+          onSeeAllPress={jest.fn()}
+        />,
+      );
+      expect(headerIconsBesideTitle(t('home.sections.comingUpPersonalized'))).toEqual([
+        'time-outline',
+      ]);
     },
   );
 
-  it.each(PLAIN_RAILS)('does not add a header icon to $type', async ({ type, titleKey }) => {
+  it.each(OFF_HOME_RAILS)('keeps $type icon-free because it is not a Home rail title', async ({
+    type,
+    titleKey,
+  }) => {
     await initI18nForTests('en');
     renderHomeRail(type);
 
     expect(headerIconsBesideTitle(titleKey ? t(titleKey) : type)).toEqual([]);
-  });
-
-  it('keeps Coming Up header icon-free when rendered as its own rail', async () => {
-    await initI18nForTests('tr');
-    const item: HomeItem = {
-      id: 'soon',
-      contentType: 'movie',
-      title: 'Soon',
-      originalTitle: null,
-      posterUrl: '/soon.jpg',
-      backdropUrl: null,
-      releaseDate: '2026-10-03',
-      voteAverage: 0,
-      voteCount: 0,
-    };
-
-    render(<HomeComingUpSection section={section('ComingUp', [item])} onSeeAllPress={jest.fn()} />);
-
-    expect(headerIconsBesideTitle(t('home.sections.comingUp'))).toEqual([]);
   });
 });

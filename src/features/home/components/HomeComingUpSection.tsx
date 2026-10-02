@@ -6,6 +6,7 @@ import { HomeComingUpCard } from './HomeComingUpCard';
 import { HomeSectionHeader } from './HomeSectionHeader';
 import { homeComingUpItemKeyExtractor } from '../utils/home-list-keys';
 import { getHomeRailItemLayout } from '../utils/home-list-layout';
+import { resolveHomeSectionHeaderIcon } from '../utils/home-section-header-icon';
 import { resolveHomeSectionTitle } from '../utils/resolve-home-section-title';
 import { layout } from '@/theme/layout';
 
@@ -24,6 +25,7 @@ export const HomeComingUpSection = memo(function HomeComingUpSection({
   const localizedTitle = resolveHomeSectionTitle(section.type, section.title, t, {
     comingUpSource: section.comingUpSource,
   });
+  const headerIcon = resolveHomeSectionHeaderIcon(section.type);
 
   const renderItem = useCallback(
     ({ item }: { item: HomeItem }) => (
@@ -38,7 +40,11 @@ export const HomeComingUpSection = memo(function HomeComingUpSection({
 
   return (
     <View style={styles.container}>
-      <HomeSectionHeader title={localizedTitle} onSeeAllPress={onSeeAllPress} />
+      <HomeSectionHeader
+        title={localizedTitle}
+        icon={headerIcon}
+        onSeeAllPress={onSeeAllPress}
+      />
       <FlatList
         horizontal
         data={section.items}
