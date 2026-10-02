@@ -7,6 +7,7 @@ import { NOW_IN_THEATERS_PREVIEW_SIZE } from '../now-in-theaters-types';
 import { ON_TV_THIS_WEEK_PREVIEW_SIZE } from '../on-tv-this-week-types';
 import type { WorldCinemaState } from '../world-cinema-types';
 import { WORLD_CINEMA_PREVIEW_SIZE } from '../world-cinema-types';
+import { GENRE_COVER_CANDIDATE_PAGE_SIZE } from '../genre-cover-selection';
 import { STREAMING_HUB_PREVIEW_SIZE } from '../streaming-platform-hub-types';
 import type { StreamingDiscoverState } from '../streaming-discover-types';
 import { DEFAULT_ADVANCED_DISCOVER_PAGE_SIZE } from '../advanced-discover-types';
@@ -166,6 +167,10 @@ export function streamingProviderPreviewQueryKey(
     weekId,
     pageSize,
   ] as const;
+}
+
+export function genreCoverCandidatesQueryKey(genreId: string) {
+  return ['discovery', 'genre-cover', genreId, GENRE_COVER_CANDIDATE_PAGE_SIZE] as const;
 }
 
 export function streamingDiscoverInfiniteQueryKey(

@@ -13,6 +13,7 @@ export function isLibraryStackRoute(segments: readonly string[]): boolean {
     || root === 'discover-browse'
     || root === 'streaming-discover'
     || root === 'streaming-platforms'
+    || root === 'discover-genres'
     || root === 'watch-history'
     || root === 'notifications'
     || root === 'watchlist'
