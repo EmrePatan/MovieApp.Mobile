@@ -10,7 +10,10 @@ import { createAdvancedDiscoverHref } from '@/features/discovery/utils/advanced-
 import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
-import { selectMainDiscoverGenres } from '@/features/discovery/main-discover-genres';
+import {
+  resolveDiscoverGenreCanonicalName,
+  selectDiscoverHubGenres,
+} from '@/features/discovery/main-discover-genres';
 import type { Genre } from '@/features/discovery/types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -36,7 +39,8 @@ const GENRE_TILE_GRADIENTS: Record<string, readonly [string, string, string]> = 
 };
 
 function genreGradient(name: string): readonly [string, string, string] {
-  return GENRE_TILE_GRADIENTS[name.trim().toLowerCase()] ?? ['#242430', '#3A3A4A', '#101014'];
+  const canonical = resolveDiscoverGenreCanonicalName(name) ?? name;
+  return GENRE_TILE_GRADIENTS[canonical.trim().toLowerCase()] ?? ['#242430', '#3A3A4A', '#101014'];
 }
 
 export function GenresHubSection() {
@@ -45,7 +49,7 @@ export function GenresHubSection() {
   const { width: windowWidth } = useWindowDimensions();
   const genresQuery = useGenres();
   const genres = useMemo(
-    () => selectMainDiscoverGenres(genresQuery.data ?? []),
+    () => selectDiscoverHubGenres(genresQuery.data ?? []),
     [genresQuery.data],
   );
 

@@ -4,7 +4,11 @@ import {
 } from '@/features/home/utils/append-missing-home-catalog-rails';
 import { resolveComingUpSeeAllTab } from '@/features/home/utils/coming-up-source';
 import { DISCOVER_RAIL_CATALOG } from '@/features/discovery/discover-rail-catalog';
-import { selectMainDiscoverGenres } from '@/features/discovery/main-discover-genres';
+import {
+  resolveDiscoverGenreCanonicalName,
+  selectDiscoverHubGenres,
+  selectMainDiscoverGenres,
+} from '@/features/discovery/main-discover-genres';
 import { parseDiscoverParams } from '@/features/discovery/utils/discover-params';
 import type { HomeItem, HomeSection } from '@/features/home/types';
 
@@ -96,6 +100,53 @@ describe('home and discover packaging', () => {
         { id: 'action', name: 'Action' },
       ]).map((genre) => genre.name),
     ).toEqual(['Action', 'Drama']);
+  });
+
+  it('selects the main Keşfet genres when /genres returns Turkish names', () => {
+    const selected = selectMainDiscoverGenres([
+      { id: 'news', name: 'Haber' },
+      { id: 'doc', name: 'Belgesel' },
+      { id: 'thriller', name: 'Gerilim' },
+      { id: 'scifi', name: 'Bilim Kurgu' },
+      { id: 'romance', name: 'Romantik' },
+      { id: 'mystery', name: 'Gizem' },
+      { id: 'horror', name: 'Korku' },
+      { id: 'fantasy', name: 'Fantastik' },
+      { id: 'drama', name: 'Dram' },
+      { id: 'crime', name: 'Suç' },
+      { id: 'comedy', name: 'Komedi' },
+      { id: 'animation', name: 'Animasyon' },
+      { id: 'adventure', name: 'Macera' },
+      { id: 'action', name: 'Aksiyon' },
+    ]);
+
+    expect(selected.map((genre) => genre.id)).toEqual([
+      'action',
+      'adventure',
+      'animation',
+      'comedy',
+      'crime',
+      'drama',
+      'fantasy',
+      'horror',
+      'mystery',
+      'romance',
+      'scifi',
+      'thriller',
+    ]);
+    expect(selected.map((genre) => genre.name)).not.toContain('Haber');
+    expect(resolveDiscoverGenreCanonicalName('Aksiyon')).toBe('Action');
+    expect(resolveDiscoverGenreCanonicalName('Bilim Kurgu')).toBe('Science Fiction');
+    expect(resolveDiscoverGenreCanonicalName('Liebesfilm')).toBe('Romance');
+    expect(resolveDiscoverGenreCanonicalName('Fantascienza')).toBe('Science Fiction');
+    expect(resolveDiscoverGenreCanonicalName('Ficção científica')).toBe('Science Fiction');
+  });
+
+  it('keeps a genres rail when returned names are outside the main set', () => {
+    const returned = [{ id: 'local', name: 'Yerel Tür' }];
+
+    expect(selectMainDiscoverGenres(returned)).toEqual([]);
+    expect(selectDiscoverHubGenres(returned)).toEqual(returned);
   });
 
   it('accepts the hidden-gems slug on See All', () => {
