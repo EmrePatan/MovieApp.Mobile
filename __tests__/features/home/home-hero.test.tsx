@@ -160,7 +160,7 @@ describe('HomeHero', () => {
     ).toBeTruthy();
   });
 
-  it('loads an original poster with contain even when a backdrop exists', () => {
+  it('loads a w780 poster with contain even when a backdrop exists', () => {
     renderHero(
       createItem({
         backdropUrl: '/backdrop.jpg',
@@ -170,7 +170,7 @@ describe('HomeHero', () => {
 
     const image = screen.UNSAFE_getByType(Image);
     expect(image.props.source).toEqual({
-      uri: 'https://image.tmdb.org/t/p/original/poster.jpg',
+      uri: 'https://image.tmdb.org/t/p/w780/poster.jpg',
     });
     expect(image.props.resizeMode).toBe('contain');
   });
