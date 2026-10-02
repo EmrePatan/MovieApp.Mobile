@@ -443,6 +443,8 @@ export const stage2Pt = {
     },
     genresHub: {
       title: 'Por gênero',
+      directoryTitle: 'Por gênero',
+      directorySubtitle: 'Escolha um gênero para explorar',
       seeAll: 'Ver tudo',
       seeAllAccessibility: 'Ver todos os gêneros',
       openGenre: 'Explorar {{genre}}',

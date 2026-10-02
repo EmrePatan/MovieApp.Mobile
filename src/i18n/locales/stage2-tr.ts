@@ -443,6 +443,8 @@ export const stage2Tr = {
     },
     genresHub: {
       title: 'Türlere Göre',
+      directoryTitle: 'Türlere Göre',
+      directorySubtitle: 'Keşfetmek istediğin türü seç',
       seeAll: 'Tümünü Gör',
       seeAllAccessibility: 'Tüm türleri gör',
       openGenre: '{{genre}} türünü keşfet',

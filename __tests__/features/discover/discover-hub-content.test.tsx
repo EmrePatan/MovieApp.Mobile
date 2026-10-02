@@ -11,6 +11,7 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({}),
+  useQueries: () => [],
 }));
 
 jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({

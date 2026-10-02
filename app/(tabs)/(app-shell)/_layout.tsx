@@ -19,6 +19,7 @@ export default function AppShellLayout() {
       <Stack.Screen name="advanced-discover" />
       <Stack.Screen name="streaming-discover" />
       <Stack.Screen name="streaming-platforms" />
+      <Stack.Screen name="discover-genres" />
       <Stack.Screen name="now-in-theaters" />
       <Stack.Screen name="on-tv-this-week" />
       <Stack.Screen name="world-cinema" />
