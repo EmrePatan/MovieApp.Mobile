@@ -9,7 +9,7 @@ import type { HomeSectionType } from '../types';
 const HOME_SECTION_HEADER_ICONS: Partial<
   Record<HomeSectionType, keyof typeof Ionicons.glyphMap>
 > = {
-  RecommendedForYou: 'sparkles-outline',
+  RecommendedForYou: 'heart-outline',
   ComingUp: 'time-outline',
   Trending: 'flame-outline',
   OnTvThisWeek: 'calendar-outline',

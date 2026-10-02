@@ -6,7 +6,7 @@ import type { HomeItem, HomeSection as HomeSectionModel, HomeSectionType } from 
 import { initI18nForTests, t } from '../../i18n/i18n-test-utils';
 
 const HOME_RAILS: { type: HomeSectionType; titleKey: string; icon: string }[] = [
-  { type: 'RecommendedForYou', titleKey: 'home.sections.recommendedForYou', icon: 'sparkles-outline' },
+  { type: 'RecommendedForYou', titleKey: 'home.sections.recommendedForYou', icon: 'heart-outline' },
   { type: 'Trending', titleKey: 'home.sections.trending', icon: 'flame-outline' },
   { type: 'OnTvThisWeek', titleKey: 'home.sections.onTvThisWeek', icon: 'calendar-outline' },
   { type: 'NowInTheaters', titleKey: 'home.sections.nowInTheaters', icon: 'film-outline' },
