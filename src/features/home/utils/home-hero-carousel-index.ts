@@ -1,5 +1,40 @@
 export const HERO_CAROUSEL_LOOP_HEAD_INDEX = 1;
 
+/**
+ * Left peek, centered slide, and right peek. FlatList's first window starts
+ * at `initialScrollIndex` and only walks forward, so this many cells mounted
+ * from index 0 are the wrap clone plus the first two real slides.
+ */
+export const HERO_CAROUSEL_RENDER_WINDOW = 3;
+
+/**
+ * Cells mounted before any scroll metrics arrive.
+ * VirtualizedList does not render the cell before `initialScrollIndex`, and
+ * the left peek is that cell (loop index 0, the last slide) when the real
+ * first slide is centered. The list therefore starts its render index at 0
+ * and uses `contentOffset` to show the centered slide.
+ */
+export function getHeroCarouselInitialMountedIndices(loopLength: number): number[] {
+  const count = Math.max(0, Math.min(loopLength, HERO_CAROUSEL_RENDER_WINDOW));
+  return Array.from({ length: count }, (_, index) => index);
+}
+
+/** Centered slide first, then the on-screen peeks. Far clones stay low. */
+export function getHeroCarouselImagePriority(
+  slideIndex: number,
+  centeredScrollIndex: number,
+): 'high' | 'normal' | 'low' {
+  if (slideIndex === centeredScrollIndex) {
+    return 'high';
+  }
+
+  if (Math.abs(slideIndex - centeredScrollIndex) === 1) {
+    return 'normal';
+  }
+
+  return 'low';
+}
+
 export function getActiveIndexFromScrollIndex(scrollIndex: number, itemCount: number): number {
   if (itemCount <= 1) {
     return 0;

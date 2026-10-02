@@ -74,8 +74,9 @@ export function resolveHomeHeroPrefetchUri(item: {
 export const HOME_RECOMMENDED_PREFETCH_COUNT = 4;
 
 /**
- * Visible hero poster plus the next one, wrapping from the last slide to the first.
- * Both use the hero `w780` profile.
+ * Posters the centered slide and both peeking neighbors will paint, in
+ * `w780` via `resolveHomeHeroPosterUri`. At index 0 the left peek is the
+ * last slide, so that wrap is included — not only the next slide.
  */
 export function resolveHomeHeroNeighborPrefetchUris(
   items: readonly { posterUrl?: string | null }[],
@@ -87,7 +88,14 @@ export function resolveHomeHeroNeighborPrefetchUris(
 
   const count = items.length;
   const safeIndex = ((activeIndex % count) + count) % count;
-  const indexes = count === 1 ? [safeIndex] : [safeIndex, (safeIndex + 1) % count];
+  const indexes =
+    count === 1
+      ? [safeIndex]
+      : [
+          safeIndex,
+          (safeIndex - 1 + count) % count,
+          (safeIndex + 1) % count,
+        ];
   const uris: string[] = [];
 
   for (const index of indexes) {

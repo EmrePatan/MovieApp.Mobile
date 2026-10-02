@@ -53,7 +53,7 @@ describe('home hero image urls', () => {
     ).toBe('https://image.tmdb.org/t/p/w780/poster.jpg');
   });
 
-  it('prefetches the visible hero and the next one, wrapping to the first', () => {
+  it('prefetches the centered hero, the previous wrap, and the next hero at w780', () => {
     delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
 
     const items = [
@@ -63,14 +63,24 @@ describe('home hero image urls', () => {
     ];
 
     expect(resolveHomeHeroNeighborPrefetchUris(items, 0)).toEqual([
-      'https://image.tmdb.org/t/p/w780/a.jpg',
-      'https://image.tmdb.org/t/p/w780/b.jpg',
+      resolveHomeHeroPosterUri('/a.jpg'),
+      resolveHomeHeroPosterUri('/b.jpg'),
     ]);
     expect(resolveHomeHeroNeighborPrefetchUris(items, 2)).toEqual([
-      'https://image.tmdb.org/t/p/w780/a.jpg',
+      resolveHomeHeroPosterUri('/b.jpg'),
+      resolveHomeHeroPosterUri('/a.jpg'),
     ]);
     expect(resolveHomeHeroNeighborPrefetchUris([{ posterUrl: '/only.jpg' }], 0)).toEqual([
-      'https://image.tmdb.org/t/p/w780/only.jpg',
+      resolveHomeHeroPosterUri('/only.jpg'),
+    ]);
+
+    const ten = Array.from({ length: 10 }, (_, index) => ({
+      posterUrl: `/${index}.jpg`,
+    }));
+    expect(resolveHomeHeroNeighborPrefetchUris(ten, 0)).toEqual([
+      resolveHomeHeroPosterUri('/0.jpg'),
+      resolveHomeHeroPosterUri('/9.jpg'),
+      resolveHomeHeroPosterUri('/1.jpg'),
     ]);
   });
 

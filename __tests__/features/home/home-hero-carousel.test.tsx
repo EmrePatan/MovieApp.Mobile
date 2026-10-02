@@ -139,6 +139,31 @@ describe('HomeHeroCarousel', () => {
     expect(getByLabelText('Slide 1 of 2')).toBeTruthy();
   });
 
+  it('prefetches the wrap-around left peek when the first slide is centered', () => {
+    const originalImageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+    delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+    const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
+    const items = Array.from({ length: 10 }, (_, index) =>
+      createItem({
+        id: `hero-${index}`,
+        posterUrl: `/${index}.jpg`,
+      }),
+    );
+
+    render(<HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />);
+
+    expect(prefetchSpy).toHaveBeenCalledWith(
+      [
+        'https://image.tmdb.org/t/p/w780/0.jpg',
+        'https://image.tmdb.org/t/p/w780/9.jpg',
+        'https://image.tmdb.org/t/p/w780/1.jpg',
+      ],
+      { cachePolicy: 'memory-disk' },
+    );
+    prefetchSpy.mockRestore();
+    process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;
+  });
+
   it('prefetches the visible and next w780 posters and wraps to the first', () => {
     const originalImageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';

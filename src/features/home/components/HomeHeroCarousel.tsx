@@ -15,9 +15,12 @@ import { HomeHeroPaginationDots } from './HomeHeroPaginationDots';
 import type { HomeItem, HomeTypeFilter } from '../types';
 import {
   getHeroCarouselActiveIndexFromOffset,
+  getHeroCarouselImagePriority,
+  getHeroCarouselInitialMountedIndices,
   getScrollIndexForActiveIndex,
   getScrollIndexFromOffset,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
+  HERO_CAROUSEL_RENDER_WINDOW,
   resolveHeroCarouselLoopSettledOffset,
 } from '../utils/home-hero-carousel-index';
 import { HOME_HERO_SEARCH_BREATHING_ROOM } from '../utils/home-hero-layout';
@@ -30,8 +33,6 @@ import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 4000;
 const SCROLL_EVENT_THROTTLE_MS = 16;
-/** Active slide plus the posters peeking beside it. Do not mount the whole loop. */
-const HERO_CAROUSEL_RENDER_WINDOW = 3;
 
 const AnimatedFlatList = Animated.FlatList<HomeItem>;
 
@@ -254,6 +255,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
         cardWidth={cardWidth}
         embedded
         isActive={index === centeredScrollIndex}
+        imagePriority={getHeroCarouselImagePriority(index, centeredScrollIndex)}
         scrollX={scrollX}
         slideIndex={index}
         snapInterval={snapInterval}
@@ -262,6 +264,8 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     ),
     [centeredScrollIndex, cardWidth, heroHeight, onItemPress, scrollX, snapInterval],
   );
+
+  const initialMountedIndices = getHeroCarouselInitialMountedIndices(loopedItems.length);
 
   if (items.length === 0) {
     return null;
@@ -305,7 +309,10 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
           renderItem={renderItem}
           getItemLayout={getItemLayout}
           extraData={`${activeIndex}:${centeredScrollIndex}`}
-          initialScrollIndex={HERO_CAROUSEL_LOOP_HEAD_INDEX}
+          // Index 0 is the left peek (last slide). initialScrollIndex 0 puts it
+          // in the forward-only first window; contentOffset shows the real first slide.
+          initialScrollIndex={initialMountedIndices[0] ?? 0}
+          contentOffset={{ x: initialScrollOffset, y: 0 }}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
             { useNativeDriver: true, listener: handleScroll },

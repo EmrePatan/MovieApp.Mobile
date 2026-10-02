@@ -43,6 +43,8 @@ interface HomeHeroProps {
   snapInterval?: number;
   paginationCount?: number;
   paginationIndex?: number;
+  /** Decode priority for this slide. Peeks are normal; the centered slide is high. */
+  imagePriority?: RemoteImagePriority;
 }
 
 const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
@@ -198,7 +200,8 @@ function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): bo
     previous.slideIndex === next.slideIndex &&
     previous.snapInterval === next.snapInterval &&
     previous.paginationCount === next.paginationCount &&
-    previous.paginationIndex === next.paginationIndex
+    previous.paginationIndex === next.paginationIndex &&
+    previous.imagePriority === next.imagePriority
   );
 }
 
@@ -214,6 +217,7 @@ export const HomeHero = memo(function HomeHero({
   snapInterval,
   paginationCount,
   paginationIndex,
+  imagePriority,
 }: HomeHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -308,7 +312,7 @@ export const HomeHero = memo(function HomeHero({
       glow={isActive}
       animatedStyle={animatedStyle}
       pressable={isPosterPressable}
-      priority={isActive ? 'high' : 'low'}
+      priority={imagePriority ?? (isActive ? 'high' : 'low')}
     />
   );
 

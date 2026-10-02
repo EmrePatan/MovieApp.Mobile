@@ -6,8 +6,9 @@ import {
 } from './home-hero-image';
 
 /**
- * Warm the posters Home is about to show: the visible hero, the next hero
- * (wrapping), and the first Recommended For You cards.
+ * Warm the posters Home is about to show: the visible hero, the previous
+ * hero (wrapping to the last slide when the first is centered), the next
+ * hero, and the first Recommended For You cards.
  * URIs come from the same builders the views use, and land in the expo-image
  * memory-disk cache those views read.
  */

@@ -4,14 +4,20 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
 import {
+  getHeroCarouselImagePriority,
+  getHeroCarouselInitialMountedIndices,
   getScrollIndexForActiveIndex,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
+  HERO_CAROUSEL_RENDER_WINDOW,
 } from '@/features/home/utils/home-hero-carousel-index';
+import { resolveHomeHeroPosterUri } from '@/features/home/utils/home-hero-image';
 
 const heroRenderLog: Array<{
   slideIndex?: number;
   isActive?: boolean;
   itemId: string;
+  posterUrl: string | null;
+  imagePriority?: string;
 }> = [];
 
 jest.mock('@tanstack/react-query', () => ({
@@ -25,12 +31,20 @@ jest.mock('@/features/home/components/HomeHero', () => ({
     item,
     slideIndex,
     isActive,
+    imagePriority,
   }: {
     item: HomeItem;
     slideIndex?: number;
     isActive?: boolean;
+    imagePriority?: string;
   }) => {
-    heroRenderLog.push({ slideIndex, isActive, itemId: item.id });
+    heroRenderLog.push({
+      slideIndex,
+      isActive,
+      itemId: item.id,
+      posterUrl: item.posterUrl,
+      imagePriority,
+    });
     const React = require('react');
     const { View } = require('react-native');
     return React.createElement(View, {
@@ -40,13 +54,13 @@ jest.mock('@/features/home/components/HomeHero', () => ({
   },
 }));
 
-function createItem(id: string): HomeItem {
+function createItem(id: string, posterUrl = `/${id}.jpg`): HomeItem {
   return {
     id,
     contentType: 'movie',
     title: `Title ${id}`,
     originalTitle: null,
-    posterUrl: '/poster.jpg',
+    posterUrl,
     backdropUrl: null,
     releaseDate: '2020-01-01',
     voteAverage: 8,
@@ -75,27 +89,75 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
     heroRenderLog.length = 0;
   });
 
-  it('rewrites head clone settle to the real last slide with a matching active cell (FIRST → LAST)', () => {
-    const items = [createItem('a'), createItem('b'), createItem('c')];
-    const { UNSAFE_getByType } = render(
+  it('mounts the wrap-around left peek in the initial window at w780', () => {
+    const items = [
+      createItem('a', '/a.jpg'),
+      createItem('b', '/b.jpg'),
+      createItem('c', '/c.jpg'),
+      createItem('last', '/last.jpg'),
+    ];
+    const { UNSAFE_getByType, getByLabelText } = render(
       <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
     );
     const list = UNSAFE_getByType(FlatList);
     const slideWidth = getCarouselSlideWidth(list);
+    const loopLength = items.length + 2;
+
+    expect(getHeroCarouselInitialMountedIndices(loopLength)).toEqual([0, 1, 2]);
+    expect(list.props.initialScrollIndex).toBe(0);
+    expect(list.props.initialNumToRender).toBe(HERO_CAROUSEL_RENDER_WINDOW);
+    expect(list.props.windowSize).toBe(HERO_CAROUSEL_RENDER_WINDOW);
+    expect(list.props.contentOffset).toEqual({
+      x: slideWidth * HERO_CAROUSEL_LOOP_HEAD_INDEX,
+      y: 0,
+    });
+
+    const mounted = getHeroCarouselInitialMountedIndices(loopLength).map((index) =>
+      heroRenderLog.find((entry) => entry.slideIndex === index),
+    );
+    expect(mounted.map((entry) => entry?.slideIndex)).toEqual([0, 1, 2]);
+    expect(mounted[0]).toEqual(
+      expect.objectContaining({
+        slideIndex: 0,
+        itemId: 'last',
+        posterUrl: '/last.jpg',
+        isActive: false,
+        imagePriority: 'normal',
+      }),
+    );
+    expect(resolveHomeHeroPosterUri(mounted[0]?.posterUrl)).toBe(
+      'https://image.tmdb.org/t/p/w780/last.jpg',
+    );
+    expect(getHeroCarouselImagePriority(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('normal');
+    expect(mounted[1]).toEqual(
+      expect.objectContaining({
+        slideIndex: 1,
+        itemId: 'a',
+        isActive: true,
+        imagePriority: 'high',
+      }),
+    );
+    expect(getByLabelText('Slide 1 of 4')).toBeTruthy();
+  });
+
+  it('rewrites head clone settle to the real last slide with a matching active cell (FIRST → LAST)', () => {
+    const items = [createItem('a'), createItem('b'), createItem('c')];
+    const { UNSAFE_getByType, getByLabelText } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(FlatList);
 
     heroRenderLog.length = 0;
     fireEvent(list, 'momentumScrollEnd', {
       nativeEvent: { contentOffset: { x: 0, y: 0 } },
     });
 
-    const activeAfterSettle = getActiveHeroRenders();
-    expect(activeAfterSettle).toEqual([
-      {
-        slideIndex: items.length,
-        isActive: true,
-        itemId: 'c',
-      },
-    ]);
+    // The real last cell sits past the 3-cell startup window in tests, where
+    // list metrics never expand the window. Settle still selects that slide.
+    expect(getByLabelText('Slide 3 of 3')).toBeTruthy();
+    expect(getActiveHeroRenders().some((entry) => entry.slideIndex === 0 && entry.isActive)).toBe(
+      false,
+    );
     expect(list.props.initialNumToRender).toBe(3);
     expect(list.props.maxToRenderPerBatch).toBe(3);
     expect(list.props.windowSize).toBe(3);
@@ -125,11 +187,12 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
 
     const activeAfterSettle = getActiveHeroRenders();
     expect(activeAfterSettle).toEqual([
-      {
+      expect.objectContaining({
         slideIndex: HERO_CAROUSEL_LOOP_HEAD_INDEX,
         isActive: true,
         itemId: 'a',
-      },
+        imagePriority: 'high',
+      }),
     ]);
   });
 
@@ -148,7 +211,12 @@ describe('HomeHeroCarousel loop boundary consistency', () => {
     });
 
     expect(getActiveHeroRenders()).toEqual([
-      { slideIndex: getScrollIndexForActiveIndex(1), isActive: true, itemId: 'b' },
+      expect.objectContaining({
+        slideIndex: getScrollIndexForActiveIndex(1),
+        isActive: true,
+        itemId: 'b',
+        imagePriority: 'high',
+      }),
     ]);
   });
 });
