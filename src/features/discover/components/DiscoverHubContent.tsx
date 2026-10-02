@@ -14,6 +14,7 @@ import { openLibraryStackScreen } from '@/features/library/navigation/library-st
 import type { SearchResultItem } from '@/features/search/types';
 import { GenresHubSection } from '@/features/discovery/components/GenresHubSection';
 import { StreamingPlatformsHubSection } from '@/features/discovery/components/StreamingPlatformsHubSection';
+import { discoverFeatureBackgrounds } from '../discover-feature-backgrounds';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
 import { WorldCinemaHubSection } from './WorldCinemaHubSection';
@@ -96,6 +97,8 @@ export function DiscoverHubContent() {
           icon="options-outline"
           onPress={openAdvancedDiscover}
           accessibilityLabel={t('discover.hub.advancedDiscover.accessibility')}
+          backgroundSource={discoverFeatureBackgrounds.advancedDiscover}
+          backgroundTestID="discover-feature-backdrop-advanced"
         />
         <DiscoverFeatureEntry
           title={t('discover.hub.pickSomething.title')}
@@ -103,6 +106,8 @@ export function DiscoverHubContent() {
           icon="shuffle-outline"
           onPress={openPickSomething}
           accessibilityLabel={t('discover.hub.pickSomething.accessibility')}
+          backgroundSource={discoverFeatureBackgrounds.pickSomething}
+          backgroundTestID="discover-feature-backdrop-pick"
         />
         {config.features.aiRecommendations ? (
           <DiscoverFeatureEntry
@@ -111,6 +116,8 @@ export function DiscoverHubContent() {
             icon="sparkles-outline"
             onPress={openAiRecommendations}
             accessibilityLabel={t('discover.hub.aiRecommendations.accessibility')}
+            backgroundSource={discoverFeatureBackgrounds.aiRecommendations}
+            backgroundTestID="discover-feature-backdrop-ai"
           />
         ) : null}
       </View>
