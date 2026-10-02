@@ -112,8 +112,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   cardWithArt: {
-    minHeight: 76,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     borderColor: colors.borderAccent,
     backgroundColor: '#0C0C12',
   },

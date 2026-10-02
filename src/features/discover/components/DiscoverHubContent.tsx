@@ -122,38 +122,40 @@ export function DiscoverHubContent() {
         ) : null}
       </View>
 
-      <StreamingPlatformsHubSection />
-      <GenresHubSection />
-      <WorldCinemaHubSection />
+      <View style={styles.rails}>
+        <StreamingPlatformsHubSection />
+        <GenresHubSection />
+        <WorldCinemaHubSection />
 
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('hidden_gems')}
-        items={hiddenGemsItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('hidden_gems')}
-        testID="discover-rail-hidden-gems"
-      />
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('popular')}
-        items={popularItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('popular')}
-        testID="discover-rail-popular"
-      />
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('new_releases')}
-        items={newReleasesItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('new_releases')}
-        testID="discover-rail-new-releases"
-      />
-      <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('top_rated')}
-        items={topRatedItems}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={() => openBrowse('top_rated')}
-        testID="discover-rail-top-rated"
-      />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('hidden_gems')}
+          items={hiddenGemsItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('hidden_gems')}
+          testID="discover-rail-hidden-gems"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('popular')}
+          items={popularItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('popular')}
+          testID="discover-rail-popular"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('new_releases')}
+          items={newReleasesItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('new_releases')}
+          testID="discover-rail-new-releases"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('top_rated')}
+          items={topRatedItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('top_rated')}
+          testID="discover-rail-top-rated"
+        />
+      </View>
     </ScrollView>
   );
 }
@@ -163,13 +165,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
-    gap: spacing.lg,
+    gap: spacing.sm,
   },
   featureSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.xs,
+  },
+  rails: {
+    gap: spacing.lg,
   },
   sectionEyebrow: {
     textTransform: 'uppercase',
