@@ -289,12 +289,15 @@ export const stage2En = {
       showFilter: 'Show {{label}}',
     },
     sections: {
+      hotThisWeek: 'Hot This Week',
       trending: 'Trending Now',
       topRated: 'Top Rated',
       newReleases: 'New Releases',
       recommendedForYou: 'Recommended For You',
       comingUp: 'Coming Up',
       comingUpPersonalized: 'Coming Up For You',
+      onTvThisWeek: 'On TV This Week',
+      nowInTheaters: 'Now in Theaters',
     },
     comingUpBadge: {
       premiere: 'Premiere',
@@ -436,6 +439,12 @@ export const stage2En = {
       },
       fallbackExplorer: '{{genreName}} Explorer',
     },
+    genresHub: {
+      title: 'By Genre',
+      seeAll: 'See All',
+      seeAllAccessibility: 'See all genres',
+      openGenre: 'Browse {{genre}}',
+    },
     streamingPlatformsHub: {
       title: 'Streaming Platforms',
       directoryTitle: 'Streaming Platforms',
@@ -449,7 +458,9 @@ export const stage2En = {
   },
   discovery: {
     modes: {
-      trending: 'Trending',
+      trending: 'Trending Now',
+      popular: 'Popular',
+      hidden_gems: 'Hidden Gems',
       top_rated: 'Top Rated',
       new_releases: 'New Releases',
     },
@@ -915,8 +926,7 @@ export const stage2En = {
       trailerOpenError: 'Unable to open trailer',
       trailerOpenErrorMessage: 'Please try again later.',
       seasonProgressError: 'Could not update season watch progress. Please try again.',
-      markThroughEpisodesError:
-        'Could not mark episodes as watched. Please try again.',
+      markThroughEpisodesError: 'Could not mark episodes as watched. Please try again.',
     },
     collection: {
       partOf: 'Part of {{name}}',

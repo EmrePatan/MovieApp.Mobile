@@ -123,7 +123,7 @@ describe('DiscoverScreen', () => {
     render(<DiscoverScreen />);
 
     expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
-    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.getByLabelText('Inception, Movie · 2010, 8.8')).toBeTruthy();
     expect(screen.getByText('★ 8.8')).toBeTruthy();
     expect(screen.getByText('Movie · 2010')).toBeTruthy();
@@ -132,7 +132,7 @@ describe('DiscoverScreen', () => {
   it('renders dynamic browse title and results without top-level mode/type controls', () => {
     render(<DiscoverScreen />);
 
-    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.queryByText('Discover')).toBeNull();
     expect(screen.queryByText('Browse movies and shows')).toBeNull();
     expect(screen.queryByLabelText('Top Rated')).toBeNull();
@@ -178,7 +178,7 @@ describe('DiscoverScreen', () => {
 
     expect(screen.getByTestId('discover-browse-list')).toBeTruthy();
     expect(UNSAFE_getAllByType(FlatList).length).toBeGreaterThan(0);
-    expect(screen.getByText('Trending')).toBeTruthy();
+    expect(screen.getByText('Trending Now')).toBeTruthy();
   });
 
   it('opens filter sheet with content type and applies filters', () => {

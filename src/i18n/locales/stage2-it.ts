@@ -289,12 +289,15 @@ export const stage2It = {
       showFilter: 'Mostra {{label}}',
     },
     sections: {
+      hotThisWeek: 'Di tendenza questa settimana',
       trending: 'Di tendenza ora',
       topRated: 'Più votati',
       newReleases: 'Nuove uscite',
       recommendedForYou: 'Consigliato per te',
       comingUp: 'In arrivo',
       comingUpPersonalized: 'In arrivo per te',
+      onTvThisWeek: 'In TV questa settimana',
+      nowInTheaters: 'Ora al cinema',
     },
     comingUpBadge: {
       premiere: 'Prima',
@@ -438,6 +441,12 @@ export const stage2It = {
       },
       fallbackExplorer: 'Esploratore di {{genreName}}',
     },
+    genresHub: {
+      title: 'Per genere',
+      seeAll: 'Vedi tutto',
+      seeAllAccessibility: 'Vedi tutti i generi',
+      openGenre: 'Esplora {{genre}}',
+    },
     streamingPlatformsHub: {
       title: 'Piattaforme streaming',
       directoryTitle: 'Piattaforme streaming',
@@ -452,6 +461,8 @@ export const stage2It = {
   discovery: {
     modes: {
       trending: 'Di tendenza',
+      popular: 'Popolari',
+      hidden_gems: 'Gemme nascoste',
       top_rated: 'Più votati',
       new_releases: 'Nuove uscite',
     },
@@ -675,6 +686,7 @@ export const stage2It = {
         popularity_desc: 'Popolari',
         rating_desc: 'Più votati',
         newest: 'Più recenti',
+        oldest: 'Più vecchi',
       },
     },
   },

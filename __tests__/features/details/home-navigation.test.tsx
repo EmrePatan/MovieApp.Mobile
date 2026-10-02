@@ -117,8 +117,8 @@ function mockHomeData(
       items: homeSectionItems,
     },
     {
-      type: 'TopRated',
-      title: 'Top Rated',
+      type: 'Trending',
+      title: 'Trending Now',
       displayOrder: 1,
       items: homeSectionItems,
     },
@@ -166,8 +166,8 @@ describe('Home detail navigation', () => {
   it('pushes tv detail from home using the tab catalog navigation helper', () => {
     mockHomeData([
       {
-        type: 'TopRated',
-        title: 'Top Rated',
+        type: 'Trending',
+        title: 'Trending Now',
         displayOrder: 1,
         items: [
           {

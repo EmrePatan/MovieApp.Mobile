@@ -289,12 +289,15 @@ export const stage2De = {
       showFilter: '{{label}} anzeigen',
     },
     sections: {
+      hotThisWeek: 'Diese Woche im Trend',
       trending: 'Jetzt im Trend',
       topRated: 'Top bewertet',
       newReleases: 'Neue Veröffentlichungen',
       recommendedForYou: 'Für dich empfohlen',
       comingUp: 'Demnächst',
       comingUpPersonalized: 'Demnächst für dich',
+      onTvThisWeek: 'Diese Woche im TV',
+      nowInTheaters: 'Jetzt im Kino',
     },
     comingUpBadge: {
       premiere: 'Premiere',
@@ -438,6 +441,12 @@ export const stage2De = {
       },
       fallbackExplorer: '{{genreName}}-Entdecker',
     },
+    genresHub: {
+      title: 'Nach Genre',
+      seeAll: 'Alle anzeigen',
+      seeAllAccessibility: 'Alle Genres anzeigen',
+      openGenre: '{{genre}} entdecken',
+    },
     streamingPlatformsHub: {
       title: 'Streaming-Plattformen',
       directoryTitle: 'Streaming-Plattformen',
@@ -452,6 +461,8 @@ export const stage2De = {
   discovery: {
     modes: {
       trending: 'Trends',
+      popular: 'Beliebt',
+      hidden_gems: 'Verborgene Juwelen',
       top_rated: 'Top bewertet',
       new_releases: 'Neue Veröffentlichungen',
     },
@@ -675,6 +686,7 @@ export const stage2De = {
         popularity_desc: 'Beliebt',
         rating_desc: 'Top bewertet',
         newest: 'Neueste',
+        oldest: 'Älteste',
       },
     },
   },

@@ -2,11 +2,14 @@ import type { TFunction } from 'i18next';
 import type { HomeComingUpSource, HomeSectionType } from '../types';
 
 const SECTION_TITLE_KEYS: Partial<Record<HomeSectionType, string>> = {
+  HotThisWeek: 'home.sections.hotThisWeek',
   Trending: 'home.sections.trending',
   TopRated: 'home.sections.topRated',
   NewReleases: 'home.sections.newReleases',
   RecommendedForYou: 'home.sections.recommendedForYou',
   ComingUp: 'home.sections.comingUp',
+  OnTvThisWeek: 'home.sections.onTvThisWeek',
+  NowInTheaters: 'home.sections.nowInTheaters',
 };
 
 export interface ResolveHomeSectionTitleOptions {

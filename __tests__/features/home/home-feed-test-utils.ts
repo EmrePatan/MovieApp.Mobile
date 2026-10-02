@@ -1,7 +1,7 @@
 import type { HomeSection } from '@/features/home/types';
 import type { PersonalizationState } from '@/features/home/utils/personalization-state';
 
-const BROWSE_SECTION_TYPES = new Set(['HotThisWeek', 'Trending', 'TopRated', 'NewReleases']);
+const BROWSE_SECTION_TYPES = new Set(['HotThisWeek', 'Trending', 'OnTvThisWeek', 'NowInTheaters']);
 const PERSONALIZED_SECTION_TYPES = new Set(['RecommendedForYou', 'ComingUp']);
 
 interface LegacyHomeQueryMock {
@@ -69,8 +69,7 @@ export function createHomeFeedMockReturnValue(options: LegacyHomeQueryMock) {
     mergedSections,
     personalization,
     isInitialBrowseLoading: browseLoading && !browseHasData,
-    isFetching:
-      options.isFetching ?? (browseLoading || personalizedLoading),
+    isFetching: options.isFetching ?? (browseLoading || personalizedLoading),
     refetch: options.refetch,
   };
 }

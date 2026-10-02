@@ -27,8 +27,9 @@ const TYPE_FILTERS = new Set<DiscoveryTypeFilter>(['all', 'movie', 'tv']);
 const SORT_VALUES = new Set<DiscoverySort>(DISCOVERY_SORT_VALUES);
 
 function parseBrowseMode(value: string | undefined): DiscoveryBrowseMode {
-  if (value && BROWSE_MODES.has(value as DiscoveryBrowseMode)) {
-    return value as DiscoveryBrowseMode;
+  const normalized = value === 'hidden-gems' ? 'hidden_gems' : value;
+  if (normalized && BROWSE_MODES.has(normalized as DiscoveryBrowseMode)) {
+    return normalized as DiscoveryBrowseMode;
   }
 
   return 'trending';
@@ -76,7 +77,10 @@ function parseKeywordLabelsParam(raw: string | undefined): Record<string, string
   }
 }
 
-function serializeKeywordLabelsParam(labels: Record<string, string>, keywordIds: string[]): string | undefined {
+function serializeKeywordLabelsParam(
+  labels: Record<string, string>,
+  keywordIds: string[],
+): string | undefined {
   if (keywordIds.length === 0) {
     return undefined;
   }

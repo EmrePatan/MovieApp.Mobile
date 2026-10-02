@@ -16,6 +16,8 @@ export type HomeSectionType =
   | 'BasedOnFavorites'
   | 'ContinueWatching'
   | 'Trending'
+  | 'OnTvThisWeek'
+  | 'NowInTheaters'
   | 'Popular'
   | 'NewReleases'
   | 'TopRated'
@@ -41,7 +43,7 @@ export interface HomeItem {
   episodeName?: string | null;
 }
 
-export type HomeComingUpSource = 'personalized' | 'catalog';
+export type HomeComingUpSource = 'for-you' | 'upcoming' | 'personalized' | 'catalog';
 
 export interface HomeSection {
   type: HomeSectionType;

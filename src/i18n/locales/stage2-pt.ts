@@ -289,12 +289,15 @@ export const stage2Pt = {
       showFilter: 'Mostrar {{label}}',
     },
     sections: {
+      hotThisWeek: 'Em alta esta semana',
       trending: 'Em alta agora',
       topRated: 'Mais bem avaliados',
       newReleases: 'Novos lançamentos',
       recommendedForYou: 'Recomendado para você',
       comingUp: 'Em breve',
       comingUpPersonalized: 'Em breve para você',
+      onTvThisWeek: 'Na TV esta semana',
+      nowInTheaters: 'Agora nos cinemas',
     },
     comingUpBadge: {
       premiere: 'Estreia',
@@ -438,6 +441,12 @@ export const stage2Pt = {
       },
       fallbackExplorer: 'Explorador de {{genreName}}',
     },
+    genresHub: {
+      title: 'Por gênero',
+      seeAll: 'Ver tudo',
+      seeAllAccessibility: 'Ver todos os gêneros',
+      openGenre: 'Explorar {{genre}}',
+    },
     streamingPlatformsHub: {
       title: 'Plataformas de streaming',
       directoryTitle: 'Plataformas de streaming',
@@ -452,6 +461,8 @@ export const stage2Pt = {
   discovery: {
     modes: {
       trending: 'Em alta',
+      popular: 'Popular',
+      hidden_gems: 'Joias escondidas',
       top_rated: 'Mais bem avaliados',
       new_releases: 'Novos lançamentos',
     },
@@ -675,6 +686,7 @@ export const stage2Pt = {
         popularity_desc: 'Populares',
         rating_desc: 'Mais bem avaliados',
         newest: 'Mais recentes',
+        oldest: 'Mais antigos',
       },
     },
   },

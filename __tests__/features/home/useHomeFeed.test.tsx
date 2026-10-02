@@ -2,6 +2,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getHomeBrowse, getHomePersonalized } from '@/features/home/api/home-api';
+import { getNowInTheaters, getOnTvThisWeek } from '@/features/discovery/api/discovery-api';
 import { getUpcomingCatalog } from '@/features/upcoming/api/upcoming-api';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { resolveHomeSectionTitle } from '@/features/home/utils/resolve-home-section-title';
@@ -31,6 +32,23 @@ jest.mock('@/features/upcoming/api/upcoming-api', () => ({
 jest.mock('@/features/home/storage/home-personalized-cache', () => ({
   readHomePersonalizedCache: jest.fn().mockResolvedValue(null),
   writeHomePersonalizedCache: jest.fn(),
+}));
+
+jest.mock('@/features/discovery/api/discovery-api', () => ({
+  getOnTvThisWeek: jest.fn().mockResolvedValue({
+    items: [],
+    page: 1,
+    pageSize: 8,
+    totalCount: 0,
+    totalPages: 0,
+  }),
+  getNowInTheaters: jest.fn().mockResolvedValue({
+    items: [],
+    page: 1,
+    pageSize: 8,
+    totalCount: 0,
+    totalPages: 0,
+  }),
 }));
 
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
@@ -241,12 +259,165 @@ describe('useHomeFeed', () => {
 
     await waitFor(() => {
       const comingUp = result.current.mergedSections.find((section) => section.type === 'ComingUp');
-      expect(comingUp?.comingUpSource).toBe('personalized');
+      expect(comingUp?.comingUpSource).toBe('for-you');
       expect(
         resolveHomeSectionTitle('ComingUp', comingUp?.title ?? '', t, {
           comingUpSource: comingUp?.comingUpSource,
         }),
-      ).toBe('Coming Up For You');
+      ).toBe('Coming Up');
     });
+  });
+
+  it('keeps a backend for-you Coming Up source', async () => {
+    (getHomePersonalized as jest.Mock).mockResolvedValue({
+      sections: [
+        {
+          type: 'ComingUp',
+          title: 'Coming Up',
+          displayOrder: 0,
+          comingUpSource: 'for-you',
+          items: [
+            {
+              id: 'followed-1',
+              contentType: 'movie',
+              title: 'Followed Release',
+              originalTitle: null,
+              posterUrl: null,
+              backdropUrl: null,
+              releaseDate: '2026-12-19',
+              voteAverage: 0,
+              voteCount: 0,
+            },
+          ],
+        },
+      ],
+      isPersonalized: true,
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    });
+
+    const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(
+        result.current.mergedSections.find((section) => section.type === 'ComingUp')
+          ?.comingUpSource,
+      ).toBe('for-you');
+    });
+  });
+
+  it('fills On TV and Now in Theaters from discovery when home browse omits them', async () => {
+    (getOnTvThisWeek as jest.Mock).mockResolvedValue({
+      items: [
+        {
+          id: 'tv-1',
+          type: 'tv',
+          title: 'Airing Drama',
+          originalTitle: 'Airing Drama',
+          posterUrl: '/tv.jpg',
+          backdropUrl: null,
+          releaseDate: '2026-01-01',
+          voteAverage: 8,
+          voteCount: 40,
+        },
+        {
+          id: 'person-1',
+          type: 'person',
+          title: 'Not A Title',
+        },
+      ],
+      page: 1,
+      pageSize: 8,
+      totalCount: 1,
+      totalPages: 1,
+    });
+    (getNowInTheaters as jest.Mock).mockResolvedValue({
+      items: [
+        {
+          id: 'movie-1',
+          type: 'movie',
+          title: 'In Theaters',
+          originalTitle: 'In Theaters',
+          posterUrl: '/movie.jpg',
+          backdropUrl: null,
+          releaseDate: '2026-01-01',
+          voteAverage: 7,
+          voteCount: 20,
+        },
+      ],
+      page: 1,
+      pageSize: 8,
+      totalCount: 1,
+      totalPages: 1,
+    });
+
+    const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      const types = result.current.mergedSections.map((section) => section.type);
+      expect(types).toEqual(expect.arrayContaining(['OnTvThisWeek', 'NowInTheaters']));
+    });
+
+    const onTv = result.current.mergedSections.find((section) => section.type === 'OnTvThisWeek');
+    expect(onTv?.items.map((item) => item.title)).toEqual(['Airing Drama']);
+    expect(
+      result.current.mergedSections.find((section) => section.type === 'NowInTheaters')?.items[0]
+        ?.title,
+    ).toBe('In Theaters');
+  });
+
+  it('does not fetch On TV or theaters again when home browse already returned them', async () => {
+    (getHomeBrowse as jest.Mock).mockResolvedValue({
+      sections: [
+        {
+          type: 'OnTvThisWeek',
+          title: 'On TV This Week',
+          displayOrder: 1,
+          items: [
+            {
+              id: 'tv-1',
+              contentType: 'tv',
+              title: 'From Home',
+              originalTitle: null,
+              posterUrl: null,
+              backdropUrl: null,
+              releaseDate: null,
+              voteAverage: 8,
+              voteCount: 10,
+            },
+          ],
+        },
+        {
+          type: 'NowInTheaters',
+          title: 'Now in Theaters',
+          displayOrder: 2,
+          items: [
+            {
+              id: 'movie-1',
+              contentType: 'movie',
+              title: 'From Home',
+              originalTitle: null,
+              posterUrl: null,
+              backdropUrl: null,
+              releaseDate: null,
+              voteAverage: 7,
+              voteCount: 10,
+            },
+          ],
+        },
+      ],
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    });
+
+    const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(
+        result.current.mergedSections.find((section) => section.type === 'OnTvThisWeek')?.items[0]
+          ?.title,
+      ).toBe('From Home');
+    });
+
+    expect(getOnTvThisWeek).not.toHaveBeenCalled();
+    expect(getNowInTheaters).not.toHaveBeenCalled();
   });
 });
