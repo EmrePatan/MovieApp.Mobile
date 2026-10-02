@@ -9,21 +9,19 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useExplorePreview } from '@/features/discovery/hooks/useExplorePreview';
 import { createAdvancedDiscoverHref } from '@/features/discovery/utils/advanced-discover-params';
 import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
+import { selectTitleListItems } from '@/features/discovery/utils/select-title-list-items';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { SearchResultItem } from '@/features/search/types';
-import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
-import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
-import { useOnTvThisWeekPreview } from '@/features/discovery/hooks/useOnTvThisWeekPreview';
-import { WorldCinemaHubSection } from './WorldCinemaHubSection';
+import { GenresHubSection } from '@/features/discovery/components/GenresHubSection';
 import { StreamingPlatformsHubSection } from '@/features/discovery/components/StreamingPlatformsHubSection';
-import { createNowInTheatersHref } from '@/features/discovery/utils/now-in-theaters-params';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
-import { DiscoverPreviewSection } from './DiscoverPreviewSection';
+import { WorldCinemaHubSection } from './WorldCinemaHubSection';
 import { spacing } from '@/theme/spacing';
 import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
+import type { DiscoveryBrowseMode } from '@/features/discovery/types';
 
 export function DiscoverHubContent() {
   const { t } = useTranslation();
@@ -31,14 +29,11 @@ export function DiscoverHubContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
-  const { region: userRegion, isHydrated } = useRegionalPreference();
   const previewQuery = useExplorePreview(10);
-  const nowInTheatersPreviewQuery = useNowInTheatersPreview(userRegion, isHydrated);
-  const onTvThisWeekPreviewQuery = useOnTvThisWeekPreview();
 
   const handlePreviewItemPress = useCallback(
     (item: SearchResultItem) => {
-      if (item.type === 'person') {
+      if (item.type !== 'movie' && item.type !== 'tv') {
         return;
       }
 
@@ -51,37 +46,12 @@ export function DiscoverHubContent() {
     router.push(createAdvancedDiscoverHref());
   }, [router]);
 
-  const openTrendingBrowse = useCallback(() => {
-    openLibraryStackScreen(
-      router,
-      createDiscoverHref({ mode: 'trending', type: 'all' }),
-      '/(tabs)/discover',
-    );
-  }, [router]);
-
-  const openTopRatedBrowse = useCallback(() => {
-    openLibraryStackScreen(
-      router,
-      createDiscoverHref({ mode: 'top_rated', type: 'all' }),
-      '/(tabs)/discover',
-    );
-  }, [router]);
-
-  const openNewReleasesBrowse = useCallback(() => {
-    openLibraryStackScreen(
-      router,
-      createDiscoverHref({ mode: 'new_releases', type: 'all' }),
-      '/(tabs)/discover',
-    );
-  }, [router]);
-
-  const openNowInTheaters = useCallback(() => {
-    router.push(createNowInTheatersHref({}, userRegion));
-  }, [router, userRegion]);
-
-  const openOnTvThisWeek = useCallback(() => {
-    router.push('/on-tv-this-week');
-  }, [router]);
+  const openBrowse = useCallback(
+    (mode: DiscoveryBrowseMode) => {
+      openLibraryStackScreen(router, createDiscoverHref({ mode, type: 'all' }), '/(tabs)/discover');
+    },
+    [router],
+  );
 
   const openPickSomething = useCallback(() => {
     router.push('/pick-something');
@@ -91,15 +61,10 @@ export function DiscoverHubContent() {
     router.push('/ai-recommendations');
   }, [router]);
 
-  const trendingItems = previewQuery.data?.trending.items ?? [];
-  const topRatedItems = previewQuery.data?.topRated.items ?? [];
-  const newReleasesItems = previewQuery.data?.newReleases.items ?? [];
-  const nowInTheatersItems = (nowInTheatersPreviewQuery.data?.items ?? []).filter(
-    (item) => item.type === 'movie',
-  );
-  const onTvThisWeekItems = (onTvThisWeekPreviewQuery.data?.items ?? []).filter(
-    (item) => item.type === 'tv',
-  );
+  const hiddenGemsItems = selectTitleListItems(previewQuery.data?.hiddenGems?.items ?? []);
+  const popularItems = selectTitleListItems(previewQuery.data?.popular?.items ?? []);
+  const topRatedItems = selectTitleListItems(previewQuery.data?.topRated?.items ?? []);
+  const newReleasesItems = selectTitleListItems(previewQuery.data?.newReleases?.items ?? []);
 
   const scrollDiscoverToTop = useCallback(() => {
     scrollScrollViewToTop(scrollRef);
@@ -107,9 +72,7 @@ export function DiscoverHubContent() {
 
   const refreshDiscoverHub = useCallback(() => {
     void previewQuery.refetch();
-    void nowInTheatersPreviewQuery.refetch();
-    void onTvThisWeekPreviewQuery.refetch();
-  }, [nowInTheatersPreviewQuery, onTvThisWeekPreviewQuery, previewQuery]);
+  }, [previewQuery]);
 
   usePrimaryTabReselectHandler('discover', {
     scrollToTop: scrollDiscoverToTop,
@@ -153,54 +116,36 @@ export function DiscoverHubContent() {
       </View>
 
       <StreamingPlatformsHubSection />
-
+      <GenresHubSection />
       <WorldCinemaHubSection />
 
-      <DiscoverPreviewSection
-        title={t('discover.hub.nowInTheaters.title')}
-        subtitle={t('discover.hub.nowInTheaters.subtitle')}
-        icon="film-outline"
-        items={nowInTheatersItems}
-        isLoading={nowInTheatersPreviewQuery.isLoading}
-        isError={nowInTheatersPreviewQuery.isError}
-        onRetry={() => void nowInTheatersPreviewQuery.refetch()}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={openNowInTheaters}
-        emptyMessage={t('discover.hub.nowInTheaters.empty')}
-        testID="now-in-theaters-preview"
-      />
-
-      <DiscoverPreviewSection
-        title={t('discover.hub.onTvThisWeek.title')}
-        subtitle={t('discover.hub.onTvThisWeek.subtitle')}
-        icon="calendar-outline"
-        items={onTvThisWeekItems}
-        isLoading={onTvThisWeekPreviewQuery.isLoading}
-        isError={onTvThisWeekPreviewQuery.isError}
-        onRetry={() => void onTvThisWeekPreviewQuery.refetch()}
-        onItemPress={handlePreviewItemPress}
-        onSeeAll={openOnTvThisWeek}
-        emptyMessage={t('discover.hub.onTvThisWeek.empty')}
-        testID="on-tv-this-week-preview"
-      />
-
       <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('trending')}
-        items={trendingItems}
+        title={translateDiscoveryBrowseMode('hidden_gems')}
+        items={hiddenGemsItems}
         onItemPress={handlePreviewItemPress}
-        onSeeAll={openTrendingBrowse}
+        onSeeAll={() => openBrowse('hidden_gems')}
+        testID="discover-rail-hidden-gems"
       />
       <DiscoverPreviewCarousel
-        title={translateDiscoveryBrowseMode('top_rated')}
-        items={topRatedItems}
+        title={translateDiscoveryBrowseMode('popular')}
+        items={popularItems}
         onItemPress={handlePreviewItemPress}
-        onSeeAll={openTopRatedBrowse}
+        onSeeAll={() => openBrowse('popular')}
+        testID="discover-rail-popular"
       />
       <DiscoverPreviewCarousel
         title={translateDiscoveryBrowseMode('new_releases')}
         items={newReleasesItems}
         onItemPress={handlePreviewItemPress}
-        onSeeAll={openNewReleasesBrowse}
+        onSeeAll={() => openBrowse('new_releases')}
+        testID="discover-rail-new-releases"
+      />
+      <DiscoverPreviewCarousel
+        title={translateDiscoveryBrowseMode('top_rated')}
+        items={topRatedItems}
+        onItemPress={handlePreviewItemPress}
+        onSeeAll={() => openBrowse('top_rated')}
+        testID="discover-rail-top-rated"
       />
     </ScrollView>
   );
@@ -218,10 +163,6 @@ const styles = StyleSheet.create({
   featureSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.xs,
-  },
-  futureSection: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
   },
   sectionEyebrow: {
     textTransform: 'uppercase',

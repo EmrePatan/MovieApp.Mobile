@@ -80,7 +80,10 @@ export default function DiscoverScreen() {
   const browseQuery = useDiscoveryBrowse(mode, typeFilter, filters);
 
   const items = useMemo(
-    () => flattenDedupedSearchResultPages(browseQuery.data?.pages),
+    () =>
+      flattenDedupedSearchResultPages(browseQuery.data?.pages).filter(
+        (item) => item.type === 'movie' || item.type === 'tv',
+      ),
     [browseQuery.data?.pages],
   );
 

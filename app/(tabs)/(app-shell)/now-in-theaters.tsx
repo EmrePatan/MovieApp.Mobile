@@ -57,7 +57,10 @@ export default function NowInTheatersScreen() {
   const resultsQuery = useNowInTheaters(discoverState, undefined, isHydrated);
 
   const items = useMemo(
-    () => flattenDedupedSearchResultPages(resultsQuery.data?.pages),
+    () =>
+      flattenDedupedSearchResultPages(resultsQuery.data?.pages).filter(
+        (item) => item.type === 'movie',
+      ),
     [resultsQuery.data?.pages],
   );
 

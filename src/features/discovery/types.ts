@@ -5,7 +5,8 @@ import type { TvDiscoverStatus } from './tv-discover-status';
 
 export type DiscoveryTypeFilter = SearchContentType;
 
-export type DiscoveryBrowseMode = 'trending' | 'top_rated' | 'new_releases';
+export type DiscoveryBrowseMode =
+  'trending' | 'top_rated' | 'new_releases' | 'popular' | 'hidden_gems';
 
 export type DiscoverySort =
   | 'popularity_desc'
@@ -23,9 +24,13 @@ export interface Genre {
 }
 
 export interface ExplorePreviewResponse {
-  trending: SearchResponse;
-  topRated: SearchResponse;
-  newReleases: SearchResponse;
+  railOrder?: string[];
+  hiddenGems?: SearchResponse;
+  popular?: SearchResponse;
+  newReleases?: SearchResponse;
+  topRated?: SearchResponse;
+  /** Previous explore-preview payload. Keşfet does not render a general trend rail. */
+  trending?: SearchResponse;
 }
 
 export interface DiscoveryBrowseFilters {
@@ -62,9 +67,11 @@ export interface DiscoveryBrowseRequest extends DiscoveryBrowseFilters {
 export const DEFAULT_DISCOVERY_PAGE_SIZE = 20;
 
 export const DISCOVERY_BROWSE_MODES: DiscoveryBrowseMode[] = [
-  'trending',
-  'top_rated',
+  'hidden_gems',
+  'popular',
   'new_releases',
+  'top_rated',
+  'trending',
 ];
 
 export const DISCOVERY_TYPE_OPTIONS: DiscoveryTypeFilter[] = ['all', 'movie', 'tv'];
@@ -84,11 +91,14 @@ export const DISCOVERY_SORT_VALUES = DISCOVERY_SORT_OPTIONS;
 
 export function getDefaultSortForMode(mode: DiscoveryBrowseMode): DiscoverySort {
   switch (mode) {
+    case 'hidden_gems':
     case 'top_rated':
       return 'rating_desc';
     case 'new_releases':
       return 'release_desc';
+    case 'popular':
     case 'trending':
+      return 'popularity_desc';
     default:
       return 'popularity_desc';
   }

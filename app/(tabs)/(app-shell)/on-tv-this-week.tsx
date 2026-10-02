@@ -46,7 +46,8 @@ export default function OnTvThisWeekScreen() {
     useFlatListScrollToTopControl(listRef);
 
   const items = useMemo(
-    () => flattenDedupedSearchResultPages(resultsQuery.data?.pages),
+    () =>
+      flattenDedupedSearchResultPages(resultsQuery.data?.pages).filter((item) => item.type === 'tv'),
     [resultsQuery.data?.pages],
   );
 

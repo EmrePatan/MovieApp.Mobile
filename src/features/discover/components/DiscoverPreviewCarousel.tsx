@@ -12,6 +12,7 @@ interface DiscoverPreviewCarouselProps {
   items: SearchResultItem[];
   onItemPress: (item: SearchResultItem) => void;
   onSeeAll?: () => void;
+  testID?: string;
 }
 
 export function DiscoverPreviewCarousel({
@@ -19,6 +20,7 @@ export function DiscoverPreviewCarousel({
   items,
   onItemPress,
   onSeeAll,
+  testID,
 }: DiscoverPreviewCarouselProps) {
   const { t } = useTranslation();
 
@@ -27,7 +29,7 @@ export function DiscoverPreviewCarousel({
   }
 
   return (
-    <View style={styles.section}>
+    <View style={styles.section} testID={testID}>
       <View style={styles.header}>
         <AppText variant="subtitle">{title}</AppText>
         {onSeeAll ? (

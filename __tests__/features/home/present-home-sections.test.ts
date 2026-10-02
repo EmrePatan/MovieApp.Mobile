@@ -48,10 +48,7 @@ describe('presentHomeSections', () => {
     const presented = presentHomeSections(sections, true);
 
     expect(presented.heroItems.map((item) => item.id)).toEqual(['hero-id']);
-    expect(presented.sections.map((section) => section.type)).toEqual([
-      'RecommendedForYou',
-      'TopRated',
-    ]);
+    expect(presented.sections.map((section) => section.type)).toEqual(['RecommendedForYou']);
     expect(presented.sections[0].items).toHaveLength(10);
   });
 
@@ -89,11 +86,14 @@ describe('presentHomeSections', () => {
     );
   });
 
-  it('orders cold-start rails as Trending then Top Rated', () => {
+  it('orders cold-start rails without Popular, New Releases, or Top Rated', () => {
     const sections = [
       createSection('HotThisWeek', [createItem({ id: 'hot-id' })]),
       createSection('NewReleases', [createItem({ id: 'new-id' })]),
       createSection('TopRated', [createItem({ id: 'top-id' })]),
+      createSection('Popular', [createItem({ id: 'popular-id' })]),
+      createSection('NowInTheaters', [createItem({ id: 'theater-id' })]),
+      createSection('OnTvThisWeek', [createItem({ id: 'tv-id', contentType: 'tv' })]),
       createSection('Trending', [createItem({ id: 'trending-id' })]),
     ];
 
@@ -101,7 +101,11 @@ describe('presentHomeSections', () => {
 
     expect(presented.showColdWelcome).toBe(false);
     expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
-    expect(presented.sections.map((section) => section.type)).toEqual(['Trending', 'TopRated']);
+    expect(presented.sections.map((section) => section.type)).toEqual([
+      'Trending',
+      'OnTvThisWeek',
+      'NowInTheaters',
+    ]);
   });
 
   it('orders personalized rails with Trending after Recommended For You', () => {
@@ -111,6 +115,7 @@ describe('presentHomeSections', () => {
       createSection('Trending', [createItem({ id: 'trending-id' })]),
       createSection('TopRated', [createItem({ id: 'top-id' })]),
       createSection('NewReleases', [createItem({ id: 'new-id' })]),
+      createSection('BecauseYouWatched', [createItem({ id: 'because-id' })]),
     ];
 
     const presented = presentHomeSections(sections, true);
@@ -118,7 +123,6 @@ describe('presentHomeSections', () => {
     expect(presented.sections.map((section) => section.type)).toEqual([
       'RecommendedForYou',
       'Trending',
-      'TopRated',
     ]);
   });
 

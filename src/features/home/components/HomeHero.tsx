@@ -413,14 +413,14 @@ const styles = StyleSheet.create({
   },
   cardInner: {
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
   mediaPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.background,
   },
   footer: {
     alignItems: 'center',

@@ -7,15 +7,23 @@ describe('resolveHomeSectionTitle (Turkish)', () => {
   });
 
   it('localizes known home section types in Turkish', () => {
-    expect(resolveHomeSectionTitle('Trending', 'Trending Now', t)).toBe('Şimdi Trend');
+    expect(resolveHomeSectionTitle('HotThisWeek', 'Hot This Week', t)).toBe('Bu Hafta Trend');
+    expect(resolveHomeSectionTitle('Trending', 'Trending Now', t)).toBe('Bu Hafta Trend');
     expect(resolveHomeSectionTitle('TopRated', 'Top Rated', t)).toBe('En Yüksek Puanlı');
-    expect(resolveHomeSectionTitle('NewReleases', 'New Releases', t)).toBe('Yeni Vizyon');
+    expect(resolveHomeSectionTitle('NewReleases', 'New Releases', t)).toBe('Yeni Yayınlar');
     expect(resolveHomeSectionTitle('ComingUp', 'Coming Up', t)).toBe('Yakında');
+    expect(resolveHomeSectionTitle('ComingUp', 'Coming Up', t, { comingUpSource: 'for-you' })).toBe(
+      'Yakında',
+    );
     expect(
       resolveHomeSectionTitle('ComingUp', 'Coming Up', t, { comingUpSource: 'personalized' }),
     ).toBe('Senin İçin Yakında');
     expect(resolveHomeSectionTitle('RecommendedForYou', 'Recommended For You', t)).toBe(
-      'Senin İçin Önerilen',
+      'Senin için önerilen',
+    );
+    expect(resolveHomeSectionTitle('OnTvThisWeek', 'On TV This Week', t)).toBe('Bu Hafta TV’de');
+    expect(resolveHomeSectionTitle('NowInTheaters', 'Now in Theaters', t)).toBe(
+      'Şimdi Sinemalarda',
     );
   });
 });

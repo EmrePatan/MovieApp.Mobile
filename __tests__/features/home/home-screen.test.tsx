@@ -124,20 +124,38 @@ describe('HomeScreen', () => {
             ],
           },
           {
-            type: 'TopRated',
-            title: 'Top Rated',
-            displayOrder: 1,
+            type: 'OnTvThisWeek',
+            title: 'On TV This Week',
+            displayOrder: 4,
             items: [
               {
-                id: 'top-1',
+                id: 'tv-week-1',
                 contentType: 'tv',
-                title: 'Top Show',
-                originalTitle: 'Top Show',
+                title: 'Airing Show',
+                originalTitle: 'Airing Show',
                 posterUrl: null,
                 backdropUrl: null,
                 releaseDate: '2008-01-20',
-                voteAverage: 9.0,
-                voteCount: 100,
+                voteAverage: 8.2,
+                voteCount: 80,
+              },
+            ],
+          },
+          {
+            type: 'NowInTheaters',
+            title: 'Now in Theaters',
+            displayOrder: 5,
+            items: [
+              {
+                id: 'theater-1',
+                contentType: 'movie',
+                title: 'Theater Movie',
+                originalTitle: 'Theater Movie',
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2026-01-20',
+                voteAverage: 7.4,
+                voteCount: 40,
               },
             ],
           },
@@ -256,9 +274,11 @@ describe('HomeScreen', () => {
     render(<HomeScreen />);
     expect(screen.getByText('Hot Show')).toBeTruthy();
     expect(screen.queryByText('Find your next favorite')).toBeNull();
-    expect(screen.getByText('Top Rated')).toBeTruthy();
     expect(screen.getByText('Trending Now')).toBeTruthy();
+    expect(screen.getByText('On TV This Week')).toBeTruthy();
+    expect(screen.getByText('Now in Theaters')).toBeTruthy();
     expect(screen.queryByText('New Releases')).toBeNull();
+    expect(screen.queryByText('Top Rated')).toBeNull();
     expect(screen.queryByLabelText('Show TV Shows')).toBeNull();
   });
 
@@ -391,41 +411,37 @@ describe('HomeScreen', () => {
             ],
           },
           {
-            type: 'TopRated',
-            title: 'Top Rated',
+            type: 'OnTvThisWeek',
+            title: 'On TV This Week',
+            displayOrder: 4,
+            items: [
+              {
+                id: 'tv-id',
+                contentType: 'tv',
+                title: 'Weekly Show',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.1,
+                voteCount: 50,
+              },
+            ],
+          },
+          {
+            type: 'NowInTheaters',
+            title: 'Now in Theaters',
             displayOrder: 5,
             items: [
               {
-                id: 'top-id',
+                id: 'theater-id',
                 contentType: 'movie',
-                title: 'Top Rated Movie',
+                title: 'Theater Movie',
                 originalTitle: null,
                 posterUrl: null,
                 backdropUrl: null,
                 releaseDate: '2020-01-01',
-                voteAverage: 9.0,
-                voteCount: 50,
-              },
-              {
-                id: 'top-id-2',
-                contentType: 'movie',
-                title: 'Second Top Rated Movie',
-                originalTitle: null,
-                posterUrl: null,
-                backdropUrl: null,
-                releaseDate: '2020-01-01',
-                voteAverage: 8.9,
-                voteCount: 50,
-              },
-              {
-                id: 'top-id-3',
-                contentType: 'movie',
-                title: 'Third Top Rated Movie',
-                originalTitle: null,
-                posterUrl: null,
-                backdropUrl: null,
-                releaseDate: '2020-01-01',
-                voteAverage: 8.8,
+                voteAverage: 7.2,
                 voteCount: 50,
               },
             ],
@@ -517,16 +533,19 @@ describe('HomeScreen', () => {
 
     expect(presented.sections.map((section) => section.type)).toEqual([
       'RecommendedForYou',
-      'TopRated',
+      'OnTvThisWeek',
+      'NowInTheaters',
     ]);
 
     render(<HomeScreen />);
 
     expect(screen.getByText('Recommended For You')).toBeTruthy();
-    expect(screen.getByText('Top Rated')).toBeTruthy();
+    expect(screen.getByText('On TV This Week')).toBeTruthy();
+    expect(screen.getByText('Now in Theaters')).toBeTruthy();
     expect(screen.queryByText('Because You Watched')).toBeNull();
     expect(screen.queryByText('Popular')).toBeNull();
     expect(screen.queryByText('Popular Movie')).toBeNull();
+    expect(screen.queryByText('Top Rated')).toBeNull();
   });
 
   it('navigates to Discover from Trending See All', () => {
@@ -610,7 +629,7 @@ describe('HomeScreen', () => {
 
     fireEvent.press(screen.getByLabelText('See all Coming Up'));
 
-    expect(mockPush).toHaveBeenCalledWith('/upcoming');
+    expect(mockPush).toHaveBeenCalledWith('/upcoming?tab=for-you');
 
     const dismissTo = jest.fn();
     returnFromLibraryStackScreen({ dismissTo } as never);
@@ -753,19 +772,37 @@ describe('HomeScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/search?from=home');
   });
 
-  it('navigates to Discover from Top Rated See All', () => {
+  it('opens On TV This Week and Now in Theaters from Home See All', () => {
     mockHomeFeed({
       data: {
         sections: [
           {
-            type: 'TopRated',
-            title: 'Top Rated',
+            type: 'OnTvThisWeek',
+            title: 'On TV This Week',
             displayOrder: 1,
             items: [
               {
-                id: 'top-only',
+                id: 'tv-only',
+                contentType: 'tv',
+                title: 'Weekly Show',
+                originalTitle: null,
+                posterUrl: null,
+                backdropUrl: null,
+                releaseDate: '2020-01-01',
+                voteAverage: 8.0,
+                voteCount: 50,
+              },
+            ],
+          },
+          {
+            type: 'NowInTheaters',
+            title: 'Now in Theaters',
+            displayOrder: 2,
+            items: [
+              {
+                id: 'theater-only',
                 contentType: 'movie',
-                title: 'Top Rated Movie',
+                title: 'Theater Movie',
                 originalTitle: null,
                 posterUrl: null,
                 backdropUrl: null,
@@ -787,8 +824,11 @@ describe('HomeScreen', () => {
 
     render(<HomeScreen />);
 
-    fireEvent.press(screen.getByLabelText('See all Top Rated'));
+    fireEvent.press(screen.getByLabelText('See all On TV This Week'));
+    expect(mockPush).toHaveBeenCalledWith('/on-tv-this-week');
 
-    expect(mockPush).toHaveBeenCalledWith('/discover-browse?mode=top_rated&type=all');
+    fireEvent.press(screen.getByLabelText('See all Now in Theaters'));
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/now-in-theaters'));
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('releaseRegion=TR'));
   });
 });

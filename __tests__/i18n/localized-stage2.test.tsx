@@ -30,7 +30,9 @@ describe('Stage 2 localization', () => {
 
   it('translates catalog label helpers in English', () => {
     expect(translateContentType('movie')).toBe('Movie');
-    expect(translateDiscoveryBrowseMode('trending')).toBe('Trending');
+    expect(translateDiscoveryBrowseMode('trending')).toBe('Trending Now');
+    expect(translateDiscoveryBrowseMode('hidden_gems')).toBe('Hidden Gems');
+    expect(translateDiscoveryBrowseMode('popular')).toBe('Popular');
     expect(translateLibrarySort('titleAsc')).toBe('Title A–Z');
     expect(translateMovieDnaGenreTitle('Science Fiction')).toBe('Sci-Fi Explorer');
     expect(formatContentType('tv')).toBe('TV');

@@ -16,8 +16,61 @@ jest.mock('@tanstack/react-query', () => ({
 jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({
   useExplorePreview: jest.fn(() => ({
     data: {
-      trending: { items: [] },
-      topRated: { items: [] },
+      railOrder: [
+        'platforms',
+        'genres',
+        'world-cinema',
+        'hidden-gems',
+        'popular',
+        'new-releases',
+        'top-rated',
+      ],
+      trending: {
+        items: [
+          {
+            id: 'trend-1',
+            type: 'movie',
+            title: 'Should Not Trend',
+            posterUrl: '/poster.jpg',
+          },
+        ],
+      },
+      hiddenGems: {
+        items: [
+          {
+            id: 'gem-1',
+            type: 'movie',
+            title: 'Quiet Gem',
+            posterUrl: '/poster.jpg',
+          },
+          {
+            id: 'person-1',
+            type: 'person',
+            title: 'Not A Gem',
+            posterUrl: null,
+          },
+        ],
+      },
+      popular: {
+        items: [
+          {
+            id: 'pop-1',
+            type: 'tv',
+            title: 'Popular Show',
+            posterUrl: '/poster.jpg',
+          },
+        ],
+      },
+      topRated: {
+        items: [
+          {
+            id: 'top-1',
+            type: 'movie',
+            title: 'Top Title',
+            posterUrl: '/poster.jpg',
+          },
+        ],
+      },
       newReleases: {
         items: [
           {
@@ -29,6 +82,19 @@ jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({
         ],
       },
     },
+    refetch: jest.fn(),
+  })),
+}));
+
+jest.mock('@/features/discovery/hooks/useGenres', () => ({
+  useGenres: jest.fn(() => ({
+    data: [
+      { id: 'g-action', name: 'Action' },
+      { id: 'g-drama', name: 'Drama' },
+      { id: 'g-news', name: 'News' },
+    ],
+    isLoading: false,
+    isError: false,
   })),
 }));
 
@@ -192,9 +258,7 @@ describe('DiscoverHubContent', () => {
 
     fireEvent.press(screen.getByLabelText(t('discover.worldCinemaHub.seeAllAccessibility')));
 
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringContaining('originCountry=KR'),
-    );
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('originCountry=KR'));
   });
 
   it('updates preview collection when a cinema chip is selected', () => {
@@ -209,52 +273,6 @@ describe('DiscoverHubContent', () => {
     expect(useWorldCinemaPreview).toHaveBeenLastCalledWith('JP', 'movie');
   });
 
-  it('renders On TV This Week preview section with See All', () => {
-    render(<DiscoverHubContent />);
-
-    expect(screen.getByTestId('on-tv-this-week-preview')).toBeTruthy();
-    expect(
-      screen.getByLabelText(
-        t('common.seeAllTitle', { title: t('discover.hub.onTvThisWeek.title') }),
-      ),
-    ).toBeTruthy();
-  });
-
-  it('opens on tv this week from See All', () => {
-    render(<DiscoverHubContent />);
-
-    fireEvent.press(
-      screen.getByLabelText(
-        t('common.seeAllTitle', { title: t('discover.hub.onTvThisWeek.title') }),
-      ),
-    );
-
-    expect(mockPush).toHaveBeenCalledWith('/on-tv-this-week');
-  });
-
-  it('renders Now in Theaters preview section with See All', () => {
-    render(<DiscoverHubContent />);
-
-    expect(screen.getByTestId('now-in-theaters-preview')).toBeTruthy();
-    expect(
-      screen.getByLabelText(
-        t('common.seeAllTitle', { title: t('discover.hub.nowInTheaters.title') }),
-      ),
-    ).toBeTruthy();
-  });
-
-  it('opens now in theaters from See All', () => {
-    render(<DiscoverHubContent />);
-
-    fireEvent.press(
-      screen.getByLabelText(
-        t('common.seeAllTitle', { title: t('discover.hub.nowInTheaters.title') }),
-      ),
-    );
-
-    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/now-in-theaters'));
-  });
-
   it('renders streaming platform poster row and opens platform on tap', () => {
     render(<DiscoverHubContent />);
 
@@ -262,10 +280,16 @@ describe('DiscoverHubContent', () => {
     expect(screen.queryByTestId('streaming-platforms-preview')).toBeNull();
 
     fireEvent.press(
-      screen.getByLabelText(t('discover.streamingPlatformsHub.openPlatform', { provider: 'Netflix' })),
+      screen.getByLabelText(
+        t('discover.streamingPlatformsHub.openPlatform', { provider: 'Netflix' }),
+      ),
     );
 
-    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('watchProviderId=8'));
+    expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining('watchProviderId=8'),
+      '/discover',
+    );
   });
 
   it('opens streaming platforms directory from See All', () => {
@@ -273,28 +297,66 @@ describe('DiscoverHubContent', () => {
 
     fireEvent.press(screen.getByTestId('streaming-platforms-hub-see-all'));
 
-    expect(mockPush).toHaveBeenCalledWith('/streaming-platforms');
+    expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
+      expect.anything(),
+      '/streaming-platforms',
+      '/discover',
+    );
   });
 
-  it('renders New Releases preview and does not show Explore by Genre', () => {
+  it('renders Keşfet rails in catalog order without a general trend rail', () => {
     render(<DiscoverHubContent />);
 
     expect(screen.getByText('Fresh Release')).toBeTruthy();
-    expect(
-      screen.getByLabelText(
-        t('common.seeAllTitle', { title: t('discover.hub.newReleases') }),
-      ),
-    ).toBeTruthy();
-    expect(screen.queryByText('Explore by Genre')).toBeNull();
+    expect(screen.getByText('Quiet Gem')).toBeTruthy();
+    expect(screen.getByText('Popular Show')).toBeTruthy();
+    expect(screen.getByText('Top Title')).toBeTruthy();
+    expect(screen.queryByText('Should Not Trend')).toBeNull();
+    expect(screen.queryByText('Not A Gem')).toBeNull();
+    expect(screen.queryByTestId('on-tv-this-week-preview')).toBeNull();
+    expect(screen.queryByTestId('now-in-theaters-preview')).toBeNull();
+    expect(screen.getByTestId('genres-hub')).toBeTruthy();
+    expect(screen.getByText('By Genre')).toBeTruthy();
+    expect(screen.getByText('Action')).toBeTruthy();
+    expect(screen.queryByText('News')).toBeNull();
+
+    const serialized = JSON.stringify(screen.toJSON());
+    const railIds = [
+      'streaming-platforms-hub',
+      'genres-hub',
+      'world-cinema-hub',
+      'discover-rail-hidden-gems',
+      'discover-rail-popular',
+      'discover-rail-new-releases',
+      'discover-rail-top-rated',
+    ];
+    const indexes = railIds.map((id) => serialized.indexOf(id));
+    expect(indexes.every((index) => index >= 0)).toBe(true);
+    expect([...indexes].sort((left, right) => left - right)).toEqual(indexes);
+  });
+
+  it('opens a main genre on the popular title list', () => {
+    render(<DiscoverHubContent />);
+
+    fireEvent.press(screen.getByTestId('genre-hub-tile-g-action'));
+
+    expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining('mode=popular'),
+      '/discover',
+    );
+    expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining('genres=g-action'),
+      '/discover',
+    );
   });
 
   it('opens new releases browse from See All', () => {
     render(<DiscoverHubContent />);
 
     fireEvent.press(
-      screen.getByLabelText(
-        t('common.seeAllTitle', { title: t('discover.hub.newReleases') }),
-      ),
+      screen.getByLabelText(t('common.seeAllTitle', { title: t('discover.hub.newReleases') })),
     );
 
     expect(mockOpenLibraryStackScreen).toHaveBeenCalledWith(
@@ -303,5 +365,4 @@ describe('DiscoverHubContent', () => {
       '/(tabs)/discover',
     );
   });
-
 });

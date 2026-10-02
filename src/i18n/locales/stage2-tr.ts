@@ -289,12 +289,15 @@ export const stage2Tr = {
       showFilter: '{{label}} göster',
     },
     sections: {
-      trending: 'Şimdi Trend',
+      hotThisWeek: 'Bu Hafta Trend',
+      trending: 'Bu Hafta Trend',
       topRated: 'En Yüksek Puanlı',
-      newReleases: 'Yeni Vizyon',
-      recommendedForYou: 'Senin İçin Önerilen',
+      newReleases: 'Yeni Yayınlar',
+      recommendedForYou: 'Senin için önerilen',
       comingUp: 'Yakında',
       comingUpPersonalized: 'Senin İçin Yakında',
+      onTvThisWeek: 'Bu Hafta TV’de',
+      nowInTheaters: 'Şimdi Sinemalarda',
     },
     comingUpBadge: {
       premiere: 'Prömiyer',
@@ -438,6 +441,12 @@ export const stage2Tr = {
       },
       fallbackExplorer: '{{genreName}} Kaşifi',
     },
+    genresHub: {
+      title: 'Türlere Göre',
+      seeAll: 'Tümünü Gör',
+      seeAllAccessibility: 'Tüm türleri gör',
+      openGenre: '{{genre}} türünü keşfet',
+    },
     streamingPlatformsHub: {
       title: 'Yayın Platformları',
       directoryTitle: 'Yayın Platformları',
@@ -451,7 +460,9 @@ export const stage2Tr = {
   },
   discovery: {
     modes: {
-      trending: 'Trend',
+      trending: 'Bu Hafta Trend',
+      popular: 'Popüler',
+      hidden_gems: 'Gizli Mücevherler',
       top_rated: 'En Yüksek Puanlı',
       new_releases: 'Yeni Yayınlar',
     },

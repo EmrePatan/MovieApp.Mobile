@@ -16,12 +16,18 @@ import { HomeLoadingState } from '@/features/home/components/HomeLoadingState';
 import { HomeComingUpSection } from '@/features/home/components/HomeComingUpSection';
 import { HomePersonalizedLoadingSlot } from '@/features/home/components/HomePersonalizedLoadingSlot';
 import { HomeSection } from '@/features/home/components/HomeSection';
+import { createNowInTheatersHref } from '@/features/discovery/utils/now-in-theaters-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { openComingUpScreen } from '@/features/upcoming/navigation/coming-up-navigation';
+import { resolveComingUpSeeAllTab } from '@/features/home/utils/coming-up-source';
 import { HomeScreenShell } from '@/features/home/components/HomeScreenShell';
 import { HomeTopChrome } from '@/features/home/components/HomeTopChrome';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
-import type { HomeItem, HomeSection as HomeSectionModel } from '@/features/home/types';
+import type {
+  HomeComingUpSource,
+  HomeItem,
+  HomeSection as HomeSectionModel,
+} from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
@@ -72,6 +78,7 @@ export default function HomeScreen() {
     isInitialBrowseLoading,
     isFetching,
     refetch,
+    releaseRegion = 'TR',
   } = useHomeFeed('all', DEFAULT_HOME_SECTION_SIZE, { screenActive: isHomeFocused });
 
   const showPersonalizedLoadingSlot = shouldShowPersonalizedLoadingSlot(
@@ -79,7 +86,11 @@ export default function HomeScreen() {
     personalized,
   );
 
-  const { sections: presentedSections, heroItems, showColdWelcome } = useMemo(() => {
+  const {
+    sections: presentedSections,
+    heroItems,
+    showColdWelcome,
+  } = useMemo(() => {
     const nonEmptySections = mergedSections.filter((section) => section.items.length > 0);
     return presentHomeSections(nonEmptySections, personalization);
   }, [mergedSections, personalization]);
@@ -180,24 +191,23 @@ export default function HomeScreen() {
   }, [router]);
 
   const handleTrendingSeeAll = useCallback(() => {
-    openLibraryStackScreen(
-      router,
-      '/discover-browse?mode=trending&type=all',
-      '/(tabs)/home',
-    );
+    openLibraryStackScreen(router, '/discover-browse?mode=trending&type=all', '/(tabs)/home');
   }, [router]);
 
-  const handleTopRatedSeeAll = useCallback(() => {
-    openLibraryStackScreen(
-      router,
-      '/discover-browse?mode=top_rated&type=all',
-      '/(tabs)/home',
-    );
+  const handleComingUpSeeAll = useCallback(
+    (source?: HomeComingUpSource) => {
+      openComingUpScreen(router, resolveComingUpSeeAllTab(source), '/(tabs)/home');
+    },
+    [router],
+  );
+
+  const handleOnTvSeeAll = useCallback(() => {
+    router.push('/on-tv-this-week');
   }, [router]);
 
-  const handleComingUpSeeAll = useCallback(() => {
-    openComingUpScreen(router, undefined, '/(tabs)/home');
-  }, [router]);
+  const handleNowInTheatersSeeAll = useCallback(() => {
+    router.push(createNowInTheatersHref({}, releaseRegion));
+  }, [releaseRegion, router]);
 
   const renderSection = useCallback(
     ({ item }: { item: HomeSectionModel }) => {
@@ -210,7 +220,7 @@ export default function HomeScreen() {
           <HomeComingUpSection
             section={item}
             onItemPress={handleComingUpItemPress}
-            onSeeAllPress={handleComingUpSeeAll}
+            onSeeAllPress={() => handleComingUpSeeAll(item.comingUpSource)}
           />
         );
       }
@@ -218,9 +228,11 @@ export default function HomeScreen() {
       const onSeeAllPress =
         item.type === 'Trending'
           ? handleTrendingSeeAll
-          : item.type === 'TopRated'
-            ? handleTopRatedSeeAll
-            : undefined;
+          : item.type === 'OnTvThisWeek'
+            ? handleOnTvSeeAll
+            : item.type === 'NowInTheaters'
+              ? handleNowInTheatersSeeAll
+              : undefined;
 
       return (
         <HomeSection section={item} onItemPress={handleItemPress} onSeeAllPress={onSeeAllPress} />
@@ -230,7 +242,8 @@ export default function HomeScreen() {
       handleComingUpItemPress,
       handleComingUpSeeAll,
       handleItemPress,
-      handleTopRatedSeeAll,
+      handleNowInTheatersSeeAll,
+      handleOnTvSeeAll,
       handleTrendingSeeAll,
     ],
   );
@@ -304,15 +317,17 @@ export default function HomeScreen() {
       );
     }
 
-    const message = isApiError(error)
-      ? error.userMessage
-      : t('common.unableToLoadSection');
+    const message = isApiError(error) ? error.userMessage : t('common.unableToLoadSection');
 
     return (
       <HomeScreenShell>
         {topChrome}
         <View style={styles.centered}>
-          <ErrorView message={message} onRetry={handleRetryBrowse} retryLabel={t('common.tryAgain')} />
+          <ErrorView
+            message={message}
+            onRetry={handleRetryBrowse}
+            retryLabel={t('common.tryAgain')}
+          />
         </View>
       </HomeScreenShell>
     );
@@ -343,9 +358,7 @@ export default function HomeScreen() {
     <HomeScreenShell>
       {topChrome}
       {androidPullToRefresh.enabled ? (
-        <GestureDetector gesture={androidPullToRefresh.composedGesture}>
-          {homeList}
-        </GestureDetector>
+        <GestureDetector gesture={androidPullToRefresh.composedGesture}>{homeList}</GestureDetector>
       ) : (
         homeList
       )}
