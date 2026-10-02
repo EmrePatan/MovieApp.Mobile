@@ -1,5 +1,7 @@
 export const DEFAULT_REVIEW_PAGE_SIZE = 10;
 export const REVIEW_COUNT_PAGE_SIZE = 1;
+/** Detail catalog preview rail: first page size (presentation only). */
+export const DETAIL_REVIEWS_PREVIEW_PAGE_SIZE = 5;
 export const MAX_REVIEW_CONTENT_LENGTH = 5000;
 
 export type ReviewContentType = 'movie' | 'tv';

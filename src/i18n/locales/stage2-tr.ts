@@ -1015,6 +1015,7 @@ export const stage2Tr = {
       countLoading: 'Yorum sayısı yükleniyor',
       noReviewsYet: 'Henüz yorum yok',
       accessibility: 'Yorumlar, {{status}}',
+      openReviewsFromPreview: 'Yorumlar sayfasını aç, {{name}} yorumu',
     },
   },
   ratings: {

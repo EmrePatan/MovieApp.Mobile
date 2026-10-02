@@ -993,6 +993,7 @@ export const stage2En = {
       countLoading: 'Reviews count loading',
       noReviewsYet: 'No reviews yet',
       accessibility: 'Reviews, {{status}}',
+      openReviewsFromPreview: 'Open reviews, {{name}}’s review',
     },
   },
   ratings: {

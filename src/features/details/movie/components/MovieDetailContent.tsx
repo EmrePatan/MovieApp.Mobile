@@ -71,13 +71,13 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       </DetailPersonalRatingProvider>
       </DetailHeaderStack>
       <DetailOverview overview={movie.overview} compactTop />
-      <DetailKeywords keywords={movie.keywords} />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}
         contentTitle={movie.title}
       />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
+      <DetailKeywords keywords={movie.keywords} />
       <CatalogGallerySection
         query={galleryQuery}
         seeAllRoute={buildMovieGalleryRoute(movie.id)}

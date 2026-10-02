@@ -1012,6 +1012,7 @@ export const stage2De = {
       countLoading: 'Rezensionsanzahl wird geladen',
       noReviewsYet: 'Noch keine Rezensionen',
       accessibility: 'Rezensionen, {{status}}',
+      openReviewsFromPreview: 'Rezensionen öffnen, Rezension von {{name}}',
     },
   },
   ratings: {

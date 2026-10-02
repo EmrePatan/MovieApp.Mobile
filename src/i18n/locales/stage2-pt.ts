@@ -1012,6 +1012,7 @@ export const stage2Pt = {
       countLoading: 'Carregando contagem de críticas',
       noReviewsYet: 'Nenhuma crítica ainda',
       accessibility: 'Críticas, {{status}}',
+      openReviewsFromPreview: 'Abrir críticas, crítica de {{name}}',
     },
   },
   ratings: {

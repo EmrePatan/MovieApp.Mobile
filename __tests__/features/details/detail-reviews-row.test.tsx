@@ -4,7 +4,8 @@ import { MovieDetailContent } from '@/features/details/movie/components/MovieDet
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';
-import { REVIEW_COUNT_PAGE_SIZE } from '@/features/reviews/types';
+import { DETAIL_REVIEWS_PREVIEW_PAGE_SIZE } from '@/features/reviews/types';
+import type { ReviewResponse } from '@/features/reviews/types';
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
@@ -43,6 +44,14 @@ jest.mock('@/features/reviews/hooks/useMovieReviews', () => ({
 
 jest.mock('@/features/reviews/hooks/useTvShowReviews', () => ({
   useTvShowReviews: jest.fn(),
+}));
+
+jest.mock('@/features/reviews/components/ReviewTranslationControls', () => ({
+  ReviewTranslationControls: ({ review }: { review: ReviewResponse }) => {
+    const mockReact = require('react');
+    const { Text } = require('react-native');
+    return mockReact.createElement(Text, null, review.content);
+  },
 }));
 
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
@@ -131,11 +140,29 @@ function collectTestIds(node: { props?: { testID?: string }; children?: unknown[
 }
 
 function mockCountQuery(totalCount: number) {
+  const items: ReviewResponse[] =
+    totalCount > 0
+      ? [
+          {
+            id: 'review-1',
+            content: 'A thoughtful review.',
+            createdAt: '2026-01-01T00:00:00Z',
+            updatedAt: '2026-01-01T00:00:00Z',
+            userRating: 9,
+            user: {
+              id: 'author-1',
+              displayName: 'Alex',
+              effectiveAvatarUrl: null,
+            },
+          },
+        ]
+      : [];
+
   return {
     data: {
-      items: [],
+      items,
       page: 1,
-      pageSize: REVIEW_COUNT_PAGE_SIZE,
+      pageSize: DETAIL_REVIEWS_PREVIEW_PAGE_SIZE,
       totalCount,
       totalPages: totalCount,
       hasNextPage: false,
@@ -159,6 +186,8 @@ describe('detail reviews row', () => {
     expect(screen.getByTestId('detail-ultra-thin-rating-rail')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
     expect(screen.getByTestId('reviews-count')).toHaveTextContent('121');
+    expect(screen.getByTestId('reviews-preview-rail')).toBeTruthy();
+    expect(screen.getByText('A thoughtful review.')).toBeTruthy();
     expect(screen.queryByTestId('reviews-section')).toBeNull();
     expect(screen.queryByTestId('reviews-detail-content')).toBeNull();
     expect(screen.queryByText('Load more reviews')).toBeNull();

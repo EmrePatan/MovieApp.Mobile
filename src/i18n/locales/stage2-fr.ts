@@ -1012,6 +1012,7 @@ export const stage2Fr = {
       countLoading: 'Chargement du nombre d\'avis',
       noReviewsYet: 'Aucun avis pour le moment',
       accessibility: 'Avis, {{status}}',
+      openReviewsFromPreview: 'Ouvrir les avis, avis de {{name}}',
     },
   },
   ratings: {

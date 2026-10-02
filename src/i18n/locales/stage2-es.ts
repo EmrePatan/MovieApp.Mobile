@@ -1013,6 +1013,7 @@ export const stage2Es = {
       countLoading: 'Cargando recuento de reseñas',
       noReviewsYet: 'Aún no hay reseñas',
       accessibility: 'Reseñas, {{status}}',
+      openReviewsFromPreview: 'Abrir reseñas, reseña de {{name}}',
     },
   },
   ratings: {
