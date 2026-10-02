@@ -1,8 +1,7 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
-  Image,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -10,6 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Image } from 'expo-image';
 import {
   getHomeHeroCardWidth,
   getHomeHeroHeight,
@@ -27,6 +27,7 @@ import type { HomeItem } from '../types';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
+import { REMOTE_IMAGE_CACHE_POLICY, type RemoteImagePriority } from '@/utils/cached-image';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -42,38 +43,69 @@ interface HomeHeroProps {
   snapInterval?: number;
   paginationCount?: number;
   paginationIndex?: number;
+  /** Decode priority for this slide. On-screen peeks and the center are high. */
+  imagePriority?: RemoteImagePriority;
+  /**
+   * Remount the poster once its frame has a size. Used for the leading loop
+   * clone, whose first decode otherwise completes before the native view has bounds.
+   */
+  repaintPosterOnLayout?: boolean;
 }
 
 const HERO_EMBEDDED_PRESS_DELAY_MS = 120;
 
 function HeroPosterImage({
   uri,
-  imageKey,
+  recyclingKey,
   width,
   height,
+  priority,
+  repaintOnLayout,
   onError,
   onLoad,
   onLoadEnd,
 }: {
   uri: string;
-  imageKey: string;
+  recyclingKey: string;
   width: number;
   height: number;
+  priority: RemoteImagePriority;
+  /**
+   * Inactive peeks remount the native image once the frame has a size.
+   * The leading scroll child otherwise finishes its decode at empty bounds
+   * and expo-image keeps the blank bitmap.
+   */
+  repaintOnLayout: boolean;
   onError: () => void;
   onLoad: () => void;
   onLoadEnd: () => void;
 }) {
+  const [paintGeneration, setPaintGeneration] = useState(0);
+  const handleLayout = useCallback(() => {
+    if (!repaintOnLayout || paintGeneration > 0) {
+      return;
+    }
+
+    setPaintGeneration(1);
+  }, [paintGeneration, repaintOnLayout]);
+
   return (
-    <Image
-      key={imageKey}
-      source={{ uri }}
-      style={{ width, height }}
-      resizeMode="contain"
-      accessibilityIgnoresInvertColors
-      onError={onError}
-      onLoad={onLoad}
-      onLoadEnd={onLoadEnd}
-    />
+    <View collapsable={false} style={{ width, height }} onLayout={handleLayout}>
+      <Image
+        key={repaintOnLayout ? `${recyclingKey}:${paintGeneration}` : undefined}
+        source={{ uri }}
+        style={{ width, height }}
+        contentFit="contain"
+        cachePolicy={REMOTE_IMAGE_CACHE_POLICY}
+        recyclingKey={recyclingKey}
+        priority={priority}
+        transition={null}
+        accessibilityIgnoresInvertColors
+        onError={onError}
+        onLoad={onLoad}
+        onLoadEnd={onLoadEnd}
+      />
+    </View>
   );
 }
 
@@ -96,6 +128,8 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
   glow = true,
   animatedStyle,
   pressable = true,
+  priority = 'high',
+  repaintOnLayout = false,
 }: {
   item: HomeItem;
   onPress?: (item: HomeItem) => void;
@@ -104,6 +138,8 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
   glow?: boolean;
   animatedStyle?: StyleProp<ViewStyle>;
   pressable?: boolean;
+  priority?: RemoteImagePriority;
+  repaintOnLayout?: boolean;
 }) {
   const { t } = useTranslation();
   const posterUri = resolveHomeHeroPosterUri(item.posterUrl);
@@ -139,9 +175,11 @@ export const HomeHeroPosterCard = memo(function HomeHeroPosterCard({
         {posterUri != null && !posterLoad.hasError ? (
           <HeroPosterImage
             uri={posterUri}
-            imageKey={posterLoad.imageKey}
+            recyclingKey={posterLoad.imageKey}
             width={innerWidth}
             height={innerHeight}
+            priority={priority}
+            repaintOnLayout={repaintOnLayout}
             onError={posterLoad.onImageError}
             onLoad={posterLoad.onImageLoad}
             onLoadEnd={posterLoad.onImageLoadEnd}
@@ -189,7 +227,9 @@ function areHomeHeroPropsEqual(previous: HomeHeroProps, next: HomeHeroProps): bo
     previous.slideIndex === next.slideIndex &&
     previous.snapInterval === next.snapInterval &&
     previous.paginationCount === next.paginationCount &&
-    previous.paginationIndex === next.paginationIndex
+    previous.paginationIndex === next.paginationIndex &&
+    previous.imagePriority === next.imagePriority &&
+    previous.repaintPosterOnLayout === next.repaintPosterOnLayout
   );
 }
 
@@ -205,6 +245,8 @@ export const HomeHero = memo(function HomeHero({
   snapInterval,
   paginationCount,
   paginationIndex,
+  imagePriority,
+  repaintPosterOnLayout = false,
 }: HomeHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -299,6 +341,8 @@ export const HomeHero = memo(function HomeHero({
       glow={isActive}
       animatedStyle={animatedStyle}
       pressable={isPosterPressable}
+      priority={imagePriority ?? (isActive ? 'high' : 'low')}
+      repaintOnLayout={repaintPosterOnLayout}
     />
   );
 

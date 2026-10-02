@@ -5,6 +5,8 @@ import {
   resolveHomeHeroPrefetchUri,
   resolveHomeHeroPrimaryUri,
   resolveHomeRecommendedPrefetchUris,
+  resolveHomeSectionPosterSize,
+  resolveHomeSectionPosterUri,
   resolveHomeTrendingPosterUri,
 } from '@/features/home/utils/home-hero-image';
 import { resolveImageUri } from '@/utils/image-url';
@@ -51,7 +53,7 @@ describe('home hero image urls', () => {
     ).toBe('https://image.tmdb.org/t/p/w780/poster.jpg');
   });
 
-  it('prefetches the visible hero and the next one, wrapping to the first', () => {
+  it('prefetches the centered hero, the previous wrap, and the next hero at w780', () => {
     delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
 
     const items = [
@@ -61,15 +63,47 @@ describe('home hero image urls', () => {
     ];
 
     expect(resolveHomeHeroNeighborPrefetchUris(items, 0)).toEqual([
-      'https://image.tmdb.org/t/p/w780/a.jpg',
-      'https://image.tmdb.org/t/p/w780/b.jpg',
+      resolveHomeHeroPosterUri('/a.jpg'),
+      resolveHomeHeroPosterUri('/b.jpg'),
     ]);
     expect(resolveHomeHeroNeighborPrefetchUris(items, 2)).toEqual([
-      'https://image.tmdb.org/t/p/w780/a.jpg',
+      resolveHomeHeroPosterUri('/b.jpg'),
+      resolveHomeHeroPosterUri('/a.jpg'),
     ]);
     expect(resolveHomeHeroNeighborPrefetchUris([{ posterUrl: '/only.jpg' }], 0)).toEqual([
-      'https://image.tmdb.org/t/p/w780/only.jpg',
+      resolveHomeHeroPosterUri('/only.jpg'),
     ]);
+
+    const ten = Array.from({ length: 10 }, (_, index) => ({
+      posterUrl: `/${index}.jpg`,
+    }));
+    const firstPaint = resolveHomeHeroNeighborPrefetchUris(ten, 0);
+    expect(firstPaint).toEqual([
+      resolveHomeHeroPosterUri('/0.jpg'),
+      resolveHomeHeroPosterUri('/9.jpg'),
+      resolveHomeHeroPosterUri('/1.jpg'),
+    ]);
+    expect(firstPaint).toHaveLength(3);
+    for (const index of [2, 3, 4, 5, 6, 7, 8]) {
+      expect(firstPaint).not.toContain(resolveHomeHeroPosterUri(`/${index}.jpg`));
+    }
+  });
+
+  it('uses one size builder for the rail that is painted and the rail that is prefetched', () => {
+    delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+
+    expect(resolveHomeSectionPosterSize('Trending')).toBe('w780');
+    expect(resolveHomeSectionPosterSize('RecommendedForYou')).toBe('w500');
+    expect(resolveHomeSectionPosterSize('TopRated')).toBe('w500');
+    expect(resolveHomeSectionPosterUri('RecommendedForYou', '/one.jpg')).toBe(
+      'https://image.tmdb.org/t/p/w500/one.jpg',
+    );
+    expect(resolveHomeRecommendedPrefetchUris([{ posterUrl: '/one.jpg' }])).toEqual([
+      resolveHomeSectionPosterUri('RecommendedForYou', '/one.jpg'),
+    ]);
+    expect(resolveHomeSectionPosterUri('Trending', '/trend.jpg')).toBe(
+      resolveHomeTrendingPosterUri('/trend.jpg'),
+    );
   });
 
   it('prefetches the first four recommended posters at w500', () => {

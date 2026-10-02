@@ -1,15 +1,37 @@
 import {
   getActiveIndexFromScrollIndex,
   getHeroCarouselActiveIndexFromOffset,
+  getHeroCarouselImagePriority,
+  getHeroCarouselInitialMountedIndices,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
+  HERO_CAROUSEL_RENDER_WINDOW,
   getScrollIndexFromOffset,
   resolveHeroCarouselLoopSettledOffset,
+  shouldMountHeroSlide,
 } from '@/features/home/utils/home-hero-carousel-index';
 
 const SNAP = 358;
 const COUNT = 3;
 
 describe('home hero carousel index helpers', () => {
+  it('puts the wrap-around left peek in the startup render window', () => {
+    const loopLength = 10 + 2;
+    expect(HERO_CAROUSEL_RENDER_WINDOW).toBe(3);
+    expect(getHeroCarouselInitialMountedIndices(loopLength)).toEqual([0, 1, 2]);
+    expect(getHeroCarouselInitialMountedIndices(loopLength)[0]).toBe(0);
+    expect(shouldMountHeroSlide(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(true);
+    expect(shouldMountHeroSlide(1, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(true);
+    expect(shouldMountHeroSlide(2, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(true);
+    expect(shouldMountHeroSlide(3, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(false);
+    expect(shouldMountHeroSlide(loopLength - 1, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(false);
+    expect(getHeroCarouselImagePriority(0, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('high');
+    expect(getHeroCarouselImagePriority(2, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('high');
+    expect(getHeroCarouselImagePriority(HERO_CAROUSEL_LOOP_HEAD_INDEX, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe(
+      'high',
+    );
+    expect(getHeroCarouselImagePriority(4, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('low');
+  });
+
   it('maps loop scroll indices to logical active indices', () => {
     expect(getActiveIndexFromScrollIndex(0, COUNT)).toBe(2);
     expect(getActiveIndexFromScrollIndex(HERO_CAROUSEL_LOOP_HEAD_INDEX, COUNT)).toBe(0);

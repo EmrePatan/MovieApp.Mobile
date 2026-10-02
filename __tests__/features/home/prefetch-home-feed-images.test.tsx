@@ -1,4 +1,4 @@
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 import { prefetchHomeFeedImages } from '@/features/home/utils/prefetch-home-feed-images';
 import type { HomeItem, HomeSection } from '@/features/home/types';
 
@@ -54,13 +54,46 @@ describe('prefetchHomeFeedImages', () => {
 
     prefetchHomeFeedImages(heroItems, sections);
 
-    expect(prefetchSpy.mock.calls.map((call) => call[0])).toEqual([
-      'https://image.tmdb.org/t/p/w780/hero-a.jpg',
-      'https://image.tmdb.org/t/p/w780/hero-b.jpg',
-      'https://image.tmdb.org/t/p/w500/one.jpg',
-      'https://image.tmdb.org/t/p/w500/two.jpg',
-      'https://image.tmdb.org/t/p/w500/three.jpg',
-      'https://image.tmdb.org/t/p/w500/four.jpg',
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      1,
+      ['https://image.tmdb.org/t/p/w780/hero-a.jpg'],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      2,
+      ['https://image.tmdb.org/t/p/w780/hero-b.jpg'],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenNthCalledWith(
+      3,
+      [
+        'https://image.tmdb.org/t/p/w500/one.jpg',
+        'https://image.tmdb.org/t/p/w500/two.jpg',
+        'https://image.tmdb.org/t/p/w500/three.jpg',
+        'https://image.tmdb.org/t/p/w500/four.jpg',
+      ],
+      { cachePolicy: 'memory-disk' },
+    );
+    expect(prefetchSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('prefetches only the centered hero, the left wrap, and the next hero', () => {
+    delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
+    const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
+    prefetchSpy.mockClear();
+    const heroItems = Array.from({ length: 10 }, (_, index) =>
+      createItem(`hero-${index}`, `/${index}.jpg`),
+    );
+
+    prefetchHomeFeedImages(heroItems, []);
+
+    const prefetched = prefetchSpy.mock.calls.flatMap((call) => call[0] as string[]);
+    expect(prefetched).toEqual([
+      'https://image.tmdb.org/t/p/w780/0.jpg',
+      'https://image.tmdb.org/t/p/w780/9.jpg',
+      'https://image.tmdb.org/t/p/w780/1.jpg',
     ]);
+    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/2.jpg');
+    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/8.jpg');
   });
 });

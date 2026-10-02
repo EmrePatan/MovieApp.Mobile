@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList } from 'react-native';
+import { ScrollView } from 'react-native';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { HomeHeroCarousel } from '@/features/home/components/HomeHeroCarousel';
 import type { HomeItem } from '@/features/home/types';
@@ -40,11 +40,12 @@ function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
   };
 }
 
-function getCarouselSlideWidth(list: FlatList<HomeItem>) {
-  return list.props.getItemLayout?.(null, 0).length ?? 400;
+function getCarouselSlideWidth(list: ScrollView) {
+  const offset = list.props.contentOffset?.x;
+  return offset != null && offset > 0 ? offset : 400;
 }
 
-function manualSwipeToActiveIndex(list: FlatList<HomeItem>, activeIndex: number) {
+function manualSwipeToActiveIndex(list: ScrollView, activeIndex: number) {
   const slideWidth = getCarouselSlideWidth(list);
   act(() => {
     fireEvent.scroll(list, {
@@ -77,7 +78,7 @@ describe('HomeHeroCarousel real hero press', () => {
         isScreenFocused={true}
       />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     fireEvent.press(screen.getByLabelText('Open Hero A'));
     expect(onItemPress).toHaveBeenCalledWith(itemA);
@@ -121,7 +122,7 @@ describe('HomeHeroCarousel real hero press', () => {
     const { UNSAFE_getByType } = render(
       <HomeHeroCarousel items={[itemA, itemB]} filterKey="all" onItemPress={jest.fn()} />,
     );
-    const list = UNSAFE_getByType(FlatList);
+    const list = UNSAFE_getByType(ScrollView);
 
     manualSwipeToActiveIndex(list, 1);
 

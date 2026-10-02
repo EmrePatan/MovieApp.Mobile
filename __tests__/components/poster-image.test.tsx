@@ -1,6 +1,13 @@
 import { act, render, screen } from '@testing-library/react-native';
-import { ActivityIndicator, Image } from 'react-native';
-import { PosterImage } from '@/components/common/PosterImage';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { PosterImage, POSTER_LOADING_VEIL } from '@/components/common/PosterImage';
+
+function findLoadingVeil() {
+  return screen.UNSAFE_getAllByType(View).find((view) => {
+    const style = StyleSheet.flatten(view.props.style);
+    return style?.backgroundColor === POSTER_LOADING_VEIL;
+  });
+}
 
 describe('PosterImage loading lifecycle', () => {
   beforeEach(() => {
@@ -17,8 +24,18 @@ describe('PosterImage loading lifecycle', () => {
       />,
     );
 
-    expect(screen.UNSAFE_getByType(Image)).toBeTruthy();
+    const image = screen.UNSAFE_getByType(Image);
+    expect(image.props.cachePolicy).toBe('memory-disk');
+    expect(image.props.contentFit).toBe('cover');
+    expect(image.props.recyclingKey).toBe(
+      'https://image.tmdb.org/t/p/w500/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg:0',
+    );
+    expect(image.props.transition).toBeNull();
     expect(screen.UNSAFE_getByType(ActivityIndicator)).toBeTruthy();
+    const veil = findLoadingVeil();
+    expect(veil).toBeTruthy();
+    expect(StyleSheet.flatten(veil?.props.style).backgroundColor).toBe(POSTER_LOADING_VEIL);
+    expect(POSTER_LOADING_VEIL).not.toBe('#1C1C28');
   });
 
   it('clears the spinner immediately on onLoad', () => {
@@ -39,6 +56,24 @@ describe('PosterImage loading lifecycle', () => {
 
     expect(screen.UNSAFE_getByType(Image)).toBeTruthy();
     expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+  });
+
+  it('clears the veil when the bitmap is displayed, before onLoadEnd', () => {
+    render(
+      <PosterImage
+        uri="/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg"
+        width={120}
+        height={180}
+        accessibilityLabel="Interstellar poster"
+      />,
+    );
+
+    act(() => {
+      screen.UNSAFE_getByType(Image).props.onDisplay?.();
+    });
+
+    expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+    expect(findLoadingVeil()).toBeUndefined();
   });
 
   it('clears the spinner on onLoadEnd', () => {

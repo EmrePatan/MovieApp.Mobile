@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import {
   Animated,
   AppState,
-  Image,
-  type ListRenderItemInfo,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -16,24 +15,32 @@ import { HomeHeroPaginationDots } from './HomeHeroPaginationDots';
 import type { HomeItem, HomeTypeFilter } from '../types';
 import {
   getHeroCarouselActiveIndexFromOffset,
+  getHeroCarouselImagePriority,
   getScrollIndexForActiveIndex,
   getScrollIndexFromOffset,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
   resolveHeroCarouselLoopSettledOffset,
+  shouldMountHeroSlide,
 } from '../utils/home-hero-carousel-index';
 import { HOME_HERO_SEARCH_BREATHING_ROOM } from '../utils/home-hero-layout';
 import { useHomeHeroCarouselLayout } from '../hooks/useHomeHeroCarouselLayout';
 import { areHomeItemsVisuallyEqual } from '../utils/home-list-keys';
 import { createHomeContentKey } from '../utils/selectHeroCandidates';
-import { resolveHomeHeroNeighborPrefetchUris } from '../utils/home-hero-image';
+import { prefetchHomeHeroNeighbors } from '../utils/prefetch-home-feed-images';
 import { spacing } from '@/theme/spacing';
 
 const AUTO_ADVANCE_MS = 4000;
 const SCROLL_EVENT_THROTTLE_MS = 16;
-/** Active slide plus the posters peeking beside it. Do not mount the whole loop. */
-const HERO_CAROUSEL_RENDER_WINDOW = 3;
 
-const AnimatedFlatList = Animated.FlatList<HomeItem>;
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+
+function scrollHeroCarouselTo(
+  list: ScrollView | null,
+  offset: number,
+  animated: boolean,
+) {
+  list?.scrollTo({ x: offset, y: 0, animated });
+}
 
 function buildLoopedHeroItems(items: HomeItem[]): HomeItem[] {
   if (items.length <= 1) {
@@ -81,7 +88,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   const includePaginationDots = items.length > 1;
   const { heroHeight, cardWidth, snapInterval, horizontalPadding } =
     useHomeHeroCarouselLayout(includePaginationDots);
-  const listRef = useRef<Animated.FlatList<HomeItem>>(null);
+  const listRef = useRef<ScrollView>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [centeredScrollIndex, setCenteredScrollIndex] = useState(
     HERO_CAROUSEL_LOOP_HEAD_INDEX,
@@ -111,6 +118,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
 
   useEffect(() => {
     const nextCarouselKey = `${filterKey}:${heroItemsKey}`;
+    const isInitialMount = previousCarouselKeyRef.current == null;
     if (previousCarouselKeyRef.current === nextCarouselKey) {
       return;
     }
@@ -121,10 +129,13 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     setIsInteracting(false);
     const nextOffset = items.length > 1 ? snapInterval * HERO_CAROUSEL_LOOP_HEAD_INDEX : 0;
     scrollX.setValue(nextOffset);
-    listRef.current?.scrollToOffset({
-      offset: nextOffset,
-      animated: false,
-    });
+    // contentOffset already shows the first slide. A mount-time scrollTo
+    // cancels the leading cell's in-flight image before it can paint.
+    if (isInitialMount) {
+      return;
+    }
+
+    scrollHeroCarouselTo(listRef.current, nextOffset, false);
   }, [filterKey, heroItemsKey, items.length, scrollX, snapInterval]);
 
   useEffect(() => {
@@ -136,10 +147,11 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
 
     autoAdvanceTimerRef.current = setTimeout(() => {
       const nextIndex = (activeIndex + 1) % items.length;
-      listRef.current?.scrollToOffset({
-        offset: getScrollIndexForActiveIndex(nextIndex) * snapInterval,
-        animated: true,
-      });
+      scrollHeroCarouselTo(
+        listRef.current,
+        getScrollIndexForActiveIndex(nextIndex) * snapInterval,
+        true,
+      );
     }, AUTO_ADVANCE_MS);
 
     return clearAutoAdvanceTimer;
@@ -164,9 +176,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   }, []);
 
   useEffect(() => {
-    for (const uri of resolveHomeHeroNeighborPrefetchUris(items, activeIndex)) {
-      void Image.prefetch(uri);
-    }
+    prefetchHomeHeroNeighbors(items, activeIndex);
   }, [activeIndex, items]);
 
   const handleScrollSettled = useCallback(
@@ -182,10 +192,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
       const settledScrollIndex = getScrollIndexFromOffset(settledOffsetX, snapInterval);
 
       if (needsScrollCorrection) {
-        listRef.current?.scrollToOffset({
-          offset: settledOffsetX,
-          animated: false,
-        });
+        scrollHeroCarouselTo(listRef.current, settledOffsetX, false);
       }
 
       scrollX.setValue(settledOffsetX);
@@ -234,37 +241,6 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     [handleScrollSettled],
   );
 
-  const getItemLayout = useCallback(
-    (_: ArrayLike<HomeItem> | null | undefined, index: number) => ({
-      length: snapInterval,
-      offset: snapInterval * index,
-      index,
-    }),
-    [snapInterval],
-  );
-
-  const keyExtractor = useCallback(
-    (item: HomeItem, index: number) => `${index}:${createHomeContentKey(item)}`,
-    [],
-  );
-
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<HomeItem>) => (
-      <HomeHero
-        item={item}
-        heroHeight={heroHeight}
-        cardWidth={cardWidth}
-        embedded
-        isActive={index === centeredScrollIndex}
-        scrollX={scrollX}
-        slideIndex={index}
-        snapInterval={snapInterval}
-        onPress={onItemPress}
-      />
-    ),
-    [centeredScrollIndex, cardWidth, heroHeight, onItemPress, scrollX, snapInterval],
-  );
-
   if (items.length === 0) {
     return null;
   }
@@ -285,11 +261,10 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
   return (
     <View style={styles.container}>
       <View style={[styles.carouselStage, { height: heroHeight }]}>
-        <AnimatedFlatList
+        <AnimatedScrollView
           testID="home-hero-carousel-list"
           ref={listRef}
           style={styles.carouselList}
-          data={loopedItems}
           horizontal
           bounces={false}
           decelerationRate="fast"
@@ -303,11 +278,7 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
             styles.listContent,
             { paddingHorizontal: horizontalPadding },
           ]}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          getItemLayout={getItemLayout}
-          extraData={`${activeIndex}:${centeredScrollIndex}`}
-          initialScrollIndex={HERO_CAROUSEL_LOOP_HEAD_INDEX}
+          contentOffset={{ x: initialScrollOffset, y: 0 }}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
             { useNativeDriver: true, listener: handleScroll },
@@ -316,14 +287,44 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
           onScrollBeginDrag={handleScrollBeginDrag}
           onScrollEndDrag={handleScrollEndDrag}
           onMomentumScrollEnd={handleScrollSettled}
-          initialNumToRender={Math.min(loopedItems.length, HERO_CAROUSEL_RENDER_WINDOW)}
-          maxToRenderPerBatch={HERO_CAROUSEL_RENDER_WINDOW}
-          windowSize={HERO_CAROUSEL_RENDER_WINDOW}
           removeClippedSubviews={false}
           accessibilityRole="adjustable"
           accessibilityLabel={t('home.slideOf', { current: activeIndex + 1, total: items.length })}
           accessibilityHint={t('home.featuredCarousel')}
-        />
+        >
+          {loopedItems.map((item, index) => {
+            const slideKey = `${index}:${createHomeContentKey(item)}`;
+            const mountPoster = shouldMountHeroSlide(index, centeredScrollIndex);
+
+            return (
+              <View
+                key={slideKey}
+                testID={`hero-slot-${slideKey}`}
+                style={[
+                  styles.slideSlot,
+                  { width: snapInterval, height: heroHeight },
+                  index === centeredScrollIndex ? styles.slideSlotActive : null,
+                ]}
+              >
+                {mountPoster ? (
+                  <HomeHero
+                    item={item}
+                    heroHeight={heroHeight}
+                    cardWidth={cardWidth}
+                    embedded
+                    isActive={index === centeredScrollIndex}
+                    imagePriority={getHeroCarouselImagePriority(index, centeredScrollIndex)}
+                    scrollX={scrollX}
+                    slideIndex={index}
+                    snapInterval={snapInterval}
+                    onPress={onItemPress}
+                    repaintPosterOnLayout={index === 0}
+                  />
+                ) : null}
+              </View>
+            );
+          })}
+        </AnimatedScrollView>
       </View>
       <View style={styles.footer}>
         <HomeHeroMetadata
@@ -355,6 +356,15 @@ const styles = StyleSheet.create({
   },
   listContent: {
     alignItems: 'center',
+  },
+  slideSlot: {
+    overflow: 'visible',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  slideSlotActive: {
+    zIndex: 2,
+    elevation: 6,
   },
   footer: {
     alignItems: 'center',
