@@ -3,6 +3,14 @@ import { applyHomeSectionPolicy } from './home-section-policy';
 import type { PersonalizationState } from './personalization-state';
 import { selectHeroCandidates } from './selectHeroCandidates';
 
+/**
+ * Recommended For You drops titles that are already in the hero only when the
+ * rail would still have at least this many cards. A shorter remainder keeps
+ * the original items, including hero overlap, so the row does not collapse.
+ * When the threshold is met, the deduped rail is capped at this length.
+ */
+export const RECOMMENDED_HERO_DEDUPE_MIN_COUNT = 10;
+
 export interface PresentedHomeFeed {
   heroItems: HomeItem[];
   sections: HomeSection[];
@@ -36,7 +44,10 @@ export function presentHomeSections(
 
       return {
         ...section,
-        items: withoutHero.length >= 10 ? withoutHero.slice(0, 10) : section.items,
+        items:
+          withoutHero.length >= RECOMMENDED_HERO_DEDUPE_MIN_COUNT
+            ? withoutHero.slice(0, RECOMMENDED_HERO_DEDUPE_MIN_COUNT)
+            : section.items,
       };
     })
     .filter((section) => section.items.length > 0);

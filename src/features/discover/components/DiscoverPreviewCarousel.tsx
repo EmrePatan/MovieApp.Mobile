@@ -1,7 +1,7 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -55,8 +55,8 @@ export function DiscoverPreviewCarousel({
             onPress={() => onItemPress(item)}
             style={({ pressed }) => [styles.card, pressed && styles.pressed]}
           >
-            <CatalogImage
-              path={item.posterUrl}
+            <PosterImage
+              uri={item.posterUrl}
               width={layout.posterCarousel.width}
               height={layout.posterCarousel.height}
               accessibilityLabel={t('common.posterAccessibility', { title: item.title })}

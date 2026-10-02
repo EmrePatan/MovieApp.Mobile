@@ -63,6 +63,29 @@ export function getScrollIndexForActiveIndex(activeIndex: number): number {
   return activeIndex + HERO_CAROUSEL_LOOP_HEAD_INDEX;
 }
 
+/**
+ * Autoplay always advances one physical slot forward.
+ * The last real slide targets the trailing clone (`itemCount + 1`), the same
+ * slot a forward swipe lands on. `resolveHeroCarouselLoopSettledOffset` then
+ * jumps to the real first slide. Scrolling straight to scroll index 1 would
+ * animate backward across every slide.
+ */
+export function getHeroCarouselAutoplayScrollIndex(
+  activeIndex: number,
+  itemCount: number,
+): number {
+  if (itemCount <= 1) {
+    return 0;
+  }
+
+  const safeIndex = ((activeIndex % itemCount) + itemCount) % itemCount;
+  if (safeIndex === itemCount - 1) {
+    return itemCount + 1;
+  }
+
+  return getScrollIndexForActiveIndex(safeIndex + 1);
+}
+
 export function getScrollIndexFromOffset(offsetX: number, snapInterval: number): number {
   if (snapInterval <= 0) {
     return 0;

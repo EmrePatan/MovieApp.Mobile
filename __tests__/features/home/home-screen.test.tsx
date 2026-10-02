@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ApiError } from '@/api/errors';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
+import {
+  resetLibraryStackNavigationForTests,
+  returnFromLibraryStackScreen,
+} from '@/features/library/navigation/library-stack-navigation';
 import { createHomeFeedMockReturnValue } from './home-feed-test-utils';
 import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
 
@@ -564,7 +568,8 @@ describe('HomeScreen', () => {
     expect(mockPush).toHaveBeenCalledWith('/discover-browse?mode=trending&type=all');
   });
 
-  it('navigates to Upcoming from Coming Up See All', () => {
+  it('navigates to Upcoming from Coming Up See All and returns to Home', () => {
+    resetLibraryStackNavigationForTests();
     mockHomeFeed({
       data: {
         sections: [
@@ -606,6 +611,10 @@ describe('HomeScreen', () => {
     fireEvent.press(screen.getByLabelText('See all Coming Up'));
 
     expect(mockPush).toHaveBeenCalledWith('/upcoming');
+
+    const dismissTo = jest.fn();
+    returnFromLibraryStackScreen({ dismissTo } as never);
+    expect(dismissTo).toHaveBeenCalledWith('/(tabs)/home');
   });
 
   it('keeps the full Recommended rail when hero comes from Hot This Week', () => {

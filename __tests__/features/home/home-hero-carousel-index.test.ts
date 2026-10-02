@@ -1,6 +1,7 @@
 import {
   getActiveIndexFromScrollIndex,
   getHeroCarouselActiveIndexFromOffset,
+  getHeroCarouselAutoplayScrollIndex,
   getHeroCarouselImagePriority,
   getHeroCarouselInitialMountedIndices,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
@@ -30,6 +31,14 @@ describe('home hero carousel index helpers', () => {
       'high',
     );
     expect(getHeroCarouselImagePriority(4, HERO_CAROUSEL_LOOP_HEAD_INDEX)).toBe('low');
+  });
+
+  it('advances autoplay one slot forward and wraps through the trailing clone', () => {
+    expect(getHeroCarouselAutoplayScrollIndex(0, 10)).toBe(2);
+    expect(getHeroCarouselAutoplayScrollIndex(8, 10)).toBe(10);
+    expect(getHeroCarouselAutoplayScrollIndex(9, 10)).toBe(11);
+    expect(getHeroCarouselAutoplayScrollIndex(1, 2)).toBe(3);
+    expect(getHeroCarouselAutoplayScrollIndex(0, 1)).toBe(0);
   });
 
   it('maps loop scroll indices to logical active indices', () => {

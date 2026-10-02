@@ -74,10 +74,10 @@ export function resolveHomeHeroPrefetchUri(item: {
 export const HOME_RECOMMENDED_PREFETCH_COUNT = 4;
 
 /**
- * The only hero posters warmed for the current slide, in paint order:
+ * Hero posters warmed for the current slide, in paint order:
  * centered slide, previous slide (the last slide when the first is centered),
- * next slide. All `w780` via `resolveHomeHeroPosterUri`.
- * Off-screen heroes are omitted — a 10-item loop prefetches 3 URIs, not 10.
+ * next slide, then one extra forward neighbor. All `w780` via
+ * `resolveHomeHeroPosterUri`. A 10-item loop prefetches 4 URIs, not 10.
  */
 export function resolveHomeHeroNeighborPrefetchUris(
   items: readonly { posterUrl?: string | null }[],
@@ -96,6 +96,7 @@ export function resolveHomeHeroNeighborPrefetchUris(
           safeIndex,
           (safeIndex - 1 + count) % count,
           (safeIndex + 1) % count,
+          (safeIndex + 2) % count,
         ];
   const uris: string[] = [];
 

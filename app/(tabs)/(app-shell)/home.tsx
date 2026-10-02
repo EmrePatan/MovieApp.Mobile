@@ -196,7 +196,7 @@ export default function HomeScreen() {
   }, [router]);
 
   const handleComingUpSeeAll = useCallback(() => {
-    openComingUpScreen(router);
+    openComingUpScreen(router, undefined, '/(tabs)/home');
   }, [router]);
 
   const renderSection = useCallback(

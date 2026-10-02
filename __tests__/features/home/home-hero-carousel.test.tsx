@@ -163,6 +163,7 @@ describe('HomeHeroCarousel', () => {
       [
         'https://image.tmdb.org/t/p/w780/9.jpg',
         'https://image.tmdb.org/t/p/w780/1.jpg',
+        'https://image.tmdb.org/t/p/w780/2.jpg',
       ],
       { cachePolicy: 'memory-disk' },
     );
@@ -172,9 +173,10 @@ describe('HomeHeroCarousel', () => {
         'https://image.tmdb.org/t/p/w780/0.jpg',
         'https://image.tmdb.org/t/p/w780/9.jpg',
         'https://image.tmdb.org/t/p/w780/1.jpg',
+        'https://image.tmdb.org/t/p/w780/2.jpg',
       ]),
     );
-    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/2.jpg');
+    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/3.jpg');
     expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/8.jpg');
     prefetchSpy.mockRestore();
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = originalImageBaseUrl;
@@ -330,6 +332,57 @@ describe('HomeHeroCarousel', () => {
       y: 0,
       animated: false,
     });
+
+    ScrollView.prototype.scrollTo = originalScrollTo;
+  });
+
+  it('autoplay wrap from the last slide scrolls to the trailing clone, then settles on the first', () => {
+    const items = Array.from({ length: 10 }, (_, index) =>
+      createItem({ id: `hero-${index + 1}`, title: `Hero ${index + 1}` }),
+    );
+    const scrollTo = jest.fn();
+    const originalScrollTo = ScrollView.prototype.scrollTo;
+    ScrollView.prototype.scrollTo = scrollTo;
+
+    const { getByLabelText, UNSAFE_getByType } = render(
+      <HomeHeroCarousel items={items} filterKey="all" onItemPress={jest.fn()} />,
+    );
+    const list = UNSAFE_getByType(ScrollView);
+    const slideWidth = getCarouselSlideWidth(list);
+    const lastRealOffset = items.length * slideWidth;
+    const trailingCloneOffset = (items.length + 1) * slideWidth;
+
+    fireEvent(list, 'momentumScrollEnd', {
+      nativeEvent: { contentOffset: { x: lastRealOffset, y: 0 } },
+    });
+    expect(getByLabelText('Slide 10 of 10')).toBeTruthy();
+
+    scrollTo.mockClear();
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+
+    expect(scrollTo).toHaveBeenCalledWith({
+      x: trailingCloneOffset,
+      y: 0,
+      animated: true,
+    });
+    expect(scrollTo).not.toHaveBeenCalledWith({
+      x: slideWidth,
+      y: 0,
+      animated: true,
+    });
+
+    fireEvent(list, 'momentumScrollEnd', {
+      nativeEvent: { contentOffset: { x: trailingCloneOffset, y: 0 } },
+    });
+
+    expect(scrollTo).toHaveBeenCalledWith({
+      x: slideWidth,
+      y: 0,
+      animated: false,
+    });
+    expect(getByLabelText('Slide 1 of 10')).toBeTruthy();
 
     ScrollView.prototype.scrollTo = originalScrollTo;
   });
