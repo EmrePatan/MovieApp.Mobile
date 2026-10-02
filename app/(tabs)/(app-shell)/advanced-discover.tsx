@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateAdvancedDiscoverMediaType,
@@ -8,6 +8,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   Pressable,
   StyleSheet,
   View,
@@ -61,6 +62,8 @@ import { SearchResultCard } from '@/features/search/components/SearchResultCard'
 import { flattenDedupedSearchResultPages } from '@/features/search/utils/search-list-keys';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 function getMediaTypeLabel(mediaType: AdvancedDiscoverMediaType): string {
@@ -90,6 +93,9 @@ export default function AdvancedDiscoverScreen() {
     [filters, mediaType],
   );
   const [hasAppliedFilters, setHasAppliedFilters] = useState(hasRouteFilters);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
   const [filterSheetVisible, setFilterSheetVisible] = useState(!hasRouteFilters);
   const shouldFetchResults = hasAppliedFilters || hasRouteFilters;
 
@@ -330,7 +336,9 @@ export default function AdvancedDiscoverScreen() {
 
   return (
     <StackListScreen topBar={topBar}>
+      <View style={styles.listHost}>
       <PlatformRefreshFlatList
+        ref={listRef}
         refreshing={isRefetching && !isFetchingNextPage}
         onRefresh={handleRefresh}
         data={items}
@@ -348,13 +356,20 @@ export default function AdvancedDiscoverScreen() {
         contentContainerStyle={catalogBrowseListStyles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
       {filterSheet}
     </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   header: {
     gap: spacing.sm,
     paddingBottom: spacing.md,

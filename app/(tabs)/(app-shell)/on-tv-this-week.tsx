@@ -1,8 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
@@ -29,6 +30,8 @@ import {
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 const RETURN_ROUTE = '/on-tv-this-week';
 
@@ -38,6 +41,9 @@ export default function OnTvThisWeekScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const resultsQuery = useOnTvThisWeek();
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const items = useMemo(
     () => flattenDedupedSearchResultPages(resultsQuery.data?.pages),
@@ -110,7 +116,9 @@ export default function OnTvThisWeekScreen() {
         </View>
       }
     >
+      <View style={styles.listHost}>
       <PlatformRefreshFlatList
+        ref={listRef}
         refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
         onRefresh={() => void resultsQuery.refetch()}
         data={items}
@@ -131,13 +139,20 @@ export default function OnTvThisWeekScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         contentContainerStyle={catalogBrowseListStyles.listContent}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
     </StackListScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   footerLoader: {
     paddingVertical: spacing.lg,
   },

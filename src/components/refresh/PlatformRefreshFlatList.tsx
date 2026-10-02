@@ -1,5 +1,11 @@
-import { useMemo } from 'react';
-import { FlatList, type FlatListProps } from 'react-native';
+import { forwardRef, useCallback, useMemo, useRef, type Ref } from 'react';
+import type React from 'react';
+import {
+  FlatList,
+  type FlatListProps,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { createIosRefreshControl } from './createIosRefreshControl';
@@ -14,14 +20,30 @@ export interface PlatformRefreshFlatListProps<ItemT>
   onRefresh: () => void;
 }
 
-export function PlatformRefreshFlatList<ItemT>({
-  refreshing,
-  onRefresh,
-  ListHeaderComponent,
-  onScroll,
-  scrollEventThrottle,
-  ...flatListProps
-}: PlatformRefreshFlatListProps<ItemT>) {
+function PlatformRefreshFlatListInner<ItemT>(
+  {
+    refreshing,
+    onRefresh,
+    ListHeaderComponent,
+    onScroll,
+    scrollEventThrottle,
+    ...flatListProps
+  }: PlatformRefreshFlatListProps<ItemT>,
+  ref: React.Ref<FlatList<ItemT>>,
+) {
+  const onScrollRef = useRef(onScroll);
+  onScrollRef.current = onScroll;
+
+  const notifyScrollOffset = useCallback((offsetY: number) => {
+    onScrollRef.current?.({
+      nativeEvent: {
+        contentOffset: { x: 0, y: offsetY },
+        contentSize: { width: 0, height: 0 },
+        layoutMeasurement: { width: 0, height: 0 },
+      },
+    } as NativeSyntheticEvent<NativeScrollEvent>);
+  }, []);
+
   const refreshControl = useMemo(
     () => createIosRefreshControl({ refreshing, onRefresh }),
     [onRefresh, refreshing],
@@ -30,6 +52,7 @@ export function PlatformRefreshFlatList<ItemT>({
   const androidPullToRefresh = useAndroidPullToRefresh({
     refreshing,
     onRefresh,
+    onScrollOffset: onScroll ? notifyScrollOffset : undefined,
   });
 
   const mergedListHeader = useMemo(
@@ -39,6 +62,7 @@ export function PlatformRefreshFlatList<ItemT>({
 
   const list = (
     <AnimatedFlatList
+      ref={ref}
       {...flatListProps}
       ListHeaderComponent={mergedListHeader}
       refreshControl={refreshControl}
@@ -55,3 +79,9 @@ export function PlatformRefreshFlatList<ItemT>({
 
   return list;
 }
+
+export const PlatformRefreshFlatList = forwardRef(PlatformRefreshFlatListInner) as <
+  ItemT,
+>(
+  props: PlatformRefreshFlatListProps<ItemT> & { ref?: React.Ref<FlatList<ItemT>> },
+) => React.ReactElement | null;

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -36,6 +36,8 @@ import { flattenWatchlistPages, type LibraryItem } from '@/features/watchlists/u
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 const WATCHLIST_SORT_OPTIONS = getAvailableSortOptions(true);
 const DEFAULT_WATCHLIST_SORT: LibrarySortOption = 'recentlyAdded';
@@ -49,6 +51,9 @@ export default function WatchlistScreen() {
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_WATCHLIST_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const watchlistsQuery = useWatchlists(isAuthenticated);
 
@@ -348,7 +353,9 @@ export default function WatchlistScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <View style={styles.listHost}>
       <FlatList
+        ref={listRef}
         data={displayItems}
         keyExtractor={getLibraryItemKey}
         renderItem={renderItem}
@@ -364,10 +371,14 @@ export default function WatchlistScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
       {createModal}
     </SafeAreaView>
   );
@@ -377,6 +388,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  listHost: {
+    flex: 1,
   },
   header: {
     paddingTop: spacing.md,

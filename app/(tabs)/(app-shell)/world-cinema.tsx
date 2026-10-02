@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateWorldCinemaSort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
@@ -54,6 +55,8 @@ import {
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 export default function WorldCinemaScreen() {
   const { t } = useTranslation();
@@ -62,6 +65,9 @@ export default function WorldCinemaScreen() {
   const rawParams = useLocalSearchParams();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
   useTrackProductMetricOnFocus(PRODUCT_METRICS.worldCinemaOpened);
 
   const discoverState = useMemo(
@@ -180,7 +186,9 @@ export default function WorldCinemaScreen() {
         </View>
       }
     >
+      <View style={styles.listHost}>
       <PlatformRefreshFlatList
+        ref={listRef}
         refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
         onRefresh={() => void resultsQuery.refetch()}
         data={items}
@@ -201,8 +209,12 @@ export default function WorldCinemaScreen() {
           }
         }}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         contentContainerStyle={catalogBrowseListStyles.listContent}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
       <CatalogSortSheet
         visible={sortSheetVisible}
         title={t('discovery.catalogFilters.sort')}
@@ -232,6 +244,9 @@ export default function WorldCinemaScreen() {
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   footerLoader: {
     paddingVertical: spacing.lg,
   },

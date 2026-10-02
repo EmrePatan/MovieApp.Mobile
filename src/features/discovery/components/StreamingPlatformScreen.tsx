@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateAdvancedDiscoverSort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
@@ -53,6 +54,8 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { commonStyles } from '@/theme/theme';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 interface StreamingPlatformScreenProps {
   discoverState: StreamingDiscoverState;
@@ -70,6 +73,9 @@ export function StreamingPlatformScreen({
   const queryClient = useQueryClient();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const primaryProviderId = discoverState.watchProviderIds[0] ?? null;
 
@@ -292,7 +298,9 @@ export function StreamingPlatformScreen({
         </View>
       }
     >
+      <View style={styles.listHost}>
       <PlatformRefreshFlatList
+        ref={listRef}
         testID="streaming-discover-list"
         refreshing={resultsQuery.isRefetching && !resultsQuery.isFetchingNextPage}
         onRefresh={() => void resultsQuery.refetch()}
@@ -308,12 +316,16 @@ export function StreamingPlatformScreen({
         ]}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
       <CatalogSortSheet
         visible={sortSheetVisible}
         title={t('discovery.catalogFilters.sort')}
@@ -343,6 +355,9 @@ export function StreamingPlatformScreen({
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   headerSafeArea: {
     backgroundColor: colors.background,
   },

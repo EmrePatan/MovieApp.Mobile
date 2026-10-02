@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -33,6 +33,8 @@ import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 const FAVORITES_SORT_OPTIONS = getAvailableSortOptions(false);
 const DEFAULT_FAVORITES_SORT: LibrarySortOption = 'titleAsc';
@@ -47,6 +49,9 @@ export default function FavoritesScreen() {
   const [sort, setSort] = useState<LibrarySortOption>(DEFAULT_FAVORITES_SORT);
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
   const [removeFeedback, setRemoveFeedback] = useState<string | null>(null);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const items = useMemo(
     () => flattenFavoritesPages(favoritesQuery.data?.pages ?? []),
@@ -222,7 +227,9 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <View style={styles.listHost}>
       <FlatList
+        ref={listRef}
         data={displayItems}
         keyExtractor={getLibraryItemKey}
         renderItem={renderItem}
@@ -251,10 +258,14 @@ export default function FavoritesScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -263,6 +274,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  listHost: {
+    flex: 1,
   },
   header: {
     paddingTop: spacing.md,

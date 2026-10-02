@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateDiscoverySort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
+  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
@@ -59,6 +60,8 @@ import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { commonStyles } from '@/theme/theme';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 export default function DiscoverScreen() {
   const { t } = useTranslation();
@@ -67,6 +70,9 @@ export default function DiscoverScreen() {
   const rawParams = useLocalSearchParams();
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const browseState = useMemo(() => parseDiscoverParams(rawParams), [rawParams]);
   const { mode, type: typeFilter, filters } = browseState;
@@ -255,7 +261,9 @@ export default function DiscoverScreen() {
 
   return (
     <View style={commonStyles.screen} testID="discover-browse-screen">
+      <View style={styles.listHost}>
       <PlatformRefreshFlatList
+        ref={listRef}
         testID="discover-browse-list"
         refreshing={isRefetching && !isFetchingNextPage}
         onRefresh={handleRefresh}
@@ -272,12 +280,16 @@ export default function DiscoverScreen() {
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
       <CatalogSortSheet
         visible={sortSheetVisible}
         title={t('discovery.catalogFilters.sort')}
@@ -312,6 +324,9 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   headerSafeArea: {
     backgroundColor: colors.background,
   },

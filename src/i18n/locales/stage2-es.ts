@@ -4,6 +4,7 @@ export const stage2Es = {
   common: {
     seeAll: 'Ver todo',
     seeAllTitle: 'Ver todo {{title}}',
+    scrollToTopAccessibility: 'Ir al inicio',
     retry: 'Reintentar',
     signIn: 'Iniciar sesión',
     signInTitleCase: 'Iniciar sesión',
@@ -735,6 +736,7 @@ export const stage2Es = {
       signInButton: 'Iniciar sesión',
       loadError: 'No se pudo cargar tu biblioteca.',
       browseDiscoverAction: 'Explorar Descubrir',
+      scrollToTopAccessibility: 'Ir al inicio de la biblioteca',
     },
     categories: {
       watching: 'Viendo',

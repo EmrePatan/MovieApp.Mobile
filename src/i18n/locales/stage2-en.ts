@@ -4,6 +4,7 @@ export const stage2En = {
   common: {
     seeAll: 'See All',
     seeAllTitle: 'See all {{title}}',
+    scrollToTopAccessibility: 'Scroll to top',
     retry: 'Retry',
     signIn: 'Sign in',
     signInTitleCase: 'Sign In',
@@ -725,6 +726,7 @@ export const stage2En = {
       signInButton: 'Sign in',
       loadError: 'Unable to load your library.',
       browseDiscoverAction: 'Browse Discover',
+      scrollToTopAccessibility: 'Scroll to top of library',
     },
     categories: {
       watching: 'Watching',

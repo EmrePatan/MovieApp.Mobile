@@ -15,11 +15,14 @@ const MAX_PULL_DISTANCE = 108;
 export interface AndroidPullToRefreshConfig {
   refreshing: boolean;
   onRefresh: () => void;
+  /** Called on the JS thread when scroll offset changes (Android pull-to-refresh lists). */
+  onScrollOffset?: (offsetY: number) => void;
 }
 
 export function useAndroidPullToRefresh({
   refreshing,
   onRefresh,
+  onScrollOffset,
 }: AndroidPullToRefreshConfig) {
   const enabled = Platform.OS === 'android';
   const scrollY = useSharedValue(0);
@@ -38,6 +41,9 @@ export function useAndroidPullToRefresh({
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
+      if (onScrollOffset) {
+        runOnJS(onScrollOffset)(event.contentOffset.y);
+      }
     },
   });
 

@@ -4,6 +4,7 @@ export const stage2De = {
   common: {
     seeAll: 'Alle anzeigen',
     seeAllTitle: 'Alle {{title}} anzeigen',
+    scrollToTopAccessibility: 'Nach oben scrollen',
     retry: 'Erneut versuchen',
     signIn: 'Anmelden',
     signInTitleCase: 'Anmelden',
@@ -734,6 +735,7 @@ export const stage2De = {
       signInButton: 'Anmelden',
       loadError: 'Bibliothek konnte nicht geladen werden.',
       browseDiscoverAction: 'Entdecken durchsuchen',
+      scrollToTopAccessibility: 'Zum Anfang der Bibliothek scrollen',
     },
     categories: {
       watching: 'Am Schauen',

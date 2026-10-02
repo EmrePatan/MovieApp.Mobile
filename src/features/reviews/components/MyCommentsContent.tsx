@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -23,12 +23,17 @@ import { MyCommentsEmptyState } from './MyCommentsEmptyState';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { MY_COMMENTS_HORIZONTAL_INSET } from '../utils/my-comments-layout';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 export function MyCommentsContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>('all');
   const commentsQuery = useMyComments(mediaType);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const items = useMemo(
     () => commentsQuery.data?.pages.flatMap((page) => page.items) ?? [],
@@ -83,7 +88,9 @@ export function MyCommentsContent() {
   }
 
   return (
+    <View style={styles.listHost}>
     <FlatList
+      ref={listRef}
       data={items}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => <MyCommentRow item={item} onPress={handleOpenReviews} />}
@@ -100,6 +107,8 @@ export function MyCommentsContent() {
       ListEmptyComponent={<MyCommentsEmptyState onDiscover={handleDiscover} />}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.4}
+      onScroll={onListScroll}
+      scrollEventThrottle={scrollEventThrottle}
       ListFooterComponent={
         commentsQuery.isFetchingNextPage ? (
           <View style={styles.footerLoader}>
@@ -108,10 +117,19 @@ export function MyCommentsContent() {
         ) : null
       }
     />
+    <ScrollToTopFab
+      visible={fabVisible}
+      onPress={scrollToTop}
+      placement="aboveSafeArea"
+    />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   filters: {
     paddingBottom: spacing.lg,
   },

@@ -17,6 +17,8 @@ import type { WatchlistSummaryResponse } from '@/features/watchlists/types';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryLoadingState } from './LibraryLoadingState';
 import { LibraryWatchlistCard } from './LibraryWatchlistCard';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -31,6 +33,10 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   const router = useRouter();
   const watchlistsQuery = useWatchlists();
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const fallbackListRef = useRef<FlatList>(null);
+  const effectiveListRef = listRef ?? fallbackListRef;
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(effectiveListRef);
 
   const watchlists = useMemo(() => {
     const items = watchlistsQuery.data ?? [];
@@ -127,7 +133,7 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   return (
     <View style={styles.screen}>
       <FlatList
-        ref={listRef}
+        ref={effectiveListRef}
         testID="library-watchlists-overview"
         data={watchlists}
         keyExtractor={(item) => item.id}
@@ -139,10 +145,13 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
         }
         ListFooterComponent={createListFooter}
         contentContainerStyle={styles.listContent}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
       {createModal}
     </View>
   );

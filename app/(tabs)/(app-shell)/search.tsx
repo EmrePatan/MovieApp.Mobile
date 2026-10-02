@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   BackHandler,
+  FlatList,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -53,6 +54,8 @@ import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { commonStyles } from '@/theme/theme';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 export default function SearchScreen() {
   const { t } = useTranslation();
@@ -67,6 +70,9 @@ export default function SearchScreen() {
 
   const handledExploreRef = useRef(false);
   const searchInputRef = useRef<TextInput>(null);
+  const resultsListRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(resultsListRef);
 
   useEffect(() => {
     if (explore !== '1') {
@@ -355,7 +361,9 @@ export default function SearchScreen() {
   if (hasActiveSearch) {
     return (
       <View style={commonStyles.screen} testID="search-screen">
+        <View style={styles.listHost}>
         <PlatformRefreshFlatList
+          ref={resultsListRef}
           testID="search-results-list"
           refreshing={isRefetching && !isFetchingNextPage}
           onRefresh={handleRefresh}
@@ -368,6 +376,8 @@ export default function SearchScreen() {
           contentContainerStyle={results.length === 0 ? styles.emptyListContent : styles.listContent}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
+          onScroll={onListScroll}
+          scrollEventThrottle={scrollEventThrottle}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -375,6 +385,8 @@ export default function SearchScreen() {
           maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
           windowSize={layout.verticalList.windowSize}
         />
+        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+        </View>
       </View>
     );
   }
@@ -416,6 +428,9 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   listContent: {
     paddingBottom: spacing.xxl,
   },

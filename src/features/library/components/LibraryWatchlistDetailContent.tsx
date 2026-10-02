@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -33,6 +33,8 @@ import { LibraryWatchlistListControls } from './LibraryWatchlistListControls';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 const WATCHLIST_SORT_OPTIONS = getAvailableSortOptions(true);
 const DEFAULT_WATCHLIST_SORT: LibrarySortOption = 'recentlyAdded';
@@ -60,6 +62,9 @@ export function LibraryWatchlistDetailContent({
   const [removingItemKey, setRemovingItemKey] = useState<string | null>(null);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [optionsSheetVisible, setOptionsSheetVisible] = useState(false);
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const watchlist = useMemo(
     () => watchlistsQuery.data?.find((entry) => entry.id === watchlistId) ?? null,
@@ -250,7 +255,9 @@ export function LibraryWatchlistDetailContent({
 
   return (
     <>
+      <View style={styles.listHost}>
       <FlatList
+      ref={listRef}
       testID="library-watchlist-detail"
       data={gridItems}
       keyExtractor={getLibraryGridItemKey}
@@ -270,10 +277,14 @@ export function LibraryWatchlistDetailContent({
       contentContainerStyle={styles.listContent}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.4}
+      onScroll={onListScroll}
+      scrollEventThrottle={scrollEventThrottle}
       initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
       maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
       windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
       {watchlistModals}
     </>
   );
@@ -283,6 +294,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     paddingHorizontal: spacing.lg,
+  },
+  listHost: {
+    flex: 1,
   },
   listContent: {
     flexGrow: 1,

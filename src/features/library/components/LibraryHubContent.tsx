@@ -32,8 +32,9 @@ import { LibraryWatchlistsOverview } from './LibraryWatchlistsOverview';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
-import { scrollFlatListToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
 
 const GRID_COLUMNS = 3;
@@ -57,6 +58,8 @@ export function LibraryHubContent() {
   });
   const watchlistsQuery = useWatchlists(isWatchlistsCategory);
   const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const itemWidth = useMemo(
     () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
@@ -92,10 +95,6 @@ export function LibraryHubContent() {
     void libraryQuery.refetch();
   }, [libraryQuery]);
 
-  const scrollLibraryToTop = useCallback(() => {
-    scrollFlatListToTop(listRef);
-  }, []);
-
   const refreshLibraryHub = useCallback(() => {
     if (isWatchlistsCategory) {
       void watchlistsQuery.refetch();
@@ -106,7 +105,7 @@ export function LibraryHubContent() {
   }, [isWatchlistsCategory, libraryQuery, watchlistsQuery]);
 
   usePrimaryTabReselectHandler('library', {
-    scrollToTop: scrollLibraryToTop,
+    scrollToTop,
     refresh: refreshLibraryHub,
   });
 
@@ -213,42 +212,47 @@ export function LibraryHubContent() {
   );
 
   return (
-    <FlatList
-      ref={listRef}
-      testID="library-grid-three-column"
-      data={displayItems}
-      keyExtractor={getLibraryGridItemKey}
-      numColumns={GRID_COLUMNS}
-      columnWrapperStyle={styles.row}
-      renderItem={renderItem}
-      ListHeaderComponent={listHeader}
-      ListEmptyComponent={emptyComponent}
-      removeClippedSubviews
-      ListFooterComponent={
-        libraryQuery.isFetchingNextPage ? (
-          <View style={styles.footerLoading}>
-            <ActivityIndicator color={colors.accent} />
-          </View>
-        ) : libraryQuery.isFetchNextPageError ? (
-          <View style={styles.footerError}>
-            <AppText variant="bodySmall" muted center>
-              {t('common.unableToLoadMore')}
-            </AppText>
-            <AppButton
-              title={t('common.retry')}
-              variant="secondary"
-              onPress={() => void libraryQuery.fetchNextPage()}
-            />
-          </View>
-        ) : null
-      }
-      contentContainerStyle={styles.listContent}
-      onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.4}
-      initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
-      maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
-      windowSize={layout.verticalList.windowSize}
-    />
+    <View style={styles.screen}>
+      <FlatList
+        ref={listRef}
+        testID="library-grid-three-column"
+        data={displayItems}
+        keyExtractor={getLibraryGridItemKey}
+        numColumns={GRID_COLUMNS}
+        columnWrapperStyle={styles.row}
+        renderItem={renderItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={emptyComponent}
+        removeClippedSubviews
+        ListFooterComponent={
+          libraryQuery.isFetchingNextPage ? (
+            <View style={styles.footerLoading}>
+              <ActivityIndicator color={colors.accent} />
+            </View>
+          ) : libraryQuery.isFetchNextPageError ? (
+            <View style={styles.footerError}>
+              <AppText variant="bodySmall" muted center>
+                {t('common.unableToLoadMore')}
+              </AppText>
+              <AppButton
+                title={t('common.retry')}
+                variant="secondary"
+                onPress={() => void libraryQuery.fetchNextPage()}
+              />
+            </View>
+          ) : null
+        }
+        contentContainerStyle={styles.listContent}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
+        initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
+        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
+        windowSize={layout.verticalList.windowSize}
+      />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
+    </View>
   );
 }
 

@@ -4,6 +4,7 @@ export const stage2Pt = {
   common: {
     seeAll: 'Ver tudo',
     seeAllTitle: 'Ver tudo {{title}}',
+    scrollToTopAccessibility: 'Voltar ao topo',
     retry: 'Tentar novamente',
     signIn: 'Entrar',
     signInTitleCase: 'Entrar',
@@ -734,6 +735,7 @@ export const stage2Pt = {
       signInButton: 'Entrar',
       loadError: 'Não foi possível carregar sua biblioteca.',
       browseDiscoverAction: 'Explorar Descobrir',
+      scrollToTopAccessibility: 'Voltar ao topo da biblioteca',
     },
     categories: {
       watching: 'Assistindo',

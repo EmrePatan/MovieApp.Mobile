@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -28,12 +28,17 @@ import {
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 export default function WatchHistoryScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const historyQuery = useRecentWatchHistory();
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const items = useMemo(
     () => flattenRecentWatchHistoryPages(historyQuery.data?.pages ?? []),
@@ -126,7 +131,9 @@ export default function WatchHistoryScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <View style={styles.listHost}>
       <FlatList
+        ref={listRef}
         data={items}
         keyExtractor={recentWatchHistoryItemKey}
         renderItem={renderItem}
@@ -153,7 +160,11 @@ export default function WatchHistoryScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -162,6 +173,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  listHost: {
+    flex: 1,
   },
   header: {
     paddingTop: spacing.md,

@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
@@ -31,6 +32,8 @@ import { flattenUpcomingPages } from '@/features/upcoming/utils/upcoming-catalog
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
+import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
 function filterUpcomingItems(
   items: UpcomingCatalogItem[],
@@ -62,6 +65,9 @@ export default function UpcomingScreen() {
     router,
   });
   const [typeFilter, setTypeFilter] = useState<CatalogMediaFilter>('all');
+  const listRef = useRef<FlatList>(null);
+  const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
+    useFlatListScrollToTopControl(listRef);
 
   const followedQuery = useUpcomingCatalog('followed', undefined, {
     enabled: activeTab === 'for-you' && isAuthenticated,
@@ -232,7 +238,9 @@ export default function UpcomingScreen() {
 
   return (
     <StackListScreen>
+      <View style={styles.listHost}>
       <PlatformRefreshFlatList
+        ref={listRef}
         refreshing={activeQuery.isRefetching && !activeQuery.isFetchingNextPage}
         onRefresh={handleRefresh}
         data={displayItems}
@@ -258,10 +266,14 @@ export default function UpcomingScreen() {
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
+        onScroll={onListScroll}
+        scrollEventThrottle={scrollEventThrottle}
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
         windowSize={layout.verticalList.windowSize}
       />
+      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
     </StackListScreen>
   );
 }
@@ -271,6 +283,9 @@ function ListSeparator() {
 }
 
 const styles = StyleSheet.create({
+  listHost: {
+    flex: 1,
+  },
   controls: {
     gap: spacing.sm,
     paddingTop: spacing.xs,

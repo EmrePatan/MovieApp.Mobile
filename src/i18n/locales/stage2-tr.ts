@@ -4,6 +4,7 @@ export const stage2Tr = {
   common: {
     seeAll: 'Tümünü Gör',
     seeAllTitle: 'Tüm {{title}} içeriğini gör',
+    scrollToTopAccessibility: 'Listenin başına dön',
     retry: 'Tekrar Dene',
     signIn: 'Giriş yap',
     signInTitleCase: 'Giriş Yap',
@@ -735,6 +736,7 @@ export const stage2Tr = {
       signInButton: 'Giriş yap',
       loadError: 'Kütüphanen yüklenemedi.',
       browseDiscoverAction: 'Keşfet\'e Git',
+      scrollToTopAccessibility: 'Kütüphanenin başına dön',
     },
     categories: {
       watching: 'İzleniyor',
