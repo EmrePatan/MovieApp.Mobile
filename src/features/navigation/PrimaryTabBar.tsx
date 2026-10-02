@@ -13,17 +13,16 @@ import {
   resolveActivePrimaryTab,
   type PrimaryTabId,
 } from '@/features/navigation/primary-tab-routes';
+import { TAB_BAR_LABEL_MINIMUM_FONT_SCALE } from '@/features/navigation/tab-bar-label-layout';
 import {
   resolveTabBarLayoutMetrics,
   resolveTabBarPressHitSlop,
   TAB_BAR_ICON_SIZE,
   TAB_BAR_LABEL_GAP,
   TAB_BAR_ROW_HEIGHT,
-  TAB_BAR_ROW_HORIZONTAL_INSET,
 } from '@/features/navigation/tab-bar-layout-metrics';
 import { getTabBarStyle, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 
 type TabConfig = {
   id: PrimaryTabId;
@@ -84,15 +83,7 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
       onLayout={handleTabBarLayout}
       style={[styles.shell, getTabBarStyle(insets)]}
     >
-      <View
-        style={[
-          styles.tabRow,
-          {
-            minHeight: layoutMetrics.rowHeight,
-            paddingHorizontal: TAB_BAR_ROW_HORIZONTAL_INSET,
-          },
-        ]}
-      >
+      <View style={[styles.tabRow, { height: layoutMetrics.rowHeight }]}>
         {PRIMARY_TABS.map((tab) => {
           const isActive = highlightedTab === tab.id;
           const color = isActive ? colors.accent : colors.textMuted;
@@ -108,9 +99,10 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
             >
               <Ionicons name={tab.icon} size={TAB_BAR_ICON_SIZE} color={color} />
               <AppText
+                variant="caption"
                 numberOfLines={1}
                 adjustsFontSizeToFit
-                minimumFontScale={0.85}
+                minimumFontScale={TAB_BAR_LABEL_MINIMUM_FONT_SCALE}
                 style={[tabBarLabelStyle, styles.label, { color }]}
               >
                 {t(tab.labelKey)}
@@ -130,16 +122,20 @@ const styles = StyleSheet.create({
   tabRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    width: '100%',
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
     minHeight: TAB_BAR_ROW_HEIGHT,
-    paddingHorizontal: spacing.xs,
+    minWidth: 0,
   },
   label: {
     marginTop: TAB_BAR_LABEL_GAP,
+    alignSelf: 'stretch',
+    width: '100%',
+    maxWidth: '100%',
     textAlign: 'center',
   },
 });

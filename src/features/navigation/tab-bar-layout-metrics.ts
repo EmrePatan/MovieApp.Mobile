@@ -20,20 +20,11 @@ export const TAB_BAR_ICON_SIZE = 22;
 /** Gap between icon and label in PrimaryTabBar. */
 export const TAB_BAR_LABEL_GAP = 2;
 
-/** Keeps first/last tab labels (e.g. Ana Sayfa, İstatistikler) off the screen edge. */
-export const TAB_BAR_ROW_HORIZONTAL_INSET = spacing.sm;
-
 const TAB_BAR_LABEL_LINE_HEIGHT = typography.caption.lineHeight ?? 16;
-
-/** Extra row space so semibold caption glyphs are not clipped on iOS. */
-export const TAB_BAR_LABEL_VERTICAL_SLACK = 2;
 
 /** Visual height of icon + label stack (single line). */
 export const TAB_BAR_ROW_HEIGHT =
-  TAB_BAR_ICON_SIZE +
-  TAB_BAR_LABEL_GAP +
-  TAB_BAR_LABEL_LINE_HEIGHT +
-  TAB_BAR_LABEL_VERTICAL_SLACK;
+  TAB_BAR_ICON_SIZE + TAB_BAR_LABEL_GAP + TAB_BAR_LABEL_LINE_HEIGHT;
 
 function resolveAndroidTabBarBottomPadding(insets: EdgeInsets): number {
   return insets.bottom > 0 ? insets.bottom : spacing.xs;
