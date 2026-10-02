@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
-import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -141,8 +141,8 @@ export function DiscoverPreviewSection({
               onPress={() => onItemPress(item)}
               style={({ pressed }) => [styles.card, pressed && styles.pressed]}
             >
-              <CatalogImage
-                path={item.posterUrl}
+              <PosterImage
+                uri={item.posterUrl}
                 width={layout.posterCarousel.width}
                 height={layout.posterCarousel.height}
                 accessibilityLabel={t('common.posterAccessibility', { title: item.title })}

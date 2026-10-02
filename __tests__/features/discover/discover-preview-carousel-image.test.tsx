@@ -36,7 +36,7 @@ describe('DiscoverPreviewCarousel images', () => {
     process.env.EXPO_PUBLIC_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
   });
 
-  it('keeps CatalogImage mounted while loading and only falls back on error', () => {
+  it('keeps PosterImage mounted while loading and only falls back on error', () => {
     render(
       <DiscoverPreviewCarousel
         title="Top Rated"
@@ -50,6 +50,7 @@ describe('DiscoverPreviewCarousel images', () => {
     expect(images[0].props.source.uri).toBe(
       'https://image.tmdb.org/t/p/w500/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg',
     );
+    expect(images[0].props.cachePolicy).toBe('memory-disk');
 
     act(() => {
       images[1].props.onError?.();

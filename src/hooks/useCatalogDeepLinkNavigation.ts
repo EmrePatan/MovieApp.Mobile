@@ -5,6 +5,7 @@ import { resolveCatalogDeepLinkRouterPath } from '@/auth/catalog-deep-link-route
 import {
   captureCatalogDeepLink,
   consumePendingCatalogDeepLinkPath,
+  peekPendingCatalogDeepLinkPath,
 } from '@/auth/pending-catalog-deep-link';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
@@ -20,11 +21,17 @@ export function useCatalogDeepLinkNavigation(): void {
     }
 
     const openPending = () => {
-      const pendingPath = consumePendingCatalogDeepLinkPath();
-      if (pendingPath && isAuthenticated) {
-        trackProductMetric(PRODUCT_METRICS.sharedContentLinkOpened);
-        router.push(pendingPath);
+      // Consume only after login. Peeking while signed out leaves the path
+      // for the auth guard to open once the session exists.
+      const pendingPath = isAuthenticated
+        ? consumePendingCatalogDeepLinkPath()
+        : peekPendingCatalogDeepLinkPath();
+      if (!pendingPath || !isAuthenticated) {
+        return;
       }
+
+      trackProductMetric(PRODUCT_METRICS.sharedContentLinkOpened);
+      router.push(pendingPath);
     };
 
     openPending();

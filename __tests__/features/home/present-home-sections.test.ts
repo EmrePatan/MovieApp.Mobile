@@ -1,4 +1,7 @@
-import { presentHomeSections } from '@/features/home/utils/present-home-sections';
+import {
+  presentHomeSections,
+  RECOMMENDED_HERO_DEDUPE_MIN_COUNT,
+} from '@/features/home/utils/present-home-sections';
 import type { HomeItem, HomeSection } from '@/features/home/types';
 
 function createItem(overrides: Partial<HomeItem> = {}): HomeItem {
@@ -50,6 +53,40 @@ describe('presentHomeSections', () => {
       'TopRated',
     ]);
     expect(presented.sections[0].items).toHaveLength(10);
+  });
+
+  it('drops hero overlap from Recommended only when ten non-hero cards remain', () => {
+    const heroItems = Array.from({ length: 3 }, (_, index) =>
+      createItem({ id: `hero-${index + 1}` }),
+    );
+    const extraRecommended = Array.from({ length: 12 }, (_, index) =>
+      createItem({ id: `rec-${index + 1}` }),
+    );
+    const shortRecommended = Array.from({ length: 4 }, (_, index) =>
+      createItem({ id: `short-${index + 1}` }),
+    );
+
+    const deduped = presentHomeSections(
+      [
+        createSection('HotThisWeek', heroItems),
+        createSection('RecommendedForYou', [...heroItems, ...extraRecommended]),
+      ],
+      true,
+    );
+    expect(deduped.sections[0].items.map((item) => item.id)).toEqual(
+      extraRecommended.slice(0, RECOMMENDED_HERO_DEDUPE_MIN_COUNT).map((item) => item.id),
+    );
+
+    const kept = presentHomeSections(
+      [
+        createSection('HotThisWeek', heroItems),
+        createSection('RecommendedForYou', [...heroItems, ...shortRecommended]),
+      ],
+      true,
+    );
+    expect(kept.sections[0].items.map((item) => item.id)).toEqual(
+      [...heroItems, ...shortRecommended].map((item) => item.id),
+    );
   });
 
   it('orders cold-start rails as Trending then Top Rated', () => {

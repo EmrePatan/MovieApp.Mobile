@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
-import { CatalogImage } from './CatalogImage';
+import { PosterImage } from '@/components/common/PosterImage';
 import { DetailHeroPosterFrame } from './DetailHeroPosterFrame';
 import { DetailMetadataRow } from './DetailMetadataRow';
 import { DetailHeroMedia } from './DetailHeroMedia';
@@ -99,16 +99,16 @@ export const DetailHero = memo(function DetailHero({
         style={({ pressed }) => [pressed && styles.posterPressed]}
         testID="detail-hero-poster"
       >
-        <CatalogImage
-          path={posterPath}
+        <PosterImage
+          uri={posterPath}
           width={layout.posterCarousel.width}
           height={layout.posterCarousel.height}
           accessibilityLabel={posterLabel}
         />
       </Pressable>
     ) : showPoster ? (
-      <CatalogImage
-        path={posterPath}
+      <PosterImage
+        uri={posterPath}
         width={layout.posterCarousel.width}
         height={layout.posterCarousel.height}
         accessibilityLabel={posterLabel}

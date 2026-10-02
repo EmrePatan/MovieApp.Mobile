@@ -53,7 +53,7 @@ describe('home hero image urls', () => {
     ).toBe('https://image.tmdb.org/t/p/w780/poster.jpg');
   });
 
-  it('prefetches the centered hero, the previous wrap, and the next hero at w780', () => {
+  it('prefetches the centered hero, the previous wrap, the next hero, and one extra forward neighbor at w780', () => {
     delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
 
     const items = [
@@ -82,9 +82,10 @@ describe('home hero image urls', () => {
       resolveHomeHeroPosterUri('/0.jpg'),
       resolveHomeHeroPosterUri('/9.jpg'),
       resolveHomeHeroPosterUri('/1.jpg'),
+      resolveHomeHeroPosterUri('/2.jpg'),
     ]);
-    expect(firstPaint).toHaveLength(3);
-    for (const index of [2, 3, 4, 5, 6, 7, 8]) {
+    expect(firstPaint).toHaveLength(4);
+    for (const index of [3, 4, 5, 6, 7, 8]) {
       expect(firstPaint).not.toContain(resolveHomeHeroPosterUri(`/${index}.jpg`));
     }
   });

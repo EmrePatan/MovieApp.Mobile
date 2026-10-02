@@ -77,7 +77,7 @@ describe('prefetchHomeFeedImages', () => {
     expect(prefetchSpy).toHaveBeenCalledTimes(3);
   });
 
-  it('prefetches only the centered hero, the left wrap, and the next hero', () => {
+  it('prefetches the centered hero, the left wrap, the next hero, and one extra forward neighbor', () => {
     delete process.env.EXPO_PUBLIC_IMAGE_BASE_URL;
     const prefetchSpy = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
     prefetchSpy.mockClear();
@@ -92,8 +92,9 @@ describe('prefetchHomeFeedImages', () => {
       'https://image.tmdb.org/t/p/w780/0.jpg',
       'https://image.tmdb.org/t/p/w780/9.jpg',
       'https://image.tmdb.org/t/p/w780/1.jpg',
+      'https://image.tmdb.org/t/p/w780/2.jpg',
     ]);
-    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/2.jpg');
+    expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/3.jpg');
     expect(prefetched).not.toContain('https://image.tmdb.org/t/p/w780/8.jpg');
   });
 });

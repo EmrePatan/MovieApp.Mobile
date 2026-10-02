@@ -82,7 +82,7 @@ export const HomeComingUpCard = memo(function HomeComingUpCard({
 const styles = StyleSheet.create({
   card: {
     width: layout.posterCarousel.width,
-    marginRight: spacing.md,
+    marginRight: layout.cardGap,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

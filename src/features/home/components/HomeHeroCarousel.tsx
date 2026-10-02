@@ -15,8 +15,8 @@ import { HomeHeroPaginationDots } from './HomeHeroPaginationDots';
 import type { HomeItem, HomeTypeFilter } from '../types';
 import {
   getHeroCarouselActiveIndexFromOffset,
+  getHeroCarouselAutoplayScrollIndex,
   getHeroCarouselImagePriority,
-  getScrollIndexForActiveIndex,
   getScrollIndexFromOffset,
   HERO_CAROUSEL_LOOP_HEAD_INDEX,
   resolveHeroCarouselLoopSettledOffset,
@@ -146,12 +146,8 @@ export const HomeHeroCarousel = memo(function HomeHeroCarousel({
     }
 
     autoAdvanceTimerRef.current = setTimeout(() => {
-      const nextIndex = (activeIndex + 1) % items.length;
-      scrollHeroCarouselTo(
-        listRef.current,
-        getScrollIndexForActiveIndex(nextIndex) * snapInterval,
-        true,
-      );
+      const nextScrollIndex = getHeroCarouselAutoplayScrollIndex(activeIndex, items.length);
+      scrollHeroCarouselTo(listRef.current, nextScrollIndex * snapInterval, true);
     }, AUTO_ADVANCE_MS);
 
     return clearAutoAdvanceTimer;
