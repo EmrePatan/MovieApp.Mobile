@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -7,6 +8,8 @@ import { spacing } from '@/theme/spacing';
 
 interface HomeSectionHeaderProps {
   title: string;
+  /** Same Ionicons treatment as Discover preview rails (size 18, accent). */
+  icon?: keyof typeof Ionicons.glyphMap;
   onSeeAllPress?: () => void;
   /** Tighter space before section body (detail overview, etc.). */
   compactSpacing?: boolean;
@@ -14,6 +17,7 @@ interface HomeSectionHeaderProps {
 
 export function HomeSectionHeader({
   title,
+  icon,
   onSeeAllPress,
   compactSpacing = false,
 }: HomeSectionHeaderProps) {
@@ -25,7 +29,10 @@ export function HomeSectionHeader({
       accessibilityRole="header"
     >
       <View style={styles.titleRow}>
-        <AppText variant="subtitle" style={styles.title}>{title}</AppText>
+        <View style={styles.titleGroup}>
+          {icon ? <Ionicons name={icon} size={18} color={colors.accent} /> : null}
+          <AppText variant="subtitle" style={styles.title}>{title}</AppText>
+        </View>
         {onSeeAllPress ? (
           <Pressable
             accessibilityRole="button"
@@ -57,6 +64,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  titleGroup: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   title: {
