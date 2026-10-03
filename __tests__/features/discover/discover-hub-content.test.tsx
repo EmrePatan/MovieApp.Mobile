@@ -327,12 +327,12 @@ describe('DiscoverHubContent', () => {
     const serialized = JSON.stringify(screen.toJSON());
     const railIds = [
       'streaming-platforms-hub',
-      'genres-hub',
       'world-cinema-hub',
-      'discover-rail-hidden-gems',
+      'genres-hub',
       'discover-rail-popular',
       'discover-rail-new-releases',
       'discover-rail-top-rated',
+      'discover-rail-hidden-gems',
     ];
     const indexes = railIds.map((id) => serialized.indexOf(id));
     expect(indexes.every((index) => index >= 0)).toBe(true);

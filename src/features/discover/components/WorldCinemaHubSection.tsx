@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   chipList: {
     paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
+    gap: 6,
   },
   chip: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    marginRight: spacing.sm,
   },
   chipContent: {
     flexDirection: 'row',

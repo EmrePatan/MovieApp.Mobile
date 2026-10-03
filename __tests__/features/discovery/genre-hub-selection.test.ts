@@ -132,6 +132,7 @@ describe('unique genre covers', () => {
         [
           'action',
           source([
+            candidate('rank-1', 'Rank 1'),
             candidate('spider', 'Spider-Man'),
             candidate('mad-max', 'Mad Max'),
           ]),
@@ -139,16 +140,18 @@ describe('unique genre covers', () => {
         [
           'drama',
           source([
-            candidate('spider-2', 'spider-man'),
+            candidate('d-1', 'Drama 1'),
             candidate('notebook', 'The Notebook'),
+            candidate('spider-2', 'spider-man'),
           ]),
         ],
         [
           'comedy',
           source([
+            candidate('c-1', 'Comedy 1'),
+            candidate('barbie', 'Barbie'),
             candidate('spider-3', 'Spider-Man'),
             candidate('notebook-2', 'The Notebook'),
-            candidate('barbie', 'Barbie'),
           ]),
         ],
       ]),
@@ -168,7 +171,10 @@ describe('unique genre covers', () => {
     const slots = resolveGenreCoverSlots(
       [{ id: 'action' }, { id: 'war' }],
       new Map([
-        ['action', source([candidate('spider', 'Spider-Man')])],
+        [
+          'action',
+          source([candidate('a-1', 'A1'), candidate('spider', 'Spider-Man')]),
+        ],
         [
           'war',
           source([

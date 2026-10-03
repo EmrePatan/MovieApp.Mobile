@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -15,32 +15,22 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const DISCOVER_GENRES_DIRECTORY_ROUTE = '/discover-genres';
-/** Posters sized so three fit in the discover hub rail (between screen gutters). */
-const HUB_RAIL_VISIBLE_COLUMNS = 3;
-const HUB_RAIL_GAP = spacing.sm;
+
+/** Matches Dünya Sineması preview posters (120×180). */
+const hubTileSize: GenreHubTileSize = {
+  width: layout.posterCarousel.width,
+  height: layout.posterCarousel.height,
+};
 
 export function GenresHubSection() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { width: windowWidth } = useWindowDimensions();
   const genresQuery = useGenres();
   const genres = useMemo(
     () => selectGenreHubRailGenres(genresQuery.data ?? []),
     [genresQuery.data],
   );
   const covers = useGenreCoverSlots(genres);
-
-  const hubTileSize = useMemo<GenreHubTileSize>(() => {
-    const contentWidth = Math.min(windowWidth, layout.maxContentWidth);
-    const innerWidth = contentWidth - spacing.lg * 2;
-    const tileWidth =
-      (innerWidth - HUB_RAIL_GAP * (HUB_RAIL_VISIBLE_COLUMNS - 1)) / HUB_RAIL_VISIBLE_COLUMNS;
-
-    return {
-      width: tileWidth,
-      height: tileWidth / layout.posterAspectRatio,
-    };
-  }, [windowWidth]);
 
   const openDirectory = useCallback(() => {
     openLibraryStackScreen(router, DISCOVER_GENRES_DIRECTORY_ROUTE, '/discover');
@@ -77,7 +67,7 @@ export function GenresHubSection() {
       <FlatList
         horizontal
         data={genres}
-        key={hubTileSize.width}
+        key={hubTileSize.height}
         keyExtractor={(item) => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.genreList}
@@ -126,6 +116,6 @@ const styles = StyleSheet.create({
   },
   genreList: {
     paddingHorizontal: spacing.lg,
-    gap: HUB_RAIL_GAP,
+    gap: spacing.md,
   },
 });

@@ -3,6 +3,9 @@ import type { SearchResultItem } from '@/features/search/types';
 /** Popular titles requested per genre from the existing browse API. */
 export const GENRE_COVER_CANDIDATE_PAGE_SIZE = 20;
 
+/** Use the Nth popular title poster per genre (1 = first result). */
+export const GENRE_COVER_PREFERRED_RANK = 2;
+
 export interface GenreCoverCandidate {
   id: string;
   title: string;
@@ -53,7 +56,7 @@ export function genreCoverCandidatesFromItems(
 }
 
 /**
- * Walk genres in order. Each genre takes the first unused poster title.
+ * Walk genres in order. Each genre takes the preferred-rank unused poster title.
  * An earlier genre that is still loading keeps later genres pending so a title
  * is not shown twice and then swapped. A genre with no remaining poster falls back.
  */
@@ -91,10 +94,18 @@ function pickUnusedCover(
   usedTitleKeys: Set<string>,
   usedIds: Set<string>,
 ): GenreCoverSlot | null {
+  const skipBeforeRank = Math.max(0, GENRE_COVER_PREFERRED_RANK - 1);
+  let eligibleRank = 0;
+
   for (const candidate of candidates) {
     const titleKey = normalizeCoverTitle(candidate.title);
     const posterUrl = candidate.posterUrl?.trim() ?? '';
     if (!titleKey || !posterUrl) {
+      continue;
+    }
+
+    if (eligibleRank < skipBeforeRank) {
+      eligibleRank += 1;
       continue;
     }
 

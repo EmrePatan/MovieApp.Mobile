@@ -93,18 +93,23 @@ describe('GenresHubSection', () => {
     });
 
     coverCandidates['g-action'] = [
+      poster('rank-1', 'Rank 1'),
       poster('spider', 'Spider-Man'),
       poster('mad-max', 'Mad Max'),
     ];
     coverCandidates['g-drama'] = [
-      poster('spider-drama', 'Spider-Man'),
+      poster('d-1', 'Drama 1'),
       poster('notebook', 'The Notebook'),
+      poster('spider-drama', 'Spider-Man'),
     ];
     for (const item of catalog) {
       if (item.id === 'g-action' || item.id === 'g-drama') {
         continue;
       }
-      coverCandidates[item.id] = [poster(`${item.id}-title`, `${item.name} Cover`)];
+      coverCandidates[item.id] = [
+        poster(`${item.id}-1`, `${item.name} 1`),
+        poster(`${item.id}-title`, `${item.name} Cover`),
+      ];
     }
     coverCandidates['g-war'] = [poster('spider-war', 'Spider-Man')];
   });
@@ -170,15 +175,20 @@ describe('GenresDirectoryScreen', () => {
     let index = 0;
     for (const item of catalog) {
       index += 1;
-      coverCandidates[item.id] = [poster(`title-${index}`, `Cover ${index}`)];
+      coverCandidates[item.id] = [
+        poster(`title-${index}-1`, `Cover ${index} 1`),
+        poster(`title-${index}`, `Cover ${index}`),
+      ];
     }
     coverCandidates['g-action'] = [
+      poster('rank-1', 'Rank 1'),
       poster('spider', 'Spider-Man'),
       poster('mad-max', 'Mad Max'),
     ];
     coverCandidates['g-adventure'] = [
-      poster('spider-adventure', 'Spider-Man'),
+      poster('adv-1', 'Adv 1'),
       poster('indiana', 'Indiana Jones'),
+      poster('spider-adventure', 'Spider-Man'),
     ];
   });
 

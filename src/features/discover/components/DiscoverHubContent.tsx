@@ -126,16 +126,9 @@ export function DiscoverHubContent() {
 
       <View style={styles.rails}>
         <StreamingPlatformsHubSection />
-        <GenresHubSection />
         <WorldCinemaHubSection />
+        <GenresHubSection />
 
-        <DiscoverPreviewCarousel
-          title={translateDiscoveryBrowseMode('hidden_gems')}
-          items={hiddenGemsItems}
-          onItemPress={handlePreviewItemPress}
-          onSeeAll={() => openBrowse('hidden_gems')}
-          testID="discover-rail-hidden-gems"
-        />
         <DiscoverPreviewCarousel
           title={translateDiscoveryBrowseMode('popular')}
           items={popularItems}
@@ -156,6 +149,13 @@ export function DiscoverHubContent() {
           onItemPress={handlePreviewItemPress}
           onSeeAll={() => openBrowse('top_rated')}
           testID="discover-rail-top-rated"
+        />
+        <DiscoverPreviewCarousel
+          title={translateDiscoveryBrowseMode('hidden_gems')}
+          items={hiddenGemsItems}
+          onItemPress={handlePreviewItemPress}
+          onSeeAll={() => openBrowse('hidden_gems')}
+          testID="discover-rail-hidden-gems"
         />
       </View>
     </ScrollView>

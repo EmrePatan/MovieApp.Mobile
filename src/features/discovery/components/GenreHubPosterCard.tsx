@@ -1,16 +1,17 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
-import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { GenreCoverSlot } from '@/features/discovery/genre-cover-selection';
 import { resolveDiscoverGenreCanonicalName } from '@/features/discovery/main-discover-genres';
 import type { Genre } from '@/features/discovery/types';
 import { createDiscoverHref } from '@/features/discovery/utils/discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { translateGenreName } from '@/i18n/catalog-labels';
+import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -19,6 +20,13 @@ export interface GenreHubTileSize {
   width: number;
   height: number;
 }
+
+export type GenreHubCardBackground = 'poster' | 'vividColor';
+
+const GENRE_HUB_POSTER_BLUR_RADIUS = 20;
+
+/** Same center scrim used on blurred poster art — keeps the soft, muted read on vivid fills. */
+const GENRE_HUB_ART_SCRIM = ['rgba(0,0,0,0.38)', 'rgba(0,0,0,0.52)', 'rgba(0,0,0,0.38)'] as const;
 
 const GENRE_TILE_GRADIENTS: Record<string, readonly [string, string, string]> = {
   action: ['#5C1C1C', '#8E2E2E', '#1A0C0C'],
@@ -46,22 +54,117 @@ const GENRE_TILE_GRADIENTS: Record<string, readonly [string, string, string]> = 
   western: ['#4A3018', '#8A5A30', '#16100C'],
 };
 
-function genreGradient(name: string): readonly [string, string, string] {
+const GENRE_VIVID_GRADIENTS: Record<string, readonly [string, string, string]> = {
+  action: ['#8E2828', '#E04848', '#3A1010'],
+  adventure: ['#1E6848', '#3CB878', '#0E2018'],
+  animation: ['#3858B8', '#6890F0', '#14182A'],
+  comedy: ['#9A6818', '#F0C040', '#2A1C08'],
+  crime: ['#483868', '#8878B0', '#18141E'],
+  documentary: ['#287048', '#58A878', '#0E1810'],
+  drama: ['#6A3048', '#C06080', '#1E0C12'],
+  family: ['#6A5020', '#C09850', '#1E1608'],
+  fantasy: ['#286878', '#58B0C8', '#0E1820'],
+  history: ['#584830', '#A08858', '#1A1408'],
+  horror: ['#6A1820', '#C03040', '#18080A'],
+  kids: ['#287868', '#58C0A8', '#0E1A18'],
+  music: ['#583070', '#A060C8', '#180C1E'],
+  mystery: ['#304868', '#6890B0', '#0E141C'],
+  news: ['#385878', '#6898C0', '#101820'],
+  reality: ['#684828', '#C08048', '#1E1208'],
+  romance: ['#7A2850', '#E07098', '#200C14'],
+  'science fiction': ['#285890', '#58A8E8', '#0E1420'],
+  soap: ['#682850', '#C070A8', '#180C14'],
+  talk: ['#484068', '#8878A8', '#14101C'],
+  thriller: ['#404040', '#787878', '#101010'],
+  war: ['#584020', '#A87840', '#1A1008'],
+  western: ['#684020', '#C08848', '#1A1008'],
+};
+
+function genreGradientKey(name: string): string {
   const canonical = resolveDiscoverGenreCanonicalName(name) ?? name;
-  return GENRE_TILE_GRADIENTS[canonical.trim().toLowerCase()] ?? ['#242430', '#3A3A4A', '#101014'];
+  return canonical.trim().toLowerCase();
+}
+
+function genreGradient(name: string): readonly [string, string, string] {
+  return GENRE_TILE_GRADIENTS[genreGradientKey(name)] ?? ['#242430', '#3A3A4A', '#101014'];
+}
+
+function genreVividGradient(name: string): readonly [string, string, string] {
+  return GENRE_VIVID_GRADIENTS[genreGradientKey(name)] ?? ['#3A3A58', '#6868A0', '#1A1A28'];
 }
 
 interface GenreHubPosterCardProps {
   genre: Genre;
   tileSize: GenreHubTileSize;
-  cover: GenreCoverSlot;
+  background?: GenreHubCardBackground;
+  cover?: GenreCoverSlot;
 }
 
-export function GenreHubPosterCard({ genre, tileSize, cover }: GenreHubPosterCardProps) {
+function GenreHubArtScrim() {
+  return (
+    <LinearGradient
+      pointerEvents="none"
+      colors={[...GENRE_HUB_ART_SCRIM]}
+      locations={[0, 0.5, 1]}
+      style={StyleSheet.absoluteFill}
+    />
+  );
+}
+
+function GenreHubVividColorBackground({
+  gradient,
+  tileSize,
+  genreId,
+}: {
+  gradient: readonly [string, string, string];
+  tileSize: GenreHubTileSize;
+  genreId: string;
+}) {
+  return (
+    <>
+      <LinearGradient
+        colors={[gradient[0], gradient[1], gradient[2]]}
+        locations={[0, 0.45, 1]}
+        start={{ x: 0.05, y: 0 }}
+        end={{ x: 0.95, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={styles.colorGlowWrap} pointerEvents="none">
+        <LinearGradient
+          colors={[`${gradient[1]}B3`, `${gradient[0]}66`, 'transparent']}
+          locations={[0, 0.55, 1]}
+          start={{ x: 0.2, y: 0.1 }}
+          end={{ x: 0.9, y: 1 }}
+          style={[
+            styles.colorGlow,
+            {
+              width: tileSize.width * 1.35,
+              height: tileSize.height * 1.35,
+              left: -tileSize.width * 0.18,
+              top: -tileSize.height * 0.2,
+            },
+          ]}
+        />
+      </View>
+      <GenreHubArtScrim />
+      <View testID={`genre-hub-color-${genreId}`} accessible={false} />
+    </>
+  );
+}
+
+export function GenreHubPosterCard({
+  genre,
+  tileSize,
+  background = 'poster',
+  cover,
+}: GenreHubPosterCardProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const label = translateGenreName(genre.name);
   const gradient = genreGradient(genre.name);
+  const vividGradient = genreVividGradient(genre.name);
+  const posterUri =
+    cover?.status === 'poster' ? resolveImageUri(cover.posterUrl, 'w780') : null;
 
   const openGenre = () => {
     openLibraryStackScreen(
@@ -87,24 +190,32 @@ export function GenreHubPosterCard({ genre, tileSize, cover }: GenreHubPosterCar
       ]}
       testID={`genre-hub-tile-${genre.id}`}
     >
-      {cover.status === 'pending' ? (
+      {background === 'vividColor' ? (
+        <>
+          <GenreHubVividColorBackground
+            gradient={vividGradient}
+            tileSize={tileSize}
+            genreId={genre.id}
+          />
+          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3}>
+            {label}
+          </AppText>
+        </>
+      ) : cover?.status === 'pending' ? (
         <SkeletonBlock width={tileSize.width} height={tileSize.height} />
-      ) : cover.status === 'poster' ? (
+      ) : cover?.status === 'poster' && posterUri ? (
         <>
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <CatalogImage
-              path={cover.posterUrl}
-              width={tileSize.width}
-              height={tileSize.height}
-              rounded={false}
+            <Image
+              source={{ uri: posterUri }}
+              style={{ width: tileSize.width, height: tileSize.height }}
+              contentFit="cover"
+              blurRadius={GENRE_HUB_POSTER_BLUR_RADIUS}
+              cachePolicy="memory-disk"
               accessibilityLabel=""
             />
           </View>
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.78)']}
-            locations={[0.45, 1]}
-            style={StyleSheet.absoluteFill}
-          />
+          <GenreHubArtScrim />
           <View
             testID={`genre-hub-cover-${genre.id}`}
             accessibilityLabel={cover.title}
@@ -137,17 +248,28 @@ const styles = StyleSheet.create({
   tile: {
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.borderAccent,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: spacing.sm,
     backgroundColor: colors.background,
+  },
+  colorGlowWrap: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  colorGlow: {
+    position: 'absolute',
+    opacity: 0.85,
   },
   tileLabel: {
     color: colors.textPrimary,
     fontWeight: '700',
     textAlign: 'center',
     alignSelf: 'stretch',
+    zIndex: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
