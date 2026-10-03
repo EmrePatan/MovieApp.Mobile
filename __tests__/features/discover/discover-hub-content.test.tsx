@@ -366,7 +366,7 @@ describe('DiscoverHubContent', () => {
       expect(screen.queryByText('Haber')).toBeNull();
 
       const serialized = JSON.stringify(screen.toJSON());
-      const labels = ['Aksiyon', 'Komedi', 'Bilim Kurgu'];
+      const labels = ['Bilim Kurgu', 'Aksiyon', 'Komedi'];
       const indexes = labels.map((label) => serialized.indexOf(label));
       expect(indexes.every((index) => index >= 0)).toBe(true);
       expect([...indexes].sort((left, right) => left - right)).toEqual(indexes);

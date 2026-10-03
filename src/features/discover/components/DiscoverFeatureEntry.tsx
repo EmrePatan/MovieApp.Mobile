@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   cardWithArt: {
     paddingVertical: spacing.sm,
-    borderColor: colors.borderAccent,
+    borderColor: 'rgba(196, 163, 90, 0.32)',
     backgroundColor: '#0C0C12',
   },
   backdrop: {

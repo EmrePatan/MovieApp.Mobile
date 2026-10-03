@@ -45,12 +45,12 @@ export const GENRE_HUB_RAIL_SIZE = 8;
 
 /** Visible Keşfet rail, in this fixed order. */
 export const GENRE_HUB_RAIL_GENRE_NAMES = [
-  'Action',
-  'Drama',
-  'Comedy',
   'Science Fiction',
   'Fantasy',
   'Mystery',
+  'Action',
+  'Drama',
+  'Comedy',
   'Romance',
   'War',
 ] as const satisfies readonly DiscoverCatalogGenreName[];

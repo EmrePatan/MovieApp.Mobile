@@ -94,24 +94,28 @@ export function HomeHeaderActionCluster({
           </AppText>
         </Pressable>
       )}
-      <View style={homeHeaderStyles.actionDivider} />
-      <HomeHeaderIconButton
-        accessibilityLabel={notificationsAccessibilityLabel}
-        badgeLabel={badgeLabel}
-        overlay={overlay}
-        compact
-        onPress={() =>
-          openLibraryStackScreen(router, '/notifications', TAB_RETURN_HREFS[searchOrigin])
-        }
-      >
-        <Ionicons name="notifications-outline" size={iconSize} color={headerActionIconColor} />
-      </HomeHeaderIconButton>
-      <View style={homeHeaderStyles.actionDivider} />
-      <HomeHeaderProfileAvatar
-        overlay={overlay}
-        compact
-        onPress={() => router.push('/(tabs)/profile')}
-      />
+      {!isLibraryOrigin ? (
+        <>
+          <View style={homeHeaderStyles.actionDivider} />
+          <HomeHeaderIconButton
+            accessibilityLabel={notificationsAccessibilityLabel}
+            badgeLabel={badgeLabel}
+            overlay={overlay}
+            compact
+            onPress={() =>
+              openLibraryStackScreen(router, '/notifications', TAB_RETURN_HREFS[searchOrigin])
+            }
+          >
+            <Ionicons name="notifications-outline" size={iconSize} color={headerActionIconColor} />
+          </HomeHeaderIconButton>
+          <View style={homeHeaderStyles.actionDivider} />
+          <HomeHeaderProfileAvatar
+            overlay={overlay}
+            compact
+            onPress={() => router.push('/(tabs)/profile')}
+          />
+        </>
+      ) : null}
     </View>
   );
 }

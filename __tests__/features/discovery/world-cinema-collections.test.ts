@@ -10,13 +10,13 @@ import {
 
 const EXPECTED_CURATED_COUNTRIES = [
   'KR',
-  'JP',
   'IR',
-  'FR',
-  'IT',
   'ES',
-  'IN',
   'TR',
+  'IT',
+  'FR',
+  'JP',
+  'IN',
   'CN',
   'HK',
   'TW',

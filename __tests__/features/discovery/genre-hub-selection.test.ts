@@ -54,12 +54,12 @@ describe('genre hub selection', () => {
     const rail = selectGenreHubRailGenres(catalog);
 
     expect(rail.map((item) => item.id)).toEqual([
-      'action',
-      'drama',
-      'comedy',
       'scifi',
       'fantasy',
       'mystery',
+      'action',
+      'drama',
+      'comedy',
       'romance',
       'war-tr',
     ]);

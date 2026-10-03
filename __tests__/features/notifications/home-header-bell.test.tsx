@@ -67,4 +67,11 @@ describe('HomeHeader notification bell', () => {
     expect(screen.getByLabelText('Open notifications, 9+ unread')).toBeTruthy();
     expect(screen.getByText('9+')).toBeTruthy();
   });
+
+  it('hides notifications and profile on the library tab chrome', () => {
+    render(<HomeHeader searchOrigin="library" />);
+
+    expect(screen.queryByLabelText('Open notifications')).toBeNull();
+    expect(screen.queryByLabelText('Open Emre User profile')).toBeNull();
+  });
 });

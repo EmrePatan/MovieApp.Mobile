@@ -146,6 +146,8 @@ const styles = StyleSheet.create({
   tileLabel: {
     color: colors.textPrimary,
     fontWeight: '700',
+    textAlign: 'center',
+    alignSelf: 'stretch',
   },
   pressed: {
     opacity: interaction.pressedOpacity,

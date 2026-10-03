@@ -113,12 +113,12 @@ describe('GenresHubSection', () => {
     render(<GenresHubSection />);
 
     const railIds = [
-      'g-action',
-      'g-drama',
-      'g-comedy',
       'g-scifi',
       'g-fantasy',
       'g-mystery',
+      'g-action',
+      'g-drama',
+      'g-comedy',
       'g-romance',
       'g-war',
     ];

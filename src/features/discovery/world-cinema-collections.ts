@@ -7,13 +7,13 @@ import type { WorldCinemaCollection } from './world-cinema-types';
 
 export const WORLD_CINEMA_CURATED_COLLECTIONS: WorldCinemaCollection[] = [
   { originCountry: 'KR' },
-  { originCountry: 'JP' },
   { originCountry: 'IR' },
-  { originCountry: 'FR' },
-  { originCountry: 'IT' },
   { originCountry: 'ES' },
-  { originCountry: 'IN' },
   { originCountry: 'TR' },
+  { originCountry: 'IT' },
+  { originCountry: 'FR' },
+  { originCountry: 'JP' },
+  { originCountry: 'IN' },
   { originCountry: 'CN' },
   { originCountry: 'HK' },
   { originCountry: 'TW' },

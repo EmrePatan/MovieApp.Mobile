@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AppText } from '@/components/common/AppText';
 import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/open-catalog-detail-from-tab';
 import { useQueryClient } from '@tanstack/react-query';
 import { useExplorePreview } from '@/features/discovery/hooks/useExplorePreview';
@@ -18,6 +17,8 @@ import { discoverFeatureBackgrounds } from '../discover-feature-backgrounds';
 import { DiscoverFeatureEntry } from './DiscoverFeatureEntry';
 import { DiscoverPreviewCarousel } from './DiscoverPreviewCarousel';
 import { WorldCinemaHubSection } from './WorldCinemaHubSection';
+import { useHomeHeaderLayout } from '@/features/home/hooks/useHomeHeaderLayout';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
@@ -26,6 +27,7 @@ import type { DiscoveryBrowseMode } from '@/features/discovery/types';
 
 export function DiscoverHubContent() {
   const { t } = useTranslation();
+  const headerLayout = useHomeHeaderLayout();
   const { config } = useAppConfig();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -84,13 +86,13 @@ export function DiscoverHubContent() {
     <ScrollView
       ref={scrollRef}
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        { paddingTop: headerLayout.heroOffsetCompensation + spacing.sm },
+      ]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.featureSection}>
-        <AppText variant="bodySmall" muted style={styles.sectionEyebrow}>
-          {t('discover.hub.eyebrow')}
-        </AppText>
         <DiscoverFeatureEntry
           title={t('discover.hub.advancedDiscover.title')}
           subtitle={t('discover.hub.advancedDiscover.subtitle')}
@@ -165,20 +167,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
-    gap: spacing.sm,
+    gap: layout.sectionGap,
   },
   featureSection: {
     paddingHorizontal: spacing.lg,
     gap: spacing.xs,
   },
   rails: {
-    gap: spacing.lg,
-  },
-  sectionEyebrow: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    fontWeight: '600',
+    gap: layout.sectionGap,
   },
 });
