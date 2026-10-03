@@ -212,26 +212,30 @@ function FollowPreferencesSheet({
               onDismiss={() => setErrorMessage(null)}
             />
 
-            <AppText variant="body" style={styles.sectionLabel}>
-              {t('details.followPreferences.notificationsSection')}
-            </AppText>
+            <View style={styles.notificationsBlock}>
+              <AppText variant="body" style={styles.sectionLabel}>
+                {t('details.followPreferences.notificationsSection')}
+              </AppText>
 
-            <PreferenceRow
-              label={t('details.followPreferences.newSeasons')}
-              description={t('details.followPreferences.newSeasonsDescription')}
-              icon="albums-outline"
-              selected={notifyNewSeasons}
-              disabled={isBusy}
-              onPress={() => setNotifyNewSeasons((value) => !value)}
-            />
-            <PreferenceRow
-              label={t('details.followPreferences.newEpisodes')}
-              description={t('details.followPreferences.newEpisodesDescription')}
-              icon="play-circle-outline"
-              selected={notifyNewEpisodes}
-              disabled={isBusy}
-              onPress={() => setNotifyNewEpisodes((value) => !value)}
-            />
+              <View style={styles.preferenceList}>
+                <PreferenceRow
+                  label={t('details.followPreferences.newSeasons')}
+                  description={t('details.followPreferences.newSeasonsDescription')}
+                  icon="albums-outline"
+                  selected={notifyNewSeasons}
+                  disabled={isBusy}
+                  onPress={() => setNotifyNewSeasons((value) => !value)}
+                />
+                <PreferenceRow
+                  label={t('details.followPreferences.newEpisodes')}
+                  description={t('details.followPreferences.newEpisodesDescription')}
+                  icon="play-circle-outline"
+                  selected={notifyNewEpisodes}
+                  disabled={isBusy}
+                  onPress={() => setNotifyNewEpisodes((value) => !value)}
+                />
+              </View>
+            </View>
 
             {bothPreferencesOff ? (
               <AppText variant="caption" muted style={styles.bothOffHint}>
@@ -345,8 +349,14 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
   },
+  notificationsBlock: {
+    gap: spacing.sm,
+  },
   sectionLabel: {
     color: colors.textSecondary,
+  },
+  preferenceList: {
+    gap: spacing.xs,
   },
   preferenceRow: {
     flexDirection: 'row',

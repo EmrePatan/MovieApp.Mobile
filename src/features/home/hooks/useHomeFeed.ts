@@ -11,6 +11,7 @@ import {
 import { normalizeHomeComingUpSource } from '../utils/coming-up-source';
 import { mapTitleSearchItemsToHomeItems } from '../utils/map-search-item-to-home-item';
 import { mergeProgressiveHomeSections } from '../utils/merge-progressive-home-sections';
+import { selectHomeComingUpRailItems } from '../utils/home-coming-up-rail-items';
 import { mapUpcomingCatalogItemsToHomeItems } from '../utils/map-upcoming-catalog-to-home-item';
 import { resolveHomeSectionTitle } from '../utils/resolve-home-section-title';
 import {
@@ -70,7 +71,11 @@ export function useHomeFeed(
   );
 
   const hasPersonalizedComingUp = useMemo(
-    () => mergedSections.some((section) => section.type === 'ComingUp' && section.items.length > 0),
+    () =>
+      mergedSections.some(
+        (section) =>
+          section.type === 'ComingUp' && selectHomeComingUpRailItems(section.items).length > 0,
+      ),
     [mergedSections],
   );
 
@@ -80,17 +85,29 @@ export function useHomeFeed(
 
   const sectionsWithComingUp = useMemo(() => {
     if (hasPersonalizedComingUp) {
-      return mergedSections.map((section) =>
-        section.type === 'ComingUp'
-          ? {
-              ...section,
-              comingUpSource: normalizeHomeComingUpSource(section.comingUpSource, 'for-you'),
-            }
-          : section,
-      );
+      return mergedSections
+        .map((section) => {
+          if (section.type !== 'ComingUp') {
+            return section;
+          }
+
+          const items = selectHomeComingUpRailItems(section.items);
+          if (items.length === 0) {
+            return null;
+          }
+
+          return {
+            ...section,
+            items,
+            comingUpSource: normalizeHomeComingUpSource(section.comingUpSource, 'for-you'),
+          };
+        })
+        .filter((section): section is HomeSection => section != null);
     }
 
-    const catalogItems = comingUpCatalogFallback.data?.items ?? [];
+    const catalogItems = selectHomeComingUpRailItems(
+      mapUpcomingCatalogItemsToHomeItems(comingUpCatalogFallback.data?.items ?? []),
+    );
     if (catalogItems.length === 0) {
       return mergedSections;
     }
@@ -102,7 +119,7 @@ export function useHomeFeed(
       }),
       displayOrder: 0,
       comingUpSource: 'catalog',
-      items: mapUpcomingCatalogItemsToHomeItems(catalogItems),
+      items: catalogItems,
     };
 
     return [...mergedSections, comingUpSection];

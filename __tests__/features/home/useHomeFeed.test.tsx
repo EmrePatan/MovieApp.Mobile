@@ -6,7 +6,27 @@ import { getNowInTheaters, getOnTvThisWeek } from '@/features/discovery/api/disc
 import { getUpcomingCatalog } from '@/features/upcoming/api/upcoming-api';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { resolveHomeSectionTitle } from '@/features/home/utils/resolve-home-section-title';
+import type { UpcomingCatalogItem } from '@/features/upcoming/types';
 import { initI18nForTests, t } from '../../i18n/i18n-test-utils';
+
+function upcomingCatalogItem(
+  overrides: Partial<UpcomingCatalogItem> & Pick<UpcomingCatalogItem, 'id' | 'title'>,
+): UpcomingCatalogItem {
+  return {
+    type: 'movie',
+    upcomingKind: 'MovieRelease',
+    originalTitle: overrides.title,
+    overview: '',
+    posterUrl: null,
+    backdropUrl: null,
+    releaseDate: '2026-12-19',
+    voteAverage: 0,
+    voteCount: 0,
+    year: 2026,
+    isFollowed: false,
+    ...overrides,
+  };
+}
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({
@@ -166,7 +186,7 @@ describe('useHomeFeed', () => {
               contentType: 'movie',
               title: 'Followed Release',
               originalTitle: null,
-              posterUrl: null,
+              posterUrl: '/followed.jpg',
               backdropUrl: null,
               releaseDate: '2026-12-19',
               voteAverage: 0,
@@ -195,21 +215,37 @@ describe('useHomeFeed', () => {
     expect(getUpcomingCatalog).toHaveBeenCalledTimes(catalogCallsAfterLoad);
   });
 
+  it('skips catalog Coming Up titles without posters', async () => {
+    (getUpcomingCatalog as jest.Mock).mockResolvedValue({
+      items: [upcomingCatalogItem({ id: 'movie-1', title: 'Avatar 4', posterUrl: null })],
+      page: 1,
+      pageSize: 40,
+      totalCount: 1,
+      totalPages: 1,
+    });
+
+    const { result } = renderHook(() => useHomeFeed('all', 10), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(getUpcomingCatalog).toHaveBeenCalled();
+    });
+
+    expect(
+      result.current.mergedSections.find((section) => section.type === 'ComingUp'),
+    ).toBeUndefined();
+  });
+
   it('adds a catalog Coming Up section when personalized Coming Up is empty', async () => {
     (getUpcomingCatalog as jest.Mock).mockResolvedValue({
       items: [
-        {
-          contentId: 'movie-1',
-          contentType: 'Movie',
-          upcomingKind: 'MovieRelease',
+        upcomingCatalogItem({
+          id: 'movie-1',
           title: 'Avatar 4',
-          posterPath: null,
-          releaseDate: '2026-12-19',
-          isFollowed: false,
-        },
+          posterUrl: 'https://image.tmdb.org/t/p/w500/avatar.jpg',
+        }),
       ],
       page: 1,
-      pageSize: 5,
+      pageSize: 40,
       totalCount: 1,
       totalPages: 1,
     });
@@ -242,7 +278,7 @@ describe('useHomeFeed', () => {
               contentType: 'movie',
               title: 'Followed Release',
               originalTitle: null,
-              posterUrl: null,
+              posterUrl: '/followed.jpg',
               backdropUrl: null,
               releaseDate: '2026-12-19',
               voteAverage: 0,
@@ -282,7 +318,7 @@ describe('useHomeFeed', () => {
               contentType: 'movie',
               title: 'Followed Release',
               originalTitle: null,
-              posterUrl: null,
+              posterUrl: '/followed.jpg',
               backdropUrl: null,
               releaseDate: '2026-12-19',
               voteAverage: 0,
