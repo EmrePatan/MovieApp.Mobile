@@ -83,7 +83,9 @@ export default function SignInSecurityScreen() {
 
   const unlinkProvider = useUnlinkExternalLoginMutation();
 
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ message: string; tone: 'success' | 'error' } | null>(
+    null,
+  );
 
   const [activeProvider, setActiveProvider] = useState<SocialAuthProvider | null>(null);
 
@@ -139,7 +141,7 @@ export default function SignInSecurityScreen() {
 
         if (reauthCandidates.length === 0) {
 
-          setFeedback(t('profile.linkProviderReauthRequired'));
+          setFeedback({ message: t('profile.linkProviderReauthRequired'), tone: 'error' });
 
           return;
 
@@ -165,7 +167,7 @@ export default function SignInSecurityScreen() {
 
         });
 
-        setFeedback(t('profile.providerLinked'));
+        setFeedback({ message: t('profile.providerLinked'), tone: 'success' });
 
       } catch (error) {
 
@@ -177,21 +179,23 @@ export default function SignInSecurityScreen() {
 
         if (error instanceof SocialAuthConfigurationError) {
 
-          setFeedback(error.message);
+          setFeedback({ message: error.message, tone: 'error' });
 
           return;
 
         }
 
-        setFeedback(
+        setFeedback({
 
-          isApiError(error)
+          message: isApiError(error)
 
             ? getDisplayMessageForApiError(error, 'profile')
 
             : t('profile.linkProviderFailed'),
 
-        );
+          tone: 'error',
+
+        });
 
       } finally {
 
@@ -221,7 +225,7 @@ export default function SignInSecurityScreen() {
 
       if (!canUnlinkProvider(profile, provider)) {
 
-        setFeedback(t('profile.cannotRemoveLastSignInMethod'));
+        setFeedback({ message: t('profile.cannotRemoveLastSignInMethod'), tone: 'error' });
 
         return;
 
@@ -257,7 +261,7 @@ export default function SignInSecurityScreen() {
 
         if (!reauthProvider) {
 
-          setFeedback(t('profile.linkProviderReauthRequired'));
+          setFeedback({ message: t('profile.linkProviderReauthRequired'), tone: 'error' });
 
           return;
 
@@ -285,15 +289,17 @@ export default function SignInSecurityScreen() {
 
         }
 
-        setFeedback(
+        setFeedback({
 
-          isApiError(error)
+          message: isApiError(error)
 
             ? getDisplayMessageForApiError(error, 'profile')
 
             : t('profile.unlinkProviderFailed'),
 
-        );
+          tone: 'error',
+
+        });
 
       } finally {
 
@@ -365,9 +371,9 @@ export default function SignInSecurityScreen() {
 
       <FeedbackMessage
 
-        message={typeof feedback === 'string' ? feedback : null}
+        message={feedback?.message ?? null}
 
-        tone="error"
+        tone={feedback?.tone}
 
         onDismiss={() => setFeedback(null)}
 
