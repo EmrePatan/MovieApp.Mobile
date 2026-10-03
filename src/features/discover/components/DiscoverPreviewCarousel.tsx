@@ -1,12 +1,12 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { DISCOVER_HUB_RAIL_GAP } from '@/features/discover/discover-hub-rail-tile';
+import { useDiscoverHubRailTileSize } from '@/features/discover/useDiscoverHubRailTileSize';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { layout } from '@/theme/layout';
-
 interface DiscoverPreviewCarouselProps {
   title: string;
   items: SearchResultItem[];
@@ -23,6 +23,7 @@ export function DiscoverPreviewCarousel({
   testID,
 }: DiscoverPreviewCarouselProps) {
   const { t } = useTranslation();
+  const tileSize = useDiscoverHubRailTileSize();
 
   if (items.length === 0) {
     return null;
@@ -47,6 +48,7 @@ export function DiscoverPreviewCarousel({
       <FlatList
         horizontal
         data={items}
+        key={tileSize.width}
         keyExtractor={(item) => `${item.type}-${item.id}`}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
@@ -55,12 +57,16 @@ export function DiscoverPreviewCarousel({
             accessibilityRole="button"
             accessibilityLabel={item.title}
             onPress={() => onItemPress(item)}
-            style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.card,
+              { width: tileSize.width },
+              pressed && styles.pressed,
+            ]}
           >
             <PosterImage
               uri={item.posterUrl}
-              width={layout.posterCarousel.width}
-              height={layout.posterCarousel.height}
+              width={tileSize.width}
+              height={tileSize.height}
               accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
             />
             <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
@@ -89,10 +95,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    gap: DISCOVER_HUB_RAIL_GAP,
   },
   card: {
-    width: layout.posterCarousel.width,
     gap: spacing.xs,
   },
   cardTitle: {

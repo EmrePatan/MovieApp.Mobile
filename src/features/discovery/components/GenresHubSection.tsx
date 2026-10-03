@@ -1,30 +1,26 @@
 import { useCallback, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { DISCOVER_HUB_RAIL_GAP } from '@/features/discover/discover-hub-rail-tile';
+import { useDiscoverHubRailTileSize } from '@/features/discover/useDiscoverHubRailTileSize';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { GenreHubPosterCard, type GenreHubTileSize } from '@/features/discovery/components/GenreHubPosterCard';
+import { GenreHubPosterCard } from '@/features/discovery/components/GenreHubPosterCard';
 import { useGenreCoverSlots } from '@/features/discovery/hooks/useGenreCoverSlots';
 import { useGenres } from '@/features/discovery/hooks/useGenres';
 import { selectGenreHubRailGenres } from '@/features/discovery/main-discover-genres';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const DISCOVER_GENRES_DIRECTORY_ROUTE = '/discover-genres';
 
-/** Matches Dünya Sineması preview posters (120×180). */
-const hubTileSize: GenreHubTileSize = {
-  width: layout.posterCarousel.width,
-  height: layout.posterCarousel.height,
-};
-
 export function GenresHubSection() {
   const { t } = useTranslation();
   const router = useRouter();
+  const hubTileSize = useDiscoverHubRailTileSize();
   const genresQuery = useGenres();
   const genres = useMemo(
     () => selectGenreHubRailGenres(genresQuery.data ?? []),
@@ -67,7 +63,7 @@ export function GenresHubSection() {
       <FlatList
         horizontal
         data={genres}
-        key={hubTileSize.height}
+        key={hubTileSize.width}
         keyExtractor={(item) => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.genreList}
@@ -116,6 +112,6 @@ const styles = StyleSheet.create({
   },
   genreList: {
     paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    gap: DISCOVER_HUB_RAIL_GAP,
   },
 });

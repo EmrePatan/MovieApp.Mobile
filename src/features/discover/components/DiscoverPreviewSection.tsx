@@ -1,4 +1,6 @@
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { DISCOVER_HUB_RAIL_GAP } from '@/features/discover/discover-hub-rail-tile';
+import { useDiscoverHubRailTileSize } from '@/features/discover/useDiscoverHubRailTileSize';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
@@ -6,7 +8,6 @@ import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import { PosterImage } from '@/components/common/PosterImage';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 interface DiscoverPreviewSectionProps {
@@ -39,6 +40,7 @@ export function DiscoverPreviewSection({
   hideTitle = false,
 }: DiscoverPreviewSectionProps) {
   const { t } = useTranslation();
+  const tileSize = useDiscoverHubRailTileSize();
   const resolvedEmptyMessage = emptyMessage ?? t('common.nothingToShow');
   const showHeader = !hideTitle && Boolean(title);
   const seeAllEnabled = Boolean(onSeeAll) && !isLoading && !isError && items.length > 0;
@@ -93,16 +95,14 @@ export function DiscoverPreviewSection({
         <FlatList
           horizontal
           data={[0, 1, 2, 3]}
+          key={tileSize.width}
           keyExtractor={(item) => `skeleton-${item}`}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
           renderItem={() => (
-            <View style={styles.card}>
-              <SkeletonBlock
-                width={layout.posterCarousel.width}
-                height={layout.posterCarousel.height}
-              />
-              <SkeletonBlock width={layout.posterCarousel.width} height={12} />
+            <View style={[styles.card, { width: tileSize.width }]}>
+              <SkeletonBlock width={tileSize.width} height={tileSize.height} />
+              <SkeletonBlock width={tileSize.width} height={12} />
             </View>
           )}
         />
@@ -131,6 +131,7 @@ export function DiscoverPreviewSection({
         <FlatList
           horizontal
           data={items}
+          key={tileSize.width}
           keyExtractor={(item) => `${item.type}-${item.id}`}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
@@ -139,12 +140,16 @@ export function DiscoverPreviewSection({
               accessibilityRole="button"
               accessibilityLabel={item.title}
               onPress={() => onItemPress(item)}
-              style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.card,
+                { width: tileSize.width },
+                pressed && styles.pressed,
+              ]}
             >
               <PosterImage
                 uri={item.posterUrl}
-                width={layout.posterCarousel.width}
-                height={layout.posterCarousel.height}
+                width={tileSize.width}
+                height={tileSize.height}
                 accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
               />
               <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
@@ -197,10 +202,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    gap: DISCOVER_HUB_RAIL_GAP,
   },
   card: {
-    width: layout.posterCarousel.width,
     gap: spacing.xs,
   },
   cardTitle: {

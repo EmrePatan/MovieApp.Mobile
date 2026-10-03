@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -11,21 +11,19 @@ import {
 } from '@/features/discovery/streaming-platform-hub-types';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
+import { DISCOVER_HUB_RAIL_GAP } from '@/features/discover/discover-hub-rail-tile';
+import { useDiscoverHubRailTileSize } from '@/features/discover/useDiscoverHubRailTileSize';
 import { StreamingProviderPosterCard } from './StreamingProviderPosterCard';
 import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
 const STREAMING_PLATFORMS_DIRECTORY_ROUTE = '/streaming-platforms';
-/** Posters sized so three fit in the discover hub rail (between screen gutters). */
-const HUB_RAIL_VISIBLE_COLUMNS = 3;
-const HUB_RAIL_GAP = spacing.sm;
 
 export function StreamingPlatformsHubSection() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { width: windowWidth } = useWindowDimensions();
+  const hubTileSize = useDiscoverHubRailTileSize();
   const { region: watchRegion, isHydrated } = useRegionalPreference();
   const providersQuery = useDiscoveryWatchProviders(
     DEFAULT_STREAMING_HUB_MEDIA_TYPE,
@@ -41,18 +39,6 @@ export function StreamingPlatformsHubSection() {
   const openDirectory = useCallback(() => {
     openLibraryStackScreen(router, STREAMING_PLATFORMS_DIRECTORY_ROUTE, '/discover');
   }, [router]);
-
-  const hubTileSize = useMemo(() => {
-    const contentWidth = Math.min(windowWidth, layout.maxContentWidth);
-    const innerWidth = contentWidth - spacing.lg * 2;
-    const tileWidth =
-      (innerWidth - HUB_RAIL_GAP * (HUB_RAIL_VISIBLE_COLUMNS - 1)) / HUB_RAIL_VISIBLE_COLUMNS;
-
-    return {
-      width: tileWidth,
-      height: tileWidth / layout.posterAspectRatio,
-    };
-  }, [windowWidth]);
 
   if (!isHydrated) {
     return null;
@@ -135,6 +121,6 @@ const styles = StyleSheet.create({
   },
   providerList: {
     paddingHorizontal: spacing.lg,
-    gap: HUB_RAIL_GAP,
+    gap: DISCOVER_HUB_RAIL_GAP,
   },
 });
