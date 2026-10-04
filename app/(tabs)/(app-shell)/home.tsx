@@ -202,11 +202,15 @@ export default function HomeScreen() {
   );
 
   const handleOnTvSeeAll = useCallback(() => {
-    router.push('/on-tv-this-week');
+    openLibraryStackScreen(router, '/on-tv-this-week', '/(tabs)/home');
   }, [router]);
 
   const handleNowInTheatersSeeAll = useCallback(() => {
-    router.push(createNowInTheatersHref({}, releaseRegion));
+    openLibraryStackScreen(
+      router,
+      createNowInTheatersHref({}, releaseRegion),
+      '/(tabs)/home',
+    );
   }, [releaseRegion, router]);
 
   const renderSection = useCallback(

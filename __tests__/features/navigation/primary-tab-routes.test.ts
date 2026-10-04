@@ -1,8 +1,13 @@
+import { clearAppShellTabOrigin } from '@/features/navigation/app-shell-tab-origin';
 import {
   isCatalogDetailRoute,
   isPrimaryTabRootPath,
   resolveActivePrimaryTab,
 } from '@/features/navigation/primary-tab-routes';
+
+beforeEach(() => {
+  clearAppShellTabOrigin();
+});
 
 describe('primary tab routes', () => {
   it('maps browse and result routes to their owning primary tab', () => {

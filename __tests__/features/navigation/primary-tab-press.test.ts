@@ -1,5 +1,10 @@
+import { resetLibraryStackNavigationForTests } from '@/features/library/navigation/library-stack-navigation';
 import { handlePrimaryTabPress, resolvePrimaryTabPressPlan } from '@/features/navigation/primary-tab-press';
 import { PRIMARY_TAB_HREFS } from '@/features/navigation/primary-tab-routes';
+
+beforeEach(() => {
+  resetLibraryStackNavigationForTests();
+});
 
 function createRouter() {
   return {
@@ -131,6 +136,23 @@ describe('primary tab press handling', () => {
 
     expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).toHaveBeenCalledWith('/discover');
+    expect(emitReselect).not.toHaveBeenCalled();
+  });
+
+  it('returns Home root from Home-opened browse See All without refresh emit', () => {
+    const router = createRouter();
+    const emitReselect = jest.fn();
+
+    handlePrimaryTabPress({
+      tabId: 'home',
+      pathname: '/discover-browse?mode=trending&type=all',
+      highlightedTab: 'home',
+      router: router as never,
+      emitReselect,
+    });
+
+    expect(router.dismissAll).not.toHaveBeenCalled();
+    expect(router.dismissTo).toHaveBeenCalledWith('/home');
     expect(emitReselect).not.toHaveBeenCalled();
   });
 

@@ -1,6 +1,7 @@
-export type PrimaryTabId = 'home' | 'discover' | 'library' | 'insights';
+import { resolveAppShellTabOrigin } from '@/features/navigation/app-shell-tab-origin';
+import type { HighlightedPrimaryTab, PrimaryTabId } from '@/features/navigation/primary-tab-types';
 
-export type HighlightedPrimaryTab = PrimaryTabId | null;
+export type { HighlightedPrimaryTab, PrimaryTabId } from '@/features/navigation/primary-tab-types';
 
 export const PRIMARY_TAB_HREFS: Record<PrimaryTabId, `/${string}`> = {
   home: '/home',
@@ -57,6 +58,11 @@ export function isPrimaryTabRootPath(tabId: PrimaryTabId, pathname: string): boo
 export function resolveActivePrimaryTab(pathname: string): HighlightedPrimaryTab {
   if (isCatalogDetailRoute(pathname)) {
     return null;
+  }
+
+  const originTab = resolveAppShellTabOrigin(pathname);
+  if (originTab) {
+    return originTab;
   }
 
   if (DISCOVER_ROUTE_PREFIXES.some((prefix) => matchesRoutePrefix(pathname, prefix))) {

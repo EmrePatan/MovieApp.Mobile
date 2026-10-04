@@ -1,4 +1,9 @@
 import type { ImperativeRouter } from 'expo-router';
+import {
+  clearAppShellTabOrigin,
+  getAppShellTabOriginForTests,
+  rememberAppShellTabOrigin,
+} from '@/features/navigation/app-shell-tab-origin';
 
 const DEFAULT_LIBRARY_RETURN_HREF = '/(tabs)/library';
 
@@ -26,15 +31,31 @@ export function openLibraryStackScreen(
   returnHref: string = DEFAULT_LIBRARY_RETURN_HREF,
 ): void {
   lastLibraryStackEntryReturnHref = returnHref;
+  rememberAppShellTabOrigin(returnHref);
   router.push(href);
 }
 
 export function returnFromLibraryStackScreen(router: ImperativeRouter): void {
   const returnHref = lastLibraryStackEntryReturnHref ?? DEFAULT_LIBRARY_RETURN_HREF;
-  lastLibraryStackEntryReturnHref = null;
+  clearLibraryStackNavigationContext();
   router.dismissTo(returnHref);
 }
 
-export function resetLibraryStackNavigationForTests(): void {
+export function clearLibraryStackNavigationContext(): void {
   lastLibraryStackEntryReturnHref = null;
+  clearAppShellTabOrigin();
+}
+
+export function resetLibraryStackNavigationForTests(): void {
+  clearLibraryStackNavigationContext();
+}
+
+export function getLibraryStackNavigationContextForTests(): {
+  returnHref: string | null;
+  primaryTab: ReturnType<typeof getAppShellTabOriginForTests>;
+} {
+  return {
+    returnHref: lastLibraryStackEntryReturnHref,
+    primaryTab: getAppShellTabOriginForTests(),
+  };
 }
