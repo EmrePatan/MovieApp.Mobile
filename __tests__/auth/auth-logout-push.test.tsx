@@ -13,8 +13,11 @@ import {
 
 jest.mock('@/auth/auth-storage', () => ({
   getAccessToken: jest.fn().mockResolvedValue(null),
+  getRefreshToken: jest.fn().mockResolvedValue(null),
   saveAccessToken: jest.fn(),
+  saveRefreshToken: jest.fn(),
   removeAccessToken: jest.fn(),
+  removeRefreshToken: jest.fn(),
 }));
 
 jest.mock('@/auth/auth-api', () => ({

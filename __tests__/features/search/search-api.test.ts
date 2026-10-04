@@ -30,7 +30,7 @@ describe('search api routes', () => {
         page: 2,
         pageSize: 20,
       }),
-    ).toBe('/api/search?q=interstellar&type=movie&page=2&pageSize=20');
+    ).toBe('/api/search?q=interstellar&type=movie&pageSize=20&page=2');
   });
 
   it('builds autocomplete path', () => {
@@ -54,7 +54,7 @@ describe('search api client', () => {
   it('searches through the central api client without auth', async () => {
     (api.get as jest.Mock).mockResolvedValue({ items: [], page: 1, pageSize: 20 });
     await search({ q: 'matrix', type: 'all', page: 1, pageSize: 20 });
-    expect(api.get).toHaveBeenCalledWith('/api/search?q=matrix&type=all&page=1&pageSize=20', {
+    expect(api.get).toHaveBeenCalledWith('/api/search?q=matrix&type=all&pageSize=20&page=1', {
       authenticated: false,
       signal: undefined,
     });

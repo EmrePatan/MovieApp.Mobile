@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../utils/render-with-providers';
 import { I18nextProvider } from 'react-i18next';
 import ProfileScreen from '../../app/(tabs)/profile';
 import LoginScreen from '../../app/(auth)/login';
@@ -8,6 +9,13 @@ import { changeUiLanguage, i18n } from '@/i18n';
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({
     logout: jest.fn(),
+  }),
+}));
+
+jest.mock('@/features/profile/hooks/useProfileAvatarEditor', () => ({
+  useProfileAvatarEditor: () => ({
+    openAvatarActions: jest.fn(),
+    isAvatarBusy: false,
   }),
 }));
 
@@ -42,7 +50,7 @@ jest.mock('@/features/auth/components/SocialAuthSection', () => ({
 }));
 
 function renderLogin() {
-  return render(
+  return renderWithProviders(
     <I18nextProvider i18n={i18n}>
       <LoginScreen />
     </I18nextProvider>,
@@ -50,7 +58,7 @@ function renderLogin() {
 }
 
 function renderProfile() {
-  return render(
+  return renderWithProviders(
     <I18nextProvider i18n={i18n}>
       <ProfileScreen />
     </I18nextProvider>,

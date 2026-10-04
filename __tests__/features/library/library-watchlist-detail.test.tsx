@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
 import { LibraryWatchlistDetailContent } from '@/features/library/components/LibraryWatchlistDetailContent';
+import { renderWithProviders } from '../../utils/render-with-providers';
 const mockPush = jest.fn();
 const mockBack = jest.fn();
 
@@ -91,6 +92,13 @@ jest.mock('@/features/watchlists/components/RenameWatchlistModal', () => {
 
 const mockRenameMutate = jest.fn();
 
+jest.mock('@/features/watchlist-share/hooks/useWatchlistShareActions', () => ({
+  useWatchlistShareActions: jest.fn(() => ({
+    presentFromListOptions: jest.fn(),
+    presentShareFlow: jest.fn(),
+  })),
+}));
+
 jest.mock('@/features/watchlists/hooks/useWatchlistMutations', () => ({
   useDeleteWatchlistMutation: jest.fn(() => ({
     mutate: mockDeleteMutate,
@@ -127,7 +135,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('renders the selected watchlist contents', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.getByTestId('library-watchlist-detail')).toBeTruthy();
     expect(screen.getByText('Weekend Movies')).toBeTruthy();
@@ -135,20 +143,20 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('lets the multi-column grid measure rows instead of supplying fixed item layouts', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     // FlatList passes row indexes to getItemLayout and the list header height is dynamic.
     expect(screen.getByTestId('library-watchlist-detail').props.getItemLayout).toBeUndefined();
   });
 
   it('does not show Delete List as a permanent primary action', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.queryByText('Delete List')).toBeNull();
   });
 
   it('exposes rename and delete actions through the overflow menu', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
 
@@ -159,7 +167,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('opens rename list modal from the overflow menu', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
     fireEvent.press(screen.getByTestId('watchlist-rename-option'));
@@ -168,7 +176,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('still confirms and deletes the list from the overflow action', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Watchlist options'));
     fireEvent.press(screen.getByTestId('watchlist-delete-option'));
@@ -182,7 +190,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('shows All, Movies, and TV Shows filters without People', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.getByLabelText('Filter All')).toBeTruthy();
     expect(screen.getByLabelText('Filter Movies')).toBeTruthy();
@@ -191,7 +199,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('shows filters and labeled sort chips in a controls panel', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.getByLabelText('Filter All')).toBeTruthy();
     expect(screen.queryByText('Sort')).toBeNull();
@@ -204,13 +212,13 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('does not show a permanent remove control in the normal row state', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.queryByLabelText('Remove Interstellar from this list')).toBeNull();
   });
 
   it('keeps item removal reachable through long press', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent(
       screen.getByLabelText('Interstellar, Watchlist'),
@@ -224,7 +232,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('keeps item removal reachable through accessibility action', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent(
       screen.getByRole('button', { name: 'Interstellar, Watchlist' }),
@@ -239,13 +247,13 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('keeps back navigation affordance intact', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.getByLabelText('Back')).toBeTruthy();
   });
 
   it('renders title inline with back and overflow in a single toolbar row', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.getByText('Weekend Movies')).toBeTruthy();
     expect(screen.getByLabelText('Back')).toBeTruthy();
@@ -254,7 +262,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('does not double-pad the watchlist detail header inside the grid list', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     const header = screen.getByTestId('library-watchlist-detail-header');
 
@@ -262,7 +270,7 @@ describe('LibraryWatchlistDetailContent', () => {
   });
 
   it('navigates to detail when a watchlist item is pressed', () => {
-    render(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
+    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     fireEvent.press(screen.getByLabelText('Interstellar, Watchlist'));
 

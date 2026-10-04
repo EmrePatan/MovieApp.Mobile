@@ -43,6 +43,17 @@ jest.mock('@/features/search/hooks/useRecentSearches', () => ({
   useRecentSearches: jest.fn(),
 }));
 
+jest.mock('@/features/library/hooks/useLibrarySearchResults', () => ({
+  useLibrarySearchResults: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+    error: null,
+    isFetching: false,
+    refetch: jest.fn(),
+  })),
+}));
+
 jest.mock('@/hooks/useDebouncedValue', () => ({
   useDebouncedValue: (value: string) => value,
 }));

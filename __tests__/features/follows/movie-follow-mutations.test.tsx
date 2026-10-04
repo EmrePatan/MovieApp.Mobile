@@ -93,8 +93,12 @@ describe('movie follow mutations', () => {
   });
 
   it('optimistically patches home Coming Up before remove resolves', async () => {
+    let resolveRemove!: () => void;
     (resolveMovieFollowRemoval as jest.Mock).mockImplementation(
-      () => new Promise(() => undefined),
+      () =>
+        new Promise((resolve) => {
+          resolveRemove = () => resolve({ isFollowing: false });
+        }),
     );
 
     const queryClient = new QueryClient({
@@ -135,7 +139,10 @@ describe('movie follow mutations', () => {
     await waitFor(() =>
       expect(removeFollowedCatalogFromHomeCaches).toHaveBeenCalledWith(queryClient, movieId),
     );
-    expect(result.current.isPending).toBe(true);
+    expect(result.current.isSuccess).toBe(false);
+
+    resolveRemove();
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
   });
 
   it('optimistically unfollows before remove resolves', async () => {

@@ -32,6 +32,7 @@ import {
   similarMoviesQueryKey,
 } from '@/features/recommendations/hooks/recommendation-query-keys';
 import { discoveryBrowseInfiniteQueryKey } from '@/features/discovery/hooks/discovery-query-keys';
+import { createDefaultDiscoveryFilters } from '@/features/discovery/types';
 
 describe('action query keys', () => {
   const id = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
@@ -114,10 +115,7 @@ describe('action query keys', () => {
         'trending',
         'all',
         {
-          genreIds: [],
-          year: null,
-          minRating: null,
-          language: null,
+          ...createDefaultDiscoveryFilters('trending'),
           sort: 'popularity_desc',
         },
         20,
@@ -131,6 +129,14 @@ describe('action query keys', () => {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [],
+      [],
       'popularity_desc',
       20,
     ]);

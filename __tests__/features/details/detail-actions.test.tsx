@@ -6,8 +6,8 @@ import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDeta
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
-jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
-  PlayTrailerButton: () => null,
+jest.mock('@/features/details/videos/components/DetailHeroTrailerLayer', () => ({
+  DetailHeroTrailerLayer: () => null,
 }));
 
 jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
@@ -19,9 +19,14 @@ jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
     showWatched?: boolean;
   }) =>
     mockReact.createElement(
-      'Text',
+      mockReact.Fragment,
       null,
-      `Actions:${contentType}${showWatched ? ':watched' : ''}`,
+      mockReact.createElement(
+        'Text',
+        null,
+        `Actions:${contentType}${showWatched ? ':watched' : ''}`,
+      ),
+      mockReact.createElement('Text', null, `Rating:${contentType}`),
     ),
 }));
 
@@ -109,7 +114,7 @@ describe('detail actions integration', () => {
     renderWithProviders(<MovieDetailContent movie={movie} />);
     expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
     expect(screen.getByText('Rating:movie')).toBeTruthy();
-    expect(screen.getByText('Movie · 2014 · ★ 8.4 · 2h 49m')).toBeTruthy();
+    expect(screen.getByText('Movie · 2014 · 2h 49m')).toBeTruthy();
     expect(screen.queryByText('TMDB Rating')).toBeNull();
     expect(screen.queryByText(/TMDB /)).toBeNull();
     expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
@@ -119,7 +124,7 @@ describe('detail actions integration', () => {
     renderWithProviders(<TvShowDetailContent show={show} />);
     expect(screen.getByText('Actions:tv:watched')).toBeTruthy();
     expect(screen.getByText('Rating:tv')).toBeTruthy();
-    expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();
+    expect(screen.getByText('TV · 2008')).toBeTruthy();
     expect(screen.queryByText('TMDB Rating')).toBeNull();
     expect(screen.queryAllByText(/^Rating:/)).toHaveLength(1);
   });

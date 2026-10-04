@@ -5,6 +5,13 @@ import { renderWithProviders } from '../../../utils/render-with-providers';
 jest.mock('expo-linking', () => ({
   canOpenURL: jest.fn().mockResolvedValue(true),
   openURL: jest.fn().mockResolvedValue(true),
+  getInitialURL: jest.fn().mockResolvedValue(null),
+  getLinkingURL: jest.fn().mockReturnValue(null),
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { id: 'user-id' } }),
 }));
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
@@ -40,6 +47,7 @@ jest.mock('@/features/details/shared/components/DetailSections', () => ({
     const { Text } = require('react-native');
     return React.createElement(Text, null, overview ?? 'Overview');
   },
+  DetailKeywords: () => null,
 }));
 
 jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({
@@ -52,6 +60,12 @@ jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () =
 jest.mock('@/features/reviews/components/ReviewsLinkRow', () => ({ ReviewsLinkRow: () => null }));
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
   SimilarContentSection: () => null,
+}));
+jest.mock('@/features/gallery/components/CatalogGallerySection', () => ({
+  CatalogGallerySection: () => null,
+}));
+jest.mock('@/features/details/collection/components/CollectionPartsSection', () => ({
+  CollectionPartsSection: () => null,
 }));
 jest.mock('@/features/details/tv/components/SeasonList', () => ({ SeasonList: () => null }));
 

@@ -76,7 +76,7 @@ describe('catalog detail route identity', () => {
   it('uses a navigator-owned custom tab bar instead of registering detail routes as tab screens', () => {
     const tabsLayout = readFileSync(path.join(process.cwd(), 'app/(tabs)/_layout.tsx'), 'utf8');
 
-    expect(tabsLayout).toContain('tabBar={() => <PrimaryTabBar />}');
+    expect(tabsLayout).toContain('tabBar={(props) => <PrimaryTabBar insets={props.insets} />}');
     expect(tabsLayout).toContain('name="(app-shell)"');
     expect(tabsLayout).not.toContain('name="home"');
     expect(tabsLayout).not.toContain('name="discover"');

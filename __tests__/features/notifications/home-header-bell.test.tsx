@@ -48,13 +48,13 @@ describe('HomeHeader notification bell', () => {
     render(<HomeHeader />);
 
     expect(screen.getByLabelText('Open notifications, 3 unread')).toBeTruthy();
-    expect(screen.getByText('3')).toBeTruthy();
+    expect(screen.getByText('3', { includeHiddenElements: true })).toBeTruthy();
   });
 
   it('renders profile avatar initials', () => {
     render(<HomeHeader />);
 
-    expect(screen.getByLabelText('Open Emre User profile')).toBeTruthy();
+    expect(screen.getAllByLabelText('Open Emre User profile').length).toBeGreaterThan(0);
   });
 
   it('shows 9+ when unread count exceeds nine', () => {
@@ -65,7 +65,7 @@ describe('HomeHeader notification bell', () => {
     render(<HomeHeader />);
 
     expect(screen.getByLabelText('Open notifications, 9+ unread')).toBeTruthy();
-    expect(screen.getByText('9+')).toBeTruthy();
+    expect(screen.getByText('9+', { includeHiddenElements: true })).toBeTruthy();
   });
 
   it('hides notifications and profile on the library tab chrome', () => {

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { Platform } from 'react-native';
 import { I18nextProvider } from 'react-i18next';
 import ProfileScreen from '../../../app/(tabs)/profile';
@@ -23,6 +24,13 @@ jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
   useCurrentProfile: jest.fn(),
 }));
 
+jest.mock('@/features/profile/hooks/useProfileAvatarEditor', () => ({
+  useProfileAvatarEditor: () => ({
+    openAvatarActions: jest.fn(),
+    isAvatarBusy: false,
+  }),
+}));
+
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
   useRegionalPreference: jest.fn(() => ({
     region: 'TR',
@@ -34,7 +42,7 @@ jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
 }));
 
 function renderProfileScreen() {
-  return render(
+  return renderWithProviders(
     <I18nextProvider i18n={i18n}>
       <ProfileScreen />
     </I18nextProvider>,
@@ -101,8 +109,7 @@ describe('ProfileScreen', () => {
     renderProfileScreen();
 
     expect(screen.getByLabelText('Edit profile')).toBeTruthy();
-    expect(screen.getByLabelText('Change email')).toBeTruthy();
-    expect(screen.getByLabelText('Change password')).toBeTruthy();
+    expect(screen.getByLabelText('Sign-in & Security')).toBeTruthy();
     expect(screen.getByLabelText('Delete account')).toBeTruthy();
   });
 

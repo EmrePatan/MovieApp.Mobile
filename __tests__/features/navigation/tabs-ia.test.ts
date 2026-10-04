@@ -12,7 +12,7 @@ describe('primary bottom navigation IA', () => {
   );
 
   it('exposes Home, Discover, Library, and Insights through the navigator-owned tab bar', () => {
-    expect(tabsLayoutSource).toContain('tabBar={() => <PrimaryTabBar />}');
+    expect(tabsLayoutSource).toContain('tabBar={(props) => <PrimaryTabBar insets={props.insets} />}');
     expect(tabBarSource).toContain("labelKey: 'tabs.home'");
     expect(tabBarSource).toContain("labelKey: 'tabs.discover'");
     expect(tabBarSource).toContain("labelKey: 'tabs.library'");

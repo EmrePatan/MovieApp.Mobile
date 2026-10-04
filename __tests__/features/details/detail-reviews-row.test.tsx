@@ -1,5 +1,6 @@
 import mockReact from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
@@ -18,8 +19,12 @@ jest.mock('expo-router', () => ({
   useSegments: () => ['(tabs)', 'movie', movieId],
 }));
 
-jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
-  PlayTrailerButton: () => null,
+jest.mock('@/features/details/videos/components/DetailHeroTrailerLayer', () => ({
+  DetailHeroTrailerLayer: () => null,
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { id: 'user-id' } }),
 }));
 
 jest.mock('@/features/gallery/hooks/useGallery', () => ({
@@ -181,7 +186,7 @@ describe('detail reviews row', () => {
   });
 
   it('shows the compact reviews row below rating on movie detail', () => {
-    render(<MovieDetailContent movie={releasedMovie} />);
+    renderWithProviders(<MovieDetailContent movie={releasedMovie} />);
 
     expect(screen.getByTestId('detail-ultra-thin-rating-rail')).toBeTruthy();
     expect(screen.getByTestId('reviews-link-row')).toBeTruthy();
@@ -194,7 +199,7 @@ describe('detail reviews row', () => {
   });
 
   it('shows the reviews section below seasons on tv detail', () => {
-    render(<TvShowDetailContent show={show} />);
+    renderWithProviders(<TvShowDetailContent show={show} />);
 
     expect(screen.getByTestId('detail-ultra-thin-rating-rail')).toBeTruthy();
     expect(screen.getByTestId('season-list-section')).toBeTruthy();
@@ -209,7 +214,7 @@ describe('detail reviews row', () => {
   });
 
   it('navigates to the dedicated reviews screen from movie detail', () => {
-    render(<MovieDetailContent movie={releasedMovie} />);
+    renderWithProviders(<MovieDetailContent movie={releasedMovie} />);
 
     fireEvent.press(screen.getByTestId('reviews-link-row-button'));
 
@@ -220,7 +225,7 @@ describe('detail reviews row', () => {
   });
 
   it('navigates to the dedicated reviews screen from tv detail', () => {
-    render(<TvShowDetailContent show={show} />);
+    renderWithProviders(<TvShowDetailContent show={show} />);
 
     fireEvent.press(screen.getByTestId('reviews-link-row-button'));
 
@@ -231,7 +236,7 @@ describe('detail reviews row', () => {
   });
 
   it('still shows reviews row for unreleased movies without inline rating', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...releasedMovie,

@@ -30,8 +30,8 @@ jest.mock('@/features/details/shared/components/DetailActionBar', () => ({
   DetailActionBar: () => null,
 }));
 
-jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
-  PlayTrailerButton: () => null,
+jest.mock('@/features/details/videos/components/DetailHeroTrailerLayer', () => ({
+  DetailHeroTrailerLayer: () => null,
 }));
 
 jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({

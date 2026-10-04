@@ -1,12 +1,13 @@
 import mockReact from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
-jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
-  PlayTrailerButton: () => null,
+jest.mock('@/features/details/videos/components/DetailHeroTrailerLayer', () => ({
+  DetailHeroTrailerLayer: () => null,
 }));
 
 jest.mock('@/features/gallery/hooks/useGallery', () => ({
@@ -119,45 +120,45 @@ const show: TvShowDetailsResponse = {
 
 describe('movie release guardrail', () => {
   it('1. hides watched for future effective release (isReleased false)', () => {
-    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
+    renderWithProviders(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
 
     expect(screen.getByText('Actions:movie')).toBeTruthy();
     expect(screen.queryByText('Actions:movie:watched')).toBeNull();
   });
 
   it('2. hides community rating rail for future effective release (isReleased false)', () => {
-    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
+    renderWithProviders(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
 
     expect(screen.queryByText('RatingRail:movie')).toBeNull();
   });
 
   it('3. shows watched for released movies (isReleased true)', () => {
-    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: true }} />);
+    renderWithProviders(<MovieDetailContent movie={{ ...baseMovie, isReleased: true }} />);
 
     expect(screen.getByText('Actions:movie:watched')).toBeTruthy();
   });
 
   it('4. shows rating rail for released movies (isReleased true)', () => {
-    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: true }} />);
+    renderWithProviders(<MovieDetailContent movie={{ ...baseMovie, isReleased: true }} />);
 
     expect(screen.getByText('RatingRail:movie')).toBeTruthy();
   });
 
   it('5. keeps tv detail watched and rating rail unchanged', () => {
-    render(<TvShowDetailContent show={show} />);
+    renderWithProviders(<TvShowDetailContent show={show} />);
 
     expect(screen.getByText('Actions:tv:watched')).toBeTruthy();
     expect(screen.getByText('RatingRail:tv')).toBeTruthy();
   });
 
   it('6. keeps non-consumption action bar visible for unreleased movies', () => {
-    render(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
+    renderWithProviders(<MovieDetailContent movie={{ ...baseMovie, isReleased: false }} />);
 
     expect(screen.getByText('Actions:movie')).toBeTruthy();
   });
 
   it('7. shows consumption actions when release date is unknown but isReleased is true', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{ ...baseMovie, releaseDate: null, isReleased: true }}
       />,
@@ -168,7 +169,7 @@ describe('movie release guardrail', () => {
   });
 
   it('8. shows consumption actions for movies releasing today (isReleased true)', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{ ...baseMovie, releaseDate: '2026-09-15', isReleased: true }}
       />,

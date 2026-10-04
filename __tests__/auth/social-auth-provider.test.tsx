@@ -17,8 +17,19 @@ jest.mock('@/auth/auth-api', () => ({
 
 jest.mock('@/auth/auth-storage', () => ({
   getAccessToken: jest.fn().mockResolvedValue(null),
+  getRefreshToken: jest.fn().mockResolvedValue(null),
   saveAccessToken: (...args: unknown[]) => mockSaveAccessToken(...args),
+  saveRefreshToken: jest.fn(),
   removeAccessToken: jest.fn(),
+  removeRefreshToken: jest.fn(),
+}));
+
+jest.mock('@/api/client', () => ({
+  api: {
+    setTokenGetter: jest.fn(),
+    setUnauthorizedHandler: jest.fn(),
+    setSessionRefreshHandler: jest.fn(),
+  },
 }));
 
 jest.mock('@/auth/social-auth-service', () => ({

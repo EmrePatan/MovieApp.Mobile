@@ -1,5 +1,28 @@
 import mockReact from 'react';
 
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn(async (uri: string) => ({ uri, width: 1, height: 1 })),
+  SaveFormat: { JPEG: 'jpeg', PNG: 'png', WEBP: 'webp' },
+  FlipType: { Horizontal: 'horizontal', Vertical: 'vertical' },
+}));
+
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: jest.fn(),
+  launchCameraAsync: jest.fn(),
+  requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ granted: true })),
+  requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true })),
+  MediaTypeOptions: { Images: 'Images' },
+}));
+
+jest.mock('expo-file-system', () => ({
+  File: class MockFile {},
+  Paths: { cache: 'cache', document: 'document' },
+}));
+
 jest.mock('expo-image', () => {
   const React = require('react');
   const { Image } = require('react-native');

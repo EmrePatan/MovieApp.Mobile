@@ -3,6 +3,7 @@ import path from 'node:path';
 import React from 'react';
 import { FlatList, Platform, ScrollView } from 'react-native';
 import { act, render } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
 import NotificationsScreen from '../../../app/(tabs)/(app-shell)/notifications';
@@ -28,11 +29,15 @@ const androidPullRefreshSurfaceFiles = [
 
 const sharedRefreshSurfaceFiles = ['app/(tabs)/(app-shell)/notifications.tsx'];
 
-jest.mock('@tanstack/react-query', () => ({
-  useQueryClient: () => ({
-    invalidateQueries: jest.fn(),
-  }),
-}));
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual<typeof import('@tanstack/react-query')>('@tanstack/react-query');
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      invalidateQueries: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('@/features/home/hooks/useHomeFeed', () => ({
   useHomeFeed: jest.fn(),
@@ -78,6 +83,13 @@ jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
 
 jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
   useCurrentProfile: jest.fn(),
+}));
+
+jest.mock('@/features/profile/hooks/useProfileAvatarEditor', () => ({
+  useProfileAvatarEditor: () => ({
+    openAvatarActions: jest.fn(),
+    isAvatarBusy: false,
+  }),
 }));
 
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({
@@ -299,7 +311,7 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const { UNSAFE_getByType } = renderWithProviders(<ProfileScreen />);
     const refreshControl = UNSAFE_getByType(ScrollView).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(true);
@@ -327,7 +339,7 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType } = render(<ProfileScreen />);
+    const { UNSAFE_getByType } = renderWithProviders(<ProfileScreen />);
     expect(UNSAFE_getByType(ScrollView).props.refreshControl).toBeUndefined();
   });
 

@@ -64,7 +64,7 @@ describe('root detail navigation architecture', () => {
       'utf8',
     );
 
-    expect(tabsLayout).toContain('tabBar={() => <PrimaryTabBar />}');
+    expect(tabsLayout).toContain('tabBar={(props) => <PrimaryTabBar insets={props.insets} />}');
     expect(tabsLayout).toContain('name="(app-shell)"');
     expect(appShellLayout).toContain('name="search"');
     expect(appShellLayout).toContain('name="discover-browse"');

@@ -8,7 +8,7 @@ describe('insights navigation', () => {
     const tabsLayoutSource = readFileSync(tabsLayoutPath, 'utf8');
     const tabBarSource = readFileSync(tabBarPath, 'utf8');
 
-    expect(tabsLayoutSource).toContain('tabBar={() => <PrimaryTabBar />}');
+    expect(tabsLayoutSource).toContain('tabBar={(props) => <PrimaryTabBar insets={props.insets} />}');
     expect(tabBarSource).toContain("labelKey: 'tabs.insights'");
     expect(tabsLayoutSource).toContain('name="profile" options={hiddenTabScreenOptions}');
   });

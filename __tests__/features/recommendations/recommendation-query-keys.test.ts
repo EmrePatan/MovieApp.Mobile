@@ -1,6 +1,7 @@
 import {
   discoveryBrowseInfiniteQueryKey,
 } from '@/features/discovery/hooks/discovery-query-keys';
+import { createDefaultDiscoveryFilters } from '@/features/discovery/types';
 import {
   recommendationHomeQueryKey,
   recommendationsInfiniteQueryKey,
@@ -31,10 +32,7 @@ describe('discovery query keys', () => {
         'top_rated',
         'movie',
         {
-          genreIds: [],
-          year: null,
-          minRating: null,
-          language: null,
+          ...createDefaultDiscoveryFilters('top_rated'),
           sort: 'rating_desc',
         },
         20,
@@ -48,6 +46,14 @@ describe('discovery query keys', () => {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [],
+      [],
       'rating_desc',
       20,
     ]);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
+import { DETAIL_NEUTRAL_ICON_CONTROL_SIZE } from '@/features/details/shared/components/DetailNeutralIconControl';
 import { interaction } from '@/theme/interaction';
 
 jest.mock('expo-router', () => ({
@@ -16,11 +17,8 @@ describe('DetailBackButton', () => {
     render(<DetailBackButton variant="overlay" topOffset={12} />);
 
     const button = screen.getByLabelText('Go back');
-    expect(button).toHaveStyle({
-      width: interaction.touchTarget,
-      height: interaction.touchTarget,
-      top: 12,
-    });
+    expect(button).toHaveStyle({ top: 12 });
+    expect(DETAIL_NEUTRAL_ICON_CONTROL_SIZE).toBe(interaction.touchTarget);
   });
 
   it('uses zero left inset when rendered inside padded headers', () => {

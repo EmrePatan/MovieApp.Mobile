@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { I18nextProvider } from 'react-i18next';
 import ProfileScreen from '../../../app/(tabs)/profile';
 import { MyCommentsContent } from '@/features/reviews/components/MyCommentsContent';
@@ -43,6 +44,13 @@ jest.mock('@/features/locale/hooks/useLocalePreference', () => ({
 
 jest.mock('@/features/reviews/hooks/useMyComments', () => ({
   useMyComments: jest.fn(),
+}));
+
+jest.mock('@/features/profile/hooks/useProfileAvatarEditor', () => ({
+  useProfileAvatarEditor: () => ({
+    openAvatarActions: jest.fn(),
+    isAvatarBusy: false,
+  }),
 }));
 
 const movieItem: UserReviewListItem = {
@@ -97,7 +105,11 @@ describe('My Comments profile feature', () => {
   });
 
   it('shows My Comments row and navigates to the screen', () => {
-    renderWithI18n(<ProfileScreen />);
+    renderWithProviders(
+      <I18nextProvider i18n={i18n}>
+        <ProfileScreen />
+      </I18nextProvider>,
+    );
 
     fireEvent.press(screen.getByLabelText('💬  My Comments'));
     expect(mockPush).toHaveBeenCalledWith('/profile/my-comments');

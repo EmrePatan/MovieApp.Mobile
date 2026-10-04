@@ -1,5 +1,5 @@
 import React from 'react';
-import { screen } from '@testing-library/react-native';
+import { screen, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../../../utils/render-with-providers';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { getCollectionDetails } from '@/features/details/collection/api/collection-api';
@@ -32,6 +32,7 @@ jest.mock('@/features/details/shared/components/DetailSections', () => ({
     const { Text } = require('react-native');
     return React.createElement(Text, null, overview ?? 'Overview');
   },
+  DetailKeywords: () => null,
 }));
 
 jest.mock('@/features/details/shared/components/DetailUltraThinRatingRail', () => ({
@@ -44,6 +45,10 @@ jest.mock('@/features/details/watch-providers/components/WhereToWatchRail', () =
 jest.mock('@/features/reviews/components/ReviewsLinkRow', () => ({ ReviewsLinkRow: () => null }));
 jest.mock('@/features/recommendations/components/SimilarContentSection', () => ({
   SimilarContentSection: () => null,
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { id: 'user-id' } }),
 }));
 
 jest.mock('@/features/details/videos/hooks/useVideos', () => ({
@@ -79,6 +84,14 @@ const baseMovie: MovieDetailsResponse = {
 describe('movie detail collection row', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getCollectionDetails as jest.Mock).mockResolvedValue({
+      tmdbId: 9485,
+      name: 'The Dark Knight Collection',
+      overview: null,
+      posterPath: null,
+      backdropPath: null,
+      parts: [],
+    });
     mockUseMovieVideos.mockReturnValue({
       data: { primary: { watchUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' } },
       isLoading: false,
@@ -91,7 +104,25 @@ describe('movie detail collection row', () => {
     });
   });
 
-  it('renders collection row between action bar and overview', () => {
+  it('renders collection parts section after overview when movie has a collection', async () => {
+    (getCollectionDetails as jest.Mock).mockResolvedValue({
+      tmdbId: 9485,
+      name: 'The Dark Knight Collection',
+      overview: null,
+      posterPath: '/collection.jpg',
+      backdropPath: '/backdrop.jpg',
+      parts: [
+        {
+          id: 'movie-batman-begins',
+          title: 'Batman Begins',
+          releaseDate: '2005-06-15',
+          posterPath: '/begins.jpg',
+          voteAverage: 8,
+          voteCount: 1000,
+        },
+      ],
+    });
+
     renderWithProviders(
       <MovieDetailContent
         movie={{
@@ -111,14 +142,18 @@ describe('movie detail collection row', () => {
       .map((node) => node.props.children);
     expect(texts).toEqual(['Action Bar', 'Overview copy']);
     expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
-    expect(screen.getByTestId('collection-link-row')).toBeTruthy();
-    expect(screen.getByLabelText('Part of The Dark Knight Collection')).toBeTruthy();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('collection-parts-section')).toBeTruthy();
+    });
+    expect(screen.getByText('All Films in the Series')).toBeTruthy();
   });
 
-  it('omits collection row without leaving layout gap when collection is null', () => {
+  it('omits collection section when collection is null', () => {
     renderWithProviders(<MovieDetailContent movie={baseMovie} />);
 
-    expect(screen.queryByTestId('collection-link-row')).toBeNull();
+    expect(screen.queryByTestId('collection-parts-section')).toBeNull();
+    expect(getCollectionDetails).not.toHaveBeenCalled();
     const texts = screen
       .getAllByText(/Action Bar|Overview copy/)
       .map((node) => node.props.children);
@@ -126,7 +161,16 @@ describe('movie detail collection row', () => {
     expect(screen.getByTestId('detail-trailer-play-affordance')).toBeTruthy();
   });
 
-  it('does not fetch collection details from movie detail', () => {
+  it('fetches collection details when movie has a collection summary', async () => {
+    (getCollectionDetails as jest.Mock).mockResolvedValue({
+      tmdbId: 9485,
+      name: 'The Dark Knight Collection',
+      overview: null,
+      posterPath: null,
+      backdropPath: null,
+      parts: [],
+    });
+
     renderWithProviders(
       <MovieDetailContent
         movie={{
@@ -141,6 +185,8 @@ describe('movie detail collection row', () => {
       />,
     );
 
-    expect(getCollectionDetails).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(getCollectionDetails).toHaveBeenCalledWith(9485, expect.anything());
+    });
   });
 });

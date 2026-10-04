@@ -1,12 +1,17 @@
 import mockReact from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieDetailContent } from '@/features/details/movie/components/MovieDetailContent';
 import { TvShowDetailContent } from '@/features/details/tv/components/TvShowDetailContent';
 import type { MovieDetailsResponse } from '@/features/details/movie/types';
 import type { TvShowDetailsResponse } from '@/features/details/tv/types';
 
-jest.mock('@/features/details/videos/components/PlayTrailerButton', () => ({
-  PlayTrailerButton: () => null,
+jest.mock('@/features/details/videos/components/DetailHeroTrailerLayer', () => ({
+  DetailHeroTrailerLayer: () => null,
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { id: 'user-id' } }),
 }));
 
 jest.mock('@/features/gallery/hooks/useGallery', () => ({
@@ -135,7 +140,7 @@ const baseShow: Omit<TvShowDetailsResponse, 'canFollow'> = {
 
 describe('detail action eligibility', () => {
   it('15. shows movie release alert when canSetReleaseAlert is true', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
@@ -150,7 +155,7 @@ describe('detail action eligibility', () => {
   });
 
   it('16. hides movie release alert when canSetReleaseAlert is false', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
@@ -167,7 +172,7 @@ describe('detail action eligibility', () => {
   });
 
   it('17. uses server canSetReleaseAlert instead of client releaseDate', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
@@ -183,7 +188,7 @@ describe('detail action eligibility', () => {
   });
 
   it('18. keeps non-alert actions visible when release alert is hidden', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
@@ -199,7 +204,7 @@ describe('detail action eligibility', () => {
   });
 
   it('19. shows TV follow when canFollow is true', () => {
-    render(
+    renderWithProviders(
       <TvShowDetailContent
         show={{
           ...baseShow,
@@ -213,7 +218,7 @@ describe('detail action eligibility', () => {
   });
 
   it('20. hides TV follow when canFollow is false for ended shows', () => {
-    render(
+    renderWithProviders(
       <TvShowDetailContent
         show={{
           ...baseShow,
@@ -228,7 +233,7 @@ describe('detail action eligibility', () => {
   });
 
   it('21. hides TV follow when canFollow is false for canceled shows', () => {
-    render(
+    renderWithProviders(
       <TvShowDetailContent
         show={{
           ...baseShow,
@@ -242,7 +247,7 @@ describe('detail action eligibility', () => {
   });
 
   it('22. keeps TV watched visible when follow is hidden', () => {
-    render(
+    renderWithProviders(
       <TvShowDetailContent
         show={{
           ...baseShow,
@@ -257,7 +262,7 @@ describe('detail action eligibility', () => {
   });
 
   it('23. preserves movie consumption guardrails when alert eligibility is false', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
@@ -274,7 +279,7 @@ describe('detail action eligibility', () => {
   });
 
   it('24. shows movie release alert when release date is unknown but eligibility is true', () => {
-    render(
+    renderWithProviders(
       <MovieDetailContent
         movie={{
           ...baseMovie,
