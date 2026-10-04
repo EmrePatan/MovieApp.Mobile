@@ -70,6 +70,19 @@ export function returnToCatalogDetailFromReviews(
   router.navigate(buildCatalogDetailRoute(contentId, contentType));
 }
 
+export function openCatalogDetailFromReviews(
+  router: ImperativeRouter,
+  contentType: 'movie' | 'tv',
+  contentId: string,
+): void {
+  if (peekReviewsReturnHref()) {
+    router.push(buildCatalogDetailRoute(contentId, contentType));
+    return;
+  }
+
+  returnToCatalogDetailFromReviews(router, contentType, contentId);
+}
+
 export function returnToCatalogDetailFromReviewsPathname(
   router: ImperativeRouter,
   pathname: string,

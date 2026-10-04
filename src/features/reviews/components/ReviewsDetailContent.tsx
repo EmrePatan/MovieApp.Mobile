@@ -288,6 +288,8 @@ export function ReviewsDetailContent({
     <View style={styles.listHeader}>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <ReviewsScreenHeader
+          contentType={contentType}
+          contentId={contentId}
           contentTitle={contentTitle}
           reviewCount={showMeta ? totalCount : undefined}
           posterPath={posterPath}

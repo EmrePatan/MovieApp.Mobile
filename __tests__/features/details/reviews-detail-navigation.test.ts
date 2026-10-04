@@ -1,5 +1,6 @@
 import {
   isReviewsDetailRoute,
+  openCatalogDetailFromReviews,
   openReviewsDetail,
   resetReviewsNavigationForTests,
   returnFromReviewsScreen,
@@ -76,6 +77,22 @@ describe('reviews detail navigation', () => {
       '/movie/3fa85f64-5717-4562-b3fc-2c963f66afa6/reviews',
       { withAnchor: true },
     );
+  });
+
+  it('opens catalog detail with push when reviews were opened from my comments', () => {
+    const push = jest.fn();
+    const back = jest.fn();
+    const router = { push, back, canGoBack: () => true } as never;
+    const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+
+    openReviewsDetail(router, `/movie/${movieId}/reviews`, {
+      returnHref: '/profile/my-comments',
+    });
+
+    openCatalogDetailFromReviews(router, 'movie', movieId);
+
+    expect(push).toHaveBeenCalledWith(`/movie/${movieId}`);
+    expect(back).not.toHaveBeenCalled();
   });
 
   it('opens reviews from my comments without anchor and dismisses back to profile', () => {

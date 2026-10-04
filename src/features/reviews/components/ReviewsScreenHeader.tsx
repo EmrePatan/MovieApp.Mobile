@@ -1,12 +1,18 @@
-import { StyleSheet, View } from 'react-native';
+import { useCallback } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { DetailBackButton } from '@/features/details/shared/components/DetailBackButton';
+import { openCatalogDetailFromReviews } from '@/features/details/shared/navigation/reviews-detail-navigation';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import { formatCommunityStarRatingDisplay } from '@/features/ratings/utils/star-rating';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+import { interaction } from '@/theme/interaction';
+import type { ReviewContentType } from '../types';
 
 const POSTER_WIDTH = 44;
 const POSTER_HEIGHT = 66;
@@ -18,6 +24,8 @@ export interface ReviewsHeaderSummary {
 }
 
 interface ReviewsScreenHeaderProps {
+  contentType: ReviewContentType;
+  contentId: string;
   contentTitle?: string;
   reviewCount?: number;
   posterPath?: string | null;
@@ -26,6 +34,8 @@ interface ReviewsScreenHeaderProps {
 }
 
 export function ReviewsScreenHeader({
+  contentType,
+  contentId,
   contentTitle,
   reviewCount,
   posterPath,
@@ -33,6 +43,7 @@ export function ReviewsScreenHeader({
   summary,
 }: ReviewsScreenHeaderProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const hasReviews = reviewCount !== undefined;
   const reviewCountLabel = hasReviews
     ? t(reviewCount === 1 ? 'common.reviewCount' : 'common.reviewsCount', {
@@ -40,10 +51,18 @@ export function ReviewsScreenHeader({
       })
     : null;
 
+  const handleOpenCatalogDetail = useCallback(() => {
+    openCatalogDetailFromReviews(router, contentType, contentId);
+  }, [contentId, contentType, router]);
+
+  const catalogAccessibilityLabel = contentTitle
+    ? t('common.openTitle', { title: contentTitle })
+    : t('reviews.title');
+
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
-        <DetailBackButton contentInset={false} />
+        <DetailBackButton showLabel={false} contentInset iconOnlyLeading />
         <AppText variant="subtitle" style={styles.screenTitle} numberOfLines={1}>
           {t('reviews.title')}
         </AppText>
@@ -51,7 +70,13 @@ export function ReviewsScreenHeader({
       </View>
 
       {showMeta && (contentTitle || reviewCountLabel) ? (
-        <View style={styles.titleRow}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={catalogAccessibilityLabel}
+          onPress={handleOpenCatalogDetail}
+          style={({ pressed }) => [styles.titleRow, pressed && styles.titleRowPressed]}
+          testID="reviews-header-catalog-link"
+        >
           {posterPath ? (
             <PosterImage
               uri={posterPath}
@@ -70,14 +95,17 @@ export function ReviewsScreenHeader({
 
           <View style={styles.titleMeta} testID="reviews-header-meta">
             {contentTitle ? (
-              <AppText
-                variant="body"
-                style={styles.contentTitle}
-                numberOfLines={2}
-                testID="reviews-content-title"
-              >
-                {contentTitle}
-              </AppText>
+              <View style={styles.contentTitleRow}>
+                <AppText
+                  variant="body"
+                  style={styles.contentTitle}
+                  numberOfLines={2}
+                  testID="reviews-content-title"
+                >
+                  {contentTitle}
+                </AppText>
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </View>
             ) : null}
             {summary ? (
               <AppText
@@ -103,7 +131,7 @@ export function ReviewsScreenHeader({
               </AppText>
             ) : null}
           </View>
-        </View>
+        </Pressable>
       ) : null}
     </View>
   );
@@ -137,6 +165,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minWidth: 0,
   },
+  titleRowPressed: {
+    opacity: interaction.pressedOpacity,
+  },
+  contentTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    minWidth: 0,
+  },
   posterPlaceholder: {
     width: POSTER_WIDTH,
     height: POSTER_HEIGHT,
@@ -149,6 +186,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   contentTitle: {
+    flexShrink: 1,
     color: colors.textPrimary,
     fontWeight: '700',
     lineHeight: 22,
