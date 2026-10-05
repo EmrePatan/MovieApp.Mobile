@@ -115,13 +115,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingHorizontal: layout.screenPadding,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
     gap: spacing.xs,
   },
   list: {
-    paddingHorizontal: layout.screenPadding,
+    paddingHorizontal: layout.screenPaddingHorizontal,
     paddingBottom: spacing.xl,
     gap: spacing.sm,
   },

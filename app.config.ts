@@ -34,7 +34,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: APP_IDENTITY.iosBundleIdentifier,
-    buildNumber: '9',
+    buildNumber: '10',
     usesAppleSignIn: true,
     associatedDomains: UNIVERSAL_LINK_HOSTS.map((host) => `applinks:${host}`),
     infoPlist: {
