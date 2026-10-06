@@ -12,7 +12,6 @@ import { StackListScreen } from '@/components/layout/StackListScreen';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
-import { useStreamingProviderPreviews } from '@/features/discovery/hooks/useStreamingProviderPreviews';
 import {
   DEFAULT_STREAMING_HUB_MEDIA_TYPE,
   listStreamingHubProvidersWithFallback,
@@ -39,12 +38,6 @@ export function StreamingPlatformsDirectoryScreen() {
   const providers = useMemo(
     () => listStreamingHubProvidersWithFallback(providersQuery.data?.providers),
     [providersQuery.data?.providers],
-  );
-  const providerPreviews = useStreamingProviderPreviews(
-    providers,
-    watchRegion,
-    DEFAULT_STREAMING_HUB_MEDIA_TYPE,
-    isHydrated,
   );
 
   const gridLayout = useMemo(() => {
@@ -85,12 +78,11 @@ export function StreamingPlatformsDirectoryScreen() {
       <StreamingProviderPosterCard
         provider={item}
         watchRegion={watchRegion}
-        spotlightPosterPath={providerPreviews.getSpotlightPosterPath(item.providerId)}
-        spotlightLoading={providerPreviews.isSpotlightLoading(item.providerId)}
+        queryEnabled={isHydrated}
         tileSize={tileSize}
       />
     ),
-    [providerPreviews, tileSize, watchRegion],
+    [isHydrated, tileSize, watchRegion],
   );
 
   return (

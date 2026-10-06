@@ -15,24 +15,20 @@ jest.mock('expo-router', () => ({
   useSegments: () => ['discover-genres'],
 }));
 
-const batchCoverResponse = {
-  items: [] as Array<{
-    genreId: string;
-    candidates: { id: string; type: 'movie'; title: string; posterUrl: string | null }[];
-  }>,
-};
-
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({}),
-  useQuery: () => ({
-    isLoading: false,
-    isPending: false,
-    isError: false,
-    status: 'success',
-    fetchStatus: 'idle',
-    dataUpdatedAt: 1,
-    data: batchCoverResponse,
-  }),
+  useQueries: ({ queries }: { queries: { queryKey: readonly unknown[] }[] }) =>
+    queries.map((query) => ({
+      isLoading: false,
+      isPending: false,
+      isError: false,
+      status: 'success',
+      fetchStatus: 'idle',
+      dataUpdatedAt: 1,
+      data: {
+        items: coverCandidates[String(query.queryKey[2])] ?? [],
+      },
+    })),
 }));
 
 jest.mock('@/features/discovery/hooks/useGenres', () => ({
@@ -116,12 +112,6 @@ describe('GenresHubSection', () => {
       ];
     }
     coverCandidates['g-war'] = [poster('spider-war', 'Spider-Man')];
-
-    batchCoverResponse.items = Object.entries(coverCandidates).map(([genreId, candidates]) => ({
-      genreId,
-      status: 'ok' as const,
-      candidates,
-    }));
   });
 
   it('renders exactly eight rail genres and leaves the rest for See All', () => {
@@ -200,12 +190,6 @@ describe('GenresDirectoryScreen', () => {
       poster('indiana', 'Indiana Jones'),
       poster('spider-adventure', 'Spider-Man'),
     ];
-
-    batchCoverResponse.items = Object.entries(coverCandidates).map(([genreId, candidates]) => ({
-      genreId,
-      status: 'ok' as const,
-      candidates,
-    }));
   });
 
   it('includes the rail genres and the See All-only genres without duplicating War', () => {

@@ -25,10 +25,8 @@ import { CatalogListActions, CatalogSortSheet } from '@/features/catalog/compone
 import { CatalogDiscoveryFilterSheet } from '@/features/discovery/components/CatalogDiscoveryFilterSheet';
 import { StreamingProviderPosterCard } from '@/features/discovery/components/StreamingProviderPosterCard';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
-import { useStreamingProviderPreviews } from '@/features/discovery/hooks/useStreamingProviderPreviews';
 import { useStreamingDiscover } from '@/features/discovery/hooks/useStreamingDiscover';
 import {
-  DEFAULT_STREAMING_HUB_MEDIA_TYPE,
   listStreamingHubProvidersWithFallback,
   resolveDiscoveryWatchProvider,
 } from '@/features/discovery/streaming-platform-hub-types';
@@ -90,12 +88,6 @@ export function StreamingPlatformScreen({
   const hubProviders = useMemo(
     () => listStreamingHubProvidersWithFallback(providersQuery.data?.providers),
     [providersQuery.data?.providers],
-  );
-  const providerPreviews = useStreamingProviderPreviews(
-    hubProviders,
-    discoverState.watchRegion,
-    DEFAULT_STREAMING_HUB_MEDIA_TYPE,
-    isRegionHydrated,
   );
 
   const activeProvider =
@@ -182,8 +174,7 @@ export function StreamingPlatformScreen({
                   key={provider.providerId}
                   provider={provider}
                   watchRegion={discoverState.watchRegion}
-                  spotlightPosterPath={providerPreviews.getSpotlightPosterPath(provider.providerId)}
-                  spotlightLoading={providerPreviews.isSpotlightLoading(provider.providerId)}
+                  queryEnabled={isRegionHydrated}
                 />
               ))}
             </View>
@@ -191,7 +182,7 @@ export function StreamingPlatformScreen({
         </SafeAreaView>
       </View>
     ),
-    [discoverState.watchRegion, hubProviders, isRegionHydrated, providerPreviews, t],
+    [discoverState.watchRegion, hubProviders, isRegionHydrated, t],
   );
 
   const platformHeader = useMemo(() => {

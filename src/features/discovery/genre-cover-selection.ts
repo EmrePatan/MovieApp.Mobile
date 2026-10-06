@@ -15,8 +15,6 @@ export interface GenreCoverCandidate {
 export interface GenreCoverSource {
   isLoading: boolean;
   candidates: readonly GenreCoverCandidate[];
-  /** Set when the latest batch attempt returned a retriable error for this genre. */
-  transientError?: boolean;
 }
 
 export type GenreCoverSlot =
@@ -59,7 +57,8 @@ export function genreCoverCandidatesFromItems(
 
 /**
  * Walk genres in order. Each genre takes the preferred-rank unused poster title.
- * A genre with no remaining poster falls back to the gradient tile.
+ * An earlier genre that is still loading keeps later genres pending so a title
+ * is not shown twice and then swapped. A genre with no remaining poster falls back.
  */
 export function resolveGenreCoverSlots(
   genres: readonly { id: string }[],
@@ -68,16 +67,18 @@ export function resolveGenreCoverSlots(
   const slots = new Map<string, GenreCoverSlot>();
   const usedTitleKeys = new Set<string>();
   const usedIds = new Set<string>();
+  let earlierPending = false;
 
   for (const genre of genres) {
-    const source = sourcesByGenreId.get(genre.id);
-    if (!source || source.isLoading) {
+    if (earlierPending) {
       slots.set(genre.id, { status: 'pending' });
       continue;
     }
 
-    if (source.transientError) {
-      slots.set(genre.id, { status: 'fallback' });
+    const source = sourcesByGenreId.get(genre.id);
+    if (!source || source.isLoading) {
+      earlierPending = true;
+      slots.set(genre.id, { status: 'pending' });
       continue;
     }
 

@@ -11,15 +11,7 @@ import {
   buildOnTvThisWeekPath,
   buildWorldCinemaPath,
   buildPickSomethingPath,
-  buildGenreCoverCandidatesBatchPath,
-  buildProviderPreviewsBatchPath,
 } from './routes';
-import type {
-  GenreCoverCandidatesBatchRequest,
-  GenreCoverCandidatesBatchResponse,
-  ProviderPreviewsBatchRequest,
-  ProviderPreviewsBatchResponse,
-} from '../discovery-batch-types';
 import type { PickSomethingRequest, PickSomethingResponse } from '../pick-something-types';
 import type { NowInTheatersRequest } from '../now-in-theaters-types';
 import type { OnTvThisWeekRequest } from '../on-tv-this-week-types';
@@ -68,30 +60,6 @@ export async function getBrowseDiscovery(
   signal?: AbortSignal,
 ): Promise<SearchResponse> {
   return api.get<SearchResponse>(buildBrowsePath(criteria), {
-    authenticated: false,
-    signal,
-  });
-}
-
-export async function postGenreCoverCandidatesBatch(
-  request: GenreCoverCandidatesBatchRequest,
-  signal?: AbortSignal,
-): Promise<GenreCoverCandidatesBatchResponse> {
-  return api.post<GenreCoverCandidatesBatchResponse>(
-    buildGenreCoverCandidatesBatchPath(),
-    request,
-    {
-      authenticated: false,
-      signal,
-    },
-  );
-}
-
-export async function postProviderPreviewsBatch(
-  request: ProviderPreviewsBatchRequest,
-  signal?: AbortSignal,
-): Promise<ProviderPreviewsBatchResponse> {
-  return api.post<ProviderPreviewsBatchResponse>(buildProviderPreviewsBatchPath(), request, {
     authenticated: false,
     signal,
   });

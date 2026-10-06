@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   DEFAULT_STREAMING_HUB_MEDIA_TYPE,
 } from '@/features/discovery/streaming-platform-hub-types';
+import { useStreamingProviderSpotlight } from '@/features/discovery/hooks/useStreamingProviderSpotlight';
 import { createStreamingDiscoverHref } from '@/features/discovery/utils/streaming-discover-params';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { DiscoveryWatchProvider } from '@/features/discovery/watch-provider-types';
@@ -16,20 +17,28 @@ import {
 interface StreamingProviderPosterCardProps {
   provider: DiscoveryWatchProvider;
   watchRegion: string;
-  spotlightPosterPath?: string | null;
-  spotlightLoading?: boolean;
+  queryEnabled?: boolean;
   tileSize?: StreamingProviderTileSize;
 }
 
 export function StreamingProviderPosterCard({
   provider,
   watchRegion,
-  spotlightPosterPath = null,
-  spotlightLoading = false,
+  queryEnabled = true,
   tileSize,
 }: StreamingProviderPosterCardProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const spotlightQuery = useStreamingProviderSpotlight(
+    provider.providerId,
+    watchRegion,
+    DEFAULT_STREAMING_HUB_MEDIA_TYPE,
+    queryEnabled,
+  );
+
+  const spotlight = spotlightQuery.data?.items?.[0];
+  const spotlightPosterPath =
+    spotlight && spotlight.type !== 'person' ? spotlight.posterUrl : null;
 
   const openPlatform = () => {
     openLibraryStackScreen(
@@ -63,7 +72,7 @@ export function StreamingProviderPosterCard({
         name={provider.name}
         logoPath={provider.logoPath}
         spotlightPosterPath={spotlightPosterPath}
-        spotlightLoading={spotlightLoading}
+        spotlightLoading={spotlightQuery.isLoading}
         tileSize={tileSize}
       />
     </Pressable>

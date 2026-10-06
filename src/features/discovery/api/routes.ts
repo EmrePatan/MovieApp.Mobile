@@ -10,14 +10,6 @@ export function buildGenresPath(): string {
   return '/api/genres';
 }
 
-export function buildGenreCoverCandidatesBatchPath(): string {
-  return '/api/discovery/genre-cover-candidates';
-}
-
-export function buildProviderPreviewsBatchPath(): string {
-  return '/api/discovery/provider-previews';
-}
-
 export function buildDiscoveryWatchProvidersPath(
   mediaType: AdvancedDiscoverMediaType,
   watchRegion: string,
