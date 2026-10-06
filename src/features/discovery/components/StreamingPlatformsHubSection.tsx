@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { useDiscoveryWatchProviders } from '@/features/discovery/hooks/useDiscoveryWatchProviders';
+import { useStreamingProviderPreviews } from '@/features/discovery/hooks/useStreamingProviderPreviews';
 import {
   DEFAULT_STREAMING_HUB_MEDIA_TYPE,
   resolveStreamingHubRailProviders,
@@ -34,6 +35,12 @@ export function StreamingPlatformsHubSection() {
   const railProviders = useMemo(
     () => resolveStreamingHubRailProviders(providersQuery.data?.providers),
     [providersQuery.data?.providers],
+  );
+  const providerPreviews = useStreamingProviderPreviews(
+    railProviders,
+    watchRegion,
+    DEFAULT_STREAMING_HUB_MEDIA_TYPE,
+    isHydrated,
   );
 
   const openDirectory = useCallback(() => {
@@ -79,7 +86,8 @@ export function StreamingPlatformsHubSection() {
           <StreamingProviderPosterCard
             provider={item}
             watchRegion={watchRegion}
-            queryEnabled={isHydrated}
+            spotlightPosterPath={providerPreviews.getSpotlightPosterPath(item.providerId)}
+            spotlightLoading={providerPreviews.isSpotlightLoading(item.providerId)}
             tileSize={hubTileSize}
           />
         )}

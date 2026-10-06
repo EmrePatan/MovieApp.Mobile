@@ -12,6 +12,10 @@ jest.mock('expo-router', () => ({
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({}),
   useQueries: () => [],
+  useQuery: () => ({
+    isLoading: false,
+    data: { items: [] },
+  }),
 }));
 
 jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({
@@ -165,21 +169,23 @@ jest.mock('@/features/discovery/hooks/useDiscoveryWatchProviders', () => ({
   })),
 }));
 
-jest.mock('@/features/discovery/hooks/useStreamingProviderSpotlight', () => ({
-  useStreamingProviderSpotlight: jest.fn(() => ({
-    data: {
-      items: [
-        {
-          id: 'spot-1',
-          type: 'movie',
-          title: 'Spotlight Film',
-          posterUrl: '/poster.jpg',
-        },
+jest.mock('@/features/discovery/hooks/useStreamingProviderPreviews', () => ({
+  useStreamingProviderPreviews: jest.fn(() => ({
+    isSpotlightLoading: () => false,
+    previewByProviderId: new Map([
+      [
+        8,
+        [
+          {
+            id: 'spot-1',
+            type: 'movie',
+            title: 'Spotlight Film',
+            posterUrl: '/poster.jpg',
+          },
+        ],
       ],
-    },
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
+    ]),
+    getSpotlightPosterPath: () => '/poster.jpg',
   })),
 }));
 

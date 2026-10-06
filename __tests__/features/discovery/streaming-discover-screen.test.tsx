@@ -36,12 +36,20 @@ jest.mock('@/features/discovery/hooks/useGenres', () => ({
   })),
 }));
 
-jest.mock('@/features/discovery/hooks/useStreamingProviderSpotlight', () => ({
-  useStreamingProviderSpotlight: jest.fn(() => ({
-    data: { items: [] },
-    isLoading: false,
-    isError: false,
+jest.mock('@/features/discovery/hooks/useStreamingProviderPreviews', () => ({
+  useStreamingProviderPreviews: jest.fn(() => ({
+    isSpotlightLoading: () => false,
+    previewByProviderId: new Map(),
+    getSpotlightPosterPath: () => null,
   })),
+}));
+
+jest.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({}),
+  useQuery: () => ({
+    isLoading: false,
+    data: { items: [] },
+  }),
 }));
 
 jest.mock('@/features/regions/hooks/useRegionalPreference', () => ({

@@ -2,17 +2,22 @@ import {
   buildAdvancedDiscoverPath,
   buildBrowsePath,
   buildGenresPath,
+  buildGenreCoverCandidatesBatchPath,
+  buildProviderPreviewsBatchPath,
 } from '@/features/discovery/api/routes';
 import {
   getAdvancedDiscover,
   getBrowseDiscovery,
   getGenres,
+  postGenreCoverCandidatesBatch,
+  postProviderPreviewsBatch,
 } from '@/features/discovery/api/discovery-api';
 import { api } from '@/api/client';
 
 jest.mock('@/api/client', () => ({
   api: {
     get: jest.fn(),
+    post: jest.fn(),
   },
 }));
 
@@ -205,5 +210,53 @@ describe('discovery api client', () => {
       authenticated: false,
       signal: undefined,
     });
+  });
+
+  it('posts genre cover candidate batches without auth', async () => {
+    (api.post as jest.Mock).mockResolvedValue({ items: [] });
+    await postGenreCoverCandidatesBatch({
+      genreIds: ['genre-1', 'genre-2'],
+      mediaType: 'all',
+      candidateCount: 20,
+    });
+
+    expect(buildGenreCoverCandidatesBatchPath()).toBe('/api/discovery/genre-cover-candidates');
+    expect(api.post).toHaveBeenCalledWith(
+      '/api/discovery/genre-cover-candidates',
+      {
+        genreIds: ['genre-1', 'genre-2'],
+        mediaType: 'all',
+        candidateCount: 20,
+      },
+      {
+        authenticated: false,
+        signal: undefined,
+      },
+    );
+  });
+
+  it('posts provider preview batches without auth', async () => {
+    (api.post as jest.Mock).mockResolvedValue({ items: [] });
+    await postProviderPreviewsBatch({
+      providerIds: [8, 119],
+      mediaType: 'movie',
+      watchRegion: 'US',
+      pageSize: 1,
+    });
+
+    expect(buildProviderPreviewsBatchPath()).toBe('/api/discovery/provider-previews');
+    expect(api.post).toHaveBeenCalledWith(
+      '/api/discovery/provider-previews',
+      {
+        providerIds: [8, 119],
+        mediaType: 'movie',
+        watchRegion: 'US',
+        pageSize: 1,
+      },
+      {
+        authenticated: false,
+        signal: undefined,
+      },
+    );
   });
 });

@@ -115,8 +115,9 @@ describe('genre hub selection', () => {
 function source(
   candidates: GenreCoverCandidate[],
   isLoading = false,
+  transientError = false,
 ): GenreCoverSource {
-  return { isLoading, candidates };
+  return { isLoading, candidates, transientError };
 }
 
 function candidate(id: string, title: string, posterUrl: string | null = `/${id}.jpg`): GenreCoverCandidate {
@@ -190,17 +191,56 @@ describe('unique genre covers', () => {
     expect(slots.get('war')).toEqual({ status: 'fallback' });
   });
 
-  it('waits to assign later covers while an earlier genre is still loading', () => {
+  it('marks genres pending while their batch source is still loading', () => {
     const slots = resolveGenreCoverSlots(
       [{ id: 'action' }, { id: 'drama' }],
       new Map([
         ['action', source([candidate('spider', 'Spider-Man')], true)],
-        ['drama', source([candidate('notebook', 'The Notebook')])],
+        ['drama', source([candidate('notebook', 'The Notebook')], true)],
       ]),
     );
 
     expect(slots.get('action')).toEqual({ status: 'pending' });
     expect(slots.get('drama')).toEqual({ status: 'pending' });
+  });
+
+  it('falls back when a genre remains in transient error after retries', () => {
+    const slots = resolveGenreCoverSlots(
+      [{ id: 'action' }],
+      new Map([
+        [
+          'action',
+          source([], false, true),
+        ],
+      ]),
+    );
+
+    expect(slots.get('action')).toEqual({ status: 'fallback' });
+  });
+
+  it('resolves all loaded genres together without a sequential reveal gate', () => {
+    const slots = resolveGenreCoverSlots(
+      [{ id: 'action' }, { id: 'drama' }],
+      new Map([
+        [
+          'action',
+          source([
+            candidate('rank-1', 'Rank 1'),
+            candidate('spider', 'Spider-Man'),
+          ]),
+        ],
+        [
+          'drama',
+          source([
+            candidate('d-1', 'Drama 1'),
+            candidate('notebook', 'The Notebook'),
+          ]),
+        ],
+      ]),
+    );
+
+    expect(slots.get('action')).toMatchObject({ status: 'poster', title: 'Spider-Man' });
+    expect(slots.get('drama')).toMatchObject({ status: 'poster', title: 'The Notebook' });
   });
 
   it('ignores people when building cover candidates', () => {
