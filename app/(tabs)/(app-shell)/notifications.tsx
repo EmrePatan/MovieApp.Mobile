@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
+import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
@@ -195,45 +195,41 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.listHost}>
-      <FlatList
-        ref={listRef}
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={<NotificationsEmptyState />}
-        ListFooterComponent={
-          notificationsQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : notificationsQuery.isFetchNextPageError ? (
-            <View style={styles.footerError}>
-              <AppText variant="bodySmall" muted center>
-                {paginationErrorMessage}
-              </AppText>
-              <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
-            </View>
-          ) : null
-        }
-        refreshControl={
-          <MovieAppRefreshControl
-            refreshing={
-              notificationsQuery.isRefetching && !notificationsQuery.isFetchingNextPage
-            }
-            onRefresh={handleRefresh}
-          />
-        }
-        contentContainerStyle={styles.listContent}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.4}
-        onScroll={onListScroll}
-        scrollEventThrottle={scrollEventThrottle}
-        initialNumToRender={layout.verticalList.initialNumToRender}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-        windowSize={layout.verticalList.windowSize}
-      />
-      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+        <PlatformRefreshFlatList
+          ref={listRef}
+          refreshing={
+            notificationsQuery.isRefetching && !notificationsQuery.isFetchingNextPage
+          }
+          onRefresh={handleRefresh}
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          ListHeaderComponent={listHeader}
+          ListEmptyComponent={<NotificationsEmptyState />}
+          ListFooterComponent={
+            notificationsQuery.isFetchingNextPage ? (
+              <View style={styles.footerLoading}>
+                <ActivityIndicator color={colors.accent} />
+              </View>
+            ) : notificationsQuery.isFetchNextPageError ? (
+              <View style={styles.footerError}>
+                <AppText variant="bodySmall" muted center>
+                  {paginationErrorMessage}
+                </AppText>
+                <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
+              </View>
+            ) : null
+          }
+          contentContainerStyle={styles.listContent}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.4}
+          onScroll={onListScroll}
+          scrollEventThrottle={scrollEventThrottle}
+          initialNumToRender={layout.verticalList.initialNumToRender}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
+          windowSize={layout.verticalList.windowSize}
+        />
+        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
       </View>
     </SafeAreaView>
   );
