@@ -48,7 +48,7 @@ const config: ExpoConfig = {
       monochromeImage: './assets/branding/monochrome-icon.png',
     },
     package: APP_IDENTITY.androidPackage,
-    versionCode: 2,
+    versionCode: 3,
     predictiveBackGestureEnabled: false,
     softwareKeyboardLayoutMode: 'resize',
     intentFilters: [
