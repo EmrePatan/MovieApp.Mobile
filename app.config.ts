@@ -34,7 +34,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: APP_IDENTITY.iosBundleIdentifier,
-    buildNumber: '10',
+    buildNumber: '11',
     usesAppleSignIn: true,
     associatedDomains: UNIVERSAL_LINK_HOSTS.map((host) => `applinks:${host}`),
     infoPlist: {
@@ -83,6 +83,15 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-image',
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'Movie Cave accesses your photo library only when you choose a profile picture.',
+        cameraPermission: false,
+        microphonePermission: false,
+      },
+    ],
     'expo-secure-store',
     'expo-notifications',
     [
