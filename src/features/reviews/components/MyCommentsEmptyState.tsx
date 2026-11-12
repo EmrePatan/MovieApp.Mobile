@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   iconGlow: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: colors.accentTint14,
     opacity: 0.65,
   },
