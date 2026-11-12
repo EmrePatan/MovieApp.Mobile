@@ -250,7 +250,10 @@ export function getDisplayMessageForApiError(
   error: ApiError,
   context: 'login' | 'register' | 'forgot-password' | 'reset-password' | 'verify-email' | 'resend-verification' | 'social' | 'profile',
 ): string {
-  const codeMessage = getLocalizedMessageForApiErrorCode(getProblemCode(error.responseBody), context);
+  const codeMessage =
+    context === 'social' || context === 'profile'
+      ? getLocalizedMessageForApiErrorCode(getProblemCode(error.responseBody), context)
+      : null;
   if (codeMessage) {
     return codeMessage;
   }
