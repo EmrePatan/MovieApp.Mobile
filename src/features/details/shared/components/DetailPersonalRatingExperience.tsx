@@ -21,8 +21,6 @@ import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import type { RatingContentType } from '@/features/ratings/types';
 import { formatPersonalRatingOutOfFive } from '@/features/ratings/utils/format-personal-rating-display';
 import { useMovieWatchStatus } from '@/features/watch-history/hooks/useMovieWatchStatus';
-import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
-import { isTvShowFullyWatched } from '@/features/watch-history/utils/tv-show-watch-status';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -196,14 +194,9 @@ export function DetailPersonalRatingRow({
   const movieStatus = useMovieWatchStatus(contentType === 'movie' ? contentId : '', {
     enabled: contentType === 'movie' && watchEligible && isAuthenticated,
   });
-  const tvProgress = useTvShowProgress(contentType === 'tv' ? contentId : '');
+  const isWatched = movieStatus.data?.isWatched ?? false;
 
-  const isWatched =
-    contentType === 'tv'
-      ? isTvShowFullyWatched(tvProgress.data)
-      : (movieStatus.data?.isWatched ?? false);
-
-  if (!isAuthenticated || !watchEligible || !isWatched) {
+  if (!isAuthenticated || !watchEligible || (contentType === 'movie' && !isWatched)) {
     return null;
   }
 
