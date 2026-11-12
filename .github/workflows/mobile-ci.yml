@@ -38,7 +38,9 @@ jobs:
         run: npm run typecheck
 
       - name: Lint
+        if: always()
         run: npm run lint
 
       - name: Tests
+        if: always()
         run: npm test -- --runInBand
