@@ -118,7 +118,7 @@ export function WatchedButton({
             text: t('details.actions.unwatchTvShowConfirm'),
             style: 'destructive',
             onPress: () => toggleTvShow.mutate(true, {
-              onError: (error) => setFeedback(t('details.actions.watchedUpdateError')),
+              onError: () => setFeedback(t('details.actions.watchedUpdateError')),
             }),
           },
         ],
