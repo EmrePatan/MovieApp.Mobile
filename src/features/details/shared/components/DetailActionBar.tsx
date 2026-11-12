@@ -49,7 +49,7 @@ export function DetailActionBar({
             target={watchedTarget}
             variant="detail"
             onMarkedWatched={contentType === 'movie' ? personalRating?.handleMarkedWatched : undefined}
-            onBeforeUnwatch={personalRating?.confirmUnwatchIfNeeded}
+            onBeforeUnwatch={contentType === 'movie' ? personalRating?.confirmUnwatchIfNeeded : undefined}
           />
         ) : null}
         {contentType === 'tv' && showFollow ? <FollowButton tvShowId={contentId} /> : null}
