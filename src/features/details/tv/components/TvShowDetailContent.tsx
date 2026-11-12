@@ -5,7 +5,6 @@ import { DetailHeaderStack } from '../../shared/components/DetailHeaderStack';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailKeywords, DetailOverview } from '../../shared/components/DetailSections';
 import { DetailUltraThinRatingRail } from '../../shared/components/DetailUltraThinRatingRail';
-import { DetailPersonalRatingProvider } from '../../shared/components/DetailPersonalRatingExperience';
 import { CastRail } from '@/features/details/credits/components/CastRail';
 import { WhereToWatchRail } from '@/features/details/watch-providers/components/WhereToWatchRail';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
@@ -55,16 +54,14 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         catalogTmdbVoteAverage={show.voteAverage}
         contentTitle={show.title}
       />
-      <DetailPersonalRatingProvider contentType="tv" contentId={show.id} watchEligible>
-        <DetailActionBar
-          contentType="tv"
-          contentId={show.id}
-          showWatched
-          showFollow={show.canFollow}
-          watchEligible
-          showPersonalRatingRow
-        />
-      </DetailPersonalRatingProvider>
+      <DetailActionBar
+        contentType="tv"
+        contentId={show.id}
+        showWatched
+        showFollow={show.canFollow}
+        watchEligible
+        showPersonalRatingRow
+      />
       </DetailHeaderStack>
       <DetailOverview overview={show.overview} compactTop />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
