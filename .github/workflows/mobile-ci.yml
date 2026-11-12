@@ -41,11 +41,22 @@ jobs:
 
       - name: Lint changed TypeScript files
         shell: bash
+        env:
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             BASE="origin/${GITHUB_BASE_REF}"
           else
-            BASE="${GITHUB_EVENT_BEFORE}"
+            BASE="${PUSH_BEFORE_SHA}"
+          fi
+
+          if [ -z "${BASE}" ] || [[ "${BASE}" =~ ^0+$ ]]; then
+            BASE="$(git rev-parse "${GITHUB_SHA}^" 2>/dev/null || true)"
+          fi
+
+          if [ -z "${BASE}" ]; then
+            echo "Unable to determine the base commit for changed-file lint." >&2
+            exit 1
           fi
 
           FILES=$(git diff --name-only "${BASE}" "${GITHUB_SHA}" -- '*.ts' '*.tsx')
