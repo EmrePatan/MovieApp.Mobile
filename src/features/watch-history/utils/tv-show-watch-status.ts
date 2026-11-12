@@ -19,6 +19,10 @@ export function getRegularSeasonTotals(progress: TvShowWatchProgressResponse | u
   };
 }
 
+export function hasStartedTvShow(progress: TvShowWatchProgressResponse | undefined): boolean {
+  return getRegularSeasonTotals(progress).regularWatchedEpisodes > 0;
+}
+
 export function isTvShowFullyWatched(progress: TvShowWatchProgressResponse | undefined): boolean {
   if (!progress) {
     return false;

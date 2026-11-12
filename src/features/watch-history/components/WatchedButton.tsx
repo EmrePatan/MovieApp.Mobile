@@ -16,7 +16,7 @@ import {
   useToggleMovieWatched,
   useToggleTvShowWatched,
 } from '../hooks/useWatchHistoryMutations';
-import { isTvShowFullyWatched } from '../utils/tv-show-watch-status';
+import { hasStartedTvShow } from '../utils/tv-show-watch-status';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -87,7 +87,7 @@ export function WatchedButton({
         : toggleEpisode;
   const isWatched =
     target.type === 'tvshow'
-      ? isTvShowFullyWatched(tvProgress.data)
+      ? hasStartedTvShow(tvProgress.data)
       : (statusQuery.data as { isWatched?: boolean } | undefined)?.isWatched ?? false;
   const isMutationPending = toggleMutation.isPending;
   const isDetailVariant = variant === 'detail';
