@@ -1,7 +1,4 @@
-import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect } from 'expo-router';
-import { useQueryClient } from '@tanstack/react-query';
 import { View } from 'react-native';
 import { DetailActionBar } from '../../shared/components/DetailActionBar';
 import { DetailHeaderStack } from '../../shared/components/DetailHeaderStack';
@@ -19,7 +16,6 @@ import { SeasonList } from './SeasonList';
 import { TvShowStatusPosterBar } from './TvShowStatusPosterBar';
 import { formatTvDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { TvShowDetailsResponse } from '../types';
-import { tvShowProgressQueryKey } from '@/features/watch-history/hooks/watch-history-query-keys';
 
 interface TvShowDetailContentProps {
   show: TvShowDetailsResponse;
@@ -27,17 +23,7 @@ interface TvShowDetailContentProps {
 
 export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const galleryQuery = useTvShowGallery(show.id);
-
-  useFocusEffect(
-    useCallback(() => {
-      const queryKey = tvShowProgressQueryKey(show.id);
-      if (queryClient.isFetching({ queryKey }) === 0) {
-        void queryClient.invalidateQueries({ queryKey });
-      }
-    }, [queryClient, show.id]),
-  );
   const metadataLine = formatTvDetailMetadataLine({
     firstAirDate: show.firstAirDate,
     seasonCount: show.seasons.length,
