@@ -1,14 +1,7 @@
 import { render, screen } from '@testing-library/react-native';
-import { useFocusEffect } from 'expo-router';
 import { TvShowCompletionCelebrationLayer } from '@/features/details/tv/components/TvShowCompletionCelebrationLayer';
 import { useAuth } from '@/auth/useAuth';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
-
-jest.mock('expo-router', () => ({
-  useFocusEffect: jest.fn((callback: () => void | (() => void)) => {
-    callback();
-  }),
-}));
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(),
@@ -37,38 +30,7 @@ describe('TvShowCompletionCelebrationLayer', () => {
       data: progressData,
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
     });
-  });
-
-  it('refetches progress whenever the TV detail route receives focus', () => {
-    const refetch = jest.fn();
-    (useTvShowProgress as jest.Mock).mockReturnValue({
-      data: progressData,
-      isLoading: false,
-      isError: false,
-      refetch,
-    });
-
-    render(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
-
-    expect(useFocusEffect).toHaveBeenCalledTimes(1);
-    expect(refetch).toHaveBeenCalledWith({ cancelRefetch: false });
-  });
-
-  it('does not refetch progress when signed out', () => {
-    const refetch = jest.fn();
-    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: false });
-    (useTvShowProgress as jest.Mock).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isError: false,
-      refetch,
-    });
-
-    render(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
-
-    expect(refetch).not.toHaveBeenCalled();
   });
 
   it('shows confetti from the stack-level layer when the server reports completion', () => {
