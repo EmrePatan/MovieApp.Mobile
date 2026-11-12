@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -104,6 +105,24 @@ export function WatchedButton({
     }
 
     if (isMutationPending) {
+      return;
+    }
+
+    if (active && target.type === 'tvshow') {
+      Alert.alert(
+        t('details.actions.unwatchTvShowTitle'),
+        t('details.actions.unwatchTvShowMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('details.actions.unwatchTvShowConfirm'),
+            style: 'destructive',
+            onPress: () => toggleTvShow.mutate(true, {
+              onError: (error) => setFeedback(t('details.actions.watchedUpdateError')),
+            }),
+          },
+        ],
+      );
       return;
     }
 
