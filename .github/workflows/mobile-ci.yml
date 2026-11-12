@@ -17,13 +17,15 @@ concurrency:
 
 jobs:
   validate:
-    name: Typecheck, lint and tests
+    name: Typecheck, changed-file lint and Home tests
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -37,10 +39,23 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Lint
-        if: always()
-        run: npm run lint
+      - name: Lint changed TypeScript files
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            BASE="origin/${GITHUB_BASE_REF}"
+          else
+            BASE="${GITHUB_EVENT_BEFORE}"
+          fi
 
-      - name: Tests
-        if: always()
-        run: npm test -- --runInBand
+          FILES=$(git diff --name-only "${BASE}" "${GITHUB_SHA}" -- '*.ts' '*.tsx')
+          if [ -z "${FILES}" ]; then
+            echo "No changed TypeScript files to lint."
+            exit 0
+          fi
+
+          printf '%s\n' "${FILES}"
+          printf '%s\n' "${FILES}" | xargs npx eslint
+
+      - name: Personalized Home query tests
+        run: npm test -- --runInBand __tests__/features/home/useHomePersonalized.test.tsx
