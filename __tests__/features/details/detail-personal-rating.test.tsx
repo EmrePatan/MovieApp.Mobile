@@ -56,7 +56,7 @@ describe('DetailPersonalRatingRow', () => {
     mockUseMyRating.mockReturnValue({ data: null, isLoading: false });
   });
 
-  it('shows nothing when content is not watched', () => {
+  it('shows nothing when a movie is not watched', () => {
     renderRow(
       <DetailPersonalRatingProvider contentType="movie" contentId={contentId} watchEligible>
         <DetailPersonalRatingRow contentType="movie" contentId={contentId} watchEligible />
@@ -67,7 +67,7 @@ describe('DetailPersonalRatingRow', () => {
     expect(screen.queryByTestId('detail-personal-rating-summary')).toBeNull();
   });
 
-  it('shows rate CTA when watched without a personal rating', () => {
+  it('shows rate CTA when a movie is watched without a personal rating', () => {
     mockUseMovieWatchStatus.mockReturnValue({
       data: { isWatched: true },
       isLoading: false,
@@ -82,7 +82,7 @@ describe('DetailPersonalRatingRow', () => {
     expect(screen.getByTestId('detail-personal-rating-rate-cta')).toBeTruthy();
   });
 
-  it('shows compact personal rating summary when watched and rated', () => {
+  it('shows compact personal rating summary when a movie is watched and rated', () => {
     mockUseMovieWatchStatus.mockReturnValue({
       data: { isWatched: true },
       isLoading: false,
@@ -102,7 +102,7 @@ describe('DetailPersonalRatingRow', () => {
     expect(screen.getByText('4/5')).toBeTruthy();
   });
 
-  it('opens the rating sheet with the existing score when editing', () => {
+  it('opens the rating sheet with the existing score when editing a movie rating', () => {
     mockUseMovieWatchStatus.mockReturnValue({
       data: { isWatched: true },
       isLoading: false,
@@ -124,7 +124,34 @@ describe('DetailPersonalRatingRow', () => {
     expect(screen.getByTestId('star-3-full')).toBeTruthy();
   });
 
-  it('opens optional rating prompt after watched transition', () => {
+  it('shows the TV rating CTA even when the show has not been watched', () => {
+    renderRow(
+      <DetailPersonalRatingProvider contentType="tv" contentId={contentId} watchEligible>
+        <DetailPersonalRatingRow contentType="tv" contentId={contentId} watchEligible />
+      </DetailPersonalRatingProvider>,
+    );
+
+    expect(screen.getByTestId('detail-personal-rating-rate-cta')).toBeTruthy();
+  });
+
+  it('shows and allows editing an existing TV rating regardless of watch progress', () => {
+    mockUseMyRating.mockReturnValue({
+      data: { score: 8 },
+      isLoading: false,
+    });
+
+    renderRow(
+      <DetailPersonalRatingProvider contentType="tv" contentId={contentId} watchEligible>
+        <DetailPersonalRatingRow contentType="tv" contentId={contentId} watchEligible />
+      </DetailPersonalRatingProvider>,
+    );
+
+    fireEvent.press(screen.getByTestId('detail-personal-rating-summary'));
+    expect(screen.getByTestId('personal-rating-prompt-sheet')).toBeTruthy();
+    expect(screen.getByTestId('star-4-full')).toBeTruthy();
+  });
+
+  it('opens optional rating prompt after a watched transition when no rating exists', () => {
     function WatchedProbe() {
       const personalRating = useOptionalDetailPersonalRating();
       return (
@@ -138,12 +165,40 @@ describe('DetailPersonalRatingRow', () => {
     }
 
     renderRow(
-      <DetailPersonalRatingProvider contentType="movie" contentId={contentId} watchEligible>
+      <DetailPersonalRatingProvider contentType="tv" contentId={contentId} watchEligible>
         <WatchedProbe />
       </DetailPersonalRatingProvider>,
     );
 
     fireEvent.press(screen.getByTestId('watched-probe'));
     expect(screen.getByTestId('personal-rating-prompt-sheet')).toBeTruthy();
+  });
+
+  it('does not prompt again after completion when a TV rating already exists', () => {
+    mockUseMyRating.mockReturnValue({
+      data: { score: 8 },
+      isLoading: false,
+    });
+
+    function CompletionProbe() {
+      const personalRating = useOptionalDetailPersonalRating();
+      return (
+        <Pressable
+          testID="completion-probe"
+          onPress={() => personalRating?.handleMarkedWatched()}
+        >
+          <Text>Complete</Text>
+        </Pressable>
+      );
+    }
+
+    renderRow(
+      <DetailPersonalRatingProvider contentType="tv" contentId={contentId} watchEligible>
+        <CompletionProbe />
+      </DetailPersonalRatingProvider>,
+    );
+
+    fireEvent.press(screen.getByTestId('completion-probe'));
+    expect(screen.queryByTestId('personal-rating-prompt-sheet')).toBeNull();
   });
 });
