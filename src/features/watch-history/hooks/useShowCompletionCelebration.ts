@@ -4,11 +4,13 @@ import { shouldTriggerShowCompletionCelebration } from '../utils/show-completion
 interface UseShowCompletionCelebrationOptions {
   isCompleted: boolean;
   enabled: boolean;
+  onCompleted?: () => void;
 }
 
 export function useShowCompletionCelebration({
   isCompleted,
   enabled,
+  onCompleted,
 }: UseShowCompletionCelebrationOptions) {
   const previousCompletedRef = useRef<boolean | null>(null);
   const [confettiVisible, setConfettiVisible] = useState(false);
@@ -21,10 +23,11 @@ export function useShowCompletionCelebration({
 
     if (shouldTriggerShowCompletionCelebration(previousCompletedRef.current, isCompleted)) {
       setConfettiVisible(true);
+      onCompleted?.();
     }
 
     previousCompletedRef.current = isCompleted;
-  }, [enabled, isCompleted]);
+  }, [enabled, isCompleted, onCompleted]);
 
   const dismissConfetti = useCallback(() => {
     setConfettiVisible(false);
