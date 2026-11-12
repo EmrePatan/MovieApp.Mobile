@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { WatchedButton } from '@/features/watch-history/components/WatchedButton';
 import { useEpisodeWatchStatus } from '@/features/watch-history/hooks/useEpisodeWatchStatus';
@@ -40,6 +41,7 @@ jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
 describe('WatchedButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
     mockRequireAuth.mockReturnValue(true);
     (useMovieWatchStatus as jest.Mock).mockReturnValue({
       data: { isWatched: false },
@@ -84,6 +86,61 @@ describe('WatchedButton', () => {
 
     render(<WatchedButton target={{ type: 'movie', contentId: 'movie-id' }} />);
     expect(screen.getByLabelText('Mark as unwatched')).toBeTruthy();
+  });
+
+  it('keeps a partially watched TV show selected', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: { isFullyWatched: false, regularTotalEpisodes: 60, regularWatchedEpisodes: 1 },
+      isLoading: false,
+    });
+
+    render(<WatchedButton target={{ type: 'tvshow', contentId: 'tv-id' }} />);
+
+    const button = screen.getByLabelText('Mark as unwatched');
+    expect(button.props.accessibilityState.selected).toBe(true);
+  });
+
+  it('requires confirmation before clearing a started TV show history', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: { isFullyWatched: false, regularTotalEpisodes: 60, regularWatchedEpisodes: 1 },
+      isLoading: false,
+    });
+
+    render(<WatchedButton target={{ type: 'tvshow', contentId: 'tv-id' }} />);
+    fireEvent.press(screen.getByLabelText('Mark as unwatched'));
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Remove watched status?',
+      'This will mark all currently released episodes of this show as unwatched. Your rating will be kept.',
+      expect.any(Array),
+    );
+    expect(mockMutate).not.toHaveBeenCalled();
+
+    const buttons = (Alert.alert as jest.Mock).mock.calls[0][2] as Array<{
+      text: string;
+      onPress?: () => void;
+    }>;
+    buttons.find((button) => button.text === 'Mark as unwatched')?.onPress?.();
+
+    expect(mockMutate).toHaveBeenCalledWith(true, expect.any(Object));
+  });
+
+  it('does not clear TV show history when the confirmation is cancelled', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: { isFullyWatched: false, regularTotalEpisodes: 60, regularWatchedEpisodes: 1 },
+      isLoading: false,
+    });
+
+    render(<WatchedButton target={{ type: 'tvshow', contentId: 'tv-id' }} />);
+    fireEvent.press(screen.getByLabelText('Mark as unwatched'));
+
+    const buttons = (Alert.alert as jest.Mock).mock.calls[0][2] as Array<{
+      style?: string;
+      onPress?: () => void;
+    }>;
+    buttons.find((button) => button.style === 'cancel')?.onPress?.();
+
+    expect(mockMutate).not.toHaveBeenCalled();
   });
 
   it('submits movie watched mutation on press', () => {
