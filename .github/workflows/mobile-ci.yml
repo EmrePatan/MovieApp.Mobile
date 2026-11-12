@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Typecheck, changed-file lint and Home tests
+    name: Typecheck, changed-file lint and focused tests
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -68,5 +68,9 @@ jobs:
           printf '%s\n' "${FILES}"
           printf '%s\n' "${FILES}" | xargs npx eslint
 
-      - name: Personalized Home query tests
-        run: npm test -- --runInBand __tests__/features/home/useHomePersonalized.test.tsx
+      - name: Focused Home and TV watch progress tests
+        run: >-
+          npm test -- --runInBand
+          __tests__/features/home/useHomePersonalized.test.tsx
+          __tests__/features/watch-history/watched-button.test.tsx
+          __tests__/features/details/season-list-progress.test.tsx
