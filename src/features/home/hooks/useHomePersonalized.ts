@@ -84,7 +84,7 @@ export function useHomePersonalized(
       return response;
     },
     staleTime: 60_000,
-    refetchOnMount: 'always',
+    refetchOnMount: true,
     enabled: queryEnabled,
   });
 }

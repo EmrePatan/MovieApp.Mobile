@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   colorGlowWrap: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     overflow: 'hidden',
   },
   colorGlow: {

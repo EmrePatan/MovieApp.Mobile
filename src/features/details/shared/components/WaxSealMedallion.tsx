@@ -26,12 +26,12 @@ export function WaxSealMedallion({
       {completed ? (
         <LinearGradient
           colors={[colors.progressCompleted, '#3D8A62']}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
       ) : (
         <LinearGradient
           colors={[colors.accentStrong, colors.accentMuted]}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
       )}
       {pending ? (

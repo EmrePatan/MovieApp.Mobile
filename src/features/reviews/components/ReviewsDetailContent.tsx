@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   composerDismissBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'transparent',
   },
   composerDock: {

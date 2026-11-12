@@ -141,6 +141,28 @@ describe('useHomePersonalized', () => {
     });
   });
 
+  it('does not force a network refetch while same-key personalized data is fresh', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const queryKey = homePersonalizedQueryKey('user-a', 'all', 10, 'TR');
+    queryClient.setQueryData(queryKey, {
+      sections: [],
+      isPersonalized: true,
+      generatedAtUtc: '2026-01-01T00:00:00Z',
+    });
+
+    const { result } = renderHook(() => useHomePersonalized('all', 10), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.data?.generatedAtUtc).toBe('2026-01-01T00:00:00Z');
+    expect(result.current.isFetching).toBe(false);
+    expect(getHomePersonalized).not.toHaveBeenCalled();
+  });
+
   it('keeps same-key data visible during a background refetch', async () => {
     let resolveNetwork!: (value: {
       sections: [];
@@ -156,11 +178,15 @@ describe('useHomePersonalized', () => {
 
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const queryKey = homePersonalizedQueryKey('user-a', 'all', 10, 'TR');
-    queryClient.setQueryData(queryKey, {
-      sections: [],
-      isPersonalized: true,
-      generatedAtUtc: '2026-01-01T00:00:00Z',
-    });
+    queryClient.setQueryData(
+      queryKey,
+      {
+        sections: [],
+        isPersonalized: true,
+        generatedAtUtc: '2026-01-01T00:00:00Z',
+      },
+      { updatedAt: 0 },
+    );
 
     const { result } = renderHook(() => useHomePersonalized('all', 10), {
       wrapper: createWrapper(queryClient),
