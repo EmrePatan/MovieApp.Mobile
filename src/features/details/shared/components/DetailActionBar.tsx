@@ -48,7 +48,7 @@ export function DetailActionBar({
           <WatchedButton
             target={watchedTarget}
             variant="detail"
-            onMarkedWatched={personalRating?.handleMarkedWatched}
+            onMarkedWatched={contentType === 'movie' ? personalRating?.handleMarkedWatched : undefined}
             onBeforeUnwatch={personalRating?.confirmUnwatchIfNeeded}
           />
         ) : null}
