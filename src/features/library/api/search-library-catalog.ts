@@ -26,6 +26,7 @@ export async function searchLibraryCatalog(
       normalizedQuery,
       typeFilter === 'person' ? 'all' : typeFilter,
       page,
+      undefined,
       signal,
     );
 
