@@ -12,24 +12,24 @@ export default function TvShowDetailLayout() {
   return (
     <DetailPersonalRatingProvider contentType="tv" contentId={tvShowId} watchEligible>
       <>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-          freezeOnBlur: false,
-        }}
-      >
-        <Stack.Screen name="index" options={ratedDetailStackScreenOptions} />
-        <Stack.Screen
-          name="reviews"
-          options={{ ...detailChildStackScreenOptions, headerBackButtonMenuEnabled: false }}
-        />
-        <Stack.Screen name="credits" options={detailChildStackScreenOptions} />
-        <Stack.Screen name="gallery" options={detailChildStackScreenOptions} />
-        <Stack.Screen name="season/[seasonNumber]" />
-        <Stack.Screen name="season/[seasonNumber]/episode/[episodeNumber]" />
-      </Stack>
-      {tvShowId ? <TvShowCompletionCelebrationLayer tvShowId={tvShowId} /> : null}
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+            freezeOnBlur: false,
+          }}
+        >
+          <Stack.Screen name="index" options={ratedDetailStackScreenOptions} />
+          <Stack.Screen
+            name="reviews"
+            options={{ ...detailChildStackScreenOptions, headerBackButtonMenuEnabled: false }}
+          />
+          <Stack.Screen name="credits" options={detailChildStackScreenOptions} />
+          <Stack.Screen name="gallery" options={detailChildStackScreenOptions} />
+          <Stack.Screen name="season/[seasonNumber]" />
+          <Stack.Screen name="season/[seasonNumber]/episode/[episodeNumber]" />
+        </Stack>
+        {tvShowId ? <TvShowCompletionCelebrationLayer tvShowId={tvShowId} /> : null}
       </>
     </DetailPersonalRatingProvider>
   );
