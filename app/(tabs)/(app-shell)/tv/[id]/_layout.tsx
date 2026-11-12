@@ -1,5 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { TvShowCompletionCelebrationLayer } from '@/features/details/tv/components/TvShowCompletionCelebrationLayer';
+import { DetailPersonalRatingProvider } from '@/features/details/shared/components/DetailPersonalRatingExperience';
 import { detailChildStackScreenOptions } from '@/features/details/shared/navigation/detail-child-stack-options';
 import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 import { colors } from '@/theme/colors';
@@ -9,7 +10,8 @@ export default function TvShowDetailLayout() {
   const tvShowId = typeof id === 'string' ? id : '';
 
   return (
-    <>
+    <DetailPersonalRatingProvider contentType="tv" contentId={tvShowId} watchEligible>
+      <>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -28,6 +30,7 @@ export default function TvShowDetailLayout() {
         <Stack.Screen name="season/[seasonNumber]/episode/[episodeNumber]" />
       </Stack>
       {tvShowId ? <TvShowCompletionCelebrationLayer tvShowId={tvShowId} /> : null}
-    </>
+      </>
+    </DetailPersonalRatingProvider>
   );
 }
