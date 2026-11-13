@@ -176,10 +176,16 @@ jobs:
         shell: bash
         run: |
           nohup npx expo start --dev-client --host localhost --port 8081 > /tmp/expo-metro.log 2>&1 &
+          METRO_PID=$!
           for attempt in $(seq 1 60); do
-            if curl --silent --fail http://127.0.0.1:8081/status >/dev/null; then
-              echo "Metro is ready."
+            if curl --silent --fail http://localhost:8081/status >/dev/null; then
+              echo "Metro is ready (PID: $METRO_PID)."
               exit 0
+            fi
+            if ! kill -0 "$METRO_PID" 2>/dev/null; then
+              echo "Metro process exited before becoming ready." >&2
+              cat /tmp/expo-metro.log
+              exit 1
             fi
             sleep 2
           done
