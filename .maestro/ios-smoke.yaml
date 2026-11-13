@@ -1,11 +1,10 @@
 appId: com.movieapp.mobile
 ---
-# iOS presents a SpringBoard confirmation the first time the custom scheme
-# opens the development client. The system alert is not consistently tappable
-# by its accessibility label in the hosted simulator, so tap the confirmed
-# center of the Open button (68% width, 54% height).
+# The first launch of an Expo development build can show the developer-menu
+# onboarding sheet. Dismiss it by its accessible action before asserting app UI.
 - tapOn:
-    point: "68%,54%"
+    text: "Continue"
+    optional: true
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 180000
