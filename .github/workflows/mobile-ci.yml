@@ -216,8 +216,15 @@ jobs:
 
           echo "Opening Expo development client with the reachable runner LAN URL: $DEV_SERVER_URL"
           xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
-          # Maestro handles the first-launch SpringBoard confirmation in the smoke flow.
           sleep 2
+
+      - name: Accept iOS development-client launch confirmation
+        shell: bash
+        run: |
+          # Maestro's tapOn can report success even when the native SpringBoard
+          # confirmation remains visible. Use the iOS alert API to accept it.
+          npx --yes agent-device@latest alert wait 10000 --platform ios --udid "$IOS_SIMULATOR_UDID"
+          npx --yes agent-device@latest alert accept --platform ios --udid "$IOS_SIMULATOR_UDID"
 
       - name: Run Maestro iOS smoke flow
         run: maestro test --device "$IOS_SIMULATOR_UDID" .maestro/ios-smoke.yaml
