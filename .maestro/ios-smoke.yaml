@@ -1,10 +1,6 @@
 appId: com.movieapp.mobile
 ---
-# The first custom-scheme launch can show an iOS SpringBoard confirmation.
-# Let Maestro handle it through accessibility rather than a separate UI daemon.
-- tapOn:
-    text: "Open"
-    optional: true
+# The workflow accepts the native iOS launch confirmation before starting Maestro.
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 60000
