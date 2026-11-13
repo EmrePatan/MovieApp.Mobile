@@ -53,14 +53,14 @@ jobs:
       - name: Boot an available iPhone simulator
         shell: bash
         run: |
-          DEVICE_LINE="$(xcrun simctl list devices available | grep -m1 -E 'iPhone.*\\([0-9A-F-]{36}\\)' || true)"
+          DEVICE_LINE="$(xcrun simctl list devices available | grep -m1 -E 'iPhone.*\([0-9A-F-]{36}\)' || true)"
           if [ -z "$DEVICE_LINE" ]; then
             echo "No available iPhone simulator was found on this runner." >&2
             xcrun simctl list devices available
             exit 1
           fi
 
-          DEVICE_UDID="$(printf '%s\\n' "$DEVICE_LINE" | sed -E 's/.*\\(([0-9A-F-]{36})\\).*/\\1/')"
+          DEVICE_UDID="$(printf '%s\n' "$DEVICE_LINE" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')"
           echo "IOS_SIMULATOR_UDID=$DEVICE_UDID" >> "$GITHUB_ENV"
           xcrun simctl boot "$DEVICE_UDID" || true
           xcrun simctl bootstatus "$DEVICE_UDID" -b
