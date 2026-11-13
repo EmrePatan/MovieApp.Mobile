@@ -84,6 +84,20 @@ jobs:
           echo "Metro did not become ready in time." >&2
           exit 1
 
+      - name: Open the running Expo development bundle
+        shell: bash
+        run: |
+          DEV_CLIENT_URL="$(grep -Eo 'exp\\+[^[:space:]]+' /tmp/expo-metro.log | head -n1 | sed 's/[[:punct:]]*$//')"
+          if [ -z "$DEV_CLIENT_URL" ]; then
+            cat /tmp/expo-metro.log
+            echo "Expo did not print a development-client URL." >&2
+            exit 1
+          fi
+
+          echo "Opening the Expo development client."
+          xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
+          sleep 10
+
       - name: Run Maestro iOS smoke flow
         run: maestro test --device "$IOS_SIMULATOR_UDID" .maestro/ios-smoke.yaml
 
