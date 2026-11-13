@@ -78,7 +78,34 @@ jobs:
           xcrun simctl bootstatus "$DEVICE_UDID" -b
 
       - name: Build and install the Expo development app
-        run: npx expo run:ios --device "$IOS_SIMULATOR_NAME" --no-bundler --configuration Debug
+        shell: bash
+        run: |
+          # Generate the native iOS project and install pods without asking Expo
+          # to select a device (Expo's --device path treated the simulator UDID
+          # as a physical device and incorrectly required signing).
+          npx expo prebuild --platform ios --no-install
+          pod install --project-directory=ios
+
+          DERIVED_DATA_PATH="$RUNNER_TEMP/MovieCaveDerivedData"
+          xcodebuild \
+            -workspace ios/MovieCave.xcworkspace \
+            -scheme MovieCave \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+          APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/MovieCave.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Built simulator app was not found at $APP_PATH" >&2
+            exit 1
+          fi
+
+          xcrun simctl install "$IOS_SIMULATOR_UDID" "$APP_PATH"
+          xcrun simctl launch "$IOS_SIMULATOR_UDID" com.movieapp.mobile
 
       - name: Start Metro for the development client
         shell: bash
