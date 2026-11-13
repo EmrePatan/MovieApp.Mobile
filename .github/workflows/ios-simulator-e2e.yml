@@ -69,7 +69,7 @@ jobs:
           xcrun simctl bootstatus "$DEVICE_UDID" -b
 
       - name: Build and install the Expo development app
-        run: npx expo run:ios --device "$IOS_SIMULATOR_UDID" --no-bundler --configuration Debug
+        run: npx expo run:ios --device "$IOS_SIMULATOR_NAME" --no-bundler --configuration Debug
 
       - name: Start Metro for the development client
         shell: bash
