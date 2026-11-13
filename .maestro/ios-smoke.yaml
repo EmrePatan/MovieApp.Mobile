@@ -1,10 +1,11 @@
 appId: com.movieapp.mobile
 ---
-# The first custom-scheme launch can show an iOS SpringBoard confirmation.
-# Let Maestro handle it through accessibility rather than a separate UI daemon.
+# iOS presents a SpringBoard confirmation the first time the custom scheme
+# opens the development client. The system alert is not consistently tappable
+# by its accessibility label in the hosted simulator, so tap the confirmed
+# center of the Open button (68% width, 54% height).
 - tapOn:
-    text: "Open"
-    optional: true
+    point: "68%,54%"
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 60000
