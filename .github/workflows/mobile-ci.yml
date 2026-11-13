@@ -203,10 +203,8 @@ jobs:
 
           echo "Opening Expo development client with the configured movieapp URL scheme."
           xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
-          # iOS presents a SpringBoard confirmation for a first-time custom-scheme launch.
-          # Accept it through the simulator accessibility bridge, not a coordinate-based tap.
-          npx --yes agent-device@latest alert accept 2500 --platform ios
-          sleep 10
+          # Maestro handles the first-launch SpringBoard confirmation in the smoke flow.
+          sleep 2
 
       - name: Run Maestro iOS smoke flow
         run: maestro test --device "$IOS_SIMULATOR_UDID" .maestro/ios-smoke.yaml
