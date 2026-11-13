@@ -1,0 +1,8 @@
+appId: com.movieapp.mobile
+---
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 60000
+- assertVisible: "Email"
+- assertVisible: "Password"
+- assertVisible: "Create an account"
