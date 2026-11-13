@@ -114,17 +114,17 @@ jobs:
       - name: Boot an available iPhone simulator
         shell: bash
         run: |
-          DEVICE_LINE="$(xcrun simctl list devices available | grep -m1 -E 'iPhone.*\\([0-9A-F-]{36}\\)' || true)"
+          DEVICE_LINE="$(xcrun simctl list devices available | grep -m1 -E 'iPhone.*\([0-9A-F-]{36}\)' || true)"
           if [ -z "$DEVICE_LINE" ]; then
             echo "No available iPhone simulator was found on this runner." >&2
             xcrun simctl list devices available
             exit 1
           fi
 
-          DEVICE_UDID="$(printf '%s\\n' "$DEVICE_LINE" | sed -E 's/.*\\(([0-9A-F-]{36})\\).*/\\1/')"
+          DEVICE_UDID="$(printf '%s\n' "$DEVICE_LINE" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')"
           if [ -z "$DEVICE_UDID" ]; then
             echo "Could not resolve the iPhone simulator UDID." >&2
-            printf '%s\\n' "$DEVICE_LINE" >&2
+            printf '%s\n' "$DEVICE_LINE" >&2
             exit 1
           fi
 
@@ -140,15 +140,15 @@ jobs:
           pod install --project-directory=ios
 
           DERIVED_DATA_PATH="$RUNNER_TEMP/MovieCaveDerivedData"
-          xcodebuild \\
-            -workspace ios/MovieCave.xcworkspace \\
-            -scheme MovieCave \\
-            -configuration Debug \\
-            -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \\
-            -derivedDataPath "$DERIVED_DATA_PATH" \\
-            CODE_SIGNING_ALLOWED=NO \\
-            CODE_SIGNING_REQUIRED=NO \\
-            CODE_SIGN_IDENTITY="" \\
+          xcodebuild \
+            -workspace ios/MovieCave.xcworkspace \
+            -scheme MovieCave \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
             build
 
           APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/MovieCave.app"
@@ -179,7 +179,7 @@ jobs:
       - name: Open the running Expo development bundle
         shell: bash
         run: |
-          DEV_CLIENT_URL="$(grep -Eo 'exp\\+[^[:space:]]+' /tmp/expo-metro.log | head -n1 | sed 's/[[:punct:]]*$//')"
+          DEV_CLIENT_URL="$(grep -Eo 'exp\+[^[:space:]]+' /tmp/expo-metro.log | head -n1 | sed 's/[[:punct:]]*$//')"
           if [ -z "$DEV_CLIENT_URL" ]; then
             cat /tmp/expo-metro.log
             echo "Expo did not print a development-client URL." >&2
