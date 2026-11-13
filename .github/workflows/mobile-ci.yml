@@ -116,8 +116,9 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
-          SWIFT_VERSION="$(swift --version | grep -Eo 'Swift version [0-9]+\\.[0-9]+' | head -n1 | awk '{print $3}')"
-          if [ -z "$SWIFT_VERSION" ] || [ "$(printf '%s\\n' "$SWIFT_VERSION" "6.2" | sort -V | head -n1)" != "6.2" ]; then
+          SWIFT_VERSION="$(swift --version | awk '{for (i = 1; i <= NF; i++) if ($i == "version") {print $(i + 1); exit}}' | cut -d. -f1,2)"
+          MIN_SWIFT_VERSION="$(printf '%s\n' "$SWIFT_VERSION" "6.2" | sort -V | head -n1)"
+          if [ -z "$SWIFT_VERSION" ] || [ "$MIN_SWIFT_VERSION" != "6.2" ]; then
             echo "Swift 6.2 or newer is required by the iOS dependency graph; found $SWIFT_VERSION." >&2
             exit 1
           fi
