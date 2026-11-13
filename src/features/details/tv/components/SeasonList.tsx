@@ -113,10 +113,9 @@ export function SeasonListItem({
   const [feedback, setFeedback] = useState<string | null>(null);
   const label = season.name ?? t('common.seasonNumber', { number: season.seasonNumber });
   const airYear = season.airDate ? season.airDate.slice(0, 4) : null;
-  const totalEpisodes = Math.max(
-    seasonProgress?.totalEpisodes ?? 0,
-    season.episodeCount ?? 0,
-  );
+  // Progress totals are the authoritative count of released episodes. Catalog episodeCount
+  // can include unaired episodes and must not inflate watch progress or bulk actions.
+  const totalEpisodes = seasonProgress?.totalEpisodes ?? 0;
   const watchedEpisodes = seasonProgress?.watchedEpisodes ?? 0;
   const showProgress = showWatchedControl && progressReady && totalEpisodes > 0;
   const isFullyWatched = getSeasonProgressState(watchedEpisodes, totalEpisodes) === 'completed';

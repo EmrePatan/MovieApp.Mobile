@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { SeasonList } from '@/features/details/tv/components/SeasonList';
 import { useAuth } from '@/auth/useAuth';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
@@ -25,6 +25,8 @@ jest.mock('@/features/watch-history/hooks/useWatchHistoryMutations', () => ({
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
+
+const mockSeasonMutate = jest.fn();
 
 jest.mock('@/hooks/useRequireAuth', () => ({
   useRequireAuth: () => ({
@@ -65,9 +67,10 @@ function buildAggregateProgress(seasonCount: number) {
 describe('SeasonList aggregate progress', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSeasonMutate.mockClear();
     (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
     (useToggleSeasonWatched as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+      mutate: mockSeasonMutate,
       isPending: false,
     });
     (useSeasonProgress as jest.Mock).mockImplementation(() => {
@@ -88,6 +91,36 @@ describe('SeasonList aggregate progress', () => {
     expect(useSeasonProgress).not.toHaveBeenCalled();
     expect(screen.getByText('4 / 10')).toBeTruthy();
     expect(screen.getAllByTestId('season-list-progress-bar').length).toBe(2);
+  });
+
+  it('uses released episode totals instead of the catalog episode count', () => {
+    (useTvShowProgress as jest.Mock).mockReturnValue({
+      data: {
+        tvShowId: 'tv-id',
+        totalEpisodes: 10,
+        watchedEpisodes: 4,
+        progressPercentage: 40,
+        nextEpisode: null,
+        seasons: [
+          { seasonNumber: 1, totalEpisodes: 10, watchedEpisodes: 4, progressPercentage: 40 },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+    const catalogSeason = { ...buildSeasons(1)[0], episodeCount: 12 };
+
+    render(<SeasonList tvShowId="tv-id" seasons={[catalogSeason]} />);
+
+    expect(screen.getByText('4 / 10')).toBeTruthy();
+    expect(screen.queryByText('4 / 12')).toBeNull();
+
+    fireEvent.press(screen.getByTestId('season-watched-toggle-1'));
+
+    expect(mockSeasonMutate).toHaveBeenCalledWith(
+      { isFullyWatched: false, totalEpisodes: 10, episodeIds: [] },
+      expect.any(Object),
+    );
   });
 
   it('still uses one aggregate TV progress query for ten seasons', () => {

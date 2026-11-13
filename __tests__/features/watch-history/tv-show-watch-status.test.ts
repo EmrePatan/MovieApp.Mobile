@@ -1,6 +1,7 @@
 import {
   getRegularSeasonTotals,
   isTvShowFullyWatched,
+  hasStartedTvShow,
 } from '@/features/watch-history/utils/tv-show-watch-status';
 import type { TvShowWatchProgressResponse } from '@/features/watch-history/types';
 
@@ -26,17 +27,22 @@ function buildProgress(
 }
 
 describe('tv show watch status helpers', () => {
-  it('treats partial regular-season progress as inactive', () => {
+  it('treats partial regular-season progress as started but not fully watched', () => {
     const progress = buildProgress();
 
     expect(getRegularSeasonTotals(progress)).toEqual({
       regularTotalEpisodes: 60,
       regularWatchedEpisodes: 34,
     });
+    expect(hasStartedTvShow(progress)).toBe(true);
     expect(isTvShowFullyWatched(progress)).toBe(false);
   });
 
-  it('treats all regular seasons watched as active even when season zero is unwatched', () => {
+  it('does not treat a show with no watched regular episodes as started', () => {
+    expect(hasStartedTvShow(buildProgress({ regularWatchedEpisodes: 0, watchedEpisodes: 0 }))).toBe(false);
+  });
+
+  it('treats all regular seasons watched as started even when season zero is unwatched', () => {
     const progress = buildProgress({
       watchedEpisodes: 62,
       regularWatchedEpisodes: 60,
@@ -48,6 +54,7 @@ describe('tv show watch status helpers', () => {
       ],
     });
 
+    expect(hasStartedTvShow(progress)).toBe(true);
     expect(isTvShowFullyWatched(progress)).toBe(true);
   });
 
