@@ -197,13 +197,11 @@ jobs:
       - name: Open the running Expo development bundle
         shell: bash
         run: |
-          DEV_CLIENT_URL="$(grep -Eo 'exp\+[^[:space:]]+' /tmp/expo-metro.log | head -n1 | sed 's/[[:punct:]]*$//')"
-          if [ -z "$DEV_CLIENT_URL" ]; then
-            cat /tmp/expo-metro.log
-            echo "Expo did not print a development-client URL." >&2
-            exit 1
-          fi
+          DEV_SERVER_URL="http://127.0.0.1:8081"
+          ENCODED_DEV_SERVER_URL="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$DEV_SERVER_URL")"
+          DEV_CLIENT_URL="movieapp://expo-development-client/?url=$ENCODED_DEV_SERVER_URL"
 
+          echo "Opening Expo development client with the configured movieapp URL scheme."
           xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
           sleep 10
 
