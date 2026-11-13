@@ -175,11 +175,21 @@ jobs:
       - name: Start Metro for the development client
         shell: bash
         run: |
-          nohup npx expo start --dev-client --host localhost --port 8081 > /tmp/expo-metro.log 2>&1 &
+          # The iOS Simulator has its own loopback interface; 127.0.0.1 points
+          # to the simulator itself, not the macOS GitHub Actions host.
+          HOST_IP="$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || true)"
+          if [ -z "$HOST_IP" ]; then
+            echo "Could not determine the macOS runner LAN IP for the iOS Simulator." >&2
+            ifconfig
+            exit 1
+          fi
+          echo "METRO_HOST_IP=$HOST_IP" >> "$GITHUB_ENV"
+
+          nohup npx expo start --dev-client --host lan --port 8081 > /tmp/expo-metro.log 2>&1 &
           METRO_PID=$!
           for attempt in $(seq 1 60); do
-            if curl --silent --fail http://localhost:8081/status >/dev/null; then
-              echo "Metro is ready (PID: $METRO_PID)."
+            if curl --silent --fail "http://$HOST_IP:8081/status" >/dev/null; then
+              echo "Metro is ready on $HOST_IP (PID: $METRO_PID)."
               exit 0
             fi
             if ! kill -0 "$METRO_PID" 2>/dev/null; then
@@ -197,11 +207,11 @@ jobs:
       - name: Open the running Expo development bundle
         shell: bash
         run: |
-          DEV_SERVER_URL="http://127.0.0.1:8081"
+          DEV_SERVER_URL="http://$METRO_HOST_IP:8081"
           ENCODED_DEV_SERVER_URL="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$DEV_SERVER_URL")"
           DEV_CLIENT_URL="movieapp://expo-development-client/?url=$ENCODED_DEV_SERVER_URL"
 
-          echo "Opening Expo development client with the configured movieapp URL scheme."
+          echo "Opening Expo development client with the reachable Metro LAN URL."
           xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
           # Maestro handles the first-launch SpringBoard confirmation in the smoke flow.
           sleep 2
