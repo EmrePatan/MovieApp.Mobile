@@ -207,6 +207,16 @@ jobs:
           echo "Metro did not become ready in time at $DEV_SERVER_URL." >&2
           exit 1
 
+      - name: Prewarm the iOS development bundle
+        shell: bash
+        run: |
+          DEV_SERVER_URL="${DEV_SERVER_URL:?DEV_SERVER_URL was not set by the Metro step}"
+          BUNDLE_URL="$DEV_SERVER_URL/node_modules/expo-router/entry.bundle?platform=ios&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+
+          echo "Prebuilding the exact iOS development bundle before opening the simulator app."
+          curl --fail --show-error --silent --max-time 240 "$BUNDLE_URL" -o /dev/null
+          echo "The iOS development bundle is ready."
+
       - name: Open the running Expo development bundle
         shell: bash
         run: |
