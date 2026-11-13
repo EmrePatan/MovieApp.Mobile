@@ -175,21 +175,24 @@ jobs:
       - name: Start Metro for the development client
         shell: bash
         run: |
-          # The iOS Simulator has its own loopback interface; 127.0.0.1 points
-          # to the simulator itself, not the macOS GitHub Actions host.
-          HOST_IP="$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || true)"
-          if [ -z "$HOST_IP" ]; then
-            echo "Could not determine the macOS runner LAN IP for the iOS Simulator." >&2
-            ifconfig
+          NETWORK_INTERFACE="$(route -n get default | awk '/interface:/{print $2}')"
+          DEV_SERVER_HOST="$(ipconfig getifaddr "$NETWORK_INTERFACE" 2>/dev/null || true)"
+          if [ -z "$DEV_SERVER_HOST" ]; then
+            DEV_SERVER_HOST="$(ipconfig getifaddr en0 2>/dev/null || true)"
+          fi
+          if [ -z "$DEV_SERVER_HOST" ]; then
+            echo "Could not determine the macOS runner LAN address for the iOS simulator." >&2
+            route -n get default
             exit 1
           fi
-          echo "METRO_HOST_IP=$HOST_IP" >> "$GITHUB_ENV"
 
+          echo "DEV_SERVER_URL=http://$DEV_SERVER_HOST:8081" >> "$GITHUB_ENV"
+          echo "Starting Metro on the runner LAN address: $DEV_SERVER_HOST"
           nohup npx expo start --dev-client --host lan --port 8081 > /tmp/expo-metro.log 2>&1 &
           METRO_PID=$!
           for attempt in $(seq 1 60); do
-            if curl --silent --fail "http://$HOST_IP:8081/status" >/dev/null; then
-              echo "Metro is ready on $HOST_IP (PID: $METRO_PID)."
+            if curl --silent --fail "http://$DEV_SERVER_HOST:8081/status" >/dev/null; then
+              echo "Metro is ready at $DEV_SERVER_URL (PID: $METRO_PID)."
               exit 0
             fi
             if ! kill -0 "$METRO_PID" 2>/dev/null; then
@@ -201,17 +204,17 @@ jobs:
           done
 
           cat /tmp/expo-metro.log
-          echo "Metro did not become ready in time." >&2
+          echo "Metro did not become ready in time at $DEV_SERVER_URL." >&2
           exit 1
 
       - name: Open the running Expo development bundle
         shell: bash
         run: |
-          DEV_SERVER_URL="http://$METRO_HOST_IP:8081"
+          DEV_SERVER_URL="${DEV_SERVER_URL:?DEV_SERVER_URL was not set by the Metro step}"
           ENCODED_DEV_SERVER_URL="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$DEV_SERVER_URL")"
           DEV_CLIENT_URL="movieapp://expo-development-client/?url=$ENCODED_DEV_SERVER_URL"
 
-          echo "Opening Expo development client with the reachable Metro LAN URL."
+          echo "Opening Expo development client with the reachable runner LAN URL: $DEV_SERVER_URL"
           xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
           # Maestro handles the first-launch SpringBoard confirmation in the smoke flow.
           sleep 2
