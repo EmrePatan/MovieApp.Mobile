@@ -1,6 +1,10 @@
 appId: com.movieapp.mobile
 ---
-- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 15000
+- tapOn:
+    point: "68%, 54%"
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 60000
