@@ -55,10 +55,8 @@ describe('AppConfigProvider startup resilience', () => {
 
     const { result } = renderHook(() => useAppConfig(), { wrapper });
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(result.current.isStartupResolved).toBe(true);
-      });
+    await waitFor(() => {
+      expect(result.current.isStartupResolved).toBe(true);
     });
 
     expect(result.current.config).toEqual(remoteConfig);
