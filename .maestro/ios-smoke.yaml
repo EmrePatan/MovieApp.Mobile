@@ -1,11 +1,14 @@
 appId: com.movieapp.mobile
 ---
-# iOS SpringBoard's "Open in Movie Cave?" alert is not reliably tappable
-# by its accessibility label in the simulator. Tap the confirmed Open button
-# location (centered in the right-hand action) using screen-relative coords.
+# First accept iOS's "Open in Movie Cave?" SpringBoard confirmation.
 - tapOn:
     point: "68%,54%"
     retryTapIfNoChange: true
+# Expo development builds show a first-run developer-menu education sheet
+# after the deep link is opened. Dismiss it before asserting the app screen.
+- tapOn:
+    text: "Continue"
+    optional: true
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible: "Sign in"
