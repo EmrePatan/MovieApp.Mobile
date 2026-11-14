@@ -40,7 +40,15 @@ interface AppConfigProviderProps {
 }
 
 export function AppConfigProvider({ children }: AppConfigProviderProps) {
-  const installedBuild = useMemo(() => readInstalledNativeBuild(), []);
+  const installedBuild = useMemo(() => {
+    try {
+      return readInstalledNativeBuild();
+    } catch (error) {
+      // Build metadata is optional; missing native constants must not block the app.
+      console.warn('[AppConfig] Unable to read installed build metadata.', error);
+      return null;
+    }
+  }, []);
   const [config, setConfig] = useState<RemoteAppConfig>(DEFAULT_REMOTE_APP_CONFIG);
   const [isStartupResolved, setIsStartupResolved] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
