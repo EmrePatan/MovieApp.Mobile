@@ -29,7 +29,8 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
     let cancelled = false;
 
     async function hydrate() {
-      const savedLanguage = await getSavedUiLanguage();
+      // A Keychain/SecureStore failure must not keep the app behind the startup gate.
+      const savedLanguage = await getSavedUiLanguage().catch(() => null);
       const resolved = resolveInitialUiLanguage(savedLanguage, getDeviceLanguageCode());
       await changeUiLanguage(resolved.language);
       acceptLanguageTagRef.current = toFormatLocaleTag(resolved.language);
