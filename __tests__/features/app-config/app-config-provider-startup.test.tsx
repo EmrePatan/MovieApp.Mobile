@@ -1,3 +1,5 @@
+jest.unmock('@/features/app-config/hooks/useAppConfig');
+
 import { renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { AppConfigProvider } from '@/features/app-config/AppConfigProvider';
