@@ -1,6 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
-import * as Localization from 'expo-localization';
 import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
 import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
 import { changeUiLanguage } from '@/i18n';
@@ -9,10 +8,6 @@ jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
-}));
-
-jest.mock('expo-localization', () => ({
-  getLocales: jest.fn(() => [{ languageCode: 'tr' }]),
 }));
 
 jest.mock('@/api/client', () => ({
@@ -28,6 +23,12 @@ jest.mock('@/i18n', () => ({
   changeUiLanguage: jest.fn(),
 }));
 
+// jest.setup.ts already registers the shared expo-localization mock.
+// Configure that exact mock instance so the provider and test observe the same locale.
+const mockedLocalization = jest.requireMock('expo-localization') as {
+  getLocales: jest.Mock;
+};
+
 function wrapper({ children }: { children: React.ReactNode }) {
   return <LocalePreferenceProvider>{children}</LocalePreferenceProvider>;
 }
@@ -35,7 +36,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 describe('LocalePreferenceProvider startup hydration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (Localization.getLocales as jest.Mock).mockReturnValue([{ languageCode: 'tr' }]);
+    mockedLocalization.getLocales.mockReturnValue([{ languageCode: 'tr' }]);
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     (changeUiLanguage as jest.Mock).mockResolvedValue(undefined);
   });
@@ -51,6 +52,7 @@ describe('LocalePreferenceProvider startup hydration', () => {
       });
     });
 
+    expect(mockedLocalization.getLocales).toHaveBeenCalled();
     expect(hook.result.current.language).toBe('tr');
     expect(hook.result.current.source).toBe('device');
     expect(changeUiLanguage).toHaveBeenCalledWith('tr');
