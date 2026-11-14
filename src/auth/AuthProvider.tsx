@@ -207,6 +207,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           },
           () => isMounted,
         );
+      } catch (error) {
+        // SecureStore can be temporarily unavailable (for example, missing simulator
+        // Keychain entitlements). Never fall back to plaintext token storage.
+        console.warn('[Auth] Secure session bootstrap failed; continuing signed out.', error);
+        if (isMounted) {
+          syncToken(null);
+          setUser(null);
+        }
       } finally {
         if (isMounted) {
           setIsSessionRestored(true);
