@@ -1,9 +1,9 @@
 appId: com.movieapp.mobile
 ---
-# iOS shows a SpringBoard confirmation the first time the custom development
-# URL is opened. Accept it before waiting for the app's sign-in screen.
+# Dismiss the Expo development-client first-run education sheet.
+# This is distinct from the iOS "Open in ..." system confirmation.
 - tapOn:
-    text: "Open"
+    text: "Continue"
     optional: true
 - extendedWaitUntil:
     visible: "Sign in"
