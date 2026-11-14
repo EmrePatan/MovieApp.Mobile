@@ -122,6 +122,9 @@ jobs:
           "$HOME/.maestro/bin/maestro" --version | tee "$RUNNER_TEMP/maestro-version.txt"
           grep -F "2.12.1" "$RUNNER_TEMP/maestro-version.txt"
 
+      - name: Validate Maestro flow syntax
+        run: maestro check-syntax .maestro/ios-smoke.yaml
+
       - name: Verify Xcode and Swift toolchain
         shell: bash
         run: |
