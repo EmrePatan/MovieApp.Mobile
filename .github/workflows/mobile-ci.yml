@@ -153,7 +153,7 @@ jobs:
           xcrun simctl boot "$DEVICE_UDID" || true
           xcrun simctl bootstatus "$DEVICE_UDID" -b
 
-      - name: Build and install the Expo development app
+      - name: Build and install the embedded Release app
         shell: bash
         run: |
           npx expo prebuild --platform ios --no-install
@@ -164,7 +164,7 @@ jobs:
           xcodebuild \
             -workspace ios/MovieCave.xcworkspace \
             -scheme MovieCave \
-            -configuration Debug \
+            -configuration Release \
             -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
             -derivedDataPath "$DERIVED_DATA_PATH" \
             CODE_SIGNING_ALLOWED=YES \
@@ -172,7 +172,7 @@ jobs:
             CODE_SIGN_IDENTITY=- \
             build
 
-          APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/MovieCave.app"
+          APP_PATH="$DERIVED_DATA_PATH/Build/Products/Release-iphonesimulator/MovieCave.app"
           if [ ! -d "$APP_PATH" ]; then
             echo "Built simulator app was not found at $APP_PATH" >&2
             exit 1
@@ -202,13 +202,5 @@ jobs:
         with:
           name: ios-smoke-diagnostics
           path: ${{ runner.temp }}/ios-smoke-diagnostics
-          if-no-files-found: ignore
-          retention-days: 7
-      - name: Upload Metro log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-simulator-metro-log
-          path: /tmp/expo-metro.log
           if-no-files-found: ignore
           retention-days: 7
