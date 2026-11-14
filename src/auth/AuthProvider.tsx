@@ -20,7 +20,7 @@ import {
   verifyEmailRequest,
 } from './auth-api';
 import { requestSocialIdentityToken } from './social-auth-service';
-import type { SocialAuthProvider } from '@/models/api/auth';
+import type { SocialAuthProvider, UserProfile } from '@/models/api/auth';
 import {
   getAccessToken,
   getRefreshToken,
@@ -30,7 +30,6 @@ import {
   saveRefreshToken,
 } from './auth-storage';
 import type { AuthContextValue } from './auth-types';
-import type { UserProfile } from '@/models/api/auth';
 import { queryClient } from '@/api/query-client';
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
 import { clearRecentSearchesForUser } from '@/features/search/recent-searches/recent-search-storage';
