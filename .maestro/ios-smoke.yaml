@@ -1,9 +1,11 @@
 appId: com.movieapp.mobile
 ---
-# First accept iOS's "Open in Movie Cave?" SpringBoard confirmation.
+# Accept iOS's SpringBoard confirmation only after its action is visible.
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 30000
 - tapOn:
-    point: "68%,54%"
-    retryTapIfNoChange: true
+    text: "Open"
 # The deep link can take time to leave Expo's development-server launcher.
 # Wait for the first-run education prompt instead of attempting an early optional tap.
 - extendedWaitUntil:
