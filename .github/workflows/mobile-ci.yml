@@ -72,6 +72,7 @@ jobs:
         run: >-
           npm test -- --runInBand
           __tests__/auth/auth-bootstrap.test.tsx
+          __tests__/auth/pending-auth-deep-link.test.ts
           __tests__/bootstrap/app-startup-gate.test.tsx
           __tests__/features/app-config/app-config-provider-startup.test.tsx
           __tests__/features/locale/locale-preference-provider.test.tsx
