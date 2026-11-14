@@ -139,6 +139,8 @@ export function NotificationBootstrapProvider({
         isAuthenticated,
         navigate,
         invalidateNotifications,
+      }).catch((error) => {
+        console.warn('[Notifications] Failed to process a notification response.', error);
       });
     },
     [isAuthenticated, invalidateNotifications, navigate],
@@ -164,15 +166,19 @@ export function NotificationBootstrapProvider({
       console.warn('[Notifications] Listener registration failed; continuing without push listeners.', error);
     }
 
-    void Notifications.getLastNotificationResponseAsync()
-      .then((response) => {
-        if (response) {
-          processResponse(response);
-        }
-      })
-      .catch((error) => {
-        console.warn('[Notifications] Failed to restore the last notification response.', error);
-      });
+    try {
+      void Notifications.getLastNotificationResponseAsync()
+        .then((response) => {
+          if (response) {
+            processResponse(response);
+          }
+        })
+        .catch((error) => {
+          console.warn('[Notifications] Failed to restore the last notification response.', error);
+        });
+    } catch (error) {
+      console.warn('[Notifications] Native last-response lookup is unavailable.', error);
+    }
 
     return () => {
       receivedSubscription?.remove();
