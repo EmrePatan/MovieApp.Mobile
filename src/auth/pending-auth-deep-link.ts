@@ -76,19 +76,27 @@ export function ensureAuthDeepLinkListener(): void {
     captureAuthDeepLink(launchUrl);
   }
 
-  void Linking.getInitialURL().then((url) => {
-    if (!hasPendingAuthDeepLink() && !restoreInFlight) {
-      if (url) {
-        traceAuthDeepLink('launch_url_read', {
-          hasUrl: true,
-          flow: parseAuthDeepLink(url)?.kind,
-        });
+  void Linking.getInitialURL()
+    .then((url) => {
+      if (!hasPendingAuthDeepLink() && !restoreInFlight) {
+        if (url) {
+          traceAuthDeepLink('launch_url_read', {
+            hasUrl: true,
+            flow: parseAuthDeepLink(url)?.kind,
+          });
+        }
+        captureAuthDeepLink(url);
       }
-      captureAuthDeepLink(url);
-    }
-  });
+    })
+    .catch((error) => {
+      console.warn('[DeepLink] Unable to restore the initial auth URL.', error);
+    });
 
-  Linking.addEventListener('url', ({ url }) => {
-    captureAuthDeepLink(url);
-  });
+  try {
+    Linking.addEventListener('url', ({ url }) => {
+      captureAuthDeepLink(url);
+    });
+  } catch (error) {
+    console.warn('[DeepLink] Unable to register the auth URL listener.', error);
+  }
 }
