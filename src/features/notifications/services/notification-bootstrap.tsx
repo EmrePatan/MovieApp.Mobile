@@ -145,25 +145,34 @@ export function NotificationBootstrapProvider({
   );
 
   useEffect(() => {
-    const receivedSubscription = Notifications.addNotificationReceivedListener(() => {
-      invalidateNotifications();
-    });
+    let receivedSubscription: Notifications.EventSubscription | undefined;
+    let responseSubscription: Notifications.EventSubscription | undefined;
 
-    const responseSubscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+    try {
+      receivedSubscription = Notifications.addNotificationReceivedListener(() => {
+        invalidateNotifications();
+      });
+      responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
         processResponse(response);
-      },
-    );
+      });
+    } catch (error) {
+      // Native notification APIs may be unavailable in simulators or restricted builds.
+      console.warn('[Notifications] Listener registration failed; continuing without push listeners.', error);
+    }
 
-    void Notifications.getLastNotificationResponseAsync().then((response) => {
-      if (response) {
-        processResponse(response);
-      }
-    });
+    void Notifications.getLastNotificationResponseAsync()
+      .then((response) => {
+        if (response) {
+          processResponse(response);
+        }
+      })
+      .catch((error) => {
+        console.warn('[Notifications] Failed to restore the last notification response.', error);
+      });
 
     return () => {
-      receivedSubscription.remove();
-      responseSubscription.remove();
+      receivedSubscription?.remove();
+      responseSubscription?.remove();
     };
   }, [invalidateNotifications, processResponse]);
 
