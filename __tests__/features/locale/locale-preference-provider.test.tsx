@@ -10,17 +10,14 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-jest.mock('expo-localization', () => ({
-  getLocales: jest.fn(() => [{ languageCode: 'tr' }]),
+jest.mock('@/features/locale/resolve-ui-locale', () => ({
+  getDeviceLanguageCode: jest.fn(() => 'tr'),
+  resolveInitialUiLanguage: jest.fn((savedLanguage: string | null, deviceLanguageCode?: string | null) => {
+    if (savedLanguage) return { language: savedLanguage, source: 'saved' };
+    if (deviceLanguageCode) return { language: 'tr', source: 'device' };
+    return { language: 'en', source: 'fallback' };
+  }),
 }));
-
-jest.mock('@/features/locale/resolve-ui-locale', () => {
-  const actual = jest.requireActual('@/features/locale/resolve-ui-locale');
-  return {
-    ...actual,
-    getDeviceLanguageCode: jest.fn(() => 'tr'),
-  };
-});
 
 jest.mock('@/api/client', () => ({
   api: { setAcceptLanguageGetter: jest.fn() },
