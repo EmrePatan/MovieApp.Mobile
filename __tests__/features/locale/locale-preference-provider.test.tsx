@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
+import * as Localization from 'expo-localization';
 import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
 import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
 import { changeUiLanguage } from '@/i18n';
@@ -10,13 +11,8 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-jest.mock('@/features/locale/resolve-ui-locale', () => ({
-  getDeviceLanguageCode: jest.fn(() => 'tr'),
-  resolveInitialUiLanguage: jest.fn((savedLanguage: string | null, deviceLanguageCode?: string | null) => {
-    if (savedLanguage) return { language: savedLanguage, source: 'saved' };
-    if (deviceLanguageCode) return { language: 'tr', source: 'device' };
-    return { language: 'en', source: 'fallback' };
-  }),
+jest.mock('expo-localization', () => ({
+  getLocales: jest.fn(() => [{ languageCode: 'tr' }]),
 }));
 
 jest.mock('@/api/client', () => ({
@@ -39,6 +35,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 describe('LocalePreferenceProvider startup hydration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (Localization.getLocales as jest.Mock).mockReturnValue([{ languageCode: 'tr' }]);
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     (changeUiLanguage as jest.Mock).mockResolvedValue(undefined);
   });
