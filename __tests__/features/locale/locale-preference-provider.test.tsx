@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { renderHook, waitFor } from '@testing-library/react-native';
 import { useContext } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {
@@ -49,10 +49,8 @@ describe('LocalePreferenceProvider startup hydration', () => {
 
     const hook = renderHook(() => useContext(LocalePreferenceContext), { wrapper });
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(hook.result.current.isHydrated).toBe(true);
-      });
+    await waitFor(() => {
+      expect(hook.result.current.isHydrated).toBe(true);
     });
 
     expect(mockedLocalization.getLocales).toHaveBeenCalled();
@@ -69,10 +67,8 @@ describe('LocalePreferenceProvider startup hydration', () => {
 
     const hook = renderHook(() => useContext(LocalePreferenceContext), { wrapper });
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(hook.result.current.isHydrated).toBe(true);
-      });
+    await waitFor(() => {
+      expect(hook.result.current.isHydrated).toBe(true);
     });
 
     expect(hook.result.current.language).toBe('en');
