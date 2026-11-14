@@ -96,6 +96,27 @@ describe('AuthProvider bootstrap', () => {
     });
   });
 
+  it('unblocks startup signed out when SecureStore cannot read the access token', async () => {
+    (getAccessToken as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const screen = render(
+      <AuthProvider>
+        <AuthProbe />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').props.children).toBe('ready');
+      expect(screen.getByTestId('session-restored').props.children).toBe('yes');
+      expect(screen.getByTestId('authenticated').props.children).toBe('no');
+      expect(screen.getByTestId('user').props.children).toBe('none');
+    });
+
+    expect(getCurrentUser).not.toHaveBeenCalled();
+    warning.mockRestore();
+  });
+
   it('clears the session when /api/auth/me returns unauthorized', async () => {
     (getAccessToken as jest.Mock).mockResolvedValue('expired-token');
     (getCurrentUser as jest.Mock).mockRejectedValue(
