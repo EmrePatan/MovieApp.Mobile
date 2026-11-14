@@ -32,15 +32,27 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
       // A Keychain/SecureStore failure must not keep the app behind the startup gate.
       const savedLanguage = await getSavedUiLanguage().catch(() => null);
       const resolved = resolveInitialUiLanguage(savedLanguage, getDeviceLanguageCode());
-      await changeUiLanguage(resolved.language);
-      acceptLanguageTagRef.current = toFormatLocaleTag(resolved.language);
+      let languageToApply = resolved.language;
+      let sourceToApply = resolved.source;
+
+      try {
+        await changeUiLanguage(languageToApply);
+      } catch (error) {
+        // Do not leave the app behind the locale startup gate if i18n initialization fails.
+        console.warn('[Locale] Failed to apply the preferred language; falling back to English.', error);
+        languageToApply = 'en';
+        sourceToApply = 'fallback';
+        await changeUiLanguage('en').catch(() => undefined);
+      }
+
+      acceptLanguageTagRef.current = toFormatLocaleTag(languageToApply);
 
       if (!cancelled) {
-        if (resolved.language !== 'en') {
+        if (languageToApply !== 'en') {
           invalidateLocalizedDetailQueries(queryClient);
         }
-        setLanguageState(resolved.language);
-        setSource(resolved.source);
+        setLanguageState(languageToApply);
+        setSource(sourceToApply);
         setIsHydrated(true);
       }
     }
