@@ -7,8 +7,12 @@ let restoreInFlight = false;
 let listenerInitialized = false;
 
 function readLaunchAuthDeepLinkUrl(): string | null {
-  const linkingUrl = Linking.getLinkingURL?.() ?? null;
-  return linkingUrl;
+  try {
+    return Linking.getLinkingURL?.() ?? null;
+  } catch (error) {
+    console.warn('[DeepLink] Unable to read the launch URL.', error);
+    return null;
+  }
 }
 
 export function captureAuthDeepLink(url: string | null | undefined): void {
