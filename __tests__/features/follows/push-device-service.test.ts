@@ -83,6 +83,14 @@ describe('ensurePushDeviceRegisteredAsync', () => {
     );
   });
 
+  it('does not register a server token when secure persistence fails', async () => {
+    (saveRegisteredExpoPushToken as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
+
+    await expect(ensurePushDeviceRegisteredAsync()).rejects.toThrow('Keychain unavailable');
+
+    expect(registerPushDevice).not.toHaveBeenCalled();
+  });
+
   it('does not request permission when allowPermissionRequest is false', async () => {
     (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'undetermined' });
 
