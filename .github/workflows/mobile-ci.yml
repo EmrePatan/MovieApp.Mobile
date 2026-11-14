@@ -179,64 +179,7 @@ jobs:
           fi
 
           xcrun simctl install "$IOS_SIMULATOR_UDID" "$APP_PATH"
-          xcrun simctl launch "$IOS_SIMULATOR_UDID" com.movieapp.mobile
-
-      - name: Start Metro for the development client
-        shell: bash
-        run: |
-          NETWORK_INTERFACE="$(route -n get default | awk '/interface:/{print $2}')"
-          DEV_SERVER_HOST="$(ipconfig getifaddr "$NETWORK_INTERFACE" 2>/dev/null || true)"
-          if [ -z "$DEV_SERVER_HOST" ]; then
-            DEV_SERVER_HOST="$(ipconfig getifaddr en0 2>/dev/null || true)"
-          fi
-          if [ -z "$DEV_SERVER_HOST" ]; then
-            echo "Could not determine the macOS runner LAN address for the iOS simulator." >&2
-            route -n get default
-            exit 1
-          fi
-
-          echo "DEV_SERVER_URL=http://$DEV_SERVER_HOST:8081" >> "$GITHUB_ENV"
-          echo "Starting Metro on the runner LAN address: $DEV_SERVER_HOST"
-          nohup npx expo start --dev-client --host lan --port 8081 > /tmp/expo-metro.log 2>&1 &
-          METRO_PID=$!
-          for attempt in $(seq 1 60); do
-            if curl --silent --fail "http://$DEV_SERVER_HOST:8081/status" >/dev/null; then
-              echo "Metro is ready at $DEV_SERVER_URL (PID: $METRO_PID)."
-              exit 0
-            fi
-            if ! kill -0 "$METRO_PID" 2>/dev/null; then
-              echo "Metro process exited before becoming ready." >&2
-              cat /tmp/expo-metro.log
-              exit 1
-            fi
-            sleep 2
-          done
-
-          cat /tmp/expo-metro.log
-          echo "Metro did not become ready in time at $DEV_SERVER_URL." >&2
-          exit 1
-
-      - name: Prewarm the iOS development bundle
-        shell: bash
-        run: |
-          DEV_SERVER_URL="${DEV_SERVER_URL:?DEV_SERVER_URL was not set by the Metro step}"
-          BUNDLE_URL="$DEV_SERVER_URL/node_modules/expo-router/entry.bundle?platform=ios&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.bytecode=1&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
-
-          echo "Prebuilding the exact iOS development bundle before opening the simulator app."
-          curl --fail --show-error --silent --max-time 240 "$BUNDLE_URL" -o /dev/null
-          echo "The iOS development bundle is ready."
-
-      - name: Open the running Expo development bundle
-        shell: bash
-        run: |
-          DEV_SERVER_URL="${DEV_SERVER_URL:?DEV_SERVER_URL was not set by the Metro step}"
-          ENCODED_DEV_SERVER_URL="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$DEV_SERVER_URL")"
-          DEV_CLIENT_URL="movieapp://expo-development-client/?url=$ENCODED_DEV_SERVER_URL"
-
-          echo "Opening Expo development client with the reachable runner LAN URL: $DEV_SERVER_URL"
-          xcrun simctl openurl "$IOS_SIMULATOR_UDID" "$DEV_CLIENT_URL"
-          # Maestro handles the first-launch SpringBoard confirmation in the smoke flow.
-          sleep 2
+          # Maestro launches the installed Release app; no Metro or dev-client deep link is needed.
 
       - name: Run Maestro iOS smoke flow
         run: maestro test --device "$IOS_SIMULATOR_UDID" .maestro/ios-smoke.yaml
