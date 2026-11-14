@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
 import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
@@ -28,6 +28,14 @@ jest.mock('@/api/query-client', () => ({
   queryClient: { invalidateQueries: jest.fn() },
 }));
 
+jest.mock('@/features/locale/resolve-ui-locale', () => ({
+  getDeviceLanguageCode: jest.fn(() => 'tr'),
+  resolveInitialUiLanguage: jest.fn((savedLanguage: string | null, deviceLanguageCode?: string | null) => ({
+    language: savedLanguage ?? (deviceLanguageCode === 'tr' ? 'tr' : 'en'),
+    source: savedLanguage ? 'saved' : deviceLanguageCode ? 'device' : 'fallback',
+  })),
+}));
+
 jest.mock('@/i18n', () => ({
   ensureI18nInitialized: jest.fn().mockResolvedValue(undefined),
   changeUiLanguage: jest.fn(),
@@ -52,10 +60,8 @@ describe('LocalePreferenceProvider startup hydration', () => {
 
     const { result } = renderHook(() => useLocalePreference(), { wrapper });
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(result.current.isHydrated).toBe(true);
-      });
+    await waitFor(() => {
+      expect(result.current.isHydrated).toBe(true);
     });
 
     expect(result.current.language).toBe('tr');
