@@ -36,7 +36,10 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
     let cancelled = false;
 
     void (async () => {
-      await preloadStartupIconFonts();
+      // The icon font is a visual enhancement, not a startup dependency.
+      await preloadStartupIconFonts().catch((error) => {
+        console.warn('[Startup] Icon font preload rejected; continuing with fallback glyphs.', error);
+      });
 
       if (!cancelled) {
         setIconFontsReady(true);
