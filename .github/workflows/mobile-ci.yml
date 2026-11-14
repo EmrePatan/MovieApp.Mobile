@@ -187,6 +187,11 @@ jobs:
             echo "Built simulator app was not found at $APP_PATH" >&2
             exit 1
           fi
+          if [ ! -f "$APP_PATH/main.jsbundle" ]; then
+            echo "Release JavaScript bundle is missing from $APP_PATH; Maestro must not depend on Metro." >&2
+            find "$APP_PATH" -maxdepth 2 -type f | sort | head -100
+            exit 1
+          fi
 
           xcrun simctl install "$IOS_SIMULATOR_UDID" "$APP_PATH"
           # Maestro launches the installed Release app; no Metro or dev-client deep link is needed.
