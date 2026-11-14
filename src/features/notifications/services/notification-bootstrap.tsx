@@ -6,14 +6,19 @@ import { useAuth } from '@/auth/useAuth';
 import { markNotificationRead } from '../api/notifications-api';
 import { buildNotificationRoute } from '../utils/notification-navigation';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+} catch (error) {
+  // Notification presentation is optional and must not prevent the app from loading.
+  console.warn('[Notifications] Failed to install the notification handler.', error);
+}
 
 export function parseNotificationIdFromPushData(
   data: Record<string, unknown> | undefined,
