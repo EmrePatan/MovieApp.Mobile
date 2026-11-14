@@ -5,6 +5,7 @@ import { useAuth } from '@/auth/useAuth';
 import { getAccessToken } from '@/auth/auth-storage';
 import { getCurrentUser } from '@/auth/auth-api';
 import { ApiError } from '@/api/errors';
+import { unregisterKnownPushDeviceAsync } from '@/features/follows/services/push-device-service';
 
 jest.mock('@/auth/auth-storage', () => ({
   getAccessToken: jest.fn(),
@@ -39,8 +40,6 @@ jest.mock('@/features/follows/services/push-device-service', () => ({
   resetPushPermissionRequestState: jest.fn(),
   unregisterKnownPushDeviceAsync: jest.fn(),
 }));
-
-import { unregisterKnownPushDeviceAsync } from '@/features/follows/services/push-device-service';
 
 function AuthProbe() {
   const auth = useAuth();
