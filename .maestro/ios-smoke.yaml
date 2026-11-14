@@ -4,13 +4,19 @@ appId: com.movieapp.mobile
 - tapOn:
     point: "68%,54%"
     retryTapIfNoChange: true
-# Expo's first-run prompt can open the developer menu; dismiss that menu too.
+# The deep link can take time to leave Expo's development-server launcher.
+# Wait for the first-run education prompt instead of attempting an early optional tap.
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 180000
 - tapOn:
     text: "Continue"
-    optional: true
+# Continue opens Expo's developer menu. Wait until its close control is actually present.
+- extendedWaitUntil:
+    visible: "Close"
+    timeout: 30000
 - tapOn:
     text: "Close"
-    optional: true
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible: "Sign in"
