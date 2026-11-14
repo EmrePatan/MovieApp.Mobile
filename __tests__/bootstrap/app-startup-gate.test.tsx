@@ -148,6 +148,26 @@ describe('AppStartupGate', () => {
     });
   });
 
+  it('reveals application UI when font preload rejects unexpectedly', async () => {
+    (startupReadiness.preloadStartupIconFonts as jest.Mock).mockRejectedValue(
+      new Error('native font module unavailable'),
+    );
+    (useAuth as jest.Mock).mockReturnValue({ isLoading: false });
+
+    render(
+      <AppStartupGate>
+        <Text>app-ready</Text>
+      </AppStartupGate>,
+    );
+
+    triggerBrandedSplashLayout();
+    await revealApplicationUi();
+
+    await waitFor(() => {
+      expect(screen.getByText('app-ready')).toBeTruthy();
+    });
+  });
+
   it('hides native splash only once', async () => {
     (useAuth as jest.Mock).mockReturnValue({ isLoading: false });
 
