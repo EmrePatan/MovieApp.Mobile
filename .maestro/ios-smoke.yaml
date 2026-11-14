@@ -4,6 +4,8 @@ appId: com.movieapp.mobile
 # so the smoke test does not depend on Metro, Expo's dev launcher, or a deep-link handoff.
 - launchApp:
     clearState: true
+    permissions:
+      all: deny
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 90000
