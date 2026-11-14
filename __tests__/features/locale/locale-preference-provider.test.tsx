@@ -23,6 +23,7 @@ jest.mock('@/api/query-client', () => ({
 }));
 
 jest.mock('@/i18n', () => ({
+  ensureI18nInitialized: jest.fn().mockResolvedValue(undefined),
   changeUiLanguage: jest.fn(),
 }));
 
