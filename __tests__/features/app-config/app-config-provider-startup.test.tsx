@@ -5,6 +5,14 @@ import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
 import { fetchRemoteAppConfig } from '@/features/app-config/app-config-api';
 import { DEFAULT_REMOTE_APP_CONFIG } from '@/features/app-config/types';
 
+jest.mock('expo-constants', () => ({
+  __esModule: true,
+  default: {
+    platform: { ios: { buildNumber: '9' }, android: { versionCode: 2 } },
+    expoConfig: { ios: { buildNumber: '9' }, android: { versionCode: 2 } },
+  },
+}));
+
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
