@@ -57,7 +57,17 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
       }
     }
 
-    void hydrate();
+    void hydrate().catch(async (error) => {
+      // Final safety net for unexpected locale/storage failures.
+      console.warn('[Locale] Unexpected hydration failure; using English fallback.', error);
+      await changeUiLanguage('en').catch(() => undefined);
+      acceptLanguageTagRef.current = toFormatLocaleTag('en');
+      if (!cancelled) {
+        setLanguageState('en');
+        setSource('fallback');
+        setIsHydrated(true);
+      }
+    });
 
     return () => {
       cancelled = true;
