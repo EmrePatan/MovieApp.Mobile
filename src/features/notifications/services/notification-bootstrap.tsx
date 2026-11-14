@@ -145,8 +145,12 @@ export function NotificationBootstrapProvider({
   );
 
   useEffect(() => {
-    let receivedSubscription: Notifications.EventSubscription | undefined;
-    let responseSubscription: Notifications.EventSubscription | undefined;
+    let receivedSubscription:
+      | ReturnType<typeof Notifications.addNotificationReceivedListener>
+      | undefined;
+    let responseSubscription:
+      | ReturnType<typeof Notifications.addNotificationResponseReceivedListener>
+      | undefined;
 
     try {
       receivedSubscription = Notifications.addNotificationReceivedListener(() => {
