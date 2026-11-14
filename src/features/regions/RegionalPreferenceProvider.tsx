@@ -32,7 +32,15 @@ export function RegionalPreferenceProvider({ children }: { children: ReactNode }
       }
     }
 
-    void hydrate();
+    void hydrate().catch((error) => {
+      // Region is optional; always release consumers with the configured fallback.
+      console.warn('[Region] Unexpected hydration failure; using fallback region.', error);
+      if (!cancelled) {
+        setRegionState(normalizeRegionCode(null));
+        setSource('fallback');
+        setIsHydrated(true);
+      }
+    });
 
     return () => {
       cancelled = true;
