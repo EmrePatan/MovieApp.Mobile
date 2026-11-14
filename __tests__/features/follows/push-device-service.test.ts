@@ -1,3 +1,17 @@
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import { registerPushDevice, unregisterPushDevice } from '@/features/follows/api/push-devices-api';
+import {
+  clearStoredExpoPushToken,
+  getStoredExpoPushToken,
+  saveRegisteredExpoPushToken,
+} from '@/features/follows/services/push-device-storage';
+import {
+  ensurePushDeviceRegisteredAsync,
+  resetPushPermissionRequestState,
+  unregisterKnownPushDeviceAsync,
+} from '@/features/follows/services/push-device-service';
+
 jest.unmock('@/features/follows/services/push-device-service');
 
 jest.mock('react-native', () => ({
@@ -43,20 +57,6 @@ jest.mock('@/features/follows/services/push-device-storage', () => ({
   getStoredExpoPushToken: jest.fn(),
   clearStoredExpoPushToken: jest.fn(),
 }));
-
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import { registerPushDevice, unregisterPushDevice } from '@/features/follows/api/push-devices-api';
-import {
-  clearStoredExpoPushToken,
-  getStoredExpoPushToken,
-  saveRegisteredExpoPushToken,
-} from '@/features/follows/services/push-device-storage';
-import {
-  ensurePushDeviceRegisteredAsync,
-  resetPushPermissionRequestState,
-  unregisterKnownPushDeviceAsync,
-} from '@/features/follows/services/push-device-service';
 
 describe('ensurePushDeviceRegisteredAsync', () => {
   beforeEach(() => {
