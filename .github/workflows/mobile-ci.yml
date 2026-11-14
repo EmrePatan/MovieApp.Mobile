@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Typecheck, changed-file lint and focused tests
+    name: Typecheck, lint and startup, auth, notification and UI tests
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -68,9 +68,16 @@ jobs:
           printf '%s\n' "${FILES}"
           printf '%s\n' "${FILES}" | xargs npx eslint
 
-      - name: Focused Home and TV watch progress tests
+      - name: Focused startup, auth, notification, Home and TV tests
         run: >-
           npm test -- --runInBand
+          __tests__/auth/auth-bootstrap.test.tsx
+          __tests__/bootstrap/app-startup-gate.test.tsx
+          __tests__/features/app-config/app-config-provider-startup.test.tsx
+          __tests__/features/locale/locale-preference-provider.test.tsx
+          __tests__/features/regions/regional-preference-provider.test.tsx
+          __tests__/features/follows/push-device-service.test.ts
+          __tests__/features/notifications/push-bootstrap.test.ts
           __tests__/features/home/useHomePersonalized.test.tsx
           __tests__/features/watch-history/watched-button.test.tsx
           __tests__/features/details/season-list-progress.test.tsx
