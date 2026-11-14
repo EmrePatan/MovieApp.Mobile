@@ -124,7 +124,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       syncToken(accessToken);
       setUser(profile);
       markHomePerfEvent('session_established');
-      void ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false });
+      void ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false }).catch((error) => {
+        // Push is optional and must never turn a successful sign-in into an unhandled rejection.
+        console.warn('[Push] Background device registration failed.', error);
+      });
     },
     [syncToken],
   );
