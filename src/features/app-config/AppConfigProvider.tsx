@@ -83,7 +83,8 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
             }
           }
 
-          const remote = await fetchRemoteAppConfig();
+          // Treat remote-config transport failures like an unavailable response.
+          const remote = await fetchRemoteAppConfig().catch(() => null);
           if (remote) {
             // Cache persistence is best-effort; a Keychain failure must not block startup.
             await saveCachedAppConfig(remote).catch(() => undefined);
