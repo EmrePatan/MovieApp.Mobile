@@ -1,9 +1,9 @@
 appId: com.movieapp.mobile
 ---
-# The first launch of an Expo development build can show the developer-menu
-# onboarding sheet. Dismiss it by its accessible action before asserting app UI.
+# iOS shows a SpringBoard confirmation the first time the custom development
+# URL is opened. Accept it before waiting for the app's sign-in screen.
 - tapOn:
-    text: "Continue"
+    text: "Open"
     optional: true
 - extendedWaitUntil:
     visible: "Sign in"
