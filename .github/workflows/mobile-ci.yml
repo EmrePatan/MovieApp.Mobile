@@ -112,12 +112,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Maestro CLI
+      - name: Install pinned Maestro CLI
         shell: bash
         run: |
+          export MAESTRO_VERSION=2.12.1
+          export MAESTRO_CLI_NO_ANALYTICS=1
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-          "$HOME/.maestro/bin/maestro" --version
+          "$HOME/.maestro/bin/maestro" --version | tee "$RUNNER_TEMP/maestro-version.txt"
+          grep -F "2.12.1" "$RUNNER_TEMP/maestro-version.txt"
 
       - name: Verify Xcode and Swift toolchain
         shell: bash
@@ -150,7 +153,14 @@ jobs:
 
           echo "Selected iOS simulator: $DEVICE_LINE"
           echo "IOS_SIMULATOR_UDID=$DEVICE_UDID" >> "$GITHUB_ENV"
-          xcrun simctl boot "$DEVICE_UDID" || true
+          if ! xcrun simctl boot "$DEVICE_UDID"; then
+            if ! xcrun simctl list devices available | grep -F "$DEVICE_UDID" | grep -q "(Booted)"; then
+              echo "Failed to boot simulator $DEVICE_UDID." >&2
+              xcrun simctl list devices available
+              exit 1
+            fi
+            echo "Simulator was already booted."
+          fi
           xcrun simctl bootstatus "$DEVICE_UDID" -b
 
       - name: Build and install the embedded Release app
