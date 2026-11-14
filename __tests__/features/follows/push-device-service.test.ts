@@ -1,3 +1,17 @@
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import { registerPushDevice, unregisterPushDevice } from '@/features/follows/api/push-devices-api';
+import {
+  clearStoredExpoPushToken,
+  getStoredExpoPushToken,
+  saveRegisteredExpoPushToken,
+} from '@/features/follows/services/push-device-storage';
+import {
+  ensurePushDeviceRegisteredAsync,
+  resetPushPermissionRequestState,
+  unregisterKnownPushDeviceAsync,
+} from '@/features/follows/services/push-device-service';
+
 jest.unmock('@/features/follows/services/push-device-service');
 
 jest.mock('react-native', () => ({
@@ -44,20 +58,6 @@ jest.mock('@/features/follows/services/push-device-storage', () => ({
   clearStoredExpoPushToken: jest.fn(),
 }));
 
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import { registerPushDevice, unregisterPushDevice } from '@/features/follows/api/push-devices-api';
-import {
-  clearStoredExpoPushToken,
-  getStoredExpoPushToken,
-  saveRegisteredExpoPushToken,
-} from '@/features/follows/services/push-device-storage';
-import {
-  ensurePushDeviceRegisteredAsync,
-  resetPushPermissionRequestState,
-  unregisterKnownPushDeviceAsync,
-} from '@/features/follows/services/push-device-service';
-
 describe('ensurePushDeviceRegisteredAsync', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -81,6 +81,14 @@ describe('ensurePushDeviceRegisteredAsync', () => {
     expect(saveRegisteredExpoPushToken).toHaveBeenCalledWith(
       'ExponentPushToken[abcdefghijklmnopqrstuvwxyz123456]',
     );
+  });
+
+  it('does not register a server token when secure persistence fails', async () => {
+    (saveRegisteredExpoPushToken as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
+
+    await expect(ensurePushDeviceRegisteredAsync()).rejects.toThrow('Keychain unavailable');
+
+    expect(registerPushDevice).not.toHaveBeenCalled();
   });
 
   it('does not request permission when allowPermissionRequest is false', async () => {

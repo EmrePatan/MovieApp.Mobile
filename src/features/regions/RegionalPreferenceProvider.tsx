@@ -21,7 +21,8 @@ export function RegionalPreferenceProvider({ children }: { children: ReactNode }
     let cancelled = false;
 
     async function hydrate() {
-      const savedRegion = await getSavedUserRegion();
+      // Region preference is optional; use the device/default region if secure storage is unavailable.
+      const savedRegion = await getSavedUserRegion().catch(() => null);
       const resolved = resolveInitialRegionalPreference(savedRegion);
 
       if (!cancelled) {
@@ -31,7 +32,15 @@ export function RegionalPreferenceProvider({ children }: { children: ReactNode }
       }
     }
 
-    void hydrate();
+    void hydrate().catch((error) => {
+      // Region is optional; always release consumers with the configured fallback.
+      console.warn('[Region] Unexpected hydration failure; using fallback region.', error);
+      if (!cancelled) {
+        setRegionState(normalizeRegionCode(null));
+        setSource('fallback');
+        setIsHydrated(true);
+      }
+    });
 
     return () => {
       cancelled = true;

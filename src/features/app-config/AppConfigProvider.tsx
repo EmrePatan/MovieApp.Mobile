@@ -40,7 +40,15 @@ interface AppConfigProviderProps {
 }
 
 export function AppConfigProvider({ children }: AppConfigProviderProps) {
-  const installedBuild = useMemo(() => readInstalledNativeBuild(), []);
+  const installedBuild = useMemo(() => {
+    try {
+      return readInstalledNativeBuild();
+    } catch (error) {
+      // Build metadata is optional; missing native constants must not block the app.
+      console.warn('[AppConfig] Unable to read installed build metadata.', error);
+      return null;
+    }
+  }, []);
   const [config, setConfig] = useState<RemoteAppConfig>(DEFAULT_REMOTE_APP_CONFIG);
   const [isStartupResolved, setIsStartupResolved] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -74,7 +82,8 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
         }
 
         try {
-          const cached = await loadCachedAppConfig();
+          // Cached config is an optimization; Keychain read failures must not block startup.
+          const cached = await loadCachedAppConfig().catch(() => null);
           if (options?.startup && cached) {
             const cachedBlocking = evaluateCachedBlockingOnly(installedBuild, cached.config);
             if (cachedBlocking !== 'none') {
@@ -82,9 +91,11 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
             }
           }
 
-          const remote = await fetchRemoteAppConfig();
+          // Treat remote-config transport failures like an unavailable response.
+          const remote = await fetchRemoteAppConfig().catch(() => null);
           if (remote) {
-            await saveCachedAppConfig(remote);
+            // Cache persistence is best-effort; a Keychain failure must not block startup.
+            await saveCachedAppConfig(remote).catch(() => undefined);
             applyResolvedConfig(remote);
             lastFetchAtRef.current = Date.now();
             return;
@@ -112,8 +123,12 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
   );
 
   useEffect(() => {
-    void resolveConfig({ startup: true });
-  }, [resolveConfig]);
+    void resolveConfig({ startup: true }).catch((error) => {
+      // Last-resort guard: no unexpected config parsing/native error may strand the splash.
+      console.warn('[AppConfig] Startup resolution failed; using safe defaults.', error);
+      applyResolvedConfig(DEFAULT_REMOTE_APP_CONFIG);
+    });
+  }, [applyResolvedConfig, resolveConfig]);
 
   useEffect(() => {
     const handleAppState = (nextState: AppStateStatus) => {

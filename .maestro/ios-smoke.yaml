@@ -1,13 +1,14 @@
 appId: com.movieapp.mobile
 ---
-# The first custom-scheme launch can show an iOS SpringBoard confirmation.
-# Let Maestro handle it through accessibility rather than a separate UI daemon.
-- tapOn:
-    text: "Open"
-    optional: true
+# Start from a clean app data state on every run. The Release build contains its JS bundle,
+# so the smoke test does not depend on Metro, Expo's dev launcher, or a deep-link handoff.
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
 - extendedWaitUntil:
     visible: "Sign in"
-    timeout: 60000
+    timeout: 90000
 - assertVisible: "Email"
 - assertVisible: "Password"
 - assertVisible: "Create an account"

@@ -20,7 +20,7 @@ import {
   verifyEmailRequest,
 } from './auth-api';
 import { requestSocialIdentityToken } from './social-auth-service';
-import type { SocialAuthProvider } from '@/models/api/auth';
+import type { SocialAuthProvider, UserProfile } from '@/models/api/auth';
 import {
   getAccessToken,
   getRefreshToken,
@@ -30,7 +30,6 @@ import {
   saveRefreshToken,
 } from './auth-storage';
 import type { AuthContextValue } from './auth-types';
-import type { UserProfile } from '@/models/api/auth';
 import { queryClient } from '@/api/query-client';
 import { clearUserQueryCache } from '@/features/profile/utils/clear-user-query-cache';
 import { clearRecentSearchesForUser } from '@/features/search/recent-searches/recent-search-storage';
@@ -124,7 +123,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       syncToken(accessToken);
       setUser(profile);
       markHomePerfEvent('session_established');
-      void ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false });
+      void ensurePushDeviceRegisteredAsync({ allowPermissionRequest: false }).catch((error) => {
+        // Push is optional and must never turn a successful sign-in into an unhandled rejection.
+        console.warn('[Push] Background device registration failed.', error);
+      });
     },
     [syncToken],
   );
@@ -207,6 +209,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           },
           () => isMounted,
         );
+      } catch (error) {
+        // SecureStore can be temporarily unavailable (for example, missing simulator
+        // Keychain entitlements). Never fall back to plaintext token storage.
+        console.warn('[Auth] Secure session bootstrap failed; continuing signed out.', error);
+        if (isMounted) {
+          syncToken(null);
+          setUser(null);
+        }
       } finally {
         if (isMounted) {
           setIsSessionRestored(true);

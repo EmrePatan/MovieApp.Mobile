@@ -34,6 +34,19 @@ describe('RegionalPreferenceProvider', () => {
     expect(result.current.source).toBe('saved');
   });
 
+  it('uses device or fallback region and unblocks hydration when SecureStore fails', async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
+
+    const { result } = renderHook(() => useRegionalPreference(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isHydrated).toBe(true);
+    });
+
+    expect(result.current.region).toMatch(/^[A-Z]{2}$/);
+    expect(result.current.source).toMatch(/^(device|fallback)$/);
+  });
+
   it('persists explicit settings changes', async () => {
     const { result } = renderHook(() => useRegionalPreference(), { wrapper });
 

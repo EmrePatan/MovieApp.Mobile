@@ -96,6 +96,10 @@ export async function ensurePushDeviceRegisteredAsync(
 
   const expoPushToken = await fetchExpoPushTokenAsync();
 
+  // Persist before server registration so a transient API failure can still be cleaned up
+  // on a later logout/retry. If secure storage is unavailable, do not create an orphan server token.
+  await saveRegisteredExpoPushToken(expoPushToken);
+
   await registerPushDevice({
     expoPushToken,
     platform: Platform.OS === 'ios' ? 'ios' : 'android',
@@ -103,7 +107,6 @@ export async function ensurePushDeviceRegisteredAsync(
   });
 
   lastRegisteredExpoPushToken = expoPushToken;
-  await saveRegisteredExpoPushToken(expoPushToken);
   return 'registered';
 }
 

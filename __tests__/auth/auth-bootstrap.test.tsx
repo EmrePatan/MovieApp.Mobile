@@ -5,6 +5,7 @@ import { useAuth } from '@/auth/useAuth';
 import { getAccessToken } from '@/auth/auth-storage';
 import { getCurrentUser } from '@/auth/auth-api';
 import { ApiError } from '@/api/errors';
+import { unregisterKnownPushDeviceAsync } from '@/features/follows/services/push-device-service';
 
 jest.mock('@/auth/auth-storage', () => ({
   getAccessToken: jest.fn(),
@@ -39,8 +40,6 @@ jest.mock('@/features/follows/services/push-device-service', () => ({
   resetPushPermissionRequestState: jest.fn(),
   unregisterKnownPushDeviceAsync: jest.fn(),
 }));
-
-import { unregisterKnownPushDeviceAsync } from '@/features/follows/services/push-device-service';
 
 function AuthProbe() {
   const auth = useAuth();
@@ -94,6 +93,27 @@ describe('AuthProvider bootstrap', () => {
       expect(screen.getByTestId('authenticated').props.children).toBe('yes');
       expect(screen.getByTestId('user').props.children).toBe('Emre');
     });
+  });
+
+  it('unblocks startup signed out when SecureStore cannot read the access token', async () => {
+    (getAccessToken as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const screen = render(
+      <AuthProvider>
+        <AuthProbe />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').props.children).toBe('ready');
+      expect(screen.getByTestId('session-restored').props.children).toBe('yes');
+      expect(screen.getByTestId('authenticated').props.children).toBe('no');
+      expect(screen.getByTestId('user').props.children).toBe('none');
+    });
+
+    expect(getCurrentUser).not.toHaveBeenCalled();
+    warning.mockRestore();
   });
 
   it('clears the session when /api/auth/me returns unauthorized', async () => {
