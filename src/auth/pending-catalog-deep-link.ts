@@ -3,6 +3,7 @@ import { parseCatalogDeepLink } from '@/auth/catalog-deep-link';
 import { buildCatalogDeepLinkRouterPath } from '@/auth/catalog-deep-link-route';
 
 let pendingCatalogPath: string | null = null;
+let listenerInitialized = false;
 
 export function captureCatalogDeepLink(url: string | null | undefined): void {
   const target = parseCatalogDeepLink(url ?? '');
