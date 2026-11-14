@@ -74,7 +74,8 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
         }
 
         try {
-          const cached = await loadCachedAppConfig();
+          // Cached config is an optimization; Keychain read failures must not block startup.
+          const cached = await loadCachedAppConfig().catch(() => null);
           if (options?.startup && cached) {
             const cachedBlocking = evaluateCachedBlockingOnly(installedBuild, cached.config);
             if (cachedBlocking !== 'none') {
