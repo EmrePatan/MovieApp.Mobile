@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
 import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
@@ -13,6 +13,14 @@ jest.mock('expo-secure-store', () => ({
 jest.mock('expo-localization', () => ({
   getLocales: jest.fn(() => [{ languageCode: 'tr' }]),
 }));
+
+jest.mock('@/features/locale/resolve-ui-locale', () => {
+  const actual = jest.requireActual('@/features/locale/resolve-ui-locale');
+  return {
+    ...actual,
+    getDeviceLanguageCode: jest.fn(() => 'tr'),
+  };
+});
 
 jest.mock('@/api/client', () => ({
   api: { setAcceptLanguageGetter: jest.fn() },
@@ -41,14 +49,16 @@ describe('LocalePreferenceProvider startup hydration', () => {
   it('falls back to device language and completes hydration when SecureStore fails', async () => {
     (SecureStore.getItemAsync as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
 
-    const { result } = renderHook(() => useLocalePreference(), { wrapper });
+    const hook = renderHook(() => useLocalePreference(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true);
+    await act(async () => {
+      await waitFor(() => {
+        expect(hook.result.current.isHydrated).toBe(true);
+      });
     });
 
-    expect(result.current.language).toBe('tr');
-    expect(result.current.source).toBe('device');
+    expect(hook.result.current.language).toBe('tr');
+    expect(hook.result.current.source).toBe('device');
     expect(changeUiLanguage).toHaveBeenCalledWith('tr');
   });
 
@@ -58,14 +68,16 @@ describe('LocalePreferenceProvider startup hydration', () => {
       .mockResolvedValueOnce(undefined);
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-    const { result } = renderHook(() => useLocalePreference(), { wrapper });
+    const hook = renderHook(() => useLocalePreference(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true);
+    await act(async () => {
+      await waitFor(() => {
+        expect(hook.result.current.isHydrated).toBe(true);
+      });
     });
 
-    expect(result.current.language).toBe('en');
-    expect(result.current.source).toBe('fallback');
+    expect(hook.result.current.language).toBe('en');
+    expect(hook.result.current.source).toBe('fallback');
     expect(changeUiLanguage).toHaveBeenNthCalledWith(2, 'en');
     warning.mockRestore();
   });
