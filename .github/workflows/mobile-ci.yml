@@ -152,14 +152,13 @@ jobs:
           pod install --project-directory=ios
 
           DERIVED_DATA_PATH="$RUNNER_TEMP/MovieCaveDerivedData"
+          # Ad-hoc signing supplies the simulator Keychain entitlements required by SecureStore.
           xcodebuild \
             -workspace ios/MovieCave.xcworkspace \
             -scheme MovieCave \
             -configuration Debug \
             -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
             -derivedDataPath "$DERIVED_DATA_PATH" \
-            # The simulator app must be signed (ad hoc is sufficient) so iOS Keychain
-            # entitlements are present for expo-secure-store and expo-notifications.
             CODE_SIGNING_ALLOWED=YES \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=- \
