@@ -4,10 +4,12 @@ appId: com.movieapp.mobile
 - tapOn:
     point: "68%,54%"
     retryTapIfNoChange: true
-# Expo development builds show a first-run developer-menu education sheet
-# after the deep link is opened. Dismiss it before asserting the app screen.
+# Expo's first-run prompt can open the developer menu; dismiss that menu too.
 - tapOn:
     text: "Continue"
+    optional: true
+- tapOn:
+    text: "Close"
     optional: true
 - waitForAnimationToEnd
 - extendedWaitUntil:
