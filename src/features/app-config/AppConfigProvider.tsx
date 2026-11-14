@@ -84,7 +84,8 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
 
           const remote = await fetchRemoteAppConfig();
           if (remote) {
-            await saveCachedAppConfig(remote);
+            // Cache persistence is best-effort; a Keychain failure must not block startup.
+            await saveCachedAppConfig(remote).catch(() => undefined);
             applyResolvedConfig(remote);
             lastFetchAtRef.current = Date.now();
             return;
