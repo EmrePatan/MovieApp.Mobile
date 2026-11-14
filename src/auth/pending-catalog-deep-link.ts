@@ -26,14 +26,28 @@ export function consumePendingCatalogDeepLinkPath(): string | null {
 
 export function resetPendingCatalogDeepLinkForTests(): void {
   pendingCatalogPath = null;
+  listenerInitialized = false;
 }
 
 export function ensureCatalogDeepLinkListener(): void {
-  void Linking.getInitialURL().then((url) => {
-    captureCatalogDeepLink(url);
-  });
+  if (listenerInitialized) {
+    return;
+  }
+  listenerInitialized = true;
 
-  Linking.addEventListener('url', ({ url }) => {
-    captureCatalogDeepLink(url);
-  });
+  void Linking.getInitialURL()
+    .then((url) => {
+      captureCatalogDeepLink(url);
+    })
+    .catch((error) => {
+      console.warn('[DeepLink] Unable to restore the initial catalog URL.', error);
+    });
+
+  try {
+    Linking.addEventListener('url', ({ url }) => {
+      captureCatalogDeepLink(url);
+    });
+  } catch (error) {
+    console.warn('[DeepLink] Unable to register the catalog URL listener.', error);
+  }
 }
