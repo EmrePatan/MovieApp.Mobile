@@ -1,7 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { useContext } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { LocalePreferenceProvider } from '@/features/locale/LocalePreferenceProvider';
-import { useLocalePreference } from '@/features/locale/hooks/useLocalePreference';
+import {
+  LocalePreferenceContext,
+  LocalePreferenceProvider,
+} from '@/features/locale/LocalePreferenceProvider';
 import { changeUiLanguage } from '@/i18n';
 
 jest.mock('expo-secure-store', () => ({
@@ -44,7 +47,7 @@ describe('LocalePreferenceProvider startup hydration', () => {
   it('falls back to device language and completes hydration when SecureStore fails', async () => {
     (SecureStore.getItemAsync as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
 
-    const hook = renderHook(() => useLocalePreference(), { wrapper });
+    const hook = renderHook(() => useContext(LocalePreferenceContext), { wrapper });
 
     await act(async () => {
       await waitFor(() => {
@@ -64,7 +67,7 @@ describe('LocalePreferenceProvider startup hydration', () => {
       .mockResolvedValueOnce(undefined);
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-    const hook = renderHook(() => useLocalePreference(), { wrapper });
+    const hook = renderHook(() => useContext(LocalePreferenceContext), { wrapper });
 
     await act(async () => {
       await waitFor(() => {
