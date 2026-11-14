@@ -77,10 +77,8 @@ describe('LocalePreferenceProvider startup hydration', () => {
 
     const { result } = renderHook(() => useLocalePreference(), { wrapper });
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(result.current.isHydrated).toBe(true);
-      });
+    await waitFor(() => {
+      expect(result.current.isHydrated).toBe(true);
     });
 
     expect(result.current.language).toBe('en');
