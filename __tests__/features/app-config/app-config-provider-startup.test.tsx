@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { AppConfigProvider } from '@/features/app-config/AppConfigProvider';
 import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
@@ -8,8 +8,8 @@ import { DEFAULT_REMOTE_APP_CONFIG } from '@/features/app-config/types';
 jest.mock('expo-constants', () => ({
   __esModule: true,
   default: {
-    platform: { ios: { buildNumber: '9' }, android: { versionCode: 2 } },
-    expoConfig: { ios: { buildNumber: '9' }, android: { versionCode: 2 } },
+    platform: { ios: {}, android: {} },
+    expoConfig: { ios: {}, android: {} },
   },
 }));
 
@@ -37,8 +37,10 @@ describe('AppConfigProvider startup resilience', () => {
 
     const { result } = renderHook(() => useAppConfig(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isStartupResolved).toBe(true);
+    await act(async () => {
+      await waitFor(() => {
+        expect(result.current.isStartupResolved).toBe(true);
+      });
     });
 
     expect(result.current.config).toEqual(DEFAULT_REMOTE_APP_CONFIG);
@@ -55,8 +57,10 @@ describe('AppConfigProvider startup resilience', () => {
 
     const { result } = renderHook(() => useAppConfig(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isStartupResolved).toBe(true);
+    await act(async () => {
+      await waitFor(() => {
+        expect(result.current.isStartupResolved).toBe(true);
+      });
     });
 
     expect(result.current.config).toEqual(remoteConfig);
