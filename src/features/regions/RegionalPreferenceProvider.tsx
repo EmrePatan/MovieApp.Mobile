@@ -21,7 +21,8 @@ export function RegionalPreferenceProvider({ children }: { children: ReactNode }
     let cancelled = false;
 
     async function hydrate() {
-      const savedRegion = await getSavedUserRegion();
+      // Region preference is optional; use the device/default region if secure storage is unavailable.
+      const savedRegion = await getSavedUserRegion().catch(() => null);
       const resolved = resolveInitialRegionalPreference(savedRegion);
 
       if (!cancelled) {
