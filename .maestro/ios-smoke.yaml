@@ -1,28 +1,12 @@
 appId: com.movieapp.mobile
 ---
-# Accept iOS's SpringBoard confirmation only after its action is visible.
-- extendedWaitUntil:
-    visible: "Open"
-    timeout: 30000
-- tapOn:
-    text: "Open"
-# The deep link can take time to leave Expo's development-server launcher.
-# Wait for the first-run education prompt instead of attempting an early optional tap.
-- extendedWaitUntil:
-    visible: "Continue"
-    timeout: 180000
-- tapOn:
-    text: "Continue"
-# Continue opens Expo's developer menu. Wait until its close control is actually present.
-- extendedWaitUntil:
-    visible: "Close"
-    timeout: 30000
-- tapOn:
-    text: "Close"
-- waitForAnimationToEnd
+# Start from a clean app data state on every run. The Release build contains its JS bundle,
+# so the smoke test does not depend on Metro, Expo's dev launcher, or a deep-link handoff.
+- launchApp:
+    clearState: true
 - extendedWaitUntil:
     visible: "Sign in"
-    timeout: 180000
+    timeout: 90000
 - assertVisible: "Email"
 - assertVisible: "Password"
 - assertVisible: "Create an account"
