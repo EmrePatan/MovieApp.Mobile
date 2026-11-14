@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { renderHook, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { AppConfigProvider } from '@/features/app-config/AppConfigProvider';
 import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
@@ -37,10 +37,8 @@ describe('AppConfigProvider startup resilience', () => {
 
     const { result } = renderHook(() => useAppConfig(), { wrapper });
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(result.current.isStartupResolved).toBe(true);
-      });
+    await waitFor(() => {
+      expect(result.current.isStartupResolved).toBe(true);
     });
 
     expect(result.current.config).toEqual(DEFAULT_REMOTE_APP_CONFIG);
