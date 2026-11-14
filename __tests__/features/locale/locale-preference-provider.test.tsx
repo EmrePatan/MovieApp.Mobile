@@ -14,12 +14,6 @@ jest.mock('expo-localization', () => ({
   getLocales: jest.fn(() => [{ languageCode: 'tr' }]),
 }));
 
-jest.mock('@/features/locale/locale-preference-storage', () => ({
-  getSavedUiLanguage: jest.fn(),
-  saveUiLanguage: jest.fn(),
-  clearSavedUiLanguage: jest.fn(),
-}));
-
 jest.mock('@/api/client', () => ({
   api: { setAcceptLanguageGetter: jest.fn() },
 }));
@@ -28,20 +22,10 @@ jest.mock('@/api/query-client', () => ({
   queryClient: { invalidateQueries: jest.fn() },
 }));
 
-jest.mock('@/features/locale/resolve-ui-locale', () => ({
-  getDeviceLanguageCode: jest.fn(() => 'tr'),
-  resolveInitialUiLanguage: jest.fn((savedLanguage: string | null, deviceLanguageCode?: string | null) => ({
-    language: savedLanguage ?? (deviceLanguageCode === 'tr' ? 'tr' : 'en'),
-    source: savedLanguage ? 'saved' : deviceLanguageCode ? 'device' : 'fallback',
-  })),
-}));
-
 jest.mock('@/i18n', () => ({
   ensureI18nInitialized: jest.fn().mockResolvedValue(undefined),
   changeUiLanguage: jest.fn(),
 }));
-
-import { getSavedUiLanguage } from '@/features/locale/locale-preference-storage';
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return <LocalePreferenceProvider>{children}</LocalePreferenceProvider>;
@@ -51,7 +35,6 @@ describe('LocalePreferenceProvider startup hydration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
-    (getSavedUiLanguage as jest.Mock).mockResolvedValue(null);
     (changeUiLanguage as jest.Mock).mockResolvedValue(undefined);
   });
 
