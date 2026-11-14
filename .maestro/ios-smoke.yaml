@@ -1,13 +1,12 @@
 appId: com.movieapp.mobile
 ---
-# The custom-scheme launch is confirmed by an iOS SpringBoard alert.
-# Maestro's UI hierarchy exposes the system button as "Open".
+# iOS SpringBoard's "Open in Movie Cave?" alert is not reliably tappable
+# by its accessibility label in the simulator. Tap the confirmed Open button
+# location (centered in the right-hand action) using screen-relative coords.
 - tapOn:
-    text: "Open"
-    optional: true
-- tapOn:
-    text: "Continue"
-    optional: true
+    point: "68%,54%"
+    retryTapIfNoChange: true
+- waitForAnimationToEnd
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 180000
