@@ -115,8 +115,12 @@ export function AppConfigProvider({ children }: AppConfigProviderProps) {
   );
 
   useEffect(() => {
-    void resolveConfig({ startup: true });
-  }, [resolveConfig]);
+    void resolveConfig({ startup: true }).catch((error) => {
+      // Last-resort guard: no unexpected config parsing/native error may strand the splash.
+      console.warn('[AppConfig] Startup resolution failed; using safe defaults.', error);
+      applyResolvedConfig(DEFAULT_REMOTE_APP_CONFIG);
+    });
+  }, [applyResolvedConfig, resolveConfig]);
 
   useEffect(() => {
     const handleAppState = (nextState: AppStateStatus) => {
