@@ -1,7 +1,10 @@
 appId: com.movieapp.mobile
 ---
-# Dismiss the Expo development-client first-run education sheet.
-# This is distinct from the iOS "Open in ..." system confirmation.
+# The custom-scheme launch is confirmed by an iOS SpringBoard alert.
+# Maestro's UI hierarchy exposes the system button as "Open".
+- tapOn:
+    text: "Open"
+    optional: true
 - tapOn:
     text: "Continue"
     optional: true
