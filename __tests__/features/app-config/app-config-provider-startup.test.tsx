@@ -41,7 +41,7 @@ describe('AppConfigProvider startup resilience', () => {
     (SecureStore.setItemAsync as jest.Mock).mockRejectedValue(new Error('Keychain unavailable'));
     const remoteConfig = {
       ...DEFAULT_REMOTE_APP_CONFIG,
-      minimumSupportedBuild: '1',
+      features: { ...DEFAULT_REMOTE_APP_CONFIG.features, aiRecommendations: false },
     };
     (fetchRemoteAppConfig as jest.Mock).mockResolvedValue(remoteConfig);
 
