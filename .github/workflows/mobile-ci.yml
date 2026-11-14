@@ -158,9 +158,11 @@ jobs:
             -configuration Debug \
             -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
             -derivedDataPath "$DERIVED_DATA_PATH" \
-            CODE_SIGNING_ALLOWED=NO \
+            # The simulator app must be signed (ad hoc is sufficient) so iOS Keychain
+            # entitlements are present for expo-secure-store and expo-notifications.
+            CODE_SIGNING_ALLOWED=YES \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_IDENTITY=- \
             build
 
           APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/MovieCave.app"
