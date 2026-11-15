@@ -1,0 +1,19 @@
+appId: com.movieapp.mobile
+---
+# Verify client-side validation; submitting an empty form must not hit the API.
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 90000
+- tapOn: "Sign in"
+- assertVisible: "Email is required."
+- assertVisible: "Password is required."
+- tapOn: "Forgot password?"
+- extendedWaitUntil:
+    visible: "Send reset instructions"
+    timeout: 15000
+- tapOn: "Send reset instructions"
+- assertVisible: "Email is required."
