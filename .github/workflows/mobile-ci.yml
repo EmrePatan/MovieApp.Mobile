@@ -123,7 +123,10 @@ jobs:
           grep -F "2.12.1" "$RUNNER_TEMP/maestro-version.txt"
 
       - name: Validate Maestro flow syntax
-        run: maestro check-syntax .maestro/ios-smoke.yaml
+        run: |
+          maestro check-syntax .maestro/ios-smoke.yaml
+          maestro check-syntax .maestro/auth-navigation.yaml
+          maestro check-syntax .maestro/auth-validation.yaml
 
       - name: Verify Xcode and Swift toolchain
         shell: bash
@@ -199,8 +202,11 @@ jobs:
           xcrun simctl install "$IOS_SIMULATOR_UDID" "$APP_PATH"
           # Maestro launches the installed Release app; no Metro or dev-client deep link is needed.
 
-      - name: Run Maestro iOS smoke flow
-        run: maestro test --device "$IOS_SIMULATOR_UDID" .maestro/ios-smoke.yaml
+      - name: Run Maestro iOS regression flows
+        run: |
+          maestro test --device "$IOS_SIMULATOR_UDID" .maestro/ios-smoke.yaml
+          maestro test --device "$IOS_SIMULATOR_UDID" .maestro/auth-navigation.yaml
+          maestro test --device "$IOS_SIMULATOR_UDID" .maestro/auth-validation.yaml
 
       - name: Collect iOS smoke diagnostics
         if: always()
