@@ -1,0 +1,30 @@
+appId: com.movieapp.mobile
+---
+# Exercise auth-screen navigation without calling an API.
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 90000
+- tapOn: "Create an account"
+- extendedWaitUntil:
+    visible: "Display name"
+    timeout: 15000
+- assertVisible: "Email"
+- assertVisible: "Password"
+- tapOn: "Sign in"
+- extendedWaitUntil:
+    visible: "Forgot password?"
+    timeout: 15000
+- tapOn: "Forgot password?"
+- extendedWaitUntil:
+    visible: "Send reset instructions"
+    timeout: 15000
+- assertVisible: "Email"
+- tapOn: "Back to sign in"
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 15000
+- assertVisible: "Create an account"
