@@ -180,14 +180,36 @@ jobs:
         if: always()
         shell: bash
         run: |
+          set +e
           DIAGNOSTICS_DIR="$RUNNER_TEMP/android-smoke-diagnostics"
           mkdir -p "$DIAGNOSTICS_DIR"
-          adb devices -l > "$DIAGNOSTICS_DIR/devices.txt" 2>&1 || true
-          adb logcat -d -t 12000 > "$DIAGNOSTICS_DIR/logcat.txt" 2>&1 || true
-          adb exec-out screencap -p > "$DIAGNOSTICS_DIR/emulator.png" 2>/dev/null || true
-          if [ -d "$HOME/.maestro/tests" ]; then
-            cp -R "$HOME/.maestro/tests" "$DIAGNOSTICS_DIR/maestro-tests"
+
+          # Diagnostics must never consume the remaining job timeout. ADB can
+          # become unresponsive after an emulator/Maestro failure, so bound
+          # every device operation and preserve a useful error message.
+          timeout 20s adb devices -l > "$DIAGNOSTICS_DIR/devices.txt" 2>&1
+          DEVICES_EXIT=$?
+          echo "adb devices exit code: $DEVICES_EXIT" >> "$DIAGNOSTICS_DIR/diagnostics-status.txt"
+
+          timeout 30s adb logcat -d -t 12000 > "$DIAGNOSTICS_DIR/logcat.txt" 2>&1
+          LOGCAT_EXIT=$?
+          echo "adb logcat exit code: $LOGCAT_EXIT" >> "$DIAGNOSTICS_DIR/diagnostics-status.txt"
+
+          timeout 20s adb exec-out screencap -p > "$DIAGNOSTICS_DIR/emulator.png" 2> "$DIAGNOSTICS_DIR/screenshot-error.txt"
+          SCREENSHOT_EXIT=$?
+          echo "adb screenshot exit code: $SCREENSHOT_EXIT" >> "$DIAGNOSTICS_DIR/diagnostics-status.txt"
+          if [ "$SCREENSHOT_EXIT" -ne 0 ]; then
+            rm -f "$DIAGNOSTICS_DIR/emulator.png"
           fi
+
+          if [ -d "$HOME/.maestro/tests" ]; then
+            timeout 20s cp -R "$HOME/.maestro/tests" "$DIAGNOSTICS_DIR/maestro-tests"
+            echo "Maestro report copy exit code: $?" >> "$DIAGNOSTICS_DIR/diagnostics-status.txt"
+          else
+            echo "Maestro report directory not found: $HOME/.maestro/tests" >> "$DIAGNOSTICS_DIR/diagnostics-status.txt"
+          fi
+
+          find "$DIAGNOSTICS_DIR" -maxdepth 3 -type f -printf '%P %s bytes\\n' > "$DIAGNOSTICS_DIR/file-manifest.txt"
 
       - name: Upload Android smoke diagnostics
         if: always()
