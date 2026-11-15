@@ -172,9 +172,9 @@ jobs:
           script: |
             adb wait-for-device
             adb install -r "$ANDROID_APK_PATH"
-            maestro test --device emulator-5554 .maestro/ios-smoke.yaml
-            maestro test --device emulator-5554 .maestro/auth-navigation.yaml
-            maestro test --device emulator-5554 .maestro/auth-validation.yaml
+            maestro test --device emulator-5554 --driver-host-port 7001 .maestro/ios-smoke.yaml
+            maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-navigation.yaml
+            maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-validation.yaml
 
       - name: Collect Android smoke diagnostics
         if: always()
@@ -224,7 +224,7 @@ jobs:
     name: iOS Simulator smoke tests (Maestro)
     runs-on: macos-26
     # A cold Xcode build can exceed 45 minutes; caching below should shorten subsequent runs.
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       EXPO_PUBLIC_APP_ENV: development
       # Deliberately unreachable: smoke tests must never call a production API.
