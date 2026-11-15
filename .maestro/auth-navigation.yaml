@@ -14,6 +14,13 @@ appId: com.movieapp.mobile
     timeout: 15000
 - assertVisible: "Email"
 - assertVisible: "Password"
+# The auth screen is taller than the simulator viewport; bring the footer link fully on-screen.
+- scrollUntilVisible:
+    element:
+      text: "Sign in"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 100
 - tapOn: "Sign in"
 - extendedWaitUntil:
     visible: "Forgot password?"
