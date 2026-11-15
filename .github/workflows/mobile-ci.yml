@@ -85,7 +85,7 @@ jobs:
 
   android-emulator-smoke:
     name: Android Emulator smoke tests (Maestro)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
       EXPO_PUBLIC_APP_ENV: development
@@ -166,6 +166,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          cores: 4
+          ram-size: 3072M
+          heap-size: 512M
           emulator-boot-timeout: 600
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
