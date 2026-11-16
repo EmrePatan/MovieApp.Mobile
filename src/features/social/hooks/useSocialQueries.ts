@@ -2,6 +2,8 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
   getSocialFeed,
+  getSocialNotifications,
+  getSocialUnreadNotificationCount,
   getSocialComments,
   getSocialFollowers,
   getSocialFollowing,
@@ -84,5 +86,26 @@ export function useSocialComments(activityId: string, parentCommentId?: string |
     queryFn: ({ signal }) => getSocialComments(activityId, parentCommentId, page, 20, signal),
     enabled: activityId.length > 0,
     staleTime: 15_000,
+  });
+}
+
+export function useSocialNotifications() {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'notifications'],
+    queryFn: ({ signal }) => getSocialNotifications(1, 20, signal),
+    enabled: isAuthenticated,
+    staleTime: 15_000,
+  });
+}
+
+export function useSocialUnreadNotificationCount() {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'notifications', 'unread-count'],
+    queryFn: ({ signal }) => getSocialUnreadNotificationCount(signal),
+    enabled: isAuthenticated,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
 }
