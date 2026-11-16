@@ -10,20 +10,16 @@ import {
   socialCommentPath,
   socialCommentLikePath,
   socialReportsPath,
-  socialActivityLikesPath,
-  socialCommentLikesPath,
   socialFollowRequestPath,
   socialFollowingPath,
   socialPrivacyPath,
   socialPendingFollowRequestsPath,
   socialProfilePath,
-  socialPendingFollowRequestsPath,
   socialSearchPath,
 } from './routes';
 import type {
   SocialCommentPage,
   SocialFeedPage,
-  SocialLikeResult,
   SocialFollowRequest,
   SocialFollowResult,
   SocialPrivacySettings,
@@ -93,22 +89,6 @@ export function getSocialFeed(cursor?: string | null, pageSize = 20, signal?: Ab
 
 export function getPendingSocialFollowRequests(page = 1, pageSize = 20, signal?: AbortSignal) {
   return api.get<SocialFollowRequest[]>(socialPendingFollowRequestsPath(page, pageSize), { signal });
-}
-
-export function likeSocialActivity(activityId: string) {
-  return api.post<SocialLikeResult>(socialActivityLikesPath(activityId));
-}
-
-export function unlikeSocialActivity(activityId: string) {
-  return api.delete<SocialLikeResult>(socialActivityLikesPath(activityId));
-}
-
-export function likeSocialComment(commentId: string) {
-  return api.post<SocialLikeResult>(socialCommentLikesPath(commentId));
-}
-
-export function unlikeSocialComment(commentId: string) {
-  return api.delete<SocialLikeResult>(socialCommentLikesPath(commentId));
 }
 
 export function getSocialComments(activityId: string, parentCommentId?: string | null, page = 1, pageSize = 20, signal?: AbortSignal) {
