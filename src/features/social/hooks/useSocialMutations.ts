@@ -3,6 +3,10 @@ import {
   acceptSocialFollowRequest,
   blockSocialUser,
   followSocialUser,
+  likeSocialActivity,
+  unlikeSocialActivity,
+  likeSocialComment,
+  unlikeSocialComment,
   rejectSocialFollowRequest,
   unblockSocialUser,
   unfollowSocialUser,
@@ -55,5 +59,23 @@ export function useUpdateSocialPrivacy() {
   return useMutation({
     mutationFn: (settings: SocialPrivacySettings) => updateSocialPrivacy(settings),
     onSuccess: (settings) => queryClient.setQueryData(socialQueryKeys.privacy(), settings),
+  });
+}
+
+export function useSocialActivityLike(activityId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (isLiked: boolean) =>
+      isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] }),
+  });
+}
+
+export function useSocialCommentLike(commentId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (isLiked: boolean) =>
+      isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all }),
   });
 }
