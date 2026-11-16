@@ -7,12 +7,8 @@ let restoreInFlight = false;
 let listenerInitialized = false;
 
 function readLaunchAuthDeepLinkUrl(): string | null {
-  try {
-    return Linking.getLinkingURL?.() ?? null;
-  } catch (error) {
-    console.warn('[DeepLink] Unable to read the launch URL.', error);
-    return null;
-  }
+  const linkingUrl = Linking.getLinkingURL?.() ?? null;
+  return linkingUrl;
 }
 
 export function captureAuthDeepLink(url: string | null | undefined): void {
@@ -76,27 +72,19 @@ export function ensureAuthDeepLinkListener(): void {
     captureAuthDeepLink(launchUrl);
   }
 
-  void Linking.getInitialURL()
-    .then((url) => {
-      if (!hasPendingAuthDeepLink() && !restoreInFlight) {
-        if (url) {
-          traceAuthDeepLink('launch_url_read', {
-            hasUrl: true,
-            flow: parseAuthDeepLink(url)?.kind,
-          });
-        }
-        captureAuthDeepLink(url);
+  void Linking.getInitialURL().then((url) => {
+    if (!hasPendingAuthDeepLink() && !restoreInFlight) {
+      if (url) {
+        traceAuthDeepLink('launch_url_read', {
+          hasUrl: true,
+          flow: parseAuthDeepLink(url)?.kind,
+        });
       }
-    })
-    .catch((error) => {
-      console.warn('[DeepLink] Unable to restore the initial auth URL.', error);
-    });
-
-  try {
-    Linking.addEventListener('url', ({ url }) => {
       captureAuthDeepLink(url);
-    });
-  } catch (error) {
-    console.warn('[DeepLink] Unable to register the auth URL listener.', error);
-  }
+    }
+  });
+
+  Linking.addEventListener('url', ({ url }) => {
+    captureAuthDeepLink(url);
+  });
 }
