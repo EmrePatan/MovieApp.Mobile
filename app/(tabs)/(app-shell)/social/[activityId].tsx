@@ -113,6 +113,6 @@ const styles = StyleSheet.create({
   composer: { flexDirection: 'row', alignItems: 'flex-end', padding: spacing.md, gap: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   input: { flex: 1, minHeight: 42, maxHeight: 120, color: colors.textPrimary, backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   send: { paddingHorizontal: spacing.md, paddingVertical: spacing.md, borderRadius: 12, backgroundColor: colors.accent },
-  sendText: { color: colors.onAccent },
+  sendText: { color: colors.textPrimary },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
 });
