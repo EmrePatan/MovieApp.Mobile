@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { useToggleSocialActivityLike } from '@/features/social/hooks/useSocialMu
 import type { SocialFeedItem } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { resolveImageUri } from '@/utils/image-url';
 
 function getActivityLabelKey(type: string): string {
   switch (type) {
@@ -48,6 +49,7 @@ function SocialActivityCard({
   activityLabel: string;
 }) {
   const dateLabel = new Date(item.createdAt).toLocaleDateString();
+  const posterUri = resolveImageUri(item.posterPath, 'w300');
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -63,15 +65,18 @@ function SocialActivityCard({
         {item.displayName} {activityLabel}
       </AppText>
       <View style={styles.contentCard}>
-        <AppText variant="subtitle">{item.targetTitle || 'İçerik'}</AppText>
-        {item.targetSubtitle ? <AppText variant="bodySmall" muted>{item.targetSubtitle}</AppText> : null}
-        {item.ratingScore !== null ? <AppText variant="bodySmall">★ {item.ratingScore}/10</AppText> : null}
-        {item.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={4}>{item.reviewExcerpt}</AppText> : null}
+        {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
+        <View style={styles.contentText}>
+          <AppText variant="subtitle">{item.targetTitle || 'Content'}</AppText>
+          {item.targetSubtitle ? <AppText variant="bodySmall" muted>{item.targetSubtitle}</AppText> : null}
+          {item.ratingScore !== null ? <AppText variant="bodySmall">★ {item.ratingScore}/10</AppText> : null}
+          {item.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={4}>{item.reviewExcerpt}</AppText> : null}
+        </View>
       </View>
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={item.isLikedByMe ? 'Beğeniyi kaldır' : 'Beğen'}
+          accessibilityLabel={item.isLikedByMe ? 'Unlike' : 'Like'}
           disabled={isLiking}
           onPress={() => onLike(item)}
           style={styles.actionButton}
@@ -81,7 +86,7 @@ function SocialActivityCard({
           </AppText>
         </Pressable>
         <Pressable accessibilityRole="button" onPress={() => onComments(item)} style={styles.actionButton}>
-          <AppText variant="bodySmall">Yorumlar · {item.commentsCount}</AppText>
+          <AppText variant="bodySmall">Comments · {item.commentsCount}</AppText>
         </Pressable>
       </View>
     </View>
@@ -184,12 +189,14 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', gap: spacing.md },
   headerAction: { color: colors.accent },
   title: { marginTop: spacing.md, marginBottom: spacing.sm },
+  poster: { width: 58, height: 86, borderRadius: 8, backgroundColor: colors.surface },
+  contentText: { flex: 1, gap: spacing.xs },
   card: { padding: spacing.md, borderRadius: 16, backgroundColor: colors.surface, gap: spacing.md },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
   actorBlock: { flex: 1 },
   actorName: { fontWeight: '600' },
-  contentCard: { padding: spacing.md, borderRadius: 12, backgroundColor: colors.surfaceElevated, gap: spacing.xs },
+  contentCard: { flexDirection: 'row', padding: spacing.md, borderRadius: 12, backgroundColor: colors.surfaceElevated, gap: spacing.md },
   actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   actionButton: { paddingVertical: spacing.xs },
   liked: { color: colors.accent },
