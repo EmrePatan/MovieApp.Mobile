@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
   getSocialFeed,
+  getSocialBlockedUsers,
   getSocialNotifications,
   getSocialUnreadNotificationCount,
   getSocialComments,
@@ -106,6 +107,16 @@ export function useSocialUnreadNotificationCount() {
     queryFn: ({ signal }) => getSocialUnreadNotificationCount(signal),
     enabled: isAuthenticated,
     refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+}
+
+export function useSocialBlockedUsers() {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'blocked-users'],
+    queryFn: ({ signal }) => getSocialBlockedUsers(signal),
+    enabled: isAuthenticated,
     staleTime: 30_000,
   });
 }
