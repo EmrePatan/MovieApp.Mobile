@@ -21,6 +21,30 @@ const stage1De = {
     insights: 'Statistiken',
     social: 'Social',
   },
+  social: {
+      title: 'Social',
+      signIn: 'Melde dich an, um deinen Feed zu sehen.',
+      loadError: 'Der soziale Feed konnte nicht geladen werden.',
+      empty: 'Noch keine Aktivitäten. Teile als Erste:r etwas!',
+      activity: {
+          watchedMovie: 'hat angesehen',
+          watchedEpisode: 'hat eine Folge angesehen',
+          rated: 'hat bewertet',
+          reviewed: 'hat rezensiert',
+          favorited: 'zu Favoriten hinzugefügt',
+          generic: 'hat eine Aktivität geteilt'
+      },
+      comments: 'Kommentare',
+      replies: 'Antworten',
+      back: 'Zurück',
+      reply: 'Antworten',
+      delete: 'Löschen',
+      send: 'Senden',
+      writeComment: 'Kommentar schreiben...',
+      writeReply: 'Antwort schreiben...',
+      noComments: 'Noch keine Kommentare.',
+      loadCommentsError: 'Kommentare konnten nicht geladen werden.'
+  },
   auth: {
     email: 'E-Mail',
     password: 'Passwort',
