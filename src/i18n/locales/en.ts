@@ -21,6 +21,30 @@ const stage1En = {
     insights: 'Insights',
     social: 'Social',
   },
+  social: {
+      title: 'Social',
+      signIn: 'Sign in to see your feed.',
+      loadError: 'Couldn't load the social feed.',
+      empty: 'No activity yet. Be the first to share.',
+      activity: {
+          watchedMovie: 'watched',
+          watchedEpisode: 'watched an episode',
+          rated: 'rated',
+          reviewed: 'reviewed',
+          favorited: 'added to favorites',
+          generic: 'shared an activity'
+      },
+      comments: 'Comments',
+      replies: 'Replies',
+      back: 'Back',
+      reply: 'Reply',
+      delete: 'Delete',
+      send: 'Send',
+      writeComment: 'Write a comment...',
+      writeReply: 'Write a reply...',
+      noComments: 'No comments yet.',
+      loadCommentsError: 'Couldn't load comments.'
+  },
   auth: {
     email: 'Email',
     password: 'Password',
