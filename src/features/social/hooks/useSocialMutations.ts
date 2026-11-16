@@ -1,6 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   acceptSocialFollowRequest,
+  createSocialComment,
+  deleteSocialComment,
+  likeSocialActivity,
+  unlikeSocialActivity,
+  likeSocialComment,
+  unlikeSocialComment,
+  reportSocialContent,
   blockSocialUser,
   followSocialUser,
   likeSocialActivity,
@@ -77,5 +84,51 @@ export function useSocialCommentLike(commentId: string) {
     mutationFn: (isLiked: boolean) =>
       isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all }),
+  });
+}
+
+export function useToggleSocialActivityLike(activityId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (isLiked: boolean) => isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] }),
+  });
+}
+
+export function useCreateSocialComment(activityId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ content, parentCommentId }: { content: string; parentCommentId?: string | null }) =>
+      createSocialComment(activityId, content, parentCommentId),
+    onSuccess: (_comment, variables) => {
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId, variables.parentCommentId ?? 'root'] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+    },
+  });
+}
+
+export function useDeleteSocialComment(activityId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteSocialComment,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+    },
+  });
+}
+
+export function useToggleSocialCommentLike(activityId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ commentId, isLiked }: { commentId: string; isLiked: boolean }) =>
+      isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] }),
+  });
+}
+
+export function useReportSocialContent() {
+  return useMutation({
+    mutationFn: reportSocialContent,
   });
 }
