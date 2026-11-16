@@ -21,6 +21,30 @@ const stage1Es = {
     insights: 'Estadísticas',
     social: 'Social',
   },
+  social: {
+      title: 'Social',
+      signIn: 'Inicia sesión para ver tu feed.',
+      loadError: 'No se pudo cargar el feed social.',
+      empty: 'Aún no hay actividad. ¡Sé la primera persona en compartir!',
+      activity: {
+          watchedMovie: 'vio',
+          watchedEpisode: 'vio un episodio',
+          rated: 'puntuó',
+          reviewed: 'reseñó',
+          favorited: 'añadió a favoritos',
+          generic: 'compartió una actividad'
+      },
+      comments: 'Comentarios',
+      replies: 'Respuestas',
+      back: 'Atrás',
+      reply: 'Responder',
+      delete: 'Eliminar',
+      send: 'Enviar',
+      writeComment: 'Escribe un comentario...',
+      writeReply: 'Escribe una respuesta...',
+      noComments: 'Aún no hay comentarios.',
+      loadCommentsError: 'No se pudieron cargar los comentarios.'
+  },
   auth: {
     email: 'Correo electrónico',
     password: 'Contraseña',
