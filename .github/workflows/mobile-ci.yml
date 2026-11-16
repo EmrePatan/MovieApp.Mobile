@@ -174,9 +174,9 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
             adb wait-for-device
-            for setting in window_animation_scale transition_animation_scale animator_duration_scale; do
-              adb shell settings put global "$setting" 0 || echo "Warning: could not disable $setting"
-            done
+            adb shell settings put global window_animation_scale 0 || echo "Warning: could not disable window_animation_scale"
+            adb shell settings put global transition_animation_scale 0 || echo "Warning: could not disable transition_animation_scale"
+            adb shell settings put global animator_duration_scale 0 || echo "Warning: could not disable animator_duration_scale"
             adb install -r "$ANDROID_APK_PATH"
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/ios-smoke.yaml
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-navigation.yaml
