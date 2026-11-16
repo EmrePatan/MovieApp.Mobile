@@ -18,6 +18,7 @@ const stage1En = {
     discover: 'Discover',
     library: 'Library',
     insights: 'Insights',
+    social: 'Social',
   },
   auth: {
     email: 'Email',
