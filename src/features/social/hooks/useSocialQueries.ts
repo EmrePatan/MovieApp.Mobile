@@ -5,6 +5,7 @@ import {
   getSocialFollowers,
   getSocialFollowing,
   getSocialPrivacy,
+  getSocialPendingFollowRequests,
   getSocialProfile,
   getPendingSocialFollowRequests,
   searchSocialUsers,
@@ -42,6 +43,16 @@ export function useSocialFollowing(userId: string, page = 1) {
     queryKey: socialQueryKeys.following(userId, page),
     queryFn: ({ signal }) => getSocialFollowing(userId, page, 20, signal),
     enabled: userId.length > 0,
+  });
+}
+
+export function useSocialPendingFollowRequests(page = 1) {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'pending-follow-requests', page],
+    queryFn: ({ signal }) => getSocialPendingFollowRequests(page, 20, signal),
+    enabled: isAuthenticated,
+    staleTime: 15_000,
   });
 }
 
