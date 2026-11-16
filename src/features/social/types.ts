@@ -96,6 +96,7 @@ export interface SocialCommentPage {
   items: SocialComment[];
   page: number;
   pageSize: number;
+  hasMore: boolean;
 }
 
 export interface SocialNotificationItem {
