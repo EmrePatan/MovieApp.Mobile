@@ -20,6 +20,7 @@ export default function SocialCommentsScreen() {
   const [parentCommentId, setParentCommentId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const comments = useSocialComments(activityId, parentCommentId);
+  const commentItems = comments.data?.pages.flatMap(page => page.items) ?? [];
   const createComment = useCreateSocialComment(activityId);
   const deleteComment = useDeleteSocialComment(activityId);
   const toggleLike = useToggleSocialCommentLike(activityId);
@@ -79,10 +80,15 @@ export default function SocialCommentsScreen() {
         </View>
       ) : (
         <FlatList
-          data={comments.data?.items ?? []}
+          data={commentItems}
           keyExtractor={item => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
+          onEndReached={() => {
+            if (comments.hasNextPage && !comments.isFetchingNextPage) void comments.fetchNextPage();
+          }}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={comments.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
           ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noComments')}</AppText>}
         />
       )}
