@@ -42,7 +42,15 @@ const LIBRARY_ROUTE_PREFIXES = [
   '/notifications',
 ] as const;
 
-const SOCIAL_ROUTE_PREFIXES = ['/social'] as const;
+const SOCIAL_ROUTE_PREFIXES = [
+  '/social',
+  '/social-notifications',
+  '/social-requests',
+  '/social-search',
+  '/social-profile',
+  '/social-people',
+  '/social-privacy',
+] as const;
 
 const INSIGHTS_ROUTE_PREFIXES = ['/insights'] as const;
 
