@@ -2,6 +2,7 @@ import { api } from '@/api/client';
 import {
   socialAcceptFollowRequestPath,
   socialBlockPath,
+  socialBlockedUsersPath,
   socialFollowersPath,
   socialFollowPath,
   socialFeedPath,
@@ -23,6 +24,7 @@ import {
 } from './routes';
 import type {
   SocialCommentPage,
+  SocialBlockedUser,
   SocialNotificationPage,
   SocialFeedPage,
   SocialFollowRequest,
@@ -141,4 +143,8 @@ export function markSocialNotificationRead(notificationId: string) {
 
 export function markAllSocialNotificationsRead() {
   return api.patch<number>(socialReadAllNotificationsPath());
+}
+
+export function getSocialBlockedUsers(signal?: AbortSignal) {
+  return api.get<SocialBlockedUser[]>(socialBlockedUsersPath(), { signal });
 }
