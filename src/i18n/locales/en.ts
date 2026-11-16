@@ -31,7 +31,7 @@ const stage1En = {
     content: 'Content',
       title: 'Social',
       signIn: 'Sign in to see your feed.',
-      loadError: 'Couldn't load the social feed.',
+      loadError: 'Could not load the social feed.',
       empty: 'No activity yet. Be the first to share.',
       activity: {
           watchedMovie: 'watched',
@@ -50,7 +50,7 @@ const stage1En = {
       writeComment: 'Write a comment...',
       writeReply: 'Write a reply...',
       noComments: 'No comments yet.',
-      loadCommentsError: 'Couldn't load comments.'
+      loadCommentsError: 'Could not load comments.'
   },
   auth: {
     email: 'Email',
