@@ -1,4 +1,9 @@
 export const socialProfilePath = (userId: string) => `/api/social/profiles/${userId}`;
+export const socialProfileActivitiesPath = (userId: string, cursor?: string | null, pageSize = 20) => {
+  const params = new URLSearchParams({ pageSize: String(pageSize) });
+  if (cursor) params.set('cursor', cursor);
+  return `/api/social/profiles/${userId}/activities?${params.toString()}`;
+};
 export const socialSearchPath = (query: string, page = 1, pageSize = 20) =>
   `/api/social/profiles/search?${new URLSearchParams({ q: query, page: String(page), pageSize: String(pageSize) }).toString()}`;
 export const socialFollowersPath = (userId: string, page = 1, pageSize = 20) =>
