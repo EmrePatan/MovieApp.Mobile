@@ -19,14 +19,20 @@ function getActivityLabelKey(type: string): string {
     case '1': return 'social.activity.watchedMovie';
     case 'WatchedEpisode':
     case '2': return 'social.activity.watchedEpisode';
+    case '3':
+    case '4':
     case 'RatedMovie':
     case 'RatedTvShow':
     case '3':
     case '4': return 'social.activity.rated';
+    case '5':
+    case '6':
     case 'ReviewedMovie':
     case 'ReviewedTvShow':
     case '5':
     case '6': return 'social.activity.reviewed';
+    case '7':
+    case '8':
     case 'FavoritedMovie':
     case 'FavoritedTvShow':
     case '7':
@@ -38,6 +44,7 @@ function getActivityLabelKey(type: string): string {
 function SocialActivityCard({
   item,
   onLike,
+  onProfile,
   onComments,
   onReport,
   isLiking,
@@ -49,6 +56,7 @@ function SocialActivityCard({
 }: {
   item: SocialFeedItem;
   onLike: (item: SocialFeedItem) => void;
+  onProfile: (item: SocialFeedItem) => void;
   onComments: (item: SocialFeedItem) => void;
   onReport: (item: SocialFeedItem) => void;
   isLiking: boolean;
@@ -62,7 +70,7 @@ function SocialActivityCard({
   const posterUri = resolveImageUri(item.posterPath, 'w300');
   return (
     <View style={styles.card}>
-      <View style={styles.cardHeader}>
+      <Pressable accessibilityRole="button" onPress={() => onProfile(item)} style={styles.cardHeader}>
         <View style={styles.avatar}>
           <AppText variant="subtitle">{item.displayName.slice(0, 1).toUpperCase()}</AppText>
         </View>
@@ -70,7 +78,7 @@ function SocialActivityCard({
           <AppText variant="body" style={styles.actorName}>{item.displayName}</AppText>
           <AppText variant="caption" muted>@{item.userName} · {dateLabel}</AppText>
         </View>
-      </View>
+      </Pressable>
       <AppText variant="body">
         {item.displayName} {activityLabel}
       </AppText>
@@ -119,6 +127,10 @@ export default function SocialFeedScreen() {
   const handleLike = useCallback((item: SocialFeedItem) => {
     toggleLike.mutate({ activityId: item.id, isLiked: item.isLikedByMe });
   }, [toggleLike]);
+
+  const handleProfile = useCallback((item: SocialFeedItem) => {
+    router.push(`/(tabs)/(app-shell)/social-profile/${item.actorId}`);
+  }, [router]);
 
   const handleComments = useCallback((item: SocialFeedItem) => {
     router.push(`/(tabs)/(app-shell)/social/${item.id}`);
