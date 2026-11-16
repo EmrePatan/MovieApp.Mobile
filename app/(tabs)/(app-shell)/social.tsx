@@ -12,17 +12,25 @@ import type { SocialFeedItem } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-function getActivityLabel(type: string): string {
+function getActivityLabelKey(type: string): string {
   switch (type) {
-    case 'WatchedMovie': return 'izledi';
-    case 'WatchedEpisode': return 'bölümünü izledi';
+    case 'WatchedMovie':
+    case '1': return 'social.activity.watchedMovie';
+    case 'WatchedEpisode':
+    case '2': return 'social.activity.watchedEpisode';
     case 'RatedMovie':
-    case 'RatedTvShow': return 'puan verdi';
+    case 'RatedTvShow':
+    case '3':
+    case '4': return 'social.activity.rated';
     case 'ReviewedMovie':
-    case 'ReviewedTvShow': return 'yorum yaptı';
+    case 'ReviewedTvShow':
+    case '5':
+    case '6': return 'social.activity.reviewed';
     case 'FavoritedMovie':
-    case 'FavoritedTvShow': return 'favorilerine ekledi';
-    default: return 'etkinlik yaptı';
+    case 'FavoritedTvShow':
+    case '7':
+    case '8': return 'social.activity.favorited';
+    default: return 'social.activity.generic';
   }
 }
 
@@ -31,11 +39,13 @@ function SocialActivityCard({
   onLike,
   onComments,
   isLiking,
+  activityLabel,
 }: {
   item: SocialFeedItem;
   onLike: (item: SocialFeedItem) => void;
   onComments: (item: SocialFeedItem) => void;
   isLiking: boolean;
+  activityLabel: string;
 }) {
   const dateLabel = new Date(item.createdAt).toLocaleDateString();
   return (
@@ -50,7 +60,7 @@ function SocialActivityCard({
         </View>
       </View>
       <AppText variant="body">
-        {item.displayName} {getActivityLabel(item.activityType)}
+        {item.displayName} {activityLabel}
       </AppText>
       <View style={styles.contentCard}>
         <AppText variant="subtitle">{item.targetTitle || 'İçerik'}</AppText>
@@ -102,8 +112,8 @@ export default function SocialFeedScreen() {
     return (
       <SafeAreaView style={styles.screen}>
         <View style={styles.empty}>
-          <AppText variant="title">{t('social.title', 'Sosyal')}</AppText>
-          <AppText variant="bodySmall" muted>{t('social.signIn', 'Akışı görmek için giriş yap.')}</AppText>
+          <AppText variant="title">{t('social.title')}</AppText>
+          <AppText variant="bodySmall" muted>{t('social.signIn')}</AppText>
           <AppButton title={t('auth.signIn')} onPress={() => router.push('/(auth)/login')} />
         </View>
       </SafeAreaView>
@@ -118,7 +128,7 @@ export default function SocialFeedScreen() {
     return (
       <SafeAreaView style={styles.screen}>
         <View style={styles.empty}>
-          <AppText variant="bodySmall" muted>{t('social.loadError', 'Sosyal akış yüklenemedi.')}</AppText>
+          <AppText variant="bodySmall" muted>{t('social.loadError')}</AppText>
           <AppButton title={t('common.retry')} variant="secondary" onPress={() => void feed.refetch()} />
         </View>
       </SafeAreaView>
@@ -136,6 +146,7 @@ export default function SocialFeedScreen() {
             onLike={handleLike}
             onComments={handleComments}
             isLiking={toggleLike.isPending && toggleLike.variables?.activityId === item.id}
+            activityLabel={t(getActivityLabelKey(item.activityType))}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -159,7 +170,7 @@ export default function SocialFeedScreen() {
             </View>
           </View>
         }
-        ListEmptyComponent={<View style={styles.empty}><AppText variant="bodySmall" muted>{t('social.empty', 'Henüz paylaşım yok. İlk hareketi sen oluştur!')}</AppText></View>}
+        ListEmptyComponent={<View style={styles.empty}><AppText variant="bodySmall" muted>{t('social.empty')}</AppText></View>}
         ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
       />
     </SafeAreaView>
