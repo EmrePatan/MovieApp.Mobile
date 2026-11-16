@@ -67,10 +67,11 @@ export function useUpdateSocialPrivacy() {
   });
 }
 
-export function useToggleSocialActivityLike(activityId: string) {
+export function useToggleSocialActivityLike() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (isLiked: boolean) => isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
+    mutationFn: ({ activityId, isLiked }: { activityId: string; isLiked: boolean }) =>
+      isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] }),
   });
 }
