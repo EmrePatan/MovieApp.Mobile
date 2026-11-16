@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
+import { useAuth } from '@/auth/useAuth';
 import { useSocialComments } from '@/features/social/hooks/useSocialQueries';
 import { useCreateSocialComment, useDeleteSocialComment, useToggleSocialCommentLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialComment } from '@/features/social/types';
@@ -14,6 +15,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialCommentsScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const { t } = useTranslation();
   const { user } = useAuth();
   const { activityId } = useLocalSearchParams<{ activityId: string }>();
@@ -54,7 +56,7 @@ export default function SocialCommentsScreen() {
           <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
         {item.userId === user?.id ? (
-          <Pressable onPress={() => deleteComment.mutate(item.id)}>
+          {item.userId === user?.id ? <Pressable onPress={() => deleteComment.mutate(item.id)}>
             <AppText variant="caption" muted>{t('social.delete')}</AppText>
           </Pressable>
         ) : null}
@@ -94,7 +96,7 @@ export default function SocialCommentsScreen() {
             placeholder={parentCommentId ? t('social.writeReply') : t('social.writeComment')}
             placeholderTextColor={colors.textMuted}
             multiline
-            maxLength={4000}
+            maxLength={2000}
             style={styles.input}
           />
           <Pressable disabled={!draft.trim() || createComment.isPending} onPress={handleSubmit} style={styles.send}>
