@@ -233,14 +233,9 @@ export function preloadExternalRatingBrandAssets(): void {
   ];
 
   for (const source of sources) {
-    try {
-      const resolved = Image.resolveAssetSource(source);
-      if (resolved?.uri) {
-        // Asset warming is best-effort; a failed prefetch must not create an unhandled rejection.
-        void Image.prefetch(resolved.uri).catch(() => false);
-      }
-    } catch {
-      // Bundled artwork is optional during startup.
+    const resolved = Image.resolveAssetSource(source);
+    if (resolved?.uri) {
+      void Image.prefetch(resolved.uri);
     }
   }
 }
