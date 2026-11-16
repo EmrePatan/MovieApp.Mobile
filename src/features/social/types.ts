@@ -67,3 +67,8 @@ export interface SocialFollowRequest {
   displayName: string;
   requestedAt: string;
 }
+
+export interface SocialLikeResult {
+  isLiked: boolean;
+  likeCount: number;
+}
