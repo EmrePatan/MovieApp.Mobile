@@ -15,6 +15,7 @@ const stage1De = {
   },
   tabs: {
     home: 'Start',
+    social: 'Social',
     discover: 'Entdecken',
     library: 'Bibliothek',
     insights: 'Statistiken',
