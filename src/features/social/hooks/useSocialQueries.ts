@@ -94,9 +94,12 @@ export function useSocialComments(activityId: string, parentCommentId?: string |
 
 export function useSocialNotifications() {
   const { isAuthenticated } = useAuth();
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: [...socialQueryKeys.all, 'notifications'],
-    queryFn: ({ signal }) => getSocialNotifications(1, 20, signal),
+    queryFn: ({ pageParam, signal }) => getSocialNotifications(pageParam, 20, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.items.length === lastPage.pageSize ? lastPage.page + 1 : undefined,
     enabled: isAuthenticated,
     staleTime: 15_000,
   });
