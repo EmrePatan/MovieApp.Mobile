@@ -24,7 +24,7 @@ export default function SocialCommentsScreen() {
   const createComment = useCreateSocialComment(activityId);
   const deleteComment = useDeleteSocialComment(activityId);
   const toggleLike = useToggleSocialCommentLike(activityId);
-  const report = useReportSocialContent(activityId);
+  const report = useReportSocialContent();
 
   const handleSubmit = useCallback(() => {
     const content = draft.trim();
