@@ -15,6 +15,7 @@ const stage1Es = {
   },
   tabs: {
     home: 'Inicio',
+    social: 'Social',
     discover: 'Descubrir',
     library: 'Biblioteca',
     insights: 'Estadísticas',
