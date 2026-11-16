@@ -29,45 +29,22 @@ export function LocalePreferenceProvider({ children }: { children: ReactNode }) 
     let cancelled = false;
 
     async function hydrate() {
-      // A Keychain/SecureStore failure must not keep the app behind the startup gate.
-      const savedLanguage = await getSavedUiLanguage().catch(() => null);
+      const savedLanguage = await getSavedUiLanguage();
       const resolved = resolveInitialUiLanguage(savedLanguage, getDeviceLanguageCode());
-      let languageToApply = resolved.language;
-      let sourceToApply = resolved.source;
-
-      try {
-        await changeUiLanguage(languageToApply);
-      } catch (error) {
-        // Do not leave the app behind the locale startup gate if i18n initialization fails.
-        console.warn('[Locale] Failed to apply the preferred language; falling back to English.', error);
-        languageToApply = 'en';
-        sourceToApply = 'fallback';
-        await changeUiLanguage('en').catch(() => undefined);
-      }
-
-      acceptLanguageTagRef.current = toFormatLocaleTag(languageToApply);
+      await changeUiLanguage(resolved.language);
+      acceptLanguageTagRef.current = toFormatLocaleTag(resolved.language);
 
       if (!cancelled) {
-        if (languageToApply !== 'en') {
+        if (resolved.language !== 'en') {
           invalidateLocalizedDetailQueries(queryClient);
         }
-        setLanguageState(languageToApply);
-        setSource(sourceToApply);
+        setLanguageState(resolved.language);
+        setSource(resolved.source);
         setIsHydrated(true);
       }
     }
 
-    void hydrate().catch(async (error) => {
-      // Final safety net for unexpected locale/storage failures.
-      console.warn('[Locale] Unexpected hydration failure; using English fallback.', error);
-      await changeUiLanguage('en').catch(() => undefined);
-      acceptLanguageTagRef.current = toFormatLocaleTag('en');
-      if (!cancelled) {
-        setLanguageState('en');
-        setSource('fallback');
-        setIsHydrated(true);
-      }
-    });
+    void hydrate();
 
     return () => {
       cancelled = true;
