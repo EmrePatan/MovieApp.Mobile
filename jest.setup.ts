@@ -132,5 +132,18 @@ jest.mock('@/features/follows/services/push-device-service', () => ({
   getLastRegisteredExpoPushToken: jest.fn().mockReturnValue(null),
 }));
 
+jest.mock('react', () => {
+  const actual = jest.requireActual<typeof import('react')>('react');
+  const runHookImmediately = (callback: () => void | (() => void)) => {
+    callback();
+    return undefined;
+  };
+
+  return {
+    ...actual,
+    useEffect: jest.fn(runHookImmediately),
+    useLayoutEffect: jest.fn(runHookImmediately),
+  };
+});
 
 export {};
