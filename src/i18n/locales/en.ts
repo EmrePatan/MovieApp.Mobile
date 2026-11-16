@@ -15,7 +15,6 @@ const stage1En = {
   },
   tabs: {
     home: 'Home',
-    social: 'Social',
     discover: 'Discover',
     library: 'Library',
     insights: 'Insights',
@@ -30,7 +29,7 @@ const stage1En = {
     content: 'Content',
       title: 'Social',
       signIn: 'Sign in to see your feed.',
-      loadError: 'Could not load the social feed.',
+      loadError: 'Unable to load the social feed.',
       empty: 'No activity yet. Be the first to share.',
       activity: {
           watchedMovie: 'watched',
@@ -49,7 +48,7 @@ const stage1En = {
       writeComment: 'Write a comment...',
       writeReply: 'Write a reply...',
       noComments: 'No comments yet.',
-      loadCommentsError: 'Could not load comments.'
+      loadCommentsError: 'Unable to load comments.'
   },
   auth: {
     email: 'Email',
