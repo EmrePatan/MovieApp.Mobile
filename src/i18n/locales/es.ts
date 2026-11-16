@@ -22,6 +22,13 @@ const stage1Es = {
     social: 'Social',
   },
   social: {
+    search: 'Buscar',
+    requests: 'Solicitudes',
+    notifications: 'Notificaciones',
+    like: 'Me gusta',
+    unlike: 'Ya no me gusta',
+    commentsCount: 'Comentarios',
+    content: 'Contenido',
       title: 'Social',
       signIn: 'Inicia sesión para ver tu feed.',
       loadError: 'No se pudo cargar el feed social.',
