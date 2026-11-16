@@ -21,6 +21,30 @@ const stage1Tr = {
     insights: 'İstatistikler',
     social: 'Sosyal',
   },
+  social: {
+      title: 'Sosyal',
+      signIn: 'Akışı görmek için giriş yap.',
+      loadError: 'Sosyal akış yüklenemedi.',
+      empty: 'Henüz paylaşım yok. İlk hareketi sen oluştur!',
+      activity: {
+          watchedMovie: 'izledi',
+          watchedEpisode: 'bölümünü izledi',
+          rated: 'puan verdi',
+          reviewed: 'yorum yaptı',
+          favorited: 'favorilerine ekledi',
+          generic: 'bir etkinlik paylaştı'
+      },
+      comments: 'Yorumlar',
+      replies: 'Yanıtlar',
+      back: 'Geri',
+      reply: 'Yanıtla',
+      delete: 'Sil',
+      send: 'Gönder',
+      writeComment: 'Yorumunu yaz...',
+      writeReply: 'Yanıtını yaz...',
+      noComments: 'Henüz yorum yok.',
+      loadCommentsError: 'Yorumlar yüklenemedi.'
+  },
   auth: {
     email: 'E-posta',
     password: 'Şifre',
