@@ -4,6 +4,7 @@ import {
   socialBlockPath,
   socialFollowersPath,
   socialFollowPath,
+  socialFeedPath,
   socialFollowRequestPath,
   socialFollowingPath,
   socialPrivacyPath,
@@ -11,6 +12,7 @@ import {
   socialSearchPath,
 } from './routes';
 import type {
+  SocialFeedPage,
   SocialFollowResult,
   SocialPrivacySettings,
   SocialProfile,
@@ -63,4 +65,8 @@ export function getSocialPrivacy(signal?: AbortSignal) {
 
 export function updateSocialPrivacy(settings: SocialPrivacySettings) {
   return api.put<SocialPrivacySettings>(socialPrivacyPath(), settings);
+}
+
+export function getSocialFeed(cursor?: string | null, pageSize = 20, signal?: AbortSignal) {
+  return api.get<SocialFeedPage>(socialFeedPath(cursor, pageSize), { signal });
 }
