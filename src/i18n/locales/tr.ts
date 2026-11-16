@@ -19,7 +19,6 @@ const stage1Tr = {
     discover: 'Keşfet',
     library: 'Kütüphane',
     insights: 'İstatistikler',
-    social: 'Sosyal',
   },
   social: {
     search: 'Ara',
