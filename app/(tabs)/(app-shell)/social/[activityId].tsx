@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
 import { useSocialComments } from '@/features/social/hooks/useSocialQueries';
-import { useCreateSocialComment, useDeleteSocialComment, useToggleSocialCommentLike } from '@/features/social/hooks/useSocialMutations';
+import { useCreateSocialComment, useDeleteSocialComment, useReportSocialContent, useToggleSocialCommentLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialComment } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -24,6 +24,7 @@ export default function SocialCommentsScreen() {
   const createComment = useCreateSocialComment(activityId);
   const deleteComment = useDeleteSocialComment(activityId);
   const toggleLike = useToggleSocialCommentLike(activityId);
+  const report = useReportSocialContent(activityId);
 
   const handleSubmit = useCallback(() => {
     const content = draft.trim();
@@ -54,6 +55,20 @@ export default function SocialCommentsScreen() {
         <Pressable onPress={() => handleReply(item)}>
           <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
+        {item.userId !== user?.id ? (
+          <Pressable onPress={() => Alert.alert(
+            'Yorumu bildir',
+            'Bildirim nedenini seç.',
+            [
+              { text: 'Spam', onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Spam' }) },
+              { text: 'Uygunsuz içerik', onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Inappropriate' }) },
+              { text: 'Taciz', onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Harassment' }) },
+              { text: 'Vazgeç', style: 'cancel' },
+            ],
+          )}>
+            <AppText variant="caption" muted>Şikâyet et</AppText>
+          </Pressable>
+        ) : null}
         {item.userId === user?.id ? (
           <Pressable onPress={() => deleteComment.mutate(item.id)}>
             <AppText variant="caption" muted>{t('social.delete')}</AppText>
@@ -61,7 +76,7 @@ export default function SocialCommentsScreen() {
         ) : null}
       </View>
     </View>
-  ), [deleteComment, handleReply, t, toggleLike, user?.id]);
+  ), [deleteComment, handleReply, report, t, toggleLike, user?.id]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
