@@ -6,6 +6,7 @@ import {
   getSocialFollowing,
   getSocialPrivacy,
   getSocialProfile,
+  getPendingSocialFollowRequests,
   searchSocialUsers,
 } from '../api/social-api';
 import { socialQueryKeys } from './social-query-keys';
@@ -63,5 +64,15 @@ export function useSocialFeed() {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: isAuthenticated,
     staleTime: 20_000,
+  });
+}
+
+export function usePendingSocialFollowRequests() {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'follow-requests'],
+    queryFn: ({ signal }) => getPendingSocialFollowRequests(1, 20, signal),
+    enabled: isAuthenticated,
+    staleTime: 15_000,
   });
 }
