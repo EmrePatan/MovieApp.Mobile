@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
   getSocialFeed,
+  getSocialComments,
   getSocialFollowers,
   getSocialFollowing,
   getSocialPrivacy,
@@ -84,6 +85,15 @@ export function usePendingSocialFollowRequests() {
     queryKey: [...socialQueryKeys.all, 'follow-requests'],
     queryFn: ({ signal }) => getPendingSocialFollowRequests(1, 20, signal),
     enabled: isAuthenticated,
+    staleTime: 15_000,
+  });
+}
+
+export function useSocialComments(activityId: string, parentCommentId?: string | null, page = 1) {
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'comments', activityId, parentCommentId ?? 'root', page],
+    queryFn: ({ signal }) => getSocialComments(activityId, parentCommentId, page, 20, signal),
+    enabled: activityId.length > 0,
     staleTime: 15_000,
   });
 }
