@@ -4,6 +4,7 @@ import {
   socialBlockPath,
   socialFollowersPath,
   socialFollowPath,
+  socialFollowRequestPath,
   socialFollowingPath,
   socialPrivacyPath,
   socialProfilePath,
