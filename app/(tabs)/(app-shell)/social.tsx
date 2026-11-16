@@ -7,7 +7,7 @@ import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
 import { useSocialFeed } from '@/features/social/hooks/useSocialQueries';
-import { useToggleSocialActivityLike } from '@/features/social/hooks/useSocialMutations';
+import { useReportSocialContent, useToggleSocialActivityLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialFeedItem } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -105,6 +105,7 @@ export default function SocialFeedScreen() {
   const { isAuthenticated } = useAuth();
   const feed = useSocialFeed();
   const toggleLike = useToggleSocialActivityLike();
+  const report = useReportSocialContent();
   const items = useMemo(() => feed.data?.pages.flatMap(page => page.items) ?? [], [feed.data?.pages]);
 
   const handleLike = useCallback((item: SocialFeedItem) => {
