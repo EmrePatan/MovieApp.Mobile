@@ -38,3 +38,25 @@ export interface SocialPageRequest {
   page?: number;
   pageSize?: number;
 }
+
+export interface SocialFeedItem {
+  id: string;
+  actorId: string;
+  userName: string;
+  displayName: string;
+  avatarUrl: string | null;
+  activityType: string;
+  createdAt: string;
+  targetContentId: string;
+  targetContentType: 'Movie' | 'TvShow' | 'Episode';
+  targetTitle: string;
+  targetSubtitle: string | null;
+  posterPath: string | null;
+  ratingScore: number | null;
+  reviewExcerpt: string | null;
+}
+
+export interface SocialFeedPage {
+  items: SocialFeedItem[];
+  nextCursor: string | null;
+}
