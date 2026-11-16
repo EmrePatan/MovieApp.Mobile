@@ -39,6 +39,7 @@ function SocialActivityCard({
   item,
   onLike,
   onComments,
+  onReport,
   isLiking,
   activityLabel,
   likeLabel,
@@ -48,6 +49,7 @@ function SocialActivityCard({
   item: SocialFeedItem;
   onLike: (item: SocialFeedItem) => void;
   onComments: (item: SocialFeedItem) => void;
+  onReport: (item: SocialFeedItem) => void;
   isLiking: boolean;
   activityLabel: string;
   likeLabel: string;
@@ -116,6 +118,15 @@ export default function SocialFeedScreen() {
     router.push(`/(tabs)/(app-shell)/social/${item.id}`);
   }, [router]);
 
+  const handleReport = useCallback((item: SocialFeedItem) => {
+    Alert.alert('Paylaşımı bildir', 'Bildirim nedenini seç.', [
+      { text: 'Spam', onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Spam' }) },
+      { text: 'Uygunsuz içerik', onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Inappropriate' }) },
+      { text: 'Taciz', onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Harassment' }) },
+      { text: 'Vazgeç', style: 'cancel' },
+    ]);
+  }, [report]);
+
   const handleLoadMore = useCallback(() => {
     if (feed.hasNextPage && !feed.isFetchingNextPage) void feed.fetchNextPage();
   }, [feed]);
@@ -157,6 +168,7 @@ export default function SocialFeedScreen() {
             item={item}
             onLike={handleLike}
             onComments={handleComments}
+            onReport={handleReport}
             isLiking={toggleLike.isPending && toggleLike.variables?.activityId === item.id}
             activityLabel={t(getActivityLabelKey(item.activityType))}
             likeLabel={t('social.like')}
