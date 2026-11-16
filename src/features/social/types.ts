@@ -97,3 +97,24 @@ export interface SocialCommentPage {
   page: number;
   pageSize: number;
 }
+
+export interface SocialNotificationItem {
+  id: string;
+  notificationType: string;
+  actorId: string;
+  userName: string;
+  displayName: string;
+  avatarUrl: string | null;
+  activityId: string | null;
+  commentId: string | null;
+  followId: string | null;
+  createdAt: string;
+  isRead: boolean;
+}
+
+export interface SocialNotificationPage {
+  items: SocialNotificationItem[];
+  page: number;
+  pageSize: number;
+  unreadCount: number;
+}
