@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,6 +45,7 @@ function SocialActivityCard({
   likeLabel,
   unlikeLabel,
   commentsLabel,
+  reportLabel,
 }: {
   item: SocialFeedItem;
   onLike: (item: SocialFeedItem) => void;
@@ -55,6 +56,7 @@ function SocialActivityCard({
   likeLabel: string;
   unlikeLabel: string;
   commentsLabel: string;
+  reportLabel: string;
 }) {
   const dateLabel = new Date(item.createdAt).toLocaleDateString();
   const posterUri = resolveImageUri(item.posterPath, 'w300');
@@ -95,6 +97,9 @@ function SocialActivityCard({
         </Pressable>
         <Pressable accessibilityRole="button" onPress={() => onComments(item)} style={styles.actionButton}>
           <AppText variant="bodySmall">{commentsLabel} · {item.commentsCount}</AppText>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => onReport(item)} style={styles.actionButton}>
+          <AppText variant="caption" muted>{reportLabel}</AppText>
         </Pressable>
       </View>
     </View>
@@ -175,6 +180,7 @@ export default function SocialFeedScreen() {
             likeLabel={t('social.like')}
             unlikeLabel={t('social.unlike')}
             commentsLabel={t('social.commentsCount')}
+            reportLabel={t('social.report', 'Report')}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -193,7 +199,7 @@ export default function SocialFeedScreen() {
                 <AppText variant="caption" style={styles.headerAction}>{t('social.requests')}</AppText>
               </Pressable>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
-                <AppText variant="caption" style={styles.headerAction} >{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
+                <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
               </Pressable>
             </View>
           </View>
