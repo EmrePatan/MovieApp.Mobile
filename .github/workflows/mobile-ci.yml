@@ -331,6 +331,8 @@ jobs:
       # Deliberately unreachable: smoke tests must never call a production API.
       EXPO_PUBLIC_API_URL: http://127.0.0.1:9
       EXPO_PUBLIC_IMAGE_BASE_URL: https://image.tmdb.org/t/p
+      # Cold Android Test Device images need more time to initialize Maestro instrumentation.
+      MAESTRO_DRIVER_STARTUP_TIMEOUT: 240000
 
     steps:
       - name: Checkout
