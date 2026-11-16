@@ -6,19 +6,14 @@ import { useAuth } from '@/auth/useAuth';
 import { markNotificationRead } from '../api/notifications-api';
 import { buildNotificationRoute } from '../utils/notification-navigation';
 
-try {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
-} catch (error) {
-  // Notification presentation is optional and must not prevent the app from loading.
-  console.warn('[Notifications] Failed to install the notification handler.', error);
-}
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export function parseNotificationIdFromPushData(
   data: Record<string, unknown> | undefined,
@@ -139,50 +134,31 @@ export function NotificationBootstrapProvider({
         isAuthenticated,
         navigate,
         invalidateNotifications,
-      }).catch((error) => {
-        console.warn('[Notifications] Failed to process a notification response.', error);
       });
     },
     [isAuthenticated, invalidateNotifications, navigate],
   );
 
   useEffect(() => {
-    let receivedSubscription:
-      | ReturnType<typeof Notifications.addNotificationReceivedListener>
-      | undefined;
-    let responseSubscription:
-      | ReturnType<typeof Notifications.addNotificationResponseReceivedListener>
-      | undefined;
+    const receivedSubscription = Notifications.addNotificationReceivedListener(() => {
+      invalidateNotifications();
+    });
 
-    try {
-      receivedSubscription = Notifications.addNotificationReceivedListener(() => {
-        invalidateNotifications();
-      });
-      responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
         processResponse(response);
-      });
-    } catch (error) {
-      // Native notification APIs may be unavailable in simulators or restricted builds.
-      console.warn('[Notifications] Listener registration failed; continuing without push listeners.', error);
-    }
+      },
+    );
 
-    try {
-      void Notifications.getLastNotificationResponseAsync()
-        .then((response) => {
-          if (response) {
-            processResponse(response);
-          }
-        })
-        .catch((error) => {
-          console.warn('[Notifications] Failed to restore the last notification response.', error);
-        });
-    } catch (error) {
-      console.warn('[Notifications] Native last-response lookup is unavailable.', error);
-    }
+    void Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        processResponse(response);
+      }
+    });
 
     return () => {
-      receivedSubscription?.remove();
-      responseSubscription?.remove();
+      receivedSubscription.remove();
+      responseSubscription.remove();
     };
   }, [invalidateNotifications, processResponse]);
 
