@@ -15,6 +15,7 @@ const stage1En = {
   },
   tabs: {
     home: 'Home',
+    social: 'Social',
     discover: 'Discover',
     library: 'Library',
     insights: 'Insights',
