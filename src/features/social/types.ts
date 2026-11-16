@@ -86,7 +86,7 @@ export interface SocialComment {
   parentCommentId: string | null;
   content: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
   likesCount: number;
   repliesCount: number;
   isLikedByMe: boolean;
