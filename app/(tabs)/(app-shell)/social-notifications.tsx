@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,11 +27,17 @@ export default function SocialNotificationsScreen() {
   const query = useSocialNotifications();
   const markRead = useMarkSocialNotificationRead();
   const markAllRead = useMarkAllSocialNotificationsRead();
+  const notifications = useMemo(
+    () => query.data?.pages.flatMap(page => page.items) ?? [],
+    [query.data?.pages],
+  );
+  const unreadCount = query.data?.pages[0]?.unreadCount ?? 0;
 
   const handlePress = useCallback((item: SocialNotificationItem) => {
     if (!item.isRead) markRead.mutate(item.id);
     if (item.activityId) router.push(`/(tabs)/(app-shell)/social/${item.activityId}`);
     else if (item.notificationType === 'FollowRequest') router.push('/(tabs)/(app-shell)/social-requests');
+    else if (item.actorId) router.push(`/(tabs)/(app-shell)/social-profile/${item.actorId}`);
   }, [markRead, router]);
 
   const renderItem = useCallback(({ item }: { item: SocialNotificationItem }) => (
@@ -50,15 +56,26 @@ export default function SocialNotificationsScreen() {
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
         <AppText variant="title">Sosyal bildirimler</AppText>
-        <Pressable disabled={!query.data?.unreadCount || markAllRead.isPending} onPress={() => markAllRead.mutate()}>
+        <Pressable disabled={!unreadCount || markAllRead.isPending} onPress={() => markAllRead.mutate()}>
           <AppText variant="caption" style={styles.markAll}>Tümünü okundu işaretle</AppText>
         </Pressable>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
         query.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>Bildirimler yüklenemedi.</AppText></View> :
-          <FlatList data={query.data?.items ?? []} keyExtractor={item => item.id} renderItem={renderItem}
+          <FlatList
+            data={notifications}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
             contentContainerStyle={styles.list}
-            ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz sosyal bildirimin yok.</AppText>} />}
+            onEndReached={() => {
+              if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+            }}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={query.isFetchingNextPage
+              ? <ActivityIndicator color={colors.accent} style={styles.footer} />
+              : null}
+            ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz sosyal bildirimin yok.</AppText>}
+          />}
     </SafeAreaView>
   );
 }
@@ -74,4 +91,5 @@ const styles = StyleSheet.create({
   copy: { flex: 1, gap: spacing.xs },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  footer: { paddingVertical: spacing.lg },
 });
