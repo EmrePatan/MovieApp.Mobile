@@ -60,3 +60,10 @@ export interface SocialFeedPage {
   items: SocialFeedItem[];
   nextCursor: string | null;
 }
+
+export interface SocialFollowRequest {
+  userId: string;
+  userName: string;
+  displayName: string;
+  requestedAt: string;
+}
