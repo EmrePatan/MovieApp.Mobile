@@ -8,12 +8,14 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { useSocialComments } from '@/features/social/hooks/useSocialQueries';
 import { useCreateSocialComment, useDeleteSocialComment, useToggleSocialCommentLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialComment } from '@/features/social/types';
+import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export default function SocialCommentsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { activityId } = useLocalSearchParams<{ activityId: string }>();
   const [parentCommentId, setParentCommentId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -51,18 +53,20 @@ export default function SocialCommentsScreen() {
         <Pressable onPress={() => handleReply(item)}>
           <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
-        <Pressable onPress={() => deleteComment.mutate(item.id)}>
-          <AppText variant="caption" muted>{t('social.delete')}</AppText>
-        </Pressable>
+        {item.userId === user?.id ? (
+          <Pressable onPress={() => deleteComment.mutate(item.id)}>
+            <AppText variant="caption" muted>{t('social.delete')}</AppText>
+          </Pressable>
+        ) : null}
       </View>
     </View>
-  ), [deleteComment, handleReply, toggleLike]);
+  ), [deleteComment, handleReply, t, toggleLike, user?.id]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Pressable onPress={() => parentCommentId ? setParentCommentId(null) : router.back()}>
-          <AppText variant="body">‹ {parentCommentId ? 'Yorumlar' : 'Geri'}</AppText>
+          <AppText variant="body">‹ {parentCommentId ? t('social.comments') : t('social.back')}</AppText>
         </Pressable>
         <AppText variant="title">{parentCommentId ? t('social.replies') : t('social.comments')}</AppText>
       </View>
