@@ -165,21 +165,50 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_atd
+          # Use a full Google APIs image: ATD images are optimized for instrumented
+          # tests and have shown unstable ADB connectivity with Maestro UI automation.
+          target: google_apis
           arch: x86_64
           profile: pixel_2
-          cores: 2
-          ram-size: 2048M
-          heap-size: 512M
+          cores: 4
+          ram-size: 4096M
+          heap-size: 1024M
           emulator-boot-timeout: 900
-          disable-animations: false
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          # Avoid loading a stale snapshot while still allowing a clean snapshot to be saved.
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot-load -noaudio -no-boot-anim -camera-back none
           script: |
             adb wait-for-device
-            adb shell settings put global window_animation_scale 0 || echo "Warning: could not disable window_animation_scale"
-            adb shell settings put global transition_animation_scale 0 || echo "Warning: could not disable transition_animation_scale"
-            adb shell settings put global animator_duration_scale 0 || echo "Warning: could not disable animator_duration_scale"
-            adb install -r "$ANDROID_APK_PATH"
+
+            # Do not install or start Maestro until ADB reports a healthy, online device.
+            DEVICE_READY=false
+            for attempt in $(seq 1 30); do
+              DEVICE_STATE="$(adb -s emulator-5554 get-state 2>/dev/null || true)"
+              if [ "$DEVICE_STATE" = "device" ]; then
+                DEVICE_READY=true
+                break
+              fi
+              echo "Waiting for Android device to become online (attempt $attempt/30): $DEVICE_STATE"
+              sleep 2
+            done
+            if [ "$DEVICE_READY" != "true" ]; then
+              adb devices -l || true
+              echo "Android emulator did not become online after boot." >&2
+              exit 1
+            fi
+
+            adb -s emulator-5554 shell settings put global window_animation_scale 0
+            adb -s emulator-5554 shell settings put global transition_animation_scale 0
+            adb -s emulator-5554 shell settings put global animator_duration_scale 0
+            adb -s emulator-5554 shell getprop sys.boot_completed
+            adb -s emulator-5554 shell free -h || true
+
+            # Non-streaming install avoids long streamed-install stalls on cold CI emulators.
+            adb -s emulator-5554 install -r --no-streaming "$ANDROID_APK_PATH"
+            adb -s emulator-5554 shell pm path com.movieapp.mobile
+
+            # Verify ADB stayed online after package installation before Maestro instrumentation.
+            adb -s emulator-5554 get-state
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/ios-smoke.yaml
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-navigation.yaml
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-validation.yaml
