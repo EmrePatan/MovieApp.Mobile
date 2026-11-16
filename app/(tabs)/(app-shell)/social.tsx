@@ -91,7 +91,7 @@ export default function SocialFeedScreen() {
   }, [toggleLike]);
 
   const handleComments = useCallback((item: SocialFeedItem) => {
-    router.push(`/(tabs)/(app-shell)/social-comments/${item.id}`);
+    router.push(`/(tabs)/(app-shell)/social/${item.id}`);
   }, [router]);
 
   const handleLoadMore = useCallback(() => {
@@ -104,7 +104,7 @@ export default function SocialFeedScreen() {
         <View style={styles.empty}>
           <AppText variant="title">{t('social.title', 'Sosyal')}</AppText>
           <AppText variant="bodySmall" muted>{t('social.signIn', 'Akışı görmek için giriş yap.')}</AppText>
-          <AppButton title={t('common.signInTitleCase')} onPress={() => router.push('/(auth)/login')} />
+          <AppButton title={t('auth.signIn')} onPress={() => router.push('/(auth)/login')} />
         </View>
       </SafeAreaView>
     );
