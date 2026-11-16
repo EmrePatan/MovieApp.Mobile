@@ -15,6 +15,7 @@ const stage1It = {
   },
   tabs: {
     home: 'Home',
+    social: 'Social',
     discover: 'Scopri',
     library: 'Libreria',
     insights: 'Statistiche',
