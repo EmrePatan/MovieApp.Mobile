@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useSocialProfile } from '@/features/social/hooks/useSocialQueries';
-import { useFollowSocialUser, useSocialBlockMutations, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
+import { useFollowSocialUser, useReportSocialContent, useSocialBlockMutations, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -16,6 +16,7 @@ export default function SocialProfileScreen() {
   const follow = useFollowSocialUser(userId);
   const unfollow = useUnfollowSocialUser(userId);
   const block = useSocialBlockMutations(userId);
+  const report = useReportSocialContent();
 
   const handleFollow = useCallback(() => {
     if (profile.data?.followStatus === 'Accepted' || profile.data?.followStatus === 'Pending') {
@@ -51,6 +52,18 @@ export default function SocialProfileScreen() {
             'Bu kullanıcıyla aranızdaki takip ilişkileri kaldırılır.',
             [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Engelle', style: 'destructive', onPress: () => block.block.mutate() }],
           )} loading={block.block.isPending} />
+        ) : null}
+        {item.followStatus !== 'Self' ? (
+          <AppButton title="Kullanıcıyı şikâyet et" variant="secondary" onPress={() => Alert.alert(
+            'Kullanıcıyı bildir',
+            'Bildirim nedenini seç.',
+            [
+              { text: 'Spam', onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'Spam' }) },
+              { text: 'Sahte hesap', onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'FakeAccount' }) },
+              { text: 'Taciz', onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'Harassment' }) },
+              { text: 'Vazgeç', style: 'cancel' },
+            ],
+          )} loading={report.isPending} />
         ) : null}
         {item.isPrivate && item.followStatus !== 'Accepted' && item.followStatus !== 'Self' ? (
           <AppText variant="bodySmall" muted center>Bu profil gizli. Paylaşımları görmek için takip isteği gönder.</AppText>
