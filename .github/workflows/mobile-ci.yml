@@ -163,17 +163,20 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: google_atd
           arch: x86_64
-          profile: pixel_6
-          cores: 4
-          ram-size: 3072M
+          profile: pixel_2
+          cores: 2
+          ram-size: 2048M
           heap-size: 512M
-          emulator-boot-timeout: 600
-          disable-animations: true
+          emulator-boot-timeout: 900
+          disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
             adb wait-for-device
+            for setting in window_animation_scale transition_animation_scale animator_duration_scale; do
+              adb shell settings put global "$setting" 0 || echo "Warning: could not disable $setting"
+            done
             adb install -r "$ANDROID_APK_PATH"
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/ios-smoke.yaml
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-navigation.yaml
