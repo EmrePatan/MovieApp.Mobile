@@ -36,3 +36,5 @@ export const socialNotificationsPath = (page = 1, pageSize = 20) =>
 export const socialUnreadNotificationCountPath = () => '/api/social/notifications/unread-count';
 export const socialNotificationReadPath = (notificationId: string) => `/api/social/notifications/${notificationId}/read`;
 export const socialReadAllNotificationsPath = () => '/api/social/notifications/read-all';
+
+export const socialBlockedUsersPath = () => '/api/social/blocks';
