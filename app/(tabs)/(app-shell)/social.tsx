@@ -19,20 +19,14 @@ function getActivityLabelKey(type: string): string {
     case '1': return 'social.activity.watchedMovie';
     case 'WatchedEpisode':
     case '2': return 'social.activity.watchedEpisode';
-    case '3':
-    case '4':
     case 'RatedMovie':
     case 'RatedTvShow':
     case '3':
     case '4': return 'social.activity.rated';
-    case '5':
-    case '6':
     case 'ReviewedMovie':
     case 'ReviewedTvShow':
     case '5':
     case '6': return 'social.activity.reviewed';
-    case '7':
-    case '8':
     case 'FavoritedMovie':
     case 'FavoritedTvShow':
     case '7':
