@@ -22,6 +22,13 @@ const stage1Fr = {
     social: 'Social',
   },
   social: {
+    search: 'Rechercher',
+    requests: 'Demandes',
+    notifications: 'Notifications',
+    like: 'J’aime',
+    unlike: 'Je n’aime plus',
+    commentsCount: 'Commentaires',
+    content: 'Contenu',
       title: 'Social',
       signIn: 'Connectez-vous pour voir votre fil.',
       loadError: 'Impossible de charger le fil social.',
