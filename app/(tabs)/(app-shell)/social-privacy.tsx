@@ -2,8 +2,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Switch, View } from 'react-na
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
-import { useSocialPrivacy } from '@/features/social/hooks/useSocialQueries';
-import { useUpdateSocialPrivacy } from '@/features/social/hooks/useSocialMutations';
+import { useSocialBlockedUsers, useSocialPrivacy } from '@/features/social/hooks/useSocialQueries';
+import { useUnblockSocialUser, useUpdateSocialPrivacy } from '@/features/social/hooks/useSocialMutations';
 import type { SocialPrivacySettings } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -11,6 +11,8 @@ import { spacing } from '@/theme/spacing';
 export default function SocialPrivacyScreen() {
   const router = useRouter();
   const query = useSocialPrivacy();
+  const blockedUsers = useSocialBlockedUsers();
+  const unblock = useUnblockSocialUser();
   const update = useUpdateSocialPrivacy();
   const settings = query.data;
 
@@ -45,6 +47,18 @@ export default function SocialPrivacyScreen() {
           {renderToggle('Puanlar', 'Film ve dizi puanların.', settings.showRatings, value => change({ showRatings: value }))}
           {renderToggle('Favoriler', 'Favorilerine eklediklerin.', settings.showFavorites, value => change({ showFavorites: value }))}
           {renderToggle('Yorumlar', 'Yayınladığın değerlendirmeler.', settings.showReviews, value => change({ showReviews: value }))}
+          <AppText variant="subtitle" style={styles.sectionTitle}>Engellediğin kullanıcılar</AppText>
+          {blockedUsers.isLoading ? <ActivityIndicator color={colors.accent} /> : blockedUsers.data?.length ? blockedUsers.data.map(user => (
+            <View key={user.userId} style={styles.row}>
+              <View style={styles.copy}>
+                <AppText variant="body">{user.displayName}</AppText>
+                <AppText variant="caption" muted>@{user.userName}</AppText>
+              </View>
+              <Pressable disabled={unblock.isPending} onPress={() => unblock.mutate(user.userId)}>
+                <AppText variant="caption" style={styles.unblock}>Engeli kaldır</AppText>
+              </Pressable>
+            </View>
+          )) : <AppText variant="caption" muted>Engellediğin kullanıcı yok.</AppText>}
         </View>
       )}
     </SafeAreaView>
@@ -58,4 +72,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   copy: { flex: 1, gap: spacing.xs },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  sectionTitle: { marginTop: spacing.xl },
+  unblock: { color: colors.accent },
 });
