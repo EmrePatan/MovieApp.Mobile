@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
   getSocialFeed,
+  getSocialUserActivities,
   getSocialBlockedUsers,
   getSocialNotifications,
   getSocialUnreadNotificationCount,
@@ -21,6 +22,17 @@ export function useSocialProfile(userId: string) {
     queryFn: ({ signal }) => getSocialProfile(userId, signal),
     enabled: userId.length > 0,
     staleTime: 30_000,
+  });
+}
+
+export function useSocialUserActivities(userId: string, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: socialQueryKeys.profileActivities(userId),
+    queryFn: ({ pageParam, signal }) => getSocialUserActivities(userId, pageParam, 20, signal),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: userId.length > 0 && enabled,
+    staleTime: 20_000,
   });
 }
 
