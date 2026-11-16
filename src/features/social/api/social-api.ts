@@ -8,6 +8,7 @@ import {
   socialFollowRequestPath,
   socialFollowingPath,
   socialPrivacyPath,
+  socialPendingFollowRequestsPath,
   socialProfilePath,
   socialPendingFollowRequestsPath,
   socialSearchPath,
@@ -18,6 +19,7 @@ import type {
   SocialFollowResult,
   SocialPrivacySettings,
   SocialProfile,
+  SocialFollowRequest,
   SocialUserSummary,
 } from '../types';
 
@@ -43,6 +45,13 @@ export function followSocialUser(userId: string) {
 
 export function unfollowSocialUser(userId: string) {
   return api.delete<void>(socialFollowPath(userId));
+}
+
+export function getSocialPendingFollowRequests(page = 1, pageSize = 20, signal?: AbortSignal) {
+  return api.get<SocialFollowRequest[]>(
+    socialPendingFollowRequestsPath(page, pageSize),
+    { signal },
+  );
 }
 
 export function acceptSocialFollowRequest(followerUserId: string) {
