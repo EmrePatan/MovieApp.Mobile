@@ -193,7 +193,7 @@ export default function SocialFeedScreen() {
                 <AppText variant="caption" style={styles.headerAction}>{t('social.requests')}</AppText>
               </Pressable>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
-                <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}</AppText>
+                <AppText variant="caption" style={styles.headerAction} >{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
               </Pressable>
             </View>
           </View>
