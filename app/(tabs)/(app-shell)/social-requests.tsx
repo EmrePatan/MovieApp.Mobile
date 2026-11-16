@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
-import { usePendingSocialFollowRequests } from '@/features/social/hooks/useSocialQueries';
+import { useSocialPendingFollowRequests } from '@/features/social/hooks/useSocialQueries';
 import { useSocialFollowRequestMutations } from '@/features/social/hooks/useSocialMutations';
 import type { SocialFollowRequest } from '@/features/social/types';
 import { colors } from '@/theme/colors';
@@ -11,7 +11,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialRequestsScreen() {
   const router = useRouter();
-  const requests = usePendingSocialFollowRequests();
+  const requests = useSocialPendingFollowRequests();
   const mutations = useSocialFollowRequestMutations();
 
   const renderItem = useCallback(({ item }: { item: SocialFollowRequest }) => (
