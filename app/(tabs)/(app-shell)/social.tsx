@@ -143,7 +143,19 @@ export default function SocialFeedScreen() {
         onEndReachedThreshold={0.4}
         refreshing={feed.isRefetching && !feed.isFetchingNextPage}
         onRefresh={() => void feed.refetch()}
-        ListHeaderComponent={<AppText variant="title" style={styles.title}>{t('social.title', 'Sosyal')}</AppText>}
+        ListHeaderComponent={
+          <View style={styles.headerRow}>
+            <AppText variant="title" style={styles.title}>{t('social.title', 'Sosyal')}</AppText>
+            <View style={styles.headerActions}>
+              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-requests')}>
+                <AppText variant="caption" style={styles.headerAction}>İstekler</AppText>
+              </Pressable>
+              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
+                <AppText variant="caption" style={styles.headerAction}>Bildirimler</AppText>
+              </Pressable>
+            </View>
+          </View>
+        }
         ListEmptyComponent={<View style={styles.empty}><AppText variant="bodySmall" muted>{t('social.empty', 'Henüz paylaşım yok. İlk hareketi sen oluştur!')}</AppText></View>}
         ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
       />
@@ -154,6 +166,9 @@ export default function SocialFeedScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   listContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerActions: { flexDirection: 'row', gap: spacing.md },
+  headerAction: { color: colors.accent },
   title: { marginTop: spacing.md, marginBottom: spacing.sm },
   card: { padding: spacing.md, borderRadius: 16, backgroundColor: colors.surface, gap: spacing.md },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
