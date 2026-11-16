@@ -19,7 +19,6 @@ const stage1De = {
     discover: 'Entdecken',
     library: 'Bibliothek',
     insights: 'Statistiken',
-    social: 'Social',
   },
   social: {
     search: 'Suchen',
