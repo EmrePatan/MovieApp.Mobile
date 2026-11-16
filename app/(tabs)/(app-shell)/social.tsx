@@ -201,6 +201,9 @@ export default function SocialFeedScreen() {
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
               </Pressable>
+              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}>
+                <AppText variant="caption" style={styles.headerAction}>Gizlilik</AppText>
+              </Pressable>
             </View>
           </View>
         }
