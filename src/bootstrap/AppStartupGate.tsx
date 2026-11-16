@@ -27,8 +27,7 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
   const { isStartupResolved, blocking } = useAppConfig();
   const [iconFontsReady, setIconFontsReady] = useState(false);
   const [showBrandedSplash, setShowBrandedSplash] = useState(true);
-  // State initializer avoids reading a ref during render (React 19 lint/runtime rules).
-  const [brandedSplashOpacity] = useState(() => new Animated.Value(1));
+  const brandedSplashOpacity = useRef(new Animated.Value(1)).current;
   const hasHiddenNativeSplashRef = useRef(false);
   const brandedSplashShownAtRef = useRef<number | null>(null);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,10 +36,7 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
     let cancelled = false;
 
     void (async () => {
-      // The icon font is a visual enhancement, not a startup dependency.
-      await preloadStartupIconFonts().catch((error) => {
-        console.warn('[Startup] Icon font preload rejected; continuing with fallback glyphs.', error);
-      });
+      await preloadStartupIconFonts();
 
       if (!cancelled) {
         setIconFontsReady(true);
@@ -94,6 +90,7 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
 
     if (isBlockingStartup) {
       hideNativeSplashOnce();
+      setShowBrandedSplash(false);
       return;
     }
 
@@ -141,7 +138,7 @@ export function AppStartupGate({ children }: AppStartupGateProps) {
         </View>
       ) : null}
       {shouldReveal && !showBrandedSplash ? children : null}
-      {showBrandedSplash && !isBlockingStartup ? (
+      {showBrandedSplash ? (
         <Animated.View
           pointerEvents={shouldReveal ? 'none' : 'auto'}
           style={[styles.splashOverlay, { opacity: brandedSplashOpacity }]}
