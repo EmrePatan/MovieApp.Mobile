@@ -16,3 +16,6 @@ export const socialFeedPath = (cursor?: string | null, pageSize = 20) => {
   if (cursor) params.set('cursor', cursor);
   return `/api/social/feed?${params.toString()}`;
 };
+
+export const socialPendingFollowRequestsPath = (page = 1, pageSize = 20) =>
+  `/api/social/follow-requests?${new URLSearchParams({ page: String(page), pageSize: String(pageSize) }).toString()}`;
