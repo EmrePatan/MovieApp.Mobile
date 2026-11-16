@@ -86,7 +86,8 @@ jobs:
   android-emulator-smoke:
     name: Android Emulator smoke tests (Maestro)
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    # Cold native builds and emulator boot can consume 45+ minutes before Maestro starts.
+    timeout-minutes: 75
     env:
       EXPO_PUBLIC_APP_ENV: development
       # Deliberately unreachable: smoke tests must never call a production API.
@@ -173,7 +174,7 @@ jobs:
           cores: 4
           ram-size: 4096M
           heap-size: 1024M
-          emulator-boot-timeout: 900
+          emulator-boot-timeout: 1200
           # Avoid the runner's post-boot settings writes; configure animations best-effort in script.
           disable-animations: false
           # Avoid loading a stale snapshot while still allowing a clean snapshot to be saved.
