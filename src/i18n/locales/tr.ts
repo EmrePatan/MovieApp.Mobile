@@ -15,6 +15,7 @@ const stage1Tr = {
   },
   tabs: {
     home: 'Ana Sayfa',
+    social: 'Sosyal',
     discover: 'Keşfet',
     library: 'Kütüphane',
     insights: 'İstatistikler',
