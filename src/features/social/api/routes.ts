@@ -22,3 +22,13 @@ export const socialPendingFollowRequestsPath = (page = 1, pageSize = 20) =>
 
 export const socialActivityLikesPath = (activityId: string) => `/api/social/activities/${activityId}/likes`;
 export const socialCommentLikesPath = (commentId: string) => `/api/social/comments/${commentId}/likes`;
+
+export const socialActivityLikePath = (activityId: string) => `/api/social/activities/${activityId}/like`;
+export const socialActivityCommentsPath = (activityId: string, parentCommentId?: string | null, page = 1, pageSize = 20) => {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (parentCommentId) params.set('parentCommentId', parentCommentId);
+  return `/api/social/activities/${activityId}/comments?${params.toString()}`;
+};
+export const socialCommentPath = (commentId: string) => `/api/social/comments/${commentId}`;
+export const socialCommentLikePath = (commentId: string) => `${socialCommentPath(commentId)}/like`;
+export const socialReportsPath = () => '/api/social/reports';
