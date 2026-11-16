@@ -22,6 +22,13 @@ const stage1Tr = {
     social: 'Sosyal',
   },
   social: {
+    search: 'Ara',
+    requests: 'İstekler',
+    notifications: 'Bildirimler',
+    like: 'Beğen',
+    unlike: 'Beğeniyi kaldır',
+    commentsCount: 'Yorumlar',
+    content: 'İçerik',
       title: 'Sosyal',
       signIn: 'Akışı görmek için giriş yap.',
       loadError: 'Sosyal akış yüklenemedi.',
