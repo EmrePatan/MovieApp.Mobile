@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
-import { useSocialFeed } from '@/features/social/hooks/useSocialQueries';
+import { useSocialFeed, useSocialUnreadNotificationCount } from '@/features/social/hooks/useSocialQueries';
 import { useReportSocialContent, useToggleSocialActivityLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialFeedItem } from '@/features/social/types';
 import { colors } from '@/theme/colors';
@@ -106,6 +106,7 @@ export default function SocialFeedScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const feed = useSocialFeed();
+  const unreadNotifications = useSocialUnreadNotificationCount();
   const toggleLike = useToggleSocialActivityLike();
   const report = useReportSocialContent();
   const items = useMemo(() => feed.data?.pages.flatMap(page => page.items) ?? [], [feed.data?.pages]);
