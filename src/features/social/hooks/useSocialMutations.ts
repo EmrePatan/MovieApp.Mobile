@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   acceptSocialFollowRequest,
@@ -111,6 +112,8 @@ export function useToggleSocialCommentLike(activityId: string) {
 export function useReportSocialContent() {
   return useMutation({
     mutationFn: reportSocialContent,
+    onSuccess: () => Alert.alert('Bildirimin alındı', 'İçerik moderasyon ekibine iletildi.'),
+    onError: () => Alert.alert('Bildirim gönderilemedi', 'Lütfen daha sonra tekrar dene.'),
   });
 }
 
