@@ -20,6 +20,7 @@ import {
   socialPrivacyPath,
   socialPendingFollowRequestsPath,
   socialProfilePath,
+  socialProfileActivitiesPath,
   socialSearchPath,
 } from './routes';
 import type {
@@ -36,6 +37,10 @@ import type {
 
 export function getSocialProfile(userId: string, signal?: AbortSignal) {
   return api.get<SocialProfile>(socialProfilePath(userId), { signal });
+}
+
+export function getSocialUserActivities(userId: string, cursor?: string | null, pageSize = 20, signal?: AbortSignal) {
+  return api.get<SocialFeedPage>(socialProfileActivitiesPath(userId, cursor, pageSize), { signal });
 }
 
 export function searchSocialUsers(query: string, page = 1, pageSize = 20, signal?: AbortSignal) {
