@@ -9,7 +9,6 @@ import { useAuth } from '@/auth/useAuth';
 import { useSocialComments } from '@/features/social/hooks/useSocialQueries';
 import { useCreateSocialComment, useDeleteSocialComment, useToggleSocialCommentLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialComment } from '@/features/social/types';
-import { useAuth } from '@/auth/useAuth';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -17,7 +16,6 @@ export default function SocialCommentsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { user } = useAuth();
   const { activityId } = useLocalSearchParams<{ activityId: string }>();
   const [parentCommentId, setParentCommentId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -56,7 +54,7 @@ export default function SocialCommentsScreen() {
           <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
         {item.userId === user?.id ? (
-          {item.userId === user?.id ? <Pressable onPress={() => deleteComment.mutate(item.id)}>
+          <Pressable onPress={() => deleteComment.mutate(item.id)}>
             <AppText variant="caption" muted>{t('social.delete')}</AppText>
           </Pressable>
         ) : null}
