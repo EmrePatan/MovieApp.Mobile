@@ -147,6 +147,9 @@ export default function SocialFeedScreen() {
           <View style={styles.headerRow}>
             <AppText variant="title" style={styles.title}>{t('social.title', 'Sosyal')}</AppText>
             <View style={styles.headerActions}>
+              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-search')}>
+                <AppText variant="caption" style={styles.headerAction}>Ara</AppText>
+              </Pressable>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-requests')}>
                 <AppText variant="caption" style={styles.headerAction}>İstekler</AppText>
               </Pressable>
