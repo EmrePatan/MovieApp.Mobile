@@ -24,7 +24,6 @@ import type {
   SocialFollowResult,
   SocialPrivacySettings,
   SocialProfile,
-  SocialFollowRequest,
   SocialUserSummary,
 } from '../types';
 
