@@ -10,3 +10,9 @@ export const socialFollowRequestPath = (followerUserId: string) => `/api/social/
 export const socialAcceptFollowRequestPath = (followerUserId: string) => `${socialFollowRequestPath(followerUserId)}/accept`;
 export const socialBlockPath = (userId: string) => `/api/social/blocks/${userId}`;
 export const socialPrivacyPath = () => '/api/social/privacy';
+
+export const socialFeedPath = (cursor?: string | null, pageSize = 20) => {
+  const params = new URLSearchParams({ pageSize: String(pageSize) });
+  if (cursor) params.set('cursor', cursor);
+  return `/api/social/feed?${params.toString()}`;
+};
