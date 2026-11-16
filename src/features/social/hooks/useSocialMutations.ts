@@ -8,6 +8,8 @@ import {
   likeSocialComment,
   unlikeSocialComment,
   reportSocialContent,
+  markSocialNotificationRead,
+  markAllSocialNotificationsRead,
   blockSocialUser,
   followSocialUser,
   rejectSocialFollowRequest,
@@ -108,5 +110,25 @@ export function useToggleSocialCommentLike(activityId: string) {
 export function useReportSocialContent() {
   return useMutation({
     mutationFn: reportSocialContent,
+  });
+}
+
+export function useMarkSocialNotificationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: markSocialNotificationRead,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications'] });
+    },
+  });
+}
+
+export function useMarkAllSocialNotificationsRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: markAllSocialNotificationsRead,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications'] });
+    },
   });
 }
