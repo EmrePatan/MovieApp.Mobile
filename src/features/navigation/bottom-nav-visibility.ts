@@ -18,7 +18,7 @@ const HIDDEN_BOTTOM_NAV_ROUTE_NAMES = new Set([
   'gallery',
 ]);
 
-const MAIN_TAB_ROUTE_NAMES = new Set(['home', 'discover', 'library', 'insights']);
+const MAIN_TAB_ROUTE_NAMES = new Set(['home', 'discover', 'social', 'library', 'insights']);
 
 export function resolveBottomNavVisibility(segments: readonly string[]): BottomNavVisibility {
   if (segments.includes('(auth)')) {
