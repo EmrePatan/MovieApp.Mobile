@@ -32,3 +32,9 @@ export const socialActivityCommentsPath = (activityId: string, parentCommentId?:
 export const socialCommentPath = (commentId: string) => `/api/social/comments/${commentId}`;
 export const socialCommentLikePath = (commentId: string) => `${socialCommentPath(commentId)}/like`;
 export const socialReportsPath = () => '/api/social/reports';
+
+export const socialNotificationsPath = (page = 1, pageSize = 20) =>
+  `/api/social/notifications?${new URLSearchParams({ page: String(page), pageSize: String(pageSize) }).toString()}`;
+export const socialUnreadNotificationCountPath = () => '/api/social/notifications/unread-count';
+export const socialNotificationReadPath = (notificationId: string) => `/api/social/notifications/${notificationId}/read`;
+export const socialReadAllNotificationsPath = () => '/api/social/notifications/read-all';
