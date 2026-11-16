@@ -15,6 +15,7 @@ const stage1Pt = {
   },
   tabs: {
     home: 'Início',
+    social: 'Social',
     discover: 'Descobrir',
     library: 'Biblioteca',
     insights: 'Estatísticas',
