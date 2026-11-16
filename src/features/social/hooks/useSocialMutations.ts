@@ -133,3 +133,11 @@ export function useMarkAllSocialNotificationsRead() {
     },
   });
 }
+
+export function useUnblockSocialUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => unblockSocialUser(userId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'blocked-users'] }),
+  });
+}
