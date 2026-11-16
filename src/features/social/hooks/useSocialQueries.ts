@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
+  getSocialFeed,
   getSocialFollowers,
   getSocialFollowing,
   getSocialPrivacy,
@@ -50,5 +51,17 @@ export function useSocialPrivacy() {
     queryFn: ({ signal }) => getSocialPrivacy(signal),
     enabled: isAuthenticated,
     staleTime: 60_000,
+  });
+}
+
+export function useSocialFeed() {
+  const { isAuthenticated } = useAuth();
+  return useInfiniteQuery({
+    queryKey: [...socialQueryKeys.all, 'feed'],
+    queryFn: ({ pageParam, signal }) => getSocialFeed(pageParam, 20, signal),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: isAuthenticated,
+    staleTime: 20_000,
   });
 }
