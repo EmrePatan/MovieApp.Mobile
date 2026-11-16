@@ -5,6 +5,11 @@ import {
   socialFollowersPath,
   socialFollowPath,
   socialFeedPath,
+  socialActivityLikePath,
+  socialActivityCommentsPath,
+  socialCommentPath,
+  socialCommentLikePath,
+  socialReportsPath,
   socialActivityLikesPath,
   socialCommentLikesPath,
   socialFollowRequestPath,
@@ -16,6 +21,7 @@ import {
   socialSearchPath,
 } from './routes';
 import type {
+  SocialCommentPage,
   SocialFeedPage,
   SocialLikeResult,
   SocialFollowRequest,
@@ -103,4 +109,36 @@ export function likeSocialComment(commentId: string) {
 
 export function unlikeSocialComment(commentId: string) {
   return api.delete<SocialLikeResult>(socialCommentLikesPath(commentId));
+}
+
+export function getSocialComments(activityId: string, parentCommentId?: string | null, page = 1, pageSize = 20, signal?: AbortSignal) {
+  return api.get<SocialCommentPage>(socialActivityCommentsPath(activityId, parentCommentId, page, pageSize), { signal });
+}
+
+export function createSocialComment(activityId: string, content: string, parentCommentId?: string | null) {
+  return api.post<import('../types').SocialComment>(socialActivityCommentsPath(activityId).split('?')[0], { content, parentCommentId });
+}
+
+export function likeSocialActivity(activityId: string) {
+  return api.post<void>(socialActivityLikePath(activityId));
+}
+
+export function unlikeSocialActivity(activityId: string) {
+  return api.delete<void>(socialActivityLikePath(activityId));
+}
+
+export function deleteSocialComment(commentId: string) {
+  return api.delete<void>(socialCommentPath(commentId));
+}
+
+export function likeSocialComment(commentId: string) {
+  return api.post<void>(socialCommentLikePath(commentId));
+}
+
+export function unlikeSocialComment(commentId: string) {
+  return api.delete<void>(socialCommentLikePath(commentId));
+}
+
+export function reportSocialContent(payload: { targetType: 'Activity' | 'Comment' | 'User'; targetId: string; reason: string; details?: string | null }) {
+  return api.post<void>(socialReportsPath(), payload);
 }
