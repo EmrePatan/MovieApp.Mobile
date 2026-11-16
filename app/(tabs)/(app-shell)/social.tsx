@@ -91,7 +91,7 @@ export default function SocialFeedScreen() {
   }, [toggleLike]);
 
   const handleComments = useCallback((item: SocialFeedItem) => {
-    router.push(`/(tabs)/(app-shell)/social/${item.id}`);
+    router.push(`/(tabs)/(app-shell)/social-comments/${item.id}`);
   }, [router]);
 
   const handleLoadMore = useCallback(() => {
