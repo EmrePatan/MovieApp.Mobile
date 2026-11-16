@@ -22,6 +22,13 @@ const stage1De = {
     social: 'Social',
   },
   social: {
+    search: 'Suchen',
+    requests: 'Anfragen',
+    notifications: 'Benachrichtigungen',
+    like: 'Gefällt mir',
+    unlike: 'Gefällt mir nicht mehr',
+    commentsCount: 'Kommentare',
+    content: 'Inhalt',
       title: 'Social',
       signIn: 'Melde dich an, um deinen Feed zu sehen.',
       loadError: 'Der soziale Feed konnte nicht geladen werden.',
