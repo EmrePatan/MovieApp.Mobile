@@ -23,10 +23,6 @@ export function resolveInitialUiLanguage(
 }
 
 export function getDeviceLanguageCode(): string | null {
-  try {
-    const primary = Localization.getLocales()[0];
-    return primary?.languageCode ?? null;
-  } catch {
-    return null;
-  }
+  const primary = Localization.getLocales()[0];
+  return primary?.languageCode ?? null;
 }
