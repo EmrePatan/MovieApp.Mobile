@@ -9,10 +9,12 @@ import {
   socialFollowingPath,
   socialPrivacyPath,
   socialProfilePath,
+  socialPendingFollowRequestsPath,
   socialSearchPath,
 } from './routes';
 import type {
   SocialFeedPage,
+  SocialFollowRequest,
   SocialFollowResult,
   SocialPrivacySettings,
   SocialProfile,
@@ -69,4 +71,8 @@ export function updateSocialPrivacy(settings: SocialPrivacySettings) {
 
 export function getSocialFeed(cursor?: string | null, pageSize = 20, signal?: AbortSignal) {
   return api.get<SocialFeedPage>(socialFeedPath(cursor, pageSize), { signal });
+}
+
+export function getPendingSocialFollowRequests(page = 1, pageSize = 20, signal?: AbortSignal) {
+  return api.get<SocialFollowRequest[]>(socialPendingFollowRequestsPath(page, pageSize), { signal });
 }
