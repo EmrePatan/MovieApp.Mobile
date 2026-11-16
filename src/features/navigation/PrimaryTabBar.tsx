@@ -26,13 +26,14 @@ import { colors } from '@/theme/colors';
 
 type TabConfig = {
   id: PrimaryTabId;
-  labelKey: 'tabs.home' | 'tabs.discover' | 'tabs.library' | 'tabs.insights';
+  labelKey: 'tabs.home' | 'tabs.discover' | 'tabs.social' | 'tabs.library' | 'tabs.insights';
   icon: keyof typeof Ionicons.glyphMap;
 };
 
 const PRIMARY_TABS: TabConfig[] = [
   { id: 'home', labelKey: 'tabs.home', icon: 'home-outline' },
   { id: 'discover', labelKey: 'tabs.discover', icon: 'compass-outline' },
+  { id: 'social', labelKey: 'tabs.social', icon: 'people-outline' },
   { id: 'library', labelKey: 'tabs.library', icon: 'albums-outline' },
   { id: 'insights', labelKey: 'tabs.insights', icon: 'sparkles-outline' },
 ];
