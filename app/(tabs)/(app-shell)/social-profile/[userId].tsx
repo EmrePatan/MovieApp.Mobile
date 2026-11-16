@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useSocialProfile } from '@/features/social/hooks/useSocialQueries';
-import { useFollowSocialUser, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
+import { useFollowSocialUser, useSocialBlockMutations, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
@@ -15,6 +15,7 @@ export default function SocialProfileScreen() {
   const profile = useSocialProfile(userId);
   const follow = useFollowSocialUser(userId);
   const unfollow = useUnfollowSocialUser(userId);
+  const block = useSocialBlockMutations(userId);
 
   const handleFollow = useCallback(() => {
     if (profile.data?.followStatus === 'Accepted' || profile.data?.followStatus === 'Pending') {
@@ -43,6 +44,13 @@ export default function SocialProfileScreen() {
         {item.followStatus !== 'Self' ? (
           <AppButton title={followLabel} variant={item.followStatus === 'Accepted' ? 'secondary' : 'primary'}
             onPress={handleFollow} loading={follow.isPending || unfollow.isPending} />
+        ) : null}
+        {item.followStatus !== 'Self' ? (
+          <AppButton title="Kullanıcıyı engelle" variant="destructive" onPress={() => Alert.alert(
+            'Kullanıcı engellensin mi?',
+            'Bu kullanıcıyla aranızdaki takip ilişkileri kaldırılır.',
+            [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Engelle', style: 'destructive', onPress: () => block.block.mutate() }],
+          )} loading={block.block.isPending} />
         ) : null}
         {item.isPrivate && item.followStatus !== 'Accepted' && item.followStatus !== 'Self' ? (
           <AppText variant="bodySmall" muted center>Bu profil gizli. Paylaşımları görmek için takip isteği gönder.</AppText>
