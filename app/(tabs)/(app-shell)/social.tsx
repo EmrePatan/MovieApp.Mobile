@@ -41,12 +41,18 @@ function SocialActivityCard({
   onComments,
   isLiking,
   activityLabel,
+  likeLabel,
+  unlikeLabel,
+  commentsLabel,
 }: {
   item: SocialFeedItem;
   onLike: (item: SocialFeedItem) => void;
   onComments: (item: SocialFeedItem) => void;
   isLiking: boolean;
   activityLabel: string;
+  likeLabel: string;
+  unlikeLabel: string;
+  commentsLabel: string;
 }) {
   const dateLabel = new Date(item.createdAt).toLocaleDateString();
   const posterUri = resolveImageUri(item.posterPath, 'w300');
@@ -76,7 +82,7 @@ function SocialActivityCard({
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={item.isLikedByMe ? 'Unlike' : 'Like'}
+          accessibilityLabel={item.isLikedByMe ? unlikeLabel : likeLabel}
           disabled={isLiking}
           onPress={() => onLike(item)}
           style={styles.actionButton}
@@ -86,7 +92,7 @@ function SocialActivityCard({
           </AppText>
         </Pressable>
         <Pressable accessibilityRole="button" onPress={() => onComments(item)} style={styles.actionButton}>
-          <AppText variant="bodySmall">Comments · {item.commentsCount}</AppText>
+          <AppText variant="bodySmall">{commentsLabel} · {item.commentsCount}</AppText>
         </Pressable>
       </View>
     </View>
@@ -152,6 +158,9 @@ export default function SocialFeedScreen() {
             onComments={handleComments}
             isLiking={toggleLike.isPending && toggleLike.variables?.activityId === item.id}
             activityLabel={t(getActivityLabelKey(item.activityType))}
+            likeLabel={t('social.like')}
+            unlikeLabel={t('social.unlike')}
+            commentsLabel={t('social.commentsCount')}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -161,16 +170,16 @@ export default function SocialFeedScreen() {
         onRefresh={() => void feed.refetch()}
         ListHeaderComponent={
           <View style={styles.headerRow}>
-            <AppText variant="title" style={styles.title}>{t('social.title', 'Sosyal')}</AppText>
+            <AppText variant="title" style={styles.title}>{t('social.title')}</AppText>
             <View style={styles.headerActions}>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-search')}>
-                <AppText variant="caption" style={styles.headerAction}>Ara</AppText>
+                <AppText variant="caption" style={styles.headerAction}>{t('social.search')}</AppText>
               </Pressable>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-requests')}>
-                <AppText variant="caption" style={styles.headerAction}>İstekler</AppText>
+                <AppText variant="caption" style={styles.headerAction}>{t('social.requests')}</AppText>
               </Pressable>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
-                <AppText variant="caption" style={styles.headerAction}>Bildirimler</AppText>
+                <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}</AppText>
               </Pressable>
             </View>
           </View>
