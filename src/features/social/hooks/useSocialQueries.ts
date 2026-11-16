@@ -81,10 +81,12 @@ export function useSocialFeed() {
   });
 }
 
-export function useSocialComments(activityId: string, parentCommentId?: string | null, page = 1) {
-  return useQuery({
-    queryKey: [...socialQueryKeys.all, 'comments', activityId, parentCommentId ?? 'root', page],
-    queryFn: ({ signal }) => getSocialComments(activityId, parentCommentId, page, 20, signal),
+export function useSocialComments(activityId: string, parentCommentId?: string | null) {
+  return useInfiniteQuery({
+    queryKey: [...socialQueryKeys.all, 'comments', activityId, parentCommentId ?? 'root'],
+    queryFn: ({ pageParam, signal }) => getSocialComments(activityId, parentCommentId, pageParam, 20, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
     enabled: activityId.length > 0,
     staleTime: 15_000,
   });
