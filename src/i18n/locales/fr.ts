@@ -21,6 +21,30 @@ const stage1Fr = {
     insights: 'Statistiques',
     social: 'Social',
   },
+  social: {
+      title: 'Social',
+      signIn: 'Connectez-vous pour voir votre fil.',
+      loadError: 'Impossible de charger le fil social.',
+      empty: 'Aucune activité pour le moment. Soyez le premier à partager !',
+      activity: {
+          watchedMovie: 'a regardé',
+          watchedEpisode: 'a regardé un épisode',
+          rated: 'a noté',
+          reviewed: 'a publié un avis sur',
+          favorited: 'a ajouté aux favoris',
+          generic: 'a partagé une activité'
+      },
+      comments: 'Commentaires',
+      replies: 'Réponses',
+      back: 'Retour',
+      reply: 'Répondre',
+      delete: 'Supprimer',
+      send: 'Envoyer',
+      writeComment: 'Écrire un commentaire...',
+      writeReply: 'Écrire une réponse...',
+      noComments: 'Aucun commentaire pour le moment.',
+      loadCommentsError: 'Impossible de charger les commentaires.'
+  },
   auth: {
     email: 'E-mail',
     password: 'Mot de passe',
