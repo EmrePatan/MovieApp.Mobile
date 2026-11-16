@@ -14,6 +14,8 @@ export default function AppShellLayout() {
       <Stack.Screen name="discover" />
       <Stack.Screen name="social" />
       <Stack.Screen name="social/[activityId]" />
+      <Stack.Screen name="social-notifications" />
+      <Stack.Screen name="social-requests" />
       <Stack.Screen name="library" />
       <Stack.Screen name="insights" />
       <Stack.Screen name="search" />
