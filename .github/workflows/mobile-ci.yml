@@ -178,37 +178,16 @@ jobs:
           disable-animations: false
           # Avoid loading a stale snapshot while still allowing a clean snapshot to be saved.
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot-load -noaudio -no-boot-anim -camera-back none
+          # The emulator-runner action executes each script line in a separate /usr/bin/sh -c.
+          # Keep commands independent; shell loops/if blocks are split and fail with "expecting done".
           script: |
-            adb wait-for-device
-
-            # Do not install or start Maestro until ADB reports a healthy, online device.
-            DEVICE_READY=false
-            for attempt in $(seq 1 30); do
-              DEVICE_STATE="$(adb -s emulator-5554 get-state 2>/dev/null || true)"
-              if [ "$DEVICE_STATE" = "device" ]; then
-                DEVICE_READY=true
-                break
-              fi
-              echo "Waiting for Android device to become online (attempt $attempt/30): $DEVICE_STATE"
-              sleep 2
-            done
-            if [ "$DEVICE_READY" != "true" ]; then
-              adb devices -l || true
-              echo "Android emulator did not become online after boot." >&2
-              exit 1
-            fi
-
-            adb -s emulator-5554 shell settings put global window_animation_scale 0
-            adb -s emulator-5554 shell settings put global transition_animation_scale 0
-            adb -s emulator-5554 shell settings put global animator_duration_scale 0
-            adb -s emulator-5554 shell getprop sys.boot_completed
+            adb wait-for-device && adb -s emulator-5554 get-state && adb -s emulator-5554 shell getprop sys.boot_completed
+            adb -s emulator-5554 shell settings put global window_animation_scale 0 || true
+            adb -s emulator-5554 shell settings put global transition_animation_scale 0 || true
+            adb -s emulator-5554 shell settings put global animator_duration_scale 0 || true
             adb -s emulator-5554 shell free -h || true
-
-            # Non-streaming install avoids long streamed-install stalls on cold CI emulators.
             adb -s emulator-5554 install -r --no-streaming "$ANDROID_APK_PATH"
             adb -s emulator-5554 shell pm path com.movieapp.mobile
-
-            # Verify ADB stayed online after package installation before Maestro instrumentation.
             adb -s emulator-5554 get-state
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/ios-smoke.yaml
             maestro test --device emulator-5554 --driver-host-port 7001 .maestro/auth-navigation.yaml
