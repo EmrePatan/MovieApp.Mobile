@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -12,6 +13,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialCommentsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { activityId } = useLocalSearchParams<{ activityId: string }>();
   const [parentCommentId, setParentCommentId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -47,10 +49,10 @@ export default function SocialCommentsScreen() {
           </AppText>
         </Pressable>
         <Pressable onPress={() => handleReply(item)}>
-          <AppText variant="caption" muted>Yanıtla · {item.repliesCount}</AppText>
+          <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
         <Pressable onPress={() => deleteComment.mutate(item.id)}>
-          <AppText variant="caption" muted>Sil</AppText>
+          <AppText variant="caption" muted>{t('social.delete')}</AppText>
         </Pressable>
       </View>
     </View>
@@ -62,14 +64,14 @@ export default function SocialCommentsScreen() {
         <Pressable onPress={() => parentCommentId ? setParentCommentId(null) : router.back()}>
           <AppText variant="body">‹ {parentCommentId ? 'Yorumlar' : 'Geri'}</AppText>
         </Pressable>
-        <AppText variant="title">{parentCommentId ? 'Yanıtlar' : 'Yorumlar'}</AppText>
+        <AppText variant="title">{parentCommentId ? t('social.replies') : t('social.comments')}</AppText>
       </View>
       {comments.isLoading ? (
         <View style={styles.loading}><ActivityIndicator color={colors.accent} /></View>
       ) : comments.isError ? (
         <View style={styles.loading}>
-          <AppText variant="bodySmall" muted>Yorumlar yüklenemedi.</AppText>
-          <AppButton title="Tekrar dene" variant="secondary" onPress={() => void comments.refetch()} />
+          <AppText variant="bodySmall" muted>{t('social.loadCommentsError')}</AppText>
+          <AppButton title={t('common.tryAgain')} variant="secondary" onPress={() => void comments.refetch()} />
         </View>
       ) : (
         <FlatList
@@ -77,7 +79,7 @@ export default function SocialCommentsScreen() {
           keyExtractor={item => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
-          ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz yorum yok.</AppText>}
+          ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noComments')}</AppText>}
         />
       )}
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -85,14 +87,14 @@ export default function SocialCommentsScreen() {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder={parentCommentId ? 'Yanıtını yaz...' : 'Yorumunu yaz...'}
+            placeholder={parentCommentId ? t('social.writeReply') : t('social.writeComment')}
             placeholderTextColor={colors.textMuted}
             multiline
             maxLength={4000}
             style={styles.input}
           />
           <Pressable disabled={!draft.trim() || createComment.isPending} onPress={handleSubmit} style={styles.send}>
-            <AppText variant="bodySmall" style={styles.sendText}>Gönder</AppText>
+            <AppText variant="bodySmall" style={styles.sendText}>{t('social.send')}</AppText>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
