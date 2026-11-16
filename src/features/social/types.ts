@@ -118,3 +118,10 @@ export interface SocialNotificationPage {
   pageSize: number;
   unreadCount: number;
 }
+
+export interface SocialBlockedUser {
+  userId: string;
+  userName: string;
+  displayName: string;
+  blockedAt: string;
+}
