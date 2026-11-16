@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
-import { useSocialProfile } from '@/features/social/hooks/useSocialQueries';
+import { useSocialProfile, useSocialUserActivities } from '@/features/social/hooks/useSocialQueries';
 import { useFollowSocialUser, useReportSocialContent, useSocialBlockMutations, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -13,6 +13,10 @@ export default function SocialProfileScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const profile = useSocialProfile(userId);
+  const canViewActivities = !!profile.data && (!profile.data.isPrivate
+    || profile.data.followStatus === 'Accepted' || profile.data.followStatus === 'Self');
+  const activities = useSocialUserActivities(userId, canViewActivities);
+  const activityItems = activities.data?.pages.flatMap(page => page.items) ?? [];
   const follow = useFollowSocialUser(userId);
   const unfollow = useUnfollowSocialUser(userId);
   const block = useSocialBlockMutations(userId);
@@ -35,6 +39,7 @@ export default function SocialProfileScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
         <View style={styles.profileHeader}>
@@ -78,11 +83,55 @@ export default function SocialProfileScreen() {
         </View>
         <AppText variant="caption" muted>Movie Cave üyesi · {new Date(item.createdAt).toLocaleDateString()}</AppText>
       </View>
+      <View style={styles.activitySection}>
+        <AppText variant="subtitle">Son aktiviteler</AppText>
+        {activities.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
+        {!activities.isLoading && activityItems.length === 0 ? (
+          <AppText variant="bodySmall" muted>Henüz görüntülenecek aktivite yok.</AppText>
+        ) : null}
+        {activityItems.map(activity => (
+          <Pressable key={activity.id} style={styles.activityCard}
+            onPress={() => router.push(`/(tabs)/(app-shell)/social/${activity.id}`)}>
+            <View style={styles.activityText}>
+              <AppText variant="body">{activity.targetTitle || 'İçerik'} · {getActivityLabel(activity.activityType)}</AppText>
+              {activity.targetSubtitle ? <AppText variant="caption" muted>{activity.targetSubtitle}</AppText> : null}
+              {activity.ratingScore !== null ? <AppText variant="bodySmall">★ {activity.ratingScore}/10</AppText> : null}
+              {activity.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={3}>{activity.reviewExcerpt}</AppText> : null}
+              <AppText variant="caption" muted>{new Date(activity.createdAt).toLocaleDateString()}</AppText>
+            </View>
+            <AppText variant="caption" muted>♥ {activity.likesCount} · Yorum {activity.commentsCount}</AppText>
+          </Pressable>
+        ))}
+        {activities.hasNextPage ? (
+          <AppButton title="Daha fazla yükle" variant="secondary"
+            onPress={() => void activities.fetchNextPage()} loading={activities.isFetchingNextPage} />
+        ) : null}
+        {activities.isError ? <AppText variant="caption" muted>Aktiviteler yüklenemedi.</AppText> : null}
+      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
+function getActivityLabel(type: string): string {
+  switch (type) {
+    case 'WatchedMovie': return 'izledi';
+    case 'WatchedEpisode': return 'bölüm izledi';
+    case 'RatedMovie':
+    case 'RatedTvShow': return 'puan verdi';
+    case 'ReviewedMovie':
+    case 'ReviewedTvShow': return 'inceleme yazdı';
+    case 'FavoritedMovie':
+    case 'FavoritedTvShow': return 'favorilerine ekledi';
+    default: return 'aktivite yaptı';
+  }
+}
+
 const styles = StyleSheet.create({
+  scrollContent: { paddingBottom: spacing.xl },
+  activitySection: { paddingHorizontal: spacing.lg, gap: spacing.md },
+  activityCard: { padding: spacing.md, borderRadius: 12, backgroundColor: colors.surface, gap: spacing.sm },
+  activityText: { gap: spacing.xs },
   screen: { flex: 1, backgroundColor: colors.background },
   header: { padding: spacing.lg, gap: spacing.lg },
   profileHeader: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.lg },
