@@ -10,6 +10,10 @@ import {
   socialCommentPath,
   socialCommentLikePath,
   socialReportsPath,
+  socialNotificationsPath,
+  socialUnreadNotificationCountPath,
+  socialNotificationReadPath,
+  socialReadAllNotificationsPath,
   socialFollowRequestPath,
   socialFollowingPath,
   socialPrivacyPath,
@@ -19,6 +23,7 @@ import {
 } from './routes';
 import type {
   SocialCommentPage,
+  SocialNotificationPage,
   SocialFeedPage,
   SocialFollowRequest,
   SocialFollowResult,
@@ -120,4 +125,20 @@ export function unlikeSocialComment(commentId: string) {
 
 export function reportSocialContent(payload: { targetType: 'Activity' | 'Comment' | 'User'; targetId: string; reason: string; details?: string | null }) {
   return api.post<void>(socialReportsPath(), payload);
+}
+
+export function getSocialNotifications(page = 1, pageSize = 20, signal?: AbortSignal) {
+  return api.get<SocialNotificationPage>(socialNotificationsPath(page, pageSize), { signal });
+}
+
+export function getSocialUnreadNotificationCount(signal?: AbortSignal) {
+  return api.get<number>(socialUnreadNotificationCountPath(), { signal });
+}
+
+export function markSocialNotificationRead(notificationId: string) {
+  return api.patch<void>(socialNotificationReadPath(notificationId));
+}
+
+export function markAllSocialNotificationsRead() {
+  return api.patch<number>(socialReadAllNotificationsPath());
 }
