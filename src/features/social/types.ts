@@ -54,6 +54,9 @@ export interface SocialFeedItem {
   posterPath: string | null;
   ratingScore: number | null;
   reviewExcerpt: string | null;
+  likesCount: number;
+  commentsCount: number;
+  isLikedByMe: boolean;
 }
 
 export interface SocialFeedPage {
@@ -71,4 +74,26 @@ export interface SocialFollowRequest {
 export interface SocialLikeResult {
   isLiked: boolean;
   likeCount: number;
+}
+
+export interface SocialComment {
+  id: string;
+  activityId: string;
+  userId: string;
+  userName: string;
+  displayName: string;
+  avatarUrl: string | null;
+  parentCommentId: string | null;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  likesCount: number;
+  repliesCount: number;
+  isLikedByMe: boolean;
+}
+
+export interface SocialCommentPage {
+  items: SocialComment[];
+  page: number;
+  pageSize: number;
 }
