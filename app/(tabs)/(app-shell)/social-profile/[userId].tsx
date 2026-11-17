@@ -13,7 +13,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialProfileScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const profile = useSocialProfile(userId);
   const canViewActivities = !!profile.data && (!profile.data.isPrivate
@@ -85,7 +85,7 @@ export default function SocialProfileScreen() {
             <AppText variant="subtitle">{item.followingCount}</AppText><AppText variant="caption" muted>{t('social.followingCountLabel')}</AppText>
           </Pressable>
         </View>
-        <AppText variant="caption" muted>{t('social.memberSince')} · {new Date(item.createdAt).toLocaleDateString()}</AppText>
+        <AppText variant="caption" muted>{t('social.memberSince')} · {new Date(item.createdAt).toLocaleDateString(i18n.language)}</AppText>
       </View>
       <View style={styles.activitySection}>
         <AppText variant="subtitle">{t('social.statistics')}</AppText>
@@ -128,7 +128,7 @@ export default function SocialProfileScreen() {
               {activity.targetSubtitle ? <AppText variant="caption" muted>{activity.targetSubtitle}</AppText> : null}
               {activity.ratingScore !== null ? <AppText variant="bodySmall">★ {activity.ratingScore}/10</AppText> : null}
               {activity.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={3}>{activity.reviewExcerpt}</AppText> : null}
-              <AppText variant="caption" muted>{new Date(activity.createdAt).toLocaleDateString()}</AppText>
+              <AppText variant="caption" muted>{new Date(activity.createdAt).toLocaleDateString(i18n.language)}</AppText>
             </View>
             <AppText variant="caption" muted>♥ {activity.likesCount} · {t('social.commentsCount')} {activity.commentsCount}</AppText>
           </Pressable>
