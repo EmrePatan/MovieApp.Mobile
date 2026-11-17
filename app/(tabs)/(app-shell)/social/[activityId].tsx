@@ -60,7 +60,7 @@ export default function SocialCommentsScreen() {
       </View>
       <AppText variant="body">{item.content}</AppText>
       <View style={styles.actions}>
-        <Pressable onPress={() => toggleLike.mutate({ commentId: item.id, isLiked: item.isLikedByMe })}>
+        <Pressable disabled={toggleLike.isPending && toggleLike.variables?.commentId === item.id} onPress={() => toggleLike.mutate({ commentId: item.id, isLiked: item.isLikedByMe })}>
           <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>
             {item.isLikedByMe ? '♥' : '♡'} {item.likesCount}
           </AppText>
@@ -83,7 +83,14 @@ export default function SocialCommentsScreen() {
           </Pressable>
         ) : null}
         {item.userId === user?.id ? (
-          <Pressable onPress={() => deleteComment.mutate(item.id)}>
+          <Pressable disabled={deleteComment.isPending} onPress={() => Alert.alert(
+            'Yorum silinsin mi?',
+            'Bu işlem geri alınamaz.',
+            [
+              { text: 'Vazgeç', style: 'cancel' },
+              { text: 'Sil', style: 'destructive', onPress: () => deleteComment.mutate(item.id) },
+            ],
+          )}>
             <AppText variant="caption" muted>{t('social.delete')}</AppText>
           </Pressable>
         ) : null}
