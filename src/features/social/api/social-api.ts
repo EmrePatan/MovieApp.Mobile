@@ -19,7 +19,8 @@ import {
   socialFollowingPath,
   socialPrivacyPath,
   socialPendingFollowRequestsPath,
-  socialProfilePath,\n  socialProfileStatisticsPath,
+  socialProfilePath,
+  socialProfileStatisticsPath,
   socialProfileActivitiesPath,
   socialSearchPath,
 } from './routes';
@@ -31,7 +32,8 @@ import type {
   SocialFollowRequest,
   SocialFollowResult,
   SocialPrivacySettings,
-  SocialProfile,\n  SocialProfileStatistics,
+  SocialProfile,
+  SocialProfileStatistics,
   SocialUserSummary,
 } from '../types';
 
@@ -39,7 +41,11 @@ export function getSocialProfile(userId: string, signal?: AbortSignal) {
   return api.get<SocialProfile>(socialProfilePath(userId), { signal });
 }
 
-export function getSocialProfileStatistics(userId: string, signal?: AbortSignal) {\n  return api.get<SocialProfileStatistics>(socialProfileStatisticsPath(userId), { signal });\n}\n\nexport function getSocialUserActivities(userId: string, cursor?: string | null, pageSize = 20, signal?: AbortSignal) {
+export function getSocialProfileStatistics(userId: string, signal?: AbortSignal) {
+  return api.get<SocialProfileStatistics>(socialProfileStatisticsPath(userId), { signal });
+}
+
+export function getSocialUserActivities(userId: string, cursor?: string | null, pageSize = 20, signal?: AbortSignal) {
   return api.get<SocialFeedPage>(socialProfileActivitiesPath(userId, cursor, pageSize), { signal });
 }
 
