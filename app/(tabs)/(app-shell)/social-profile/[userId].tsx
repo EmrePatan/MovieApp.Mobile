@@ -59,7 +59,7 @@ export default function SocialProfileScreen() {
           <AppButton title={t('social.blockUser')} variant="destructive" onPress={() => Alert.alert(
             t('social.blockUserTitle'),
             t('social.blockUserMessage'),
-            [{ text: t('social.cancel'), style: 'cancel' }, { text: t('social.blockUser'), style: 'destructive', onPress: () => block.block.mutate() }],
+            [{ text: t('social.cancel'), style: 'cancel' }, { text: t('social.blockUser'), style: 'destructive', onPress: () => block.block.mutate(undefined, { onSuccess: () => router.back() }) }],
           )} loading={block.block.isPending} />
         ) : null}
         {item.followStatus !== 'Self' ? (
