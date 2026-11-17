@@ -121,7 +121,15 @@ const stage1De = {
     requestRejectFailed: "Folgeanfrage konnte nicht abgelehnt werden.",
     blockFailed: "Nutzer konnte nicht blockiert werden.",
     unblockFailed: "Blockierung konnte nicht aufgehoben werden.",
-    privacySaveFailed: "Datenschutzeinstellungen konnten nicht gespeichert werden.",
+    privacySaveFailed: "Datenschutzeinstellungen konnten nicht gespeichert werden.",    notificationFollowRequest: "möchte dir folgen.",
+    notificationNewFollower: "folgt dir jetzt.",
+    notificationFollowAccepted: "hat deine Anfrage angenommen.",
+    notificationActivityLike: "gefällt deine Aktivität.",
+    notificationNewComment: "hat deine Aktivität kommentiert.",
+    notificationCommentReply: "hat auf deinen Kommentar geantwortet.",
+    notificationCommentLike: "gefällt dein Kommentar.",
+    notificationGeneric: "hat mit dir interagiert.",
+
   },
   auth: {
     email: 'E-Mail',
