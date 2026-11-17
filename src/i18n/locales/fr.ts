@@ -121,7 +121,15 @@ const stage1Fr = {
     requestRejectFailed: "Impossible de refuser la demande.",
     blockFailed: "Impossible de bloquer l'utilisateur.",
     unblockFailed: "Impossible de débloquer l'utilisateur.",
-    privacySaveFailed: "Impossible d'enregistrer les paramètres de confidentialité.",
+    privacySaveFailed: "Impossible d'enregistrer les paramètres de confidentialité.",    notificationFollowRequest: "souhaite vous suivre.",
+    notificationNewFollower: "a commencé à vous suivre.",
+    notificationFollowAccepted: "a accepté votre demande.",
+    notificationActivityLike: "a aimé votre activité.",
+    notificationNewComment: "a commenté votre activité.",
+    notificationCommentReply: "a répondu à votre commentaire.",
+    notificationCommentLike: "a aimé votre commentaire.",
+    notificationGeneric: "a interagi avec vous.",
+
   },
   auth: {
     email: 'E-mail',
