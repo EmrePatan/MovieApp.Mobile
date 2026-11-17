@@ -148,7 +148,7 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
         <View style={styles.actorBlock}><AppText variant="body" style={styles.actorName}>{first.displayName}</AppText>
           <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString()}</AppText></View>
       </Pressable>
-      <AppText variant="body">{first.displayName} {watchedLabel} · {items.length} bölüm</AppText>
+      <AppText variant="body">{first.displayName} {watchedLabel} · {t('social.watchedEpisodesCount', { count: items.length })}</AppText>
       <View style={styles.contentCard}>
         {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
         <View style={styles.contentText}><AppText variant="subtitle">{first.targetTitle}</AppText>
