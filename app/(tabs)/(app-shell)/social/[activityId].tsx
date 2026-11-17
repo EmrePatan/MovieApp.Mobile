@@ -129,7 +129,12 @@ export default function SocialCommentsScreen() {
             if (comments.hasNextPage && !comments.isFetchingNextPage) void comments.fetchNextPage();
           }}
           onEndReachedThreshold={0.4}
-          ListFooterComponent={comments.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
+          ListFooterComponent={comments.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : comments.isFetchNextPageError ? (
+            <View style={styles.loading}>
+              <AppText variant="caption" muted>{t('social.nextPageError')}</AppText>
+              <AppButton title={t('common.retry')} variant="secondary" onPress={() => void comments.fetchNextPage()} />
+            </View>
+          ) : null}
           ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noComments')}</AppText>}
         />
       )}
