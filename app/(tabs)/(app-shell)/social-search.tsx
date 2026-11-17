@@ -28,7 +28,7 @@ export default function SocialSearchScreen() {
         <TextInput accessibilityLabel={t('social.searchPlaceholder')} value={query} onChangeText={setQuery} placeholder={t('social.searchPlaceholder')}
           placeholderTextColor={colors.textMuted} autoCapitalize="none" style={styles.input} />
       </View>
-      {results.isFetching ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
+      {results.isFetching && !results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
       <FlatList
         data={resultItems}
         keyExtractor={item => item.id}
