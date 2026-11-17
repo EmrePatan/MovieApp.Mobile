@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
@@ -8,6 +9,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialPeopleScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { userId, type } = useLocalSearchParams<{ userId: string; type?: string }>();
   const isFollowers = type !== 'following';
   const followers = useSocialFollowers(userId, isFollowers);
@@ -18,11 +20,11 @@ export default function SocialPeopleScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
-        <AppText variant="title">{isFollowers ? 'Takipçiler' : 'Takip ettikleri'}</AppText>
+        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <AppText variant="title">{isFollowers ? t('social.followers') : t('social.following')}</AppText>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        query.isError && items.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>Liste yüklenemedi.</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
+        query.isError && items.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>{t('social.listLoadError')}</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> :
           <FlatList data={items} keyExtractor={item => item.id} contentContainerStyle={styles.list}
             renderItem={({ item }) => (
               <Pressable style={styles.row} onPress={() => router.push(`/(tabs)/(app-shell)/social-profile/${item.id}`)}>
@@ -34,9 +36,9 @@ export default function SocialPeopleScreen() {
               if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
-            ListHeaderComponent={query.isError && items.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>Liste yenilenemedi.</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void query.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-            ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz kullanıcı yok.</AppText>}
+            ListHeaderComponent={query.isError && items.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.listRefreshError')}</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><Pressable onPress={() => void query.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+            ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noUsers')}</AppText>}
           />}
     </SafeAreaView>
   );
