@@ -42,7 +42,7 @@ export default function SocialSearchScreen() {
         onEndReachedThreshold={0.5}
         ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
         ListEmptyComponent={query.trim().length < 2 ? <AppText variant="bodySmall" muted center>En az 2 karakter yaz.</AppText> :
-          results.isError ? <AppText variant="bodySmall" muted center>Arama yapılamadı.</AppText> :
+          results.isError ? <View style={styles.error}><AppText variant="bodySmall" muted center>Arama yapılamadı.</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           results.isLoading ? null : <AppText variant="bodySmall" muted center>Sonuç bulunamadı.</AppText>}
       />
     </SafeAreaView>
@@ -58,4 +58,6 @@ const styles = StyleSheet.create({
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
   copy: { flex: 1 },
   loading: { padding: spacing.md },
+  error: { alignItems: 'center', gap: spacing.sm },
+  retry: { color: colors.accent },
 });
