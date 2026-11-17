@@ -79,9 +79,7 @@ export default function SocialNotificationsScreen() {
             onEndReachedThreshold={0.5}
             refreshing={query.isRefetching && !query.isFetchingNextPage}
             onRefresh={() => void query.refetch()}
-            ListFooterComponent={query.isFetchingNextPage
-              ? <ActivityIndicator color={colors.accent} style={styles.footer} />
-              : null}
+            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void query.fetchNextPage()} /></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz sosyal bildirimin yok.</AppText>}
           />
         )}
