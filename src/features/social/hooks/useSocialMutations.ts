@@ -89,6 +89,7 @@ export function useUpdateSocialPrivacy() {
 
 export function useToggleSocialActivityLike() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ activityId, isLiked }: { activityId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
@@ -102,6 +103,7 @@ export function useToggleSocialActivityLike() {
 
 export function useCreateSocialComment(activityId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ content, parentCommentId }: { content: string; parentCommentId?: string | null }) =>
       createSocialComment(activityId, content, parentCommentId),
@@ -115,6 +117,7 @@ export function useCreateSocialComment(activityId: string) {
 
 export function useDeleteSocialComment(activityId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: deleteSocialComment,
     onSuccess: () => {
@@ -127,6 +130,7 @@ export function useDeleteSocialComment(activityId: string) {
 
 export function useToggleSocialCommentLike(activityId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ commentId, isLiked }: { commentId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
