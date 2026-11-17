@@ -1,4 +1,5 @@
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   acceptSocialFollowRequest,
@@ -21,63 +22,68 @@ import {
 import type { SocialPrivacySettings } from '../types';
 import { socialQueryKeys } from './social-query-keys';
 
-function showSocialMutationError(message: string) {
-  Alert.alert('İşlem tamamlanamadı', message);
+function showSocialMutationError(title: string, message: string) {
+  Alert.alert(title, message);
 }
 
 export function useFollowSocialUser(userId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: () => followSocialUser(userId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.profile(userId) });
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
     },
-    onError: () => showSocialMutationError('Takip isteği gönderilemedi. Lütfen tekrar dene.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.followRequestFailed')),
   });
 }
 
 export function useUnfollowSocialUser(userId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: () => unfollowSocialUser(userId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.profile(userId) });
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
     },
-    onError: () => showSocialMutationError('Takip işlemi tamamlanamadı. Lütfen tekrar dene.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.unfollowFailed')),
   });
 }
 
 export function useSocialFollowRequestMutations() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
   return {
-    accept: useMutation({ mutationFn: acceptSocialFollowRequest, onSuccess: invalidate, onError: () => showSocialMutationError('Takip isteği kabul edilemedi.') }),
-    reject: useMutation({ mutationFn: rejectSocialFollowRequest, onSuccess: invalidate, onError: () => showSocialMutationError('Takip isteği reddedilemedi.') }),
+    accept: useMutation({ mutationFn: acceptSocialFollowRequest, onSuccess: invalidate, onError: () => showSocialMutationError(t('social.operationFailed'), t('social.requestAcceptFailed')) }),
+    reject: useMutation({ mutationFn: rejectSocialFollowRequest, onSuccess: invalidate, onError: () => showSocialMutationError(t('social.operationFailed'), t('social.requestRejectFailed')) }),
   };
 }
 
 export function useSocialBlockMutations(userId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
   };
   return {
-    block: useMutation({ mutationFn: () => blockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError('Kullanıcı engellenemedi.') }),
-    unblock: useMutation({ mutationFn: () => unblockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError('Kullanıcının engeli kaldırılamadı.') }),
+    block: useMutation({ mutationFn: () => blockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError(t('social.operationFailed'), t('social.blockFailed')) }),
+    unblock: useMutation({ mutationFn: () => unblockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError(t('social.operationFailed'), t('social.unblockFailed')) }),
   };
 }
 
 export function useUpdateSocialPrivacy() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (settings: SocialPrivacySettings) => updateSocialPrivacy(settings),
     onSuccess: (settings) => {
       queryClient.setQueryData(socialQueryKeys.privacy(), settings);
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
     },
-    onError: () => showSocialMutationError('Gizlilik ayarları kaydedilemedi.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.privacySaveFailed')),
   });
 }
 
@@ -90,7 +96,7 @@ export function useToggleSocialActivityLike() {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
     },
-    onError: () => showSocialMutationError('Beğeni işlemi kaydedilemedi.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.likeFailed')),
   });
 }
 
@@ -103,7 +109,7 @@ export function useCreateSocialComment(activityId: string) {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId, variables.parentCommentId ?? 'root'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
     },
-    onError: () => showSocialMutationError('Yorum gönderilemedi. Yazdığın metin korunuyor; tekrar deneyebilirsin.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.commentFailed')),
   });
 }
 
@@ -115,7 +121,7 @@ export function useDeleteSocialComment(activityId: string) {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
     },
-    onError: () => showSocialMutationError('Yorum silinemedi. Lütfen tekrar dene.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.deleteCommentFailed')),
   });
 }
 
@@ -125,47 +131,51 @@ export function useToggleSocialCommentLike(activityId: string) {
     mutationFn: ({ commentId, isLiked }: { commentId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] }),
-    onError: () => showSocialMutationError('Yorum beğenisi kaydedilemedi.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.commentLikeFailed')),
   });
 }
 
 export function useReportSocialContent() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: reportSocialContent,
-    onSuccess: () => Alert.alert('Bildirimin alındı', 'Bildirimin kaydedildi. Teşekkürler.'),
-    onError: () => Alert.alert('Bildirim gönderilemedi', 'Lütfen daha sonra tekrar dene.'),
+    onSuccess: () => Alert.alert(t('social.reportSuccessTitle'), t('social.reportSuccessMessage')),
+    onError: () => Alert.alert(t('social.reportFailedTitle'), t('social.reportFailedMessage')),
   });
 }
 
 export function useMarkSocialNotificationRead() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: markSocialNotificationRead,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications', 'unread-count'] });
     },
-    onError: () => showSocialMutationError('Bildirim okundu olarak işaretlenemedi.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.notificationReadFailed')),
   });
 }
 
 export function useMarkAllSocialNotificationsRead() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: markAllSocialNotificationsRead,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications', 'unread-count'] });
     },
-    onError: () => showSocialMutationError('Bildirimler okundu olarak işaretlenemedi.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.notificationsReadFailed')),
   });
 }
 
 export function useUnblockSocialUser() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (userId: string) => unblockSocialUser(userId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all }),
-    onError: () => showSocialMutationError('Kullanıcının engeli kaldırılamadı.'),
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.unblockFailed')),
   });
 }
