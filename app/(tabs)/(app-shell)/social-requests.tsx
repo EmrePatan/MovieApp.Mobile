@@ -38,7 +38,7 @@ export default function SocialRequestsScreen() {
         <AppText variant="title">Takip istekleri</AppText>
       </View>
       {requests.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        requests.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>İstekler yüklenemedi.</AppText></View> :
+        requests.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>İstekler yüklenemedi.</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           <FlatList data={requestItems} keyExtractor={item => item.userId} renderItem={renderItem}
             contentContainerStyle={styles.list}
             onEndReached={() => {
@@ -63,4 +63,5 @@ const styles = StyleSheet.create({
   reject: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   footer: { paddingVertical: spacing.lg },
+  retry: { color: colors.accent, marginTop: spacing.sm },
 });
