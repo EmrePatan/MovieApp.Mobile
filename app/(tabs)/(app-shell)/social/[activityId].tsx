@@ -18,6 +18,7 @@ export default function SocialCommentsScreen() {
   const { t } = useTranslation();
   const { activityId } = useLocalSearchParams<{ activityId: string }>();
   const [parentCommentId, setParentCommentId] = useState<string | null>(null);
+  const [parentStack, setParentStack] = useState<string[]>([]);
   const [draft, setDraft] = useState('');
   const comments = useSocialComments(activityId, parentCommentId);
   const commentItems = comments.data?.pages.flatMap(page => page.items) ?? [];
@@ -33,8 +34,20 @@ export default function SocialCommentsScreen() {
   }, [createComment, draft, parentCommentId]);
 
   const handleReply = useCallback((comment: SocialComment) => {
+    setParentStack(current => [...current, comment.id]);
     setParentCommentId(comment.id);
   }, []);
+
+  const handleBack = useCallback(() => {
+    if (parentStack.length === 0) {
+      router.back();
+      return;
+    }
+
+    const nextStack = parentStack.slice(0, -1);
+    setParentStack(nextStack);
+    setParentCommentId(nextStack.at(-1) ?? null);
+  }, [parentStack, router]);
 
   const renderItem = useCallback(({ item }: { item: SocialComment }) => (
     <View style={styles.comment}>
@@ -81,8 +94,8 @@ export default function SocialCommentsScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => parentCommentId ? setParentCommentId(null) : router.back()}>
-          <AppText variant="body">‹ {parentCommentId ? t('social.comments') : t('social.back')}</AppText>
+        <Pressable onPress={handleBack}>
+          <AppText variant="body">‹ {parentStack.length > 1 ? t('social.replies') : parentCommentId ? t('social.comments') : t('social.back')}</AppText>
         </Pressable>
         <AppText variant="title">{parentCommentId ? t('social.replies') : t('social.comments')}</AppText>
       </View>
