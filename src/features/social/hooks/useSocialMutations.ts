@@ -118,7 +118,7 @@ export function useToggleSocialCommentLike(activityId: string) {
 export function useReportSocialContent() {
   return useMutation({
     mutationFn: reportSocialContent,
-    onSuccess: () => Alert.alert('Bildirimin alındı', 'İçerik moderasyon ekibine iletildi.'),
+    onSuccess: () => Alert.alert('Bildirimin alındı', 'Bildirimin kaydedildi. Teşekkürler.'),
     onError: () => Alert.alert('Bildirim gönderilemedi', 'Lütfen daha sonra tekrar dene.'),
   });
 }
