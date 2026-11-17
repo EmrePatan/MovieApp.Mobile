@@ -11,7 +11,8 @@ import {
   getSocialFollowing,
   getSocialPrivacy,
   getSocialPendingFollowRequests,
-  getSocialProfile,\n  getSocialProfileStatistics,
+  getSocialProfile,
+  getSocialProfileStatistics,
   searchSocialUsers,
 } from '../api/social-api';
 import { socialQueryKeys } from './social-query-keys';
@@ -25,7 +26,16 @@ export function useSocialProfile(userId: string) {
   });
 }
 
-export function useSocialProfileStatistics(userId: string, enabled = true) {\n  return useQuery({\n    queryKey: socialQueryKeys.profileStatistics(userId),\n    queryFn: ({ signal }) => getSocialProfileStatistics(userId, signal),\n    enabled: userId.length > 0 && enabled,\n    staleTime: 60_000,\n  });\n}\n\nexport function useSocialUserActivities(userId: string, enabled = true) {
+export function useSocialProfileStatistics(userId: string, enabled = true) {
+  return useQuery({
+    queryKey: socialQueryKeys.profileStatistics(userId),
+    queryFn: ({ signal }) => getSocialProfileStatistics(userId, signal),
+    enabled: userId.length > 0 && enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useSocialUserActivities(userId: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: socialQueryKeys.profileActivities(userId),
     queryFn: ({ pageParam, signal }) => getSocialUserActivities(userId, pageParam, 20, signal),
