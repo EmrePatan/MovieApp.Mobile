@@ -22,7 +22,7 @@ export default function SocialPeopleScreen() {
         <AppText variant="title">{isFollowers ? 'Takipçiler' : 'Takip ettikleri'}</AppText>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        query.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>Liste yüklenemedi.</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
+        query.isError && items.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>Liste yüklenemedi.</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           <FlatList data={items} keyExtractor={item => item.id} contentContainerStyle={styles.list}
             renderItem={({ item }) => (
               <Pressable style={styles.row} onPress={() => router.push(`/(tabs)/(app-shell)/social-profile/${item.id}`)}>
@@ -34,6 +34,7 @@ export default function SocialPeopleScreen() {
               if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
+            ListHeaderComponent={query.isError && items.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>Liste yenilenemedi.</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void query.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz kullanıcı yok.</AppText>}
           />}
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
   copy: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  inlineError: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
   footer: { paddingVertical: spacing.lg },
   retry: { color: colors.accent, marginTop: spacing.sm },
 });
