@@ -135,7 +135,7 @@ export default function SocialProfileScreen() {
           <AppButton title="Daha fazla yükle" variant="secondary"
             onPress={() => void activities.fetchNextPage()} loading={activities.isFetchingNextPage} />
         ) : null}
-        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>Aktiviteler yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void (activities.data ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
+        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>Aktiviteler yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void (activities.isFetchNextPageError ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
       </View>
       </ScrollView>
     </SafeAreaView>
