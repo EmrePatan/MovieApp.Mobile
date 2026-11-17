@@ -42,7 +42,7 @@ const stage1It = {
     writeComment: 'Scrivi un commento...',
     writeReply: 'Scrivi una risposta...',
     noComments: 'Nessun commento.',
-    loadCommentsError: 'Impossibile caricare i commenti.',,
+    loadCommentsError: 'Impossibile caricare i commenti.',
     profileTitle: "Profilo social",
     privacyTitle: "Privacy social",
     privacyDescription: "Gestisci il profilo e le attività visibili nel feed social.",
