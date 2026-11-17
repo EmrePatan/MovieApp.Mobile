@@ -93,6 +93,7 @@ export function invalidateEpisodeWatchHistoryQueries(
   void queryClient.invalidateQueries({ queryKey: ['home', 'personalized'] });
   void queryClient.invalidateQueries({ queryKey: ['recommendations'] });
   invalidateProfileStatistics(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 export function applySeasonWatchedEpisodeIds(
