@@ -60,8 +60,8 @@ function SocialActivityCard({
   commentsLabel: string;
   reportLabel: string;
 }) {
-  const { t } = useTranslation();
-  const dateLabel = new Date(item.createdAt).toLocaleDateString();
+  const { t, i18n } = useTranslation();
+  const dateLabel = new Date(item.createdAt).toLocaleDateString(i18n.language);
   const posterUri = resolveImageUri(item.posterPath, 'w300');
   return (
     <View style={styles.card}>
@@ -140,6 +140,7 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
   isLiking: (item: SocialFeedItem) => boolean; watchedLabel: string; watchedCountLabel: string; likeLabel: string; unlikeLabel: string;
   commentsLabel: string; reportLabel: string;
 }) {
+  const { i18n } = useTranslation();
   const first = items[0];
   const posterUri = resolveImageUri(first.posterPath, 'w300');
   return (
@@ -147,7 +148,7 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
       <Pressable accessibilityRole="button" onPress={() => onProfile(first)} style={styles.cardHeader}>
         <View style={styles.avatar}><AppText variant="subtitle">{first.displayName.slice(0, 1).toUpperCase()}</AppText></View>
         <View style={styles.actorBlock}><AppText variant="body" style={styles.actorName}>{first.displayName}</AppText>
-          <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString()}</AppText></View>
+          <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString(i18n.language)}</AppText></View>
       </Pressable>
       <AppText variant="body">{first.displayName} {watchedLabel} · {watchedCountLabel}</AppText>
       <View style={styles.contentCard}>
