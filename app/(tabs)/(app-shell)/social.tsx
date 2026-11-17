@@ -188,11 +188,11 @@ export default function SocialFeedScreen() {
   }, [router]);
 
   const handleReport = useCallback((item: SocialFeedItem) => {
-    Alert.alert('Paylaşımı bildir', 'Bildirim nedenini seç.', [
-      { text: 'Spam', onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Spam' }) },
-      { text: 'Uygunsuz içerik', onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Inappropriate' }) },
-      { text: 'Taciz', onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Harassment' }) },
-      { text: 'Vazgeç', style: 'cancel' },
+    Alert.alert(t('social.reportTitle'), t('social.chooseReportReason'), [
+      { text: t('social.spam'), onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Spam' }) },
+      { text: t('social.inappropriate'), onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Inappropriate' }) },
+      { text: t('social.harassment'), onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Harassment' }) },
+      { text: t('social.cancel'), style: 'cancel' },
     ]);
   }, [report]);
 
@@ -237,7 +237,7 @@ export default function SocialFeedScreen() {
             item={row.item} onLike={handleLike} onProfile={handleProfile} onComments={handleComments} onReport={handleReport}
             isLiking={toggleLike.isPending && toggleLike.variables?.activityId === row.item.id}
             activityLabel={t(getActivityLabelKey(row.item.activityType))} likeLabel={t('social.like')} unlikeLabel={t('social.unlike')}
-            commentsLabel={t('social.commentsCount')} reportLabel={t('social.report', 'Report')}
+            commentsLabel={t('social.commentsCount')} reportLabel={t('social.report')}
           />
         ) : (
           <SocialEpisodeGroupCard
@@ -273,7 +273,7 @@ export default function SocialFeedScreen() {
                 <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
               </Pressable>
               <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}>
-                <AppText variant="caption" style={styles.headerAction}>Gizlilik</AppText>
+                <AppText variant="caption" style={styles.headerAction}>{t('social.privacyTitle')}</AppText>
               </Pressable>
             </View>
           </View>
