@@ -33,7 +33,7 @@ export default function SocialProfileScreen() {
   }, [follow, profile.data?.followStatus, unfollow]);
 
   if (profile.isLoading) return <SafeAreaView style={styles.screen}><View style={styles.center}><ActivityIndicator color={colors.accent} /></View></SafeAreaView>;
-  if (profile.isError || !profile.data) return <SafeAreaView style={styles.screen}><View style={styles.center}><AppText variant="bodySmall" muted>Profil bulunamadı veya gizli.</AppText></View></SafeAreaView>;
+  if (profile.isError || !profile.data) return <SafeAreaView style={styles.screen}><View style={styles.center}><AppText variant="bodySmall" muted>{profile.isError ? 'Profil yüklenemedi.' : 'Profil bulunamadı veya gizli.'}</AppText>{profile.isError ? <Pressable onPress={() => void profile.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable> : null}</View></SafeAreaView>;
 
   const item = profile.data;
   const followLabel = item.followStatus === 'Accepted' ? 'Takibi bırak' :
@@ -172,4 +172,5 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xxl },
   stat: { alignItems: 'center', gap: spacing.xs },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
+  retry: { color: colors.accent, marginTop: spacing.sm },
 });
