@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { useSocialBlockedUsers, useSocialPrivacy } from '@/features/social/hooks/useSocialQueries';
@@ -10,6 +11,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialPrivacyScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const query = useSocialPrivacy();
   const blockedUsers = useSocialBlockedUsers();
   const unblock = useUnblockSocialUser();
@@ -36,27 +38,27 @@ export default function SocialPrivacyScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
-        <AppText variant="title">Sosyal gizlilik</AppText>
-        <AppText variant="bodySmall" muted>Profilini ve hangi aktivitelerinin sosyal akışta görüneceğini yönet.</AppText>
+        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <AppText variant="title">{t('social.privacyTitle')}</AppText>
+        <AppText variant="bodySmall" muted>{t('social.privacyDescription')}</AppText>
       </View>
       {query.isError ? (
         <View style={styles.center}>
-          <AppText variant="bodySmall" muted>Gizlilik ayarları yüklenemedi.</AppText>
-          <Pressable onPress={() => void query.refetch()}><AppText variant="bodySmall" style={styles.unblock}>Tekrar dene</AppText></Pressable>
+          <AppText variant="bodySmall" muted>{t('social.privacyLoadError')}</AppText>
+          <Pressable onPress={() => void query.refetch()}><AppText variant="bodySmall" style={styles.unblock}>{t('common.retry')}</AppText></Pressable>
         </View>
       ) : query.isLoading || !settings ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> : (
         <View style={styles.list}>
-          {renderToggle('Gizli profil', 'Takip isteklerini onaylaman gerekir.', settings.isPrivate, value => change({ isPrivate: value }))}
-          {renderToggle('İzleme aktiviteleri', 'İzlediğin film ve bölümler.', settings.showWatched, value => change({ showWatched: value }))}
-          {renderToggle('Puanlar', 'Film ve dizi puanların.', settings.showRatings, value => change({ showRatings: value }))}
-          {renderToggle('Favoriler', 'Favorilerine eklediklerin.', settings.showFavorites, value => change({ showFavorites: value }))}
-          {renderToggle('Yorumlar', 'Yayınladığın değerlendirmeler.', settings.showReviews, value => change({ showReviews: value }))}
-          <AppText variant="subtitle" style={styles.sectionTitle}>Engellediğin kullanıcılar</AppText>
+          {renderToggle(t('social.privateProfile'), t('social.privateProfileDescription'), settings.isPrivate, value => change({ isPrivate: value }))}
+          {renderToggle(t('social.watchedActivities'), t('social.watchedDescription'), settings.showWatched, value => change({ showWatched: value }))}
+          {renderToggle(t('social.ratings'), t('social.ratingsDescription'), settings.showRatings, value => change({ showRatings: value }))}
+          {renderToggle(t('social.favorites'), t('social.favoritesDescription'), settings.showFavorites, value => change({ showFavorites: value }))}
+          {renderToggle(t('social.reviews'), t('social.reviewsDescription'), settings.showReviews, value => change({ showReviews: value }))}
+          <AppText variant="subtitle" style={styles.sectionTitle}>{t('social.blockedUsers')}</AppText>
           {blockedUsers.isLoading ? <ActivityIndicator color={colors.accent} /> : blockedUsers.isError ? (
             <View style={styles.row}>
-              <AppText variant="caption" muted>Engellenen kullanıcılar yüklenemedi.</AppText>
-              <Pressable onPress={() => void blockedUsers.refetch()}><AppText variant="caption" style={styles.unblock}>Tekrar dene</AppText></Pressable>
+              <AppText variant="caption" muted>{t('social.blockedUsersLoadError')}</AppText>
+              <Pressable onPress={() => void blockedUsers.refetch()}><AppText variant="caption" style={styles.unblock}>{t('common.retry')}</AppText></Pressable>
             </View>
           ) : blockedUsers.data?.length ? blockedUsers.data.map(user => (
             <View key={user.userId} style={styles.row}>
@@ -65,10 +67,10 @@ export default function SocialPrivacyScreen() {
                 <AppText variant="caption" muted>@{user.userName}</AppText>
               </View>
               <Pressable disabled={unblock.isPending} onPress={() => unblock.mutate(user.userId)}>
-                <AppText variant="caption" style={styles.unblock}>Engeli kaldır</AppText>
+                <AppText variant="caption" style={styles.unblock}>{t('social.unblock')}</AppText>
               </Pressable>
             </View>
-          )) : <AppText variant="caption" muted>Engellediğin kullanıcı yok.</AppText>}
+          )) : <AppText variant="caption" muted>{t('social.noBlockedUsers')}</AppText>}
         </View>
       )}
     </SafeAreaView>
