@@ -121,7 +121,15 @@ const stage1Es = {
     requestRejectFailed: "No se pudo rechazar la solicitud.",
     blockFailed: "No se pudo bloquear al usuario.",
     unblockFailed: "No se pudo desbloquear al usuario.",
-    privacySaveFailed: "No se pudo guardar la configuración de privacidad.",
+    privacySaveFailed: "No se pudo guardar la configuración de privacidad.",    notificationFollowRequest: "quiere seguirte.",
+    notificationNewFollower: "ha empezado a seguirte.",
+    notificationFollowAccepted: "ha aceptado tu solicitud.",
+    notificationActivityLike: "ha indicado que le gusta tu actividad.",
+    notificationNewComment: "ha comentado tu actividad.",
+    notificationCommentReply: "ha respondido a tu comentario.",
+    notificationCommentLike: "le ha gustado tu comentario.",
+    notificationGeneric: "ha interactuado contigo.",
+
   },
   auth: {
     email: 'Correo electrónico',
