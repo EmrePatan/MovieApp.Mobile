@@ -47,7 +47,7 @@ export default function SocialRequestsScreen() {
               if (requests.hasNextPage && !requests.isFetchingNextPage) void requests.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
-            ListHeaderComponent={requests.isError && requestItems.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.requestsRefreshError')}</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+            ListHeaderComponent={requests.isError && requestItems.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.requestsRefreshError')}</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
             ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : requests.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><Pressable onPress={() => void requests.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noPendingRequests')}</AppText>} />}
     </SafeAreaView>
