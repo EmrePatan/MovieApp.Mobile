@@ -40,7 +40,12 @@ export default function SocialPrivacyScreen() {
         <AppText variant="title">Sosyal gizlilik</AppText>
         <AppText variant="bodySmall" muted>Profilini ve hangi aktivitelerinin sosyal akışta görüneceğini yönet.</AppText>
       </View>
-      {query.isLoading || !settings ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> : (
+      {query.isError ? (
+        <View style={styles.center}>
+          <AppText variant="bodySmall" muted>Gizlilik ayarları yüklenemedi.</AppText>
+          <Pressable onPress={() => void query.refetch()}><AppText variant="bodySmall" style={styles.unblock}>Tekrar dene</AppText></Pressable>
+        </View>
+      ) : query.isLoading || !settings ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> : (
         <View style={styles.list}>
           {renderToggle('Gizli profil', 'Takip isteklerini onaylaman gerekir.', settings.isPrivate, value => change({ isPrivate: value }))}
           {renderToggle('İzleme aktiviteleri', 'İzlediğin film ve bölümler.', settings.showWatched, value => change({ showWatched: value }))}
@@ -48,7 +53,12 @@ export default function SocialPrivacyScreen() {
           {renderToggle('Favoriler', 'Favorilerine eklediklerin.', settings.showFavorites, value => change({ showFavorites: value }))}
           {renderToggle('Yorumlar', 'Yayınladığın değerlendirmeler.', settings.showReviews, value => change({ showReviews: value }))}
           <AppText variant="subtitle" style={styles.sectionTitle}>Engellediğin kullanıcılar</AppText>
-          {blockedUsers.isLoading ? <ActivityIndicator color={colors.accent} /> : blockedUsers.data?.length ? blockedUsers.data.map(user => (
+          {blockedUsers.isLoading ? <ActivityIndicator color={colors.accent} /> : blockedUsers.isError ? (
+            <View style={styles.row}>
+              <AppText variant="caption" muted>Engellenen kullanıcılar yüklenemedi.</AppText>
+              <Pressable onPress={() => void blockedUsers.refetch()}><AppText variant="caption" style={styles.unblock}>Tekrar dene</AppText></Pressable>
+            </View>
+          ) : blockedUsers.data?.length ? blockedUsers.data.map(user => (
             <View key={user.userId} style={styles.row}>
               <View style={styles.copy}>
                 <AppText variant="body">{user.displayName}</AppText>
