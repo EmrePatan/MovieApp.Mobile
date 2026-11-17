@@ -60,16 +60,16 @@ export default function SocialCommentsScreen() {
       </View>
       <AppText variant="body">{item.content}</AppText>
       <View style={styles.actions}>
-        <Pressable disabled={toggleLike.isPending && toggleLike.variables?.commentId === item.id} onPress={() => toggleLike.mutate({ commentId: item.id, isLiked: item.isLikedByMe })}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${item.isLikedByMe ? t('social.unlike') : t('social.like')} ${item.likesCount}`} disabled={toggleLike.isPending && toggleLike.variables?.commentId === item.id} onPress={() => toggleLike.mutate({ commentId: item.id, isLiked: item.isLikedByMe })}>
           <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>
             {item.isLikedByMe ? '♥' : '♡'} {item.likesCount}
           </AppText>
         </Pressable>
-        <Pressable onPress={() => handleReply(item)}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${t('social.reply')} ${item.repliesCount}`} onPress={() => handleReply(item)}>
           <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
         {item.userId !== user?.id ? (
-          <Pressable onPress={() => Alert.alert(
+          <Pressable accessibilityRole="button" accessibilityLabel={t('social.report')} onPress={() => Alert.alert(
             t('social.commentReportTitle'),
             t('social.chooseReportReason'),
             [
@@ -83,7 +83,7 @@ export default function SocialCommentsScreen() {
           </Pressable>
         ) : null}
         {item.userId === user?.id ? (
-          <Pressable disabled={deleteComment.isPending} onPress={() => Alert.alert(
+          <Pressable accessibilityRole="button" accessibilityLabel={t('social.delete')} disabled={deleteComment.isPending} onPress={() => Alert.alert(
             t('social.deleteCommentTitle'),
             t('social.deleteCommentMessage'),
             [
@@ -101,7 +101,7 @@ export default function SocialCommentsScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={handleBack}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.back')} onPress={handleBack}>
           <AppText variant="body">‹ {parentStack.length > 1 ? t('social.replies') : parentCommentId ? t('social.comments') : t('social.back')}</AppText>
         </Pressable>
         <AppText variant="title">{parentCommentId ? t('social.replies') : t('social.comments')}</AppText>
