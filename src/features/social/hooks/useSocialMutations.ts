@@ -25,7 +25,10 @@ export function useFollowSocialUser(userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => followSocialUser(userId),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.profile(userId) }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: socialQueryKeys.profile(userId) });
+      void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
+    },
   });
 }
 
@@ -64,7 +67,10 @@ export function useUpdateSocialPrivacy() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (settings: SocialPrivacySettings) => updateSocialPrivacy(settings),
-    onSuccess: (settings) => queryClient.setQueryData(socialQueryKeys.privacy(), settings),
+    onSuccess: (settings) => {
+      queryClient.setQueryData(socialQueryKeys.privacy(), settings);
+      void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
+    },
   });
 }
 
@@ -143,6 +149,6 @@ export function useUnblockSocialUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => unblockSocialUser(userId),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'blocked-users'] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all }),
   });
 }
