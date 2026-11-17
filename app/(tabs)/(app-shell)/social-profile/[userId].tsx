@@ -121,7 +121,7 @@ export default function SocialProfileScreen() {
           <AppText variant="bodySmall" muted>{t('social.noActivities')}</AppText>
         ) : null}
         {activityItems.map(activity => (
-          <Pressable accessibilityRole="button" accessibilityLabel={`${activity.targetTitle || t('social.contentFallback')} ${getActivityLabel(activity.activityType, t)}`} key={activity.id} style={styles.activityCard>
+          <Pressable accessibilityRole="button" accessibilityLabel={`${activity.targetTitle || t('social.contentFallback')} ${getActivityLabel(activity.activityType, t)}`} key={activity.id} style={styles.activityCard}
             onPress={() => router.push(`/(tabs)/(app-shell)/social/${activity.id}`)}>
             <View style={styles.activityText}>
               <AppText variant="body">{activity.targetTitle || t('social.contentFallback')} · {getActivityLabel(activity.activityType, t)}</AppText>
