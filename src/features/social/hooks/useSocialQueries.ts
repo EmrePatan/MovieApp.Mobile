@@ -55,19 +55,19 @@ export function useSocialUserSearch(query: string) {
   });
 }
 
-export function useSocialFollowers(userId: string, page = 1) {
+export function useSocialFollowers(userId: string, page = 1, enabled = true) {
   return useQuery({
     queryKey: socialQueryKeys.followers(userId, page),
     queryFn: ({ signal }) => getSocialFollowers(userId, page, 20, signal),
-    enabled: userId.length > 0,
+    enabled: userId.length > 0 && enabled,
   });
 }
 
-export function useSocialFollowing(userId: string, page = 1) {
+export function useSocialFollowing(userId: string, page = 1, enabled = true) {
   return useQuery({
     queryKey: socialQueryKeys.following(userId, page),
     queryFn: ({ signal }) => getSocialFollowing(userId, page, 20, signal),
-    enabled: userId.length > 0,
+    enabled: userId.length > 0 && enabled,
   });
 }
 
