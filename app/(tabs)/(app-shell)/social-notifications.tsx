@@ -11,16 +11,16 @@ import type { SocialNotificationItem } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-function notificationText(type: string): string {
+function notificationText(type: string, t: (key: string) => string): string {
   switch (type) {
-    case 'FollowRequest': return 'seni takip etmek istiyor.';
-    case 'NewFollower': return 'seni takip etmeye başladı.';
-    case 'FollowAccepted': return 'takip isteğini kabul etti.';
-    case 'ActivityLike': return 'hareketini beğendi.';
-    case 'NewComment': return 'hareketine yorum yaptı.';
-    case 'CommentReply': return 'yorumuna yanıt verdi.';
-    case 'CommentLike': return 'yorumunu beğendi.';
-    default: return 'yeni bir etkileşimde bulundu.';
+    case 'FollowRequest': return t('social.notificationFollowRequest');
+    case 'NewFollower': return t('social.notificationNewFollower');
+    case 'FollowAccepted': return t('social.notificationFollowAccepted');
+    case 'ActivityLike': return t('social.notificationActivityLike');
+    case 'NewComment': return t('social.notificationNewComment');
+    case 'CommentReply': return t('social.notificationCommentReply');
+    case 'CommentLike': return t('social.notificationCommentLike');
+    default: return t('social.notificationGeneric');
   }
 }
 
@@ -47,12 +47,12 @@ export default function SocialNotificationsScreen() {
     <Pressable onPress={() => handlePress(item)} style={[styles.row, !item.isRead && styles.unread]}>
       <View style={styles.avatar}><AppText variant="body">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
       <View style={styles.copy}>
-        <AppText variant="body">{item.displayName} {notificationText(item.notificationType)}</AppText>
+        <AppText variant="body">{item.displayName} {notificationText(item.notificationType, t)}</AppText>
         <AppText variant="caption" muted>{new Date(item.createdAt).toLocaleString()}</AppText>
       </View>
       {!item.isRead ? <View style={styles.dot} /> : null}
     </Pressable>
-  ), [handlePress]);
+  ), [handlePress, t]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -81,7 +81,7 @@ export default function SocialNotificationsScreen() {
             onEndReachedThreshold={0.5}
             refreshing={query.isRefetching && !query.isFetchingNextPage}
             onRefresh={() => void query.refetch()}
-            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void query.fetchNextPage()} /></View> : null}
+            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><AppButton title={t('common.retry')} variant="secondary" onPress={() => void query.fetchNextPage()} /></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noNotifications')}</AppText>}
           />
         )}
