@@ -38,13 +38,14 @@ export default function SocialRequestsScreen() {
         <AppText variant="title">Takip istekleri</AppText>
       </View>
       {requests.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        requests.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>İstekler yüklenemedi.</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
+        requests.isError && requestItems.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>İstekler yüklenemedi.</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           <FlatList data={requestItems} keyExtractor={item => item.userId} renderItem={renderItem}
             contentContainerStyle={styles.list}
             onEndReached={() => {
               if (requests.hasNextPage && !requests.isFetchingNextPage) void requests.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
+            ListHeaderComponent={requests.isError && requestItems.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>İstekler yenilenemedi.</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : requests.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void requests.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>Bekleyen takip isteğin yok.</AppText>} />}
     </SafeAreaView>
@@ -62,6 +63,7 @@ const styles = StyleSheet.create({
   buttonText: { color: colors.textPrimary },
   reject: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  inlineError: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
   footer: { paddingVertical: spacing.lg },
   retry: { color: colors.accent, marginTop: spacing.sm },
 });
