@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -25,6 +26,7 @@ function notificationText(type: string): string {
 
 export default function SocialNotificationsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const query = useSocialNotifications();
   const markRead = useMarkSocialNotificationRead();
   const markAllRead = useMarkAllSocialNotificationsRead();
@@ -55,17 +57,17 @@ export default function SocialNotificationsScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
-        <AppText variant="title">Sosyal bildirimler</AppText>
+        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <AppText variant="title">{t('social.notificationsTitle')}</AppText>
         <Pressable disabled={!unreadCount || markAllRead.isPending} onPress={() => markAllRead.mutate()}>
-          <AppText variant="caption" style={styles.markAll}>Tümünü okundu işaretle</AppText>
+          <AppText variant="caption" style={styles.markAll}>{t('social.markAllRead')}</AppText>
         </Pressable>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
         query.isError && notifications.length === 0 ? (
           <View style={styles.center}>
-            <AppText variant="bodySmall" muted>Bildirimler yüklenemedi.</AppText>
-            <AppButton title="Tekrar dene" variant="secondary" onPress={() => void query.refetch()} />
+            <AppText variant="bodySmall" muted>{t('social.notificationsLoadError')}</AppText>
+            <AppButton title={t('common.retry')} variant="secondary" onPress={() => void query.refetch()} />
           </View>
         ) : (
           <FlatList
@@ -79,8 +81,8 @@ export default function SocialNotificationsScreen() {
             onEndReachedThreshold={0.5}
             refreshing={query.isRefetching && !query.isFetchingNextPage}
             onRefresh={() => void query.refetch()}
-            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void query.fetchNextPage()} /></View> : null}
-            ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz sosyal bildirimin yok.</AppText>}
+            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void query.fetchNextPage()} /></View> : null}
+            ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noNotifications')}</AppText>}
           />
         )}
     </SafeAreaView>
