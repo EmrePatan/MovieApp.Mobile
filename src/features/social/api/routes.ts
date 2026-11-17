@@ -1,4 +1,4 @@
-export const socialProfilePath = (userId: string) => `/api/social/profiles/${userId}`;
+export const socialProfilePath = (userId: string) => `/api/social/profiles/${userId}`;\nexport const socialProfileStatisticsPath = (userId: string) => `/api/social/profiles/${userId}/statistics`;
 export const socialProfileActivitiesPath = (userId: string, cursor?: string | null, pageSize = 20) => {
   const params = new URLSearchParams({ pageSize: String(pageSize) });
   if (cursor) params.set('cursor', cursor);
