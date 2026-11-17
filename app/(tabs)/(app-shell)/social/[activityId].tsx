@@ -46,7 +46,7 @@ export default function SocialCommentsScreen() {
 
     const nextStack = parentStack.slice(0, -1);
     setParentStack(nextStack);
-    setParentCommentId(nextStack.at(-1) ?? null);
+    setParentCommentId(nextStack[nextStack.length - 1] ?? null);
   }, [parentStack, router]);
 
   const renderItem = useCallback(({ item }: { item: SocialComment }) => (
