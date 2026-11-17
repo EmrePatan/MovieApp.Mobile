@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { AppButton } from '@/components/buttons/AppButton';
-import { useSocialProfile, useSocialUserActivities } from '@/features/social/hooks/useSocialQueries';
+import { useSocialProfile, useSocialProfileStatistics, useSocialUserActivities } from '@/features/social/hooks/useSocialQueries';
 import { useFollowSocialUser, useReportSocialContent, useSocialBlockMutations, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -17,6 +17,7 @@ export default function SocialProfileScreen() {
   const canViewActivities = !!profile.data && (!profile.data.isPrivate
     || profile.data.followStatus === 'Accepted' || profile.data.followStatus === 'Self');
   const activities = useSocialUserActivities(userId, canViewActivities);
+  const statistics = useSocialProfileStatistics(userId, canViewActivities);
   const activityItems = activities.data?.pages.flatMap(page => page.items) ?? [];
   const follow = useFollowSocialUser(userId);
   const unfollow = useUnfollowSocialUser(userId);
@@ -85,6 +86,33 @@ export default function SocialProfileScreen() {
         <AppText variant="caption" muted>Movie Cave üyesi · {new Date(item.createdAt).toLocaleDateString()}</AppText>
       </View>
       <View style={styles.activitySection}>
+        <AppText variant="subtitle">İstatistikler</AppText>
+        {statistics.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
+        {statistics.data ? (
+          <>
+            <View style={styles.profileStatsGrid}>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.moviesWatched}</AppText><AppText variant="caption" muted>Film</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.episodesWatched}</AppText><AppText variant="caption" muted>Bölüm</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.ratingsCount}</AppText><AppText variant="caption" muted>Puan</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.reviewsCount}</AppText><AppText variant="caption" muted>İnceleme</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.favoritesCount}</AppText><AppText variant="caption" muted>Favori</AppText></View>
+            </View>
+            {statistics.data.milestones.length > 0 ? (
+              <View style={styles.milestoneList}>
+                <AppText variant="subtitle">Başarımlar</AppText>
+                {statistics.data.milestones.map(milestone => (
+                  <View key={milestone.id} style={styles.milestoneCard}>
+                    <AppText variant="body">🏆 {milestone.title}</AppText>
+                    <AppText variant="caption" muted>{milestone.description}</AppText>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </>
+        ) : null}
+        {statistics.isError ? <AppText variant="caption" muted>İstatistikler yüklenemedi.</AppText> : null}
+      </View>
+      <View style={styles.activitySection}>
         <AppText variant="subtitle">Son aktiviteler</AppText>
         {activities.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
         {!activities.isLoading && activityItems.length === 0 ? (
@@ -131,6 +159,10 @@ function getActivityLabel(type: string): string {
 const styles = StyleSheet.create({
   scrollContent: { paddingBottom: spacing.xl },
   activitySection: { paddingHorizontal: spacing.lg, gap: spacing.md },
+  profileStatsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  profileStatCard: { minWidth: '30%', flexGrow: 1, padding: spacing.md, borderRadius: 12, backgroundColor: colors.surface, alignItems: 'center', gap: spacing.xs },
+  milestoneList: { gap: spacing.sm },
+  milestoneCard: { padding: spacing.md, borderRadius: 12, backgroundColor: colors.surface, gap: spacing.xs },
   activityCard: { padding: spacing.md, borderRadius: 12, backgroundColor: colors.surface, gap: spacing.sm },
   activityText: { gap: spacing.xs },
   screen: { flex: 1, backgroundColor: colors.background },
