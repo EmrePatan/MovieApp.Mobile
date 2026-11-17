@@ -45,7 +45,7 @@ export default function SocialRequestsScreen() {
               if (requests.hasNextPage && !requests.isFetchingNextPage) void requests.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
-            ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
+            ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : requests.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void requests.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>Bekleyen takip isteğin yok.</AppText>} />}
     </SafeAreaView>
   );
