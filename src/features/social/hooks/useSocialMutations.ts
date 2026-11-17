@@ -99,6 +99,7 @@ export function useCreateSocialComment(activityId: string) {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId, variables.parentCommentId ?? 'root'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
     },
+    onError: () => showSocialMutationError('Yorum gönderilemedi. Yazdığın metin korunuyor; tekrar deneyebilirsin.'),
   });
 }
 
@@ -110,6 +111,7 @@ export function useDeleteSocialComment(activityId: string) {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
     },
+    onError: () => showSocialMutationError('Yorum silinemedi. Lütfen tekrar dene.'),
   });
 }
 
@@ -149,6 +151,7 @@ export function useMarkAllSocialNotificationsRead() {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications', 'unread-count'] });
     },
+    onError: () => showSocialMutationError('Bildirimler okundu olarak işaretlenemedi.'),
   });
 }
 
