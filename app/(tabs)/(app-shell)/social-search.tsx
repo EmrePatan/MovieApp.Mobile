@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { useSocialUserSearch } from '@/features/social/hooks/useSocialQueries';
@@ -9,6 +10,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialSearchScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   useEffect(() => {
@@ -21,9 +23,9 @@ export default function SocialSearchScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
-        <AppText variant="title">Kullanıcı bul</AppText>
-        <TextInput value={query} onChangeText={setQuery} placeholder="İsim veya kullanıcı adı"
+        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <AppText variant="title">{t('social.searchTitle')}</AppText>
+        <TextInput value={query} onChangeText={setQuery} placeholder={t('social.searchPlaceholder')}
           placeholderTextColor={colors.textMuted} autoCapitalize="none" style={styles.input} />
       </View>
       {results.isFetching ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
@@ -38,18 +40,18 @@ export default function SocialSearchScreen() {
               <AppText variant="body">{item.displayName}</AppText>
               <AppText variant="caption" muted>@{item.userName}</AppText>
             </View>
-            <AppText variant="caption" muted>{item.followStatus === 'Accepted' ? 'Takip ediliyor' : item.followStatus === 'Pending' ? 'İstek gönderildi' : ''}</AppText>
+            <AppText variant="caption" muted>{item.followStatus === 'Accepted' ? t('social.followed') : item.followStatus === 'Pending' ? t('social.requestSent') : ''}</AppText>
           </Pressable>
         )}
         onEndReached={() => {
           if (results.hasNextPage && !results.isFetchingNextPage) void results.fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        ListHeaderComponent={results.isError && resultItems.length > 0 ? <View style={styles.error}><AppText variant="caption" muted>Arama sonuçları yenilenemedi.</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-        ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : results.isFetchNextPageError ? <View style={styles.error}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void results.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-        ListEmptyComponent={debouncedQuery.length < 2 ? <AppText variant="bodySmall" muted center>En az 2 karakter yaz.</AppText> :
-          results.isError ? <View style={styles.error}><AppText variant="bodySmall" muted center>Arama yapılamadı.</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
-          results.isLoading ? null : <AppText variant="bodySmall" muted center>Sonuç bulunamadı.</AppText>}
+        ListHeaderComponent={results.isError && resultItems.length > 0 ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchRefreshError')}</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
+        ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : results.isFetchNextPageError ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchNextPageError')}</AppText><Pressable onPress={() => void results.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+        ListEmptyComponent={debouncedQuery.length < 2 ? <AppText variant="bodySmall" muted center>{t('social.minSearchCharacters')}</AppText> :
+          results.isError ? <View style={styles.error}><AppText variant="bodySmall" muted center>{t('social.searchFailed')}</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
+          results.isLoading ? null : <AppText variant="bodySmall" muted center>{t('social.noSearchResults')}</AppText>}
       />
     </SafeAreaView>
   );
