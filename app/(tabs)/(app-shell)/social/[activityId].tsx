@@ -87,7 +87,7 @@ export default function SocialCommentsScreen() {
             t('social.deleteCommentTitle'),
             t('social.deleteCommentMessage'),
             [
-              { text: 'Vazgeç', style: 'cancel' },
+              { text: t('social.cancel'), style: 'cancel' },
               { text: t('social.delete'), style: 'destructive', onPress: () => deleteComment.mutate(item.id) },
             ],
           )}>
