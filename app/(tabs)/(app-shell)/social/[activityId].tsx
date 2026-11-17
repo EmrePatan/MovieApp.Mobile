@@ -106,9 +106,15 @@ export default function SocialCommentsScreen() {
         </Pressable>
         <AppText variant="title">{parentCommentId ? t('social.replies') : t('social.comments')}</AppText>
       </View>
+      {comments.isError && commentItems.length > 0 ? (
+        <View style={styles.inlineError}>
+          <AppText variant="caption" muted>{t('social.loadCommentsError')}</AppText>
+          <AppButton title={t('common.tryAgain')} variant="secondary" onPress={() => void comments.refetch()} />
+        </View>
+      ) : null}
       {comments.isLoading ? (
         <View style={styles.loading}><ActivityIndicator color={colors.accent} /></View>
-      ) : comments.isError ? (
+      ) : comments.isError && commentItems.length === 0 ? (
         <View style={styles.loading}>
           <AppText variant="bodySmall" muted>{t('social.loadCommentsError')}</AppText>
           <AppButton title={t('common.tryAgain')} variant="secondary" onPress={() => void comments.refetch()} />
@@ -161,5 +167,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, minHeight: 42, maxHeight: 120, color: colors.textPrimary, backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   send: { paddingHorizontal: spacing.md, paddingVertical: spacing.md, borderRadius: 12, backgroundColor: colors.accent },
   sendText: { color: colors.textPrimary },
+  inlineError: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, gap: spacing.sm },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
 });
