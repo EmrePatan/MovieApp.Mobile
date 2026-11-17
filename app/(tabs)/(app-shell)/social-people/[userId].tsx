@@ -10,8 +10,8 @@ export default function SocialPeopleScreen() {
   const router = useRouter();
   const { userId, type } = useLocalSearchParams<{ userId: string; type?: string }>();
   const isFollowers = type !== 'following';
-  const followers = useSocialFollowers(userId);
-  const following = useSocialFollowing(userId);
+  const followers = useSocialFollowers(userId, 1, isFollowers);
+  const following = useSocialFollowing(userId, 1, !isFollowers);
   const query = isFollowers ? followers : following;
   const items = query.data ?? [];
 
