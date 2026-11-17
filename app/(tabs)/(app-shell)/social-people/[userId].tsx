@@ -20,14 +20,14 @@ export default function SocialPeopleScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.back')} onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
         <AppText variant="title">{isFollowers ? t('social.followers') : t('social.following')}</AppText>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        query.isError && items.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>{t('social.listLoadError')}</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> :
+        query.isError && items.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>{t('social.listLoadError')}</AppText><Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> :
           <FlatList data={items} keyExtractor={item => item.id} contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <Pressable style={styles.row} onPress={() => router.push(`/(tabs)/(app-shell)/social-profile/${item.id}`)}>
+              <Pressable accessibilityRole="button" accessibilityLabel={`${item.displayName} @${item.userName}`} style={styles.row} onPress={() => router.push(`/(tabs)/(app-shell)/social-profile/${item.id}`)}>
                 <View style={styles.avatar}><AppText variant="body">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
                 <View style={styles.copy}><AppText variant="body">{item.displayName}</AppText><AppText variant="caption" muted>@{item.userName}</AppText></View>
               </Pressable>
@@ -37,7 +37,7 @@ export default function SocialPeopleScreen() {
             }}
             onEndReachedThreshold={0.5}
             ListHeaderComponent={query.isError && items.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.listRefreshError')}</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
-            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><Pressable onPress={() => void query.fetchNextPage()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
+            ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={() => void query.fetchNextPage()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noUsers')}</AppText>}
           />}
     </SafeAreaView>
