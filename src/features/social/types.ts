@@ -126,3 +126,19 @@ export interface SocialBlockedUser {
   displayName: string;
   blockedAt: string;
 }
+
+export interface SocialProfileMilestone {
+  id: string;
+  title: string;
+  description: string;
+  achievedAt: string | null;
+}
+
+export interface SocialProfileStatistics {
+  moviesWatched: number;
+  episodesWatched: number;
+  ratingsCount: number;
+  reviewsCount: number;
+  favoritesCount: number;
+  milestones: SocialProfileMilestone[];
+}
