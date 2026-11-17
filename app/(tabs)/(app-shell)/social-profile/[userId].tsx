@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
@@ -12,6 +13,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const profile = useSocialProfile(userId);
   const canViewActivities = !!profile.data && (!profile.data.isPrivate
@@ -33,11 +35,11 @@ export default function SocialProfileScreen() {
   }, [follow, profile.data?.followStatus, unfollow]);
 
   if (profile.isLoading) return <SafeAreaView style={styles.screen}><View style={styles.center}><ActivityIndicator color={colors.accent} /></View></SafeAreaView>;
-  if (profile.isError || !profile.data) return <SafeAreaView style={styles.screen}><View style={styles.center}><AppText variant="bodySmall" muted>{profile.isError ? 'Profil yüklenemedi.' : 'Profil bulunamadı veya gizli.'}</AppText>{profile.isError ? <Pressable onPress={() => void profile.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable> : null}</View></SafeAreaView>;
+  if (profile.isError || !profile.data) return <SafeAreaView style={styles.screen}><View style={styles.center}><AppText variant="bodySmall" muted>{profile.isError ? t('social.profileLoadError') : t('social.profileNotFound')}</AppText>{profile.isError ? <Pressable onPress={() => void profile.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable> : null}</View></SafeAreaView>;
 
   const item = profile.data;
-  const followLabel = item.followStatus === 'Accepted' ? 'Takibi bırak' :
-    item.followStatus === 'Pending' ? 'İsteği iptal et' : 'Takip et';
+  const followLabel = item.followStatus === 'Accepted' ? t('social.unfollow') :
+    item.followStatus === 'Pending' ? t('social.cancelFollowRequest') : t('social.follow');
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -54,52 +56,52 @@ export default function SocialProfileScreen() {
             onPress={handleFollow} loading={follow.isPending || unfollow.isPending} />
         ) : null}
         {item.followStatus !== 'Self' ? (
-          <AppButton title="Kullanıcıyı engelle" variant="destructive" onPress={() => Alert.alert(
-            'Kullanıcı engellensin mi?',
-            'Bu kullanıcıyla aranızdaki takip ilişkileri kaldırılır.',
-            [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Engelle', style: 'destructive', onPress: () => block.block.mutate() }],
+          <AppButton title={t('social.blockUser')} variant="destructive" onPress={() => Alert.alert(
+            t('social.blockUserTitle'),
+            t('social.blockUserMessage'),
+            [{ text: t('social.cancel'), style: 'cancel' }, { text: t('social.blockUser'), style: 'destructive', onPress: () => block.block.mutate() }],
           )} loading={block.block.isPending} />
         ) : null}
         {item.followStatus !== 'Self' ? (
-          <AppButton title="Kullanıcıyı şikâyet et" variant="secondary" onPress={() => Alert.alert(
-            'Kullanıcıyı bildir',
-            'Bildirim nedenini seç.',
+          <AppButton title={t('social.reportUser')} variant="secondary" onPress={() => Alert.alert(
+            t('social.reportUserTitle'),
+            t('social.reportUserReason'),
             [
-              { text: 'Spam', onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'Spam' }) },
-              { text: 'Sahte hesap', onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'FakeAccount' }) },
-              { text: 'Taciz', onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'Harassment' }) },
-              { text: 'Vazgeç', style: 'cancel' },
+              { text: t('social.spam'), onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'Spam' }) },
+              { text: t('social.reportFakeAccount'), onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'FakeAccount' }) },
+              { text: t('social.harassment'), onPress: () => report.mutate({ targetType: 'User', targetId: item.id, reason: 'Harassment' }) },
+              { text: t('social.cancel'), style: 'cancel' },
             ],
           )} loading={report.isPending} />
         ) : null}
         {item.isPrivate && item.followStatus !== 'Accepted' && item.followStatus !== 'Self' ? (
-          <AppText variant="bodySmall" muted center>Bu profil gizli. Paylaşımları görmek için takip isteği gönder.</AppText>
+          <AppText variant="bodySmall" muted center>{t('social.privateProfileNotice')}</AppText>
         ) : null}
         <View style={styles.stats}>
           <Pressable onPress={() => router.push(`/(tabs)/(app-shell)/social-people/${item.id}?type=followers`)} style={styles.stat}>
-            <AppText variant="subtitle">{item.followersCount}</AppText><AppText variant="caption" muted>Takipçi</AppText>
+            <AppText variant="subtitle">{item.followersCount}</AppText><AppText variant="caption" muted>{t('social.followersCountLabel')}</AppText>
           </Pressable>
           <Pressable onPress={() => router.push(`/(tabs)/(app-shell)/social-people/${item.id}?type=following`)} style={styles.stat}>
-            <AppText variant="subtitle">{item.followingCount}</AppText><AppText variant="caption" muted>Takip</AppText>
+            <AppText variant="subtitle">{item.followingCount}</AppText><AppText variant="caption" muted>{t('social.followingCountLabel')}</AppText>
           </Pressable>
         </View>
-        <AppText variant="caption" muted>Movie Cave üyesi · {new Date(item.createdAt).toLocaleDateString()}</AppText>
+        <AppText variant="caption" muted>{t('social.memberSince')} · {new Date(item.createdAt).toLocaleDateString()}</AppText>
       </View>
       <View style={styles.activitySection}>
-        <AppText variant="subtitle">İstatistikler</AppText>
+        <AppText variant="subtitle">{t('social.statistics')}</AppText>
         {statistics.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
         {statistics.data ? (
           <>
             <View style={styles.profileStatsGrid}>
-              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.moviesWatched}</AppText><AppText variant="caption" muted>Film</AppText></View>
-              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.episodesWatched}</AppText><AppText variant="caption" muted>Bölüm</AppText></View>
-              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.ratingsCount}</AppText><AppText variant="caption" muted>Puan</AppText></View>
-              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.reviewsCount}</AppText><AppText variant="caption" muted>İnceleme</AppText></View>
-              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.favoritesCount}</AppText><AppText variant="caption" muted>Favori</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.moviesWatched}</AppText><AppText variant="caption" muted>{t('social.movies')}</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.episodesWatched}</AppText><AppText variant="caption" muted>{t('social.episodes')}</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.ratingsCount}</AppText><AppText variant="caption" muted>{t('social.ratingCount')}</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.reviewsCount}</AppText><AppText variant="caption" muted>{t('social.reviewCount')}</AppText></View>
+              <View style={styles.profileStatCard}><AppText variant="title">{statistics.data.favoritesCount}</AppText><AppText variant="caption" muted>{t('social.favoriteCount')}</AppText></View>
             </View>
             {statistics.data.milestones.length > 0 ? (
               <View style={styles.milestoneList}>
-                <AppText variant="subtitle">Başarımlar</AppText>
+                <AppText variant="subtitle">{t('social.achievements')}</AppText>
                 {statistics.data.milestones.map(milestone => (
                   <View key={milestone.id} style={styles.milestoneCard}>
                     <AppText variant="body">🏆 {milestone.title}</AppText>
@@ -110,19 +112,19 @@ export default function SocialProfileScreen() {
             ) : null}
           </>
         ) : null}
-        {statistics.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>İstatistikler yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void statistics.refetch()} /></View> : null}
+        {statistics.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.statsLoadError')}</AppText><AppButton title={t('common.retry')} variant="secondary" onPress={() => void statistics.refetch()} /></View> : null}
       </View>
       <View style={styles.activitySection}>
-        <AppText variant="subtitle">Son aktiviteler</AppText>
+        <AppText variant="subtitle">{t('social.recentActivities')}</AppText>
         {activities.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
         {!activities.isLoading && activityItems.length === 0 ? (
-          <AppText variant="bodySmall" muted>Henüz görüntülenecek aktivite yok.</AppText>
+          <AppText variant="bodySmall" muted>{t('social.noActivities')}</AppText>
         ) : null}
         {activityItems.map(activity => (
           <Pressable key={activity.id} style={styles.activityCard}
             onPress={() => router.push(`/(tabs)/(app-shell)/social/${activity.id}`)}>
             <View style={styles.activityText}>
-              <AppText variant="body">{activity.targetTitle || 'İçerik'} · {getActivityLabel(activity.activityType)}</AppText>
+              <AppText variant="body">{activity.targetTitle || t('social.contentFallback')} · {getActivityLabel(activity.activityType, t)}</AppText>
               {activity.targetSubtitle ? <AppText variant="caption" muted>{activity.targetSubtitle}</AppText> : null}
               {activity.ratingScore !== null ? <AppText variant="bodySmall">★ {activity.ratingScore}/10</AppText> : null}
               {activity.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={3}>{activity.reviewExcerpt}</AppText> : null}
@@ -132,27 +134,27 @@ export default function SocialProfileScreen() {
           </Pressable>
         ))}
         {activities.hasNextPage ? (
-          <AppButton title="Daha fazla yükle" variant="secondary"
+          <AppButton title={t('social.loadMore')} variant="secondary"
             onPress={() => void activities.fetchNextPage()} loading={activities.isFetchingNextPage} />
         ) : null}
-        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>Aktiviteler yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void (activities.isFetchNextPageError ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
+        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.activitiesLoadError')}</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void (activities.isFetchNextPageError ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
       </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function getActivityLabel(type: string): string {
+function getActivityLabel(type: string, t: (key: string) => string): string {
   switch (type) {
-    case 'WatchedMovie': return 'izledi';
-    case 'WatchedEpisode': return 'bölüm izledi';
+    case 'WatchedMovie': return t('social.activity.watchedMovie');
+    case 'WatchedEpisode': return t('social.activity.watchedEpisode');
     case 'RatedMovie':
-    case 'RatedTvShow': return 'puan verdi';
+    case 'RatedTvShow': return t('social.activity.rated');
     case 'ReviewedMovie':
-    case 'ReviewedTvShow': return 'inceleme yazdı';
+    case 'ReviewedTvShow': return t('social.activity.reviewed');
     case 'FavoritedMovie':
-    case 'FavoritedTvShow': return 'favorilerine ekledi';
-    default: return 'aktivite yaptı';
+    case 'FavoritedTvShow': return t('social.activity.favorited');
+    default: return t('social.activity.generic');
   }
 }
 
