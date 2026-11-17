@@ -87,6 +87,7 @@ export function useToggleSocialActivityLike() {
     mutationFn: ({ activityId, isLiked }: { activityId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] }),
+    onError: () => showSocialMutationError('Beğeni işlemi kaydedilemedi.'),
   });
 }
 
@@ -121,6 +122,7 @@ export function useToggleSocialCommentLike(activityId: string) {
     mutationFn: ({ commentId, isLiked }: { commentId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] }),
+    onError: () => showSocialMutationError('Yorum beğenisi kaydedilemedi.'),
   });
 }
 
