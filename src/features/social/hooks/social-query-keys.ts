@@ -1,6 +1,7 @@
 export const socialQueryKeys = {
   all: ['social'] as const,
-  profile: (userId: string) => ['social', 'profile', userId] as const,\n  profileStatistics: (userId: string) => ['social', 'profile-statistics', userId] as const,
+  profile: (userId: string) => ['social', 'profile', userId] as const,
+  profileStatistics: (userId: string) => ['social', 'profile-statistics', userId] as const,
   profileActivities: (userId: string) => ['social', 'profile-activities', userId] as const,
   search: (query: string) => ['social', 'search', query] as const,
   followers: (userId: string, page: number) => ['social', 'followers', userId, page] as const,
