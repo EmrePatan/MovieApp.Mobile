@@ -21,6 +21,10 @@ import {
 import type { SocialPrivacySettings } from '../types';
 import { socialQueryKeys } from './social-query-keys';
 
+function showSocialMutationError(message: string) {
+  Alert.alert('İşlem tamamlanamadı', message);
+}
+
 export function useFollowSocialUser(userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -29,6 +33,7 @@ export function useFollowSocialUser(userId: string) {
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.profile(userId) });
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
     },
+    onError: () => showSocialMutationError('Takip isteği gönderilemedi. Lütfen tekrar dene.'),
   });
 }
 
@@ -40,6 +45,7 @@ export function useUnfollowSocialUser(userId: string) {
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.profile(userId) });
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
     },
+    onError: () => showSocialMutationError('Takip işlemi tamamlanamadı. Lütfen tekrar dene.'),
   });
 }
 
@@ -47,8 +53,8 @@ export function useSocialFollowRequestMutations() {
   const queryClient = useQueryClient();
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
   return {
-    accept: useMutation({ mutationFn: acceptSocialFollowRequest, onSuccess: invalidate }),
-    reject: useMutation({ mutationFn: rejectSocialFollowRequest, onSuccess: invalidate }),
+    accept: useMutation({ mutationFn: acceptSocialFollowRequest, onSuccess: invalidate, onError: () => showSocialMutationError('Takip isteği kabul edilemedi.') }),
+    reject: useMutation({ mutationFn: rejectSocialFollowRequest, onSuccess: invalidate, onError: () => showSocialMutationError('Takip isteği reddedilemedi.') }),
   };
 }
 
@@ -58,8 +64,8 @@ export function useSocialBlockMutations(userId: string) {
     void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
   };
   return {
-    block: useMutation({ mutationFn: () => blockSocialUser(userId), onSuccess: invalidate }),
-    unblock: useMutation({ mutationFn: () => unblockSocialUser(userId), onSuccess: invalidate }),
+    block: useMutation({ mutationFn: () => blockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError('Kullanıcı engellenemedi.') }),
+    unblock: useMutation({ mutationFn: () => unblockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError('Kullanıcının engeli kaldırılamadı.') }),
   };
 }
 
@@ -71,6 +77,7 @@ export function useUpdateSocialPrivacy() {
       queryClient.setQueryData(socialQueryKeys.privacy(), settings);
       void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all });
     },
+    onError: () => showSocialMutationError('Gizlilik ayarları kaydedilemedi.'),
   });
 }
 
@@ -150,5 +157,6 @@ export function useUnblockSocialUser() {
   return useMutation({
     mutationFn: (userId: string) => unblockSocialUser(userId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: socialQueryKeys.all }),
+    onError: () => showSocialMutationError('Kullanıcının engeli kaldırılamadı.'),
   });
 }
