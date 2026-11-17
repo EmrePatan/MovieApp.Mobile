@@ -8,6 +8,7 @@ import {
   updateTvReview,
 } from '../api/reviews-api';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
+import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import {
   movieMyReviewQueryKey,
   tvMyReviewQueryKey,
@@ -27,6 +28,7 @@ export function invalidateReviewQueries(
   contentType: ReviewContentType,
   contentId: string,
 ) {
+  invalidateSocialActivityQueries(queryClient);
   if (contentType === 'movie') {
     void queryClient.invalidateQueries({ queryKey: movieMyReviewQueryKey(contentId) });
     void queryClient.invalidateQueries({ queryKey: ['reviews', 'movie', contentId] });
