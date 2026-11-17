@@ -133,10 +133,10 @@ function groupConsecutiveEpisodeActivities(items: SocialFeedItem[]): FeedListIte
   return result;
 }
 
-function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport, isLiking, watchedLabel, likeLabel, unlikeLabel, commentsLabel, reportLabel }: {
+function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport, isLiking, watchedLabel, watchedCountLabel, likeLabel, unlikeLabel, commentsLabel, reportLabel }: {
   items: SocialFeedItem[]; onLike: (item: SocialFeedItem) => void; onProfile: (item: SocialFeedItem) => void;
   onComments: (item: SocialFeedItem) => void; onReport: (item: SocialFeedItem) => void;
-  isLiking: (item: SocialFeedItem) => boolean; watchedLabel: string; likeLabel: string; unlikeLabel: string;
+  isLiking: (item: SocialFeedItem) => boolean; watchedLabel: string; watchedCountLabel: string; likeLabel: string; unlikeLabel: string;
   commentsLabel: string; reportLabel: string;
 }) {
   const first = items[0];
@@ -148,7 +148,7 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
         <View style={styles.actorBlock}><AppText variant="body" style={styles.actorName}>{first.displayName}</AppText>
           <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString()}</AppText></View>
       </Pressable>
-      <AppText variant="body">{first.displayName} {watchedLabel} · {t('social.watchedEpisodesCount', { count: items.length })}</AppText>
+      <AppText variant="body">{first.displayName} {watchedLabel} · {watchedCountLabel}</AppText>
       <View style={styles.contentCard}>
         {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
         <View style={styles.contentText}><AppText variant="subtitle">{first.targetTitle}</AppText>
@@ -194,7 +194,7 @@ export default function SocialFeedScreen() {
       { text: t('social.harassment'), onPress: () => report.mutate({ targetType: 'Activity', targetId: item.id, reason: 'Harassment' }) },
       { text: t('social.cancel'), style: 'cancel' },
     ]);
-  }, [report]);
+  }, [report, t]);
 
   const handleLoadMore = useCallback(() => {
     if (feed.hasNextPage && !feed.isFetchingNextPage) void feed.fetchNextPage();
@@ -243,7 +243,8 @@ export default function SocialFeedScreen() {
           <SocialEpisodeGroupCard
             items={row.items} onLike={handleLike} onProfile={handleProfile} onComments={handleComments} onReport={handleReport}
             isLiking={episode => toggleLike.isPending && toggleLike.variables?.activityId === episode.id}
-            watchedLabel={t('social.activity.watchedEpisode')} likeLabel={t('social.like')} unlikeLabel={t('social.unlike')}
+            watchedLabel={t('social.activity.watchedEpisode')} watchedCountLabel={t('social.watchedEpisodesCount', { count: row.items.length })}
+            likeLabel={t('social.like')} unlikeLabel={t('social.unlike')}
             commentsLabel={t('social.commentsCount')} reportLabel={t('social.report', 'Report')}
           />
         )}
