@@ -110,6 +110,7 @@ export function useCreateSocialComment(activityId: string) {
       // A reply also changes its parent's repliesCount, so refresh every comment thread for this activity.
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
     },
     onError: () => showSocialMutationError(t('social.operationFailed'), t('social.commentFailed')),
   });
@@ -123,6 +124,7 @@ export function useDeleteSocialComment(activityId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
     },
     onError: () => showSocialMutationError(t('social.operationFailed'), t('social.deleteCommentFailed')),
   });
