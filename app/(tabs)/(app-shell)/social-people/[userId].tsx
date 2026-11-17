@@ -22,7 +22,7 @@ export default function SocialPeopleScreen() {
         <AppText variant="title">{isFollowers ? 'Takipçiler' : 'Takip ettikleri'}</AppText>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        query.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>Liste yüklenemedi.</AppText></View> :
+        query.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>Liste yüklenemedi.</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           <FlatList data={items} keyExtractor={item => item.id} contentContainerStyle={styles.list}
             renderItem={({ item }) => (
               <Pressable style={styles.row} onPress={() => router.push(`/(tabs)/(app-shell)/social-profile/${item.id}`)}>
@@ -50,4 +50,5 @@ const styles = StyleSheet.create({
   copy: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   footer: { paddingVertical: spacing.lg },
+  retry: { color: colors.accent, marginTop: spacing.sm },
 });
