@@ -29,7 +29,7 @@ export default function SocialPrivacyScreen() {
         <AppText variant="body">{label}</AppText>
         <AppText variant="caption" muted>{description}</AppText>
       </View>
-      <Switch value={value} onValueChange={onChange} disabled={update.isPending}
+      <Switch accessibilityRole="switch" accessibilityLabel={label} accessibilityHint={description} value={value} onValueChange={onChange} disabled={update.isPending}
         trackColor={{ false: colors.border, true: colors.accentMuted }}
         thumbColor={value ? colors.accent : colors.textMuted} />
     </View>
