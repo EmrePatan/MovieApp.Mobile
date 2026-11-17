@@ -140,6 +140,7 @@ export function useMarkSocialNotificationRead() {
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications'] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'notifications', 'unread-count'] });
     },
+    onError: () => showSocialMutationError('Bildirim okundu olarak işaretlenemedi.'),
   });
 }
 
