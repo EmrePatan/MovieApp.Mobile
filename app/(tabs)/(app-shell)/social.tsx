@@ -60,6 +60,7 @@ function SocialActivityCard({
   commentsLabel: string;
   reportLabel: string;
 }) {
+  const { t } = useTranslation();
   const dateLabel = new Date(item.createdAt).toLocaleDateString();
   const posterUri = resolveImageUri(item.posterPath, 'w300');
   return (
@@ -79,7 +80,7 @@ function SocialActivityCard({
       <View style={styles.contentCard}>
         {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
         <View style={styles.contentText}>
-          <AppText variant="subtitle">{item.targetTitle || 'Content'}</AppText>
+          <AppText variant="subtitle">{item.targetTitle || t('social.contentFallback')}</AppText>
           {item.targetSubtitle ? <AppText variant="bodySmall" muted>{item.targetSubtitle}</AppText> : null}
           {item.ratingScore !== null ? <AppText variant="bodySmall">★ {item.ratingScore}/10</AppText> : null}
           {item.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={4}>{item.reviewExcerpt}</AppText> : null}
