@@ -13,6 +13,7 @@ describe('clear user query cache', () => {
     clearUserQueryCache(queryClient);
 
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['profile'] });
+    expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['social'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['favorites'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['watchlists'] });
     expect(removeQueries).toHaveBeenCalledWith({ queryKey: ['watch-history'] });
