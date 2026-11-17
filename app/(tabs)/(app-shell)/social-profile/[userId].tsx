@@ -45,7 +45,7 @@ export default function SocialProfileScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.back')} onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
         <View style={styles.profileHeader}>
           <UserAvatar displayName={item.displayName} effectiveAvatarUrl={item.avatarUrl} size={84} textVariant="subtitle" style={styles.avatar} />
           <AppText variant="title">{item.displayName}</AppText>
@@ -78,10 +78,10 @@ export default function SocialProfileScreen() {
           <AppText variant="bodySmall" muted center>{t('social.privateProfileNotice')}</AppText>
         ) : null}
         <View style={styles.stats}>
-          <Pressable onPress={() => router.push(`/(tabs)/(app-shell)/social-people/${item.id}?type=followers`)} style={styles.stat}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`${item.followersCount} ${t('social.followersCountLabel')}`} onPress={() => router.push(`/(tabs)/(app-shell)/social-people/${item.id}?type=followers`)} style={styles.stat}>
             <AppText variant="subtitle">{item.followersCount}</AppText><AppText variant="caption" muted>{t('social.followersCountLabel')}</AppText>
           </Pressable>
-          <Pressable onPress={() => router.push(`/(tabs)/(app-shell)/social-people/${item.id}?type=following`)} style={styles.stat}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`${item.followingCount} ${t('social.followingCountLabel')}`} onPress={() => router.push(`/(tabs)/(app-shell)/social-people/${item.id}?type=following`)} style={styles.stat}>
             <AppText variant="subtitle">{item.followingCount}</AppText><AppText variant="caption" muted>{t('social.followingCountLabel')}</AppText>
           </Pressable>
         </View>
@@ -121,7 +121,7 @@ export default function SocialProfileScreen() {
           <AppText variant="bodySmall" muted>{t('social.noActivities')}</AppText>
         ) : null}
         {activityItems.map(activity => (
-          <Pressable key={activity.id} style={styles.activityCard}
+          <Pressable accessibilityRole="button" accessibilityLabel={`${activity.targetTitle || t('social.contentFallback')} ${getActivityLabel(activity.activityType, t)}`} key={activity.id} style={styles.activityCard>
             onPress={() => router.push(`/(tabs)/(app-shell)/social/${activity.id}`)}>
             <View style={styles.activityText}>
               <AppText variant="body">{activity.targetTitle || t('social.contentFallback')} · {getActivityLabel(activity.activityType, t)}</AppText>
