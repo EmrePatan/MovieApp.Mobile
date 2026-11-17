@@ -114,7 +114,15 @@ const stage1Pt = {
     requestRejectFailed: "Não foi possível recusar a solicitação.",
     blockFailed: "Não foi possível bloquear o usuário.",
     unblockFailed: "Não foi possível desbloquear o usuário.",
-    privacySaveFailed: "Não foi possível salvar as configurações de privacidade.",
+    privacySaveFailed: "Não foi possível salvar as configurações de privacidade.",    notificationFollowRequest: "quer seguir você.",
+    notificationNewFollower: "começou a seguir você.",
+    notificationFollowAccepted: "aceitou sua solicitação.",
+    notificationActivityLike: "curtiu sua atividade.",
+    notificationNewComment: "comentou sua atividade.",
+    notificationCommentReply: "respondeu ao seu comentário.",
+    notificationCommentLike: "curtiu seu comentário.",
+    notificationGeneric: "interagiu com você.",
+
   },
   auth: {
     email: 'E-mail',
