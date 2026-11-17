@@ -121,7 +121,15 @@ const stage1En = {
     requestRejectFailed: "Unable to decline follow request.",
     blockFailed: "Unable to block user.",
     unblockFailed: "Unable to unblock user.",
-    privacySaveFailed: "Unable to save privacy settings.",
+    privacySaveFailed: "Unable to save privacy settings.",    notificationFollowRequest: "wants to follow you.",
+    notificationNewFollower: "started following you.",
+    notificationFollowAccepted: "accepted your follow request.",
+    notificationActivityLike: "liked your activity.",
+    notificationNewComment: "commented on your activity.",
+    notificationCommentReply: "replied to your comment.",
+    notificationCommentLike: "liked your comment.",
+    notificationGeneric: "interacted with you.",
+
   },
   auth: {
     email: 'Email',
