@@ -86,7 +86,10 @@ export function useToggleSocialActivityLike() {
   return useMutation({
     mutationFn: ({ activityId, isLiked }: { activityId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
+    },
     onError: () => showSocialMutationError('Beğeni işlemi kaydedilemedi.'),
   });
 }
