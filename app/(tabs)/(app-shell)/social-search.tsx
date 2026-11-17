@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +10,12 @@ import { spacing } from '@/theme/spacing';
 export default function SocialSearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const results = useSocialUserSearch(query);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(query.trim()), 300);
+    return () => clearTimeout(timeout);
+  }, [query]);
+  const results = useSocialUserSearch(debouncedQuery);
   const resultItems = results.data?.pages.flatMap(page => page) ?? [];
 
   return (
@@ -41,7 +46,7 @@ export default function SocialSearchScreen() {
         }}
         onEndReachedThreshold={0.5}
         ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : results.isFetchNextPageError ? <View style={styles.error}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void results.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-        ListEmptyComponent={query.trim().length < 2 ? <AppText variant="bodySmall" muted center>En az 2 karakter yaz.</AppText> :
+        ListEmptyComponent={debouncedQuery.length < 2 ? <AppText variant="bodySmall" muted center>En az 2 karakter yaz.</AppText> :
           results.isError ? <View style={styles.error}><AppText variant="bodySmall" muted center>Arama yapılamadı.</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           results.isLoading ? null : <AppText variant="bodySmall" muted center>Sonuç bulunamadı.</AppText>}
       />
