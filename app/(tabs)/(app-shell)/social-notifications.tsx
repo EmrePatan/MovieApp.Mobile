@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
+import { AppButton } from '@/components/buttons/AppButton';
 import { useSocialNotifications } from '@/features/social/hooks/useSocialQueries';
 import { useMarkAllSocialNotificationsRead, useMarkSocialNotificationRead } from '@/features/social/hooks/useSocialMutations';
 import type { SocialNotificationItem } from '@/features/social/types';
@@ -61,7 +62,12 @@ export default function SocialNotificationsScreen() {
         </Pressable>
       </View>
       {query.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        query.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>Bildirimler yüklenemedi.</AppText></View> :
+        query.isError && notifications.length === 0 ? (
+          <View style={styles.center}>
+            <AppText variant="bodySmall" muted>Bildirimler yüklenemedi.</AppText>
+            <AppButton title="Tekrar dene" variant="secondary" onPress={() => void query.refetch()} />
+          </View>
+        ) : (
           <FlatList
             data={notifications}
             keyExtractor={item => item.id}
@@ -71,11 +77,14 @@ export default function SocialNotificationsScreen() {
               if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
+            refreshing={query.isRefetching && !query.isFetchingNextPage}
+            onRefresh={() => void query.refetch()}
             ListFooterComponent={query.isFetchingNextPage
               ? <ActivityIndicator color={colors.accent} style={styles.footer} />
               : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>Henüz sosyal bildirimin yok.</AppText>}
-          />}
+          />
+        )}
     </SafeAreaView>
   );
 }
@@ -90,6 +99,6 @@ const styles = StyleSheet.create({
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
   copy: { flex: 1, gap: spacing.xs },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.xl },
   footer: { paddingVertical: spacing.lg },
 });
