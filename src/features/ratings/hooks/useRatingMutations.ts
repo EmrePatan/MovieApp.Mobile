@@ -12,6 +12,7 @@ import {
   tvRatingAggregateQueryKey,
 } from './rating-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
+import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
@@ -36,6 +37,7 @@ function invalidateAggregateQueries(
 
   invalidateRecommendationQueries(queryClient);
   invalidateProfileStatistics(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 function buildOptimisticRating(
