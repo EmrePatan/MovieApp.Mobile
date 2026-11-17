@@ -44,7 +44,7 @@ export default function SocialNotificationsScreen() {
   }, [markRead, router]);
 
   const renderItem = useCallback(({ item }: { item: SocialNotificationItem }) => (
-    <Pressable onPress={() => handlePress(item)} style={[styles.row, !item.isRead && styles.unread]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${item.displayName} ${notificationText(item.notificationType)}`} onPress={() => handlePress(item)} style={[styles.row, !item.isRead && styles.unread]}>
       <View style={styles.avatar}><AppText variant="body">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
       <View style={styles.copy}>
         <AppText variant="body">{item.displayName} {notificationText(item.notificationType)}</AppText>
@@ -52,14 +52,14 @@ export default function SocialNotificationsScreen() {
       </View>
       {!item.isRead ? <View style={styles.dot} /> : null}
     </Pressable>
-  ), [handlePress, t]);
+  ), [handlePress, i18n.language, t]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.back')} onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
         <AppText variant="title">{t('social.notificationsTitle')}</AppText>
-        <Pressable disabled={!unreadCount || markAllRead.isPending} onPress={() => markAllRead.mutate()}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.markAllRead')} disabled={!unreadCount || markAllRead.isPending} onPress={() => markAllRead.mutate()}>
           <AppText variant="caption" style={styles.markAll}>{t('social.markAllRead')}</AppText>
         </Pressable>
       </View>
