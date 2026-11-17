@@ -110,7 +110,7 @@ export default function SocialProfileScreen() {
             ) : null}
           </>
         ) : null}
-        {statistics.isError ? <AppText variant="caption" muted>İstatistikler yüklenemedi.</AppText> : null}
+        {statistics.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>İstatistikler yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void statistics.refetch()} /></View> : null}
       </View>
       <View style={styles.activitySection}>
         <AppText variant="subtitle">Son aktiviteler</AppText>
@@ -135,7 +135,7 @@ export default function SocialProfileScreen() {
           <AppButton title="Daha fazla yükle" variant="secondary"
             onPress={() => void activities.fetchNextPage()} loading={activities.isFetchingNextPage} />
         ) : null}
-        {activities.isError ? <AppText variant="caption" muted>Aktiviteler yüklenemedi.</AppText> : null}
+        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>Aktiviteler yüklenemedi.</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void (activities.data ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
       </View>
       </ScrollView>
     </SafeAreaView>
@@ -159,6 +159,7 @@ function getActivityLabel(type: string): string {
 const styles = StyleSheet.create({
   scrollContent: { paddingBottom: spacing.xl },
   activitySection: { paddingHorizontal: spacing.lg, gap: spacing.md },
+  inlineError: { gap: spacing.sm, alignItems: 'flex-start' },
   profileStatsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   profileStatCard: { minWidth: '30%', flexGrow: 1, padding: spacing.md, borderRadius: 12, backgroundColor: colors.surface, alignItems: 'center', gap: spacing.xs },
   milestoneList: { gap: spacing.sm },
