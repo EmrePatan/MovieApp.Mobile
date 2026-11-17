@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +12,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialRequestsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const requests = useSocialPendingFollowRequests();
   const requestItems = requests.data?.pages.flatMap(page => page) ?? [];
   const mutations = useSocialFollowRequestMutations();
@@ -23,10 +25,10 @@ export default function SocialRequestsScreen() {
         <AppText variant="caption" muted>@{item.userName}</AppText>
       </View>
       <Pressable disabled={mutations.accept.isPending} onPress={() => mutations.accept.mutate(item.userId)} style={styles.accept}>
-        <AppText variant="caption" style={styles.buttonText}>Kabul</AppText>
+        <AppText variant="caption" style={styles.buttonText}>{t('social.accept')}</AppText>
       </Pressable>
       <Pressable disabled={mutations.reject.isPending} onPress={() => mutations.reject.mutate(item.userId)} style={styles.reject}>
-        <AppText variant="caption">Reddet</AppText>
+        <AppText variant="caption">{t('social.reject')}</AppText>
       </Pressable>
     </View>
   ), [mutations]);
@@ -34,20 +36,20 @@ export default function SocialRequestsScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
-        <AppText variant="title">Takip istekleri</AppText>
+        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <AppText variant="title">{t('social.followRequests')}</AppText>
       </View>
       {requests.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
-        requests.isError && requestItems.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>İstekler yüklenemedi.</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
+        requests.isError && requestItems.length === 0 ? <View style={styles.center}><AppText variant="bodySmall" muted>{t('social.requestsLoadError')}</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> :
           <FlatList data={requestItems} keyExtractor={item => item.userId} renderItem={renderItem}
             contentContainerStyle={styles.list}
             onEndReached={() => {
               if (requests.hasNextPage && !requests.isFetchingNextPage) void requests.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
-            ListHeaderComponent={requests.isError && requestItems.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>İstekler yenilenemedi.</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-            ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : requests.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>Sonraki sayfa yüklenemedi.</AppText><Pressable onPress={() => void requests.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
-            ListEmptyComponent={<AppText variant="bodySmall" muted center>Bekleyen takip isteğin yok.</AppText>} />}
+            ListHeaderComponent={requests.isError && requestItems.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.requestsRefreshError')}</AppText><Pressable onPress={() => void requests.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+            ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : requests.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><Pressable onPress={() => void requests.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+            ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noPendingRequests')}</AppText>} />}
     </SafeAreaView>
   );
 }
