@@ -36,7 +36,7 @@ export default function SocialPeopleScreen() {
               if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
-            ListHeaderComponent={query.isError && items.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.listRefreshError')}</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+            ListHeaderComponent={query.isError && items.length > 0 ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.listRefreshError')}</AppText><Pressable onPress={() => void query.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
             ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : query.isFetchNextPageError ? <View style={styles.center}><AppText variant="caption" muted>{t('social.nextPageError')}</AppText><Pressable onPress={() => void query.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noUsers')}</AppText>}
           />}
