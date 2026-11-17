@@ -12,6 +12,7 @@ import { spacing } from '@/theme/spacing';
 export default function SocialRequestsScreen() {
   const router = useRouter();
   const requests = useSocialPendingFollowRequests();
+  const requestItems = requests.data?.pages.flatMap(page => page) ?? [];
   const mutations = useSocialFollowRequestMutations();
 
   const renderItem = useCallback(({ item }: { item: SocialFollowRequest }) => (
@@ -38,8 +39,13 @@ export default function SocialRequestsScreen() {
       </View>
       {requests.isLoading ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> :
         requests.isError ? <View style={styles.center}><AppText variant="bodySmall" muted>İstekler yüklenemedi.</AppText></View> :
-          <FlatList data={requests.data ?? []} keyExtractor={item => item.userId} renderItem={renderItem}
+          <FlatList data={requestItems} keyExtractor={item => item.userId} renderItem={renderItem}
             contentContainerStyle={styles.list}
+            onEndReached={() => {
+              if (requests.hasNextPage && !requests.isFetchingNextPage) void requests.fetchNextPage();
+            }}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={requests.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
             ListEmptyComponent={<AppText variant="bodySmall" muted center>Bekleyen takip isteğin yok.</AppText>} />}
     </SafeAreaView>
   );
@@ -56,4 +62,5 @@ const styles = StyleSheet.create({
   buttonText: { color: colors.textPrimary },
   reject: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  footer: { paddingVertical: spacing.lg },
 });
