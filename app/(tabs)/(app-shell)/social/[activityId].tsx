@@ -141,6 +141,7 @@ export default function SocialCommentsScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.composer}>
           <TextInput
+            accessibilityLabel={parentCommentId ? t('social.writeReply') : t('social.writeComment')}
             value={draft}
             onChangeText={setDraft}
             placeholder={parentCommentId ? t('social.writeReply') : t('social.writeComment')}
@@ -149,7 +150,7 @@ export default function SocialCommentsScreen() {
             maxLength={2000}
             style={styles.input}
           />
-          <Pressable disabled={!draft.trim() || createComment.isPending} onPress={handleSubmit} style={styles.send}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('social.send')} disabled={!draft.trim() || createComment.isPending} onPress={handleSubmit} style={styles.send}>
             <AppText variant="bodySmall" style={styles.sendText}>{t('social.send')}</AppText>
           </Pressable>
         </View>
