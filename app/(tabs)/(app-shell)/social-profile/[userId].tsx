@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
+import { UserAvatar } from '@/components/common/UserAvatar';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useSocialProfile, useSocialUserActivities } from '@/features/social/hooks/useSocialQueries';
 import { useFollowSocialUser, useReportSocialContent, useSocialBlockMutations, useUnfollowSocialUser } from '@/features/social/hooks/useSocialMutations';
@@ -43,7 +44,7 @@ export default function SocialProfileScreen() {
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
         <View style={styles.profileHeader}>
-          <View style={styles.avatar}><AppText variant="title">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
+          <UserAvatar displayName={item.displayName} effectiveAvatarUrl={item.avatarUrl} size={84} textVariant="subtitle" style={styles.avatar} />
           <AppText variant="title">{item.displayName}</AppText>
           <AppText variant="bodySmall" muted>@{item.userName}</AppText>
         </View>
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   header: { padding: spacing.lg, gap: spacing.lg },
   profileHeader: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.lg },
-  avatar: { width: 84, height: 84, borderRadius: 42, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
+  avatar: { marginBottom: spacing.sm },
   stats: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xxl },
   stat: { alignItems: 'center', gap: spacing.xs },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
