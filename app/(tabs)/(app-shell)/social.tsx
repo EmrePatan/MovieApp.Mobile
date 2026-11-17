@@ -253,6 +253,13 @@ export default function SocialFeedScreen() {
         refreshing={feed.isRefetching && !feed.isFetchingNextPage}
         onRefresh={() => void feed.refetch()}
         ListHeaderComponent={
+          <View style={styles.headerContainer}>
+          {feed.isError && items.length > 0 ? (
+            <View style={styles.inlineError}>
+              <AppText variant="caption" muted>{t('social.loadError')}</AppText>
+              <Pressable onPress={() => void feed.refetch()}><AppText variant="caption" style={styles.headerAction}>{t('common.retry')}</AppText></Pressable>
+            </View>
+          ) : null}
           <View style={styles.headerRow}>
             <AppText variant="title" style={styles.title}>{t('social.title')}</AppText>
             <View style={styles.headerActions}>
@@ -270,9 +277,15 @@ export default function SocialFeedScreen() {
               </Pressable>
             </View>
           </View>
+          </View>
         }
         ListEmptyComponent={<View style={styles.empty}><AppText variant="bodySmall" muted>{t('social.empty')}</AppText></View>}
-        ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : null}
+        ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.footer} /> : feed.isFetchNextPageError ? (
+          <View style={styles.inlineError}>
+            <AppText variant="caption" muted>{t('social.loadError')}</AppText>
+            <AppButton title={t('common.retry')} variant="secondary" onPress={() => void feed.fetchNextPage()} />
+          </View>
+        ) : null}
       />
     </SafeAreaView>
   );
@@ -281,6 +294,8 @@ export default function SocialFeedScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   listContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
+  headerContainer: { gap: spacing.sm },
+  inlineError: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerActions: { flexDirection: 'row', gap: spacing.md },
   headerAction: { color: colors.accent },
