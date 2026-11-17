@@ -11,6 +11,7 @@ export default function SocialSearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const results = useSocialUserSearch(query);
+  const resultItems = results.data?.pages.flatMap(page => page) ?? [];
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -22,7 +23,7 @@ export default function SocialSearchScreen() {
       </View>
       {results.isFetching ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
       <FlatList
-        data={results.data ?? []}
+        data={resultItems}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
@@ -35,7 +36,13 @@ export default function SocialSearchScreen() {
             <AppText variant="caption" muted>{item.followStatus === 'Accepted' ? 'Takip ediliyor' : item.followStatus === 'Pending' ? 'İstek gönderildi' : ''}</AppText>
           </Pressable>
         )}
+        onEndReached={() => {
+          if (results.hasNextPage && !results.isFetchingNextPage) void results.fetchNextPage();
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
         ListEmptyComponent={query.trim().length < 2 ? <AppText variant="bodySmall" muted center>En az 2 karakter yaz.</AppText> :
+          results.isError ? <AppText variant="bodySmall" muted center>Arama yapılamadı.</AppText> :
           results.isLoading ? null : <AppText variant="bodySmall" muted center>Sonuç bulunamadı.</AppText>}
       />
     </SafeAreaView>
