@@ -14,7 +14,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function SocialNotificationsScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const notificationText = (type: string): string => {
     switch (type) {
       case 'FollowRequest': return t('social.notificationFollowRequest');
@@ -48,7 +48,7 @@ export default function SocialNotificationsScreen() {
       <View style={styles.avatar}><AppText variant="body">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
       <View style={styles.copy}>
         <AppText variant="body">{item.displayName} {notificationText(item.notificationType)}</AppText>
-        <AppText variant="caption" muted>{new Date(item.createdAt).toLocaleString()}</AppText>
+        <AppText variant="caption" muted>{new Date(item.createdAt).toLocaleString(i18n.language)}</AppText>
       </View>
       {!item.isRead ? <View style={styles.dot} /> : null}
     </Pressable>
