@@ -45,7 +45,7 @@ export default function SocialProfileScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ Geri</AppText></Pressable>
+        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
         <View style={styles.profileHeader}>
           <UserAvatar displayName={item.displayName} effectiveAvatarUrl={item.avatarUrl} size={84} textVariant="subtitle" style={styles.avatar} />
           <AppText variant="title">{item.displayName}</AppText>
@@ -130,14 +130,14 @@ export default function SocialProfileScreen() {
               {activity.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={3}>{activity.reviewExcerpt}</AppText> : null}
               <AppText variant="caption" muted>{new Date(activity.createdAt).toLocaleDateString()}</AppText>
             </View>
-            <AppText variant="caption" muted>♥ {activity.likesCount} · Yorum {activity.commentsCount}</AppText>
+            <AppText variant="caption" muted>♥ {activity.likesCount} · {t('social.commentsCount')} {activity.commentsCount}</AppText>
           </Pressable>
         ))}
         {activities.hasNextPage ? (
           <AppButton title={t('social.loadMore')} variant="secondary"
             onPress={() => void activities.fetchNextPage()} loading={activities.isFetchingNextPage} />
         ) : null}
-        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.activitiesLoadError')}</AppText><AppButton title="Tekrar dene" variant="secondary" onPress={() => void (activities.isFetchNextPageError ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
+        {activities.isError ? <View style={styles.inlineError}><AppText variant="caption" muted>{t('social.activitiesLoadError')}</AppText><AppButton title={t('common.retry')} variant="secondary" onPress={() => void (activities.isFetchNextPageError ? activities.fetchNextPage() : activities.refetch())} loading={activities.isFetching} /></View> : null}
       </View>
       </ScrollView>
     </SafeAreaView>
