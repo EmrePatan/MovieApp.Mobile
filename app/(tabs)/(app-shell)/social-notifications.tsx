@@ -11,22 +11,22 @@ import type { SocialNotificationItem } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-function notificationText(type: string, t: (key: string) => string): string {
-  switch (type) {
-    case 'FollowRequest': return t('social.notificationFollowRequest');
-    case 'NewFollower': return t('social.notificationNewFollower');
-    case 'FollowAccepted': return t('social.notificationFollowAccepted');
-    case 'ActivityLike': return t('social.notificationActivityLike');
-    case 'NewComment': return t('social.notificationNewComment');
-    case 'CommentReply': return t('social.notificationCommentReply');
-    case 'CommentLike': return t('social.notificationCommentLike');
-    default: return t('social.notificationGeneric');
-  }
-}
 
 export default function SocialNotificationsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const notificationText = (type: string): string => {
+    switch (type) {
+      case 'FollowRequest': return t('social.notificationFollowRequest');
+      case 'NewFollower': return t('social.notificationNewFollower');
+      case 'FollowAccepted': return t('social.notificationFollowAccepted');
+      case 'ActivityLike': return t('social.notificationActivityLike');
+      case 'NewComment': return t('social.notificationNewComment');
+      case 'CommentReply': return t('social.notificationCommentReply');
+      case 'CommentLike': return t('social.notificationCommentLike');
+      default: return t('social.notificationGeneric');
+    }
+  };
   const query = useSocialNotifications();
   const markRead = useMarkSocialNotificationRead();
   const markAllRead = useMarkAllSocialNotificationsRead();
@@ -47,7 +47,7 @@ export default function SocialNotificationsScreen() {
     <Pressable onPress={() => handlePress(item)} style={[styles.row, !item.isRead && styles.unread]}>
       <View style={styles.avatar}><AppText variant="body">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
       <View style={styles.copy}>
-        <AppText variant="body">{item.displayName} {notificationText(item.notificationType, t)}</AppText>
+        <AppText variant="body">{item.displayName} {notificationText(item.notificationType)}</AppText>
         <AppText variant="caption" muted>{new Date(item.createdAt).toLocaleString()}</AppText>
       </View>
       {!item.isRead ? <View style={styles.dot} /> : null}
