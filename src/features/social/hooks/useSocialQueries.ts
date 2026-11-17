@@ -47,35 +47,48 @@ export function useSocialUserActivities(userId: string, enabled = true) {
 }
 
 export function useSocialUserSearch(query: string) {
-  return useQuery({
-    queryKey: socialQueryKeys.search(query.trim()),
-    queryFn: ({ signal }) => searchSocialUsers(query.trim(), 1, 20, signal),
-    enabled: query.trim().length >= 2,
+  const normalizedQuery = query.trim();
+  return useInfiniteQuery({
+    queryKey: socialQueryKeys.search(normalizedQuery),
+    queryFn: ({ pageParam, signal }) => searchSocialUsers(normalizedQuery, pageParam, 20, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.length === 20 ? lastPageParam + 1 : undefined,
+    enabled: normalizedQuery.length >= 2,
     staleTime: 15_000,
   });
 }
 
-export function useSocialFollowers(userId: string, page = 1, enabled = true) {
-  return useQuery({
-    queryKey: socialQueryKeys.followers(userId, page),
-    queryFn: ({ signal }) => getSocialFollowers(userId, page, 20, signal),
+export function useSocialFollowers(userId: string, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: socialQueryKeys.followers(userId),
+    queryFn: ({ pageParam, signal }) => getSocialFollowers(userId, pageParam, 20, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.length === 20 ? lastPageParam + 1 : undefined,
     enabled: userId.length > 0 && enabled,
   });
 }
 
-export function useSocialFollowing(userId: string, page = 1, enabled = true) {
-  return useQuery({
-    queryKey: socialQueryKeys.following(userId, page),
-    queryFn: ({ signal }) => getSocialFollowing(userId, page, 20, signal),
+export function useSocialFollowing(userId: string, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: socialQueryKeys.following(userId),
+    queryFn: ({ pageParam, signal }) => getSocialFollowing(userId, pageParam, 20, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.length === 20 ? lastPageParam + 1 : undefined,
     enabled: userId.length > 0 && enabled,
   });
 }
 
-export function useSocialPendingFollowRequests(page = 1) {
+export function useSocialPendingFollowRequests() {
   const { isAuthenticated } = useAuth();
-  return useQuery({
-    queryKey: [...socialQueryKeys.all, 'pending-follow-requests', page],
-    queryFn: ({ signal }) => getSocialPendingFollowRequests(page, 20, signal),
+  return useInfiniteQuery({
+    queryKey: [...socialQueryKeys.all, 'pending-follow-requests'],
+    queryFn: ({ pageParam, signal }) => getSocialPendingFollowRequests(pageParam, 20, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.length === 20 ? lastPageParam + 1 : undefined,
     enabled: isAuthenticated,
     staleTime: 15_000,
   });
