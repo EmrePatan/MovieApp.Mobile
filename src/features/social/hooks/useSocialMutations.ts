@@ -70,7 +70,6 @@ export function useSocialBlockMutations(userId: string) {
   };
   return {
     block: useMutation({ mutationFn: () => blockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError(t('social.operationFailed'), t('social.blockFailed')) }),
-    unblock: useMutation({ mutationFn: () => unblockSocialUser(userId), onSuccess: invalidate, onError: () => showSocialMutationError(t('social.operationFailed'), t('social.unblockFailed')) }),
   };
 }
 
@@ -107,7 +106,7 @@ export function useCreateSocialComment(activityId: string) {
   return useMutation({
     mutationFn: ({ content, parentCommentId }: { content: string; parentCommentId?: string | null }) =>
       createSocialComment(activityId, content, parentCommentId),
-    onSuccess: (_comment, variables) => {
+    onSuccess: () => {
       // A reply also changes its parent's repliesCount, so refresh every comment thread for this activity.
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
