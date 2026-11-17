@@ -70,25 +70,25 @@ export default function SocialCommentsScreen() {
         </Pressable>
         {item.userId !== user?.id ? (
           <Pressable onPress={() => Alert.alert(
-            'Yorumu bildir',
-            'Bildirim nedenini seç.',
+            t('social.commentReportTitle'),
+            t('social.chooseReportReason'),
             [
-              { text: 'Spam', onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Spam' }) },
-              { text: 'Uygunsuz içerik', onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Inappropriate' }) },
-              { text: 'Taciz', onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Harassment' }) },
-              { text: 'Vazgeç', style: 'cancel' },
+              { text: t('social.spam'), onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Spam' }) },
+              { text: t('social.inappropriate'), onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Inappropriate' }) },
+              { text: t('social.harassment'), onPress: () => report.mutate({ targetType: 'Comment', targetId: item.id, reason: 'Harassment' }) },
+              { text: t('social.cancel'), style: 'cancel' },
             ],
           )}>
-            <AppText variant="caption" muted>Şikâyet et</AppText>
+            <AppText variant="caption" muted>{t('social.report')}</AppText>
           </Pressable>
         ) : null}
         {item.userId === user?.id ? (
           <Pressable disabled={deleteComment.isPending} onPress={() => Alert.alert(
-            'Yorum silinsin mi?',
-            'Bu işlem geri alınamaz.',
+            t('social.deleteCommentTitle'),
+            t('social.deleteCommentMessage'),
             [
               { text: 'Vazgeç', style: 'cancel' },
-              { text: 'Sil', style: 'destructive', onPress: () => deleteComment.mutate(item.id) },
+              { text: t('social.delete'), style: 'destructive', onPress: () => deleteComment.mutate(item.id) },
             ],
           )}>
             <AppText variant="caption" muted>{t('social.delete')}</AppText>
