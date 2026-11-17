@@ -65,7 +65,7 @@ function SocialActivityCard({
   const posterUri = resolveImageUri(item.posterPath, 'w300');
   return (
     <View style={styles.card}>
-      <Pressable accessibilityRole="button" onPress={() => onProfile(item)} style={styles.cardHeader}>
+      <Pressable accessibilityRole="button" accessibilityLabel={item.displayName} onPress={() => onProfile(item)} style={styles.cardHeader}>
         <View style={styles.avatar}>
           <AppText variant="subtitle">{item.displayName.slice(0, 1).toUpperCase()}</AppText>
         </View>
@@ -98,10 +98,10 @@ function SocialActivityCard({
             {item.isLikedByMe ? '♥' : '♡'} {item.likesCount}
           </AppText>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => onComments(item)} style={styles.actionButton}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${commentsLabel} ${item.commentsCount}`} onPress={() => onComments(item)} style={styles.actionButton}>
           <AppText variant="bodySmall">{commentsLabel} · {item.commentsCount}</AppText>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => onReport(item)} style={styles.actionButton}>
+        <Pressable accessibilityRole="button" accessibilityLabel={reportLabel} onPress={() => onReport(item)} style={styles.actionButton}>
           <AppText variant="caption" muted>{reportLabel}</AppText>
         </Pressable>
       </View>
@@ -145,7 +145,7 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
   const posterUri = resolveImageUri(first.posterPath, 'w300');
   return (
     <View style={styles.card}>
-      <Pressable accessibilityRole="button" onPress={() => onProfile(first)} style={styles.cardHeader}>
+      <Pressable accessibilityRole="button" accessibilityLabel={first.displayName} onPress={() => onProfile(first)} style={styles.cardHeader}>
         <View style={styles.avatar}><AppText variant="subtitle">{first.displayName.slice(0, 1).toUpperCase()}</AppText></View>
         <View style={styles.actorBlock}><AppText variant="body" style={styles.actorName}>{first.displayName}</AppText>
           <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString(i18n.language)}</AppText></View>
@@ -158,8 +158,8 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
             <View style={styles.episodeTitle}><AppText variant="bodySmall">{item.targetSubtitle ?? item.targetTitle}</AppText></View>
             <Pressable accessibilityRole="button" accessibilityLabel={item.isLikedByMe ? unlikeLabel : likeLabel} disabled={isLiking(item)} onPress={() => onLike(item)}>
               <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>{item.isLikedByMe ? '♥' : '♡'} {item.likesCount}</AppText></Pressable>
-            <Pressable accessibilityRole="button" onPress={() => onComments(item)}><AppText variant="caption">{commentsLabel} · {item.commentsCount}</AppText></Pressable>
-            <Pressable accessibilityRole="button" onPress={() => onReport(item)}><AppText variant="caption" muted>{reportLabel}</AppText></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={`${commentsLabel} ${item.commentsCount}`} onPress={() => onComments(item)}><AppText variant="caption">{commentsLabel} · {item.commentsCount}</AppText></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={reportLabel} onPress={() => onReport(item)}><AppText variant="caption" muted>{reportLabel}</AppText></Pressable>
           </View>)}
         </View>
       </View>
@@ -266,16 +266,16 @@ export default function SocialFeedScreen() {
           <View style={styles.headerRow}>
             <AppText variant="title" style={styles.title}>{t('social.title')}</AppText>
             <View style={styles.headerActions}>
-              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-search')}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.search')} onPress={() => router.push('/(tabs)/(app-shell)/social-search')}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.search')}</AppText>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-requests')}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.requests')} onPress={() => router.push('/(tabs)/(app-shell)/social-requests')}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.requests')}</AppText>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.notifications')} onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
               </Pressable>
-              <Pressable onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.privacyTitle')} onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.privacyTitle')}</AppText>
               </Pressable>
             </View>
