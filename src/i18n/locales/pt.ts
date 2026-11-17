@@ -42,7 +42,7 @@ const stage1Pt = {
     writeComment: 'Escreva um comentário...',
     writeReply: 'Escreva uma resposta...',
     noComments: 'Ainda não há comentários.',
-    loadCommentsError: 'Não foi possível carregar os comentários.',,
+    loadCommentsError: 'Não foi possível carregar os comentários.',
     profileTitle: "Perfil social",
     privacyTitle: "Privacidade social",
     privacyDescription: "Gerencie seu perfil e as atividades exibidas no feed social.",
