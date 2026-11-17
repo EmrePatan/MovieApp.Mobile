@@ -121,7 +121,15 @@ const stage1Tr = {
     requestRejectFailed: "Takip isteği reddedilemedi.",
     blockFailed: "Kullanıcı engellenemedi.",
     unblockFailed: "Kullanıcının engeli kaldırılamadı.",
-    privacySaveFailed: "Gizlilik ayarları kaydedilemedi.",
+    privacySaveFailed: "Gizlilik ayarları kaydedilemedi.",    notificationFollowRequest: "seni takip etmek istiyor.",
+    notificationNewFollower: "seni takip etmeye başladı.",
+    notificationFollowAccepted: "takip isteğini kabul etti.",
+    notificationActivityLike: "hareketini beğendi.",
+    notificationNewComment: "hareketine yorum yaptı.",
+    notificationCommentReply: "yorumuna yanıt verdi.",
+    notificationCommentLike: "yorumunu beğendi.",
+    notificationGeneric: "yeni bir etkileşimde bulundu.",
+
   },
   auth: {
     email: 'E-posta',
