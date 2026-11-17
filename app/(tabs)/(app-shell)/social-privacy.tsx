@@ -38,14 +38,14 @@ export default function SocialPrivacyScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.back')} onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
         <AppText variant="title">{t('social.privacyTitle')}</AppText>
         <AppText variant="bodySmall" muted>{t('social.privacyDescription')}</AppText>
       </View>
       {query.isError ? (
         <View style={styles.center}>
           <AppText variant="bodySmall" muted>{t('social.privacyLoadError')}</AppText>
-          <Pressable onPress={() => void query.refetch()}><AppText variant="bodySmall" style={styles.unblock}>{t('common.retry')}</AppText></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={() => void query.refetch()}><AppText variant="bodySmall" style={styles.unblock}>{t('common.retry')}</AppText></Pressable>
         </View>
       ) : query.isLoading || !settings ? <View style={styles.center}><ActivityIndicator color={colors.accent} /></View> : (
         <View style={styles.list}>
@@ -58,7 +58,7 @@ export default function SocialPrivacyScreen() {
           {blockedUsers.isLoading ? <ActivityIndicator color={colors.accent} /> : blockedUsers.isError ? (
             <View style={styles.row}>
               <AppText variant="caption" muted>{t('social.blockedUsersLoadError')}</AppText>
-              <Pressable onPress={() => void blockedUsers.refetch()}><AppText variant="caption" style={styles.unblock}>{t('common.retry')}</AppText></Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={() => void blockedUsers.refetch()}><AppText variant="caption" style={styles.unblock}>{t('common.retry')}</AppText></Pressable>
             </View>
           ) : blockedUsers.data?.length ? blockedUsers.data.map(user => (
             <View key={user.userId} style={styles.row}>
@@ -66,7 +66,7 @@ export default function SocialPrivacyScreen() {
                 <AppText variant="body">{user.displayName}</AppText>
                 <AppText variant="caption" muted>@{user.userName}</AppText>
               </View>
-              <Pressable disabled={unblock.isPending} onPress={() => unblock.mutate(user.userId)}>
+              <Pressable accessibilityRole="button" accessibilityLabel={`${t('social.unblock')} ${user.displayName}`} disabled={unblock.isPending} onPress={() => unblock.mutate(user.userId)}>
                 <AppText variant="caption" style={styles.unblock}>{t('social.unblock')}</AppText>
               </Pressable>
             </View>
