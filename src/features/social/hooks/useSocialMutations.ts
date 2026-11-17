@@ -108,7 +108,8 @@ export function useCreateSocialComment(activityId: string) {
     mutationFn: ({ content, parentCommentId }: { content: string; parentCommentId?: string | null }) =>
       createSocialComment(activityId, content, parentCommentId),
     onSuccess: (_comment, variables) => {
-      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId, variables.parentCommentId ?? 'root'] });
+      // A reply also changes its parent's repliesCount, so refresh every comment thread for this activity.
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
     },
     onError: () => showSocialMutationError(t('social.operationFailed'), t('social.commentFailed')),
