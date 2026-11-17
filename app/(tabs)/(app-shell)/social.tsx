@@ -125,7 +125,7 @@ function groupConsecutiveEpisodeActivities(items: SocialFeedItem[]): FeedListIte
       const candidate = items[next];
       const candidateIsEpisode = candidate.activityType === 'WatchedEpisode' || candidate.activityType === '2';
       const withinOneDay = Math.abs(new Date(first.createdAt).getTime() - new Date(candidate.createdAt).getTime()) <= 86400000;
-      if (candidateIsEpisode && candidate.actorId === first.actorId && candidate.targetTitle === first.targetTitle && withinOneDay) { group.push(candidate); next += 1; }
+      if (candidateIsEpisode && candidate.actorId === first.actorId && candidate.targetContentId === first.targetContentId && withinOneDay) { group.push(candidate); next += 1; }
       else break;
     }
     result.push(group.length > 1 ? { kind: 'episode-group', items: group } : { kind: 'activity', item: first });
