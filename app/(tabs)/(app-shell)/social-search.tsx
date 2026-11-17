@@ -25,7 +25,7 @@ export default function SocialSearchScreen() {
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
         <AppText variant="title">{t('social.searchTitle')}</AppText>
-        <TextInput value={query} onChangeText={setQuery} placeholder={t('social.searchPlaceholder')}
+        <TextInput accessibilityLabel={t('social.searchPlaceholder')} value={query} onChangeText={setQuery} placeholder={t('social.searchPlaceholder')}
           placeholderTextColor={colors.textMuted} autoCapitalize="none" style={styles.input} />
       </View>
       {results.isFetching ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
@@ -48,7 +48,7 @@ export default function SocialSearchScreen() {
         }}
         onEndReachedThreshold={0.5}
         ListHeaderComponent={results.isError && resultItems.length > 0 ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchRefreshError')}</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
-        ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : results.isFetchNextPageError ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchNextPageError')}</AppText><Pressable onPress={() => void results.fetchNextPage()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> : null}
+        ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : results.isFetchNextPageError ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchNextPageError')}</AppText><Pressable accessibilityRole="button" onPress={() => void results.fetchNextPage()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
         ListEmptyComponent={debouncedQuery.length < 2 ? <AppText variant="bodySmall" muted center>{t('social.minSearchCharacters')}</AppText> :
           results.isError ? <View style={styles.error}><AppText variant="bodySmall" muted center>{t('social.searchFailed')}</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>Tekrar dene</AppText></Pressable></View> :
           results.isLoading ? null : <AppText variant="bodySmall" muted center>{t('social.noSearchResults')}</AppText>}
