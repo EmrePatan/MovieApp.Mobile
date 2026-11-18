@@ -149,7 +149,7 @@ export default function SocialCommentsScreen() {
                   <AppText variant="caption" muted>@{activity.userName} · {new Date(activity.createdAt).toLocaleDateString()}</AppText>
                 </View>
               </View>
-              <AppText variant="body">{activity.displayName} {activity.activityType}</AppText>
+              <AppText variant="body">{activity.displayName} {t('social.activity.generic')}</AppText>
               <View style={styles.activityContent}>
                 {activity.posterPath ? <Image source={{ uri: resolveImageUri(activity.posterPath, 'w300') ?? undefined }} style={styles.activityPoster} /> : null}
                 <View style={styles.author}>
