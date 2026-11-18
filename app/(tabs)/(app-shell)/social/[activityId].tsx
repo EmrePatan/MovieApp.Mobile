@@ -1,16 +1,17 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
-import { useSocialComments } from '@/features/social/hooks/useSocialQueries';
+import { useSocialComments, useSocialFeed } from '@/features/social/hooks/useSocialQueries';
 import { useCreateSocialComment, useDeleteSocialComment, useReportSocialContent, useToggleSocialCommentLike } from '@/features/social/hooks/useSocialMutations';
 import type { SocialComment } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { resolveImageUri } from '@/utils/image-url';
 
 export default function SocialCommentsScreen() {
   const router = useRouter();
@@ -21,6 +22,8 @@ export default function SocialCommentsScreen() {
   const [parentStack, setParentStack] = useState<string[]>([]);
   const [draft, setDraft] = useState('');
   const comments = useSocialComments(activityId, parentCommentId);
+  const feed = useSocialFeed();
+  const activity = feed.data?.pages.flatMap(page => page.items).find(item => item.id === activityId);
   const commentItems = comments.data?.pages.flatMap(page => page.items) ?? [];
   const createComment = useCreateSocialComment(activityId);
   const deleteComment = useDeleteSocialComment(activityId);
@@ -60,11 +63,13 @@ export default function SocialCommentsScreen() {
       </View>
       <AppText variant="body">{item.content}</AppText>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" accessibilityLabel={`${item.isLikedByMe ? t('social.unlike') : t('social.like')} ${item.likesCount}`} disabled={toggleLike.isPending && toggleLike.variables?.commentId === item.id} onPress={() => toggleLike.mutate({ commentId: item.id, isLiked: item.isLikedByMe })}>
-          <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>
-            {item.isLikedByMe ? '♥' : '♡'} {item.likesCount}
-          </AppText>
-        </Pressable>
+        {item.userId !== user?.id ? (
+          <Pressable accessibilityRole="button" accessibilityLabel={`${item.isLikedByMe ? t('social.unlike') : t('social.like')} ${item.likesCount}`} disabled={toggleLike.isPending && toggleLike.variables?.commentId === item.id} onPress={() => toggleLike.mutate({ commentId: item.id, isLiked: item.isLikedByMe })}>
+            <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>
+              {item.isLikedByMe ? '♥' : '♡'} {item.likesCount}
+            </AppText>
+          </Pressable>
+        ) : null}
         <Pressable accessibilityRole="button" accessibilityLabel={`${t('social.reply')} ${item.repliesCount}`} onPress={() => handleReply(item)}>
           <AppText variant="caption" muted >{t('social.reply')} · {item.repliesCount}</AppText>
         </Pressable>
@@ -135,6 +140,28 @@ export default function SocialCommentsScreen() {
               <AppButton title={t('common.retry')} variant="secondary" onPress={() => void comments.fetchNextPage()} />
             </View>
           ) : null}
+          ListHeaderComponent={activity ? (
+            <View style={styles.activityDetail}>
+              <View style={styles.commentHeader}>
+                <View style={styles.avatar}><AppText variant="body">{activity.displayName.slice(0, 1).toUpperCase()}</AppText></View>
+                <View style={styles.author}>
+                  <AppText variant="body">{activity.displayName}</AppText>
+                  <AppText variant="caption" muted>@{activity.userName} · {new Date(activity.createdAt).toLocaleDateString()}</AppText>
+                </View>
+              </View>
+              <AppText variant="body">{activity.displayName} {activity.activityType}</AppText>
+              <View style={styles.activityContent}>
+                {activity.posterPath ? <Image source={{ uri: resolveImageUri(activity.posterPath, 'w300') ?? undefined }} style={styles.activityPoster} /> : null}
+                <View style={styles.author}>
+                  <AppText variant="subtitle">{activity.targetTitle}</AppText>
+                  {activity.targetSubtitle ? <AppText variant="caption" muted>{activity.targetSubtitle}</AppText> : null}
+                  {activity.ratingScore !== null ? <AppText variant="bodySmall">★ {activity.ratingScore}/10</AppText> : null}
+                  {activity.reviewExcerpt ? <AppText variant="bodySmall" muted>{activity.reviewExcerpt}</AppText> : null}
+                </View>
+              </View>
+              <AppText variant="caption" muted>{t('social.commentsCount')} · {activity.commentsCount}</AppText>
+            </View>
+          ) : null}
           ListEmptyComponent={<AppText variant="bodySmall" muted center>{t('social.noComments')}</AppText>}
         />
       )}
@@ -163,6 +190,9 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md, gap: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, gap: spacing.md },
+  activityDetail: { padding: spacing.md, marginBottom: spacing.md, borderRadius: 18, backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, gap: spacing.md },
+  activityContent: { flexDirection: 'row', alignItems: 'center', padding: spacing.md, borderRadius: 14, backgroundColor: colors.surfaceElevated, gap: spacing.md },
+  activityPoster: { width: 82, height: 120, borderRadius: 10, backgroundColor: colors.surface },
   comment: { padding: spacing.md, borderRadius: 14, backgroundColor: colors.surface, gap: spacing.sm },
   commentHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
