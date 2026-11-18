@@ -32,10 +32,10 @@ export function resolvePrimaryTabPressPlan(params: {
   }
 
   if (highlightedTab === null) {
-    return { kind: 'establish-root', href: targetHref, resetStackFirst: false };
+    return { kind: 'establish-root', href: targetHref };
   }
 
-  return { kind: 'establish-root', href: targetHref, resetStackFirst: false };
+  return { kind: 'establish-root', href: targetHref };
 }
 
 export function handlePrimaryTabPress(params: {
