@@ -22,17 +22,6 @@ function routeFromPathname(pathname: string): string {
   return pathname;
 }
 
-function simulateDismissAll(state: AppShellStackState): AppShellStackState {
-  if (state.routes.length <= 1) {
-    return state;
-  }
-
-  return {
-    routes: [state.routes[0]],
-    index: 0,
-  };
-}
-
 function simulateDismissTo(state: AppShellStackState, href: string): AppShellStackState {
   const targetRoute = routeFromPathname(href);
   let foundIndex = -1;
@@ -74,13 +63,7 @@ export function applyPrimaryTabPressPlanToStack(
     return { state, reselectCount: 1 };
   }
 
-  let nextState = state;
-
-  if (plan.resetStackFirst) {
-    nextState = simulateDismissAll(nextState);
-  }
-
-  nextState = simulateDismissTo(nextState, plan.href);
+  const nextState = simulateDismissTo(state, plan.href);
   return { state: nextState, reselectCount: 0 };
 }
 
