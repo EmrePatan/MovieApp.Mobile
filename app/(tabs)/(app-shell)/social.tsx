@@ -155,18 +155,19 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onActivi
           <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString(i18n.language)}</AppText></View>
       </Pressable>
       <AppText variant="body">{first.displayName} {watchedLabel} · {watchedCountLabel}</AppText>
-      <Pressable accessibilityRole="button" accessibilityLabel={first.targetTitle} onPress={() => onActivity(first)} style={styles.contentCard}>
-        {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
-        <View style={styles.contentText}><AppText variant="subtitle">{first.targetTitle}</AppText>
+      <View style={styles.contentCard}>
+        {posterUri ? <Pressable accessibilityRole="button" accessibilityLabel={first.targetTitle} onPress={() => onActivity(first)}><Image source={{ uri: posterUri }} style={styles.poster} /></Pressable> : null}
+        <View style={styles.contentText}>
+          <Pressable accessibilityRole="button" accessibilityLabel={first.targetTitle} onPress={() => onActivity(first)}><AppText variant="subtitle">{first.targetTitle}</AppText></Pressable>
           {items.map(item => <View key={item.id} style={styles.episodeRow}>
-            <View style={styles.episodeTitle}><AppText variant="bodySmall">{item.targetSubtitle ?? item.targetTitle}</AppText></View>
+            <Pressable style={styles.episodeTitle} accessibilityRole="button" accessibilityLabel={item.targetSubtitle ?? item.targetTitle} onPress={() => onActivity(item)}><AppText variant="bodySmall">{item.targetSubtitle ?? item.targetTitle}</AppText></Pressable>
             {item.actorId !== currentUserId ? <Pressable accessibilityRole="button" accessibilityLabel={item.isLikedByMe ? unlikeLabel : likeLabel} disabled={isLiking(item)} onPress={() => onLike(item)}>
               <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>{item.isLikedByMe ? '♥' : '♡'} {item.likesCount}</AppText></Pressable> : null}
             <Pressable accessibilityRole="button" accessibilityLabel={`${commentsLabel} ${item.commentsCount}`} onPress={() => onComments(item)}><AppText variant="caption">{commentsLabel} · {item.commentsCount}</AppText></Pressable>
             <Pressable accessibilityRole="button" accessibilityLabel={reportLabel} onPress={() => onReport(item)}><AppText variant="caption" muted>{reportLabel}</AppText></Pressable>
           </View>)}
         </View>
-      </Pressable>
+      </View>
     </View>
   );
 }
@@ -273,7 +274,8 @@ export default function SocialFeedScreen() {
           ) : null}
           <View style={styles.headerRow}>
             <AppText variant="title" style={styles.title}>{t('social.title')}</AppText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.headerActions}>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.headerActions}>
               <Pressable accessibilityRole="button" accessibilityLabel={t('social.search')} onPress={() => router.push('/(tabs)/(app-shell)/social-search')} style={styles.headerChip}>
                 <AppText variant="caption" style={styles.headerAction}>⌕  {t('social.search')}</AppText>
               </Pressable>
@@ -286,8 +288,7 @@ export default function SocialFeedScreen() {
               <Pressable accessibilityRole="button" accessibilityLabel={t('social.privacyTitle')} onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')} style={styles.headerChip}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.privacyTitle')}</AppText>
               </Pressable>
-            </ScrollView>
-          </View>
+          </ScrollView>
           </View>
         }
         ListEmptyComponent={<View style={styles.empty}><AppText variant="bodySmall" muted>{t('social.empty')}</AppText></View>}
