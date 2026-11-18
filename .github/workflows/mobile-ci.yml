@@ -74,4 +74,5 @@ jobs:
           __tests__/features/home/useHomePersonalized.test.tsx
           __tests__/features/watch-history/watched-button.test.tsx
           __tests__/features/details/season-list-progress.test.tsx
+          __tests__/features/social/invalidate-social-activity-queries.test.ts
 
