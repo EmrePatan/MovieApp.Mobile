@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import {
   acceptSocialFollowRequest,
   createSocialComment,
@@ -19,7 +19,7 @@ import {
   unfollowSocialUser,
   updateSocialPrivacy,
 } from '../api/social-api';
-import type { SocialPrivacySettings } from '../types';
+import type { SocialFeedPage, SocialPrivacySettings } from '../types';
 import { socialQueryKeys } from './social-query-keys';
 
 function showSocialMutationError(title: string, message: string) {
@@ -89,14 +89,55 @@ export function useUpdateSocialPrivacy() {
 export function useToggleSocialActivityLike() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const feedKey = [...socialQueryKeys.all, 'feed'] as const;
+  const profileActivitiesKey = [...socialQueryKeys.all, 'profile-activities'] as const;
+
+  const updateActivityLike = (
+    data: InfiniteData<SocialFeedPage> | undefined,
+    activityId: string,
+    isLiked: boolean,
+  ): InfiniteData<SocialFeedPage> | undefined => {
+    if (!data) return data;
+    return {
+      ...data,
+      pages: data.pages.map(page => ({
+        ...page,
+        items: page.items.map(item => item.id !== activityId ? item : {
+          ...item,
+          isLikedByMe: isLiked,
+          likesCount: Math.max(0, item.likesCount + (isLiked ? 1 : -1)),
+        }),
+      })),
+    };
+  };
+
   return useMutation({
     mutationFn: ({ activityId, isLiked }: { activityId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialActivity(activityId) : likeSocialActivity(activityId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
-      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
+    onMutate: async ({ activityId, isLiked }) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: feedKey }),
+        queryClient.cancelQueries({ queryKey: profileActivitiesKey }),
+      ]);
+      const previousFeed = queryClient.getQueryData<InfiniteData<SocialFeedPage>>(feedKey);
+      const previousProfiles = queryClient.getQueriesData<InfiniteData<SocialFeedPage>>({
+        queryKey: profileActivitiesKey,
+      });
+      queryClient.setQueryData<InfiniteData<SocialFeedPage>>(feedKey, current =>
+        updateActivityLike(current, activityId, !isLiked));
+      queryClient.setQueriesData<InfiniteData<SocialFeedPage>>(
+        { queryKey: profileActivitiesKey },
+        current => updateActivityLike(current, activityId, !isLiked),
+      );
+      return { previousFeed, previousProfiles };
     },
-    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.likeFailed')),
+    onError: (_error, _variables, context) => {
+      if (context?.previousFeed) queryClient.setQueryData(feedKey, context.previousFeed);
+      context?.previousProfiles?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+      showSocialMutationError(t('social.operationFailed'), t('social.likeFailed'));
+    },
   });
 }
 
