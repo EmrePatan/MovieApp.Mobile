@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -40,8 +40,10 @@ function SocialActivityCard({
   onLike,
   onProfile,
   onComments,
+  onActivity,
   onReport,
   isLiking,
+  isOwnActivity,
   activityLabel,
   likeLabel,
   unlikeLabel,
@@ -52,8 +54,10 @@ function SocialActivityCard({
   onLike: (item: SocialFeedItem) => void;
   onProfile: (item: SocialFeedItem) => void;
   onComments: (item: SocialFeedItem) => void;
+  onActivity: (item: SocialFeedItem) => void;
   onReport: (item: SocialFeedItem) => void;
   isLiking: boolean;
+  isOwnActivity: boolean;
   activityLabel: string;
   likeLabel: string;
   unlikeLabel: string;
@@ -77,7 +81,7 @@ function SocialActivityCard({
       <AppText variant="body">
         {item.displayName} {activityLabel}
       </AppText>
-      <View style={styles.contentCard}>
+      <Pressable accessibilityRole="button" accessibilityLabel={item.targetTitle || t('social.contentFallback')} onPress={() => onActivity(item)} style={styles.contentCard}>
         {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
         <View style={styles.contentText}>
           <AppText variant="subtitle">{item.targetTitle || t('social.contentFallback')}</AppText>
@@ -85,9 +89,9 @@ function SocialActivityCard({
           {item.ratingScore !== null ? <AppText variant="bodySmall">★ {item.ratingScore}/10</AppText> : null}
           {item.reviewExcerpt ? <AppText variant="bodySmall" muted numberOfLines={4}>{item.reviewExcerpt}</AppText> : null}
         </View>
-      </View>
+      </Pressable>
       <View style={styles.actions}>
-        <Pressable
+        {!isOwnActivity ? <Pressable
           accessibilityRole="button"
           accessibilityLabel={item.isLikedByMe ? unlikeLabel : likeLabel}
           disabled={isLiking}
@@ -97,7 +101,7 @@ function SocialActivityCard({
           <AppText variant="bodySmall" style={item.isLikedByMe ? styles.liked : undefined}>
             {item.isLikedByMe ? '♥' : '♡'} {item.likesCount}
           </AppText>
-        </Pressable>
+        </Pressable> : null}
         <Pressable accessibilityRole="button" accessibilityLabel={`${commentsLabel} ${item.commentsCount}`} onPress={() => onComments(item)} style={styles.actionButton}>
           <AppText variant="bodySmall">{commentsLabel} · {item.commentsCount}</AppText>
         </Pressable>
@@ -134,10 +138,10 @@ function groupConsecutiveEpisodeActivities(items: SocialFeedItem[]): FeedListIte
   return result;
 }
 
-function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport, isLiking, watchedLabel, watchedCountLabel, likeLabel, unlikeLabel, commentsLabel, reportLabel }: {
+function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onActivity, onReport, isLiking, currentUserId, watchedLabel, watchedCountLabel, likeLabel, unlikeLabel, commentsLabel, reportLabel }: {
   items: SocialFeedItem[]; onLike: (item: SocialFeedItem) => void; onProfile: (item: SocialFeedItem) => void;
-  onComments: (item: SocialFeedItem) => void; onReport: (item: SocialFeedItem) => void;
-  isLiking: (item: SocialFeedItem) => boolean; watchedLabel: string; watchedCountLabel: string; likeLabel: string; unlikeLabel: string;
+  onComments: (item: SocialFeedItem) => void; onActivity: (item: SocialFeedItem) => void; onReport: (item: SocialFeedItem) => void;
+  isLiking: (item: SocialFeedItem) => boolean; currentUserId?: string; watchedLabel: string; watchedCountLabel: string; likeLabel: string; unlikeLabel: string;
   commentsLabel: string; reportLabel: string;
 }) {
   const { i18n } = useTranslation();
@@ -151,25 +155,25 @@ function SocialEpisodeGroupCard({ items, onLike, onProfile, onComments, onReport
           <AppText variant="caption" muted>@{first.userName} · {new Date(first.createdAt).toLocaleDateString(i18n.language)}</AppText></View>
       </Pressable>
       <AppText variant="body">{first.displayName} {watchedLabel} · {watchedCountLabel}</AppText>
-      <View style={styles.contentCard}>
+      <Pressable accessibilityRole="button" accessibilityLabel={first.targetTitle} onPress={() => onActivity(first)} style={styles.contentCard}>
         {posterUri ? <Image source={{ uri: posterUri }} style={styles.poster} /> : null}
         <View style={styles.contentText}><AppText variant="subtitle">{first.targetTitle}</AppText>
           {items.map(item => <View key={item.id} style={styles.episodeRow}>
             <View style={styles.episodeTitle}><AppText variant="bodySmall">{item.targetSubtitle ?? item.targetTitle}</AppText></View>
-            <Pressable accessibilityRole="button" accessibilityLabel={item.isLikedByMe ? unlikeLabel : likeLabel} disabled={isLiking(item)} onPress={() => onLike(item)}>
-              <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>{item.isLikedByMe ? '♥' : '♡'} {item.likesCount}</AppText></Pressable>
+            {item.actorId !== currentUserId ? <Pressable accessibilityRole="button" accessibilityLabel={item.isLikedByMe ? unlikeLabel : likeLabel} disabled={isLiking(item)} onPress={() => onLike(item)}>
+              <AppText variant="caption" style={item.isLikedByMe ? styles.liked : undefined}>{item.isLikedByMe ? '♥' : '♡'} {item.likesCount}</AppText></Pressable> : null}
             <Pressable accessibilityRole="button" accessibilityLabel={`${commentsLabel} ${item.commentsCount}`} onPress={() => onComments(item)}><AppText variant="caption">{commentsLabel} · {item.commentsCount}</AppText></Pressable>
             <Pressable accessibilityRole="button" accessibilityLabel={reportLabel} onPress={() => onReport(item)}><AppText variant="caption" muted>{reportLabel}</AppText></Pressable>
           </View>)}
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 }
 export default function SocialFeedScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const feed = useSocialFeed();
   const unreadNotifications = useSocialUnreadNotificationCount();
   const toggleLike = useToggleSocialActivityLike();
@@ -186,6 +190,10 @@ export default function SocialFeedScreen() {
   }, [router]);
 
   const handleComments = useCallback((item: SocialFeedItem) => {
+    router.push(`/(tabs)/(app-shell)/social/${item.id}`);
+  }, [router]);
+
+  const handleActivity = useCallback((item: SocialFeedItem) => {
     router.push(`/(tabs)/(app-shell)/social/${item.id}`);
   }, [router]);
 
@@ -236,15 +244,15 @@ export default function SocialFeedScreen() {
         keyExtractor={row => row.kind === 'activity' ? row.item.id : 'episode-group-' + row.items[0].id}
         renderItem={({ item: row }) => row.kind === 'activity' ? (
           <SocialActivityCard
-            item={row.item} onLike={handleLike} onProfile={handleProfile} onComments={handleComments} onReport={handleReport}
-            isLiking={toggleLike.isPending && toggleLike.variables?.activityId === row.item.id}
+            item={row.item} onLike={handleLike} onProfile={handleProfile} onComments={handleComments} onActivity={handleActivity} onReport={handleReport}
+            isLiking={toggleLike.isPending && toggleLike.variables?.activityId === row.item.id} isOwnActivity={row.item.actorId === user?.id}
             activityLabel={t(getActivityLabelKey(row.item.activityType))} likeLabel={t('social.like')} unlikeLabel={t('social.unlike')}
             commentsLabel={t('social.commentsCount')} reportLabel={t('social.report')}
           />
         ) : (
           <SocialEpisodeGroupCard
-            items={row.items} onLike={handleLike} onProfile={handleProfile} onComments={handleComments} onReport={handleReport}
-            isLiking={episode => toggleLike.isPending && toggleLike.variables?.activityId === episode.id}
+            items={row.items} onLike={handleLike} onProfile={handleProfile} onComments={handleComments} onActivity={handleActivity} onReport={handleReport}
+            isLiking={episode => toggleLike.isPending && toggleLike.variables?.activityId === episode.id} currentUserId={user?.id}
             watchedLabel={t('social.activity.watchedEpisode')} watchedCountLabel={t('social.watchedEpisodesCount', { count: row.items.length })}
             likeLabel={t('social.like')} unlikeLabel={t('social.unlike')}
             commentsLabel={t('social.commentsCount')} reportLabel={t('social.report', 'Report')}
@@ -265,20 +273,20 @@ export default function SocialFeedScreen() {
           ) : null}
           <View style={styles.headerRow}>
             <AppText variant="title" style={styles.title}>{t('social.title')}</AppText>
-            <View style={styles.headerActions}>
-              <Pressable accessibilityRole="button" accessibilityLabel={t('social.search')} onPress={() => router.push('/(tabs)/(app-shell)/social-search')}>
-                <AppText variant="caption" style={styles.headerAction}>{t('social.search')}</AppText>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.headerActions}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.search')} onPress={() => router.push('/(tabs)/(app-shell)/social-search')} style={styles.headerChip}>
+                <AppText variant="caption" style={styles.headerAction}>⌕  {t('social.search')}</AppText>
               </Pressable>
-              <Pressable accessibilityRole="button" accessibilityLabel={t('social.requests')} onPress={() => router.push('/(tabs)/(app-shell)/social-requests')}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.requests')} onPress={() => router.push('/(tabs)/(app-shell)/social-requests')} style={styles.headerChip}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.requests')}</AppText>
               </Pressable>
-              <Pressable accessibilityRole="button" accessibilityLabel={t('social.notifications')} onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')}>
-                <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}{unreadNotifications.data ? ` (${unreadNotifications.data})` : ''}</AppText>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.notifications')} onPress={() => router.push('/(tabs)/(app-shell)/social-notifications')} style={styles.headerChip}>
+                <AppText variant="caption" style={styles.headerAction}>{t('social.notifications')}{unreadNotifications.data ? ` · ${unreadNotifications.data}` : ''}</AppText>
               </Pressable>
-              <Pressable accessibilityRole="button" accessibilityLabel={t('social.privacyTitle')} onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('social.privacyTitle')} onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')} style={styles.headerChip}>
                 <AppText variant="caption" style={styles.headerAction}>{t('social.privacyTitle')}</AppText>
               </Pressable>
-            </View>
+            </ScrollView>
           </View>
           </View>
         }
@@ -296,24 +304,25 @@ export default function SocialFeedScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  listContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
-  headerContainer: { gap: spacing.sm },
+  listContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: spacing.md },
+  headerContainer: { gap: spacing.sm, paddingBottom: spacing.sm },
   inlineError: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  headerActions: { flexDirection: 'row', gap: spacing.md },
-  headerAction: { color: colors.accent },
-  title: { marginTop: spacing.md, marginBottom: spacing.sm },
-  poster: { width: 58, height: 86, borderRadius: 8, backgroundColor: colors.surface },
+  headerRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
+  headerChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: 18, backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
+  headerAction: { color: colors.textSecondary },
+  title: { marginTop: spacing.sm, marginBottom: spacing.xs, fontWeight: '700' },
+  poster: { width: 76, height: 112, borderRadius: 10, backgroundColor: colors.surface },
   contentText: { flex: 1, gap: spacing.xs },
   episodeRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm, paddingVertical: spacing.xs },
   episodeTitle: { flex: 1, minWidth: 110 },
-  card: { padding: spacing.md, borderRadius: 16, backgroundColor: colors.surface, gap: spacing.md },
+  card: { padding: spacing.md, borderRadius: 18, backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, gap: spacing.md },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
   actorBlock: { flex: 1 },
   actorName: { fontWeight: '600' },
-  contentCard: { flexDirection: 'row', padding: spacing.md, borderRadius: 12, backgroundColor: colors.surfaceElevated, gap: spacing.md },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
+  contentCard: { flexDirection: 'row', alignItems: 'center', padding: spacing.md, borderRadius: 14, backgroundColor: colors.surfaceElevated, gap: spacing.md },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.xl, paddingTop: spacing.xs },
   actionButton: { paddingVertical: spacing.xs },
   liked: { color: colors.accent },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.xl },
