@@ -9,7 +9,7 @@ import {
 
 export type PrimaryTabPressAction = 'dismiss' | 'reselect';
 
-export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissAll' | 'dismissTo'>;
+export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissTo'>;
 
 export type PrimaryTabPressPlan =
   | { kind: 'reselect' }
