@@ -105,7 +105,6 @@ describe('primary tab press handling', () => {
     expect(plan).toEqual({
       kind: 'establish-root',
       href: '/discover',
-      resetStackFirst: false,
     });
 
     const action = handlePrimaryTabPress({
