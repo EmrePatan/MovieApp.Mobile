@@ -72,7 +72,7 @@ describe('primary tab stack semantics', () => {
     expect(highlightedTabForStack(state)).toBe('discover');
   });
 
-  it('D) Discover → Browse → Movie → Home → Movie B → Back stops at Home without old Discover flow', () => {
+  it('D) switching tabs from a detail uses one dismissTo action without an intermediate stack reset', () => {
     let state = root('/discover');
     state = simulateContentPush(state, '/discover-browse');
     state = simulateContentPush(state, '/movie/a');
@@ -83,14 +83,12 @@ describe('primary tab stack semantics', () => {
       pathname: '/movie/a',
     }).state;
 
-    expect(state).toEqual({ routes: ['/home'], index: 0 });
-    expect(canStackGoBack(state)).toBe(false);
+    // dismissTo replaces the current detail when Home is not already in this stack.
+    expect(state).toEqual({ routes: ['/discover', '/discover-browse', '/home'], index: 2 });
+    expect(canStackGoBack(state)).toBe(true);
 
-    state = simulateContentPush(state, '/movie/b');
     state = simulateContentBack(state);
-
-    expect(stackPathname(state)).toBe('/home');
-    expect(canStackGoBack(state)).toBe(false);
+    expect(stackPathname(state)).toBe('/discover-browse');
   });
 
   it('E) Home → Movie → Back preserves Home as the only stack entry', () => {

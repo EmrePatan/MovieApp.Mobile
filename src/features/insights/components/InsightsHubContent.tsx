@@ -105,7 +105,7 @@ export function InsightsHubContent() {
 
     return (
       <View style={styles.errorContainer}>
-        <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
+        <InsightsScreenHeader onOpenProfile={() => router.navigate('/(tabs)/profile')} />
         <ErrorView message={message} onRetry={() => void insightsQuery.refetch()} />
       </View>
     );
@@ -114,7 +114,7 @@ export function InsightsHubContent() {
   if (insightsQuery.isLoading && !insightsQuery.data) {
     return (
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
+        <InsightsScreenHeader onOpenProfile={() => router.navigate('/(tabs)/profile')} />
         <InsightsLoadingSkeleton />
       </ScrollView>
     );
@@ -134,7 +134,7 @@ export function InsightsHubContent() {
       scrollEventThrottle={16}
     >
       {androidPullToRefresh.RefreshHeader}
-      <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
+      <InsightsScreenHeader onOpenProfile={() => router.navigate('/(tabs)/profile')} />
       <InsightsMovieDnaHero
         movieDna={insights.movieDna}
         backdropImagePath={insights.yourEra.oldestTitle?.posterPath}

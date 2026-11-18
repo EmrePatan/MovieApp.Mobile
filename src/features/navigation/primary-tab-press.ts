@@ -9,11 +9,11 @@ import {
 
 export type PrimaryTabPressAction = 'dismiss' | 'reselect';
 
-export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissAll' | 'dismissTo'>;
+export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissTo'>;
 
 export type PrimaryTabPressPlan =
   | { kind: 'reselect' }
-  | { kind: 'establish-root'; href: `/${string}`; resetStackFirst: boolean };
+  | { kind: 'establish-root'; href: `/${string}` };
 
 export function resolvePrimaryTabPressPlan(params: {
   tabId: PrimaryTabId;
@@ -28,14 +28,14 @@ export function resolvePrimaryTabPressPlan(params: {
   }
 
   if (highlightedTab === tabId && !isPrimaryTabRootPath(tabId, pathname)) {
-    return { kind: 'establish-root', href: targetHref, resetStackFirst: false };
+    return { kind: 'establish-root', href: targetHref };
   }
 
   if (highlightedTab === null) {
-    return { kind: 'establish-root', href: targetHref, resetStackFirst: true };
+    return { kind: 'establish-root', href: targetHref };
   }
 
-  return { kind: 'establish-root', href: targetHref, resetStackFirst: false };
+  return { kind: 'establish-root', href: targetHref };
 }
 
 export function handlePrimaryTabPress(params: {
@@ -52,10 +52,6 @@ export function handlePrimaryTabPress(params: {
   if (plan.kind === 'reselect') {
     emitReselect(tabId);
     return 'reselect';
-  }
-
-  if (plan.resetStackFirst) {
-    router.dismissAll();
   }
 
   router.dismissTo(plan.href);

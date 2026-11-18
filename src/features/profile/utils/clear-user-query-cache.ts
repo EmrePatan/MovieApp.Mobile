@@ -3,6 +3,7 @@ import { clearHomePersonalizedCacheForUser } from '@/features/home/storage/home-
 
 const USER_QUERY_PREFIXES = [
   ['profile'],
+  ['social'],
   ['favorites'],
   ['favorite'],
   ['watchlists'],

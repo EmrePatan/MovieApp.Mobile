@@ -57,7 +57,7 @@ describe('primary tab press handling', () => {
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
-  it('returns to Home root from neutral detail without forcing reselect refresh', () => {
+  it('returns to Home from neutral detail with a single stack dismissal', () => {
     const router = createRouter();
     const emitReselect = jest.fn();
 
@@ -70,7 +70,7 @@ describe('primary tab press handling', () => {
     });
 
     expect(action).toBe('dismiss');
-    expect(router.dismissAll).toHaveBeenCalledTimes(1);
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).toHaveBeenCalledWith(PRIMARY_TAB_HREFS.home);
     expect(emitReselect).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe('primary tab press handling', () => {
       emitReselect,
     });
 
-    expect(router.dismissAll).toHaveBeenCalledTimes(1);
+    expect(router.dismissAll).not.toHaveBeenCalled();
     expect(router.dismissTo).toHaveBeenCalledWith('/discover');
     expect(emitReselect).not.toHaveBeenCalled();
   });
@@ -105,7 +105,6 @@ describe('primary tab press handling', () => {
     expect(plan).toEqual({
       kind: 'establish-root',
       href: '/discover',
-      resetStackFirst: false,
     });
 
     const action = handlePrimaryTabPress({

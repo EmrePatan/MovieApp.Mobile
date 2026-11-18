@@ -1,0 +1,71 @@
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppText } from '@/components/common/AppText';
+import { useSocialUserSearch } from '@/features/social/hooks/useSocialQueries';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+
+export default function SocialSearchScreen() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(query.trim()), 300);
+    return () => clearTimeout(timeout);
+  }, [query]);
+  const results = useSocialUserSearch(debouncedQuery);
+  const resultItems = results.data?.pages.flatMap(page => page) ?? [];
+
+  return (
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <View style={styles.header}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('social.back')} onPress={() => router.back()}><AppText variant="body">‹ {t('social.back')}</AppText></Pressable>
+        <AppText variant="title">{t('social.searchTitle')}</AppText>
+        <TextInput accessibilityLabel={t('social.searchPlaceholder')} value={query} onChangeText={setQuery} placeholder={t('social.searchPlaceholder')}
+          placeholderTextColor={colors.textMuted} autoCapitalize="none" style={styles.input} />
+      </View>
+      {results.isFetching && !results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : null}
+      <FlatList
+        data={resultItems}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <Pressable accessibilityRole="button" accessibilityLabel={`${item.displayName} @${item.userName}`} style={styles.row} onPress={() => router.push(`/(tabs)/(app-shell)/social-profile/${item.id}`)}>
+            <View style={styles.avatar}><AppText variant="body">{item.displayName.slice(0, 1).toUpperCase()}</AppText></View>
+            <View style={styles.copy}>
+              <AppText variant="body">{item.displayName}</AppText>
+              <AppText variant="caption" muted>@{item.userName}</AppText>
+            </View>
+            <AppText variant="caption" muted>{item.followStatus === 'Accepted' ? t('social.followed') : item.followStatus === 'Pending' ? t('social.requestSent') : ''}</AppText>
+          </Pressable>
+        )}
+        onEndReached={() => {
+          if (results.hasNextPage && !results.isFetchingNextPage) void results.fetchNextPage();
+        }}
+        onEndReachedThreshold={0.5}
+        ListHeaderComponent={results.isError && resultItems.length > 0 ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchRefreshError')}</AppText><Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
+        ListFooterComponent={results.isFetchingNextPage ? <ActivityIndicator color={colors.accent} style={styles.loading} /> : results.isFetchNextPageError ? <View style={styles.error}><AppText variant="caption" muted>{t('social.searchNextPageError')}</AppText><Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={() => void results.fetchNextPage()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> : null}
+        ListEmptyComponent={debouncedQuery.length < 2 ? <AppText variant="bodySmall" muted center>{t('social.minSearchCharacters')}</AppText> :
+          results.isError ? <View style={styles.error}><AppText variant="bodySmall" muted center>{t('social.searchFailed')}</AppText><Pressable onPress={() => void results.refetch()}><AppText variant="caption" style={styles.retry}>{t('common.retry')}</AppText></Pressable></View> :
+          results.isLoading ? null : <AppText variant="bodySmall" muted center>{t('social.noSearchResults')}</AppText>}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
+  header: { padding: spacing.lg, gap: spacing.md },
+  input: { color: colors.textPrimary, backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md },
+  list: { padding: spacing.lg, gap: spacing.sm },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md, backgroundColor: colors.surface, borderRadius: 14 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
+  copy: { flex: 1 },
+  loading: { padding: spacing.md },
+  error: { alignItems: 'center', gap: spacing.sm },
+  retry: { color: colors.accent },
+});

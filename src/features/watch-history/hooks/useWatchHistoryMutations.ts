@@ -26,6 +26,7 @@ import type {
 import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import { calculateSeasonProgressPercentage } from '../utils/season-progress';
 import {
   updateTvShowAggregateAllSeasonsWatched,
@@ -60,6 +61,7 @@ export function invalidateWatchStateDependents(queryClient: ReturnType<typeof us
   invalidateRecentWatchHistory(queryClient);
   invalidateHomeQueries(queryClient);
   invalidateLibraryQueries(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 export function invalidateMovieWatchHistoryQueries(
@@ -91,6 +93,7 @@ export function invalidateEpisodeWatchHistoryQueries(
   void queryClient.invalidateQueries({ queryKey: ['home', 'personalized'] });
   void queryClient.invalidateQueries({ queryKey: ['recommendations'] });
   invalidateProfileStatistics(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 export function applySeasonWatchedEpisodeIds(

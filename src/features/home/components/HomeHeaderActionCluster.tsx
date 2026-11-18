@@ -112,7 +112,7 @@ export function HomeHeaderActionCluster({
           <HomeHeaderProfileAvatar
             overlay={overlay}
             compact
-            onPress={() => router.push('/(tabs)/profile')}
+            onPress={() => router.navigate('/(tabs)/profile')}
           />
         </>
       ) : null}
