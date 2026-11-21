@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "figma": {
+      "enabled": true
+    },
+    "impeccable": {
+      "enabled": true
+    },
+    "blackbird-concierge": {
+      "enabled": true
+    }
+  }
+}
