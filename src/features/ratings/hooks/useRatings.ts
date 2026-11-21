@@ -1,12 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
+  getEpisodeMyRating,
+  getEpisodeRatingAggregate,
   getMovieMyRating,
   getMovieRatingAggregate,
   getTvMyRating,
   getTvRatingAggregate,
 } from '../api/ratings-api';
 import {
+  episodeMyRatingQueryKey,
+  episodeRatingAggregateQueryKey,
   movieMyRatingQueryKey,
   movieRatingAggregateQueryKey,
   tvMyRatingQueryKey,
@@ -44,11 +48,19 @@ export function useMyRating(contentType: RatingContentType, contentId: string) {
     queryKey:
       contentType === 'movie'
         ? movieMyRatingQueryKey(contentId)
-        : tvMyRatingQueryKey(contentId),
-    queryFn: ({ signal }) =>
-      contentType === 'movie'
-        ? getMovieMyRating(contentId, signal)
-        : getTvMyRating(contentId, signal),
+        : contentType === 'tv'
+          ? tvMyRatingQueryKey(contentId)
+          : episodeMyRatingQueryKey(contentId),
+    queryFn: ({ signal }) => {
+      switch (contentType) {
+        case 'movie':
+          return getMovieMyRating(contentId, signal);
+        case 'tv':
+          return getTvMyRating(contentId, signal);
+        case 'episode':
+          return getEpisodeMyRating(contentId, signal);
+      }
+    },
     enabled,
     staleTime: 30_000,
   });
@@ -77,11 +89,19 @@ export function useRatingAggregate(contentType: RatingContentType, contentId: st
     queryKey:
       contentType === 'movie'
         ? movieRatingAggregateQueryKey(contentId)
-        : tvRatingAggregateQueryKey(contentId),
-    queryFn: ({ signal }) =>
-      contentType === 'movie'
-        ? getMovieRatingAggregate(contentId, signal)
-        : getTvRatingAggregate(contentId, signal),
+        : contentType === 'tv'
+          ? tvRatingAggregateQueryKey(contentId)
+          : episodeRatingAggregateQueryKey(contentId),
+    queryFn: ({ signal }) => {
+      switch (contentType) {
+        case 'movie':
+          return getMovieRatingAggregate(contentId, signal);
+        case 'tv':
+          return getTvRatingAggregate(contentId, signal);
+        case 'episode':
+          return getEpisodeRatingAggregate(contentId, signal);
+      }
+    },
     enabled: contentId.length > 0,
     staleTime: 60_000,
   });

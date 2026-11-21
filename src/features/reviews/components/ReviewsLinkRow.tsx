@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { openReviewsDetail } from '@/features/details/shared/navigation/reviews-detail-navigation';
 import {
+  buildEpisodeReviewsRoute,
   buildMovieReviewsRoute,
   buildTvReviewsRoute,
 } from '@/features/details/shared/routes';
@@ -34,12 +35,18 @@ interface ReviewsLinkRowProps {
   contentType: ReviewContentType;
   contentId: string;
   contentTitle: string;
+  episodeLocation?: {
+    tvShowId: string;
+    seasonNumber: number;
+    episodeNumber: number;
+  };
 }
 
 export function ReviewsLinkRow({
   contentType,
   contentId,
   contentTitle,
+  episodeLocation,
 }: ReviewsLinkRowProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -67,13 +74,30 @@ export function ReviewsLinkRow({
       : t('details.reviewsLink.noReviewsYet');
 
   const handlePress = useCallback(() => {
+    if (contentType === 'episode') {
+      if (!episodeLocation) {
+        return;
+      }
+
+      openReviewsDetail(
+        router,
+        buildEpisodeReviewsRoute(
+          episodeLocation.tvShowId,
+          episodeLocation.seasonNumber,
+          episodeLocation.episodeNumber,
+          { title: contentTitle },
+        ),
+      );
+      return;
+    }
+
     const reviewsRoute =
       contentType === 'movie'
         ? buildMovieReviewsRoute(contentId, { title: contentTitle })
         : buildTvReviewsRoute(contentId, { title: contentTitle });
 
     openReviewsDetail(router, reviewsRoute);
-  }, [contentId, contentTitle, contentType, router]);
+  }, [contentId, contentTitle, contentType, episodeLocation, router]);
 
   return (
     <View style={styles.section} testID="reviews-link-row">

@@ -1,6 +1,5 @@
 import type { ViewStyle } from 'react-native';
 import type { EdgeInsets } from 'react-native-safe-area-context';
-import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import {
   resolveTabBarBottomPadding,
@@ -33,9 +32,10 @@ export function getTabBarStyle(insets: EdgeInsets): ViewStyle {
   const metrics = resolveTabBarLayoutMetrics(insets);
 
   return {
-    backgroundColor: colors.tabBar,
-    borderTopColor: colors.tabBarBorder,
-    borderTopWidth: 1,
+    // Visual surface is owned by PrimaryTabBar (Black Titanium dock).
+    // Layout metrics match the original shell contract (compact iOS bottom).
+    backgroundColor: 'transparent',
+    borderTopWidth: 0,
     paddingTop: metrics.paddingTop,
     paddingBottom: metrics.paddingBottom,
     height: metrics.totalHeight,
@@ -44,5 +44,5 @@ export function getTabBarStyle(insets: EdgeInsets): ViewStyle {
 
 export const tabBarLabelStyle = {
   ...typography.caption,
-  fontWeight: '600' as const,
+  fontWeight: '500' as const,
 };

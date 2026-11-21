@@ -18,7 +18,7 @@ import {
   verifyTvShowFollowPreferences,
   verifyTvShowUnfollowed,
 } from '../utils/verify-follow-mutation-outcome';
-import { colors } from '@/theme/colors';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -188,21 +188,22 @@ function FollowPreferencesSheet({
     : t('details.followPreferences.followShow');
 
   return (
-      <View style={styles.backdrop}>
+      <View style={premiumSheetChrome.overlay}>
         <SafeAreaView style={styles.sheetContainer}>
           <View style={styles.sheet}>
+            <View style={premiumSheetChrome.handle} />
             <View style={styles.hero}>
               <View style={styles.iconBadge}>
-                <Ionicons name="notifications" size={22} color={colors.accent} />
+                <Ionicons name="notifications" size={22} color={premiumSheet.mutedGold} />
               </View>
               <View style={styles.headerText}>
-                <AppText variant="title">{title}</AppText>
-                <AppText variant="bodySmall" muted>
+                <AppText variant="title" style={premiumSheetChrome.title}>{title}</AppText>
+                <AppText variant="bodySmall" style={premiumSheetChrome.subtitle}>
                   {subtitle}
                 </AppText>
               </View>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={onClose}>
-                <Ionicons name="close" size={22} color={colors.textPrimary} />
+                <Ionicons name="close" size={22} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -293,7 +294,7 @@ function PreferenceRow({
           <Ionicons
             name={icon}
             size={18}
-            color={selected ? colors.accent : colors.textMuted}
+            color={selected ? premiumSheet.mutedGold : premiumSheet.textSecondary}
           />
         </View>
         <View style={styles.preferenceCopy}>
@@ -306,29 +307,19 @@ function PreferenceRow({
       <Ionicons
         name={selected ? 'checkmark-circle' : 'ellipse-outline'}
         size={24}
-        color={selected ? colors.accent : colors.textMuted}
+        color={selected ? premiumSheet.mutedGold : premiumSheet.textSecondary}
       />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.62)',
-  },
   sheetContainer: {
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surfaceElevated,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    padding: spacing.lg,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
-    borderTopWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   hero: {
     flexDirection: 'row',
@@ -353,7 +344,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sectionLabel: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
   },
   preferenceList: {
     gap: spacing.xs,
@@ -365,13 +356,13 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     gap: spacing.md,
   },
   preferenceRowSelected: {
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint12,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   preferenceLeading: {
     flex: 1,
@@ -388,7 +379,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.04)',
   },
   preferenceIconSelected: {
-    backgroundColor: colors.accentTint18,
+    backgroundColor: 'rgba(210, 164, 81, 0.18)',
   },
   preferenceCopy: {
     flex: 1,

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { ComingUpTab } from '../navigation/coming-up-navigation';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -59,19 +59,20 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xs,
   },
   tabLabel: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
   },
   tabLabelSelected: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
     fontWeight: '600',
   },
   indicator: {
     marginTop: spacing.sm,
     height: 2,
     borderRadius: 1,
-    backgroundColor: colors.accent,
+    backgroundColor: premiumSheet.mutedGold,
   },
+
   indicatorSpacer: {
     marginTop: spacing.sm,
     height: 2,

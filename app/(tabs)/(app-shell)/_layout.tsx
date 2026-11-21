@@ -1,9 +1,11 @@
 import { Stack } from 'expo-router';
+import { BrowseQuickActionsProvider } from '@/features/browse-quick-actions/BrowseQuickActionsProvider';
 import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
 import { colors } from '@/theme/colors';
 
 export default function AppShellLayout() {
   return (
+    <BrowseQuickActionsProvider>
     <Stack
       screenOptions={{
         headerShown: false,
@@ -37,6 +39,7 @@ export default function AppShellLayout() {
       <Stack.Screen name="watch-history" />
       <Stack.Screen name="watchlist" />
       <Stack.Screen name="notifications" />
+      <Stack.Screen name="messages" />
       <Stack.Screen name="pick-something" />
       <Stack.Screen name="ai-recommendations" />
       <Stack.Screen name="movie" options={ratedDetailStackScreenOptions} />
@@ -44,5 +47,6 @@ export default function AppShellLayout() {
       <Stack.Screen name="person" />
       <Stack.Screen name="collection" />
     </Stack>
+    </BrowseQuickActionsProvider>
   );
 }

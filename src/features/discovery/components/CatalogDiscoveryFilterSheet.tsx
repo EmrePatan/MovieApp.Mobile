@@ -34,7 +34,7 @@ import {
   type CatalogFilterField,
   type CatalogFilterSheetConfig,
 } from '../utils/catalog-filter-draft';
-import { colors } from '@/theme/colors';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
 type SelectorKind =
@@ -268,7 +268,7 @@ function CatalogDiscoveryFilterSheetBody({
       case 'genre':
         return (
           <>
-            {genresQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
+            {genresQuery.isLoading ? <ActivityIndicator color={premiumSheet.mutedGold} /> : null}
             <CatalogOptionList
               multi
               values={draft.genreIds}
@@ -489,7 +489,7 @@ function CatalogDiscoveryFilterSheetBody({
       case 'contentType':
         return (
           <View key={field} style={styles.section}>
-            <AppText variant="bodySmall" muted style={styles.sectionLabel}>
+            <AppText variant="bodySmall" style={premiumSheetChrome.sectionLabel}>
               {t('discovery.catalogFilters.contentType')}
             </AppText>
             <CatalogChipRow
@@ -660,9 +660,6 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.sm,
     paddingVertical: spacing.xs,
-  },
-  sectionLabel: {
-    fontWeight: '600',
   },
   rangeInputs: {
     gap: spacing.sm,

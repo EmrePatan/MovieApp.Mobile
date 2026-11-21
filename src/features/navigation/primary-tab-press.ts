@@ -7,13 +7,18 @@ import {
   type PrimaryTabId,
 } from '@/features/navigation/primary-tab-routes';
 
-export type PrimaryTabPressAction = 'dismiss' | 'reselect';
+export type PrimaryTabPressAction = 'dismiss' | 'reselect' | 'replace';
 
-export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissTo'>;
+export type PrimaryTabPressRouter = Pick<ImperativeRouter, 'dismissTo' | 'replace'>;
 
 export type PrimaryTabPressPlan =
   | { kind: 'reselect' }
   | { kind: 'establish-root'; href: `/${string}` };
+
+/** Settings hub lives as a sibling tab of (app-shell); POP_TO cannot leave it. */
+export function isSettingsHubPath(pathname: string): boolean {
+  return pathname === '/profile';
+}
 
 export function resolvePrimaryTabPressPlan(params: {
   tabId: PrimaryTabId;
@@ -45,13 +50,19 @@ export function handlePrimaryTabPress(params: {
   router: PrimaryTabPressRouter;
   emitReselect?: (tabId: PrimaryTabId) => void;
 }): PrimaryTabPressAction {
-  const { tabId, router } = params;
+  const { tabId, router, pathname } = params;
   const emitReselect = params.emitReselect ?? emitPrimaryTabReselect;
   const plan = resolvePrimaryTabPressPlan(params);
 
   if (plan.kind === 'reselect') {
     emitReselect(tabId);
     return 'reselect';
+  }
+
+  // Sibling tab navigator ignores POP_TO — leave settings with replace.
+  if (isSettingsHubPath(pathname)) {
+    router.replace(plan.href);
+    return 'replace';
   }
 
   router.dismissTo(plan.href);

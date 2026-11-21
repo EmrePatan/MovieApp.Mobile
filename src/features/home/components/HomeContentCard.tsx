@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
+import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
+import {
+  buildBrowseQuickActionsTarget,
+  useBrowsePosterQuickActions,
+} from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
 import type { HomeItem } from '../types';
 import {
   formatCatalogYear,
@@ -27,6 +32,20 @@ export const HomeContentCard = memo(function HomeContentCard({
   posterSize,
 }: HomeContentCardProps) {
   const { t } = useTranslation();
+  const quickTarget = useMemo(
+    () =>
+      buildBrowseQuickActionsTarget({
+        contentId: item.id,
+        contentType: item.contentType,
+        title: item.title,
+        posterUrl: item.posterUrl,
+        releaseDate: item.releaseDate,
+        voteAverage: item.voteAverage,
+      }),
+    [item.contentType, item.id, item.posterUrl, item.releaseDate, item.title, item.voteAverage],
+  );
+  const { isWatched, watchedBusy, onLongPress, onToggleWatched } =
+    useBrowsePosterQuickActions(quickTarget);
   const metadataLine = useMemo(() => {
     const parts = [
       formatContentType(item.contentType),
@@ -44,15 +63,23 @@ export const HomeContentCard = memo(function HomeContentCard({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(item)}
+      onLongPress={onLongPress}
+      delayLongPress={380}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <PosterImage
-        uri={item.posterUrl}
-        width={layout.posterCarousel.width}
-        height={layout.posterCarousel.height}
-        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-        size={posterSize}
-      />
+      <BrowsePosterFrame
+        watched={isWatched}
+        busy={watchedBusy}
+        onToggleWatched={onToggleWatched}
+      >
+        <PosterImage
+          uri={item.posterUrl}
+          width={layout.posterCarousel.width}
+          height={layout.posterCarousel.height}
+          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
+          size={posterSize}
+        />
+      </BrowsePosterFrame>
       <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}

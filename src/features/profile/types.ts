@@ -2,6 +2,20 @@ import type { SocialAuthProvider } from '@/models/api/auth';
 
 export type UserAvatarKind = 'custom' | 'provider' | 'initials';
 
+/** Handles or URLs; empty/null clears. Backend must persist on me + social profile GET. */
+export interface ProfileSocialLinks {
+  x?: string | null;
+  instagram?: string | null;
+  snapchat?: string | null;
+  tiktok?: string | null;
+  youtube?: string | null;
+  twitch?: string | null;
+  threads?: string | null;
+  website?: string | null;
+}
+
+export type ProfileSocialPlatform = keyof ProfileSocialLinks;
+
 export interface UserProfileResponse {
   id: string;
   email: string;
@@ -15,10 +29,15 @@ export interface UserProfileResponse {
   providerAvatarUrl?: string | null;
   effectiveAvatarUrl?: string | null;
   avatarKind?: UserAvatarKind;
+  /** Optional until backend ships; max 300. */
+  bio?: string | null;
+  socialLinks?: ProfileSocialLinks | null;
 }
 
 export interface UpdateProfileRequest {
   displayName: string;
+  bio?: string | null;
+  socialLinks?: ProfileSocialLinks | null;
 }
 
 export interface ChangeEmailRequest {

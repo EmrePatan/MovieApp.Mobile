@@ -34,6 +34,7 @@ const DISCOVER_ROUTE_PREFIXES = [
 
 const LIBRARY_ROUTE_PREFIXES = [
   '/library',
+  '/profile',
   '/favorites',
   '/following',
   '/watch-history',
@@ -43,6 +44,7 @@ const LIBRARY_ROUTE_PREFIXES = [
 ] as const;
 
 const SOCIAL_ROUTE_PREFIXES = [
+  '/messages',
   '/social',
   '/social-notifications',
   '/social-requests',

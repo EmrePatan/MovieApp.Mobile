@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { translateWatchProviderType } from '@/i18n/catalog-labels';
 import { WATCH_MONETIZATION_OPTIONS, type WatchMonetizationType } from '../watch-provider-types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface WatchMonetizationSelectorProps {
@@ -55,19 +55,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     justifyContent: 'center',
   },
   chipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   chipLabel: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '600',
   },
   chipLabelSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
   },
 });

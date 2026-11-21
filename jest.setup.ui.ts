@@ -156,10 +156,16 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
-jest.mock('@expo/vector-icons', () => ({
-  Ionicons: ({ name, ...props }: { name: string }) =>
-    mockReact.createElement('Icon', { ...props, accessibilityLabel: name }),
-}));
+jest.mock('@expo/vector-icons', () => {
+  const Icon = ({ name, ...props }: { name: string }) =>
+    mockReact.createElement('Icon', { ...props, accessibilityLabel: name });
+  return {
+    Ionicons: Icon,
+    FontAwesome5: Icon,
+    FontAwesome6: Icon,
+    MaterialCommunityIcons: Icon,
+  };
+});
 
 jest.mock('expo-linear-gradient', () => ({
   LinearGradient: ({

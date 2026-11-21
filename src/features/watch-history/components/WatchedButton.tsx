@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,7 +16,7 @@ import {
   useToggleMovieWatched,
   useToggleTvShowWatched,
 } from '../hooks/useWatchHistoryMutations';
-import { hasStartedTvShow } from '../utils/tv-show-watch-status';
+import { isTvShowFullyWatched } from '../utils/tv-show-watch-status';
 import { colors } from '@/theme/colors';
 import { borderRadius } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -88,7 +87,7 @@ export function WatchedButton({
         : toggleEpisode;
   const isWatched =
     target.type === 'tvshow'
-      ? hasStartedTvShow(tvProgress.data)
+      ? isTvShowFullyWatched(tvProgress.data)
       : (statusQuery.data as { isWatched?: boolean } | undefined)?.isWatched ?? false;
   const isMutationPending = toggleMutation.isPending;
   const isDetailVariant = variant === 'detail';
@@ -108,24 +107,6 @@ export function WatchedButton({
       return;
     }
 
-    if (active && target.type === 'tvshow') {
-      Alert.alert(
-        t('details.actions.unwatchTvShowTitle'),
-        t('details.actions.unwatchTvShowMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('details.actions.unwatchTvShowConfirm'),
-            style: 'destructive',
-            onPress: () => toggleTvShow.mutate(true, {
-              onError: () => setFeedback(t('details.actions.watchedUpdateError')),
-            }),
-          },
-        ],
-      );
-      return;
-    }
-
     if (active && onBeforeUnwatch) {
       const proceed = await onBeforeUnwatch();
       if (!proceed) {
@@ -141,23 +122,43 @@ export function WatchedButton({
       );
     };
 
-    const onSuccess = () => {
-      if (!active) {
-        onMarkedWatched?.();
-      }
-    };
-
     if (target.type === 'episode') {
-      toggleEpisode.mutate({ episodeId: target.contentId, isWatched }, { onError, onSuccess });
+      toggleEpisode.mutate(
+        { episodeId: target.contentId, isWatched },
+        {
+          onError,
+          onSuccess: () => {
+            if (!active) {
+              onMarkedWatched?.();
+            }
+          },
+        },
+      );
       return;
     }
 
     if (target.type === 'tvshow') {
-      toggleTvShow.mutate(isWatched, { onError, onSuccess });
+      toggleTvShow.mutate(isWatched, {
+        onError,
+        onSuccess: (result) => {
+          // Completed shows: rating opens after confetti dismisses.
+          // Caught-up ongoing shows: open rating immediately (no confetti).
+          if (!active && !result.celebrated) {
+            onMarkedWatched?.();
+          }
+        },
+      });
       return;
     }
 
-    toggleMovie.mutate(isWatched, { onError, onSuccess });
+    toggleMovie.mutate(isWatched, {
+      onError,
+      onSuccess: () => {
+        if (!active) {
+          onMarkedWatched?.();
+        }
+      },
+    });
   };
 
   const label = active ? t('common.markAsUnwatched') : t('common.markAsWatched');

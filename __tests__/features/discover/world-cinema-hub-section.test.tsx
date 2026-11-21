@@ -18,6 +18,27 @@ jest.mock('@/features/discovery/hooks/useWorldCinemaPreview', () => ({
   useWorldCinemaPreview: jest.fn(),
 }));
 
+jest.mock('@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions', () => ({
+  buildBrowseQuickActionsTarget: (input: {
+    contentId: string;
+    contentType: 'movie' | 'tv';
+    title: string;
+    posterUrl: string | null | undefined;
+  }) => ({
+    contentId: input.contentId,
+    contentType: input.contentType,
+    title: input.title,
+    posterUrl: input.posterUrl ?? null,
+  }),
+  useBrowsePosterQuickActions: () => ({
+    supported: false,
+    isWatched: false,
+    watchedBusy: false,
+    onLongPress: undefined,
+    onToggleWatched: undefined,
+  }),
+}));
+
 describe('WorldCinemaHubSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();

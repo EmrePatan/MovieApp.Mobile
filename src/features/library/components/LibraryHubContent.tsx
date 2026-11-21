@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -44,7 +44,11 @@ const GRID_GAP = spacing.sm;
 const DEFAULT_CATEGORY: LibraryCategory = 'watching';
 const DEFAULT_MEDIA_FILTER: CatalogMediaFilter = 'all';
 
-export function LibraryHubContent() {
+interface LibraryHubContentProps {
+  banner?: ReactNode;
+}
+
+export function LibraryHubContent({ banner = null }: LibraryHubContentProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -52,10 +56,23 @@ export function LibraryHubContent() {
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState<LibraryCategory>(DEFAULT_CATEGORY);
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>(DEFAULT_MEDIA_FILTER);
-  const { debouncedSearch, isSearchActive, clearSearch } = useLibraryHubSearch();
+  const {
+    searchInput,
+    setSearchInput,
+    debouncedSearch,
+    isSearchActive,
+    clearSearch,
+  } = useLibraryHubSearch();
+  const [searchOpen, setSearchOpen] = useState(false);
   const isWatchlistsCategory = category === 'watchlist';
   const effectiveMediaType = category === 'watching' ? 'all' : mediaType;
   const searchMediaType = mediaType;
+
+  useEffect(() => {
+    if (isSearchActive) {
+      setSearchOpen(true);
+    }
+  }, [isSearchActive]);
 
   const libraryQuery = useLibrary(category, effectiveMediaType, {
     enabled: !isWatchlistsCategory && !isSearchActive,
@@ -88,9 +105,19 @@ export function LibraryHubContent() {
       return;
     }
 
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
     setCategory(nextCategory);
     trackProductMetric(PRODUCT_METRICS.libraryFilterSelected);
   }, [category]);
+
+  const handleOpenSearch = useCallback(() => {
+    setSearchOpen(true);
+  }, []);
+
+  const handleCloseSearch = useCallback(() => {
+    clearSearch();
+    setSearchOpen(false);
+  }, [clearSearch]);
 
   const handleMediaTypeChange = useCallback((nextMediaType: CatalogMediaFilter) => {
     if (nextMediaType === mediaType) {
@@ -107,6 +134,7 @@ export function LibraryHubContent() {
 
   const refreshLibraryHub = useCallback(() => {
     clearSearch();
+    setSearchOpen(false);
 
     if (isWatchlistsCategory) {
       void watchlistsQuery.refetch();
@@ -186,13 +214,22 @@ export function LibraryHubContent() {
     [handleItemPress, itemHeight, itemWidth, resolveGridCategory],
   );
 
-  const listHeader = isSearchActive ? null : (
-    <LibraryHubHeader
-      category={category}
-      mediaType={mediaType}
-      onCategoryChange={handleCategoryChange}
-      onMediaTypeChange={handleMediaTypeChange}
-    />
+  const chrome = (
+    <View style={styles.chrome}>
+      {banner}
+      <LibraryHubHeader
+        category={category}
+        mediaType={mediaType}
+        onCategoryChange={handleCategoryChange}
+        onMediaTypeChange={handleMediaTypeChange}
+        searchOpen={searchOpen}
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        onClearSearch={clearSearch}
+        onOpenSearch={handleOpenSearch}
+        onCloseSearch={handleCloseSearch}
+      />
+    </View>
   );
 
   if (!isAuthenticated) {
@@ -208,13 +245,21 @@ export function LibraryHubContent() {
   }
 
   if (isWatchlistsCategory && !isSearchActive) {
-    return <LibraryWatchlistsOverview listHeader={listHeader} listRef={listRef} />;
+    return (
+      <View style={styles.screen}>
+        {chrome}
+        <View style={styles.bodyPad}>
+          <LibraryWatchlistsOverview listRef={listRef} />
+        </View>
+      </View>
+    );
   }
 
   if (isSearchActive && librarySearchQuery.isLoading && gridItems.length === 0) {
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        {chrome}
+        <View style={[styles.bodyPad, styles.centered]}>
           <ActivityIndicator color={colors.accent} />
           <AppText variant="bodySmall" muted>{t('library.hub.searchLoading')}</AppText>
         </View>
@@ -228,8 +273,9 @@ export function LibraryHubContent() {
       : t('library.hub.searchError');
 
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        {chrome}
+        <View style={[styles.bodyPad, styles.centered]}>
           <ErrorView
             message={message}
             onRetry={() => void librarySearchQuery.refetch()}
@@ -241,9 +287,9 @@ export function LibraryHubContent() {
 
   if (!isSearchActive && libraryQuery.isLoading && displayItems.length === 0) {
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        {listHeader}
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        {chrome}
+        <View style={[styles.bodyPad, styles.centered]}>
           <ActivityIndicator color={colors.accent} />
           <AppText variant="bodySmall" muted>{t('common.loadingYourLibrary')}</AppText>
         </View>
@@ -257,9 +303,9 @@ export function LibraryHubContent() {
       : t('library.hub.loadError');
 
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        {listHeader}
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        {chrome}
+        <View style={[styles.bodyPad, styles.centered]}>
           <ErrorView message={message} onRetry={handleRefresh} />
         </View>
       </View>
@@ -287,47 +333,49 @@ export function LibraryHubContent() {
 
   return (
     <View style={styles.screen}>
-      <FlatList
-        ref={listRef}
-        testID="library-grid-three-column"
-        data={gridItems}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        keyExtractor={getLibraryGridItemKey}
-        numColumns={GRID_COLUMNS}
-        columnWrapperStyle={styles.row}
-        renderItem={renderItem}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={emptyComponent}
-        removeClippedSubviews
-        ListFooterComponent={
-          activeQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : activeQuery.isFetchNextPageError ? (
-            <View style={styles.footerError}>
-              <AppText variant="bodySmall" muted center>
-                {t('common.unableToLoadMore')}
-              </AppText>
-              <AppButton
-                title={t('common.retry')}
-                variant="secondary"
-                onPress={() => void activeQuery.fetchNextPage()}
-              />
-            </View>
-          ) : null
-        }
-        contentContainerStyle={styles.listContent}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.4}
-        onScroll={onListScroll}
-        scrollEventThrottle={scrollEventThrottle}
-        initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
-        windowSize={layout.verticalList.windowSize}
-      />
-      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
+      {chrome}
+      <View style={styles.bodyPad}>
+        <FlatList
+          ref={listRef}
+          testID="library-grid-three-column"
+          data={gridItems}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          keyExtractor={getLibraryGridItemKey}
+          numColumns={GRID_COLUMNS}
+          columnWrapperStyle={styles.row}
+          renderItem={renderItem}
+          ListEmptyComponent={emptyComponent}
+          removeClippedSubviews
+          ListFooterComponent={
+            activeQuery.isFetchingNextPage ? (
+              <View style={styles.footerLoading}>
+                <ActivityIndicator color={colors.accent} />
+              </View>
+            ) : activeQuery.isFetchNextPageError ? (
+              <View style={styles.footerError}>
+                <AppText variant="bodySmall" muted center>
+                  {t('common.unableToLoadMore')}
+                </AppText>
+                <AppButton
+                  title={t('common.retry')}
+                  variant="secondary"
+                  onPress={() => void activeQuery.fetchNextPage()}
+                />
+              </View>
+            ) : null
+          }
+          contentContainerStyle={styles.listContent}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.4}
+          onScroll={onListScroll}
+          scrollEventThrottle={scrollEventThrottle}
+          initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
+          windowSize={layout.verticalList.windowSize}
+        />
+        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
+      </View>
     </View>
   );
 }
@@ -336,12 +384,15 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  screenPadding: {
+  chrome: {
+    paddingHorizontal: spacing.lg,
+  },
+  bodyPad: {
+    flex: 1,
     paddingHorizontal: spacing.lg,
   },
   listContent: {
     flexGrow: 1,
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     gap: GRID_GAP,
   },
@@ -352,7 +403,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
   signInCopy: {

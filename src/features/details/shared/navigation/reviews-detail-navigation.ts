@@ -7,6 +7,10 @@ import { getMovieSegmentIndex, getTvSegmentIndex } from './catalog-route-segment
 
 export const MY_COMMENTS_REVIEWS_RETURN_HREF = '/profile/my-comments' as const;
 
+export function buildUserCommentsReturnHref(userId: string): string {
+  return `/profile/user-comments/${userId}`;
+}
+
 let reviewsReturnHref: string | null = null;
 
 export function peekReviewsReturnHref(): string | null {
@@ -24,11 +28,12 @@ export function isReviewsDetailRoute(segments: readonly string[]): boolean {
   }
 
   const tvIndex = getTvSegmentIndex(segments);
-  if (tvIndex !== -1) {
-    return segments[tvIndex + 2] === 'reviews';
+  if (tvIndex !== -1 && segments[tvIndex + 2] === 'reviews') {
+    return true;
   }
 
-  return false;
+  const episodeIndex = segments.indexOf('episode');
+  return episodeIndex !== -1 && segments[episodeIndex + 2] === 'reviews';
 }
 
 export function openReviewsDetail(

@@ -13,7 +13,7 @@ describe('insights navigation', () => {
     expect(tabsLayoutSource).toContain('name="profile" options={hiddenTabScreenOptions}');
   });
 
-  it('keeps home header profile route reachable', () => {
+  it('opens messages from the home header', () => {
     const headerPath = path.join(
       process.cwd(),
       'src',
@@ -24,6 +24,7 @@ describe('insights navigation', () => {
     );
     const headerSource = readFileSync(headerPath, 'utf8');
 
-    expect(headerSource).toContain("router.push('/(tabs)/profile')");
+    expect(headerSource).toContain("openLibraryStackScreen(router, '/messages'");
+    expect(headerSource).toContain('chatbox-outline');
   });
 });

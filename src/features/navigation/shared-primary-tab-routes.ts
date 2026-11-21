@@ -11,6 +11,7 @@ export const SHARED_PRIMARY_TAB_CONTEXT_PREFIXES = [
   '/streaming-platforms',
   '/discover-genres',
   '/notifications',
+  '/messages',
   '/following',
   '/favorites',
   '/watch-history',

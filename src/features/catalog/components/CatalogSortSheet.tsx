@@ -2,8 +2,8 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 export interface CatalogSortOption<T extends string> {
   value: T;
@@ -33,13 +33,21 @@ export function CatalogSortSheet<T extends string>({
 }: CatalogSortSheetProps<T>) {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose} accessibilityRole="button" accessibilityLabel={closeLabel}>
+      <Pressable
+        style={premiumSheetChrome.overlay}
+        onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel={closeLabel}
+      >
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
           <Pressable onPress={(event) => event.stopPropagation()} testID={testID}>
+            <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>
-              <AppText variant="subtitle">{title}</AppText>
+              <AppText variant="subtitle" style={styles.title}>
+                {title}
+              </AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={closeLabel} onPress={onClose}>
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={22} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -58,19 +66,19 @@ export function CatalogSortSheet<T extends string>({
                       onClose();
                     }}
                     style={({ pressed }) => [
-                      styles.optionRow,
-                      selected && styles.optionRowSelected,
+                      premiumSheetChrome.optionRow,
+                      selected && premiumSheetChrome.optionRowSelected,
                       pressed && styles.pressed,
                     ]}
                   >
                     <AppText
                       variant="body"
-                      style={selected ? styles.optionLabelSelected : undefined}
+                      style={selected ? premiumSheetChrome.optionLabelSelected : styles.optionLabel}
                     >
                       {option.label}
                     </AppText>
                     {selected ? (
-                      <Ionicons name="checkmark" size={20} color={colors.accent} />
+                      <Ionicons name="checkmark" size={18} color={premiumSheet.mutedGold} />
                     ) : null}
                   </Pressable>
                 );
@@ -84,18 +92,8 @@ export function CatalogSortSheet<T extends string>({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
   },
   header: {
@@ -103,23 +101,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  title: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
+  },
   options: {
-    gap: spacing.xs,
+    gap: 8,
   },
-  optionRow: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-  },
-  optionRowSelected: {
-    backgroundColor: colors.accentTint12,
-  },
-  optionLabelSelected: {
-    color: colors.accent,
-    fontWeight: '600',
+  optionLabel: {
+    color: premiumSheet.textPrimary,
   },
   pressed: {
     opacity: 0.85,

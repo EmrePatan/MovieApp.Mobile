@@ -2,8 +2,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 export interface CatalogOptionItem<T extends string> {
   value: T;
@@ -55,8 +55,8 @@ export function CatalogOptionList<T extends string>({
               onSingleSelectComplete?.();
             }}
             style={({ pressed }) => [
-              styles.optionRow,
-              selected && styles.optionRowSelected,
+              premiumSheetChrome.optionRow,
+              selected && premiumSheetChrome.optionRowSelected,
               pressed && styles.pressed,
             ]}
           >
@@ -64,12 +64,14 @@ export function CatalogOptionList<T extends string>({
               {option.flagEmoji ? <CircularFlagBadge emoji={option.flagEmoji} /> : null}
               <AppText
                 variant="body"
-                style={[styles.optionLabel, selected && styles.optionLabelSelected]}
+                style={[styles.optionLabel, selected && premiumSheetChrome.optionLabelSelected]}
               >
                 {option.label}
               </AppText>
             </View>
-            {selected ? <Ionicons name="checkmark" size={20} color={colors.accent} /> : null}
+            {selected ? (
+              <Ionicons name="checkmark" size={18} color={premiumSheet.mutedGold} />
+            ) : null}
           </Pressable>
         );
       })}
@@ -98,7 +100,7 @@ export function CatalogOptionSelector<T extends string>(props: CatalogOptionList
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.xs,
+    gap: 8,
     paddingBottom: spacing.xs,
   },
   labelRow: {
@@ -110,21 +112,7 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     flexShrink: 1,
-  },
-  optionRow: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.md,
-  },
-  optionRowSelected: {
-    backgroundColor: colors.accentTint12,
-  },
-  optionLabelSelected: {
-    color: colors.accent,
-    fontWeight: '600',
+    color: premiumSheet.textPrimary,
   },
   pressed: {
     opacity: 0.85,

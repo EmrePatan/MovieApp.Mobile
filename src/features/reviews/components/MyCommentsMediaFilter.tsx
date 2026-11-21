@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '@/features/library/types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 const FILTER_VALUES: CatalogMediaFilter[] = ['all', 'movie', 'tv'];
 
@@ -36,7 +36,7 @@ export function MyCommentsMediaFilter({ value, onChange }: MyCommentsMediaFilter
             accessibilityState={{ selected }}
             accessibilityLabel={t('common.filterLabel', { label: filter.label })}
             onPress={() => onChange(filter.value)}
-            style={[styles.chip, selected && styles.chipSelected]}
+            style={[styles.tab, selected && styles.tabSelected]}
           >
             <AppText
               variant="caption"
@@ -56,28 +56,23 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'stretch',
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    padding: spacing.xs,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    alignItems: 'stretch',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderSubtle,
+    backgroundColor: colors.background,
   },
-  chip: {
+  tab: {
     flex: 1,
-    minHeight: 34,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    backgroundColor: 'transparent',
+    minHeight: 40,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+    marginBottom: -StyleSheet.hairlineWidth,
   },
-  chipSelected: {
-    backgroundColor: colors.accentSurface,
-    borderColor: colors.borderAccent,
+  tabSelected: {
+    borderBottomColor: colors.textPrimary,
   },
   label: {
     color: colors.textMuted,

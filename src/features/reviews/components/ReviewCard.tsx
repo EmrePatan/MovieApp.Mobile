@@ -16,7 +16,8 @@ import {
   isValidBackendScore,
 } from '@/features/ratings/utils/star-rating';
 import { ReviewStarRow } from './ReviewStarRow';
-import { ReviewTranslationControls } from './ReviewTranslationControls';
+import { ReviewRichBody } from './ReviewRichBody';
+import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -31,8 +32,11 @@ interface ReviewCardProps {
   isOwnReview?: boolean;
   variant?: ReviewCardVariant;
   isDeleting?: boolean;
+  isLikePending?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onLike?: () => void;
+  onOpenComments?: () => void;
 }
 
 export const ReviewCard = memo(function ReviewCard({
@@ -40,15 +44,23 @@ export const ReviewCard = memo(function ReviewCard({
   isOwnReview = false,
   variant = 'row',
   isDeleting = false,
+  isLikePending = false,
   onEdit,
   onDelete,
+  onLike,
+  onOpenComments,
 }: ReviewCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const dateLabel = formatReviewDateLabel(review.createdAt, review.updatedAt);
   const content = review.content.trim();
-  const canExpand = likelyExceedsCollapsedLines(content, REVIEW_LIST_COLLAPSED_LINE_COUNT);
+  const textOnly = parseSocialCommentContent(content).text;
+  const canExpand = likelyExceedsCollapsedLines(textOnly, REVIEW_LIST_COLLAPSED_LINE_COUNT);
   const hasActions = isOwnReview && (onEdit || onDelete);
+  const likesCount = review.likesCount ?? 0;
+  const commentsCount = review.commentsCount ?? 0;
+  const isLiked = Boolean(review.isLikedByMe);
+  const canEngage = Boolean(review.socialActivityId);
   const starRating =
     review.userRating != null && isValidBackendScore(review.userRating)
       ? backendScoreToStarRating(review.userRating)
@@ -131,22 +143,14 @@ export const ReviewCard = memo(function ReviewCard({
       </View>
 
       <View style={styles.body}>
-        {isOwnReview ? (
-          <AppText
-            variant="bodySmall"
-            style={styles.content}
-            numberOfLines={expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined}
-          >
-            {content}
-          </AppText>
-        ) : (
-          <ReviewTranslationControls
-            review={review}
-            numberOfLines={
-              expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined
-            }
-          />
-        )}
+        <ReviewRichBody
+          content={content}
+          review={isOwnReview ? undefined : review}
+          plain={isOwnReview}
+          numberOfLines={
+            expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined
+          }
+        />
         {canExpand ? (
           <Pressable
             accessibilityRole="button"
@@ -167,9 +171,68 @@ export const ReviewCard = memo(function ReviewCard({
         ) : null}
       </View>
 
-      <AppText variant="caption" muted style={styles.dateFooter} numberOfLines={1}>
-        {dateLabel}
-      </AppText>
+      <View style={styles.footer}>
+        {canEngage ? (
+          <View style={styles.engagement}>
+            {isOwnReview || !onLike ? (
+              <View
+                style={styles.engageHit}
+                accessibilityRole="text"
+                accessibilityLabel={`${t('social.like')}: ${likesCount}`}
+              >
+                <Ionicons
+                  name={isLiked ? 'heart' : 'heart-outline'}
+                  size={16}
+                  color={isLiked ? colors.accentStrong : colors.textMuted}
+                />
+                <AppText style={[styles.engageCount, isLiked && styles.engageCountActive]}>
+                  {likesCount}
+                </AppText>
+              </View>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={isLiked ? t('social.unlike') : t('social.like')}
+                disabled={isLikePending}
+                onPress={onLike}
+                hitSlop={8}
+                style={({ pressed }) => [styles.engageHit, pressed && styles.pressed]}
+              >
+                {isLikePending ? (
+                  <ActivityIndicator color={colors.textMuted} size="small" />
+                ) : (
+                  <>
+                    <Ionicons
+                      name={isLiked ? 'heart' : 'heart-outline'}
+                      size={16}
+                      color={isLiked ? colors.accentStrong : colors.textMuted}
+                    />
+                    <AppText style={[styles.engageCount, isLiked && styles.engageCountActive]}>
+                      {likesCount}
+                    </AppText>
+                  </>
+                )}
+              </Pressable>
+            )}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('social.commentsCount')}
+              onPress={onOpenComments}
+              disabled={!onOpenComments}
+              hitSlop={8}
+              style={({ pressed }) => [styles.engageHit, pressed && styles.pressed]}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={15} color={colors.textMuted} />
+              <AppText style={styles.engageCount}>{commentsCount}</AppText>
+            </Pressable>
+          </View>
+        ) : (
+          <View />
+        )}
+        <AppText variant="caption" muted style={styles.dateFooter} numberOfLines={1}>
+          {dateLabel}
+        </AppText>
+      </View>
     </View>
   );
 });
@@ -227,10 +290,39 @@ const styles = StyleSheet.create({
     letterSpacing: 0.12,
     fontSize: 14,
   },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    minHeight: 28,
+  },
+  engagement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    flexShrink: 1,
+  },
+  engageHit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 32,
+  },
+  engageCount: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: colors.textMuted,
+    fontVariant: ['tabular-nums'],
+  },
+  engageCountActive: {
+    color: colors.accentStrong,
+  },
   dateFooter: {
-    alignSelf: 'flex-end',
     fontSize: 11,
     lineHeight: 14,
+    flexShrink: 0,
   },
   expandButton: {
     alignSelf: 'flex-start',

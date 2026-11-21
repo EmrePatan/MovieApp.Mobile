@@ -7,7 +7,7 @@ export default function MyCommentsScreen() {
   const { t } = useTranslation();
 
   return (
-    <Screen>
+    <Screen padded={false}>
       <ProfileSubscreenHeader title={t('profile.myComments.title')} />
       <MyCommentsContent />
     </Screen>

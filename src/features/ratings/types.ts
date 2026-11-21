@@ -6,6 +6,7 @@ export interface RatingResponse {
   id: string;
   movieId: string | null;
   tvShowId: string | null;
+  episodeId: string | null;
   score: number;
   createdAt: string;
   updatedAt: string;
@@ -17,4 +18,4 @@ export interface RatingSummaryResponse {
   scoreDistribution: Record<string, number>;
 }
 
-export type RatingContentType = 'movie' | 'tv';
+export type RatingContentType = 'movie' | 'tv' | 'episode';

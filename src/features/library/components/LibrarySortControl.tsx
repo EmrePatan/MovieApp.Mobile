@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { getSortLabel } from '../utils/library-sort';
 import type { LibrarySortOption } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LibrarySortControlProps {
@@ -34,7 +34,7 @@ export function LibrarySortControl({
     <View style={styles.wrapper}>
       {showLabel ? (
         <View style={styles.labelRow}>
-          <Ionicons name="swap-vertical-outline" size={14} color={colors.textMuted} />
+          <Ionicons name="swap-vertical-outline" size={14} color={premiumSheet.textSecondary} />
           <AppText variant="caption" muted>
             {t('common.sortBy')}
           </AppText>
@@ -99,31 +99,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipFilled: {
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
   },
   chipFilledSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   chipOutlined: {
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   chipOutlinedSelected: {
-    backgroundColor: colors.accentTint12,
-    borderColor: colors.borderAccent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   label: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
   },
   labelFilledSelected: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   labelOutlinedSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
 });
+

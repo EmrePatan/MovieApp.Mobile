@@ -1,236 +1,132 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
-import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
-import { NotificationRow } from '@/features/notifications/components/NotificationRow';
-import { NotificationsEmptyState } from '@/features/notifications/components/NotificationsEmptyState';
-import { useDeleteNotification } from '@/features/notifications/hooks/useDeleteNotification';
+import { NotificationsInboxSegmentTabs } from '@/features/notifications/components/NotificationsInboxSegmentTabs';
+import { ReleasesNotificationsPane } from '@/features/notifications/components/ReleasesNotificationsPane';
+import { SocialNotificationsPane } from '@/features/notifications/components/SocialNotificationsPane';
+import { useCombinedUnreadNotificationCount } from '@/features/notifications/hooks/useCombinedUnreadNotificationCount';
 import { useMarkAllNotificationsRead } from '@/features/notifications/hooks/useMarkAllNotificationsRead';
-import { useMarkNotificationRead } from '@/features/notifications/hooks/useMarkNotificationRead';
-import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
-import type { NotificationItem } from '@/features/notifications/types';
-import { flattenNotificationPages } from '@/features/notifications/utils/flatten-notification-pages';
-import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
-import { buildNotificationRoute } from '@/features/notifications/utils/notification-navigation';
-import { LibraryLoadingState } from '@/features/library/components/LibraryLoadingState';
-import { colors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
-import { spacing } from '@/theme/spacing';
+import {
+  parseNotificationsInboxSegment,
+  type NotificationsInboxSegment,
+} from '@/features/notifications/types-inbox';
+import { useMarkAllSocialNotificationsRead } from '@/features/social/hooks/useSocialMutations';
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
+import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
+import { premiumSheet } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 export default function NotificationsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const notificationsQuery = useNotificationsInbox();
-  const markNotificationRead = useMarkNotificationRead();
-  const markAllNotificationsRead = useMarkAllNotificationsRead();
-  const deleteNotification = useDeleteNotification();
+  const params = useLocalSearchParams<{ tab?: string | string[] }>();
+  const initialSegment = parseNotificationsInboxSegment(params.tab) ?? 'releases';
+
+  const [segment, setSegment] = useState<NotificationsInboxSegment>(initialSegment);
+  const unread = useCombinedUnreadNotificationCount();
+  const markAllReleasesRead = useMarkAllNotificationsRead();
+  const markAllSocialRead = useMarkAllSocialNotificationsRead();
   const listRef = useRef<FlatList>(null);
   const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
     useFlatListScrollToTopControl(listRef);
 
-  const items = useMemo(
-    () => flattenNotificationPages(notificationsQuery.data?.pages ?? []),
-    [notificationsQuery.data?.pages],
-  );
-
-  const hasUnread = useMemo(
-    () => items.some((item) => item.readAtUtc == null),
-    [items],
-  );
+  const activeHasUnread = segment === 'social' ? unread.socialUnread > 0 : unread.releasesUnread > 0;
+  const markAllPending =
+    segment === 'social' ? markAllSocialRead.isPending : markAllReleasesRead.isPending;
 
   const handleSignIn = useCallback(() => {
     router.push('/(auth)/login');
   }, [router]);
 
-  const handleItemPress = useCallback(
-    (item: NotificationItem) => {
-      if (item.readAtUtc == null) {
-        markNotificationRead.mutate(item.id);
-      }
-
-      router.push(buildNotificationRoute(item.contentType, item.contentId));
-    },
-    [markNotificationRead, router],
-  );
-
   const handleMarkAllRead = useCallback(() => {
-    if (markAllNotificationsRead.isPending || !hasUnread) {
+    if (markAllPending || !activeHasUnread) {
       return;
     }
 
-    markAllNotificationsRead.mutate();
-  }, [hasUnread, markAllNotificationsRead]);
-
-  const handleDelete = useCallback(
-    (item: NotificationItem) => {
-      if (deleteNotification.isPending) {
-        return;
-      }
-
-      deleteNotification.mutate({
-        notificationId: item.id,
-        wasUnread: item.readAtUtc == null,
-      });
-    },
-    [deleteNotification],
-  );
-
-  const handleLoadMore = useCallback(() => {
-    if (!shouldRequestNextInfinitePage(notificationsQuery)) {
+    if (segment === 'social') {
+      markAllSocialRead.mutate();
       return;
     }
 
-    void notificationsQuery.fetchNextPage();
-  }, [notificationsQuery]);
+    markAllReleasesRead.mutate();
+  }, [activeHasUnread, markAllPending, markAllReleasesRead, markAllSocialRead, segment]);
 
-  const handleRefresh = useCallback(() => {
-    void notificationsQuery.refetch();
-  }, [notificationsQuery]);
+  const handleSegmentChange = useCallback((next: NotificationsInboxSegment) => {
+    setSegment(next);
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, []);
 
-  const handleRetryNextPage = useCallback(() => {
-    void notificationsQuery.fetchNextPage();
-  }, [notificationsQuery]);
-
-  const renderItem = useCallback(
-    ({ item }: { item: NotificationItem }) => (
-      <NotificationRow
-        item={item}
-        onPress={handleItemPress}
-        onDelete={handleDelete}
-      />
-    ),
-    [handleDelete, handleItemPress],
-  );
-
-  const listHeader = (
-    <View style={styles.header}>
-      <DetailBackButton />
-      <View style={styles.titleRow}>
-        <AppText variant="title">{t('notifications.title')}</AppText>
-        {isAuthenticated ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('notifications.markAllRead')}
-            accessibilityState={{ disabled: !hasUnread || markAllNotificationsRead.isPending }}
-            disabled={!hasUnread || markAllNotificationsRead.isPending}
-            onPress={handleMarkAllRead}
-            style={({ pressed }) => [styles.markAllButton, pressed && styles.pressed]}
-          >
-            <AppText
-              variant="bodySmall"
-              style={!hasUnread ? styles.markAllDisabled : styles.markAllEnabled}
+  return (
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <View style={styles.header}>
+        <DetailBackButton />
+        <View style={styles.titleRow}>
+          <AppText variant="title">{t('notifications.title')}</AppText>
+          {isAuthenticated ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('notifications.markAllRead')}
+              accessibilityState={{ disabled: !activeHasUnread || markAllPending }}
+              disabled={!activeHasUnread || markAllPending}
+              onPress={handleMarkAllRead}
+              style={({ pressed }) => [styles.markAllButton, pressed && styles.pressed]}
             >
-              {t('notifications.markAllRead')}
-            </AppText>
-          </Pressable>
-        ) : null}
+              <AppText
+                variant="bodySmall"
+                style={!activeHasUnread ? styles.markAllDisabled : styles.markAllEnabled}
+              >
+                {t('notifications.markAllRead')}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
-      <AppText variant="bodySmall" muted>
-        {t('notifications.subtitle')}
-      </AppText>
-    </View>
-  );
 
-  if (!isAuthenticated) {
-    return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
+      {!isAuthenticated ? (
         <View style={styles.filteredEmpty}>
           <AppText variant="subtitle" center>
             {t('notifications.guestTitle')}
           </AppText>
           <AppText variant="bodySmall" muted center>
-            {t('notifications.guestMessage')}
+            {t('notifications.guestMessageUnified')}
           </AppText>
           <AppButton title={t('common.signInTitleCase')} variant="secondary" onPress={handleSignIn} />
         </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (notificationsQuery.isLoading && items.length === 0) {
-    return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
-        <LibraryLoadingState accessibilityLabel={t('common.loadingNotifications')} />
-      </SafeAreaView>
-    );
-  }
-
-  if (notificationsQuery.isError && items.length === 0) {
-    return (
-      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        {listHeader}
-        <View style={styles.errorContainer}>
-          <ErrorView
-            message={t('notifications.loadError')}
-            onRetry={() => void notificationsQuery.refetch()}
-            retryLabel={t('common.retry')}
+      ) : (
+        <>
+          <NotificationsInboxSegmentTabs
+            active={segment}
+            onChange={handleSegmentChange}
+            socialUnread={unread.socialUnread}
+            releasesUnread={unread.releasesUnread}
           />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const paginationErrorMessage = notificationsQuery.isFetchNextPageError
-    ? t('common.unableToLoadMoreNotifications')
-    : null;
-
-  return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <View style={styles.listHost}>
-        <PlatformRefreshFlatList
-          ref={listRef}
-          refreshing={
-            notificationsQuery.isRefetching && !notificationsQuery.isFetchingNextPage
-          }
-          onRefresh={handleRefresh}
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={<NotificationsEmptyState />}
-          ListFooterComponent={
-            notificationsQuery.isFetchingNextPage ? (
-              <View style={styles.footerLoading}>
-                <ActivityIndicator color={colors.accent} />
-              </View>
-            ) : notificationsQuery.isFetchNextPageError ? (
-              <View style={styles.footerError}>
-                <AppText variant="bodySmall" muted center>
-                  {paginationErrorMessage}
-                </AppText>
-                <AppButton title={t('common.retry')} variant="secondary" onPress={handleRetryNextPage} />
-              </View>
-            ) : null
-          }
-          contentContainerStyle={styles.listContent}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.4}
-          onScroll={onListScroll}
-          scrollEventThrottle={scrollEventThrottle}
-          initialNumToRender={layout.verticalList.initialNumToRender}
-          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
-          windowSize={layout.verticalList.windowSize}
-        />
-        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
-      </View>
+          <View style={styles.listHost}>
+            {segment === 'social' ? (
+              <SocialNotificationsPane
+                listRef={listRef}
+                onScroll={onListScroll}
+                scrollEventThrottle={scrollEventThrottle}
+              />
+            ) : (
+              <ReleasesNotificationsPane
+                listRef={listRef}
+                onScroll={onListScroll}
+                scrollEventThrottle={scrollEventThrottle}
+              />
+            )}
+            <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -239,9 +135,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  listHost: {
-    flex: 1,
   },
   header: {
     paddingTop: spacing.md,
@@ -261,7 +154,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   markAllEnabled: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
   },
   markAllDisabled: {
     color: colors.textMuted,
@@ -269,28 +162,12 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.85,
   },
-  listContent: {
-    flexGrow: 1,
-    paddingBottom: spacing.xxl,
-  },
-  errorContainer: {
+  listHost: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   filteredEmpty: {
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: spacing.xl,
-    gap: spacing.sm,
-    alignItems: 'center',
-  },
-  footerLoading: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
-  },
-  footerError: {
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.lg,
     gap: spacing.sm,
     alignItems: 'center',
   },

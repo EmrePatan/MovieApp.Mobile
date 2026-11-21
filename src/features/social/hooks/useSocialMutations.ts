@@ -20,6 +20,7 @@ import {
   updateSocialPrivacy,
 } from '../api/social-api';
 import type { SocialFeedPage, SocialPrivacySettings } from '../types';
+import { getUiFormatLocaleTag } from '@/i18n';
 import { socialQueryKeys } from './social-query-keys';
 
 function showSocialMutationError(title: string, message: string) {
@@ -119,20 +120,26 @@ export function useToggleSocialActivityLike() {
         queryClient.cancelQueries({ queryKey: feedKey }),
         queryClient.cancelQueries({ queryKey: profileActivitiesKey }),
       ]);
-      const previousFeed = queryClient.getQueryData<InfiniteData<SocialFeedPage>>(feedKey);
+      const previousFeeds = queryClient.getQueriesData<InfiniteData<SocialFeedPage>>({
+        queryKey: feedKey,
+      });
       const previousProfiles = queryClient.getQueriesData<InfiniteData<SocialFeedPage>>({
         queryKey: profileActivitiesKey,
       });
-      queryClient.setQueryData<InfiniteData<SocialFeedPage>>(feedKey, current =>
-        updateActivityLike(current, activityId, !isLiked));
+      queryClient.setQueriesData<InfiniteData<SocialFeedPage>>(
+        { queryKey: feedKey },
+        current => updateActivityLike(current, activityId, !isLiked),
+      );
       queryClient.setQueriesData<InfiniteData<SocialFeedPage>>(
         { queryKey: profileActivitiesKey },
         current => updateActivityLike(current, activityId, !isLiked),
       );
-      return { previousFeed, previousProfiles };
+      return { previousFeeds, previousProfiles };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousFeed) queryClient.setQueryData(feedKey, context.previousFeed);
+      context?.previousFeeds?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       context?.previousProfiles?.forEach(([queryKey, data]) => {
         queryClient.setQueryData(queryKey, data);
       });
@@ -146,7 +153,7 @@ export function useCreateSocialComment(activityId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ content, parentCommentId }: { content: string; parentCommentId?: string | null }) =>
-      createSocialComment(activityId, content, parentCommentId),
+      createSocialComment(activityId, content, parentCommentId, getUiFormatLocaleTag()),
     onSuccess: () => {
       // A reply also changes its parent's repliesCount, so refresh every comment thread for this activity.
       void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
@@ -171,13 +178,40 @@ export function useDeleteSocialComment(activityId: string) {
   });
 }
 
+export function useToggleSocialCommentLikeFeed() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: ({
+      commentId,
+      isLiked,
+    }: {
+      commentId: string;
+      isLiked: boolean;
+      activityId: string;
+    }) => (isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId)),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [...socialQueryKeys.all, 'comments', variables.activityId],
+      });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
+    },
+    onError: () => showSocialMutationError(t('social.operationFailed'), t('social.commentLikeFailed')),
+  });
+}
+
 export function useToggleSocialCommentLike(activityId: string) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ commentId, isLiked }: { commentId: string; isLiked: boolean }) =>
       isLiked ? unlikeSocialComment(commentId) : likeSocialComment(commentId),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'comments', activityId] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'feed'] });
+      void queryClient.invalidateQueries({ queryKey: [...socialQueryKeys.all, 'profile-activities'] });
+    },
     onError: () => showSocialMutationError(t('social.operationFailed'), t('social.commentLikeFailed')),
   });
 }

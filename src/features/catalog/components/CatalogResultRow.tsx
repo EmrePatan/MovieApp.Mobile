@@ -4,6 +4,11 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
+import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
+import {
+  buildBrowseQuickActionsTarget,
+  useBrowsePosterQuickActions,
+} from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
 import { translateGenreNames } from '@/i18n/catalog-labels';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { interaction } from '@/theme/interaction';
@@ -12,6 +17,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 export interface CatalogResultRowProps {
+  contentId?: string;
   title: string;
   posterUrl: string | null;
   mediaType: 'movie' | 'tv';
@@ -36,6 +42,7 @@ function buildMetadataLine(
 }
 
 export const CatalogResultRow = memo(function CatalogResultRow({
+  contentId,
   title,
   posterUrl,
   mediaType,
@@ -47,6 +54,23 @@ export const CatalogResultRow = memo(function CatalogResultRow({
   testID,
 }: CatalogResultRowProps) {
   const { t } = useTranslation();
+  const quickTarget = useMemo(
+    () =>
+      contentId
+        ? buildBrowseQuickActionsTarget({
+            contentId,
+            contentType: mediaType,
+            title,
+            posterUrl,
+            year,
+            releaseDate,
+            voteAverage,
+          })
+        : null,
+    [contentId, mediaType, posterUrl, releaseDate, title, voteAverage, year],
+  );
+  const { isWatched, watchedBusy, onLongPress, onToggleWatched } =
+    useBrowsePosterQuickActions(quickTarget);
   const yearLabel = formatCatalogYear(releaseDate ?? null, year ?? null);
   const metadataLine = buildMetadataLine(mediaType, yearLabel);
   const showRating = voteAverage > 0;
@@ -71,15 +95,23 @@ export const CatalogResultRow = memo(function CatalogResultRow({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={380}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       testID={testID}
     >
-      <PosterImage
-        uri={posterUrl}
-        width={posterWidth}
-        height={posterHeight}
-        accessibilityLabel={t('common.posterAccessibility', { title })}
-      />
+      <BrowsePosterFrame
+        watched={isWatched}
+        busy={watchedBusy}
+        onToggleWatched={onToggleWatched}
+      >
+        <PosterImage
+          uri={posterUrl}
+          width={posterWidth}
+          height={posterHeight}
+          accessibilityLabel={t('common.posterAccessibility', { title })}
+        />
+      </BrowsePosterFrame>
 
       <View style={styles.body}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>

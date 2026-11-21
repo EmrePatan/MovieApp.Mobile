@@ -1,4 +1,6 @@
 export const socialProfilePath = (userId: string) => `/api/social/profiles/${userId}`;
+export const socialProfileCoverPosterPath = () => '/api/social/profiles/me/cover-poster';
+export const socialProfileCoverImagePath = () => '/api/users/me/profile-cover';
 export const socialProfileStatisticsPath = (userId: string) => `/api/social/profiles/${userId}/statistics`;
 export const socialProfileActivitiesPath = (userId: string, cursor?: string | null, pageSize = 20) => {
   const params = new URLSearchParams({ pageSize: String(pageSize) });
@@ -17,9 +19,16 @@ export const socialAcceptFollowRequestPath = (followerUserId: string) => `${soci
 export const socialBlockPath = (userId: string) => `/api/social/blocks/${userId}`;
 export const socialPrivacyPath = () => '/api/social/privacy';
 
-export const socialFeedPath = (cursor?: string | null, pageSize = 20) => {
+export const socialActivityPath = (activityId: string) => `/api/social/activities/${activityId}`;
+
+export const socialFeedPath = (
+  cursor?: string | null,
+  pageSize = 20,
+  mode?: 'following' | 'discover' | null,
+) => {
   const params = new URLSearchParams({ pageSize: String(pageSize) });
   if (cursor) params.set('cursor', cursor);
+  if (mode) params.set('mode', mode);
   return `/api/social/feed?${params.toString()}`;
 };
 
@@ -34,6 +43,8 @@ export const socialActivityCommentsPath = (activityId: string, parentCommentId?:
   return `/api/social/activities/${activityId}/comments?${params.toString()}`;
 };
 export const socialCommentPath = (commentId: string) => `/api/social/comments/${commentId}`;
+export const socialCommentTranslationPath = (commentId: string) =>
+  `${socialCommentPath(commentId)}/translation`;
 export const socialCommentLikePath = (commentId: string) => `${socialCommentPath(commentId)}/like`;
 export const socialReportsPath = () => '/api/social/reports';
 

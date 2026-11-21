@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 export type CatalogFilterSheetHeaderAction = 'close' | 'back';
 
@@ -45,7 +45,7 @@ export function CatalogFilterSheetShell({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onHeaderAction}>
-      <View style={styles.overlay}>
+      <View style={premiumSheetChrome.overlay}>
         <Pressable
           style={StyleSheet.absoluteFill}
           onPress={onHeaderAction}
@@ -57,6 +57,7 @@ export function CatalogFilterSheetShell({
           edges={['bottom']}
           testID={testID}
         >
+          <View style={premiumSheetChrome.handle} />
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
@@ -66,7 +67,7 @@ export function CatalogFilterSheetShell({
               style={styles.headerIconButton}
               testID={testID ? `${testID}-header-action` : undefined}
             >
-              <Ionicons name={headerIcon} size={24} color={colors.textPrimary} />
+              <Ionicons name={headerIcon} size={24} color={premiumSheet.textPrimary} />
             </Pressable>
             <AppText variant="subtitle" style={styles.headerTitle} numberOfLines={1}>
               {title}
@@ -100,18 +101,9 @@ export function CatalogFilterSheetShell({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   sheet: {
+    ...premiumSheetChrome.sheet,
     maxHeight: '85%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
     paddingBottom: spacing.md,
   },
   sheetKeywordDrillDown: {
@@ -136,6 +128,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: 'center',
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   scroll: {
     flexGrow: 0,
@@ -148,7 +142,7 @@ const styles = StyleSheet.create({
   actions: {
     gap: spacing.sm,
     paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
+    borderTopWidth: 1,
+    borderTopColor: premiumSheet.border,
   },
 });

@@ -16,8 +16,8 @@ import { AppText } from '@/components/common/AppText';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDiscoveryKeywords } from '@/features/discovery/hooks/useDiscoveryKeywords';
 import type { DiscoveryKeywordItem } from '@/features/discovery/keyword-types';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 interface CatalogKeywordSelectorPanelProps {
   selectedIds: string[];
@@ -119,12 +119,12 @@ export function CatalogKeywordSelectorPanel({
               accessibilityState={{ selected: true }}
               accessibilityLabel={item.name}
               onPress={() => toggleKeyword(item)}
-              style={styles.optionRowSelected}
+              style={[premiumSheetChrome.optionRow, premiumSheetChrome.optionRowSelected]}
             >
-              <AppText variant="body" style={styles.optionLabelSelected}>
+              <AppText variant="body" style={premiumSheetChrome.optionLabelSelected}>
                 {item.name}
               </AppText>
-              <Ionicons name="checkmark" size={20} color={colors.accent} />
+              <Ionicons name="checkmark" size={18} color={premiumSheet.mutedGold} />
             </Pressable>
           ))}
         </View>
@@ -137,7 +137,7 @@ export function CatalogKeywordSelectorPanel({
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator
       >
-        {keywordsQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
+        {keywordsQuery.isLoading ? <ActivityIndicator color={premiumSheet.mutedGold} /> : null}
 
         {keywordsQuery.isError ? (
           <AppText variant="bodySmall" muted>
@@ -161,9 +161,14 @@ export function CatalogKeywordSelectorPanel({
             accessibilityState={{ selected: false }}
             accessibilityLabel={item.name}
             onPress={() => toggleKeyword(item)}
-            style={({ pressed }) => [styles.optionRow, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              premiumSheetChrome.optionRow,
+              pressed && styles.pressed,
+            ]}
           >
-            <AppText variant="body">{item.name}</AppText>
+            <AppText variant="body" style={styles.optionLabel}>
+              {item.name}
+            </AppText>
           </Pressable>
         ))}
       </ScrollView>
@@ -195,7 +200,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   selectedSection: {
-    gap: spacing.xs,
+    gap: 8,
     marginTop: spacing.sm,
     flexShrink: 0,
   },
@@ -205,29 +210,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   content: {
-    gap: spacing.xs,
+    gap: 8,
     paddingBottom: spacing.sm,
   },
-  optionRow: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.md,
-  },
-  optionRowSelected: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.accentTint12,
-  },
-  optionLabelSelected: {
-    color: colors.accent,
-    fontWeight: '600',
+  optionLabel: {
+    color: premiumSheet.textPrimary,
   },
   pressed: {
     opacity: 0.85,

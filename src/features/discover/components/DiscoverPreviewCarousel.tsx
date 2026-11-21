@@ -3,10 +3,11 @@ import { DISCOVER_HUB_RAIL_GAP } from '@/features/discover/discover-hub-rail-til
 import { useDiscoverHubRailTileSize } from '@/features/discover/useDiscoverHubRailTileSize';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { PosterImage } from '@/components/common/PosterImage';
+import { DiscoverPreviewPosterCard } from './DiscoverPreviewPosterCard';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+
 interface DiscoverPreviewCarouselProps {
   title: string;
   items: SearchResultItem[];
@@ -53,26 +54,12 @@ export function DiscoverPreviewCarousel({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={item.title}
-            onPress={() => onItemPress(item)}
-            style={({ pressed }) => [
-              styles.card,
-              { width: tileSize.width },
-              pressed && styles.pressed,
-            ]}
-          >
-            <PosterImage
-              uri={item.posterUrl}
-              width={tileSize.width}
-              height={tileSize.height}
-              accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-            />
-            <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
-              {item.title}
-            </AppText>
-          </Pressable>
+          <DiscoverPreviewPosterCard
+            item={item}
+            width={tileSize.width}
+            height={tileSize.height}
+            onPress={onItemPress}
+          />
         )}
       />
     </View>
@@ -96,14 +83,5 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: spacing.lg,
     gap: DISCOVER_HUB_RAIL_GAP,
-  },
-  card: {
-    gap: spacing.xs,
-  },
-  cardTitle: {
-    color: colors.textPrimary,
-  },
-  pressed: {
-    opacity: 0.85,
   },
 });

@@ -15,7 +15,8 @@ describe('primary bottom navigation IA', () => {
     expect(tabsLayoutSource).toContain('tabBar={(props) => <PrimaryTabBar insets={props.insets} />}');
     expect(tabBarSource).toContain("labelKey: 'tabs.home'");
     expect(tabBarSource).toContain("labelKey: 'tabs.discover'");
-    expect(tabBarSource).toContain("labelKey: 'tabs.library'");
+    expect(tabBarSource).toContain("labelKey: 'tabs.profile'");
+    expect(tabBarSource).toContain("labelKey: 'tabs.social'");
     expect(tabBarSource).toContain("labelKey: 'tabs.insights'");
     expect(tabsLayoutSource).toMatch(/name="profile"/);
   });

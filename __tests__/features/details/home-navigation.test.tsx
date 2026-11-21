@@ -43,11 +43,20 @@ jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
 }));
 
-jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
-  useUnreadNotificationCount: jest.fn(() => ({
-    data: { unreadCount: 0 },
+jest.mock('@/features/messages/hooks/useMessageQueries', () => ({
+  useDirectMessageUnreadCount: () => ({ data: 0, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/notifications/hooks/useCombinedUnreadNotificationCount', () => ({
+  useCombinedUnreadNotificationCount: jest.fn(() => ({
+    unreadCount: 0,
+    releasesUnread: 0,
+    socialUnread: 0,
+    isLoading: false,
+    isError: false,
   })),
 }));
+
 
 jest.mock('@/features/home/components/HomeHeroCarousel', () => ({
   HomeHeroCarousel: () => null,

@@ -14,7 +14,7 @@ import {
   isValidBackendScore,
 } from '@/features/ratings/utils/star-rating';
 import { ReviewStarRow } from './ReviewStarRow';
-import { ReviewTranslationControls } from './ReviewTranslationControls';
+import { ReviewRichBody } from './ReviewRichBody';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -74,9 +74,11 @@ export const ReviewPreviewCard = memo(function ReviewPreviewCard({
       </View>
 
       <View style={styles.body}>
-        <ReviewTranslationControls
+        <ReviewRichBody
+          content={review.content}
           review={review}
           numberOfLines={DETAIL_REVIEW_PREVIEW_LINE_COUNT}
+          compactMedia
         />
       </View>
 
@@ -149,6 +151,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     minHeight: 0,
+    overflow: 'hidden',
   },
   date: {
     alignSelf: 'flex-end',

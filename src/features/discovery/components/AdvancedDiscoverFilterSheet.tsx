@@ -45,7 +45,7 @@ import {
   type GenreMatchMode,
 } from '../advanced-discover-types';
 import type { Genre } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface AdvancedDiscoverFilterSheetProps {
@@ -324,13 +324,14 @@ export function AdvancedDiscoverFilterSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <View style={premiumSheetChrome.overlay}>
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
           <View style={styles.sheetInner}>
+            <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>
-              <AppText variant="subtitle">{t('discovery.advancedDiscover.sheetTitle')}</AppText>
+              <AppText variant="subtitle" style={styles.headerTitle}>{t('discovery.advancedDiscover.sheetTitle')}</AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={onClose}>
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -365,7 +366,7 @@ export function AdvancedDiscoverFilterSheet({
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.genresSection')}</AppText>
               {genresQuery.isLoading ? (
-                <ActivityIndicator color={colors.accent} />
+                <ActivityIndicator color={premiumSheet.mutedGold} />
               ) : (
                 <GenreSelector
                   genres={genresQuery.data ?? []}
@@ -785,16 +786,12 @@ export function AdvancedDiscoverFilterSheet({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   sheet: {
+    ...premiumSheetChrome.sheet,
     maxHeight: '88%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
   sheetInner: {
     flexShrink: 1,
@@ -804,14 +801,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingHorizontal: premiumSheet.contentPaddingH,
+    paddingTop: premiumSheet.contentPaddingTop,
     paddingBottom: spacing.sm,
+  },
+  headerTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   scroll: {
     flexGrow: 1,
     flexShrink: 1,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: premiumSheet.contentPaddingH,
   },
   scrollContent: {
     gap: spacing.sm,
@@ -830,15 +831,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   genreToggleText: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   sectionLabel: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '600',
   },
   sectionHeading: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
     fontWeight: '700',
     marginTop: spacing.sm,
   },
@@ -859,28 +860,28 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     minHeight: 44,
     justifyContent: 'center',
   },
   filterChipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   filterChipLabel: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
   },
   filterChipLabelSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   footer: {
     gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: premiumSheet.contentPaddingH,
     paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    paddingBottom: premiumSheet.contentPaddingBottom,
+    borderTopWidth: 1,
+    borderTopColor: premiumSheet.border,
   },
 });

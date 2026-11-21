@@ -13,13 +13,12 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
-import { useDetailActionStatusBatch } from '@/features/library-actions/context/DetailActionStatusContext';
 import { PersonalRatingPromptSheet } from '@/features/ratings/components/PersonalRatingPromptSheet';
-import { PersonalRatingUnwatchConfirmSheet } from '@/features/ratings/components/PersonalRatingUnwatchConfirmSheet';
 import { useDeleteRating, useRateContent } from '@/features/ratings/hooks/useRatingMutations';
 import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import type { RatingContentType } from '@/features/ratings/types';
 import { formatPersonalRatingOutOfFive } from '@/features/ratings/utils/format-personal-rating-display';
+import { useEpisodeWatchStatus } from '@/features/watch-history/hooks/useEpisodeWatchStatus';
 import { useMovieWatchStatus } from '@/features/watch-history/hooks/useMovieWatchStatus';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -29,6 +28,7 @@ import { interaction } from '@/theme/interaction';
 interface DetailPersonalRatingContextValue {
   openRatingSheet: () => void;
   handleMarkedWatched: () => void;
+  /** Deletes any personal rating, then lets unwatch proceed — no confirm sheet. */
   confirmUnwatchIfNeeded: () => Promise<boolean>;
 }
 
@@ -63,8 +63,6 @@ export function DetailPersonalRatingProvider({
   const [promptVisible, setPromptVisible] = useState(false);
   const [promptSessionKey, setPromptSessionKey] = useState(0);
   const [promptSheetBusy, setPromptSheetBusy] = useState(false);
-  const [unwatchConfirmVisible, setUnwatchConfirmVisible] = useState(false);
-  const unwatchResolverRef = useRef<((value: boolean) => void) | null>(null);
   const closePromptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearPromptCloseTimeout = useCallback(() => {
@@ -101,31 +99,18 @@ export function DetailPersonalRatingProvider({
     openPrompt();
   }, [isAuthenticated, watchEligible, myRatingQuery.data?.score, openPrompt]);
 
-  const resolveUnwatchPrompt = useCallback((confirmed: boolean) => {
-    setUnwatchConfirmVisible(false);
-    unwatchResolverRef.current?.(confirmed);
-    unwatchResolverRef.current = null;
-  }, []);
-
   const confirmUnwatchIfNeeded = useCallback(async (): Promise<boolean> => {
     if (myRatingQuery.data?.score == null) {
       return true;
     }
 
-    return new Promise<boolean>((resolve) => {
-      unwatchResolverRef.current = resolve;
-      setUnwatchConfirmVisible(true);
-    });
-  }, [myRatingQuery.data?.score]);
-
-  const handleUnwatchConfirm = useCallback(async () => {
     try {
       await deleteRating.mutateAsync();
-      resolveUnwatchPrompt(true);
+      return true;
     } catch {
-      resolveUnwatchPrompt(false);
+      return false;
     }
-  }, [deleteRating, resolveUnwatchPrompt]);
+  }, [deleteRating, myRatingQuery.data?.score]);
 
   const handleSubmitRating = useCallback(
     (backendScore: number) => {
@@ -163,14 +148,6 @@ export function DetailPersonalRatingProvider({
         onClose={closePrompt}
         onSubmit={handleSubmitRating}
       />
-      <PersonalRatingUnwatchConfirmSheet
-        visible={unwatchConfirmVisible}
-        loading={deleteRating.isPending}
-        onCancel={() => resolveUnwatchPrompt(false)}
-        onConfirm={() => {
-          void handleUnwatchConfirm();
-        }}
-      />
     </DetailPersonalRatingContext.Provider>
   );
 }
@@ -194,26 +171,37 @@ export function DetailPersonalRatingRow({
   const movieStatus = useMovieWatchStatus(contentType === 'movie' ? contentId : '', {
     enabled: contentType === 'movie' && watchEligible && isAuthenticated,
   });
-  const isWatched = movieStatus.data?.isWatched ?? false;
+  const episodeStatus = useEpisodeWatchStatus(contentType === 'episode' ? contentId : '');
+  const isWatched =
+    contentType === 'episode'
+      ? (episodeStatus.data?.isWatched ?? false)
+      : (movieStatus.data?.isWatched ?? false);
 
-  if (!isAuthenticated || !watchEligible || (contentType === 'movie' && !isWatched)) {
+  if (
+    !isAuthenticated
+    || !watchEligible
+    || ((contentType === 'movie' || contentType === 'episode') && !isWatched)
+  ) {
     return null;
   }
 
   const score = myRatingQuery.data?.score ?? null;
 
   if (score == null) {
+    const rateCtaKey =
+      contentType === 'episode' ? 'ratings.detail.episodeRateCta' : 'ratings.detail.rateCta';
+
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('ratings.detail.rateCta')}
+        accessibilityLabel={t(rateCtaKey)}
         onPress={() => personalRating?.openRatingSheet()}
         style={({ pressed }) => [styles.row, pressed && styles.pressed]}
         testID="detail-personal-rating-rate-cta"
       >
         <Ionicons name="star-outline" size={14} color={colors.textMuted} />
         <AppText variant="caption" style={styles.rateCtaText}>
-          {t('ratings.detail.rateCta')}
+          {t(rateCtaKey)}
         </AppText>
       </Pressable>
     );

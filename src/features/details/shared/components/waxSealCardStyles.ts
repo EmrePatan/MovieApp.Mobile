@@ -6,7 +6,7 @@ export const waxSealCardStyles = StyleSheet.create({
   card: {
     borderRadius: borderRadius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(196, 163, 90, 0.35)',
+    borderColor: colors.borderSubtle,
     backgroundColor: colors.surfaceElevated,
     overflow: 'hidden',
   },

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
-import { PosterImage } from '@/components/common/PosterImage';
+import { DiscoverPreviewPosterCard } from './DiscoverPreviewPosterCard';
 import type { SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -136,26 +136,12 @@ export function DiscoverPreviewSection({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={item.title}
-              onPress={() => onItemPress(item)}
-              style={({ pressed }) => [
-                styles.card,
-                { width: tileSize.width },
-                pressed && styles.pressed,
-              ]}
-            >
-              <PosterImage
-                uri={item.posterUrl}
-                width={tileSize.width}
-                height={tileSize.height}
-                accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-              />
-              <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
-                {item.title}
-              </AppText>
-            </Pressable>
+            <DiscoverPreviewPosterCard
+              item={item}
+              width={tileSize.width}
+              height={tileSize.height}
+              onPress={onItemPress}
+            />
           )}
         />
       ) : null}
@@ -206,12 +192,6 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: spacing.xs,
-  },
-  cardTitle: {
-    color: colors.textPrimary,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   errorContainer: {
     paddingHorizontal: spacing.lg,

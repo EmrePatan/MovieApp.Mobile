@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { createAdvancedDiscoverHref } from '../utils/advanced-discover-params';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 export function SearchExploreLanding() {
@@ -24,16 +24,16 @@ export function SearchExploreLanding() {
         onPress={openAdvancedDiscover}
         style={({ pressed }) => [styles.advancedEntry, pressed && styles.pressed]}
       >
-        <Ionicons name="options-outline" size={20} color={colors.accent} />
+        <Ionicons name="options-outline" size={20} color={premiumSheet.mutedGold} />
         <View style={styles.advancedEntryText}>
           <AppText variant="body" style={styles.advancedEntryTitle}>
             {t('search.exploreLanding.title')}
           </AppText>
-          <AppText variant="bodySmall" muted>
+          <AppText variant="bodySmall" style={styles.advancedEntrySubtitle}>
             {t('search.exploreLanding.subtitle')}
           </AppText>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        <Ionicons name="chevron-forward" size={18} color={premiumSheet.textSecondary} />
       </Pressable>
     </View>
   );
@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
   },
   advancedEntryText: {
     flex: 1,
@@ -61,6 +61,10 @@ const styles = StyleSheet.create({
   },
   advancedEntryTitle: {
     fontWeight: '600',
+    color: premiumSheet.textPrimary,
+  },
+  advancedEntrySubtitle: {
+    color: premiumSheet.textSecondary,
   },
   pressed: {
     opacity: 0.85,

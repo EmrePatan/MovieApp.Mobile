@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '../types';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 const FILTER_VALUES: CatalogMediaFilter[] = ['all', 'movie', 'tv'];
 
@@ -54,29 +54,23 @@ export function LibraryMediaFilterControl({ value, onChange }: LibraryMediaFilte
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+    alignItems: 'center',
+    gap: spacing.lg,
   },
   chip: {
-    minHeight: 32,
-    paddingHorizontal: spacing.sm + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
+    minHeight: 36,
     justifyContent: 'center',
   },
-  chipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
+  chipSelected: {},
   label: {
-    color: colors.textSecondary,
-    fontWeight: '500',
+    color: premiumSheet.textSecondary,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    fontSize: 11,
   },
   labelSelected: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+    color: premiumSheet.mutedGold,
+    fontWeight: '700',
   },
 });
+

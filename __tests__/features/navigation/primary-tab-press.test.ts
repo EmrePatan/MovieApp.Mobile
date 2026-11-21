@@ -10,6 +10,7 @@ function createRouter() {
   return {
     dismissAll: jest.fn(),
     dismissTo: jest.fn(),
+    replace: jest.fn(),
   };
 }
 
@@ -186,6 +187,41 @@ describe('primary tab press handling', () => {
 
     expect(router.dismissTo).toHaveBeenCalledWith('/library');
     expect(emitReselect).not.toHaveBeenCalled();
+  });
+
+  it('leaves the settings hub with replace because sibling tabs ignore dismissTo', () => {
+    const router = createRouter();
+    const emitReselect = jest.fn();
+
+    const action = handlePrimaryTabPress({
+      tabId: 'home',
+      pathname: '/profile',
+      highlightedTab: 'library',
+      router: router as never,
+      emitReselect,
+    });
+
+    expect(action).toBe('replace');
+    expect(router.replace).toHaveBeenCalledWith('/home');
+    expect(router.dismissTo).not.toHaveBeenCalled();
+    expect(emitReselect).not.toHaveBeenCalled();
+  });
+
+  it('returns to Library from settings hub with replace', () => {
+    const router = createRouter();
+    const emitReselect = jest.fn();
+
+    const action = handlePrimaryTabPress({
+      tabId: 'library',
+      pathname: '/profile',
+      highlightedTab: 'library',
+      router: router as never,
+      emitReselect,
+    });
+
+    expect(action).toBe('replace');
+    expect(router.replace).toHaveBeenCalledWith('/library');
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('reselects Insights root without navigation', () => {

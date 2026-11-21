@@ -6,12 +6,12 @@
  * danger/error — red destructive and validation failures
  */
 export const colors = {
-  background: '#0A0A0F',
-  surface: '#14141C',
-  surfaceElevated: '#1C1C28',
-  inputBackground: '#1A1A24',
-  tabBar: '#0F0F16',
-  tabBarBorder: '#222230',
+  background: '#050508',
+  surface: '#0C0C12',
+  surfaceElevated: '#14141C',
+  inputBackground: '#101018',
+  tabBar: '#08080E',
+  tabBarBorder: '#1A1A24',
   skeleton: '#1C1C28',
   overlay: 'rgba(0, 0, 0, 0.6)',
 

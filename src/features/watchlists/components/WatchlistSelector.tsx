@@ -14,6 +14,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import type { WatchlistSummaryResponse } from '../types';
 import { colors } from '@/theme/colors';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface WatchlistSelectorProps {
@@ -83,22 +84,23 @@ export function WatchlistSelector({
       </View>
 
       <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setVisible(false)}>
-        <View style={styles.overlay}>
+        <View style={premiumSheetChrome.overlay}>
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <View style={premiumSheetChrome.handle} />
             <View style={styles.sheetHeader}>
-              <AppText variant="subtitle">{t('watchlists.selector.yourWatchlists')}</AppText>
+              <AppText variant="subtitle" style={styles.sheetTitle}>{t('watchlists.selector.yourWatchlists')}</AppText>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('common.closeWatchlistSelector')}
                 onPress={() => setVisible(false)}
               >
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
             {isLoading ? (
               <View style={styles.centered}>
-                <ActivityIndicator color={colors.accent} />
+                <ActivityIndicator color={premiumSheet.mutedGold} />
               </View>
             ) : isError ? (
               <View style={styles.centered}>
@@ -149,7 +151,7 @@ export function WatchlistSelector({
                         </AppText>
                       </View>
                       {selected ? (
-                        <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
+                        <Ionicons name="checkmark-circle" size={22} color={premiumSheet.mutedGold} />
                       ) : null}
                     </Pressable>
                   );
@@ -197,20 +199,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   sheet: {
+    ...premiumSheetChrome.sheet,
     maxHeight: '70%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  sheetTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -229,11 +226,12 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
   },
   rowSelected: {
-    borderColor: colors.accent,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   rowMeta: {
     flex: 1,

@@ -2,6 +2,7 @@ import { invalidateReviewQueries } from '@/features/reviews/hooks/useReviewMutat
 import { profileStatisticsQueryKey } from '@/features/profile/hooks/profile-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import {
+  episodeMyReviewQueryKey,
   movieMyReviewQueryKey,
   tvMyReviewQueryKey,
 } from '@/features/reviews/hooks/review-query-keys';
@@ -35,6 +36,21 @@ describe('review cache invalidation', () => {
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['reviews', 'tv', tvShowId],
+    });
+  });
+
+  it('invalidates episode review queries', () => {
+    const invalidateQueries = jest.fn();
+    const queryClient = { invalidateQueries } as never;
+    const episodeId = '11111111-1111-4111-8111-111111111111';
+
+    invalidateReviewQueries(queryClient, 'episode', episodeId);
+
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: episodeMyReviewQueryKey(episodeId),
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['reviews', 'episode', episodeId],
     });
   });
 

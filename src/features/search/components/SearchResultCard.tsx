@@ -104,6 +104,7 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
 
   return (
     <CatalogResultRow
+      contentId={item.id}
       title={item.title}
       posterUrl={item.posterUrl}
       mediaType={mediaType}

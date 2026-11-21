@@ -31,6 +31,11 @@ export const homeHeaderStyles = StyleSheet.create({
     borderColor: colors.borderAccent,
     paddingRight: spacing.xs,
   },
+  /** Social feed: chrome secondary — no gold outline (gold stays on content). */
+  headerBarQuiet: {
+    backgroundColor: colors.surface,
+    borderColor: colors.borderSubtle,
+  },
   headerBarOverlay: {
     backgroundColor: 'rgba(20, 20, 28, 0.82)',
     borderColor: colors.borderAccent,

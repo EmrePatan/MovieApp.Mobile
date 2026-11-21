@@ -9,9 +9,11 @@ import {
   isValidBackendScore,
 } from '@/features/ratings/utils/star-rating';
 import { ReviewStarRow } from './ReviewStarRow';
+import { ReviewRichBody } from './ReviewRichBody';
 import { formatReviewDate } from '../utils/review-format';
 import { buildMyCommentMetadataLabel } from '../utils/my-comment-format';
 import type { UserReviewListItem } from '../types/my-comments';
+import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -48,14 +50,15 @@ export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyComm
       : t('profile.myComments.ratingOutOfFive', { rating: Math.round(starRating) });
   const dateLabel = formatReviewDate(item.createdAt);
   const preview = item.content.trim();
-  const canExpand = likelyExceedsCollapsedLines(preview, MY_COMMENT_PREVIEW_LINE_COUNT);
+  const textOnly = parseSocialCommentContent(preview).text;
+  const canExpand = likelyExceedsCollapsedLines(textOnly, MY_COMMENT_PREVIEW_LINE_COUNT);
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${item.title}, ${metadata}`}
       onPress={() => onPress(item)}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       <View style={[styles.posterFrame, { height: posterHeight }]}>
         <CatalogImage
@@ -85,16 +88,15 @@ export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyComm
         ) : null}
         {preview.length > 0 ? (
           <View style={styles.previewBlock}>
-            <AppText
-              variant="bodySmall"
-              muted
+            <ReviewRichBody
+              content={preview}
+              plain
+              textVariant="bodySmall"
+              mediaSize="quote"
               numberOfLines={
                 expanded ? undefined : canExpand ? MY_COMMENT_PREVIEW_LINE_COUNT : undefined
               }
-              style={styles.preview}
-            >
-              {preview}
-            </AppText>
+            />
             {canExpand ? (
               <Pressable
                 accessibilityRole="button"
@@ -124,32 +126,27 @@ export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyComm
 });
 
 const styles = StyleSheet.create({
-  card: {
+  row: {
     width: '100%',
     alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'stretch',
     gap: spacing.sm + 2,
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderSubtle,
+    backgroundColor: 'transparent',
   },
   pressed: {
     opacity: interaction.subtlePressedOpacity,
-    backgroundColor: colors.accentTint12,
-    borderColor: colors.borderAccent,
   },
   posterFrame: {
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: borderRadius.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderAccent,
     overflow: 'hidden',
+    backgroundColor: colors.surface,
   },
   body: {
     flex: 1,
@@ -166,9 +163,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: '600',
     letterSpacing: 0.1,
+    color: colors.textPrimary,
   },
   metadata: {
     letterSpacing: 0.15,
+    color: colors.textMuted,
   },
   ratingRow: {
     flexDirection: 'row',
@@ -177,7 +176,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   ratingLabel: {
-    color: colors.accentMuted,
+    color: colors.textSecondary,
     fontWeight: '600',
     fontSize: 12,
     lineHeight: 14,
@@ -185,19 +184,15 @@ const styles = StyleSheet.create({
   previewBlock: {
     marginTop: spacing.sm,
     paddingLeft: spacing.sm,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.accentTint18,
-  },
-  preview: {
-    lineHeight: 20,
-    fontStyle: 'italic',
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderLeftColor: colors.borderSubtle,
   },
   expandButton: {
     alignSelf: 'flex-start',
     marginTop: spacing.xs,
   },
   expandLabel: {
-    color: colors.accent,
+    color: colors.textSecondary,
     fontWeight: '600',
     fontSize: 11,
   },

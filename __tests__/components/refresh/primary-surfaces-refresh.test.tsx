@@ -71,19 +71,50 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), navigate: jest.fn() }),
   useFocusEffect: jest.fn(),
   useSegments: jest.fn(() => []),
+  useLocalSearchParams: () => ({ tab: 'releases' }),
+}));
+
+jest.mock('@/features/messages/hooks/useMessageQueries', () => ({
+  useDirectMessageUnreadCount: () => ({ data: 0, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/notifications/hooks/useCombinedUnreadNotificationCount', () => ({
+  useCombinedUnreadNotificationCount: jest.fn(() => ({
+    unreadCount: 0,
+    releasesUnread: 0,
+    socialUnread: 0,
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
+jest.mock('@/features/social/hooks/useSocialQueries', () => ({
+  useSocialNotifications: jest.fn(() => ({
+    data: { pages: [{ items: [], page: 1, pageSize: 20, unreadCount: 0 }] },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    isRefetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+  })),
+  useSocialUnreadNotificationCount: jest.fn(() => ({ data: 0 })),
+}));
+
+jest.mock('@/features/social/hooks/useSocialMutations', () => ({
+  useMarkSocialNotificationRead: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
+  useMarkAllSocialNotificationsRead: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }));
 
 jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
 }));
 
-jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
-  useUnreadNotificationCount: jest.fn(() => ({ data: { unreadCount: 0 } })),
-}));
-
 jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
   useCurrentProfile: jest.fn(),
 }));
+
 
 jest.mock('@/features/profile/hooks/useProfileAvatarEditor', () => ({
   useProfileAvatarEditor: () => ({

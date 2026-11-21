@@ -62,13 +62,19 @@ describe('WatchlistPickerModal', () => {
     expect(screen.getByText('Create a list to save movies and TV shows you want to watch.')).toBeTruthy();
   });
 
-  it('adds item to selected watchlist', () => {
+  it('adds item to selected watchlist and closes on success', () => {
+    const onClose = jest.fn();
+    mockItemMutate.mockImplementation((_vars, options) => {
+      options?.onSuccess?.();
+      options?.onSettled?.();
+    });
+
     render(
       <WatchlistPickerModal
         visible
         contentType="movie"
         contentId="movie-id"
-        onClose={jest.fn()}
+        onClose={onClose}
       />,
     );
 
@@ -77,6 +83,7 @@ describe('WatchlistPickerModal', () => {
       { watchlistId: 'wl-1', isInWatchlist: false },
       expect.any(Object),
     );
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('collapses long watchlist lists until expanded', () => {

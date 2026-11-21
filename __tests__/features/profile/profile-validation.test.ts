@@ -12,6 +12,21 @@ describe('profile validation', () => {
     expect(hasProfileValidationErrors(validateUpdateProfile('Emre'))).toBe(false);
   });
 
+  it('validates bio length and social drafts', () => {
+    expect(hasProfileValidationErrors(validateUpdateProfile('Emre', 'x'.repeat(301)))).toBe(true);
+    expect(
+      hasProfileValidationErrors(
+        validateUpdateProfile('Emre', 'ok', { website: 'not a url :::' }),
+      ),
+    ).toBe(true);
+    expect(
+      hasProfileValidationErrors(
+        validateUpdateProfile('Emre', 'ok', { instagram: '@emre', website: 'https://ok.dev' }),
+      ),
+    ).toBe(false);
+  });
+
+
   it('validates email change', () => {
     expect(hasProfileValidationErrors(validateChangeEmail('', ''))).toBe(true);
     expect(

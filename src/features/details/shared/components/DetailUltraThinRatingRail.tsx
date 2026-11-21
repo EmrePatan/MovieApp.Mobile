@@ -43,7 +43,7 @@ export const DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT = {
 } as const;
 
 interface DetailUltraThinRatingRailProps {
-  contentType: RatingContentType;
+  contentType: Exclude<RatingContentType, 'episode'>;
   contentId: string;
   showCommunityScore?: boolean;
   /** Catalog TMDB vote average when external-ratings snapshot has no TMDB row. */

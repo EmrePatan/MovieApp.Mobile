@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 import { normalizeRegionCode } from './region-options';
 
 const USER_REGION_KEY = 'movieapp.user_region';

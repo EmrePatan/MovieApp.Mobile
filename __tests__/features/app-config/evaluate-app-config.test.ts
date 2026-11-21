@@ -8,6 +8,14 @@ jest.mock('react-native', () => ({
   Platform: { OS: 'ios' },
 }));
 
+jest.mock('@/api/environment', () => ({
+  getAppEnvironment: jest.fn(() => 'production'),
+}));
+
+import { getAppEnvironment } from '@/api/environment';
+
+const mockGetAppEnvironment = getAppEnvironment as jest.MockedFunction<typeof getAppEnvironment>;
+
 const baseConfig: RemoteAppConfig = {
   maintenance: { enabled: false },
   versions: {
@@ -29,6 +37,10 @@ const baseConfig: RemoteAppConfig = {
 };
 
 describe('evaluateAppConfig', () => {
+  beforeEach(() => {
+    mockGetAppEnvironment.mockReturnValue('production');
+  });
+
   it('prioritizes maintenance over forced update', () => {
     const result = evaluateAppConfig(5, {
       ...baseConfig,
@@ -43,6 +55,13 @@ describe('evaluateAppConfig', () => {
     const result = evaluateAppConfig(8, baseConfig);
     expect(result.blocking).toBe('forced');
     expect(result.updatePrompt).toBe('none');
+  });
+
+  it('does not force update in development when installed build is below minimum', () => {
+    mockGetAppEnvironment.mockReturnValue('development');
+    const result = evaluateAppConfig(8, baseConfig);
+    expect(result.blocking).toBe('none');
+    expect(result.updatePrompt).toBe('optional');
   });
 
   it('shows optional update when installed is between minimum and latest', () => {
@@ -65,7 +84,16 @@ describe('evaluateAppConfig', () => {
 });
 
 describe('evaluateCachedBlockingOnly', () => {
+  beforeEach(() => {
+    mockGetAppEnvironment.mockReturnValue('production');
+  });
+
   it('returns forced when cached minimum exceeds installed build', () => {
     expect(evaluateCachedBlockingOnly(8, baseConfig)).toBe('forced');
+  });
+
+  it('does not return forced in development when cached minimum exceeds installed build', () => {
+    mockGetAppEnvironment.mockReturnValue('development');
+    expect(evaluateCachedBlockingOnly(8, baseConfig)).toBe('none');
   });
 });

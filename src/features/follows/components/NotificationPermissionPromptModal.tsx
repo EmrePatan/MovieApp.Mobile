@@ -3,8 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 interface NotificationPermissionPromptModalProps {
   visible: boolean;
@@ -25,13 +25,14 @@ export function NotificationPermissionPromptModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onDismiss}>
-      <View style={styles.backdrop}>
-        <Pressable style={styles.dismissArea} onPress={onDismiss} accessibilityRole="button" />
+      <View style={premiumSheetChrome.overlay}>
+        <Pressable style={premiumSheetChrome.backdrop} onPress={onDismiss} accessibilityRole="button" />
         <SafeAreaView edges={['bottom']} style={styles.sheet}>
-          <AppText variant="title" style={styles.title}>
+          <View style={premiumSheetChrome.handle} />
+          <AppText variant="title" style={premiumSheetChrome.title}>
             {t('details.notificationsPermission.title')}
           </AppText>
-          <AppText variant="body" style={styles.body}>
+          <AppText variant="body" style={premiumSheetChrome.subtitle}>
             {t('details.notificationsPermission.body')}
           </AppText>
           <View style={styles.actions}>
@@ -58,28 +59,9 @@ export function NotificationPermissionPromptModal({
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.62)',
-  },
-  dismissArea: {
-    flex: 1,
-  },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
-  },
-  title: {
-    color: colors.textPrimary,
-  },
-  body: {
-    color: colors.textSecondary,
   },
   actions: {
     gap: spacing.sm,

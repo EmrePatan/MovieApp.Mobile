@@ -9,6 +9,22 @@ import {
   setPendingNotificationResponseForTests,
 } from '@/features/notifications/services/notification-bootstrap';
 
+jest.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
+jest.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
+
+jest.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true, isLoading: false }),
+}));
+
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),
   addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
@@ -161,6 +177,32 @@ describe('notification push bootstrap', () => {
 
     expect(mockMarkNotificationRead).toHaveBeenCalledTimes(1);
     expect(navigate).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the conversation from a direct-message push', async () => {
+    const navigate = jest.fn();
+    const invalidateNotifications = jest.fn();
+
+    await processNotificationResponse(
+      createNotificationResponse(
+        {
+          type: 'direct-message',
+          conversationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        },
+        'dm-request',
+      ),
+      {
+        isAuthenticated: true,
+        navigate,
+        invalidateNotifications,
+      },
+    );
+
+    expect(mockMarkNotificationRead).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(
+      '/(tabs)/(app-shell)/messages/3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    );
+    expect(invalidateNotifications).toHaveBeenCalled();
   });
 
   it('does not navigate when mark read fails', async () => {

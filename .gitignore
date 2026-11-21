@@ -50,3 +50,9 @@ coverage/
 # Translation tooling scratch files
 scripts/_*.tmp.json
 scripts/_keys-index.txt
+
+# Agent skills / local tooling (not part of app repo)
+.agents/
+.impeccable/
+skills-lock.json
+.cursor/settings.json

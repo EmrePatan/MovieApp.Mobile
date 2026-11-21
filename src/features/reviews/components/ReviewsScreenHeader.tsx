@@ -52,6 +52,13 @@ export function ReviewsScreenHeader({
     : null;
 
   const handleOpenCatalogDetail = useCallback(() => {
+    if (contentType === 'episode') {
+      if (router.canGoBack()) {
+        router.back();
+      }
+      return;
+    }
+
     openCatalogDetailFromReviews(router, contentType, contentId);
   }, [contentId, contentType, router]);
 

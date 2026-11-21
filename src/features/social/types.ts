@@ -1,3 +1,5 @@
+import type { ProfileSocialLinks } from '@/features/profile/types';
+
 export type SocialFollowStatus = 'None' | 'Pending' | 'Accepted' | 'Self';
 
 export interface SocialProfile {
@@ -10,6 +12,11 @@ export interface SocialProfile {
   followStatus: SocialFollowStatus;
   followersCount: number;
   followingCount: number;
+  coverPosterPath?: string | null;
+  coverImageUrl?: string | null;
+  /** Optional until backend ships. */
+  bio?: string | null;
+  socialLinks?: ProfileSocialLinks | null;
 }
 
 export interface SocialUserSummary {
@@ -50,13 +57,25 @@ export interface SocialFeedItem {
   targetContentId: string;
   targetContentType: 'Movie' | 'TvShow' | 'Episode';
   targetTitle: string;
+  targetOriginalTitle?: string | null;
   targetSubtitle: string | null;
   posterPath: string | null;
   ratingScore: number | null;
   reviewExcerpt: string | null;
+  reviewId?: string | null;
+  reviewAuthoringLocale?: string | null;
+  reviewUpdatedAt?: string | null;
   likesCount: number;
   commentsCount: number;
   isLikedByMe: boolean;
+  catalogNavigationId?: string | null;
+  catalogNavigationType?: 'movie' | 'tv' | 'episode' | null;
+  catalogSeasonNumber?: number | null;
+  catalogEpisodeNumber?: number | null;
+  highlightComment?: SocialComment | null;
+  highlightCommentParentContent?: string | null;
+  highlightCommentParentDisplayName?: string | null;
+  highlightCommentAuthorRatingScore?: number | null;
 }
 
 export interface SocialFeedPage {
@@ -85,6 +104,7 @@ export interface SocialComment {
   avatarUrl: string | null;
   parentCommentId: string | null;
   content: string;
+  authoringLocale?: string | null;
   createdAt: string;
   updatedAt: string | null;
   likesCount: number;
@@ -108,6 +128,8 @@ export interface SocialNotificationItem {
   avatarUrl: string | null;
   activityId: string | null;
   commentId: string | null;
+  /** Parent of `commentId` when the notification points at a reply. */
+  parentCommentId?: string | null;
   followId: string | null;
   createdAt: string;
   isRead: boolean;
@@ -134,6 +156,14 @@ export interface SocialProfileMilestone {
   achievedAt: string | null;
 }
 
+export interface SocialProfileShelfItem {
+  id: string;
+  title: string;
+  posterPath: string | null;
+  contentType: 'Movie' | 'TvShow';
+  progressPercentage?: number | null;
+}
+
 export interface SocialProfileStatistics {
   moviesWatched: number;
   episodesWatched: number;
@@ -141,4 +171,13 @@ export interface SocialProfileStatistics {
   reviewsCount: number;
   favoritesCount: number;
   milestones: SocialProfileMilestone[];
+  movieRuntimeMinutes?: number;
+  episodeRuntimeMinutes?: number;
+  favoriteMovies?: SocialProfileShelfItem[];
+  favoriteShows?: SocialProfileShelfItem[];
+  libraryTitles?: SocialProfileShelfItem[];
+  watchingTitles?: SocialProfileShelfItem[];
+  watchedTitles?: SocialProfileShelfItem[];
+  likedTitles?: SocialProfileShelfItem[];
+  watchlistTitles?: SocialProfileShelfItem[];
 }

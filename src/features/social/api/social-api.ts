@@ -1,5 +1,7 @@
 import { api } from '@/api/client';
+import { buildAvatarUploadFormData } from '@/api/form-data-file';
 import {
+  socialActivityPath,
   socialAcceptFollowRequestPath,
   socialBlockPath,
   socialBlockedUsersPath,
@@ -9,6 +11,7 @@ import {
   socialActivityLikePath,
   socialActivityCommentsPath,
   socialCommentPath,
+  socialCommentTranslationPath,
   socialCommentLikePath,
   socialReportsPath,
   socialNotificationsPath,
@@ -20,6 +23,8 @@ import {
   socialPrivacyPath,
   socialPendingFollowRequestsPath,
   socialProfilePath,
+  socialProfileCoverImagePath,
+  socialProfileCoverPosterPath,
   socialProfileStatisticsPath,
   socialProfileActivitiesPath,
   socialSearchPath,
@@ -27,6 +32,7 @@ import {
 import type {
   SocialCommentPage,
   SocialBlockedUser,
+  SocialFeedItem,
   SocialNotificationPage,
   SocialFeedPage,
   SocialFollowRequest,
@@ -100,8 +106,17 @@ export function updateSocialPrivacy(settings: SocialPrivacySettings) {
   return api.put<SocialPrivacySettings>(socialPrivacyPath(), settings);
 }
 
-export function getSocialFeed(cursor?: string | null, pageSize = 20, signal?: AbortSignal) {
-  return api.get<SocialFeedPage>(socialFeedPath(cursor, pageSize), { signal });
+export function getSocialFeed(
+  cursor?: string | null,
+  pageSize = 20,
+  mode?: 'following' | 'discover',
+  signal?: AbortSignal,
+) {
+  return api.get<SocialFeedPage>(socialFeedPath(cursor, pageSize, mode), { signal });
+}
+
+export function getSocialActivity(activityId: string, signal?: AbortSignal) {
+  return api.get<SocialFeedItem>(socialActivityPath(activityId), { signal });
 }
 
 export function getPendingSocialFollowRequests(page = 1, pageSize = 20, signal?: AbortSignal) {
@@ -112,8 +127,25 @@ export function getSocialComments(activityId: string, parentCommentId?: string |
   return api.get<SocialCommentPage>(socialActivityCommentsPath(activityId, parentCommentId, page, pageSize), { signal });
 }
 
-export function createSocialComment(activityId: string, content: string, parentCommentId?: string | null) {
-  return api.post<import('../types').SocialComment>(socialActivityCommentsPath(activityId).split('?')[0], { content, parentCommentId });
+export function translateSocialComment(commentId: string, signal?: AbortSignal) {
+  return api.post<import('@/features/reviews/types').ReviewTranslationResponse>(
+    socialCommentTranslationPath(commentId),
+    {},
+    { authenticated: false, signal },
+  );
+}
+
+export function createSocialComment(
+  activityId: string,
+  content: string,
+  parentCommentId?: string | null,
+  authoringLocale?: string | null,
+) {
+  return api.post<import('../types').SocialComment>(socialActivityCommentsPath(activityId).split('?')[0], {
+    content,
+    parentCommentId,
+    authoringLocale,
+  });
 }
 
 export function likeSocialActivity(activityId: string) {
@@ -158,4 +190,17 @@ export function markAllSocialNotificationsRead() {
 
 export function getSocialBlockedUsers(signal?: AbortSignal) {
   return api.get<SocialBlockedUser[]>(socialBlockedUsersPath(), { signal });
+}
+
+export function setSocialProfileCoverPoster(posterPath: string | null) {
+  return api.patch<void>(socialProfileCoverPosterPath(), { posterPath });
+}
+
+export async function uploadSocialProfileCover(file: { uri: string; name: string; type: string }) {
+  const formData = buildAvatarUploadFormData(file);
+  return api.postFormData<void>(socialProfileCoverImagePath(), formData);
+}
+
+export function removeSocialProfileCover() {
+  return api.delete<void>(socialProfileCoverImagePath());
 }

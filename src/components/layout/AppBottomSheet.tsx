@@ -3,8 +3,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 
 type AppBottomSheetAlign = 'center' | 'stretch';
 
@@ -31,25 +30,25 @@ function AppBottomSheetFrame({
   const { t } = useTranslation();
 
   return (
-    <View style={styles.overlay} testID={testID}>
+    <View style={premiumSheetChrome.overlay} testID={testID}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('common.cancel')}
-        style={styles.backdrop}
+        style={premiumSheetChrome.backdrop}
         onPress={onClose}
       />
       <SafeAreaView
         style={[styles.sheet, align === 'center' && styles.sheetCentered]}
         edges={['bottom']}
       >
-        <View style={styles.handle} />
+        <View style={premiumSheetChrome.handle} />
         {title ? (
           <AppText variant="subtitle" style={styles.title}>
             {title}
           </AppText>
         ) : null}
         {subtitle ? (
-          <AppText variant="caption" muted center style={styles.subtitle}>
+          <AppText variant="caption" center style={styles.subtitle}>
             {subtitle}
           </AppText>
         ) : null}
@@ -108,38 +107,19 @@ export function AppBottomSheetChrome({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  backdrop: {
-    flex: 1,
-  },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
-    gap: spacing.lg,
+    ...premiumSheetChrome.sheet,
+    gap: 16,
   },
   sheetCentered: {
     alignItems: 'center',
   },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.border,
-    marginBottom: spacing.xs,
-  },
   title: {
+    ...premiumSheetChrome.title,
     textAlign: 'center',
   },
   subtitle: {
-    marginTop: -spacing.sm,
+    color: premiumSheet.textSecondary,
+    marginTop: -4,
   },
 });

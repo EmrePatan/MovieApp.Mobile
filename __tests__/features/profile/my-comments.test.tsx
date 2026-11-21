@@ -104,15 +104,14 @@ describe('My Comments profile feature', () => {
     });
   });
 
-  it('shows My Comments row and navigates to the screen', () => {
+  it('does not expose My Comments from settings', () => {
     renderWithProviders(
       <I18nextProvider i18n={i18n}>
         <ProfileScreen />
       </I18nextProvider>,
     );
 
-    fireEvent.press(screen.getByLabelText('💬  My Comments'));
-    expect(mockPush).toHaveBeenCalledWith('/profile/my-comments');
+    expect(screen.queryByLabelText('💬  My Comments')).toBeNull();
   });
 
   it('renders empty state when the user has no comments', () => {

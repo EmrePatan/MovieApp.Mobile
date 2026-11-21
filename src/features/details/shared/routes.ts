@@ -105,6 +105,22 @@ export function buildTvReviewsRoute(
   return `${base}?${params.toString()}`;
 }
 
+export function buildEpisodeReviewsRoute(
+  tvShowId: string,
+  seasonNumber: number,
+  episodeNumber: number,
+  options?: { title?: string },
+): string {
+  const base = `/tv/${encodePathSegment(tvShowId)}/season/${encodePathSegment(seasonNumber)}/episode/${encodePathSegment(episodeNumber)}/reviews`;
+
+  if (!options?.title) {
+    return base;
+  }
+
+  const params = new URLSearchParams({ title: options.title });
+  return `${base}?${params.toString()}`;
+}
+
 export function buildCreditsRoute(
   type: 'movie' | 'tv',
   catalogId: string,

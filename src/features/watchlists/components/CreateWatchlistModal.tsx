@@ -18,8 +18,8 @@ import { AppText } from '@/components/common/AppText';
 import { AppInput } from '@/components/inputs/AppInput';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useCreateWatchlistForLibrary } from '../hooks/useWatchlistMutations';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 interface CreateWatchlistModalProps {
   visible: boolean;
@@ -92,16 +92,17 @@ export function CreateWatchlistModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={styles.overlay}>
+      <View style={premiumSheetChrome.overlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboardAvoid}
         >
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>
-              <AppText variant="subtitle">{t('watchlists.createModal.title')}</AppText>
+              <AppText variant="subtitle" style={styles.headerTitle}>{t('watchlists.createModal.title')}</AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -139,26 +140,21 @@ export function CreateWatchlistModal({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   keyboardAvoid: {
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
 });

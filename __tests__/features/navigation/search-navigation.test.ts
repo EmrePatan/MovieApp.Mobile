@@ -15,6 +15,7 @@ describe('search navigation', () => {
     expect(parseSearchReturnOrigin('home')).toBe('home');
     expect(parseSearchReturnOrigin('discover')).toBe('discover');
     expect(parseSearchReturnOrigin('library')).toBe('library');
+    expect(parseSearchReturnOrigin('social')).toBe('social');
     expect(parseSearchReturnOrigin('search')).toBeNull();
   });
 

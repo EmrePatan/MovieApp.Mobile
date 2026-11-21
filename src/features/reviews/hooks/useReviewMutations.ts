@@ -1,15 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  createEpisodeReview,
   createMovieReview,
   createTvReview,
+  deleteEpisodeReview,
   deleteMovieReview,
   deleteTvReview,
+  updateEpisodeReview,
   updateMovieReview,
   updateTvReview,
 } from '../api/reviews-api';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import {
+  episodeMyReviewQueryKey,
   movieMyReviewQueryKey,
   tvMyReviewQueryKey,
 } from './review-query-keys';
@@ -29,24 +33,36 @@ export function invalidateReviewQueries(
   contentId: string,
 ) {
   invalidateSocialActivityQueries(queryClient);
-  if (contentType === 'movie') {
-    void queryClient.invalidateQueries({ queryKey: movieMyReviewQueryKey(contentId) });
-    void queryClient.invalidateQueries({ queryKey: ['reviews', 'movie', contentId] });
-    return;
+  switch (contentType) {
+    case 'movie':
+      void queryClient.invalidateQueries({ queryKey: movieMyReviewQueryKey(contentId) });
+      void queryClient.invalidateQueries({ queryKey: ['reviews', 'movie', contentId] });
+      return;
+    case 'tv':
+      void queryClient.invalidateQueries({ queryKey: tvMyReviewQueryKey(contentId) });
+      void queryClient.invalidateQueries({ queryKey: ['reviews', 'tv', contentId] });
+      return;
+    case 'episode':
+      void queryClient.invalidateQueries({ queryKey: episodeMyReviewQueryKey(contentId) });
+      void queryClient.invalidateQueries({ queryKey: ['reviews', 'episode', contentId] });
+      return;
   }
-
-  void queryClient.invalidateQueries({ queryKey: tvMyReviewQueryKey(contentId) });
-  void queryClient.invalidateQueries({ queryKey: ['reviews', 'tv', contentId] });
 }
 
 export function useCreateReviewMutation(contentType: ReviewContentType, contentId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateReviewRequest) =>
-      contentType === 'movie'
-        ? createMovieReview(contentId, payload)
-        : createTvReview(contentId, payload),
+    mutationFn: (payload: CreateReviewRequest) => {
+      switch (contentType) {
+        case 'movie':
+          return createMovieReview(contentId, payload);
+        case 'tv':
+          return createTvReview(contentId, payload);
+        case 'episode':
+          return createEpisodeReview(contentId, payload);
+      }
+    },
     onSuccess: () => {
       trackProductMetric(PRODUCT_METRICS.reviewCreated);
       invalidateReviewQueries(queryClient, contentType, contentId);
@@ -60,10 +76,16 @@ export function useUpdateReviewMutation(contentType: ReviewContentType, contentI
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UpdateReviewRequest) =>
-      contentType === 'movie'
-        ? updateMovieReview(contentId, payload)
-        : updateTvReview(contentId, payload),
+    mutationFn: (payload: UpdateReviewRequest) => {
+      switch (contentType) {
+        case 'movie':
+          return updateMovieReview(contentId, payload);
+        case 'tv':
+          return updateTvReview(contentId, payload);
+        case 'episode':
+          return updateEpisodeReview(contentId, payload);
+      }
+    },
     onSuccess: () => {
       invalidateReviewQueries(queryClient, contentType, contentId);
     },
@@ -74,15 +96,23 @@ export function useDeleteReviewMutation(contentType: ReviewContentType, contentI
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () =>
-      contentType === 'movie'
-        ? deleteMovieReview(contentId)
-        : deleteTvReview(contentId),
+    mutationFn: () => {
+      switch (contentType) {
+        case 'movie':
+          return deleteMovieReview(contentId);
+        case 'tv':
+          return deleteTvReview(contentId);
+        case 'episode':
+          return deleteEpisodeReview(contentId);
+      }
+    },
     onSuccess: () => {
       const myReviewKey =
         contentType === 'movie'
           ? movieMyReviewQueryKey(contentId)
-          : tvMyReviewQueryKey(contentId);
+          : contentType === 'tv'
+            ? tvMyReviewQueryKey(contentId)
+            : episodeMyReviewQueryKey(contentId);
       queryClient.setQueryData(myReviewKey, null);
 
       queryClient.setQueriesData<ReviewListResponse>(

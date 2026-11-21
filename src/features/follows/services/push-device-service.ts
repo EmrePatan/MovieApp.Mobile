@@ -70,7 +70,8 @@ export async function ensurePushDeviceRegisteredAsync(
 ): Promise<PushRegistrationResult> {
   const allowPermissionRequest = options.allowPermissionRequest ?? true;
 
-  if (!Device.isDevice) {
+  // Web push needs notification.vapidPublicKey; native-only path for now.
+  if (Platform.OS === 'web' || !Device.isDevice) {
     return 'unavailable';
   }
 

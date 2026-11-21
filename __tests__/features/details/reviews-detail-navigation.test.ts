@@ -8,6 +8,7 @@ import {
   returnToCatalogDetailFromReviewsPathname,
 } from '@/features/details/shared/navigation/reviews-detail-navigation';
 import {
+  buildEpisodeReviewsRoute,
   buildMovieReviewsRoute,
   buildTvReviewsRoute,
 } from '@/features/details/shared/routes';
@@ -27,11 +28,15 @@ describe('reviews detail navigation', () => {
     expect(buildTvReviewsRoute(tvShowId, { title: 'Breaking Bad' })).toBe(
       `/tv/${tvShowId}/reviews?title=Breaking+Bad`,
     );
+    expect(buildEpisodeReviewsRoute(tvShowId, 2, 5, { title: 'Pilot' })).toBe(
+      `/tv/${tvShowId}/season/2/episode/5/reviews?title=Pilot`,
+    );
   });
 
   it('detects reviews detail routes in the catalog stack', () => {
     expect(isReviewsDetailRoute(['movie', 'id', 'reviews'])).toBe(true);
     expect(isReviewsDetailRoute(['tv', 'id', 'reviews'])).toBe(true);
+    expect(isReviewsDetailRoute(['tv', 'id', 'season', '1', 'episode', '3', 'reviews'])).toBe(true);
     expect(isReviewsDetailRoute(['movie', 'id'])).toBe(false);
     expect(isReviewsDetailRoute(['(tabs)', 'reviews', 'movie', 'id'])).toBe(false);
   });

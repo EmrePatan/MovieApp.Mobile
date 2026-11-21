@@ -3,6 +3,9 @@ import {
   buildDeleteTvRatingPath,
   buildMovieMyRatingPath,
   buildMovieRatingAggregatePath,
+  buildEpisodeMyRatingPath,
+  buildEpisodeRatingAggregatePath,
+  buildRateEpisodePath,
   buildRateMoviePath,
   buildRateTvShowPath,
   buildTvMyRatingPath,
@@ -45,6 +48,13 @@ describe('ratings api routes', () => {
     expect(buildDeleteTvRatingPath(tvShowId)).toBe(`/api/ratings/tvshows/${tvShowId}`);
     expect(buildTvMyRatingPath(tvShowId)).toBe(`/api/ratings/tvshows/${tvShowId}/me`);
     expect(buildTvRatingAggregatePath(tvShowId)).toBe(`/api/ratings/tvshows/${tvShowId}`);
+  });
+
+  it('builds episode rating routes', () => {
+    const episodeId = '11111111-1111-4111-8111-111111111111';
+    expect(buildRateEpisodePath(episodeId)).toBe(`/api/ratings/episodes/${episodeId}`);
+    expect(buildEpisodeMyRatingPath(episodeId)).toBe(`/api/ratings/episodes/${episodeId}/me`);
+    expect(buildEpisodeRatingAggregatePath(episodeId)).toBe(`/api/ratings/episodes/${episodeId}`);
   });
 });
 

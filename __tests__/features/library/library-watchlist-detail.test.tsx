@@ -13,6 +13,22 @@ jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(() => ({ isAuthenticated: true })),
 }));
 
+jest.mock('@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions', () => ({
+  buildBrowseQuickActionsTarget: (input: {
+    contentId: string;
+    contentType: 'movie' | 'tv';
+    title: string;
+    posterUrl: string | null;
+  }) => input,
+  useBrowsePosterQuickActions: () => ({
+    supported: false,
+    isWatched: false,
+    watchedBusy: false,
+    onLongPress: undefined,
+    onToggleWatched: undefined,
+  }),
+}));
+
 const mockRefetchItems = jest.fn();
 const mockFetchNextPage = jest.fn();
 const mockRefetchWatchlists = jest.fn();
@@ -215,20 +231,6 @@ describe('LibraryWatchlistDetailContent', () => {
     renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
 
     expect(screen.queryByLabelText('Remove Interstellar from this list')).toBeNull();
-  });
-
-  it('keeps item removal reachable through long press', () => {
-    renderWithProviders(<LibraryWatchlistDetailContent watchlistId="wl-1" />);
-
-    fireEvent(
-      screen.getByLabelText('Interstellar, Watchlist'),
-      'longPress',
-    );
-
-    expect(mockRemoveMutate).toHaveBeenCalledWith(
-      { contentType: 'movie', contentId: 'movie-1' },
-      expect.any(Object),
-    );
   });
 
   it('keeps item removal reachable through accessibility action', () => {

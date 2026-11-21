@@ -1,4 +1,5 @@
 import { useCallback, useEffect, type ReactNode } from 'react';
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -82,9 +83,25 @@ export async function processNotificationResponse(
     return;
   }
 
-  const notificationId = parseNotificationIdFromPushData(
-    response.notification.request.content.data as Record<string, unknown> | undefined,
-  );
+  const data = response.notification.request.content.data as Record<string, unknown> | undefined;
+  if (data?.type === 'direct-message') {
+    const conversationId = data.conversationId == null ? '' : String(data.conversationId).trim();
+    inFlightNotificationResponseKeys.add(responseKey);
+    try {
+      lastProcessedNotificationResponseKey = responseKey;
+      if (!conversationId) {
+        return;
+      }
+
+      options.invalidateNotifications();
+      options.navigate(`/(tabs)/(app-shell)/messages/${conversationId}`);
+    } finally {
+      inFlightNotificationResponseKeys.delete(responseKey);
+    }
+    return;
+  }
+
+  const notificationId = parseNotificationIdFromPushData(data);
 
   if (!notificationId) {
     return;
@@ -119,6 +136,8 @@ export function NotificationBootstrapProvider({
 
   const invalidateNotifications = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    void queryClient.invalidateQueries({ queryKey: ['messages'] });
+    void queryClient.invalidateQueries({ queryKey: ['social', 'notifications'] });
   }, [queryClient]);
 
   const navigate = useCallback(
@@ -140,6 +159,10 @@ export function NotificationBootstrapProvider({
   );
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
     const receivedSubscription = Notifications.addNotificationReceivedListener(() => {
       invalidateNotifications();
     });

@@ -25,11 +25,9 @@ export function resolveBottomNavVisibility(segments: readonly string[]): BottomN
     return 'hide';
   }
 
+  // Nested account screens under /profile/* stay fullscreen; the settings hub at
+  // /(tabs)/profile keeps the primary tab bar so users can jump to other tabs.
   if (segments.includes('profile') && !segments.includes('(tabs)')) {
-    return 'hide';
-  }
-
-  if (segments.includes('(tabs)') && segments.includes('profile')) {
     return 'hide';
   }
 

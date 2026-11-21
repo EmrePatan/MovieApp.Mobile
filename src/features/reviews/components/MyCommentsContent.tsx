@@ -1,5 +1,12 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
@@ -7,9 +14,11 @@ import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import {
   MY_COMMENTS_REVIEWS_RETURN_HREF,
+  buildUserCommentsReturnHref,
   openReviewsDetail,
 } from '@/features/details/shared/navigation/reviews-detail-navigation';
 import {
+  buildEpisodeReviewsRoute,
   buildMovieReviewsRoute,
   buildTvReviewsRoute,
 } from '@/features/details/shared/routes';
@@ -17,6 +26,7 @@ import { MyCommentsMediaFilter } from './MyCommentsMediaFilter';
 import type { CatalogMediaFilter } from '@/features/library/types';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { useMyComments } from '../hooks/useMyComments';
+import { useUserComments } from '../hooks/useUserComments';
 import type { UserReviewListItem } from '../types/my-comments';
 import { MyCommentRow } from './MyCommentRow';
 import { MyCommentsEmptyState } from './MyCommentsEmptyState';
@@ -26,14 +36,32 @@ import { MY_COMMENTS_HORIZONTAL_INSET } from '../utils/my-comments-layout';
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 
-export function MyCommentsContent() {
+interface MyCommentsContentProps {
+  listHeader?: ReactNode;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+  /** When set, loads that user's public reviews instead of the current user's. */
+  userId?: string;
+  reviewsReturnHref?: string;
+}
+
+export function MyCommentsContent({
+  listHeader,
+  contentContainerStyle,
+  userId,
+  reviewsReturnHref,
+}: MyCommentsContentProps = {}) {
   const { t } = useTranslation();
   const router = useRouter();
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>('all');
-  const commentsQuery = useMyComments(mediaType);
+  const myCommentsQuery = useMyComments(mediaType, { enabled: !userId });
+  const userCommentsQuery = useUserComments(userId ?? '', mediaType);
+  const commentsQuery = userId ? userCommentsQuery : myCommentsQuery;
   const listRef = useRef<FlatList>(null);
   const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
     useFlatListScrollToTopControl(listRef);
+  const returnHref =
+    reviewsReturnHref
+    ?? (userId ? buildUserCommentsReturnHref(userId) : MY_COMMENTS_REVIEWS_RETURN_HREF);
 
   const items = useMemo(
     () => commentsQuery.data?.pages.flatMap((page) => page.items) ?? [],
@@ -42,16 +70,30 @@ export function MyCommentsContent() {
 
   const handleOpenReviews = useCallback(
     (item: UserReviewListItem) => {
-      const reviewsRoute =
-        item.contentType === 'movie'
-          ? buildMovieReviewsRoute(item.contentId, { title: item.title })
-          : buildTvReviewsRoute(item.contentId, { title: item.title });
+      let reviewsRoute: string;
+      if (item.contentType === 'movie') {
+        reviewsRoute = buildMovieReviewsRoute(item.contentId, { title: item.title });
+      } else if (
+        item.contentType === 'episode' &&
+        item.tvShowId &&
+        item.seasonNumber != null &&
+        item.episodeNumber != null
+      ) {
+        reviewsRoute = buildEpisodeReviewsRoute(
+          item.tvShowId,
+          item.seasonNumber,
+          item.episodeNumber,
+          { title: item.title },
+        );
+      } else {
+        reviewsRoute = buildTvReviewsRoute(item.contentId, { title: item.title });
+      }
 
       openReviewsDetail(router, reviewsRoute, {
-        returnHref: MY_COMMENTS_REVIEWS_RETURN_HREF,
+        returnHref,
       });
     },
-    [router],
+    [returnHref, router],
   );
 
   const handleDiscover = useCallback(() => {
@@ -97,14 +139,28 @@ export function MyCommentsContent() {
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       contentContainerStyle={[
         styles.listContent,
+        contentContainerStyle,
         items.length === 0 && styles.listContentEmpty,
       ]}
       ListHeaderComponent={
-        <View style={styles.filters}>
-          <MyCommentsMediaFilter value={mediaType} onChange={setMediaType} />
-        </View>
+        <>
+          {listHeader}
+          <View style={styles.filters}>
+            <MyCommentsMediaFilter value={mediaType} onChange={setMediaType} />
+          </View>
+        </>
       }
-      ListEmptyComponent={<MyCommentsEmptyState onDiscover={handleDiscover} />}
+      ListEmptyComponent={
+        userId ? (
+          <View style={styles.otherEmpty}>
+            <AppText variant="subtitle" center style={styles.otherEmptyTitle}>
+              {t('social.profileReviewsEmpty')}
+            </AppText>
+          </View>
+        ) : (
+          <MyCommentsEmptyState onDiscover={handleDiscover} />
+        )
+      }
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.4}
       onScroll={onListScroll}
@@ -158,5 +214,15 @@ const styles = StyleSheet.create({
   footerLoader: {
     paddingVertical: spacing.lg,
     alignItems: 'center',
+  },
+  otherEmpty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxl,
+  },
+  otherEmptyTitle: {
+    fontWeight: '600',
   },
 });

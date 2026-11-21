@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
 interface FilterSelectorRowProps {
@@ -30,13 +30,15 @@ export function FilterSelectorRow({
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       testID={testID}
     >
-      <AppText variant="body">{label}</AppText>
+      <AppText variant="body" style={styles.label}>
+        {label}
+      </AppText>
       <View style={styles.valueRow}>
         {valueFlagEmoji ? <CircularFlagBadge emoji={valueFlagEmoji} /> : null}
-        <AppText variant="bodySmall" muted numberOfLines={1} style={styles.value}>
+        <AppText variant="bodySmall" numberOfLines={1} style={styles.value}>
           {valueLabel}
         </AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        <Ionicons name="chevron-forward" size={18} color={premiumSheet.textSecondary} />
       </View>
     </Pressable>
   );
@@ -44,12 +46,20 @@ export function FilterSelectorRow({
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: 48,
+    minHeight: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
+  },
+  label: {
+    color: premiumSheet.textPrimary,
   },
   valueRow: {
     flexDirection: 'row',
@@ -61,6 +71,7 @@ const styles = StyleSheet.create({
   value: {
     flexShrink: 1,
     textAlign: 'right',
+    color: premiumSheet.textSecondary,
   },
   pressed: {
     opacity: 0.85,

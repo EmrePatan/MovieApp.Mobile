@@ -232,6 +232,10 @@ export function preloadExternalRatingBrandAssets(): void {
     ROTTEN_TOMATOES_ASSETS.popcornIcon,
   ];
 
+  if (typeof Image.resolveAssetSource !== 'function') {
+    return;
+  }
+
   for (const source of sources) {
     const resolved = Image.resolveAssetSource(source);
     if (resolved?.uri) {

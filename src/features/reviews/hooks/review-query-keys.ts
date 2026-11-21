@@ -5,6 +5,10 @@ export function myCommentsInfiniteQueryKey(mediaType: CatalogMediaFilter) {
   return ['reviews', 'me', 'list', mediaType] as const;
 }
 
+export function userCommentsInfiniteQueryKey(userId: string, mediaType: CatalogMediaFilter) {
+  return ['reviews', 'user', userId, 'list', mediaType] as const;
+}
+
 export function movieReviewsQueryKey(
   movieId: string,
   page: number,
@@ -31,6 +35,20 @@ export function movieMyReviewQueryKey(movieId: string) {
 
 export function tvMyReviewQueryKey(tvShowId: string) {
   return ['reviews', 'tv', tvShowId, 'me'] as const;
+}
+
+export function episodeReviewsQueryKey(
+  episodeId: string,
+  page: number,
+  pageSize = DEFAULT_REVIEW_PAGE_SIZE,
+  sort: ReviewSortOption = DEFAULT_REVIEW_SORT,
+  ratingStars: number | null = null,
+) {
+  return ['reviews', 'episode', episodeId, page, pageSize, sort, ratingStars] as const;
+}
+
+export function episodeMyReviewQueryKey(episodeId: string) {
+  return ['reviews', 'episode', episodeId, 'me'] as const;
 }
 
 export function reviewTranslationQueryKey(

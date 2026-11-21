@@ -1,6 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { CatalogResultRow } from '@/features/catalog/components/CatalogResultRow';
 
+jest.mock('@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions', () => ({
+  buildBrowseQuickActionsTarget: jest.requireActual(
+    '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions',
+  ).buildBrowseQuickActionsTarget,
+  useBrowsePosterQuickActions: () => ({
+    supported: false,
+    isWatched: false,
+    watchedBusy: false,
+    onLongPress: undefined,
+    onToggleWatched: undefined,
+  }),
+}));
+
 describe('CatalogResultRow', () => {
   it('renders localized genre labels between metadata and rating', () => {
     render(

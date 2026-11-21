@@ -3,6 +3,7 @@ import { getSeason } from '@/features/details/season/api/season-api';
 import {
   bulkUpdateEpisodeWatchState,
   bulkUpdateTvShowWatchState,
+  getTvShowProgress,
   markEpisodeWatched,
   markMovieWatched,
   markThroughEpisode,
@@ -32,6 +33,7 @@ import {
   updateTvShowAggregateAllSeasonsWatched,
   updateTvShowAggregateSeasonProgress,
 } from '../utils/tv-show-progress-cache';
+import { requestTvShowCompletionCelebration } from '../utils/tv-show-completion-celebration-requests';
 
 function restoreQuerySnapshot<T>(
   queryClient: QueryClient,
@@ -510,11 +512,37 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
   });
 }
 
+export type ToggleTvShowWatchedResult = {
+  markingWatched: boolean;
+  celebrated: boolean;
+};
+
 export function useToggleTvShowWatched(tvShowId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (isFullyWatched: boolean) => bulkUpdateTvShowWatchState(tvShowId, !isFullyWatched),
+    mutationFn: async (isFullyWatched: boolean): Promise<ToggleTvShowWatchedResult> => {
+      const markingWatched = !isFullyWatched;
+      await bulkUpdateTvShowWatchState(tvShowId, markingWatched);
+
+      await queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
+      await queryClient.invalidateQueries({
+        queryKey: ['watch-history', 'tv', tvShowId, 'season'],
+      });
+      invalidateWatchStateDependents(queryClient);
+
+      const progress = await queryClient.fetchQuery({
+        queryKey: tvShowProgressQueryKey(tvShowId),
+        queryFn: ({ signal }) => getTvShowProgress(tvShowId, signal),
+      });
+
+      const celebrated = markingWatched && progress.isCompleted === true;
+      if (celebrated) {
+        requestTvShowCompletionCelebration(tvShowId);
+      }
+
+      return { markingWatched, celebrated };
+    },
     onMutate: async (isFullyWatched) => {
       const tvKey = tvShowProgressQueryKey(tvShowId);
       await queryClient.cancelQueries({ queryKey: tvKey });
@@ -531,13 +559,6 @@ export function useToggleTvShowWatched(tvShowId: string) {
       if (context?.previousTvProgress) {
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
-      void queryClient.invalidateQueries({
-        queryKey: ['watch-history', 'tv', tvShowId, 'season'],
-      });
-      invalidateWatchStateDependents(queryClient);
     },
   });
 }

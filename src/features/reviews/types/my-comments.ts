@@ -1,6 +1,6 @@
 export interface UserReviewListItem {
   id: string;
-  contentType: 'movie' | 'tv';
+  contentType: 'movie' | 'tv' | 'episode';
   contentId: string;
   title: string;
   posterPath: string | null;
@@ -9,6 +9,9 @@ export interface UserReviewListItem {
   createdAt: string;
   updatedAt: string;
   userRating: number | null;
+  tvShowId?: string | null;
+  seasonNumber?: number | null;
+  episodeNumber?: number | null;
 }
 
 export interface UserReviewListResponse {

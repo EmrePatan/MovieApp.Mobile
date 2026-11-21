@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type AccessibilityActionEvent,
@@ -9,14 +9,20 @@ import {
 } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
+import {
+  buildBrowseQuickActionsTarget,
+  useBrowsePosterQuickActions,
+} from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
 import type { LibraryCategory, LibraryItem } from '../types/library';
 import {
   buildLibraryGridAccessibilityLabel,
   resolveLibraryStatusPresentation,
 } from '../utils/library-status-presentation';
 import { LibraryStatusIndicator } from './LibraryStatusIndicator';
+import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 interface LibraryGridCardProps {
   item: LibraryItem;
@@ -47,6 +53,20 @@ export const LibraryGridCard = memo(function LibraryGridCard({
     title: item.title,
     listName: resolvedListName,
   });
+  const quickTarget = useMemo(
+    () =>
+      buildBrowseQuickActionsTarget({
+        contentId: item.id,
+        contentType: item.type,
+        title: item.title,
+        posterUrl: resolveImageUri(item.posterUrl, 'w300'),
+        year: item.year,
+        voteAverage: item.voteAverage,
+      }),
+    [item.id, item.posterUrl, item.title, item.type, item.voteAverage, item.year],
+  );
+  const { isWatched, watchedBusy, onLongPress, onToggleWatched } =
+    useBrowsePosterQuickActions(quickTarget);
 
   const handleRemove = useCallback(() => {
     if (isRemoving) {
@@ -72,32 +92,38 @@ export const LibraryGridCard = memo(function LibraryGridCard({
       accessibilityActions={onRemove ? [{ name: 'remove', label: removeActionLabel }] : undefined}
       onAccessibilityAction={onRemove ? handleAccessibilityAction : undefined}
       onPress={() => onPress(item)}
-      onLongPress={onRemove ? handleRemove : undefined}
-      delayLongPress={400}
+      onLongPress={onLongPress}
+      delayLongPress={380}
       style={({ pressed }) => [styles.card, { width }, pressed && styles.pressed]}
     >
-      <View style={[styles.posterWrap, { height }]}>
-        <CatalogImage
-          path={item.posterUrl}
-          width={width}
-          height={height}
-          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-        />
-        {category === 'watching' ? (
-          <LibraryStatusIndicator
-            status={presentation.status}
-            progressPercentage={presentation.progressPercentage}
-            display="poster-progress"
+      <BrowsePosterFrame
+        watched={isWatched}
+        busy={watchedBusy}
+        onToggleWatched={onToggleWatched}
+      >
+        <View style={[styles.posterWrap, { width, height }]}>
+          <CatalogImage
+            path={item.posterUrl}
+            width={width}
+            height={height}
+            accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
           />
-        ) : (
-          <LibraryStatusIndicator status={presentation.status} display="badge" />
-        )}
-        {isRemoving ? (
-          <View style={styles.removingOverlay}>
-            <ActivityIndicator color={colors.accent} />
-          </View>
-        ) : null}
-      </View>
+          {category === 'watching' ? (
+            <LibraryStatusIndicator
+              status={presentation.status}
+              progressPercentage={presentation.progressPercentage}
+              display="poster-progress"
+            />
+          ) : (
+            <LibraryStatusIndicator status={presentation.status} display="badge" />
+          )}
+          {isRemoving ? (
+            <View style={styles.removingOverlay}>
+              <ActivityIndicator color={colors.accent} />
+            </View>
+          ) : null}
+        </View>
+      </BrowsePosterFrame>
       {category === 'watching' && presentation.detail ? (
         <AppText variant="caption" muted numberOfLines={1} style={styles.watchingDetail}>
           {presentation.detail}
@@ -113,10 +139,8 @@ const styles = StyleSheet.create({
   },
   posterWrap: {
     position: 'relative',
-    borderRadius: borderRadius.md,
+    borderRadius: 14,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
     backgroundColor: colors.surface,
   },
   watchingDetail: {

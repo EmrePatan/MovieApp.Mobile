@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
 import { DetailEpisodeActionBar } from '../../shared/components/DetailEpisodeActionBar';
 import { DetailHero } from '../../shared/components/DetailHero';
 import { DetailOverview } from '../../shared/components/DetailSections';
@@ -40,6 +41,16 @@ export function EpisodeDetailContent({ episode }: EpisodeDetailContentProps) {
         seasonNumber={episode.seasonNumber}
       />
       <DetailOverview overview={episode.overview} />
+      <ReviewsLinkRow
+        contentType="episode"
+        contentId={episode.id}
+        contentTitle={title}
+        episodeLocation={{
+          tvShowId: episode.tvShowId,
+          seasonNumber: episode.seasonNumber,
+          episodeNumber: episode.episodeNumber,
+        }}
+      />
     </View>
   );
 }

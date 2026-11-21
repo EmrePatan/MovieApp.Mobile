@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
 interface CatalogListActionsProps {
@@ -36,7 +36,7 @@ export function CatalogListActions({
         <Ionicons
           name="swap-vertical-outline"
           size={22}
-          color={sortActive ? colors.accent : colors.textPrimary}
+          color={sortActive ? premiumSheet.mutedGold : premiumSheet.textPrimary}
         />
       </Pressable>
       <Pressable
@@ -51,7 +51,7 @@ export function CatalogListActions({
         <Ionicons
           name="filter-outline"
           size={22}
-          color={filterActive ? colors.accent : colors.textPrimary}
+          color={filterActive ? premiumSheet.mutedGold : premiumSheet.textPrimary}
         />
       </Pressable>
     </View>

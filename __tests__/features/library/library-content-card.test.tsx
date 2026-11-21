@@ -2,6 +2,22 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { LibraryContentCard } from '@/features/library/components/LibraryContentCard';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 
+jest.mock('@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions', () => ({
+  buildBrowseQuickActionsTarget: (input: {
+    contentId: string;
+    contentType: 'movie' | 'tv';
+    title: string;
+    posterUrl: string | null;
+  }) => input,
+  useBrowsePosterQuickActions: () => ({
+    supported: false,
+    isWatched: false,
+    watchedBusy: false,
+    onLongPress: undefined,
+    onToggleWatched: undefined,
+  }),
+}));
+
 const movieItem: LibraryItem = {
   id: 'movie-id',
   type: 'movie',

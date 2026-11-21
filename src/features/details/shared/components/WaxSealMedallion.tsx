@@ -28,28 +28,32 @@ export function WaxSealMedallion({
           colors={[colors.progressCompleted, '#3D8A62']}
           style={StyleSheet.absoluteFill}
         />
-      ) : (
-        <LinearGradient
-          colors={[colors.accentStrong, colors.accentMuted]}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
+      ) : null}
       {pending ? (
-        <ActivityIndicator color={colors.textPrimary} size="small" />
+        <ActivityIndicator
+          color={completed ? colors.textPrimary : colors.textSecondary}
+          size="small"
+        />
       ) : completed ? (
         <Ionicons name="checkmark" size={22} color={colors.background} />
-      ) : null}
+      ) : (
+        <Ionicons name="checkmark" size={18} color={colors.textMuted} />
+      )}
     </>
   );
 
-  const medallionStyle = [styles.medallion, completed && styles.medallionCompleted];
+  const medallionStyle = [
+    styles.medallion,
+    completed ? styles.medallionCompleted : styles.medallionIdle,
+    disabled && !completed && styles.medallionDisabled,
+  ];
 
   if (onPress) {
     return (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ selected: completed, busy: pending }}
+        accessibilityState={{ selected: completed, busy: pending, disabled }}
         disabled={disabled || pending}
         onPress={onPress}
         hitSlop={8}
@@ -72,14 +76,21 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    borderWidth: 2,
-    borderColor: colors.accentStrong,
+    borderWidth: StyleSheet.hairlineWidth * 2,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+    flexShrink: 0,
+  },
+  medallionIdle: {
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surfaceElevated,
   },
   medallionCompleted: {
     borderColor: colors.progressCompleted,
+  },
+  medallionDisabled: {
+    opacity: 0.45,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

@@ -2,7 +2,7 @@ import type { HomeTypeFilter } from '../types';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 const FILTERS: HomeTypeFilter[] = ['all', 'movie', 'tv'];
@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -103,22 +103,23 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   chipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   chipSelectedOverlay: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   label: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
   },
   labelOverlay: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
   },
   labelSelected: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
 });
+

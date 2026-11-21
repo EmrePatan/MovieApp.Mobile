@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
 interface ExpandableAdvancedFiltersProps {
@@ -40,7 +40,7 @@ export function ExpandableAdvancedFilters({
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={colors.textSecondary}
+          color={premiumSheet.textSecondary}
         />
       </Pressable>
       {expanded ? <View style={styles.content}>{children}</View> : null}
@@ -66,12 +66,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '600',
+    color: premiumSheet.textPrimary,
   },
   activeDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.accent,
+    backgroundColor: premiumSheet.mutedGold,
   },
   content: {
     gap: spacing.sm,

@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react-native';
+import { act, render, screen, waitFor } from '@testing-library/react-native';
 import { TvShowCompletionCelebrationLayer } from '@/features/details/tv/components/TvShowCompletionCelebrationLayer';
 import { useAuth } from '@/auth/useAuth';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
+import { requestTvShowCompletionCelebration } from '@/features/watch-history/utils/tv-show-completion-celebration-requests';
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(),
@@ -73,5 +74,19 @@ describe('TvShowCompletionCelebrationLayer', () => {
     view.rerender(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
 
     expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
+  });
+
+  it('celebrates when an explicit completion request arrives for this show', async () => {
+    render(<TvShowCompletionCelebrationLayer tvShowId="tv-id" />);
+
+    expect(screen.queryByTestId('show-completed-confetti')).toBeNull();
+
+    act(() => {
+      requestTvShowCompletionCelebration('tv-id');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('show-completed-confetti')).toBeTruthy();
+    });
   });
 });

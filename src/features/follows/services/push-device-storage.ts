@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 
 const EXPO_PUSH_TOKEN_KEY = 'movieapp.expo_push_token';
 

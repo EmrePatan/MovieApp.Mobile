@@ -17,7 +17,7 @@ import {
   layoutDetailKeywordRailRows,
   limitKeywordsForDetailRail,
 } from '../utils/detail-keyword-rail';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface DetailKeywordsProps {
@@ -170,15 +170,16 @@ const styles = StyleSheet.create({
   },
   chip: {
     flexShrink: 0,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: premiumSheet.secondary,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: premiumSheet.rowBorder,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },
   chipPressed: {
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint12,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
 });
+

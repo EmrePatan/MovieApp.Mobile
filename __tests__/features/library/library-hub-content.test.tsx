@@ -40,11 +40,10 @@ jest.mock('@/features/navigation/usePrimaryTabReselectHandler', () => ({
 }));
 
 jest.mock('@/features/library/components/LibraryWatchlistsOverview', () => ({
-  LibraryWatchlistsOverview: ({ listHeader }: { listHeader: React.ReactNode }) => {
+  LibraryWatchlistsOverview: () => {
     const { View, Text } = require('react-native');
     return (
       <View testID="library-watchlists-overview">
-        {listHeader}
         <Text>Watchlists overview</Text>
       </View>
     );

@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
 import {
+  getSocialActivity,
   getSocialFeed,
   getSocialUserActivities,
   getSocialBlockedUsers,
@@ -21,7 +22,7 @@ export function useSocialProfile(userId: string) {
   return useQuery({
     queryKey: socialQueryKeys.profile(userId),
     queryFn: ({ signal }) => getSocialProfile(userId, signal),
-    enabled: userId.length > 0,
+    enabled: Boolean(userId?.length),
     staleTime: 30_000,
   });
 }
@@ -30,8 +31,9 @@ export function useSocialProfileStatistics(userId: string, enabled = true) {
   return useQuery({
     queryKey: socialQueryKeys.profileStatistics(userId),
     queryFn: ({ signal }) => getSocialProfileStatistics(userId, signal),
-    enabled: userId.length > 0 && enabled,
-    staleTime: 60_000,
+    enabled: Boolean(userId?.length) && enabled,
+    staleTime: 15_000,
+    refetchOnMount: 'always',
   });
 }
 
@@ -41,7 +43,7 @@ export function useSocialUserActivities(userId: string, enabled = true) {
     queryFn: ({ pageParam, signal }) => getSocialUserActivities(userId, pageParam, 20, signal),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    enabled: userId.length > 0 && enabled,
+    enabled: Boolean(userId?.length) && enabled,
     staleTime: 20_000,
   });
 }
@@ -66,7 +68,7 @@ export function useSocialFollowers(userId: string, enabled = true) {
     initialPageParam: 1,
     getNextPageParam: (lastPage, _allPages, lastPageParam) =>
       lastPage.length === 20 ? lastPageParam + 1 : undefined,
-    enabled: userId.length > 0 && enabled,
+    enabled: Boolean(userId?.length) && enabled,
   });
 }
 
@@ -77,7 +79,7 @@ export function useSocialFollowing(userId: string, enabled = true) {
     initialPageParam: 1,
     getNextPageParam: (lastPage, _allPages, lastPageParam) =>
       lastPage.length === 20 ? lastPageParam + 1 : undefined,
-    enabled: userId.length > 0 && enabled,
+    enabled: Boolean(userId?.length) && enabled,
   });
 }
 
@@ -94,6 +96,17 @@ export function useSocialPendingFollowRequests() {
   });
 }
 
+export function useSocialPendingFollowRequestCount(enabled = true) {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'pending-follow-requests', 'count'],
+    queryFn: ({ signal }) => getSocialPendingFollowRequests(1, 50, signal),
+    enabled: isAuthenticated && enabled,
+    staleTime: 15_000,
+    select: (requests) => requests.length,
+  });
+}
+
 export function useSocialPrivacy() {
   const { isAuthenticated } = useAuth();
   return useQuery({
@@ -104,11 +117,21 @@ export function useSocialPrivacy() {
   });
 }
 
-export function useSocialFeed() {
+export function useSocialActivity(activityId: string) {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...socialQueryKeys.all, 'activity', activityId],
+    queryFn: ({ signal }) => getSocialActivity(activityId, signal),
+    enabled: isAuthenticated && activityId.length > 0,
+    staleTime: 20_000,
+  });
+}
+
+export function useSocialFeed(mode: 'following' | 'discover' = 'discover') {
   const { isAuthenticated } = useAuth();
   return useInfiniteQuery({
-    queryKey: [...socialQueryKeys.all, 'feed'],
-    queryFn: ({ pageParam, signal }) => getSocialFeed(pageParam, 20, signal),
+    queryKey: socialQueryKeys.feed(mode),
+    queryFn: ({ pageParam, signal }) => getSocialFeed(pageParam, 20, mode, signal),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: isAuthenticated,
@@ -140,12 +163,12 @@ export function useSocialNotifications() {
   });
 }
 
-export function useSocialUnreadNotificationCount() {
+export function useSocialUnreadNotificationCount(enabled = true) {
   const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: [...socialQueryKeys.all, 'notifications', 'unread-count'],
     queryFn: ({ signal }) => getSocialUnreadNotificationCount(signal),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && enabled,
     refetchInterval: 60_000,
     staleTime: 30_000,
   });

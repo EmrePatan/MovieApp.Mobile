@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 import type { UiLanguage } from '@/i18n/types';
 import { UI_LANGUAGE_STORAGE_KEY, SUPPORTED_UI_LANGUAGES } from '@/i18n/types';
 

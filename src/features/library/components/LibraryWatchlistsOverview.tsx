@@ -1,7 +1,6 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useCallback, useMemo, useRef, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
@@ -24,11 +23,10 @@ import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LibraryWatchlistsOverviewProps {
-  listHeader: ReactNode;
   listRef?: RefObject<FlatList | null>;
 }
 
-export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchlistsOverviewProps) {
+export function LibraryWatchlistsOverview({ listRef }: LibraryWatchlistsOverviewProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const watchlistsQuery = useWatchlists();
@@ -91,8 +89,7 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   if (watchlistsQuery.isLoading && watchlists.length === 0) {
     return (
-      <View style={styles.screen}>
-        {listHeader}
+      <View style={styles.body}>
         <LibraryLoadingState accessibilityLabel={t('common.loadingWatchlists')} />
         {createModal}
       </View>
@@ -101,8 +98,7 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   if (watchlistsQuery.isError && watchlists.length === 0) {
     return (
-      <View style={styles.screen}>
-        {listHeader}
+      <View style={styles.body}>
         <View style={styles.centered}>
           <ErrorView
             message={t('library.watchlistsOverview.loadError')}
@@ -116,8 +112,7 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   if (watchlists.length === 0) {
     return (
-      <View style={styles.screen}>
-        {listHeader}
+      <View style={styles.body}>
         <LibraryEmptyState
           icon="bookmark"
           title={t('library.watchlistsOverview.emptyTitle')}
@@ -131,18 +126,13 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.body}>
       <FlatList
         ref={effectiveListRef}
         testID="library-watchlists-overview"
         data={watchlists}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            {listHeader}
-          </View>
-        }
         ListFooterComponent={createListFooter}
         contentContainerStyle={styles.listContent}
         onScroll={onListScroll}
@@ -158,23 +148,17 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  body: {
     flex: 1,
-  },
-  listHeader: {
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
   },
   listContent: {
     flexGrow: 1,
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     gap: spacing.sm,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
   },
   newListAction: {
     flexDirection: 'row',
