@@ -79,6 +79,15 @@ export function useDirectMessageThread(conversationId: string) {
   const [olderExhausted, setOlderExhausted] = useState(false);
   const olderPageRef = useRef(1);
   const previousRecent = useRef<DirectMessageItem[]>([]);
+  const [threadConversationId, setThreadConversationId] = useState(conversationId);
+
+  // Reset paged state when the conversation changes. Adjusting state during
+  // render (instead of in an effect) avoids an extra cascading render.
+  if (threadConversationId !== conversationId) {
+    setThreadConversationId(conversationId);
+    setOlder([]);
+    setOlderExhausted(false);
+  }
 
   const latest = useQuery({
     queryKey: messageQueryKeys.thread(conversationId),
@@ -94,8 +103,6 @@ export function useDirectMessageThread(conversationId: string) {
   });
 
   useEffect(() => {
-    setOlder([]);
-    setOlderExhausted(false);
     olderPageRef.current = 1;
     previousRecent.current = [];
   }, [conversationId]);

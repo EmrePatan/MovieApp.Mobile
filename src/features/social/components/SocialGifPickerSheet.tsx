@@ -28,18 +28,26 @@ export function SocialGifPickerSheet({ visible, onClose, onSelect }: SocialGifPi
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GiphyResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [wasVisible, setWasVisible] = useState(visible);
 
-  useEffect(() => {
+  // Reset the picker when it closes. Adjusting state during render (instead of
+  // in an effect) avoids an extra cascading render.
+  if (wasVisible !== visible) {
+    setWasVisible(visible);
     if (!visible) {
       setQuery('');
       setResults([]);
       setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!visible) {
       return;
     }
 
     const apiKey = getGiphyApiKey();
     if (!apiKey) {
-      setResults([]);
       return;
     }
 

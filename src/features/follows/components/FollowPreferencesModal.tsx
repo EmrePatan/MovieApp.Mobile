@@ -98,7 +98,7 @@ function FollowPreferencesSheet({
   const createFollow = useCreateTvShowFollow(tvShowId);
   const updateFollow = useUpdateTvShowFollow(tvShowId);
   const removeFollow = useRemoveTvShowFollow(tvShowId);
-  const wasFollowingWhenOpenedRef = useRef(isFollowing);
+  const [wasFollowingWhenOpened, setWasFollowingWhenOpened] = useState(isFollowing);
   const [notifyNewSeasons, setNotifyNewSeasons] = useState(() =>
     resolveInitialNotifyPreference(isFollowing, status?.notifyNewSeasons),
   );
@@ -118,7 +118,7 @@ function FollowPreferencesSheet({
     setErrorMessage(null);
 
     if (bothPreferencesOff) {
-      if (wasFollowingWhenOpenedRef.current) {
+      if (wasFollowingWhenOpened) {
         try {
           await removeFollow.mutateAsync();
         } catch {
@@ -128,7 +128,7 @@ function FollowPreferencesSheet({
           }
         }
 
-        wasFollowingWhenOpenedRef.current = false;
+        setWasFollowingWhenOpened(false);
         onClose();
         return;
       }
@@ -142,7 +142,7 @@ function FollowPreferencesSheet({
       notifyNewEpisodes,
     };
 
-    if (wasFollowingWhenOpenedRef.current) {
+    if (wasFollowingWhenOpened) {
       try {
         await updateFollow.mutateAsync(request);
       } catch {
@@ -176,7 +176,7 @@ function FollowPreferencesSheet({
     }
   };
 
-  const isEditingExistingFollow = wasFollowingWhenOpenedRef.current;
+  const isEditingExistingFollow = wasFollowingWhenOpened;
   const title = isEditingExistingFollow
     ? t('details.followPreferences.titleFollowing')
     : t('details.followPreferences.titleNew');
