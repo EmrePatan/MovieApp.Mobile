@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { normalizeRouteParam } from '@/features/navigation/normalize-route-param';
 import {
   ActivityIndicator,
@@ -79,9 +79,7 @@ export default function SocialCommentsScreen() {
     [params.parentCommentId],
   );
 
-  const [thread, setThread] = useState<ThreadFrame | null>(null);
-  const parentCommentId = thread?.parentId ?? null;
-  /** True only when the user drilled Comments → Replies in-app (not a notification/deep link). */
+  const parentCommentId = parentCommentIdParam?.trim() || null;
   const drilledInFromCommentsRef = useRef(false);
 
   const [draftText, setDraftText] = useState('');
@@ -92,6 +90,14 @@ export default function SocialCommentsScreen() {
   const activity = activityQuery.data;
   const commentItems = comments.data?.pages.flatMap((page) => page.items) ?? [];
   const rootItems = rootComments.data?.pages.flatMap((page) => page.items) ?? [];
+  const thread = useMemo<ThreadFrame | null>(() => {
+    if (!parentCommentId) return null;
+    const parent = rootItems.find((item) => item.id === parentCommentId);
+    return {
+      parentId: parentCommentId,
+      parent: parent ?? placeholderParent(activityId, parentCommentId),
+    };
+  }, [activityId, parentCommentId, rootItems]);
   const createComment = useCreateSocialComment(activityId);
   const deleteComment = useDeleteSocialComment(activityId);
   const toggleLike = useToggleSocialCommentLike(activityId);
@@ -110,28 +116,6 @@ export default function SocialCommentsScreen() {
     [router],
   );
 
-  // Keep local thread frame in sync with the route param (deep links + setParams).
-  useEffect(() => {
-    if (!parentCommentIdParam?.trim()) {
-      setThread(null);
-      return;
-    }
-    setThread((current) => {
-      if (current?.parentId === parentCommentIdParam) return current;
-      const fromRoot = rootItems.find((item) => item.id === parentCommentIdParam);
-      return {
-        parentId: parentCommentIdParam,
-        parent: fromRoot ?? placeholderParent(activityId, parentCommentIdParam),
-      };
-    });
-  }, [activityId, parentCommentIdParam, rootItems]);
-
-  useEffect(() => {
-    if (!thread || thread.parent.content) return;
-    const found = rootItems.find((item) => item.id === thread.parentId);
-    if (found) setThread({ parentId: found.id, parent: found });
-  }, [rootItems, thread]);
-
   const handleSubmit = useCallback(() => {
     const content = draftText.trim();
     if (!content || createComment.isPending) return;
@@ -149,7 +133,6 @@ export default function SocialCommentsScreen() {
     (comment: SocialComment) => {
       if (thread) return;
       drilledInFromCommentsRef.current = true;
-      setThread({ parentId: comment.id, parent: comment });
       syncRouteParent(comment.id);
     },
     [syncRouteParent, thread],
@@ -168,7 +151,6 @@ export default function SocialCommentsScreen() {
     // In-app drill: peel one layer back to root comments.
     if (drilledInFromCommentsRef.current) {
       drilledInFromCommentsRef.current = false;
-      setThread(null);
       syncRouteParent(null);
       return;
     }
