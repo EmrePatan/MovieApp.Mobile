@@ -45,14 +45,22 @@ export function RenameWatchlistModal({
   const [description, setDescription] = useState(initialDescription ?? '');
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  // Reset the form whenever the sheet opens or its initial values change (adjust state during render).
+  const resetKey = visible ? `${initialName}\u0000${initialDescription ?? ''}` : null;
+  const [appliedResetKey, setAppliedResetKey] = useState<string | null>(null);
+  if (resetKey !== appliedResetKey) {
+    setAppliedResetKey(resetKey);
+    if (resetKey !== null) {
+      setName(initialName);
+      setDescription(initialDescription ?? '');
+      setFeedback(null);
+    }
+  }
+
   useEffect(() => {
     if (!visible) {
       return;
     }
-
-    setName(initialName);
-    setDescription(initialDescription ?? '');
-    setFeedback(null);
 
     const focusTimer = setTimeout(() => {
       nameInputRef.current?.focus();

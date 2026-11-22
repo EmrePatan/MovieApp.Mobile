@@ -73,11 +73,14 @@ export function LibraryHubContent({
   const effectiveMediaType = category === 'watching' ? 'all' : mediaType;
   const searchMediaType = mediaType;
 
-  useEffect(() => {
+  // Open the search field when a search becomes active (adjust state during render, not in an effect).
+  const [wasSearchActive, setWasSearchActive] = useState(isSearchActive);
+  if (wasSearchActive !== isSearchActive) {
+    setWasSearchActive(isSearchActive);
     if (isSearchActive) {
       setSearchOpen(true);
     }
-  }, [isSearchActive]);
+  }
 
   const libraryQuery = useLibrary(category, effectiveMediaType, {
     enabled: !isWatchlistsCategory && !isSearchActive,
