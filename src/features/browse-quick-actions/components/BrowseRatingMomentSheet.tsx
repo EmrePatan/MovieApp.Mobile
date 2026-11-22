@@ -38,14 +38,14 @@ export function BrowseRatingMomentSheet({
   const { t } = useTranslation();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [previewRating, setPreviewRating] = useState<number | null>(null);
-  const submittedSaveRef = useRef(false);
+  const [submittedSave, setSubmittedSave] = useState(false);
   const resetSessionRef = useRef(-1);
-  const heroOpacity = useRef(new Animated.Value(0)).current;
-  const heroTranslate = useRef(new Animated.Value(8)).current;
+  const [heroOpacity] = useState(() => new Animated.Value(0));
+  const [heroTranslate] = useState(() => new Animated.Value(8));
 
   useEffect(() => {
     if (!visible) {
-      submittedSaveRef.current = false;
+      setSubmittedSave(false);
       resetSessionRef.current = -1;
       heroOpacity.setValue(0);
       heroTranslate.setValue(8);
@@ -56,7 +56,7 @@ export function BrowseRatingMomentSheet({
       resetSessionRef.current = sessionKey;
       setPreviewRating(null);
       setFeedback(null);
-      submittedSaveRef.current = false;
+      setSubmittedSave(false);
     }
 
     Animated.parallel([
@@ -97,16 +97,16 @@ export function BrowseRatingMomentSheet({
     }
 
     try {
-      submittedSaveRef.current = true;
+      setSubmittedSave(true);
       onSubmit(starRatingToBackendScore(previewRating));
     } catch {
-      submittedSaveRef.current = false;
+      setSubmittedSave(false);
       setFeedback(t('ratings.saveError'));
     }
   };
 
   const hasPendingRating =
-    previewRating != null || (isSubmitting && submittedSaveRef.current);
+    previewRating != null || (isSubmitting && submittedSave);
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
