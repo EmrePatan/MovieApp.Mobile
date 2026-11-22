@@ -56,3 +56,6 @@ scripts/_keys-index.txt
 .impeccable/
 skills-lock.json
 .cursor/settings.json
+
+# graphify knowledge graph (generated)
+graphify-out/
