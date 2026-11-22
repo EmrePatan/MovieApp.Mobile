@@ -59,7 +59,7 @@ jobs:
             exit 1
           fi
 
-          FILES=$(git diff --name-only "${BASE}" "${GITHUB_SHA}" -- '*.ts' '*.tsx')
+          FILES=$(git diff --diff-filter=ACMRT --name-only "${BASE}" "${GITHUB_SHA}" -- '*.ts' '*.tsx')
           if [ -z "${FILES}" ]; then
             echo "No changed TypeScript files to lint."
             exit 0
