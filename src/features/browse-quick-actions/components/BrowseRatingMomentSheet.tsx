@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Modal, StyleSheet, View } from 'react-native';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -36,27 +36,31 @@ export function BrowseRatingMomentSheet({
   onSubmit,
 }: BrowseRatingMomentSheetProps) {
   const { t } = useTranslation();
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [previewRating, setPreviewRating] = useState<number | null>(null);
-  const submittedSaveRef = useRef(false);
-  const resetSessionRef = useRef(-1);
+  const [sessionState, setSessionState] = useState(() => ({
+    sessionKey,
+    visible,
+    feedback: null as string | null,
+    previewRating: null as number | null,
+  }));
+
+  if (sessionState.sessionKey !== sessionKey || sessionState.visible !== visible) {
+    setSessionState({
+      sessionKey,
+      visible,
+      feedback: null,
+      previewRating: null,
+    });
+  }
+
+  const { feedback, previewRating } = sessionState;
   const [heroOpacity] = useState(() => new Animated.Value(0));
   const [heroTranslate] = useState(() => new Animated.Value(8));
 
   useEffect(() => {
     if (!visible) {
-      submittedSaveRef.current = false;
-      resetSessionRef.current = -1;
       heroOpacity.setValue(0);
       heroTranslate.setValue(8);
       return;
-    }
-
-    if (resetSessionRef.current !== sessionKey) {
-      resetSessionRef.current = sessionKey;
-      setPreviewRating(null);
-      setFeedback(null);
-      submittedSaveRef.current = false;
     }
 
     Animated.parallel([
@@ -82,8 +86,11 @@ export function BrowseRatingMomentSheet({
     if (isSubmitting) {
       return;
     }
-    setPreviewRating(starRating);
-    setFeedback(null);
+    setSessionState((current) => ({
+      ...current,
+      previewRating: starRating,
+      feedback: null,
+    }));
   };
 
   const handleSecondaryAction = () => {
@@ -97,16 +104,16 @@ export function BrowseRatingMomentSheet({
     }
 
     try {
-      submittedSaveRef.current = true;
       onSubmit(starRatingToBackendScore(previewRating));
     } catch {
-      submittedSaveRef.current = false;
-      setFeedback(t('ratings.saveError'));
+      setSessionState((current) => ({
+        ...current,
+        feedback: t('ratings.saveError'),
+      }));
     }
   };
 
-  const hasPendingRating =
-    previewRating != null || (isSubmitting && submittedSaveRef.current);
+  const hasPendingRating = previewRating != null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -149,8 +156,11 @@ export function BrowseRatingMomentSheet({
               onCommit={handleCommit}
               onClear={() => {
                 if (!isSubmitting) {
-                  setPreviewRating(null);
-                  setFeedback(null);
+                  setSessionState((current) => ({
+                    ...current,
+                    previewRating: null,
+                    feedback: null,
+                  }));
                 }
               }}
             />
@@ -159,7 +169,9 @@ export function BrowseRatingMomentSheet({
           <FeedbackMessage
             message={feedback}
             tone="error"
-            onDismiss={() => setFeedback(null)}
+            onDismiss={() =>
+              setSessionState((current) => ({ ...current, feedback: null }))
+            }
           />
 
           <View style={styles.actions}>
