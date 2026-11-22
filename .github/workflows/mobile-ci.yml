@@ -65,16 +65,12 @@ jobs:
             exit 0
           fi
 
-          printf '%s\n' "${FILES}"
-          # ESLint treats CLI path args as globs; Expo routes like [token].tsx must be escaped
-          # or Linux runners exit 123 (unmatched pattern) even when the file exists.
-          ARGS=()
+          # Feed each changed file through stdin so ESLint does not interpret
+          # Expo Router dynamic-route brackets (for example [id].tsx) as glob syntax.
           while IFS= read -r file; do
             [ -n "${file}" ] || continue
-            escaped=$(printf '%s' "${file}" | sed -e 's/\[/\\[/g' -e 's/\]/\\]/g' -e 's/\*/\\*/g' -e 's/\?/\\?/g')
-            ARGS+=("${escaped}")
+            npx eslint --stdin --stdin-filename "${file}" < "${file}"
           done <<< "${FILES}"
-          npx eslint -- "${ARGS[@]}"
 
       - name: Focused Home and TV watch progress tests
         run: >-
