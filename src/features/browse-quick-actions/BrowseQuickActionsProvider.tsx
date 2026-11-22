@@ -65,7 +65,7 @@ export function BrowseQuickActionsProvider({ children }: BrowseQuickActionsProvi
   const [ratingVisible, setRatingVisible] = useState(false);
   const [ratingSessionKey, setRatingSessionKey] = useState(0);
   const [ratingBusy, setRatingBusy] = useState(false);
-  const ratingTargetRef = useRef<BrowseQuickActionsTarget | null>(null);
+  const [ratingTarget, setRatingTarget] = useState<BrowseQuickActionsTarget | null>(null);
   const ratingDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ratingCloseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -78,8 +78,8 @@ export function BrowseQuickActionsProvider({ children }: BrowseQuickActionsProvi
   const toggleFavorite = useToggleFavorite(contentType, contentId);
   const toggleWatchedMutation = useToggleBrowseWatched();
 
-  const ratingType = ratingTargetRef.current?.contentType ?? contentType;
-  const ratingId = ratingTargetRef.current?.contentId ?? contentId;
+  const ratingType = ratingTarget?.contentType ?? contentType;
+  const ratingId = ratingTarget?.contentId ?? contentId;
   const myRating = useMyRating(ratingType, ratingVisible ? ratingId : '');
   const rateContent = useRateContent(ratingType, ratingId);
 
@@ -124,7 +124,7 @@ export function BrowseQuickActionsProvider({ children }: BrowseQuickActionsProvi
   const scheduleRatingPrompt = useCallback(
     (forTarget: BrowseQuickActionsTarget) => {
       clearRatingDelay();
-      ratingTargetRef.current = forTarget;
+      setRatingTarget(forTarget);
       ratingDelayRef.current = setTimeout(() => {
         ratingDelayRef.current = null;
         void (async () => {
@@ -244,7 +244,6 @@ export function BrowseQuickActionsProvider({ children }: BrowseQuickActionsProvi
     [isWatchedTogglePending, openQuickActions, toggleWatched],
   );
 
-  const ratingTarget = ratingTargetRef.current;
   const watchedBusy =
     toggleWatchedMutation.isPending &&
     toggleWatchedMutation.variables?.target.contentId === contentId;
