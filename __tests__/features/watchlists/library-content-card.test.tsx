@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { LibraryContentCard } from '@/features/watchlists/components/LibraryContentCard';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 
@@ -11,6 +12,8 @@ const movieItem: LibraryItem = {
   voteAverage: 8.4,
   createdAt: '2026-09-11T14:30:00Z',
 };
+
+jest.mock('@/auth/useAuth', () => ({ useAuth: jest.fn(() => ({ isAuthenticated: true, logout: jest.fn() })) }));
 
 describe('LibraryContentCard (watchlists re-export)', () => {
   it('renders movie card and navigates on press', () => {

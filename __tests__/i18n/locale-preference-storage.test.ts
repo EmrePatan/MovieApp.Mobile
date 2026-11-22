@@ -6,6 +6,9 @@ import {
 } from '@/features/locale/locale-preference-storage';
 import { UI_LANGUAGE_STORAGE_KEY } from '@/i18n/types';
 
+// The storage wrapper only needs Platform.OS; avoid loading the full react-native entry in the node unit project.
+jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
+
 describe('locale preference storage', () => {
   beforeEach(() => {
     jest.clearAllMocks();

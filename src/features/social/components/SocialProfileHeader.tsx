@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
+import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
+import type { GalleryImage } from '@/features/gallery/types';
 import { OwnProfileCinemaStats } from '@/features/profile/components/OwnProfileCinemaStats';
 import { ProfileSocialLinksRow } from '@/features/profile/components/ProfileSocialLinksRow';
 import { filledSocialLinks } from '@/features/profile/utils/profile-social-links';
@@ -56,6 +58,23 @@ export function SocialProfileHeader({
   const { width } = useWindowDimensions();
   const coverHeight = Math.round(Math.min(168, Math.max(120, width * 0.42)));
   const avatarOverlap = Math.round(AVATAR_SIZE / 2);
+  const [avatarViewerOpen, setAvatarViewerOpen] = useState(false);
+  const avatarImages = useMemo<GalleryImage[]>(() => {
+    const path = profile.avatarUrl?.trim();
+    if (!path) return [];
+    return [
+      {
+        filePath: path,
+        width: null,
+        height: null,
+        aspectRatio: null,
+        category: 'profile',
+        language: null,
+        voteAverage: 0,
+        voteCount: 0,
+      },
+    ];
+  }, [profile.avatarUrl]);
 
   const coverUri = resolveSocialProfileCoverUri(
     profile.coverImageUrl,
@@ -142,7 +161,13 @@ export function SocialProfileHeader({
 
       <View style={[styles.body, { marginTop: -avatarOverlap }]}>
         <View style={styles.identityRow}>
-          <View style={styles.avatarRing}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('social.viewAvatar')}
+            disabled={avatarImages.length === 0}
+            onPress={() => setAvatarViewerOpen(true)}
+            style={styles.avatarRing}
+          >
             <UserAvatar
               displayName={profile.displayName}
               effectiveAvatarUrl={profile.avatarUrl}
@@ -150,7 +175,13 @@ export function SocialProfileHeader({
               textVariant="subtitle"
               accessibilityLabel={profile.displayName}
             />
-          </View>
+          </Pressable>
+          <ImageViewerModal
+            visible={avatarViewerOpen}
+            images={avatarImages}
+            initialIndex={0}
+            onClose={() => setAvatarViewerOpen(false)}
+          />
           {actions ? <View style={styles.actions}>{actions}</View> : null}
         </View>
 

@@ -9,6 +9,7 @@ import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFla
 import { useAuth } from '@/auth/useAuth';
 import { ConversationRow } from '@/features/messages/components/ConversationRow';
 import { useDirectConversations } from '@/features/messages/hooks/useMessageQueries';
+import { useDeleteDirectConversation } from '@/features/messages/hooks/useMessageMutations';
 import { SocialSubscreenHeader } from '@/features/social/components/SocialSubscreenHeader';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { colors } from '@/theme/colors';
@@ -20,6 +21,7 @@ export default function MessagesInboxScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const query = useDirectConversations();
+  const deleteConversation = useDeleteDirectConversation();
   const conversations = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
     [query.data?.pages],
@@ -53,6 +55,7 @@ export default function MessagesInboxScreen() {
             item={item}
             currentUserId={user?.id}
             onPress={() => router.push(`/(tabs)/(app-shell)/messages/${item.id}`)}
+            onDelete={() => deleteConversation.mutate(item.id)}
           />
         )}
         onEndReached={() => {

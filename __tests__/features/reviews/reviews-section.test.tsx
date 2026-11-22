@@ -1,6 +1,8 @@
+jest.mock('@/features/social/components/SocialGifPickerSheet', () => ({ SocialGifPickerSheet: () => null }));
 import React from 'react';
 import { Alert } from 'react-native';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders } from '../../utils/render-with-providers';
 import { ApiError } from '@/api/errors';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
@@ -157,7 +159,7 @@ describe('ReviewsDetailContent', () => {
   });
 
   it('renders the write-review CTA when the user has not reviewed yet', () => {
-    render(
+    renderWithProviders(
       <ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />,
     );
 
@@ -166,7 +168,7 @@ describe('ReviewsDetailContent', () => {
   });
 
   it('renders review count and public reviews', () => {
-    render(
+    renderWithProviders(
       <ReviewsDetailContent contentType="movie" contentId={movieId} contentTitle="Interstellar" />,
     );
 
@@ -193,7 +195,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByTestId('reviews-loading')).toBeTruthy();
     expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
@@ -214,7 +216,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByTestId('reviews-empty-state')).toBeTruthy();
     expect(screen.getByText('No reviews yet')).toBeTruthy();
     expect(screen.getByText('No one has shared their thoughts on this title yet.')).toBeTruthy();
@@ -232,7 +234,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByText('Server error.')).toBeTruthy();
     expect(screen.queryByTestId('reviews-empty-state')).toBeNull();
     fireEvent.press(screen.getByText('Retry'));
@@ -256,7 +258,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByTestId('reviews-empty-state-action'));
 
     expect(mockCreateMutate).not.toHaveBeenCalled();
@@ -278,7 +280,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByTestId('reviews-empty-state-action'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
@@ -286,7 +288,7 @@ describe('ReviewsDetailContent', () => {
     fireEvent.press(screen.getByText('Send'));
 
     expect(mockCreateMutate).toHaveBeenCalledWith(
-      { content: 'Great film.' },
+      expect.objectContaining({ content: 'Great film.' }),
       expect.any(Object),
     );
   });
@@ -302,7 +304,7 @@ describe('ReviewsDetailContent', () => {
       isLoading: false,
     });
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByText('Read more')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Read more of your review'));
@@ -316,7 +318,7 @@ describe('ReviewsDetailContent', () => {
       isLoading: false,
     });
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
     expect(screen.getByText('Your review')).toBeTruthy();
@@ -334,7 +336,7 @@ describe('ReviewsDetailContent', () => {
       isLoading: false,
     });
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByLabelText('Edit review'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
@@ -342,7 +344,7 @@ describe('ReviewsDetailContent', () => {
     fireEvent.press(screen.getByText('Save'));
 
     expect(mockUpdateMutate).toHaveBeenCalledWith(
-      { content: 'Updated take.' },
+      expect.objectContaining({ content: 'Updated take.' }),
       expect.any(Object),
     );
   });
@@ -353,7 +355,7 @@ describe('ReviewsDetailContent', () => {
       isLoading: false,
     });
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByLabelText('Edit review'));
     expect(screen.getByTestId('review-composer-anchor')).toBeTruthy();
@@ -372,7 +374,7 @@ describe('ReviewsDetailContent', () => {
       isLoading: false,
     });
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByLabelText('Edit review'));
     fireEvent.press(screen.getByLabelText('Delete'));
 
@@ -411,7 +413,7 @@ describe('ReviewsDetailContent', () => {
       options?.onSuccess?.();
     });
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     fireEvent.press(screen.getByLabelText('Edit review'));
     fireEvent.press(screen.getByLabelText('Delete'));
 
@@ -435,7 +437,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByTestId('reviews-pagination-label')).toHaveTextContent('1 / 2');
   });
 
@@ -454,7 +456,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByLabelText('Rated 4.0 out of 5 stars')).toBeTruthy();
   });
 
@@ -473,7 +475,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
     expect(screen.getByLabelText('Rated 3.5 out of 5 stars')).toBeTruthy();
   });
 
@@ -504,7 +506,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(
+    renderWithProviders(
       <ReviewsDetailContent
         contentType="movie"
         contentId={movieId}
@@ -549,7 +551,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
     expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
@@ -572,7 +574,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    const { rerender } = render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    const { rerender } = renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByTestId('reviews-empty-state')).toBeTruthy();
 
@@ -618,7 +620,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.queryByTestId('reviews-rating-distribution')).toBeNull();
     expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
@@ -643,7 +645,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     expect(screen.getByTestId('reviews-own-review-bar')).toBeTruthy();
     expect(screen.queryByTestId('reviews-sort-chip-newest')).toBeNull();
@@ -682,7 +684,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
     expect(screen.getByText('Your review matches this rating. See it above.')).toBeTruthy();
@@ -712,7 +714,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     const twoStarBar = screen.getByTestId('reviews-rating-bar-2');
     expect(twoStarBar.props.accessibilityState.disabled).toBe(true);
@@ -743,7 +745,7 @@ describe('ReviewsDetailContent', () => {
       }),
     );
 
-    render(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="movie" contentId={movieId} />);
 
     fireEvent.press(screen.getByTestId('reviews-rating-bar-4'));
     expect(useMovieReviews).toHaveBeenCalledWith(
@@ -755,7 +757,7 @@ describe('ReviewsDetailContent', () => {
   });
 
   it('uses tv review query for tv content', () => {
-    render(<ReviewsDetailContent contentType="tv" contentId={movieId} />);
+    renderWithProviders(<ReviewsDetailContent contentType="tv" contentId={movieId} />);
     expect(useTvShowReviews).toHaveBeenCalledWith(movieId, {
       page: 1,
       sort: 'newest',

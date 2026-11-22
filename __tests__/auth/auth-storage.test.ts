@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { getAccessToken, removeAccessToken, saveAccessToken } from '@/auth/auth-storage';
 
+jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
+
 describe('auth storage', () => {
   beforeEach(() => {
     jest.clearAllMocks();

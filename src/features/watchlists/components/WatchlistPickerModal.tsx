@@ -144,7 +144,7 @@ function WatchlistPickerBody({
 
     dismissCreateKeyboard();
 
-    createWatchlistMutation.mutate(trimmedWatchlistName, {
+    createWatchlistMutation.mutate({ name: trimmedWatchlistName }, {
       onSuccess: (created) => {
         setNewWatchlistName('');
         setErrorMessage(null);

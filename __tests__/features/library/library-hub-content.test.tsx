@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+﻿import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { LibraryHubContent } from '@/features/library/components/LibraryHubContent';
 import { LibraryHubSearchProvider } from '@/features/library/context/LibraryHubSearchContext';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
@@ -8,10 +9,6 @@ const mockOpenCatalogDetailFromTab = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
-}));
-
-jest.mock('@tanstack/react-query', () => ({
-  useQueryClient: jest.fn(() => ({})),
 }));
 
 jest.mock('@/auth/useAuth', () => ({

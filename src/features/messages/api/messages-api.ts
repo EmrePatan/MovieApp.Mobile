@@ -16,6 +16,10 @@ export function getDirectConversations(page = 1, pageSize = 20, signal?: AbortSi
   return api.get<DirectConversationPage>(directConversationsPath(page, pageSize), { signal });
 }
 
+export function deleteDirectConversation(conversationId: string) {
+  return api.delete<void>(directConversationPath(conversationId));
+}
+
 export function getDirectConversation(conversationId: string, signal?: AbortSignal) {
   return api.get<DirectConversationDetail>(directConversationPath(conversationId), { signal });
 }

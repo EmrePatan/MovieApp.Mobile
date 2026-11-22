@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ReviewsOwnReviewBar } from '@/features/reviews/components/ReviewsOwnReviewBar';
 import type { ReviewResponse } from '@/features/reviews/types';
 import { initI18nForTests, t } from '../../i18n/i18n-test-utils';

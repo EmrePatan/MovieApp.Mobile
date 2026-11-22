@@ -55,3 +55,12 @@ export const socialNotificationReadPath = (notificationId: string) => `/api/soci
 export const socialReadAllNotificationsPath = () => '/api/social/notifications/read-all';
 
 export const socialBlockedUsersPath = () => '/api/social/blocks';
+
+export const socialProfileWatchlistsPath = (userId: string) => `/api/social/profiles/${userId}/watchlists`;
+export const socialProfileWatchlistItemsPath = (userId: string, watchlistId: string, page = 1, pageSize = 50) =>
+  `/api/social/profiles/${userId}/watchlists/${watchlistId}/items?${new URLSearchParams({
+    mediaType: 'all',
+    sort: 'recentlyAdded',
+    page: String(page),
+    pageSize: String(pageSize),
+  }).toString()}`;

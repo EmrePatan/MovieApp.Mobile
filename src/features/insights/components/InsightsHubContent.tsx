@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
@@ -105,7 +105,7 @@ export function InsightsHubContent() {
 
     return (
       <View style={styles.errorContainer}>
-        <InsightsScreenHeader onOpenProfile={() => router.navigate('/(tabs)/profile')} />
+        <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
         <ErrorView message={message} onRetry={() => void insightsQuery.refetch()} />
       </View>
     );
@@ -114,7 +114,7 @@ export function InsightsHubContent() {
   if (insightsQuery.isLoading && !insightsQuery.data) {
     return (
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <InsightsScreenHeader onOpenProfile={() => router.navigate('/(tabs)/profile')} />
+        <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
         <InsightsLoadingSkeleton />
       </ScrollView>
     );
@@ -134,7 +134,7 @@ export function InsightsHubContent() {
       scrollEventThrottle={16}
     >
       {androidPullToRefresh.RefreshHeader}
-      <InsightsScreenHeader onOpenProfile={() => router.navigate('/(tabs)/profile')} />
+      <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
       <InsightsMovieDnaHero
         movieDna={insights.movieDna}
         backdropImagePath={insights.yourEra.oldestTitle?.posterPath}

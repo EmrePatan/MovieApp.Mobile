@@ -88,6 +88,11 @@ export default function PublicWatchlistScreen() {
         <AppText variant="caption" muted>
           {t('watchlistShare.publicItemCount', { count: items.length })}
         </AppText>
+        {query.data?.description ? (
+          <AppText variant="bodySmall" muted>
+            {query.data.description}
+          </AppText>
+        ) : null}
       </View>
       {items.length === 0 ? (
         <LibraryEmptyState

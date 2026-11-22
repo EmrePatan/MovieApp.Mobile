@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
@@ -14,9 +15,10 @@ import {
   formatContentType,
   formatRating,
 } from '@/utils/format';
+import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
-import { spacing } from '@/theme/spacing';
+import { borderRadius, spacing } from '@/theme/spacing';
 import type { ImageSize } from '@/utils/image-url';
 
 interface HomeContentCardProps {
@@ -24,12 +26,15 @@ interface HomeContentCardProps {
   onPress?: (item: HomeItem) => void;
   /** Override the default w500 poster profile (Home trending uses w780). */
   posterSize?: ImageSize;
+  /** When set, shows a "not interested" control on the poster's top-left corner. */
+  onDismiss?: (item: HomeItem) => void;
 }
 
 export const HomeContentCard = memo(function HomeContentCard({
   item,
   onPress,
   posterSize,
+  onDismiss,
 }: HomeContentCardProps) {
   const { t } = useTranslation();
   const quickTarget = useMemo(
@@ -80,6 +85,20 @@ export const HomeContentCard = memo(function HomeContentCard({
           size={posterSize}
         />
       </BrowsePosterFrame>
+      {onDismiss ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('home.dismissRecommendation')}
+          hitSlop={8}
+          onPress={() => onDismiss(item)}
+          style={({ pressed }) => [styles.dismissAnchor, pressed && styles.pressed]}
+          testID="home-recommendation-dismiss"
+        >
+          <View style={styles.dismissBadge}>
+            <Ionicons name="close" size={14} color={colors.textPrimary} />
+          </View>
+        </Pressable>
+      ) : null}
       <View style={styles.meta}>
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
@@ -101,6 +120,27 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: interaction.pressedOpacity,
+  },
+  dismissAnchor: {
+    position: 'absolute',
+    top: spacing.xs,
+    left: spacing.xs,
+    zIndex: 4,
+  },
+  dismissBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(10, 10, 15, 0.72)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 4,
   },
   meta: {
     marginTop: spacing.sm,

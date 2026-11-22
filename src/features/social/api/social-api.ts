@@ -27,8 +27,11 @@ import {
   socialProfileCoverPosterPath,
   socialProfileStatisticsPath,
   socialProfileActivitiesPath,
+  socialProfileWatchlistItemsPath,
+  socialProfileWatchlistsPath,
   socialSearchPath,
 } from './routes';
+import type { WatchlistItemsResponse, WatchlistSummaryResponse } from '@/features/watchlists/types';
 import type {
   SocialCommentPage,
   SocialBlockedUser,
@@ -49,6 +52,14 @@ export function getSocialProfile(userId: string, signal?: AbortSignal) {
 
 export function getSocialProfileStatistics(userId: string, signal?: AbortSignal) {
   return api.get<SocialProfileStatistics>(socialProfileStatisticsPath(userId), { signal });
+}
+
+export function getSocialProfileWatchlists(userId: string, signal?: AbortSignal) {
+  return api.get<WatchlistSummaryResponse[]>(socialProfileWatchlistsPath(userId), { signal });
+}
+
+export function getSocialProfileWatchlistItems(userId: string, watchlistId: string, signal?: AbortSignal) {
+  return api.get<WatchlistItemsResponse>(socialProfileWatchlistItemsPath(userId, watchlistId), { signal });
 }
 
 export function getSocialUserActivities(userId: string, cursor?: string | null, pageSize = 20, signal?: AbortSignal) {

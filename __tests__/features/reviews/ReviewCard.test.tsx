@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { Image } from 'react-native';
 import { ReviewCard } from '@/features/reviews/components/ReviewCard';
 import type { ReviewResponse } from '@/features/reviews/types';

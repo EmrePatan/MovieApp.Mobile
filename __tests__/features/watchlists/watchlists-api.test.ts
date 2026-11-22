@@ -79,6 +79,15 @@ describe('watchlists api client', () => {
     expect(api.post).toHaveBeenCalledWith('/api/watchlists', { name: 'My List' });
   });
 
+  it('creates a watchlist with a description', async () => {
+    (api.post as jest.Mock).mockResolvedValue({ id: watchlistId, name: 'My List' });
+    await createWatchlist('My List', 'Weekend picks');
+    expect(api.post).toHaveBeenCalledWith('/api/watchlists', {
+      name: 'My List',
+      description: 'Weekend picks',
+    });
+  });
+
   it('updates a watchlist name', async () => {
     (api.patch as jest.Mock).mockResolvedValue({ id: watchlistId, name: 'Renamed List' });
     await updateWatchlist(watchlistId, 'Renamed List');

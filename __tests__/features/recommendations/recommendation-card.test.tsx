@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { RecommendationCard } from '@/features/recommendations/components/RecommendationCard';
 import type { RecommendationItem } from '@/features/recommendations/types';
 
@@ -17,6 +18,8 @@ const item: RecommendationItem = {
   score: 0.85,
   reason: 'Similar genres and cast',
 };
+
+jest.mock('@/auth/useAuth', () => ({ useAuth: jest.fn(() => ({ isAuthenticated: true, logout: jest.fn() })) }));
 
 describe('RecommendationCard', () => {
   it('renders title, type, year, rating, and reason', () => {

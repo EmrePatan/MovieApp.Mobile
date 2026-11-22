@@ -279,6 +279,8 @@ export const stage2Pt = {
     },
   },
   home: {
+    dismissRecommendation: 'Não tenho interesse',
+    dismissRecommendationFailed: 'Não foi possível atualizar a recomendação. Tente novamente.',
     brandMark: 'Movie Cave',
     featured: 'Em destaque',
     featuredCarousel: 'Carrossel de descoberta em destaque',
@@ -844,6 +846,8 @@ export const stage2Pt = {
       createError: 'Não foi possível criar a lista para assistir. Tente novamente.',
       listNamePlaceholder: 'Nome da lista',
     },
+    descriptionLabel: 'Descrição',
+    descriptionPlaceholder: 'Sobre o que é esta lista?',
     createModal: {
       title: 'Criar lista para assistir',
       enterName: 'Digite um nome para a lista para assistir.',
@@ -851,7 +855,7 @@ export const stage2Pt = {
       createError: 'Não foi possível criar a lista para assistir. Tente novamente.',
     },
     renameModal: {
-      title: 'Renomear lista',
+      title: 'Editar lista',
       enterName: 'Digite um nome para a lista.',
       nameConflict: 'Já existe uma lista com esse nome.',
       renameError: 'Não foi possível renomear a lista. Tente novamente.',
@@ -859,7 +863,7 @@ export const stage2Pt = {
     optionsSheet: {
       listOptions: 'Opções da lista',
       shareList: 'Partilhar lista',
-      renameList: 'Renomear lista',
+      renameList: 'Editar lista',
       deleteList: 'Excluir lista',
       confirmTitle: 'Excluir lista',
       confirmMessage: 'Excluir "{{name}}"? Essa ação não pode ser desfeita.',
@@ -1065,6 +1069,7 @@ export const stage2Pt = {
     communityRailEmptyAccessibility: 'Avaliação da comunidade: 0 estrelas, ainda sem avaliações',
     communityRailOpenReviews: 'Abrir avaliações',
     detail: {
+      episodeRateCta: 'Avaliar este episódio',
       rateCta: 'Avaliar',
       yourScore: 'Sua nota',
       change: 'Alterar',
@@ -1569,5 +1574,8 @@ export const stage2Pt = {
     openProfile: 'Abrir perfil',
     profile: 'Perfil',
     unreadCount: '{{count}} não lidas',
+    deleteConversation: 'Excluir conversa',
+    deleteFailedTitle: 'Não foi possível excluir',
+    deleteFailed: 'Não foi possível excluir esta conversa. Tente novamente.',
   },
 } as const;

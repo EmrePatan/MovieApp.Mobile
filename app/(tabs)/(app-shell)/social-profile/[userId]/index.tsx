@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { normalizeRouteParam } from '@/features/navigation/normalize-route-param';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -73,6 +73,14 @@ export default function SocialProfileScreen() {
     [router],
   );
 
+  const handleOpenWatchlist = useCallback(
+    (watchlistId: string) => {
+      if (!userId) return;
+      router.push(`/(tabs)/(app-shell)/social-profile/${userId}/watchlist/${watchlistId}`);
+    },
+    [router, userId],
+  );
+
   const handleBlock = useCallback(() => setBlockSheetVisible(true), []);
 
   const confirmBlock = useCallback(() => {
@@ -93,6 +101,14 @@ export default function SocialProfileScreen() {
     if (!userId) return;
     router.push(`/profile/user-comments/${userId}`);
   }, [router, userId]);
+
+  const followStatus = profile.data?.followStatus;
+  useEffect(() => {
+    // The signed-in user's own profile lives on the bottom Profile tab; never render it here.
+    if (followStatus === 'Self') {
+      router.replace('/library');
+    }
+  }, [followStatus, router]);
 
   if (!userId) {
     return (
@@ -175,9 +191,6 @@ export default function SocialProfileScreen() {
                 !isSelf && userId ? () => startConversation.mutate(userId) : undefined
               }
               isMessageLoading={startConversation.isPending}
-              onPrivacyPress={
-                isSelf ? () => router.push('/(tabs)/(app-shell)/social-privacy') : undefined
-              }
               onBlockPress={!isSelf ? handleBlock : undefined}
               onReportPress={!isSelf ? () => openUserReport(userId) : undefined}
             />
@@ -219,7 +232,13 @@ export default function SocialProfileScreen() {
           </View>
         ) : null}
         {canViewLibrary && statistics.data ? (
-          <SocialProfileLibrary statistics={statistics.data} onOpenTitle={handleOpenTitle} />
+          <SocialProfileLibrary
+            userId={userId}
+            statistics={statistics.data}
+            onOpenTitle={handleOpenTitle}
+            onOpenWatchlist={handleOpenWatchlist}
+            quickActionsEnabled={!isSelf}
+          />
         ) : null}
       </ScrollView>
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
 
@@ -22,6 +23,7 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: () => ({
     invalidateQueries: mockInvalidateQueries,
     prefetchQuery: mockPrefetchQuery,

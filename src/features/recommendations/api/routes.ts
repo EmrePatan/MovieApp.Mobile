@@ -19,6 +19,10 @@ export function buildRecommendationHomePath(): string {
   return '/api/recommendations/home';
 }
 
+export function buildRecommendationDismissalsPath(): string {
+  return '/api/recommendations/dismissals';
+}
+
 export function buildSimilarMoviesPath(
   movieId: string,
   criteria: SimilarContentRequest = {},

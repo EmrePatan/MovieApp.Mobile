@@ -11,6 +11,8 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
+jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
+
 describe('regional-preference-storage', () => {
   beforeEach(() => {
     jest.clearAllMocks();

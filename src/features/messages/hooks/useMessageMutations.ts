@@ -1,9 +1,50 @@
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createDirectConversation, sendDirectMessage } from '../api/messages-api';
+import { type InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  createDirectConversation,
+  deleteDirectConversation,
+  sendDirectMessage,
+} from '../api/messages-api';
+import type { DirectConversationPage } from '../types';
 import { messageQueryKeys } from './useMessageQueries';
+
+export function useDeleteDirectConversation() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: (conversationId: string) => deleteDirectConversation(conversationId),
+    onMutate: async (conversationId) => {
+      await queryClient.cancelQueries({ queryKey: messageQueryKeys.conversations });
+      const previous = queryClient.getQueryData<InfiniteData<DirectConversationPage>>(
+        messageQueryKeys.conversations,
+      );
+      queryClient.setQueryData<InfiniteData<DirectConversationPage>>(
+        messageQueryKeys.conversations,
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((item) => item.id !== conversationId),
+            })),
+          },
+      );
+      return { previous };
+    },
+    onError: (_error, _conversationId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(messageQueryKeys.conversations, context.previous);
+      }
+      Alert.alert(t('messages.deleteFailedTitle'), t('messages.deleteFailed'));
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: messageQueryKeys.conversations });
+      void queryClient.invalidateQueries({ queryKey: messageQueryKeys.unread });
+    },
+  });
+}
 
 export function useSendDirectMessage(conversationId: string) {
   const queryClient = useQueryClient();

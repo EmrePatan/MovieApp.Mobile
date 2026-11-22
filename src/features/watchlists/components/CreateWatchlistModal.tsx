@@ -36,6 +36,7 @@ export function CreateWatchlistModal({
   const createWatchlist = useCreateWatchlistForLibrary();
   const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export function CreateWatchlistModal({
   const handleClose = () => {
     dismissKeyboard();
     setName('');
+    setDescription('');
     setFeedback(null);
     onClose();
   };
@@ -73,9 +75,13 @@ export function CreateWatchlistModal({
 
     dismissKeyboard();
 
-    createWatchlist.mutate(trimmed, {
+    const trimmedDescription = description.trim();
+    createWatchlist.mutate(
+      { name: trimmed, description: trimmedDescription.length > 0 ? trimmedDescription : null },
+      {
       onSuccess: (created) => {
         setName('');
+        setDescription('');
         setFeedback(null);
         onCreated(created.id);
         onClose();
@@ -124,6 +130,17 @@ export function CreateWatchlistModal({
               autoCorrect={false}
               returnKeyType="done"
               onSubmitEditing={handleCreate}
+            />
+
+            <AppInput
+              label={t('watchlists.descriptionLabel')}
+              value={description}
+              onChangeText={setDescription}
+              placeholder={t('watchlists.descriptionPlaceholder')}
+              maxLength={280}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
             />
 
             <AppButton

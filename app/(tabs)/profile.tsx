@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +41,22 @@ export default function ProfileScreen() {
     void logout();
   }, [logout]);
 
+  const goBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  }, [router]);
+
+  // Right swipe anywhere on the settings hub returns to the previous screen.
+  const swipeBackGesture = Gesture.Pan()
+    .activeOffsetX(24)
+    .failOffsetY([-16, 16])
+    .onEnd((event) => {
+      if (event.translationX > 90 && event.velocityX > 300) {
+        runOnJS(goBack)();
+      }
+    });
+
   if (profileQuery.isLoading && !profile) {
     return (
       <Screen>
@@ -67,6 +85,7 @@ export default function ProfileScreen() {
 
   return (
     <Screen padded={false}>
+      <GestureDetector gesture={swipeBackGesture}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -108,6 +127,11 @@ export default function ProfileScreen() {
             onPress={() => router.push('/profile/edit')}
           />
           <ProfileMenuRow
+            label={t('social.managePrivacy')}
+            subtitle={t('social.privacyDescription')}
+            onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}
+          />
+          <ProfileMenuRow
             label={t('profile.signInSecurityTitle')}
             subtitle={t('profile.signInSecurityMenuSubtitle')}
             onPress={() => router.push('/profile/security')}
@@ -121,6 +145,7 @@ export default function ProfileScreen() {
 
         <AppButton title={t('profile.signOut')} variant="ghost" onPress={handleLogout} />
       </ScrollView>
+      </GestureDetector>
     </Screen>
   );
 }

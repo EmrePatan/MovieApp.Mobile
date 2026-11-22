@@ -46,9 +46,14 @@ const DEFAULT_MEDIA_FILTER: CatalogMediaFilter = 'all';
 
 interface LibraryHubContentProps {
   banner?: ReactNode;
+  /** Long-press quick actions and watched badges on posters. */
+  quickActionsEnabled?: boolean;
 }
 
-export function LibraryHubContent({ banner = null }: LibraryHubContentProps) {
+export function LibraryHubContent({
+  banner = null,
+  quickActionsEnabled = true,
+}: LibraryHubContentProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -208,10 +213,11 @@ export function LibraryHubContent({ banner = null }: LibraryHubContentProps) {
         category={resolveGridCategory(item)}
         width={itemWidth}
         height={itemHeight}
+        quickActionsEnabled={quickActionsEnabled}
         onPress={handleItemPress}
       />
     ),
-    [handleItemPress, itemHeight, itemWidth, resolveGridCategory],
+    [handleItemPress, itemHeight, itemWidth, quickActionsEnabled, resolveGridCategory],
   );
 
   const chrome = (

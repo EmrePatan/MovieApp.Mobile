@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ReviewsLinkRow } from '@/features/reviews/components/ReviewsLinkRow';
 import { useMovieReviews } from '@/features/reviews/hooks/useMovieReviews';
 import { useTvShowReviews } from '@/features/reviews/hooks/useTvShowReviews';

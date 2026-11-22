@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ApiError } from '@/api/errors';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { markHomePerfEvent } from '@/perf/home-cold-start-trace';
@@ -10,6 +11,7 @@ const mockRefetch = jest.fn();
 const mockUseHomeFeed = useHomeFeed as jest.Mock;
 
 jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: () => ({
     invalidateQueries: jest.fn(),
   }),

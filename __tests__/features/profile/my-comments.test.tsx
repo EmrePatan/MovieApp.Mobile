@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+﻿import { fireEvent, render, screen } from '@testing-library/react-native';
 import { renderWithProviders } from '../../utils/render-with-providers';
 import { I18nextProvider } from 'react-i18next';
 import ProfileScreen from '../../../app/(tabs)/profile';
@@ -80,7 +80,7 @@ const tvItem: UserReviewListItem = {
 };
 
 function renderWithI18n(ui: React.ReactElement) {
-  return render(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
+  return renderWithProviders(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
 }
 
 describe('My Comments profile feature', () => {
@@ -164,7 +164,7 @@ describe('My Comments profile feature', () => {
   it('renders movie and TV rows and forwards press to handler', () => {
     const onPress = jest.fn();
 
-    render(
+    renderWithI18n(
       <MyCommentRow item={movieItem} onPress={onPress} />,
     );
     expect(screen.getByText('Interstellar')).toBeTruthy();
@@ -172,7 +172,7 @@ describe('My Comments profile feature', () => {
     fireEvent.press(screen.getByLabelText('Interstellar, Movie · 2014'));
     expect(onPress).toHaveBeenCalledWith(movieItem);
 
-    render(
+    renderWithI18n(
       <MyCommentRow item={tvItem} onPress={onPress} />,
     );
     expect(screen.getByText('Reacher')).toBeTruthy();

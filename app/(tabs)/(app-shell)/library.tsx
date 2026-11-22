@@ -14,7 +14,7 @@ export default function LibraryTabScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <LibraryHubSearchProvider>
         <View style={styles.content}>
-          <LibraryHubContent banner={<OwnProfileTabHeader />} />
+          <LibraryHubContent banner={<OwnProfileTabHeader />} quickActionsEnabled={false} />
         </View>
       </LibraryHubSearchProvider>
     </SafeAreaView>

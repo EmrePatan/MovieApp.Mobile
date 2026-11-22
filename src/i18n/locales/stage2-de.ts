@@ -279,6 +279,8 @@ export const stage2De = {
     },
   },
   home: {
+    dismissRecommendation: 'Nicht interessant',
+    dismissRecommendationFailed: 'Empfehlung konnte nicht aktualisiert werden. Bitte versuche es erneut.',
     brandMark: 'Movie Cave',
     featured: 'Empfohlen',
     featuredCarousel: 'Empfohlenes Entdecken-Karussell',
@@ -844,6 +846,8 @@ export const stage2De = {
       createError: 'Merkliste konnte nicht erstellt werden. Bitte versuche es erneut.',
       listNamePlaceholder: 'Listenname',
     },
+    descriptionLabel: 'Beschreibung',
+    descriptionPlaceholder: 'Worum geht es in dieser Liste?',
     createModal: {
       title: 'Merkliste erstellen',
       enterName: 'Gib einen Merklistennamen ein.',
@@ -851,7 +855,7 @@ export const stage2De = {
       createError: 'Merkliste konnte nicht erstellt werden. Bitte versuche es erneut.',
     },
     renameModal: {
-      title: 'Liste umbenennen',
+      title: 'Liste bearbeiten',
       enterName: 'Gib einen Listennamen ein.',
       nameConflict: 'Eine Liste mit diesem Namen existiert bereits.',
       renameError: 'Liste konnte nicht umbenannt werden. Bitte versuche es erneut.',
@@ -859,7 +863,7 @@ export const stage2De = {
     optionsSheet: {
       listOptions: 'Listenoptionen',
       shareList: 'Liste teilen',
-      renameList: 'Liste umbenennen',
+      renameList: 'Liste bearbeiten',
       deleteList: 'Liste löschen',
       confirmTitle: 'Liste löschen',
       confirmMessage: '„{{name}}“ löschen? Dies kann nicht rückgängig gemacht werden.',
@@ -1065,6 +1069,7 @@ export const stage2De = {
     communityRailEmptyAccessibility: 'Community-Bewertung: 0 Sterne, noch keine Bewertungen',
     communityRailOpenReviews: 'Rezensionen öffnen',
     detail: {
+      episodeRateCta: 'Diese Folge bewerten',
       rateCta: 'Bewerten',
       yourScore: 'Deine Bewertung',
       change: 'Ändern',
@@ -1569,5 +1574,8 @@ export const stage2De = {
     openProfile: 'Profil öffnen',
     profile: 'Profil',
     unreadCount: '{{count}} ungelesen',
+    deleteConversation: 'Unterhaltung löschen',
+    deleteFailedTitle: 'Nicht gelöscht',
+    deleteFailed: 'Diese Unterhaltung konnte nicht gelöscht werden. Bitte versuche es erneut.',
   },
 } as const;

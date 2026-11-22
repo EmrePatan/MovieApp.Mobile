@@ -178,6 +178,7 @@ export function LibraryWatchlistDetailContent({
   const listHeader = (
     <LibraryWatchlistDetailHeader
       title={watchlist?.name ?? t('library.watchlistDetail.defaultTitle')}
+      description={watchlist?.description}
       onOverflowPress={watchlist ? handleOverflowPress : undefined}
     >
       {listControls}
@@ -199,6 +200,7 @@ export function LibraryWatchlistDetailContent({
         visible={renameModalVisible}
         watchlistId={watchlist?.id ?? null}
         initialName={watchlist?.name ?? ''}
+        initialDescription={watchlist?.description ?? ''}
         onClose={() => setRenameModalVisible(false)}
       />
     </>

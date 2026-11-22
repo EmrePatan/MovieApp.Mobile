@@ -279,6 +279,8 @@ export const stage2It = {
     },
   },
   home: {
+    dismissRecommendation: 'Non mi interessa',
+    dismissRecommendationFailed: 'Impossibile aggiornare il consiglio. Riprova.',
     brandMark: 'Movie Cave',
     featured: 'In evidenza',
     featuredCarousel: 'Carosello Scopri in evidenza',
@@ -844,6 +846,8 @@ export const stage2It = {
       createError: 'Impossibile creare la lista da vedere. Riprova.',
       listNamePlaceholder: 'Nome lista',
     },
+    descriptionLabel: 'Descrizione',
+    descriptionPlaceholder: 'Di cosa parla questa lista?',
     createModal: {
       title: 'Crea lista da vedere',
       enterName: 'Inserisci un nome per la lista da vedere.',
@@ -851,7 +855,7 @@ export const stage2It = {
       createError: 'Impossibile creare la lista da vedere. Riprova.',
     },
     renameModal: {
-      title: 'Rinomina lista',
+      title: 'Modifica lista',
       enterName: 'Inserisci un nome per la lista.',
       nameConflict: 'Esiste già una lista con questo nome.',
       renameError: 'Impossibile rinominare la lista. Riprova.',
@@ -859,7 +863,7 @@ export const stage2It = {
     optionsSheet: {
       listOptions: 'Opzioni lista',
       shareList: 'Condividi lista',
-      renameList: 'Rinomina lista',
+      renameList: 'Modifica lista',
       deleteList: 'Elimina lista',
       confirmTitle: 'Elimina lista',
       confirmMessage: 'Eliminare "{{name}}"? Questa azione non può essere annullata.',
@@ -1065,6 +1069,7 @@ export const stage2It = {
     communityRailEmptyAccessibility: 'Valutazione community: 0 stelle, nessuna valutazione ancora',
     communityRailOpenReviews: 'Apri recensioni',
     detail: {
+      episodeRateCta: 'Valuta questo episodio',
       rateCta: 'Vota',
       yourScore: 'Il tuo voto',
       change: 'Modifica',
@@ -1569,5 +1574,8 @@ export const stage2It = {
     openProfile: 'Apri profilo',
     profile: 'Profilo',
     unreadCount: '{{count}} non letti',
+    deleteConversation: 'Elimina conversazione',
+    deleteFailedTitle: 'Impossibile eliminare',
+    deleteFailed: 'Impossibile eliminare questa conversazione. Riprova.',
   },
 } as const;

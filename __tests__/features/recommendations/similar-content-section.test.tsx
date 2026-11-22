@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ApiError } from '@/api/errors';
 import { SimilarContentSection } from '@/features/recommendations/components/SimilarContentSection';
 import { useSimilarMovies } from '@/features/recommendations/hooks/useSimilarMovies';
@@ -33,6 +34,8 @@ const similarItem = {
   score: 0.7,
   reason: 'Similar genres',
 };
+
+jest.mock('@/auth/useAuth', () => ({ useAuth: jest.fn(() => ({ isAuthenticated: true, logout: jest.fn() })) }));
 
 describe('SimilarContentSection', () => {
   beforeEach(() => {

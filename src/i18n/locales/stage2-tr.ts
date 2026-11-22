@@ -279,6 +279,8 @@ export const stage2Tr = {
     },
   },
   home: {
+    dismissRecommendation: 'Beğenmedim',
+    dismissRecommendationFailed: 'Öneri güncellenemedi. Lütfen tekrar dene.',
     brandMark: 'Movie Cave',
     featured: 'Öne çıkan',
     featuredCarousel: 'Öne çıkan keşif karuseli',
@@ -844,6 +846,8 @@ export const stage2Tr = {
       createError: 'İzleme listesi oluşturulamadı. Lütfen tekrar dene.',
       listNamePlaceholder: 'Liste adı',
     },
+    descriptionLabel: 'Açıklama',
+    descriptionPlaceholder: 'Bu liste ne hakkında?',
     createModal: {
       title: 'İzleme Listesi Oluştur',
       enterName: 'Bir izleme listesi adı gir.',
@@ -851,7 +855,7 @@ export const stage2Tr = {
       createError: 'İzleme listesi oluşturulamadı. Lütfen tekrar dene.',
     },
     renameModal: {
-      title: 'Listeyi Yeniden Adlandır',
+      title: 'Listeyi düzenle',
       enterName: 'Bir liste adı gir.',
       nameConflict: 'Bu isimde bir liste zaten var.',
       renameError: 'Liste yeniden adlandırılamadı. Lütfen tekrar dene.',
@@ -859,7 +863,7 @@ export const stage2Tr = {
     optionsSheet: {
       listOptions: 'Liste seçenekleri',
       shareList: 'Listeyi paylaş',
-      renameList: 'Listeyi Yeniden Adlandır',
+      renameList: 'Listeyi düzenle',
       deleteList: 'Listeyi Sil',
       confirmTitle: 'Listeyi sil',
       confirmMessage: '"{{name}}" silinsin mi? Bu işlem geri alınamaz.',
@@ -1573,5 +1577,8 @@ export const stage2Tr = {
     openProfile: 'Profili aç',
     profile: 'Profil',
     unreadCount: '{{count}} okunmamış',
+    deleteConversation: 'Sohbeti sil',
+    deleteFailedTitle: 'Silinemedi',
+    deleteFailed: 'Bu sohbet silinemedi. Lütfen tekrar dene.',
   },
 } as const;

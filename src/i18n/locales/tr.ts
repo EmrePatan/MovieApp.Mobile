@@ -23,6 +23,7 @@ const stage1Tr = {
     lists: 'Liste',
   },
   social: {
+    viewAvatar: 'Profil fotoğrafını aç',
     search: 'Ara',
     requests: 'İstekler',
     notifications: 'Bildirimler',

@@ -23,6 +23,7 @@ const stage1En = {
     lists: 'Lists',
   },
   social: {
+    viewAvatar: 'Open profile photo',
     search: 'Search',
     requests: 'Requests',
     notifications: 'Notifications',

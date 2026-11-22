@@ -14,9 +14,29 @@ import {
   getSocialPendingFollowRequests,
   getSocialProfile,
   getSocialProfileStatistics,
+  getSocialProfileWatchlistItems,
+  getSocialProfileWatchlists,
   searchSocialUsers,
 } from '../api/social-api';
 import { socialQueryKeys } from './social-query-keys';
+
+export function useSocialProfileWatchlists(userId: string, enabled = true) {
+  return useQuery({
+    queryKey: socialQueryKeys.profileWatchlists(userId),
+    queryFn: ({ signal }) => getSocialProfileWatchlists(userId, signal),
+    enabled: Boolean(userId?.length) && enabled,
+    staleTime: 15_000,
+  });
+}
+
+export function useSocialProfileWatchlistItems(userId: string, watchlistId: string) {
+  return useQuery({
+    queryKey: socialQueryKeys.profileWatchlistItems(userId, watchlistId),
+    queryFn: ({ signal }) => getSocialProfileWatchlistItems(userId, watchlistId, signal),
+    enabled: Boolean(userId?.length) && Boolean(watchlistId?.length),
+    staleTime: 15_000,
+  });
+}
 
 export function useSocialProfile(userId: string) {
   return useQuery({

@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ApiError } from '@/api/errors';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
@@ -20,6 +21,7 @@ function mockHomeFeed(options: Parameters<typeof createHomeFeedMockReturnValue>[
 }
 
 jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: () => ({
     invalidateQueries: mockInvalidateQueries,
   }),

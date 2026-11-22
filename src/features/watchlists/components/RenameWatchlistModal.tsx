@@ -25,6 +25,7 @@ interface RenameWatchlistModalProps {
   visible: boolean;
   watchlistId: string | null;
   initialName: string;
+  initialDescription?: string | null;
   onClose: () => void;
   onRenamed?: () => void;
 }
@@ -33,6 +34,7 @@ export function RenameWatchlistModal({
   visible,
   watchlistId,
   initialName,
+  initialDescription,
   onClose,
   onRenamed,
 }: RenameWatchlistModalProps) {
@@ -40,6 +42,7 @@ export function RenameWatchlistModal({
   const renameWatchlist = useRenameWatchlistMutation();
   const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription ?? '');
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export function RenameWatchlistModal({
     }
 
     setName(initialName);
+    setDescription(initialDescription ?? '');
     setFeedback(null);
 
     const focusTimer = setTimeout(() => {
@@ -57,7 +61,7 @@ export function RenameWatchlistModal({
     return () => {
       clearTimeout(focusTimer);
     };
-  }, [initialName, visible]);
+  }, [initialDescription, initialName, visible]);
 
   const dismissKeyboard = () => {
     nameInputRef.current?.blur();
@@ -81,7 +85,8 @@ export function RenameWatchlistModal({
       return;
     }
 
-    if (trimmed === initialName.trim()) {
+    const trimmedDescription = description.trim();
+    if (trimmed === initialName.trim() && trimmedDescription === (initialDescription ?? '').trim()) {
       handleClose();
       return;
     }
@@ -89,7 +94,7 @@ export function RenameWatchlistModal({
     dismissKeyboard();
 
     renameWatchlist.mutate(
-      { watchlistId, name: trimmed },
+      { watchlistId, name: trimmed, description: trimmedDescription },
       {
         onSuccess: () => {
           setFeedback(null);
@@ -141,6 +146,17 @@ export function RenameWatchlistModal({
               autoCorrect={false}
               returnKeyType="done"
               onSubmitEditing={handleSave}
+            />
+
+            <AppInput
+              label={t('watchlists.descriptionLabel')}
+              value={description}
+              onChangeText={setDescription}
+              placeholder={t('watchlists.descriptionPlaceholder')}
+              maxLength={280}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
             />
 
             <AppButton

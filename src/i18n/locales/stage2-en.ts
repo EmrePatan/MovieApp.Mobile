@@ -279,6 +279,8 @@ export const stage2En = {
     },
   },
   home: {
+    dismissRecommendation: 'Not interested',
+    dismissRecommendationFailed: 'Could not update recommendations. Please try again.',
     brandMark: 'Movie Cave',
     featured: 'Featured',
     featuredCarousel: 'Featured discovery carousel',
@@ -826,6 +828,8 @@ export const stage2En = {
       createError: 'Could not create watchlist. Please try again.',
       listNamePlaceholder: 'List name',
     },
+    descriptionLabel: 'Description',
+    descriptionPlaceholder: 'What is this list about?',
     createModal: {
       title: 'Create Watchlist',
       enterName: 'Enter a watchlist name.',
@@ -833,7 +837,7 @@ export const stage2En = {
       createError: 'Could not create watchlist. Please try again.',
     },
     renameModal: {
-      title: 'Rename List',
+      title: 'Edit list',
       enterName: 'Enter a list name.',
       nameConflict: 'A list with this name already exists.',
       renameError: 'Could not rename list. Please try again.',
@@ -841,7 +845,7 @@ export const stage2En = {
     optionsSheet: {
       listOptions: 'List options',
       shareList: 'Share list',
-      renameList: 'Rename List',
+      renameList: 'Edit list',
       deleteList: 'Delete List',
       confirmTitle: 'Delete list',
       confirmMessage: 'Delete "{{name}}"? This cannot be undone.',
@@ -1548,5 +1552,8 @@ export const stage2En = {
     openProfile: 'Open profile',
     profile: 'Profile',
     unreadCount: '{{count}} unread',
+    deleteConversation: 'Delete conversation',
+    deleteFailedTitle: 'Could not delete',
+    deleteFailed: 'Could not delete this conversation. Please try again.',
   },
 } as const;

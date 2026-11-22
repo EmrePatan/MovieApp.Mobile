@@ -33,6 +33,10 @@ interface LibraryGridCardProps {
   onRemove?: (item: LibraryItem) => void;
   removeAccessibilityLabel?: string;
   isRemoving?: boolean;
+  /** Long-press quick actions and the corner watched badge. Disable on the owner's own profile. */
+  quickActionsEnabled?: boolean;
+  /** Corner list-status badge (e.g. the blue watchlist bookmark). Off where the watched check replaces it. */
+  showStatusBadge?: boolean;
 }
 
 export const LibraryGridCard = memo(function LibraryGridCard({
@@ -44,6 +48,8 @@ export const LibraryGridCard = memo(function LibraryGridCard({
   onRemove,
   removeAccessibilityLabel,
   isRemoving = false,
+  quickActionsEnabled = true,
+  showStatusBadge = true,
 }: LibraryGridCardProps) {
   const { t } = useTranslation();
   const presentation = resolveLibraryStatusPresentation(item);
@@ -55,15 +61,25 @@ export const LibraryGridCard = memo(function LibraryGridCard({
   });
   const quickTarget = useMemo(
     () =>
-      buildBrowseQuickActionsTarget({
-        contentId: item.id,
-        contentType: item.type,
-        title: item.title,
-        posterUrl: resolveImageUri(item.posterUrl, 'w300'),
-        year: item.year,
-        voteAverage: item.voteAverage,
-      }),
-    [item.id, item.posterUrl, item.title, item.type, item.voteAverage, item.year],
+      quickActionsEnabled
+        ? buildBrowseQuickActionsTarget({
+            contentId: item.id,
+            contentType: item.type,
+            title: item.title,
+            posterUrl: resolveImageUri(item.posterUrl, 'w300'),
+            year: item.year,
+            voteAverage: item.voteAverage,
+          })
+        : null,
+    [
+      quickActionsEnabled,
+      item.id,
+      item.posterUrl,
+      item.title,
+      item.type,
+      item.voteAverage,
+      item.year,
+    ],
   );
   const { isWatched, watchedBusy, onLongPress, onToggleWatched } =
     useBrowsePosterQuickActions(quickTarget);
@@ -85,6 +101,31 @@ export const LibraryGridCard = memo(function LibraryGridCard({
     [handleRemove],
   );
 
+  const posterContent = (
+    <View style={[styles.posterWrap, { width, height }]}>
+      <CatalogImage
+        path={item.posterUrl}
+        width={width}
+        height={height}
+        accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
+      />
+      {category === 'watching' ? (
+        <LibraryStatusIndicator
+          status={presentation.status}
+          progressPercentage={presentation.progressPercentage}
+          display="poster-progress"
+        />
+      ) : showStatusBadge ? (
+        <LibraryStatusIndicator status={presentation.status} display="badge" />
+      ) : null}
+      {isRemoving ? (
+        <View style={styles.removingOverlay}>
+          <ActivityIndicator color={colors.accent} />
+        </View>
+      ) : null}
+    </View>
+  );
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -96,34 +137,17 @@ export const LibraryGridCard = memo(function LibraryGridCard({
       delayLongPress={380}
       style={({ pressed }) => [styles.card, { width }, pressed && styles.pressed]}
     >
-      <BrowsePosterFrame
-        watched={isWatched}
-        busy={watchedBusy}
-        onToggleWatched={onToggleWatched}
-      >
-        <View style={[styles.posterWrap, { width, height }]}>
-          <CatalogImage
-            path={item.posterUrl}
-            width={width}
-            height={height}
-            accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-          />
-          {category === 'watching' ? (
-            <LibraryStatusIndicator
-              status={presentation.status}
-              progressPercentage={presentation.progressPercentage}
-              display="poster-progress"
-            />
-          ) : (
-            <LibraryStatusIndicator status={presentation.status} display="badge" />
-          )}
-          {isRemoving ? (
-            <View style={styles.removingOverlay}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : null}
-        </View>
-      </BrowsePosterFrame>
+      {quickActionsEnabled ? (
+        <BrowsePosterFrame
+          watched={isWatched}
+          busy={watchedBusy}
+          onToggleWatched={onToggleWatched}
+        >
+          {posterContent}
+        </BrowsePosterFrame>
+      ) : (
+        posterContent
+      )}
       {category === 'watching' && presentation.detail ? (
         <AppText variant="caption" muted numberOfLines={1} style={styles.watchingDetail}>
           {presentation.detail}

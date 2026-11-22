@@ -16,6 +16,8 @@ interface HomeSectionProps {
   section: HomeSectionModel;
   onItemPress?: (item: HomeItem) => void;
   onSeeAllPress?: () => void;
+  /** Only personalized rails pass this; enables the "not interested" control on each poster. */
+  onItemDismiss?: (item: HomeItem) => void;
 }
 
 function areHomeSectionPropsEqual(
@@ -25,6 +27,7 @@ function areHomeSectionPropsEqual(
   return (
     previous.onItemPress === next.onItemPress &&
     previous.onSeeAllPress === next.onSeeAllPress &&
+    previous.onItemDismiss === next.onItemDismiss &&
     previous.section.type === next.section.type &&
     previous.section.displayOrder === next.section.displayOrder &&
     previous.section.title === next.section.title &&
@@ -36,6 +39,7 @@ export const HomeSection = memo(function HomeSection({
   section,
   onItemPress,
   onSeeAllPress,
+  onItemDismiss,
 }: HomeSectionProps) {
   const { t } = useTranslation();
   const variant = getHomeSectionVariant(section.type);
@@ -46,9 +50,14 @@ export const HomeSection = memo(function HomeSection({
 
   const renderItem = useCallback(
     ({ item }: { item: HomeItem }) => (
-      <HomeContentCard item={item} onPress={onItemPress} posterSize={posterSize} />
+      <HomeContentCard
+        item={item}
+        onPress={onItemPress}
+        posterSize={posterSize}
+        onDismiss={onItemDismiss}
+      />
     ),
-    [onItemPress, posterSize],
+    [onItemDismiss, onItemPress, posterSize],
   );
 
   const listContentStyle = useMemo(

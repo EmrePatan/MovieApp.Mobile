@@ -279,6 +279,8 @@ export const stage2Fr = {
     },
   },
   home: {
+    dismissRecommendation: 'Pas intéressé',
+    dismissRecommendationFailed: 'Impossible de mettre à jour la recommandation. Réessayez.',
     brandMark: 'Movie Cave',
     featured: 'À la une',
     featuredCarousel: 'Carrousel de découverte à la une',
@@ -844,6 +846,8 @@ export const stage2Fr = {
       createError: 'Impossible de créer la liste à voir. Veuillez réessayer.',
       listNamePlaceholder: 'Nom de la liste',
     },
+    descriptionLabel: 'Description',
+    descriptionPlaceholder: 'De quoi parle cette liste ?',
     createModal: {
       title: 'Créer une liste à voir',
       enterName: 'Saisissez un nom de liste à voir.',
@@ -851,7 +855,7 @@ export const stage2Fr = {
       createError: 'Impossible de créer la liste à voir. Veuillez réessayer.',
     },
     renameModal: {
-      title: 'Renommer la liste',
+      title: 'Modifier la liste',
       enterName: 'Saisissez un nom de liste.',
       nameConflict: 'Une liste avec ce nom existe déjà.',
       renameError: 'Impossible de renommer la liste. Veuillez réessayer.',
@@ -859,7 +863,7 @@ export const stage2Fr = {
     optionsSheet: {
       listOptions: 'Options de liste',
       shareList: 'Partager la liste',
-      renameList: 'Renommer la liste',
+      renameList: 'Modifier la liste',
       deleteList: 'Supprimer la liste',
       confirmTitle: 'Supprimer la liste',
       confirmMessage: 'Supprimer « {{name}} » ? Cette action est irréversible.',
@@ -1065,6 +1069,7 @@ export const stage2Fr = {
     communityRailEmptyAccessibility: 'Note communautaire : 0 étoile, pas encore de notes',
     communityRailOpenReviews: 'Ouvrir les avis',
     detail: {
+      episodeRateCta: 'Noter cet épisode',
       rateCta: 'Noter',
       yourScore: 'Votre note',
       change: 'Modifier',
@@ -1569,5 +1574,8 @@ export const stage2Fr = {
     openProfile: 'Ouvrir le profil',
     profile: 'Profil',
     unreadCount: '{{count}} non lus',
+    deleteConversation: 'Supprimer la conversation',
+    deleteFailedTitle: 'Suppression impossible',
+    deleteFailed: 'Impossible de supprimer cette conversation. Veuillez réessayer.',
   },
 } as const;

@@ -10,7 +10,6 @@ interface SocialProfileActionRowProps {
   followStatus: SocialFollowStatus;
   isFollowLoading: boolean;
   onFollowPress: () => void;
-  onPrivacyPress?: () => void;
   onMessagePress?: () => void;
   isMessageLoading?: boolean;
   onBlockPress?: () => void;
@@ -21,7 +20,6 @@ export function SocialProfileActionRow({
   followStatus,
   isFollowLoading,
   onFollowPress,
-  onPrivacyPress,
   onMessagePress,
   isMessageLoading = false,
   onBlockPress,
@@ -31,17 +29,8 @@ export function SocialProfileActionRow({
   const isSelf = followStatus === 'Self';
 
   if (isSelf) {
-    if (!onPrivacyPress) return null;
-    return (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('social.managePrivacy')}
-        onPress={onPrivacyPress}
-        style={({ pressed }) => [styles.circleLight, pressed && styles.pressed]}
-      >
-        <Ionicons name="options-outline" size={18} color={colors.background} />
-      </Pressable>
-    );
+    // Own profile is handled on the bottom Profile tab; no social actions here.
+    return null;
   }
 
   const followLabel =

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
 import { FlatList, Platform, ScrollView } from 'react-native';
-import { act, render } from '@testing-library/react-native';
+import { act } from '@testing-library/react-native';
 import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
@@ -27,7 +27,12 @@ const androidPullRefreshSurfaceFiles = [
   'src/features/insights/components/InsightsHubContent.tsx',
 ];
 
-const sharedRefreshSurfaceFiles = ['app/(tabs)/(app-shell)/notifications.tsx'];
+// Notifications intentionally has no native/shared refresh control (see commit 2cd90366), so it is not listed here.
+const sharedRefreshSurfaceFiles = [
+  'app/(tabs)/(app-shell)/following.tsx',
+  'app/(tabs)/(app-shell)/favorites.tsx',
+  'app/(tabs)/(app-shell)/watch-history.tsx',
+];
 
 jest.mock('@tanstack/react-query', () => {
   const actual = jest.requireActual<typeof import('@tanstack/react-query')>('@tanstack/react-query');
@@ -250,7 +255,7 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_getByType } = render(<HomeScreen />);
+    const { UNSAFE_getByType } = renderWithProviders(<HomeScreen />);
     const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(false);
@@ -305,7 +310,7 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_getByType, getByTestId } = render(<HomeScreen />);
+    const { UNSAFE_getByType, getByTestId } = renderWithProviders(<HomeScreen />);
     expect(UNSAFE_getByType(FlatList).props.refreshControl).toBeUndefined();
     expect(getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
@@ -320,7 +325,7 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_queryByType } = render(<HomeScreen />);
+    const { UNSAFE_queryByType } = renderWithProviders(<HomeScreen />);
     expect(UNSAFE_queryByType(FlatList)).toBeNull();
   });
 
@@ -386,7 +391,7 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType } = render(<InsightsHubContent />);
+    const { UNSAFE_getByType } = renderWithProviders(<InsightsHubContent />);
     const refreshControl = UNSAFE_getByType(ScrollView).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(true);
@@ -408,7 +413,7 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType, getByTestId } = render(<InsightsHubContent />);
+    const { UNSAFE_getByType, getByTestId } = renderWithProviders(<InsightsHubContent />);
     expect(UNSAFE_getByType(ScrollView).props.refreshControl).toBeUndefined();
     expect(getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
@@ -440,7 +445,7 @@ describe('primary surface refresh presentation', () => {
       fetchNextPage: jest.fn(),
     });
 
-    const { UNSAFE_getByType } = render(<NotificationsScreen />);
+    const { UNSAFE_getByType } = renderWithProviders(<NotificationsScreen />);
     const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(true);

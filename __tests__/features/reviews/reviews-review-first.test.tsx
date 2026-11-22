@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ReviewsDetailContent } from '@/features/reviews/components/ReviewsDetailContent';
 import { useAuth } from '@/auth/useAuth';
 import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';

@@ -279,6 +279,8 @@ export const stage2Es = {
     },
   },
   home: {
+    dismissRecommendation: 'No me interesa',
+    dismissRecommendationFailed: 'No se pudo actualizar la recomendación. Inténtalo de nuevo.',
     brandMark: 'Movie Cave',
     featured: 'Destacados',
     featuredCarousel: 'Carrusel de descubrimiento destacado',
@@ -844,6 +846,8 @@ export const stage2Es = {
       createError: 'No se pudo crear la lista de seguimiento. Inténtalo de nuevo.',
       listNamePlaceholder: 'Nombre de la lista',
     },
+    descriptionLabel: 'Descripción',
+    descriptionPlaceholder: '¿De qué trata esta lista?',
     createModal: {
       title: 'Crear lista de seguimiento',
       enterName: 'Introduce un nombre de lista de seguimiento.',
@@ -851,7 +855,7 @@ export const stage2Es = {
       createError: 'No se pudo crear la lista de seguimiento. Inténtalo de nuevo.',
     },
     renameModal: {
-      title: 'Renombrar lista',
+      title: 'Editar lista',
       enterName: 'Introduce un nombre de lista.',
       nameConflict: 'Ya existe una lista con este nombre.',
       renameError: 'No se pudo renombrar la lista. Inténtalo de nuevo.',
@@ -859,7 +863,7 @@ export const stage2Es = {
     optionsSheet: {
       listOptions: 'Opciones de lista',
       shareList: 'Compartir lista',
-      renameList: 'Renombrar lista',
+      renameList: 'Editar lista',
       deleteList: 'Eliminar lista',
       confirmTitle: 'Eliminar lista',
       confirmMessage: '¿Eliminar «{{name}}»? Esta acción no se puede deshacer.',
@@ -1065,6 +1069,7 @@ export const stage2Es = {
     communityRailEmptyAccessibility: 'Puntuación de la comunidad: 0 estrellas, aún sin valoraciones',
     communityRailOpenReviews: 'Abrir reseñas',
     detail: {
+      episodeRateCta: 'Puntuar este episodio',
       rateCta: 'Valorar',
       yourScore: 'Tu puntuación',
       change: 'Cambiar',
@@ -1569,5 +1574,8 @@ export const stage2Es = {
     openProfile: 'Abrir perfil',
     profile: 'Perfil',
     unreadCount: '{{count}} sin leer',
+    deleteConversation: 'Eliminar conversación',
+    deleteFailedTitle: 'No se pudo eliminar',
+    deleteFailed: 'No se pudo eliminar esta conversación. Inténtalo de nuevo.',
   },
 } as const;
