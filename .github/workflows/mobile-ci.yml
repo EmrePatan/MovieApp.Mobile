@@ -66,7 +66,15 @@ jobs:
           fi
 
           printf '%s\n' "${FILES}"
-          printf '%s\n' "${FILES}" | xargs npx eslint
+          # ESLint treats CLI path args as globs; Expo routes like [token].tsx must be escaped
+          # or Linux runners exit 123 (unmatched pattern) even when the file exists.
+          ARGS=()
+          while IFS= read -r file; do
+            [ -n "${file}" ] || continue
+            escaped=$(printf '%s' "${file}" | sed -e 's/\[/\\[/g' -e 's/\]/\\]/g' -e 's/\*/\\*/g' -e 's/\?/\\?/g')
+            ARGS+=("${escaped}")
+          done <<< "${FILES}"
+          npx eslint -- "${ARGS[@]}"
 
       - name: Focused Home and TV watch progress tests
         run: >-
