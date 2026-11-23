@@ -69,6 +69,7 @@ export const SocialFeedCommentMoment = memo(function SocialFeedCommentMoment({
     <SocialFeedEntry
       chrome="flat"
       displayName={comment.displayName}
+      authorId={comment.userId}
       avatarUrl={comment.avatarUrl}
       timeLabel={time}
       title={title}

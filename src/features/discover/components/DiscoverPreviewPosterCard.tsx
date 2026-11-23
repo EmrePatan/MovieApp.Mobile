@@ -3,15 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
+import { PosterRatingBadge } from '@/components/content/PosterRatingBadge';
 import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
 import {
   buildBrowseQuickActionsTarget,
   useBrowsePosterQuickActions,
 } from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
-import {
-  isPersonSearchResult,
-  type SearchResultItem,
-} from '@/features/search/types';
+import { isPersonSearchResult, type SearchResultItem } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
@@ -56,11 +54,7 @@ export const DiscoverPreviewPosterCard = memo(function DiscoverPreviewPosterCard
       delayLongPress={380}
       style={({ pressed }) => [styles.card, { width }, pressed && styles.pressed]}
     >
-      <BrowsePosterFrame
-        watched={isWatched}
-        busy={watchedBusy}
-        onToggleWatched={onToggleWatched}
-      >
+      <BrowsePosterFrame watched={isWatched} busy={watchedBusy} onToggleWatched={onToggleWatched}>
         <PosterImage
           uri={item.posterUrl}
           width={width}
@@ -68,6 +62,9 @@ export const DiscoverPreviewPosterCard = memo(function DiscoverPreviewPosterCard
           accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
         />
       </BrowsePosterFrame>
+      {!isPersonSearchResult(item) ? (
+        <PosterRatingBadge voteAverage={item.voteAverage} posterHeight={height} />
+      ) : null}
       <AppText variant="caption" numberOfLines={2} style={styles.cardTitle}>
         {item.title}
       </AppText>

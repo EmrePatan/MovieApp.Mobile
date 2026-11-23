@@ -2,7 +2,6 @@ import { useMemo, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -15,11 +14,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { GlassSurface } from '@/components/common/GlassSurface';
 import { UserAvatar } from '@/components/common/UserAvatar';
+import { AchievementLevelBadge } from '@/features/achievements/components/AchievementLevelBadge';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import type { GalleryImage } from '@/features/gallery/types';
 import { ProfileInlineCounts } from '@/features/profile/components/ProfileInlineCounts';
 import { OwnProfileCinemaStats } from '@/features/profile/components/OwnProfileCinemaStats';
-import { ProfileSocialLinksRow } from '@/features/profile/components/ProfileSocialLinksRow';
+import { ProfileSocialLinksRail } from '@/features/profile/components/ProfileSocialLinksRow';
 import { filledSocialLinks } from '@/features/profile/utils/profile-social-links';
 import { COVER_ASPECT } from '@/features/profile/utils/cover-crop';
 import type { SocialProfile, SocialProfileStatistics } from '../types';
@@ -27,6 +27,7 @@ import { resolveSocialProfileCoverUri } from '../utils/resolve-social-profile-co
 import { authTypography } from '@/features/auth/auth-typography';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -42,6 +43,8 @@ interface SocialProfileHeaderProps {
   onEditCover?: () => void;
   onBack?: () => void;
   actions?: ReactNode;
+  /** Small element at the right end of the name row (e.g. the taste-match badge). */
+  identityTrailing?: ReactNode;
   onFollowersPress: () => void;
   onFollowingPress: () => void;
   onReviewsPress?: () => void;
@@ -62,6 +65,7 @@ export function SocialProfileHeader({
   onEditCover,
   onBack,
   actions,
+  identityTrailing,
   onFollowersPress,
   onFollowingPress,
   onReviewsPress,
@@ -101,14 +105,19 @@ export function SocialProfileHeader({
 
   const memberSinceLabel = useMemo(() => {
     const date = new Date(profile.createdAt).toLocaleDateString(i18n.language, {
-      month: 'long',
+      month: 'short',
       year: 'numeric',
     });
-    return t('profile.memberSince', { date });
+    return { date, full: t('profile.memberSince', { date }) };
   }, [i18n.language, profile.createdAt, t]);
 
   const hasSocialLinks = filledSocialLinks(profile.socialLinks).length > 0;
   const bio = profile.bio?.trim() || null;
+  const relation: 'mutual' | 'followsYou' | null = profile.followsViewer
+    ? profile.followStatus === 'Accepted'
+      ? 'mutual'
+      : 'followsYou'
+    : null;
 
   const counts = [
     {
@@ -116,12 +125,14 @@ export function SocialProfileHeader({
       value: profile.followersCount,
       label: t('social.followersCountLabel'),
       onPress: onFollowersPress,
+      icon: hasSocialLinks ? undefined : 'people-outline',
     },
     {
       key: 'following',
       value: profile.followingCount,
       label: t('social.followingCountLabel'),
       onPress: onFollowingPress,
+      icon: hasSocialLinks ? undefined : 'person-outline',
     },
     ...(statistics
       ? [
@@ -130,6 +141,7 @@ export function SocialProfileHeader({
             value: statistics.reviewsCount,
             label: t('social.reviewCount'),
             onPress: onReviewsPress,
+            icon: hasSocialLinks ? undefined : 'star-outline',
           },
         ]
       : []),
@@ -163,10 +175,7 @@ export function SocialProfileHeader({
         />
       </View>
 
-      <View
-        style={[styles.topChrome, { top: insets.top + spacing.sm }]}
-        pointerEvents="box-none"
-      >
+      <View style={[styles.topChrome, { top: insets.top + spacing.sm }]} pointerEvents="box-none">
         {onBack ? (
           <GlassSurface style={styles.chromeGlass}>
             <Pressable
@@ -176,7 +185,7 @@ export function SocialProfileHeader({
               hitSlop={8}
               style={({ pressed }) => [styles.chromeHit, pressed && styles.pressed]}
             >
-              <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+              <Ionicons name="chevron-back" size={18} color={colors.textPrimary} />
             </Pressable>
           </GlassSurface>
         ) : (
@@ -203,21 +212,23 @@ export function SocialProfileHeader({
 
       <View style={[styles.body, { marginTop: -avatarOverlap }]}>
         <View style={styles.identityRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('social.viewAvatar')}
-            disabled={avatarImages.length === 0}
-            onPress={() => setAvatarViewerOpen(true)}
-            style={styles.avatarRing}
-          >
-            <UserAvatar
-              displayName={profile.displayName}
-              effectiveAvatarUrl={profile.avatarUrl}
-              size={AVATAR_SIZE}
-              textVariant="subtitle"
-              accessibilityLabel={profile.displayName}
-            />
-          </Pressable>
+          <View style={styles.avatarColumn}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('social.viewAvatar')}
+              disabled={avatarImages.length === 0}
+              onPress={() => setAvatarViewerOpen(true)}
+              style={styles.avatarRing}
+            >
+              <UserAvatar
+                displayName={profile.displayName}
+                effectiveAvatarUrl={profile.avatarUrl}
+                size={AVATAR_SIZE}
+                textVariant="subtitle"
+                accessibilityLabel={profile.displayName}
+              />
+            </Pressable>
+          </View>
           <ImageViewerModal
             visible={avatarViewerOpen}
             images={avatarImages}
@@ -226,18 +237,57 @@ export function SocialProfileHeader({
           />
 
           <View style={[styles.identityCopy, { paddingTop: avatarOverlap + spacing.xs }]}>
-            <AppText numberOfLines={1} style={styles.name}>
-              {profile.displayName}
-            </AppText>
-            <AppText numberOfLines={1} style={styles.handle}>
-              @{profile.userName}
-            </AppText>
+            <View style={styles.nameRow}>
+              <AppText
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.78}
+                style={styles.name}
+              >
+                {profile.displayName}
+              </AppText>
+              <AchievementLevelBadge points={profile.achievementPoints} />
+            </View>
+            <View style={styles.handleRow}>
+              <AppText numberOfLines={1} style={[styles.handle, styles.handleText]}>
+                @{profile.userName}
+              </AppText>
+              {profile.isPrivate ? (
+                <Ionicons
+                  name="lock-closed"
+                  size={12}
+                  color={colors.textSecondary}
+                  accessibilityLabel={t('social.privateProfile')}
+                />
+              ) : null}
+            </View>
+            {relation ? (
+              <View style={styles.relation}>
+                <Ionicons
+                  name={relation === 'mutual' ? 'swap-horizontal' : 'person-outline'}
+                  size={11}
+                  color={colors.accentStrong}
+                />
+                <AppText style={styles.relationText} numberOfLines={1}>
+                  {relation === 'mutual' ? t('social.mutualFollow') : t('social.followsYou')}
+                </AppText>
+              </View>
+            ) : memberSinceLabel ? (
+              <View style={styles.joinedLine} accessible accessibilityLabel={memberSinceLabel.full}>
+                <Ionicons name="calendar-outline" size={12} color={colors.textSecondary} />
+                <AppText style={styles.joinedText} numberOfLines={1}>
+                  {memberSinceLabel.date}
+                </AppText>
+              </View>
+            ) : null}
           </View>
+          {identityTrailing ? (
+            <View style={[
+                styles.trailing,
+                { paddingTop: avatarOverlap + spacing.xs, alignSelf: 'stretch', justifyContent: 'center' },
+              ]}>{identityTrailing}</View>
+          ) : null}
         </View>
-
-        <ProfileInlineCounts counts={counts} />
-
-        {actions ? <View style={styles.actions}>{actions}</View> : null}
 
         {bio ? (
           <AppText style={styles.bio} numberOfLines={4}>
@@ -245,32 +295,13 @@ export function SocialProfileHeader({
           </AppText>
         ) : null}
 
-        {hasSocialLinks || memberSinceLabel || profile.isPrivate ? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.rail}
-            contentContainerStyle={styles.railContent}
-          >
-            {hasSocialLinks ? <ProfileSocialLinksRow links={profile.socialLinks} /> : null}
-            {memberSinceLabel ? (
-              <GlassSurface style={styles.chip}>
-                <Ionicons name="calendar-outline" size={13} color={colors.textSecondary} />
-                <AppText style={styles.chipText} numberOfLines={1}>
-                  {memberSinceLabel}
-                </AppText>
-              </GlassSurface>
-            ) : null}
-            {profile.isPrivate ? (
-              <GlassSurface style={styles.chip}>
-                <Ionicons name="lock-closed-outline" size={13} color={colors.textSecondary} />
-                <AppText style={styles.chipText} numberOfLines={1}>
-                  {t('social.privateProfile')}
-                </AppText>
-              </GlassSurface>
-            ) : null}
-          </ScrollView>
-        ) : null}
+        <ProfileInlineCounts
+          counts={counts}
+          spread={false}
+          trailing={hasSocialLinks ? <ProfileSocialLinksRail links={profile.socialLinks} /> : null}
+        />
+
+        {actions ? <View style={styles.actions}>{actions}</View> : null}
 
         {statistics ? <OwnProfileCinemaStats statistics={statistics} /> : null}
       </View>
@@ -314,6 +345,19 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: layout.screenPaddingHorizontal,
   },
+  handleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  handleText: {
+    flexShrink: 1,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   identityRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -332,9 +376,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   name: {
+    flexShrink: 1,
     fontFamily: authTypography.wordmarkSemibold,
-    fontSize: 26,
-    lineHeight: 32,
+    fontSize: 24,
+    lineHeight: 30,
     color: colors.textPrimary,
     letterSpacing: -0.4,
   },
@@ -343,25 +388,45 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: colors.textSecondary,
   },
+  avatarColumn: {
+    alignItems: 'flex-start',
+    gap: 2,
+  },
+  relation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: glass.accentFill,
+    borderWidth: 1,
+    borderColor: glass.accentBorder,
+  },
+  relationText: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '700',
+    color: colors.accentStrong,
+  },
   actions: {
     marginTop: spacing.md,
+  },
+  trailing: {
+    flexShrink: 0,
+    alignItems: 'center',
   },
   bio: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.textSecondary,
-    paddingTop: spacing.md,
-  },
-  rail: {
+    color: colors.textPrimary,
+    opacity: 0.88,
     marginTop: spacing.md,
-    marginHorizontal: -layout.screenPaddingHorizontal,
-    flexGrow: 0,
-  },
-  railContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: layout.screenPaddingHorizontal,
+    paddingLeft: spacing.md,
+    borderLeftWidth: 2,
+    borderLeftColor: glass.accentBorder,
   },
   chip: {
     flexDirection: 'row',
@@ -370,6 +435,20 @@ const styles = StyleSheet.create({
     height: 34,
     paddingHorizontal: spacing.md,
     borderRadius: 17,
+    backgroundColor: glass.panelElevated,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+  },
+  joinedLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 2,
+  },
+  joinedText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textSecondary,
   },
   chipText: {
     fontSize: 12,

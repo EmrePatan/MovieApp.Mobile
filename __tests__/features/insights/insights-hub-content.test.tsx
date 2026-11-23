@@ -93,7 +93,7 @@ describe('InsightsHubContent', () => {
     expect(screen.getByText('Time in Stories')).toBeTruthy();
     expect(screen.getByText('Your Ratings')).toBeTruthy();
     expect(screen.getByText('Your Era')).toBeTruthy();
-    expect(screen.getByText('Your Records')).toBeTruthy();
+    expect(screen.queryByText('Your Records')).toBeNull();
     expect(screen.getByText('Achievements')).toBeTruthy();
   });
 

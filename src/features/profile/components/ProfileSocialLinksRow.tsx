@@ -1,4 +1,4 @@
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { ProfileSocialLinks } from '../types';
 import { filledSocialLinks } from '../utils/profile-social-links';
@@ -44,11 +44,36 @@ export function ProfileSocialLinksRow({
   );
 }
 
+/**
+ * Social icons that fill whatever room is left beside the counts, right-aligned.
+ * When a member has more links than fit, the rail scrolls sideways.
+ */
+export function ProfileSocialLinksRail({ links }: ProfileSocialLinksRowProps) {
+  if (filledSocialLinks(links).length === 0) return null;
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.rail}
+      contentContainerStyle={styles.railContent}
+    >
+      <ProfileSocialLinksRow links={links} />
+    </ScrollView>
+  );
+}
+
 const styles = StyleSheet.create({
+  rail: {
+    flexGrow: 0,
+  },
+  railContent: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: spacing.sm,
   },
   iconHit: {

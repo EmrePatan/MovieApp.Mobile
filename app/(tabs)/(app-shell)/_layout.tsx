@@ -24,6 +24,7 @@ export default function AppShellLayout() {
       <Stack.Screen name="social-privacy" />
       <Stack.Screen name="library" />
       <Stack.Screen name="insights" />
+      <Stack.Screen name="achievements" />
       <Stack.Screen name="search" />
       <Stack.Screen name="discover-browse" />
       <Stack.Screen name="advanced-discover" />

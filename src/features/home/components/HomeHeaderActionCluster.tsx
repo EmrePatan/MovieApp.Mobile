@@ -92,7 +92,7 @@ export function HomeHeaderActionCluster({
       )}
       {!hideSearchAndActions ? (
         <>
-          <View style={homeHeaderStyles.actionDivider} />
+          <View style={{ width: 4 }} />
           <HomeHeaderIconButton
             accessibilityLabel={notificationsAccessibilityLabel}
             badgeLabel={badgeLabel}
@@ -104,7 +104,7 @@ export function HomeHeaderActionCluster({
           >
             <Ionicons name="notifications-outline" size={iconSize} color={headerActionIconColor} />
           </HomeHeaderIconButton>
-          <View style={homeHeaderStyles.actionDivider} />
+          <View style={{ width: 4 }} />
           <HomeHeaderIconButton
             accessibilityLabel={messagesAccessibilityLabel}
             badgeLabel={messageBadgeLabel}

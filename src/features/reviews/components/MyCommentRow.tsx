@@ -14,6 +14,7 @@ import { formatReviewDate } from '../utils/review-format';
 import { buildMyCommentMetadataLabel } from '../utils/my-comment-format';
 import type { UserReviewListItem } from '../types/my-comments';
 import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
+import { authTypography } from '@/features/auth/auth-typography';
 import { colors } from '@/theme/colors';
 import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -61,34 +62,40 @@ export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyComm
       onPress={() => onPress(item)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <View style={[styles.posterFrame, { height: posterHeight }]}>
-        <CatalogImage
-          path={item.posterPath}
-          width={posterWidth}
-          height={posterHeight}
-          accessibilityLabel={item.title}
-        />
-      </View>
-      <View style={[styles.body, { minHeight: posterHeight }]}>
-        <View style={styles.titleRow}>
-          <AppText variant="body" style={styles.title} numberOfLines={1}>
-            {item.title}
-          </AppText>
-          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+      <View style={styles.top}>
+        <View style={[styles.posterFrame, { height: posterHeight }]}>
+          <CatalogImage
+            path={item.posterPath}
+            width={posterWidth}
+            height={posterHeight}
+            accessibilityLabel={item.title}
+          />
         </View>
-        <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
-          {metadata}
-        </AppText>
-        {starRating != null && ratingLabel != null ? (
-          <View style={styles.ratingRow}>
-            <ReviewStarRow starRating={starRating} size={14} />
-            <AppText variant="caption" style={styles.ratingLabel}>
-              {ratingLabel}
+        <View style={[styles.body, { minHeight: posterHeight }]}>
+          <View style={styles.titleRow}>
+            <AppText style={styles.title} numberOfLines={2}>
+              {item.title}
             </AppText>
+            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </View>
-        ) : null}
-        {preview.length > 0 ? (
-          <View style={styles.previewBlock}>
+          <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
+            {metadata}
+          </AppText>
+          {starRating != null && ratingLabel != null ? (
+            <View style={styles.ratingPill} accessibilityLabel={ratingLabel}>
+              <ReviewStarRow starRating={starRating} size={13} />
+              <AppText style={styles.ratingValue}>{Math.round(starRating * 10) / 10}</AppText>
+            </View>
+          ) : null}
+        </View>
+      </View>
+
+      {preview.length > 0 ? (
+        <View style={styles.quote}>
+          <AppText style={styles.quoteMark} accessibilityElementsHidden>
+            {'“'}
+          </AppText>
+          <View style={styles.quoteBody}>
             <ReviewRichBody
               content={preview}
               plain
@@ -117,7 +124,11 @@ export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyComm
               </Pressable>
             ) : null}
           </View>
-        ) : null}
+        </View>
+      ) : null}
+
+      <View style={styles.stub}>
+        <View style={styles.stubLine} />
         <AppText variant="caption" muted style={styles.date}>
           {dateLabel}
         </AppText>
@@ -130,17 +141,20 @@ const styles = StyleSheet.create({
   row: {
     width: '100%',
     alignSelf: 'stretch',
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: spacing.sm + 2,
+    gap: spacing.md,
     padding: spacing.md,
-    borderRadius: 20,
+    borderRadius: 22,
     backgroundColor: glass.panel,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: glass.hairline,
   },
   pressed: {
     opacity: interaction.subtlePressedOpacity,
+  },
+  top: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: spacing.md,
   },
   posterFrame: {
     alignSelf: 'center',
@@ -149,65 +163,97 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     overflow: 'hidden',
     backgroundColor: glass.panel,
+    borderWidth: 1,
+    borderColor: glass.accentBorder,
   },
   body: {
     flex: 1,
     flexShrink: 1,
     alignSelf: 'stretch',
-    gap: 3,
+    gap: 4,
   },
   titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.xs,
   },
   title: {
     flex: 1,
-    fontWeight: '600',
-    letterSpacing: 0.1,
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 18,
+    lineHeight: 23,
     color: colors.textPrimary,
   },
   metadata: {
     letterSpacing: 0.15,
     color: colors.textMuted,
   },
-  ratingRow: {
+  ratingPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
     gap: spacing.sm,
-    marginTop: spacing.xs,
+    marginTop: 'auto',
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 5,
+    borderRadius: borderRadius.full,
+    backgroundColor: glass.accentFill,
+    borderWidth: 1,
+    borderColor: glass.accentBorder,
   },
-  ratingLabel: {
-    color: colors.textSecondary,
-    fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 14,
+  ratingValue: {
+    color: colors.accentStrong,
+    fontWeight: '800',
+    fontSize: 13,
+    lineHeight: 16,
+    fontVariant: ['tabular-nums'],
   },
-  previewBlock: {
-    marginTop: spacing.sm,
-    paddingLeft: spacing.sm,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: colors.borderSubtle,
+  quote: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(236, 210, 150, 0.06)',
+  },
+  quoteMark: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 34,
+    lineHeight: 38,
+    height: 30,
+    color: colors.accentStrong,
+  },
+  quoteBody: {
+    flex: 1,
+    minWidth: 0,
   },
   expandButton: {
     alignSelf: 'flex-start',
     marginTop: spacing.xs,
   },
   expandLabel: {
-    color: colors.textSecondary,
-    fontWeight: '600',
+    color: colors.accentStrong,
+    fontWeight: '700',
     fontSize: 11,
   },
   expandPressed: {
     opacity: interaction.subtlePressedOpacity,
   },
+  stub: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  stubLine: {
+    flex: 1,
+    height: 0,
+    borderTopWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: glass.hairline,
+  },
   date: {
-    marginTop: 'auto',
-    alignSelf: 'flex-end',
-    paddingTop: spacing.sm,
     fontSize: 11,
     lineHeight: 14,
     letterSpacing: 0.2,
-    textAlign: 'right',
   },
 });

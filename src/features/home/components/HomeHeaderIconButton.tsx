@@ -40,9 +40,13 @@ export function HomeHeaderIconButton({
         pressed && styles.pressed,
       ]}
     >
-      {children}
+      {compact ? <View style={styles.glassCircle}>{children}</View> : children}
       {badgeLabel ? (
-        <View style={styles.badge} importantForAccessibility="no-hide-descendants" accessible={false}>
+        <View
+          style={styles.badge}
+          importantForAccessibility="no-hide-descendants"
+          accessible={false}
+        >
           <AppText variant="caption" style={styles.badgeText}>
             {badgeLabel}
           </AppText>
@@ -67,13 +71,21 @@ const styles = StyleSheet.create({
     minWidth: 40,
     minHeight: 40,
   },
+  glassCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Plain icon on the bar: the glass disc that used to sit here bloomed white behind the icons.
+  },
   pressed: {
     opacity: interaction.subtlePressedOpacity,
   },
   badge: {
     position: 'absolute',
-    top: 4,
-    right: 2,
+    top: 0,
+    right: -2,
     minWidth: 18,
     height: 18,
     borderRadius: 9,

@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { normalizeRouteParam } from '@/features/navigation/normalize-route-param';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
-import { useSocialProfile, useSocialProfileStatistics } from '@/features/social/hooks/useSocialQueries';
+import {
+  useSocialProfile,
+  useSocialProfileStatistics,
+} from '@/features/social/hooks/useSocialQueries';
 import {
   useFollowSocialUser,
   useReportSocialContent,
@@ -55,7 +65,9 @@ export default function SocialProfileScreen() {
   const coverEditor = useSocialProfileCoverEditor(userId);
   const shelfPosters = useMemo(() => {
     const items = resolveProfileLibraryTitles(statistics.data);
-    return items.map((item) => item.posterPath).filter((path): path is string => Boolean(path?.trim()));
+    return items
+      .map((item) => item.posterPath)
+      .filter((path): path is string => Boolean(path?.trim()));
   }, [statistics.data]);
   const fallbackCoverPoster = shelfPosters[0] ?? null;
 
@@ -69,7 +81,12 @@ export default function SocialProfileScreen() {
 
   const handleOpenTitle = useCallback(
     (item: SocialProfileShelfItem) => {
-      openCatalogDetailFromTab(router, item.id, item.contentType === 'Movie' ? 'movie' : 'tv', 'home');
+      openCatalogDetailFromTab(
+        router,
+        item.id,
+        item.contentType === 'Movie' ? 'movie' : 'tv',
+        'home',
+      );
     },
     [router],
   );
@@ -183,6 +200,9 @@ export default function SocialProfileScreen() {
           coverBusy={coverEditor.isBusy}
           onEditCover={() => setCoverPickerVisible(true)}
           onBack={() => router.back()}
+          identityTrailing={
+            !isSelf && canViewLibrary ? <SocialTasteMatchCard userId={userId} enabled /> : undefined
+          }
           actions={
             <SocialProfileActionRow
               followStatus={item.followStatus}
@@ -210,10 +230,6 @@ export default function SocialProfileScreen() {
                 : undefined
           }
         />
-
-        {!isSelf && canViewLibrary ? (
-          <SocialTasteMatchCard userId={userId} enabled />
-        ) : null}
 
         {showPrivateNotice ? (
           <AppText variant="bodySmall" muted style={styles.privateNotice}>

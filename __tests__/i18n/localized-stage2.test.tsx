@@ -10,7 +10,7 @@ import {
 } from '@/i18n/catalog-labels';
 import { formatContentType } from '@/utils/format';
 import { NotificationsEmptyState } from '@/features/notifications/components/NotificationsEmptyState';
-import { InsightsMilestonesSection } from '@/features/insights/components/InsightsMilestonesSection';
+import { AchievementsShowcase } from '@/features/achievements/components/AchievementsShowcase';
 import { ProfileYourYearSection } from '@/features/profile/components/ProfileYourYearSection';
 import { LibraryContinueWatchingSection } from '@/features/library/components/LibraryContinueWatchingSection';
 import { createProfileStatisticsFixture } from '@/features/profile/utils/profile-statistics-fixtures';
@@ -76,7 +76,7 @@ describe('Stage 2 localization', () => {
 
   it('renders localized insights milestone section header', async () => {
     renderWithI18n(
-      <InsightsMilestonesSection
+      <AchievementsShowcase
         achievements={[
           {
             id: 'a1',
@@ -95,7 +95,7 @@ describe('Stage 2 localization', () => {
 
     await changeUiLanguage('tr');
     renderWithI18n(
-      <InsightsMilestonesSection
+      <AchievementsShowcase
         achievements={[
           {
             id: 'a1',

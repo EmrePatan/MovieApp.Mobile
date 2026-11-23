@@ -49,13 +49,20 @@ export function DetailCircularAction({
           borderRadius={DETAIL_ACTION_SIZE / 2}
           style={styles.frame}
         >
-          <GlassSurface tone={active ? 'accent' : 'default'} style={styles.buttonSurface}>
-            {busy ? (
+          {(() => {
+            const content = busy ? (
               <ActivityIndicator color={active ? colors.accent : colors.textPrimary} size="small" />
             ) : (
               children
-            )}
-          </GlassSurface>
+            );
+            return active ? (
+              <View style={[styles.buttonSurface, styles.activeSurface]}>{content}</View>
+            ) : (
+              <GlassSurface style={[styles.buttonSurface, styles.glassSurface]}>
+                {content}
+              </GlassSurface>
+            );
+          })()}
         </DetailDirectionalFrame>
       </Pressable>
       <AppText
@@ -83,9 +90,14 @@ const styles = StyleSheet.create({
     width: ACTION_INNER_SIZE,
     height: ACTION_INNER_SIZE,
     borderRadius: ACTION_INNER_SIZE / 2,
-    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeSurface: {
+    backgroundColor: 'rgba(12, 12, 18, 0.78)',
+  },
+  glassSurface: {
+    borderWidth: 0,
   },
   pressed: {
     transform: [{ scale: 0.94 }],

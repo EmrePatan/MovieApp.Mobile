@@ -4,17 +4,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
+import { PosterRatingBadge } from '@/components/content/PosterRatingBadge';
 import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
 import {
   buildBrowseQuickActionsTarget,
   useBrowsePosterQuickActions,
 } from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
 import type { HomeItem } from '../types';
-import {
-  formatCatalogYear,
-  formatContentType,
-  formatRating,
-} from '@/utils/format';
+import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
@@ -56,13 +53,13 @@ export const HomeContentCard = memo(function HomeContentCard({
     const parts = [
       formatContentType(item.contentType),
       formatCatalogYear(item.releaseDate, null),
-      item.voteAverage > 0 ? `★ ${formatRating(item.voteAverage)}` : null,
     ].filter(Boolean);
 
     return parts.join(' · ');
-  }, [item.contentType, item.releaseDate, item.voteAverage]);
+  }, [item.contentType, item.releaseDate]);
+  const rating = item.voteAverage > 0 ? formatRating(item.voteAverage) : null;
 
-  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.contentType)}`;
+  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.contentType)}${rating ? `, ★ ${rating}` : ''}`;
 
   return (
     <Pressable
@@ -73,11 +70,7 @@ export const HomeContentCard = memo(function HomeContentCard({
       delayLongPress={380}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <BrowsePosterFrame
-        watched={isWatched}
-        busy={watchedBusy}
-        onToggleWatched={onToggleWatched}
-      >
+      <BrowsePosterFrame watched={isWatched} busy={watchedBusy} onToggleWatched={onToggleWatched}>
         <PosterImage
           uri={item.posterUrl}
           width={layout.posterCarousel.width}
@@ -86,6 +79,10 @@ export const HomeContentCard = memo(function HomeContentCard({
           size={posterSize}
         />
       </BrowsePosterFrame>
+      <PosterRatingBadge
+        voteAverage={item.voteAverage}
+        posterHeight={layout.posterCarousel.height}
+      />
       {onDismiss ? (
         <Pressable
           accessibilityRole="button"

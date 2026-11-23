@@ -16,6 +16,7 @@ export const SHARED_PRIMARY_TAB_CONTEXT_PREFIXES = [
   '/favorites',
   '/watch-history',
   '/watchlist',
+  '/achievements',
 ] as const;
 
 export function normalizeAppShellPathname(pathname: string): string {

@@ -13,6 +13,7 @@ import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { shouldShowOriginalTitle } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
+import { SocialUserLevelSeal } from './SocialUserLevelSeal';
 import { socialFeedTheme } from './social-feed-theme';
 import {
   SOCIAL_AVATAR_FEED_ROW,
@@ -23,6 +24,8 @@ import {
 
 interface SocialFeedEntryProps {
   displayName: string;
+  /** Author's user id; when set, their level seal is shown next to the name. */
+  authorId?: string | null;
   avatarUrl: string | null;
   timeLabel: string;
   title: string;
@@ -47,6 +50,7 @@ interface SocialFeedEntryProps {
  */
 export function SocialFeedEntry({
   displayName,
+  authorId,
   avatarUrl,
   timeLabel,
   title,
@@ -113,9 +117,12 @@ export function SocialFeedEntry({
           onPress={onProfilePress}
           style={({ pressed }) => [styles.identityHit, pressed && socialUi.pressed]}
         >
-          <AppText numberOfLines={1} style={styles.name}>
-            {displayName}
-          </AppText>
+          <View style={styles.nameRow}>
+            <AppText numberOfLines={1} style={[styles.name, styles.nameText]}>
+              {displayName}
+            </AppText>
+            {authorId ? <SocialUserLevelSeal userId={authorId} size={20} /> : null}
+          </View>
           {timeLabel ? (
             <AppText style={styles.time} numberOfLines={1}>
               {timeLabel}
@@ -245,6 +252,14 @@ const styles = StyleSheet.create({
     minWidth: 0,
     justifyContent: 'center',
     gap: 2,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  nameText: {
+    flexShrink: 1,
   },
   name: {
     fontSize: 15,

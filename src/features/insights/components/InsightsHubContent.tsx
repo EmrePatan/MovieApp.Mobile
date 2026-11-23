@@ -10,26 +10,31 @@ import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
-import { GlassSurface } from '@/components/common/GlassSurface';
 import { HomeHeaderProfileAvatar } from '@/features/home/components/HomeHeaderProfileAvatar';
+import { AchievementsShowcase } from '@/features/achievements/components/AchievementsShowcase';
 import { useInsightsV3 } from '../hooks/useInsightsV3';
+import { useDnaCover } from '../hooks/useDnaCover';
 import { useNewAchievements } from '../hooks/useNewAchievements';
-import { beginInsightsTrace, markInsightsPerfEvent, resetInsightsTrace } from '@/perf/insights-trace';
+import { InsightsDnaCoverSheet } from './InsightsDnaCoverSheet';
+import {
+  beginInsightsTrace,
+  markInsightsPerfEvent,
+  resetInsightsTrace,
+} from '@/perf/insights-trace';
 import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { buildSelectableYears } from '../utils/insights-format';
 import { InsightsAchievementCelebration } from './InsightsAchievementCelebration';
 import { InsightsErasSection } from './InsightsErasSection';
 import { InsightsLoadingSkeleton } from './InsightsLoadingSkeleton';
-import { InsightsMilestonesSection } from './InsightsMilestonesSection';
 import { InsightsMovieDnaHero } from './InsightsMovieDnaHero';
 import { InsightsRatingsSection } from './InsightsRatingsSection';
-import { InsightsRecordsSection } from './InsightsRecordsSection';
 import { InsightsShareSheet } from './InsightsShareSheet';
 import { InsightsTasteSection } from './InsightsTasteSection';
 import { InsightsTimeInStoriesSection } from './InsightsTimeInStoriesSection';
 import { InsightsYourYearSection } from './InsightsYourYearSection';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
@@ -43,6 +48,8 @@ export function InsightsHubContent() {
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const insightsQuery = useInsightsV3(selectedYear);
   const [shareOpen, setShareOpen] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const dnaCover = useDnaCover(insightsQuery.data?.meta.memberSinceUtc);
   const newAchievements = useNewAchievements(
     insightsQuery.data?.achievements,
     insightsQuery.data?.meta.memberSinceUtc,
@@ -127,7 +134,9 @@ export function InsightsHubContent() {
 
   if (insightsQuery.isLoading && !insightsQuery.data) {
     return (
-      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xxl + tabBarInset }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xxl + tabBarInset }]}
+      >
         <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
         <InsightsLoadingSkeleton />
       </ScrollView>
@@ -154,7 +163,8 @@ export function InsightsHubContent() {
       />
       <InsightsMovieDnaHero
         movieDna={insights.movieDna}
-        backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
+        backdropImagePath={dnaCover.coverPath ?? insights.yourEra.oldestTitle?.posterPath}
+        onChangeCover={() => setCoverOpen(true)}
       />
       <InsightsYourYearSection
         yourYear={insights.yourYear}
@@ -170,11 +180,7 @@ export function InsightsHubContent() {
       />
       <InsightsRatingsSection ratings={insights.yourRatings} />
       <InsightsErasSection era={insights.yourEra} />
-      <InsightsRecordsSection
-        records={insights.yourRecords}
-        favoriteWeekday={insights.yourYear.favoriteWeekday}
-      />
-      <InsightsMilestonesSection achievements={insights.achievements} />
+      <AchievementsShowcase achievements={insights.achievements} />
       <InsightsAchievementCelebration
         achievements={newAchievements.fresh}
         onClose={newAchievements.dismiss}
@@ -184,6 +190,14 @@ export function InsightsHubContent() {
         onClose={() => setShareOpen(false)}
         insights={insights}
         year={activeYear}
+        coverPath={dnaCover.coverPath ?? insights.yourEra.oldestTitle?.posterPath ?? null}
+      />
+      <InsightsDnaCoverSheet
+        visible={coverOpen}
+        hasCustomCover={dnaCover.coverPath != null}
+        onClose={() => setCoverOpen(false)}
+        onPick={dnaCover.setCover}
+        onReset={() => dnaCover.setCover(null)}
       />
     </AnimatedScrollView>
   );
@@ -215,18 +229,16 @@ function InsightsScreenHeader({
         </AppText>
       </View>
       {onShare ? (
-        <GlassSurface style={styles.shareGlass}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('insights.hub.share')}
-            onPress={onShare}
-            hitSlop={8}
-            style={styles.shareHit}
-            testID="insights-share"
-          >
-            <Ionicons name="share-outline" size={18} color={colors.textPrimary} />
-          </Pressable>
-        </GlassSurface>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('insights.hub.share')}
+          onPress={onShare}
+          hitSlop={8}
+          style={({ pressed }) => [styles.shareGlass, pressed && styles.sharePressed]}
+          testID="insights-share"
+        >
+          <Ionicons name="share-outline" size={18} color={colors.accentStrong} />
+        </Pressable>
       ) : null}
       <HomeHeaderProfileAvatar compact onPress={onOpenProfile} />
     </View>
@@ -250,11 +262,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-  },
-  shareHit: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: glass.accentFill,
+    borderWidth: 1,
+    borderColor: glass.accentBorder,
+  },
+  sharePressed: {
+    opacity: 0.8,
   },
   headerCopy: {
     flex: 1,

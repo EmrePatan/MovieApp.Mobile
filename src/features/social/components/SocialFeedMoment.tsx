@@ -62,6 +62,7 @@ export const SocialFeedMoment = memo(function SocialFeedMoment({
     <SocialFeedEntry
       chrome="card"
       displayName={item.displayName}
+      authorId={item.actorId}
       avatarUrl={item.avatarUrl}
       timeLabel={time}
       title={title}

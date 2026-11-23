@@ -10,6 +10,7 @@ import { formatNotificationRelativeTime } from '@/features/notifications/utils/f
 import type { SocialFeedItem } from '../types';
 import { formatSocialCompactDetail, formatSocialCompactHeadline } from '../utils/social-feed-embed';
 import { socialActivityFeedVerbI18nKey } from '../utils/social-activity-feed-verb';
+import { SocialUserLevelSeal } from './SocialUserLevelSeal';
 import { SOCIAL_TWITTER_AVATAR, socialFeedSpacing, socialUi } from './social-ui-tokens';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -82,9 +83,12 @@ export const SocialFeedActivityCompactRow = memo(function SocialFeedActivityComp
           style={({ pressed }) => [styles.mainHit, pressed && socialUi.pressed]}
         >
           <View style={styles.main}>
-            <AppText variant="bodySmall" style={styles.name}>
-              {first.displayName}
-            </AppText>
+            <View style={styles.nameRow}>
+              <AppText variant="bodySmall" style={[styles.name, styles.nameText]} numberOfLines={1}>
+                {first.displayName}
+              </AppText>
+              <SocialUserLevelSeal userId={first.actorId} size={20} />
+            </View>
             <View style={styles.headlineRow}>
               <AppText variant="bodySmall" style={styles.headline}>
                 {headline}
@@ -144,6 +148,14 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: socialFeedSpacing.blockGap,
     paddingTop: 0,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  nameText: {
+    flexShrink: 1,
   },
   name: {
     fontWeight: '700',

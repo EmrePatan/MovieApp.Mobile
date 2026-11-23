@@ -12,6 +12,10 @@ export interface SocialProfile {
   followStatus: SocialFollowStatus;
   followersCount: number;
   followingCount: number;
+  /** The profile's owner follows the viewer (accepted). */
+  followsViewer?: boolean;
+  /** Total achievement points, null/absent when the viewer may not see this member's activity. */
+  achievementPoints?: number | null;
   coverPosterPath?: string | null;
   coverImageUrl?: string | null;
   /** Optional until backend ships. */

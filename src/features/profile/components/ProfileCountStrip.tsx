@@ -10,6 +10,8 @@ export interface ProfileCount {
   value: number;
   label: string;
   onPress?: () => void;
+  /** Optional Ionicons glyph shown beside the numeral (compact stat rows). */
+  icon?: string;
 }
 
 /** Glass strip of tappable counts: gold serif numeral over a lowercase label. */

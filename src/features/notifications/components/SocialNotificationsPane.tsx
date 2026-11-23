@@ -39,7 +39,11 @@ export function SocialNotificationsPane({
   const internalRef = useRef<FlatList>(null);
   const resolvedRef = listRef ?? internalRef;
   const notifications = useMemo(
-    () => query.data?.pages.flatMap((page) => page.items) ?? [],
+    // Messages live in the inbox with their own unread badges; hide legacy DirectMessage rows.
+    () =>
+      query.data?.pages
+        .flatMap((page) => page.items)
+        .filter((item) => item.notificationType !== 'DirectMessage') ?? [],
     [query.data?.pages],
   );
 

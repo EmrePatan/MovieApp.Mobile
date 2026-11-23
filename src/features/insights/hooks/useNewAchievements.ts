@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { InsightsAchievement } from '../types';
 
-const STORAGE_PREFIX = 'insights.seenAchievements.v1:';
+const STORAGE_PREFIX = 'insights.seenAchievements.v2:';
 
 /**
  * Finds achievements unlocked since the user last opened insights. The first

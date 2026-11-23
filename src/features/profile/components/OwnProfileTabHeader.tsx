@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -17,22 +16,27 @@ import { AppText } from '@/components/common/AppText';
 import { GlassSurface } from '@/components/common/GlassSurface';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { useAuth } from '@/auth/useAuth';
+import { OwnAchievementLevelBadge } from '@/features/achievements/components/AchievementLevelBadge';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { authTypography } from '@/features/auth/auth-typography';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileAvatarEditor } from '@/features/profile/hooks/useProfileAvatarEditor';
 import { ProfileInlineCounts } from '@/features/profile/components/ProfileInlineCounts';
 import { OwnProfileCinemaStats } from '@/features/profile/components/OwnProfileCinemaStats';
-import { ProfileSocialLinksRow } from '@/features/profile/components/ProfileSocialLinksRow';
+import { ProfileSocialLinksRail } from '@/features/profile/components/ProfileSocialLinksRow';
 import { filledSocialLinks } from '@/features/profile/utils/profile-social-links';
 import { COVER_ASPECT } from '@/features/profile/utils/cover-crop';
 import { useOwnProfileCover } from '@/features/profile/hooks/useOwnProfileCover';
-import { useSocialProfile, useSocialProfileStatistics } from '@/features/social/hooks/useSocialQueries';
+import {
+  useSocialProfile,
+  useSocialProfileStatistics,
+} from '@/features/social/hooks/useSocialQueries';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 const AVATAR_SIZE = 76;
-const ACTION_SIZE = 38;
+const ACTION_SIZE = 40;
 
 export function OwnProfileTabHeader() {
   useAuthFonts();
@@ -61,10 +65,10 @@ export function OwnProfileTabHeader() {
     const createdAt = profile?.createdAt ?? currentProfile.data?.createdAt;
     if (!createdAt) return null;
     const date = new Date(createdAt).toLocaleDateString(i18n.language, {
-      month: 'long',
+      month: 'short',
       year: 'numeric',
     });
-    return t('profile.memberSince', { date });
+    return { date, full: t('profile.memberSince', { date }) };
   }, [currentProfile.data?.createdAt, i18n.language, profile?.createdAt, t]);
 
   const bio = (profile?.bio ?? currentProfile.data?.bio)?.trim() || null;
@@ -85,12 +89,14 @@ export function OwnProfileTabHeader() {
           value: profile.followersCount,
           label: t('social.followersCountLabel'),
           onPress: () => openPeople('followers'),
+          icon: hasSocialLinks ? undefined : 'people-outline',
         },
         {
           key: 'following',
           value: profile.followingCount,
           label: t('social.followingCountLabel'),
           onPress: () => openPeople('following'),
+          icon: hasSocialLinks ? undefined : 'person-outline',
         },
         ...(statistics.data
           ? [
@@ -99,6 +105,7 @@ export function OwnProfileTabHeader() {
                 value: statistics.data.reviewsCount,
                 label: t('social.reviewCount'),
                 onPress: () => router.push('/profile/my-comments'),
+                icon: hasSocialLinks ? undefined : 'star-outline',
               },
             ]
           : []),
@@ -134,6 +141,16 @@ export function OwnProfileTabHeader() {
       </View>
 
       <View style={[styles.floatingActions, { top: insets.top + spacing.sm }]}>
+        <GlassSurface style={styles.actionGlass}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('profile.editProfile')}
+            onPress={() => router.push('/profile/edit')}
+            style={({ pressed }) => [styles.actionHit, pressed && styles.pressed]}
+          >
+            <Ionicons name="create-outline" size={18} color={colors.textPrimary} />
+          </Pressable>
+        </GlassSurface>
         <GlassSurface style={styles.actionGlass}>
           <Pressable
             accessibilityRole="button"
@@ -174,32 +191,27 @@ export function OwnProfileTabHeader() {
           </Pressable>
 
           <View style={[styles.identityCopy, { paddingTop: avatarOverlap + spacing.xs }]}>
-            <AppText numberOfLines={1} style={styles.name}>
-              {displayName}
-            </AppText>
+            <View style={styles.nameRow}>
+              <AppText numberOfLines={1} style={styles.name}>
+                {displayName}
+              </AppText>
+              <OwnAchievementLevelBadge />
+            </View>
             {userName ? (
               <AppText numberOfLines={1} style={styles.handle}>
                 @{userName}
               </AppText>
             ) : null}
+            {memberSinceLabel ? (
+              <View style={styles.joinedLine} accessible accessibilityLabel={memberSinceLabel.full}>
+                <Ionicons name="calendar-outline" size={12} color={colors.textSecondary} />
+                <AppText style={styles.joinedText} numberOfLines={1}>
+                  {memberSinceLabel.date}
+                </AppText>
+              </View>
+            ) : null}
           </View>
         </View>
-
-        <ProfileInlineCounts
-          counts={counts}
-          trailing={
-            <GlassSurface style={styles.editPill}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('profile.editProfile')}
-                onPress={() => router.push('/profile/edit')}
-                style={({ pressed }) => [styles.editPillHit, pressed && styles.pressed]}
-              >
-                <Ionicons name="create-outline" size={17} color={colors.textPrimary} />
-              </Pressable>
-            </GlassSurface>
-          }
-        />
 
         {bio ? (
           <AppText style={styles.bio} numberOfLines={4}>
@@ -207,29 +219,14 @@ export function OwnProfileTabHeader() {
           </AppText>
         ) : null}
 
-        {hasSocialLinks || memberSinceLabel ? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.rail}
-            contentContainerStyle={styles.railContent}
-          >
-            {hasSocialLinks ? <ProfileSocialLinksRow links={socialLinks} /> : null}
-            {memberSinceLabel ? (
-              <GlassSurface style={styles.joinedChip}>
-                <Ionicons name="calendar-outline" size={13} color={colors.textSecondary} />
-                <AppText style={styles.joinedText} numberOfLines={1}>
-                  {memberSinceLabel}
-                </AppText>
-              </GlassSurface>
-            ) : null}
-          </ScrollView>
-        ) : null}
+        <ProfileInlineCounts
+          counts={counts}
+          spread={false}
+          trailing={hasSocialLinks ? <ProfileSocialLinksRail links={socialLinks} /> : null}
+        />
 
         {statistics.data ? <OwnProfileCinemaStats statistics={statistics.data} /> : null}
-
       </View>
-
     </View>
   );
 }
@@ -299,9 +296,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   name: {
+    flexShrink: 1,
     fontFamily: authTypography.wordmarkSemibold,
-    fontSize: 26,
-    lineHeight: 32,
+    fontSize: 24,
+    lineHeight: 30,
     color: colors.textPrimary,
     letterSpacing: -0.4,
   },
@@ -313,37 +311,23 @@ const styles = StyleSheet.create({
   bio: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.textSecondary,
-    paddingTop: spacing.md,
-  },
-  editPill: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-  },
-  editPillHit: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rail: {
+    color: colors.textPrimary,
+    opacity: 0.88,
     marginTop: spacing.md,
-    marginHorizontal: -spacing.lg,
-    flexGrow: 0,
+    paddingLeft: spacing.md,
+    borderLeftWidth: 2,
+    borderLeftColor: glass.accentBorder,
   },
-  railContent: {
+  joinedLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 2,
+  },
+  nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  joinedChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    height: 34,
-    paddingHorizontal: spacing.md,
-    borderRadius: 17,
   },
   joinedText: {
     fontSize: 12,

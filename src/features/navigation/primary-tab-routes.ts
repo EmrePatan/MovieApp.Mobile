@@ -54,7 +54,7 @@ const SOCIAL_ROUTE_PREFIXES = [
   '/social-privacy',
 ] as const;
 
-const INSIGHTS_ROUTE_PREFIXES = ['/insights'] as const;
+const INSIGHTS_ROUTE_PREFIXES = ['/insights', '/achievements'] as const;
 
 function matchesRoutePrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);

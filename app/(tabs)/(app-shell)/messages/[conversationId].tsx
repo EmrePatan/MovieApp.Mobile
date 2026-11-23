@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -40,6 +41,22 @@ export default function DirectMessageThreadScreen() {
   const thread = useDirectMessageThread(conversationId);
   const send = useSendDirectMessage(conversationId);
   const [draft, setDraft] = useState('');
+  // The composer owns the bottom safe-area inset; with the keyboard up it must not add it again.
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardOpen(true),
+    );
+    const hide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardOpen(false),
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
   const invertedMessages = useMemo(() => [...thread.messages].reverse(), [thread.messages]);
 
   const handleSend = useCallback(() => {
@@ -55,9 +72,9 @@ export default function DirectMessageThreadScreen() {
   const otherUser = conversation.data?.otherUser;
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right', 'bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
-        style={styles.flex}
+        style={[styles.flex, styles.screen]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <SocialSubscreenHeader
@@ -123,6 +140,7 @@ export default function DirectMessageThreadScreen() {
           draftText={draft}
           placeholder={t('messages.composePlaceholder')}
           isSending={send.isPending}
+          sitAboveTabBar={keyboardOpen}
           onChangeText={setDraft}
           onSend={handleSend}
         />

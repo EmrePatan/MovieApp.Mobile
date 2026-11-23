@@ -170,7 +170,7 @@ describe('Home detail navigation', () => {
 
   it('pushes movie detail from home using the tab catalog navigation helper', () => {
     render(<HomeScreen />);
-    fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016 · ★ 7.9'));
+    fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016, ★ 7.9'));
 
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-b');
     expect(mockReplace).not.toHaveBeenCalled();
@@ -212,7 +212,7 @@ describe('Home detail navigation', () => {
     ]);
 
     render(<HomeScreen />);
-    fireEvent.press(screen.getByLabelText('Better Call Saul, TV · 2015 · ★ 8.7'));
+    fireEvent.press(screen.getByLabelText('Better Call Saul, TV · 2015, ★ 8.7'));
 
     expect(mockPush).toHaveBeenCalledWith('/tv/tv-b');
     expect(mockReplace).not.toHaveBeenCalled();
@@ -221,9 +221,9 @@ describe('Home detail navigation', () => {
   it('pushes each selected detail in order', () => {
     render(<HomeScreen />);
 
-    fireEvent.press(screen.getByLabelText('Interstellar, Movie · ★ 8.4'));
-    fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016 · ★ 7.9'));
-    fireEvent.press(screen.getByLabelText('Dune, Movie · 2021 · ★ 8.0'));
+    fireEvent.press(screen.getByLabelText('Interstellar, Movie, ★ 8.4'));
+    fireEvent.press(screen.getByLabelText('Arrival, Movie · 2016, ★ 7.9'));
+    fireEvent.press(screen.getByLabelText('Dune, Movie · 2021, ★ 8.0'));
 
     expect(mockPush).toHaveBeenNthCalledWith(1, '/movie/movie-a');
     expect(mockPush).toHaveBeenNthCalledWith(2, '/movie/movie-b');

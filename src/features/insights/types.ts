@@ -139,6 +139,8 @@ export interface InsightsAchievement {
   targetValue: number;
   achieved: boolean;
   achievedAt: string | null;
+  /** Rung of the family ladder (1 = bronze … 5 = legend). Absent on older servers. */
+  tier?: number;
 }
 
 export interface InsightsV3Meta {
@@ -155,6 +157,11 @@ export interface InsightsCompareGenre {
   theirShare: number;
 }
 
+export interface InsightsCompareKeyword {
+  keywordId: string;
+  name: string;
+}
+
 export interface InsightsCompareResponse {
   matchPercent: number;
   sharedGenres: InsightsCompareGenre[];
@@ -162,6 +169,8 @@ export interface InsightsCompareResponse {
   theirTopGenres: string[];
   myWatchMinutes: number;
   theirWatchMinutes: number;
+  keywordMatchPercent?: number | null;
+  sharedKeywords?: InsightsCompareKeyword[];
 }
 
 export interface InsightsV3Response {

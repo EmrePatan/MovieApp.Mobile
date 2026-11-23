@@ -28,7 +28,7 @@ function StatTile({ icon, value, unit, runtime }: TileProps) {
   return (
     <GlassSurface style={styles.tile}>
       <View style={styles.iconWrap}>
-        <Ionicons name={icon} size={18} color={colors.textPrimary} />
+        <Ionicons name={icon} size={15} color={colors.textPrimary} />
       </View>
       <View style={styles.copy}>
         <AppText style={styles.primary} numberOfLines={1}>
@@ -88,14 +88,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.md,
-    borderRadius: 18,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: 16,
   },
   iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -103,24 +103,24 @@ const styles = StyleSheet.create({
   copy: {
     flex: 1,
     minWidth: 0,
-    gap: 1,
+    gap: 0,
   },
   primary: {
-    fontSize: 16,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 18,
     fontWeight: '700',
     color: colors.textPrimary,
     fontVariant: ['tabular-nums'],
   },
   unit: {
-    fontSize: 12,
-    lineHeight: 20,
+    fontSize: 11,
+    lineHeight: 18,
     fontWeight: '500',
     color: colors.textSecondary,
   },
   runtime: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11,
+    lineHeight: 14,
     color: colors.textSecondary,
   },
 });
