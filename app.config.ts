@@ -1,7 +1,7 @@
 import type { ExpoConfig } from 'expo/config';
 import { getCatalogShareUniversalLinkHosts } from './config/catalog-share-hosts.js';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 /** Keep in sync with config/app-identity.ts (validated by validate:production). */
 const APP_IDENTITY = {
