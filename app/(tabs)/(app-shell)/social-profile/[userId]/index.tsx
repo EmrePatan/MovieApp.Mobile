@@ -27,7 +27,6 @@ import { useCreateDirectConversation } from '@/features/messages/hooks/useMessag
 import { SocialProfileCoverPickerSheet } from '@/features/social/components/SocialProfileCoverPickerSheet';
 import { SocialProfileHeader } from '@/features/social/components/SocialProfileHeader';
 import { SocialTasteMatchCard } from '@/features/social/components/SocialTasteMatchCard';
-import { SocialCommonTitlesStrip } from '@/features/social/components/SocialCommonTitlesStrip';
 import { useSocialProfileCoverEditor } from '@/features/social/hooks/useSocialProfileCoverEditor';
 import { SocialProfileActionRow } from '@/features/social/components/SocialProfileActionRow';
 import { SocialProfileLibrary } from '@/features/social/components/SocialProfileLibrary';
@@ -202,7 +201,7 @@ export default function SocialProfileScreen() {
           onEditCover={() => setCoverPickerVisible(true)}
           onBack={() => router.back()}
           identityTrailing={
-            !isSelf && canViewLibrary ? <SocialTasteMatchCard userId={userId} enabled /> : undefined
+            !isSelf && canViewLibrary ? <SocialTasteMatchCard userId={userId} enabled onOpenTitle={handleOpenTitle} /> : undefined
           }
           actions={
             <SocialProfileActionRow
@@ -252,9 +251,6 @@ export default function SocialProfileScreen() {
               </AppText>
             </Pressable>
           </View>
-        ) : null}
-        {!isSelf && canViewLibrary && statistics.data ? (
-          <SocialCommonTitlesStrip theirStatistics={statistics.data} onOpenTitle={handleOpenTitle} />
         ) : null}
         {canViewLibrary && statistics.data ? (
           <SocialProfileLibrary

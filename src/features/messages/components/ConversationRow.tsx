@@ -70,6 +70,7 @@ export function ConversationRow({ item, currentUserId, onPress, onDelete }: Conv
 
   const rowContent = (
     <SocialUserListRow
+      userId={item.otherUser.id}
       displayName={item.otherUser.displayName}
       userName={item.otherUser.userName}
       avatarUrl={item.otherUser.avatarUrl}

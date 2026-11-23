@@ -24,6 +24,7 @@ export default function SocialRequestsScreen() {
   const renderItem = useCallback(
     ({ item }: { item: SocialFollowRequest }) => (
       <SocialUserListRow
+        userId={item.userId}
         displayName={item.displayName}
         userName={item.userName}
         trailing={

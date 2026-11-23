@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { getSeason } from '@/features/details/season/api/season-api';
 import {
   bulkUpdateEpisodeWatchState,
+  bulkUpdateSeasonWatchState,
   bulkUpdateTvShowWatchState,
   getTvShowProgress,
   markEpisodeWatched,
@@ -420,19 +420,14 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
 
   return useMutation({
     mutationFn: async ({ isFullyWatched, episodeIds }: ToggleSeasonWatchedVariables) => {
-      let resolvedEpisodeIds = episodeIds;
-
-      if (resolvedEpisodeIds.length === 0) {
-        const season = await getSeason(tvShowId, seasonNumber);
-        resolvedEpisodeIds = season.episodes.map((episode) => episode.id);
-      }
-
-      if (resolvedEpisodeIds.length === 0) {
-        throw new Error('No episodes found for this season.');
+      if (episodeIds.length === 0) {
+        // The server resolves the season's aired episodes itself. Sending catalog episode IDs from
+        // the client broke on seasons whose episodes were not ingested yet or were still unaired.
+        return bulkUpdateSeasonWatchState(tvShowId, seasonNumber, !isFullyWatched);
       }
 
       return bulkUpdateEpisodeWatchState(tvShowId, {
-        episodeIds: resolvedEpisodeIds,
+        episodeIds,
         watched: !isFullyWatched,
       });
     },

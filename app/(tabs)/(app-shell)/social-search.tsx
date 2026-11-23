@@ -6,15 +6,21 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { SocialSubscreenHeader } from '@/features/social/components/SocialSubscreenHeader';
+import { SocialPersonCard } from '@/features/social/components/SocialPersonCard';
 import { SocialUserListRow } from '@/features/social/components/SocialUserListRow';
 import { useSocialUserSearch } from '@/features/social/hooks/useSocialQueries';
-import { useSuggestedPeople } from '@/features/social/hooks/useSuggestedPeople';
+import type { SocialUserSummary } from '@/features/social/types';
+import { useSuggestedPeople, type SuggestedPerson } from '@/features/social/hooks/useSuggestedPeople';
 import { openSocialProfile } from '@/features/social/navigation/open-social-profile';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { glass } from '@/theme/glass';
 import { IconEmptyState } from '@/components/common/IconEmptyState';
+
+function isSummary(item: SocialUserSummary | SuggestedPerson): item is SocialUserSummary {
+  return 'followStatus' in item;
+}
 
 export default function SocialSearchScreen() {
   const router = useRouter();
@@ -60,23 +66,20 @@ export default function SocialSearchScreen() {
             <AppText style={styles.sectionLabel}>{t('extras.suggestedPeople')}</AppText>
           ) : null
         }
-        renderItem={({ item }) => (
-          <SocialUserListRow
-            displayName={item.displayName}
-            userName={item.userName}
-            avatarUrl={item.avatarUrl}
-            meta={
-              'followStatus' in item
-                ? item.followStatus === 'Accepted'
-                  ? t('social.followed')
-                  : item.followStatus === 'Pending'
-                    ? t('social.requestSent')
-                    : undefined
-                : undefined
-            }
-            onPress={() => openSocialProfile(router, item.id)}
-          />
-        )}
+        renderItem={({ item }) =>
+          isSummary(item) ? (
+            <SocialPersonCard user={item} onPress={() => openSocialProfile(router, item.id)} />
+          ) : (
+            <SocialUserListRow
+              userId={item.id}
+              displayName={item.displayName}
+              userName={item.userName}
+              avatarUrl={item.avatarUrl}
+              onPress={() => openSocialProfile(router, item.id)}
+              trailing={<Ionicons name="chevron-forward" size={18} color={colors.textMuted} />}
+            />
+          )
+        }
         onEndReached={() => {
           if (results.hasNextPage && !results.isFetchingNextPage) void results.fetchNextPage();
         }}
@@ -116,8 +119,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    minHeight: 44,
-    paddingHorizontal: spacing.lg,
+    minHeight: 42,
+    paddingHorizontal: spacing.md,
     borderRadius: 999,
     backgroundColor: glass.panelInput,
     borderWidth: 1,

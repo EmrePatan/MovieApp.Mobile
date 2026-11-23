@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, ClipPath, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
@@ -8,22 +10,32 @@ import { AppText } from '@/components/common/AppText';
 import { AppBottomSheet } from '@/components/layout/AppBottomSheet';
 import { authTypography } from '@/features/auth/auth-typography';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
+import { useAuth } from '@/auth/useAuth';
+import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { useInsightsCompare } from '@/features/insights/hooks/useInsightsCompare';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import { colors } from '@/theme/colors';
 import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
+import { useSocialProfileStatistics } from '../hooks/useSocialQueries';
+import type { SocialProfileShelfItem } from '../types';
+import { findCommonWatchedTitles } from '../utils/find-common-titles';
 
 const VENN_W = 220;
 const VENN_H = 124;
 const VENN_R = 52;
 const VENN_CY = VENN_H / 2;
 const REVEAL_MS = 1100;
+const COMMON_PAGE = 10;
+const COMMON_STEP = 20;
+const COMMON_POSTER = 64;
 
 interface SocialTasteMatchCardProps {
   userId: string;
   /** Skip the request when the profile's activity is hidden from the viewer. */
   enabled: boolean;
+  /** Opens a shared title's detail page. */
+  onOpenTitle?: (item: SocialProfileShelfItem) => void;
 }
 
 function bandKey(percent: number) {
@@ -68,13 +80,32 @@ function useReveal(active: boolean) {
  * Compact "taste match" badge for someone else's profile header. Tapping it opens a showcase
  * sheet: the two taste circles slide together, the percentage counts up and the shared genres fill.
  */
-export function SocialTasteMatchCard({ userId, enabled }: SocialTasteMatchCardProps) {
+export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTasteMatchCardProps) {
   useAuthFonts();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const progress = useReveal(open);
   const compare = useInsightsCompare(userId, enabled);
   const data = compare.data;
+  const { user: me } = useAuth();
+  const mine = useSocialProfileStatistics(me?.id ?? '', open && Boolean(me?.id));
+  const theirs = useSocialProfileStatistics(userId, open);
+  const [commonVisible, setCommonVisible] = useState(COMMON_PAGE);
+  // A native modal would sit on top of the detail screen, so the sheet closes while the title is
+  // open and comes back (same expanded rail) when the user returns here.
+  const reopenOnFocus = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (reopenOnFocus.current) {
+        reopenOnFocus.current = false;
+        setOpen(true);
+      }
+    }, []),
+  );
+  const common = useMemo(
+    () => findCommonWatchedTitles(mine.data, theirs.data),
+    [mine.data, theirs.data],
+  );
 
   // A match needs watch history on both sides; otherwise "0%" would read as "opposite tastes".
   if (!data || data.myTopGenres.length === 0 || data.theirTopGenres.length === 0) {
@@ -221,6 +252,62 @@ export function SocialTasteMatchCard({ userId, enabled }: SocialTasteMatchCardPr
                   </View>
                 ))}
               </View>
+            </View>
+          ) : null}
+          {common.length > 0 ? (
+            <View style={styles.common} testID="taste-match-common-titles">
+              <View style={styles.sharedHeader}>
+                <AppText variant="caption" muted>
+                  {t('extras.commonWatchedTitle')}
+                </AppText>
+                <AppText variant="caption" muted>
+                  {t('extras.commonWatchedCount', { count: common.length })}
+                </AppText>
+              </View>
+              <GestureHandlerRootView style={styles.commonRail}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.commonRow}
+                >
+                  {common.slice(0, commonVisible).map((item) => (
+                    <Pressable
+                      key={item.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.title}
+                      onPress={() => {
+                        if (!onOpenTitle) return;
+                        reopenOnFocus.current = true;
+                        onOpenTitle(item);
+                        setOpen(false);
+                      }}
+                      style={({ pressed }) => [styles.commonPoster, pressed && styles.pressed]}
+                    >
+                      <CatalogImage
+                        path={item.posterPath}
+                        width={COMMON_POSTER}
+                        height={COMMON_POSTER}
+                        accessibilityLabel={item.title}
+                        rounded={false}
+                      />
+                    </Pressable>
+                  ))}
+                  {common.length > commonVisible ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('extras.seeMoreTitles')}
+                      onPress={() => setCommonVisible((current) => current + COMMON_STEP)}
+                      style={({ pressed }) => [styles.commonMore, pressed && styles.pressed]}
+                      testID="taste-match-common-more"
+                    >
+                      <Ionicons name="add" size={20} color={colors.accentStrong} />
+                      <AppText style={styles.commonMoreText}>
+                        {`${Math.min(COMMON_STEP, common.length - commonVisible)}+`}
+                      </AppText>
+                    </Pressable>
+                  ) : null}
+                </ScrollView>
+              </GestureHandlerRootView>
             </View>
           ) : null}
         </View>
@@ -370,6 +457,43 @@ const styles = StyleSheet.create({
     color: colors.accentStrong,
     fontWeight: '600',
     fontSize: 12,
+  },
+  common: {
+    alignSelf: 'stretch',
+    gap: spacing.sm,
+    paddingTop: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: glass.hairline,
+  },
+  commonRail: { alignSelf: 'stretch' },
+  commonRow: {
+    gap: spacing.sm,
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+  commonPoster: {
+    width: COMMON_POSTER,
+    height: COMMON_POSTER,
+    borderRadius: COMMON_POSTER / 2,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+    backgroundColor: glass.panelElevated,
+  },
+  commonMore: {
+    width: COMMON_POSTER,
+    height: COMMON_POSTER,
+    borderRadius: COMMON_POSTER / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+  },
+  commonMoreText: {
+    color: colors.accentStrong,
+    fontSize: 11,
+    fontWeight: '700',
   },
   genreValues: {
     width: 44,

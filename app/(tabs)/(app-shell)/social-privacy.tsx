@@ -1,7 +1,8 @@
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppSwitch } from '@/components/common/AppSwitch';
 import { AppText } from '@/components/common/AppText';
 import { SocialSubscreenHeader } from '@/features/social/components/SocialSubscreenHeader';
 import { SocialUserListRow } from '@/features/social/components/SocialUserListRow';
@@ -39,15 +40,12 @@ export default function SocialPrivacyScreen() {
         <AppText style={styles.rowTitle}>{label}</AppText>
         <AppText style={styles.rowDesc}>{description}</AppText>
       </View>
-      <Switch
-        accessibilityRole="switch"
+      <AppSwitch
         accessibilityLabel={label}
         accessibilityHint={description}
         value={value}
         onValueChange={onChange}
         disabled={update.isPending}
-        trackColor={{ false: colors.border, true: colors.accentMuted }}
-        thumbColor={value ? colors.accent : colors.textMuted}
       />
     </View>
   );

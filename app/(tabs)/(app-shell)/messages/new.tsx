@@ -64,6 +64,7 @@ export default function NewDirectMessageScreen() {
         keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => (
           <SocialUserListRow
+            userId={item.id}
             displayName={item.displayName}
             userName={item.userName}
             avatarUrl={item.avatarUrl}
@@ -72,6 +73,7 @@ export default function NewDirectMessageScreen() {
                 createConversation.mutate(item.id);
               }
             }}
+            trailing={<Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.accentStrong} />}
           />
         )}
         onEndReached={() => {
@@ -115,12 +117,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    minHeight: 44,
+    minHeight: 42,
     paddingHorizontal: spacing.md,
-    borderRadius: 12,
-    backgroundColor: glass.panelElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    borderRadius: 999,
+    backgroundColor: glass.panelInput,
+    borderWidth: 1,
+    borderColor: glass.hairline,
   },
   input: {
     flex: 1,

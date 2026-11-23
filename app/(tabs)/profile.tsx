@@ -107,6 +107,19 @@ export default function ProfileScreen() {
             })}
             onPress={() => router.push('/profile/language')}
           />
+          <ProfileMenuRow
+            label={t('extras.notificationPrefsTitle')}
+            subtitle={t('extras.notificationPrefsSubtitle')}
+            onPress={() => router.push('/profile/notifications')}
+          />
+        </ProfileSection>
+
+        <ProfileSection title={t('extras.libraryActivity')}>
+          <ProfileMenuRow
+            label={t('extras.watchHistoryTitle')}
+            subtitle={t('extras.watchHistorySubtitle')}
+            onPress={() => router.push('/profile/history')}
+          />
         </ProfileSection>
 
         <ProfileSection title={t('profile.app')}>
@@ -121,7 +134,7 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             label={t('social.managePrivacy')}
             subtitle={t('social.privacyDescription')}
-            onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}
+            onPress={() => router.push('/profile/privacy')}
           />
           <ProfileMenuRow
             label={t('profile.signInSecurityTitle')}

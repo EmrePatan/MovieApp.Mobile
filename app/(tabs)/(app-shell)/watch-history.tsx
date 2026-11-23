@@ -101,9 +101,9 @@ export default function WatchHistoryScreen() {
   const listHeader = (
     <View style={styles.header}>
       <DetailBackButton />
-      <AppText variant="title">{t('common.watched')}</AppText>
+      <AppText variant="title">{t('extras.watchHistoryTitle')}</AppText>
       <AppText variant="bodySmall" muted>
-        {t('library.empty.watchedMessage')}
+        {t('extras.watchHistorySubtitle')}
       </AppText>
     </View>
   );
