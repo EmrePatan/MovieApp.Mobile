@@ -8,6 +8,7 @@ import {
   getRecentHistoryTitle,
 } from '../utils/history-navigation';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface RecentHistoryCardProps {
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   badge: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,

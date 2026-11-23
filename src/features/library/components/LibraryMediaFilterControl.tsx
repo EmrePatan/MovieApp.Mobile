@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '../types';
+import { glass } from '@/theme/glass';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
@@ -55,21 +56,33 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
   },
   chip: {
-    minHeight: 36,
+    minHeight: 30,
     justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  chipSelected: {},
+  chipSelected: {
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
+  },
   label: {
     color: premiumSheet.textSecondary,
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: '500',
   },
   labelSelected: {
-    color: premiumSheet.mutedGold,
+    color: premiumSheet.textPrimary,
     fontWeight: '700',
   },
 });

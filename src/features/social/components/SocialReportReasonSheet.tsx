@@ -6,6 +6,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { glass } from '@/theme/glass';
 
 export type SocialReportReason = 'Spam' | 'Inappropriate' | 'Harassment' | 'FakeAccount';
 export type SocialReportSheetKind = 'activity' | 'comment' | 'user';
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   reasonRowPressed: {
     opacity: interaction.pressedOpacity,

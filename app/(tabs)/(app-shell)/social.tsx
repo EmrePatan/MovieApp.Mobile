@@ -28,18 +28,21 @@ import {
   SocialFeedSegmentTabs,
   type SocialFeedSegment,
 } from '@/features/social/components/SocialFeedSegmentTabs';
+import { SocialFeedHeader } from '@/features/social/components/SocialFeedHeader';
 import { SocialFeedFindPeopleButton } from '@/features/social/components/SocialFeedChrome';
 import { SocialFeedFilmTexture } from '@/features/social/components/SocialFeedFilmTexture';
 import { SocialFeedTimelineRowView } from '@/features/social/components/SocialFeedTimelineRowView';
 import { SocialReportReasonSheet } from '@/features/social/components/SocialReportReasonSheet';
 import { useSocialReportReasonSheet } from '@/features/social/hooks/useSocialReportReasonSheet';
 import { socialFeedTheme } from '@/features/social/components/social-feed-theme';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 function feedModeForSegment(segment: SocialFeedSegment): 'following' | 'discover' {
   return segment === 'following' ? 'following' : 'discover';
 }
 
 export default function SocialFeedScreen() {
+  const tabBarInset = useTabBarOverlayInset();
   useAuthFonts();
   const { t } = useTranslation();
   const router = useRouter();
@@ -100,7 +103,16 @@ export default function SocialFeedScreen() {
   const emptyCopy =
     feedSegment === 'following' ? t('social.emptyFollowing') : t('social.emptyDiscover');
 
-  const chrome = <SocialFeedSegmentTabs active={feedSegment} onChange={setFeedSegment} />;
+  const openMessages = useCallback(() => {
+    router.push('/(tabs)/(app-shell)/messages');
+  }, [router]);
+
+  const chrome = (
+    <>
+      <SocialFeedHeader onSearchPress={openPeopleSearch} onMessagesPress={openMessages} />
+      <SocialFeedSegmentTabs active={feedSegment} onChange={setFeedSegment} />
+    </>
+  );
 
   const renderRow = useCallback(
     ({ item: row }: { item: SocialFeedTimelineRow }) => (
@@ -177,7 +189,7 @@ export default function SocialFeedScreen() {
           data={feedRows}
           keyExtractor={socialFeedTimelineRowKey}
           renderItem={renderRow}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: spacing.xl + tabBarInset }]}
           showsVerticalScrollIndicator={false}
           overScrollMode="never"
           onEndReached={handleLoadMore}

@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { SocialProfileStatistics } from '@/features/social/types';
 import { formatWatchDuration } from '@/features/social/utils/format-watch-duration';
+import { authTypography } from '@/features/auth/auth-typography';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 interface OwnProfileCinemaStatsProps {
@@ -47,9 +49,11 @@ export function OwnProfileCinemaStats({ statistics }: OwnProfileCinemaStatsProps
           <AppText style={styles.heading} numberOfLines={1}>
             {t('social.movies')}
           </AppText>
-          <AppText style={styles.line}>
-            <AppText style={styles.number}>{movieCount}</AppText>
-            <AppText style={styles.muted}>{` · ${movieRuntime}`}</AppText>
+          <AppText style={styles.number} numberOfLines={1}>
+            {movieCount}
+          </AppText>
+          <AppText style={styles.muted} numberOfLines={1}>
+            {movieRuntime}
           </AppText>
         </View>
       </View>
@@ -60,9 +64,12 @@ export function OwnProfileCinemaStats({ statistics }: OwnProfileCinemaStatsProps
           <AppText style={styles.heading} numberOfLines={1}>
             {t('common.tv')}
           </AppText>
-          <AppText style={styles.line}>
-            <AppText style={styles.number}>{episodeCount}</AppText>
-            <AppText style={styles.muted}>{` ${t('social.episodes').toLowerCase()} · ${showRuntime}`}</AppText>
+          <AppText style={styles.number} numberOfLines={1}>
+            {episodeCount}
+            <AppText style={styles.unit}>{` ${t('social.episodes').toLowerCase()}`}</AppText>
+          </AppText>
+          <AppText style={styles.muted} numberOfLines={1}>
+            {showRuntime}
           </AppText>
         </View>
       </View>
@@ -76,53 +83,65 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: spacing.md,
-    paddingTop: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
   },
   filmColumn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    flexShrink: 1,
+    gap: spacing.sm,
+    minWidth: 0,
   },
   tvColumn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    flexShrink: 1,
+    gap: spacing.sm,
+    minWidth: 0,
   },
   icon: {
     marginTop: 1,
   },
   copy: {
-    gap: 2,
+    gap: 3,
     flexShrink: 1,
   },
   divider: {
     width: StyleSheet.hairlineWidth,
     alignSelf: 'stretch',
-    backgroundColor: colors.borderSubtle,
+    backgroundColor: glass.hairline,
     marginVertical: 2,
   },
   heading: {
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
     color: colors.textMuted,
   },
-  line: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
   number: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 22,
+    lineHeight: 28,
     color: colors.textPrimary,
     fontVariant: ['tabular-nums'],
   },
+  unit: {
+    fontFamily: undefined,
+    fontSize: 12,
+    lineHeight: 28,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
   muted: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 16,
     color: colors.textSecondary,
   },
 });

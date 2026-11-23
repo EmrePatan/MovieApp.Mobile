@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 export interface CatalogSortOption<T extends string> {
   value: T;
@@ -40,6 +41,7 @@ export function CatalogSortSheet<T extends string>({
         accessibilityLabel={closeLabel}
       >
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <GlassSheetLayer />
           <Pressable onPress={(event) => event.stopPropagation()} testID={testID}>
             <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>

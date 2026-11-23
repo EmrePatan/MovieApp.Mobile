@@ -13,6 +13,7 @@ import { DetailScrim } from '@/features/details/shared/components/DetailScrim';
 import { DETAIL_DIRECTIONAL_FRAME_BORDER } from '@/features/details/shared/detailDirectionalFrame';
 import { formatIsoDate, formatKnownForDepartment } from '@/utils/format';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { i18n } from '@/i18n';
@@ -159,11 +160,11 @@ const styles = StyleSheet.create({
   },
   mediaContainer: {
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   fallbackBackdrop: {
     width: '100%',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   content: {
     marginTop: -72,
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   textBlock: {
     flex: 1,

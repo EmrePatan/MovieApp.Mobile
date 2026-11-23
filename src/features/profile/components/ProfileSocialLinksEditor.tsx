@@ -5,6 +5,7 @@ import type { ProfileSocialPlatform } from '../types';
 import { PROFILE_SOCIAL_PLATFORMS } from '../utils/profile-social-links';
 import { ProfileSocialPlatformIcon } from './ProfileSocialPlatformIcon';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
@@ -77,10 +78,10 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   card: {
-    backgroundColor: colors.inputBackground,
+    backgroundColor: glass.panelInput,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     overflow: 'hidden',
   },
   row: {

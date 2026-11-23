@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { NotificationsInboxSegment } from '../types-inbox';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
@@ -62,14 +63,20 @@ export function NotificationsInboxSegmentTabs({
 
 const styles = StyleSheet.create({
   outer: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(196, 163, 90, 0.14)',
     backgroundColor: colors.background,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'stretch',
     width: '100%',
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.border,
+    backgroundColor: glass.fill,
   },
   tab: {
     flex: 1,
@@ -78,12 +85,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    marginBottom: -StyleSheet.hairlineWidth,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: premiumSheet.goldBorder,
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
   },
   tabLabelRow: {
     flexDirection: 'row',

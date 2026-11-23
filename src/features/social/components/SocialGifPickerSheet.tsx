@@ -15,6 +15,7 @@ import { fetchTrendingGiphy, isFetchCanceled, searchGiphy, type GiphyResult } fr
 import { getGiphyApiKey } from '../utils/giphy-api-key';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface SocialGifPickerSheetProps {
   visible: boolean;
@@ -94,6 +95,7 @@ export function SocialGifPickerSheet({ visible, onClose, onSelect }: SocialGifPi
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={premiumSheetChrome.overlay}>
         <View style={styles.sheet}>
+          <GlassSheetLayer />
           <View style={premiumSheetChrome.handle} />
           <View style={styles.header}>
             <AppText variant="subtitle" style={styles.headerTitle}>{t('social.pickGif')}</AppText>

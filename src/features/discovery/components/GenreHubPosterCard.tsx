@@ -197,7 +197,7 @@ export function GenreHubPosterCard({
             tileSize={tileSize}
             genreId={genre.id}
           />
-          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3}>
+          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.75}>
             {label}
           </AppText>
         </>
@@ -221,7 +221,7 @@ export function GenreHubPosterCard({
             accessibilityLabel={cover.title}
             accessible={false}
           />
-          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3}>
+          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.75}>
             {label}
           </AppText>
         </>
@@ -235,7 +235,7 @@ export function GenreHubPosterCard({
             style={StyleSheet.absoluteFill}
           />
           <View testID={`genre-hub-fallback-${genre.id}`} accessible={false} />
-          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3}>
+          <AppText variant="subtitle" style={styles.tileLabel} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.75}>
             {label}
           </AppText>
         </>
@@ -262,6 +262,8 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   tileLabel: {
+    fontSize: 15,
+    lineHeight: 20,
     color: colors.textPrimary,
     fontWeight: '700',
     textAlign: 'center',

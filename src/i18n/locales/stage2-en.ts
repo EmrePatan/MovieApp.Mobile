@@ -331,7 +331,7 @@ export const stage2En = {
       accessibility: 'Search movies, TV shows, and people',
       clear: 'Clear search',
     },
-    header: { back: 'Back' },
+    header: { back: 'Back', title: 'Search' },
     filter: {
       all: 'All',
       movies: 'Movies',
@@ -854,6 +854,7 @@ export const stage2En = {
       createWatchlist: 'Create watchlist',
       selectNamed: 'Select {{name}}',
       yourWatchlists: 'Your Watchlists',
+      selectedList: 'Selected list',
     },
   },
   details: {

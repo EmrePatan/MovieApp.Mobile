@@ -26,7 +26,7 @@ const stage1De = {
     emptyFollowing: 'Noch nichts von Personen, denen du folgst. Finde jemanden zum Folgen.',
     emptyDiscover: 'Gerade gibt es nichts zu entdecken. Schau bald wieder vorbei.',
     feedTabs: {
-      forYou: 'Entdecken',
+      forYou: 'Alle',
       following: 'Folge ich',
       explore: 'Entdecken',
       discover: 'Entdecken',
@@ -127,6 +127,7 @@ const stage1De = {
     storiesSelfShort: 'Du',
     storiesFindPeople: 'Personen zum Folgen finden',
     findPeople: 'Personen finden',
+    feedSubtitle: 'Das Neueste aus der Filmwelt',
     episodeBingeSummary: '{{show}} · {{countLabel}}',
     profileCoverEdit: 'Titelbild',
     profileCoverEditHint: 'Lade ein Titelfoto hoch oder wähle ein Poster aus deiner Bibliothek als Hintergrund.',

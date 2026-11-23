@@ -9,6 +9,7 @@ import { colors } from '@/theme/colors';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 type SheetView = 'options' | 'confirmDelete';
 
@@ -105,6 +106,7 @@ function WatchlistListOptionsSheetContent({
         onPress={onClose}
       />
       <SafeAreaView style={styles.sheet} edges={['bottom']}>
+        <GlassSheetLayer />
         <View style={premiumSheetChrome.handle} />
 
         {isConfirmView ? (

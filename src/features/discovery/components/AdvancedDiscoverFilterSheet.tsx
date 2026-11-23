@@ -47,6 +47,7 @@ import {
 import type { Genre } from '../types';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface AdvancedDiscoverFilterSheetProps {
   visible: boolean;
@@ -326,6 +327,7 @@ export function AdvancedDiscoverFilterSheet({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={premiumSheetChrome.overlay}>
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <GlassSheetLayer />
           <View style={styles.sheetInner}>
             <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>

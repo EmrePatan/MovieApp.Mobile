@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 export function FollowingEmptyState() {
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,

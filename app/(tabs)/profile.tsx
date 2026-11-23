@@ -136,6 +136,9 @@ export default function ProfileScreen() {
             subtitle={t('profile.signInSecurityMenuSubtitle')}
             onPress={() => router.push('/profile/security')}
           />
+        </ProfileSection>
+
+        <ProfileSection>
           <ProfileMenuRow
             label={t('profile.deleteAccount')}
             destructive

@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, TextInput, TextInputProps, View } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
@@ -65,10 +66,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   input: {
-    backgroundColor: colors.inputBackground,
+    backgroundColor: glass.panelInput,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     color: colors.textPrimary,
     minHeight: 48,
     paddingHorizontal: spacing.md,

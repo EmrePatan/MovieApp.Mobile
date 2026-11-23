@@ -12,6 +12,7 @@ import { openSocialProfile } from '@/features/social/navigation/open-social-prof
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { IconEmptyState } from '@/components/common/IconEmptyState';
 
 export default function SocialPeopleScreen() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function SocialPeopleScreen() {
             if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
           }}
           onEndReachedThreshold={0.5}
-          ListEmptyComponent={<AppText style={styles.empty}>{t('social.noUsers')}</AppText>}
+          ListEmptyComponent={<IconEmptyState icon="people-outline" title={t('social.noUsers')} />}
           ListFooterComponent={
             query.isFetchingNextPage ? (
               <ActivityIndicator color={colors.accent} style={styles.footer} />

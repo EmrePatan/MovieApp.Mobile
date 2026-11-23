@@ -24,13 +24,14 @@ import { InsightsRecordsSection } from './InsightsRecordsSection';
 import { InsightsTasteSection } from './InsightsTasteSection';
 import { InsightsTimeInStoriesSection } from './InsightsTimeInStoriesSection';
 import { InsightsYourYearSection } from './InsightsYourYearSection';
-import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export function InsightsHubContent() {
+  const tabBarInset = useTabBarOverlayInset();
   const { t } = useTranslation();
   const router = useRouter();
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
@@ -113,7 +114,7 @@ export function InsightsHubContent() {
 
   if (insightsQuery.isLoading && !insightsQuery.data) {
     return (
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xxl + tabBarInset }]}>
         <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
         <InsightsLoadingSkeleton />
       </ScrollView>
@@ -128,7 +129,7 @@ export function InsightsHubContent() {
   const insightsScrollView = (
     <AnimatedScrollView
       ref={scrollRef}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xxl + tabBarInset }]}
       refreshControl={refreshControl}
       onScroll={androidPullToRefresh.scrollHandler}
       scrollEventThrottle={16}

@@ -5,8 +5,8 @@ import { AppBottomSheetChrome } from '@/components/layout/AppBottomSheet';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
-import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 interface SocialProfileCoverPickerSheetProps {
   visible: boolean;
   posterPaths: string[];
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
   },
   pressed: {
     opacity: 0.88,

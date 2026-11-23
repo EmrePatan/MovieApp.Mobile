@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     minHeight: 228,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderAccent,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     ...Platform.select({
       ios: {
         shadowColor: colors.accent,

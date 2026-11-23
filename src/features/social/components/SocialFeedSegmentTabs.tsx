@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 import { socialFeedTheme } from './social-feed-theme';
 
@@ -29,12 +30,11 @@ export function SocialFeedSegmentTabs({ active, onChange }: SocialFeedSegmentTab
               accessibilityState={{ selected: isActive }}
               accessibilityLabel={label}
               onPress={() => onChange(segment)}
-              style={styles.tab}
+              style={[styles.tab, isActive && styles.tabActive]}
             >
               <AppText style={[styles.tabLabel, isActive && styles.tabLabelActive]} numberOfLines={1}>
                 {label}
               </AppText>
-              <View style={[styles.indicator, isActive && styles.indicatorActive]} />
             </Pressable>
           );
         })}
@@ -45,22 +45,33 @@ export function SocialFeedSegmentTabs({ active, onChange }: SocialFeedSegmentTab
 
 const styles = StyleSheet.create({
   outer: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: socialFeedTheme.border,
     backgroundColor: socialFeedTheme.background,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'stretch',
     width: '100%',
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
   },
   tab: {
     flex: 1,
-    minHeight: 44,
+    minHeight: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  tabActive: {
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
   },
   tabLabel: {
     fontSize: 15,
@@ -72,17 +83,5 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: socialFeedTheme.textPrimary,
-  },
-  indicator: {
-    position: 'absolute',
-    left: '18%',
-    right: '18%',
-    bottom: 0,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: 'transparent',
-  },
-  indicatorActive: {
-    backgroundColor: socialFeedTheme.accent,
   },
 });

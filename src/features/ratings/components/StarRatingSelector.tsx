@@ -22,6 +22,7 @@ import {
 } from '../utils/star-rating';
 import { createRatingPanResponder } from '../utils/create-rating-pan-responder';
 import { colors } from '@/theme/colors';
+import { hapticStep, hapticSuccess } from '@/utils/haptics';
 
 export const STAR_VISUAL_SIZE = RATING_STAR_VISUAL_SIZE;
 const STAR_GAP = RATING_STAR_GAP;
@@ -78,6 +79,7 @@ export function StarRatingSelector({
 
   const handlePreviewChange = useCallback(
     (rating: number | 'clear' | null) => {
+      hapticStep(typeof rating === 'number' ? rating : null);
       setLocalPreviewRating(rating);
       if (rating === 'clear' || rating == null) {
         onPreviewChange?.(null);
@@ -101,6 +103,14 @@ export function StarRatingSelector({
     return value;
   }, [localPreviewRating, value]);
 
+  const handleCommit = useCallback(
+    (starRating: number) => {
+      hapticSuccess();
+      onCommit(starRating);
+    },
+    [onCommit],
+  );
+
   const nativeGesture = useMemo(() => Gesture.Native(), []);
 
   const { panHandlers, touchHandlers } = useMemo(
@@ -112,7 +122,7 @@ export function StarRatingSelector({
         getStarClusterWidth: () => STAR_CLUSTER_WIDTH,
         onGestureStart: () => onGestureStart?.() ?? true,
         onPreviewChange: handlePreviewChange,
-        onCommit,
+        onCommit: handleCommit,
         onClear,
         onInteractionActiveChange,
         retainPreviewOnCommit: true,
@@ -122,7 +132,7 @@ export function StarRatingSelector({
       value,
       trackWidth,
       handlePreviewChange,
-      onCommit,
+      handleCommit,
       onClear,
       onGestureStart,
       onInteractionActiveChange,

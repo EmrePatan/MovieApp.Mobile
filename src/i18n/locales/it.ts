@@ -26,7 +26,7 @@ const stage1It = {
     emptyFollowing: 'Ancora nulla dalle persone che segui. Trova qualcuno da seguire.',
     emptyDiscover: 'Niente da scoprire al momento. Torna presto.',
     feedTabs: {
-      forYou: 'Esplora',
+      forYou: 'Tutti',
       following: 'Seguiti',
       explore: 'Esplora',
       discover: 'Esplora',
@@ -127,6 +127,7 @@ const stage1It = {
     storiesSelfShort: 'Tu',
     storiesFindPeople: 'Trova persone da seguire',
     findPeople: 'Trova persone',
+    feedSubtitle: 'Le ultime dal mondo del cinema',
     episodeBingeSummary: '{{show}} · {{countLabel}}',
     profileCoverEdit: 'Immagine di copertina',
     profileCoverEditHint: 'Carica una foto di copertina o scegli una locandina dalla tua libreria come sfondo.',

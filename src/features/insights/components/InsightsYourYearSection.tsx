@@ -14,6 +14,7 @@ import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { InsightsYearSelector } from './InsightsYearSelector';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsYourYearSectionProps {
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   calloutText: {
     flex: 1,

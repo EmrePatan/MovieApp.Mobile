@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   StyleSheet,
   View,
 } from 'react-native';
@@ -249,11 +250,14 @@ export default function FavoritesScreen() {
             </View>
           ) : null
         }
+        // RN-web renders an empty list when a RefreshControl is attached.
         refreshControl={
-          <MovieAppRefreshControl
-            refreshing={favoritesQuery.isRefetching && !favoritesQuery.isFetchingNextPage}
-            onRefresh={handleRefresh}
-          />
+          Platform.OS === 'web' ? undefined : (
+            <MovieAppRefreshControl
+              refreshing={favoritesQuery.isRefetching && !favoritesQuery.isFetchingNextPage}
+              onRefresh={handleRefresh}
+            />
+          )
         }
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}

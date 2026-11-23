@@ -12,6 +12,8 @@ import { openSocialProfile } from '@/features/social/navigation/open-social-prof
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
+import { IconEmptyState } from '@/components/common/IconEmptyState';
 
 export default function SocialSearchScreen() {
   const router = useRouter();
@@ -71,7 +73,7 @@ export default function SocialSearchScreen() {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           debouncedQuery.length < 2 ? (
-            <AppText style={styles.empty}>{t('social.minSearchCharacters')}</AppText>
+            <IconEmptyState icon="search-outline" title={t('social.minSearchCharacters')} />
           ) : results.isError ? (
             <View style={styles.error}>
               <AppText style={styles.empty}>{t('social.searchFailed')}</AppText>
@@ -80,7 +82,7 @@ export default function SocialSearchScreen() {
               </Pressable>
             </View>
           ) : results.isLoading ? null : (
-            <AppText style={styles.empty}>{t('social.noSearchResults')}</AppText>
+            <IconEmptyState icon="people-outline" title={t('social.noSearchResults')} />
           )
         }
         ListFooterComponent={
@@ -105,11 +107,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     minHeight: 44,
-    paddingHorizontal: spacing.md,
-    borderRadius: 12,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 999,
+    backgroundColor: glass.panelInput,
+    borderWidth: 1,
+    borderColor: glass.hairline,
   },
   input: {
     flex: 1,

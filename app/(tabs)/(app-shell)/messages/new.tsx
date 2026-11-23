@@ -12,6 +12,8 @@ import { useSocialUserSearch } from '@/features/social/hooks/useSocialQueries';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
+import { IconEmptyState } from '@/components/common/IconEmptyState';
 
 export default function NewDirectMessageScreen() {
   const router = useRouter();
@@ -72,7 +74,7 @@ export default function NewDirectMessageScreen() {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           debouncedQuery.length < 2 ? (
-            <AppText style={styles.empty}>{t('messages.minSearchCharacters')}</AppText>
+            <IconEmptyState icon="search-outline" title={t('messages.minSearchCharacters')} />
           ) : results.isError ? (
             <View style={styles.error}>
               <AppText style={styles.empty}>{t('messages.searchFailed')}</AppText>
@@ -81,7 +83,7 @@ export default function NewDirectMessageScreen() {
               </Pressable>
             </View>
           ) : results.isLoading ? null : (
-            <AppText style={styles.empty}>{t('messages.noSearchResults')}</AppText>
+            <IconEmptyState icon="people-outline" title={t('messages.noSearchResults')} />
           )
         }
       />
@@ -108,7 +110,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingHorizontal: spacing.md,
     borderRadius: 12,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },

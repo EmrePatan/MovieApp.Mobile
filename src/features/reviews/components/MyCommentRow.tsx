@@ -15,6 +15,7 @@ import { buildMyCommentMetadataLabel } from '../utils/my-comment-format';
 import type { UserReviewListItem } from '../types/my-comments';
 import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: borderRadius.sm,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   body: {
     flex: 1,

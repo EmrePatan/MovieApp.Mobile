@@ -24,6 +24,7 @@ import type { WatchlistContentType } from '../types';
 import { interaction } from '@/theme/interaction';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { typography } from '@/theme/typography';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 import {
   getVisibleWatchlists,
   shouldCollapseWatchlistPicker,
@@ -278,6 +279,7 @@ function WatchlistPickerBody({
           onPress={handleClose}
         />
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <GlassSheetLayer />
           <View style={styles.handle} />
 
           <View style={styles.body}>
@@ -398,7 +400,9 @@ const styles = StyleSheet.create({
   },
   overlay: premiumSheetChrome.overlay,
   backdrop: premiumSheetChrome.backdrop,
-  sheet: premiumSheetChrome.sheet,
+  sheet: {
+    ...premiumSheetChrome.sheet,
+  },
   handle: premiumSheetChrome.handle,
   body: {
     paddingTop: 18,

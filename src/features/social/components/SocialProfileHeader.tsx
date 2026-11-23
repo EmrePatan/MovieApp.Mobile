@@ -15,12 +15,16 @@ import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import type { GalleryImage } from '@/features/gallery/types';
+import { ProfileCountStrip } from '@/features/profile/components/ProfileCountStrip';
 import { OwnProfileCinemaStats } from '@/features/profile/components/OwnProfileCinemaStats';
 import { ProfileSocialLinksRow } from '@/features/profile/components/ProfileSocialLinksRow';
 import { filledSocialLinks } from '@/features/profile/utils/profile-social-links';
 import type { SocialProfile, SocialProfileStatistics } from '../types';
 import { resolveSocialProfileCoverUri } from '../utils/resolve-social-profile-cover';
+import { authTypography } from '@/features/auth/auth-typography';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -53,10 +57,11 @@ export function SocialProfileHeader({
   onFollowingPress,
   onReviewsPress,
 }: SocialProfileHeaderProps) {
+  useAuthFonts();
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const coverHeight = Math.round(Math.min(168, Math.max(120, width * 0.42)));
+  const coverHeight = Math.round(Math.min(148, Math.max(112, width * 0.36)));
   const avatarOverlap = Math.round(AVATAR_SIZE / 2);
   const [avatarViewerOpen, setAvatarViewerOpen] = useState(false);
   const avatarImages = useMemo<GalleryImage[]>(() => {
@@ -192,38 +197,32 @@ export function SocialProfileHeader({
           @{profile.userName}
         </AppText>
 
-        <View style={styles.meta}>
-          <Pressable accessibilityRole="button" onPress={onFollowersPress} hitSlop={6}>
-            <AppText style={styles.metaText}>
-              <AppText style={styles.metaNumber}>{profile.followersCount}</AppText>
-              {` ${t('social.followersCountLabel').toLowerCase()}`}
-            </AppText>
-          </Pressable>
-          <AppText style={styles.metaDot}>·</AppText>
-          <Pressable accessibilityRole="button" onPress={onFollowingPress} hitSlop={6}>
-            <AppText style={styles.metaText}>
-              <AppText style={styles.metaNumber}>{profile.followingCount}</AppText>
-              {` ${t('social.followingCountLabel').toLowerCase()}`}
-            </AppText>
-          </Pressable>
-          {statistics ? (
-            <>
-              <AppText style={styles.metaDot}>·</AppText>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`${statistics.reviewsCount} ${t('social.reviewCount')}`}
-                onPress={onReviewsPress}
-                disabled={!onReviewsPress}
-                hitSlop={6}
-              >
-                <AppText style={styles.metaText}>
-                  <AppText style={styles.metaNumber}>{statistics.reviewsCount}</AppText>
-                  {` ${t('social.reviewCount').toLowerCase()}`}
-                </AppText>
-              </Pressable>
-            </>
-          ) : null}
-        </View>
+        <ProfileCountStrip
+          counts={[
+            {
+              key: 'followers',
+              value: profile.followersCount,
+              label: t('social.followersCountLabel'),
+              onPress: onFollowersPress,
+            },
+            {
+              key: 'following',
+              value: profile.followingCount,
+              label: t('social.followingCountLabel'),
+              onPress: onFollowingPress,
+            },
+            ...(statistics
+              ? [
+                  {
+                    key: 'reviews',
+                    value: statistics.reviewsCount,
+                    label: t('social.reviewCount'),
+                    onPress: onReviewsPress,
+                  },
+                ]
+              : []),
+          ]}
+        />
 
         {bio ? (
           <AppText style={styles.bio} numberOfLines={4}>
@@ -286,9 +285,9 @@ const styles = StyleSheet.create({
     borderRadius: layout.touchTarget / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: glass.panelElevated,
+    borderWidth: 1,
+    borderColor: glass.hairline,
   },
   chromeSpacer: {
     width: layout.touchTarget,
@@ -312,46 +311,25 @@ const styles = StyleSheet.create({
   },
   avatarRing: {
     borderRadius: 999,
-    borderWidth: 3,
-    borderColor: colors.background,
+    borderWidth: 2,
+    borderColor: colors.accent,
     backgroundColor: colors.background,
+    padding: 2,
   },
   actions: {
     paddingBottom: 2,
   },
   name: {
-    fontSize: 24,
-    lineHeight: 28,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 28,
+    lineHeight: 34,
     color: colors.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   handle: {
     fontSize: 13,
     lineHeight: 16,
-    color: colors.textMuted,
-  },
-  meta: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingTop: spacing.xs,
-  },
-  metaText: {
-    fontSize: 12,
-    lineHeight: 16,
     color: colors.textSecondary,
-  },
-  metaNumber: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  metaDot: {
-    color: colors.textMuted,
-    fontSize: 12,
   },
   bio: {
     fontSize: 13,
@@ -364,7 +342,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.sm,
   },
   linksDivider: {
     width: StyleSheet.hairlineWidth,
@@ -386,10 +364,10 @@ const styles = StyleSheet.create({
   joinedText: {
     fontSize: 11,
     lineHeight: 14,
-    color: colors.textMuted,
+    color: colors.textSecondary,
   },
   statsBlock: {
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
   },
   pressed: {
     opacity: 0.88,

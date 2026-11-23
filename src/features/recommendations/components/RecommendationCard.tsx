@@ -13,6 +13,7 @@ import { formatCatalogYear, formatContentType, formatRating } from '@/utils/form
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 interface RecommendationCardProps {
   item: RecommendationItem;
@@ -67,7 +68,7 @@ export const RecommendationCard = memo(function RecommendationCard({
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={POSTER_CARD_ROLE}
       accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(item)}
       onLongPress={onLongPress}

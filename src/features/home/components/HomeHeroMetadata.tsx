@@ -5,6 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import type { ContentType } from '@/models/api/pagination';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { HOME_HERO_RATING_CHIP_HEIGHT } from '../utils/home-hero-metadata-metrics';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: colors.borderAccent,
   },

@@ -12,6 +12,7 @@ import type { SocialFollowRequest } from '@/features/social/types';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { IconEmptyState } from '@/components/common/IconEmptyState';
 
 export default function SocialRequestsScreen() {
   const router = useRouter();
@@ -76,7 +77,9 @@ export default function SocialRequestsScreen() {
             if (requests.hasNextPage && !requests.isFetchingNextPage) void requests.fetchNextPage();
           }}
           onEndReachedThreshold={0.5}
-          ListEmptyComponent={<AppText style={styles.empty}>{t('social.noPendingRequests')}</AppText>}
+          ListEmptyComponent={
+            <IconEmptyState icon="person-add-outline" title={t('social.noPendingRequests')} />
+          }
           ListFooterComponent={
             requests.isFetchingNextPage ? (
               <ActivityIndicator color={colors.accent} style={styles.footer} />
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.textPrimary,
+    backgroundColor: colors.accentStrong,
   },
   acceptLabel: { fontSize: 12, fontWeight: '700', color: colors.background },
   reject: {

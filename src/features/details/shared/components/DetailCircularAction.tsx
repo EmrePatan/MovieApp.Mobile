@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { spacing } from '@/theme/spacing';
@@ -48,13 +49,13 @@ export function DetailCircularAction({
           borderRadius={DETAIL_ACTION_SIZE / 2}
           style={styles.frame}
         >
-          <View style={styles.buttonSurface}>
+          <GlassSurface tone={active ? 'accent' : 'default'} style={styles.buttonSurface}>
             {busy ? (
               <ActivityIndicator color={active ? colors.accent : colors.textPrimary} size="small" />
             ) : (
               children
             )}
-          </View>
+          </GlassSurface>
         </DetailDirectionalFrame>
       </Pressable>
       <AppText
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     width: ACTION_INNER_SIZE,
     height: ACTION_INNER_SIZE,
     borderRadius: ACTION_INNER_SIZE / 2,
-    backgroundColor: 'rgba(12, 12, 18, 0.78)',
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -15,8 +15,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { useAuth } from '@/auth/useAuth';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
+import { authTypography } from '@/features/auth/auth-typography';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileAvatarEditor } from '@/features/profile/hooks/useProfileAvatarEditor';
+import { ProfileCountStrip } from '@/features/profile/components/ProfileCountStrip';
 import { OwnProfileCinemaStats } from '@/features/profile/components/OwnProfileCinemaStats';
 import { ProfileSocialLinksRow } from '@/features/profile/components/ProfileSocialLinksRow';
 import { filledSocialLinks } from '@/features/profile/utils/profile-social-links';
@@ -26,6 +29,7 @@ import { useSocialProfile, useSocialProfileStatistics } from '@/features/social/
 import { resolveProfileLibraryTitles } from '@/features/social/utils/resolve-profile-library-titles';
 import { resolveSocialProfileCoverUri } from '@/features/social/utils/resolve-social-profile-cover';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -34,7 +38,7 @@ const GRID_GAP = spacing.sm;
 const TAB_BAR_CLEARANCE = 84;
 const HUB_CHROME_CLEARANCE = 56;
 const IDENTITY_BLOCK_ESTIMATE = 168;
-const AVATAR_SIZE = 68;
+const AVATAR_SIZE = 72;
 
 function resolveCoverHeight(windowWidth: number, windowHeight: number, topInset: number, bottomInset: number) {
   const itemWidth =
@@ -50,10 +54,11 @@ function resolveCoverHeight(windowWidth: number, windowHeight: number, topInset:
     - twoPosterRows
     - IDENTITY_BLOCK_ESTIMATE;
 
-  return Math.round(Math.min(148, Math.max(104, budget)));
+  return Math.round(Math.min(132, Math.max(96, budget)));
 }
 
 export function OwnProfileTabHeader() {
+  useAuthFonts();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -202,37 +207,32 @@ export function OwnProfileTabHeader() {
         ) : null}
 
         {profile ? (
-          <View style={styles.meta}>
-            <Pressable accessibilityRole="button" onPress={() => openPeople('followers')} hitSlop={6}>
-              <AppText style={styles.metaText}>
-                <AppText style={styles.metaNumber}>{profile.followersCount}</AppText>
-                {` ${t('social.followersCountLabel').toLowerCase()}`}
-              </AppText>
-            </Pressable>
-            <AppText style={styles.metaDot}>·</AppText>
-            <Pressable accessibilityRole="button" onPress={() => openPeople('following')} hitSlop={6}>
-              <AppText style={styles.metaText}>
-                <AppText style={styles.metaNumber}>{profile.followingCount}</AppText>
-                {` ${t('social.followingCountLabel').toLowerCase()}`}
-              </AppText>
-            </Pressable>
-            {statistics.data ? (
-              <>
-                <AppText style={styles.metaDot}>·</AppText>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`${statistics.data.reviewsCount} ${t('social.reviewCount')}`}
-                  onPress={() => router.push('/profile/my-comments')}
-                  hitSlop={6}
-                >
-                  <AppText style={styles.metaText}>
-                    <AppText style={styles.metaNumber}>{statistics.data.reviewsCount}</AppText>
-                    {` ${t('social.reviewCount').toLowerCase()}`}
-                  </AppText>
-                </Pressable>
-              </>
-            ) : null}
-          </View>
+          <ProfileCountStrip
+            counts={[
+              {
+                key: 'followers',
+                value: profile.followersCount,
+                label: t('social.followersCountLabel'),
+                onPress: () => openPeople('followers'),
+              },
+              {
+                key: 'following',
+                value: profile.followingCount,
+                label: t('social.followingCountLabel'),
+                onPress: () => openPeople('following'),
+              },
+              ...(statistics.data
+                ? [
+                    {
+                      key: 'reviews',
+                      value: statistics.data.reviewsCount,
+                      label: t('social.reviewCount'),
+                      onPress: () => router.push('/profile/my-comments'),
+                    },
+                  ]
+                : []),
+            ]}
+          />
         ) : null}
 
         {bio ? (
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },
@@ -347,43 +347,21 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },
   name: {
-    fontSize: 22,
-    lineHeight: 26,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 28,
+    lineHeight: 34,
     color: colors.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   handle: {
     fontSize: 13,
     lineHeight: 16,
-    color: colors.textMuted,
-  },
-  meta: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingTop: spacing.xs,
-  },
-  metaText: {
-    fontSize: 12,
-    lineHeight: 16,
     color: colors.textSecondary,
-  },
-  metaNumber: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  metaDot: {
-    color: colors.textMuted,
-    fontSize: 12,
   },
   bio: {
     fontSize: 13,
@@ -396,7 +374,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.sm,
   },
   linksDivider: {
     width: StyleSheet.hairlineWidth,
@@ -412,10 +390,10 @@ const styles = StyleSheet.create({
   joinedText: {
     fontSize: 11,
     lineHeight: 14,
-    color: colors.textMuted,
+    color: colors.textSecondary,
   },
   statsBlock: {
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
   },
 
   pressed: {

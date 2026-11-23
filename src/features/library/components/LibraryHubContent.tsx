@@ -38,6 +38,7 @@ import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTa
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = spacing.sm;
@@ -54,6 +55,7 @@ export function LibraryHubContent({
   banner = null,
   quickActionsEnabled = true,
 }: LibraryHubContentProps) {
+  const tabBarInset = useTabBarOverlayInset();
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -374,7 +376,7 @@ export function LibraryHubContent({
               </View>
             ) : null
           }
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: spacing.xxl + tabBarInset }]}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
           onScroll={onListScroll}

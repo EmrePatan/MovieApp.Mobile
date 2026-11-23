@@ -16,7 +16,6 @@ import { openSocialProfile } from '@/features/social/navigation/open-social-prof
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { socialNotificationText } from '../utils/social-notification-copy';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
-import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';

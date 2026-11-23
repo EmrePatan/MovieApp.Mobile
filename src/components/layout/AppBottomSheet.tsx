@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 
 type AppBottomSheetAlign = 'center' | 'stretch';
@@ -41,6 +42,7 @@ function AppBottomSheetFrame({
         style={[styles.sheet, align === 'center' && styles.sheetCentered]}
         edges={['bottom']}
       >
+        <GlassSurface pointerEvents="none" style={[StyleSheet.absoluteFill, styles.glassLayer]} />
         <View style={premiumSheetChrome.handle} />
         {title ? (
           <AppText variant="subtitle" style={styles.title}>
@@ -109,7 +111,13 @@ export function AppBottomSheetChrome({
 const styles = StyleSheet.create({
   sheet: {
     ...premiumSheetChrome.sheet,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
     gap: 16,
+  },
+  glassLayer: {
+    borderTopLeftRadius: premiumSheet.cornerRadius,
+    borderTopRightRadius: premiumSheet.cornerRadius,
   },
   sheetCentered: {
     alignItems: 'center',

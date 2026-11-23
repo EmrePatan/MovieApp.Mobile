@@ -1,12 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarHeightCallbackContext } from 'expo-router/build/react-navigation/bottom-tabs/utils/BottomTabBarHeightCallbackContext';
 import { usePathname, useRouter, useSegments } from 'expo-router';
-import { useCallback, useContext, useMemo } from 'react';
-import { Platform, Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import type { EdgeInsets } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
+import { colors } from '@/theme/colors';
+import { hapticSelection } from '@/utils/haptics';
+import { isTabBarOverlayActive } from '@/features/navigation/tab-bar-overlay';
 import { handlePrimaryTabPress } from '@/features/navigation/primary-tab-press';
 import { resolveBottomNavVisibility } from '@/features/navigation/bottom-nav-visibility';
 import {
@@ -22,18 +34,20 @@ import {
 } from '@/features/navigation/tab-bar-layout-metrics';
 import { getTabBarStyle, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 
-/**
- * Black Titanium dock palette — local to PrimaryTabBar only.
- * Spec: #0B0B0E / #151519 / #29292E / #898991 / #B9A276 / #EAE8E4
- */
+/** Liquid Glass dock palette — local to PrimaryTabBar only. */
 const dock = {
-  background: '#0B0B0E',
-  elevated: '#151519',
-  border: '#29292E',
-  inactive: '#898991',
-  activeAccent: '#B9A276',
-  activeLabel: '#B9A276',
+  background: colors.background,
+  inactive: 'rgba(245, 245, 247, 0.62)',
+  activeAccent: colors.accentStrong,
+  activeLabel: '#FFFFFF',
 } as const;
+
+/** Float inset of the glass capsule inside the full-height shell. */
+const GLASS_DOCK_INSET_H = 12;
+const GLASS_DOCK_INSET_TOP = 2;
+const GLASS_DOCK_MIN_BOTTOM = 2;
+const GLASS_DOCK_BOTTOM_TRIM = 6;
+const SLIDER_SPRING = { damping: 20, stiffness: 240, mass: 0.7 } as const;
 
 type TabConfig = {
   id: PrimaryTabId;
@@ -79,13 +93,44 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
     [onTabBarHeightChange],
   );
 
+  const highlightedTab = resolveActivePrimaryTab(pathname);
+  const overlayActive = isTabBarOverlayActive(pathname, segments);
+  const activeIndex = PRIMARY_TABS.findIndex((tab) => tab.id === highlightedTab);
+
+  const [rowWidth, setRowWidth] = useState(0);
+  const sliderWidth =
+    rowWidth > 0 ? (rowWidth - layoutMetrics.rowPaddingHorizontal * 2) / PRIMARY_TABS.length : 0;
+  const sliderX = useSharedValue(0);
+  const sliderPlacedRef = useRef(false);
+
+  useEffect(() => {
+    if (sliderWidth <= 0 || activeIndex < 0) {
+      return;
+    }
+
+    const target = activeIndex * sliderWidth;
+    if (!sliderPlacedRef.current) {
+      sliderPlacedRef.current = true;
+      sliderX.value = target;
+      return;
+    }
+
+    sliderX.value = withSpring(target, SLIDER_SPRING);
+  }, [activeIndex, sliderWidth, sliderX]);
+
+  const sliderStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: sliderX.value }],
+    opacity: activeIndex < 0 || sliderWidth <= 0 ? 0 : 1,
+  }));
+
   if (resolveBottomNavVisibility(segments) === 'hide') {
     return null;
   }
 
-  const highlightedTab = resolveActivePrimaryTab(pathname);
-
   const handleTabPress = (tabId: PrimaryTabId) => {
+    if (tabId !== highlightedTab) {
+      hapticSelection();
+    }
     handlePrimaryTabPress({
       tabId,
       pathname,
@@ -100,22 +145,56 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
       style={[
         styles.shell,
         getTabBarStyle(insets),
-        styles.dockSurface,
-        {
-          borderTopLeftRadius: layoutMetrics.dockTopRadius,
-          borderTopRightRadius: layoutMetrics.dockTopRadius,
-        },
+        overlayActive ? styles.dockOverlay : styles.dockSurface,
       ]}
     >
+      {overlayActive ? (
+        <LinearGradient
+          pointerEvents="none"
+          colors={['rgba(5, 5, 8, 0)', 'rgba(5, 5, 8, 0.92)']}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+      <GlassSurface
+        pointerEvents="none"
+        style={[
+          styles.glassCapsule,
+          {
+            bottom: Math.max(
+              layoutMetrics.paddingBottom - GLASS_DOCK_BOTTOM_TRIM,
+              GLASS_DOCK_MIN_BOTTOM,
+            ),
+          },
+        ]}
+      />
       <View
         style={[
           styles.tabRow,
           {
             height: layoutMetrics.rowHeight,
+            marginHorizontal: GLASS_DOCK_INSET_H,
             paddingHorizontal: layoutMetrics.rowPaddingHorizontal,
           },
         ]}
+        onLayout={(event) => setRowWidth(event.nativeEvent.layout.width)}
       >
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.slider,
+            {
+              left: layoutMetrics.rowPaddingHorizontal,
+              width: sliderWidth,
+              borderRadius: layoutMetrics.activeRadius,
+            },
+            sliderStyle,
+          ]}
+        >
+          <GlassSurface
+            tone="accent"
+            style={[StyleSheet.absoluteFill, { borderRadius: layoutMetrics.activeRadius }]}
+          />
+        </Animated.View>
         {PRIMARY_TABS.map((tab) => {
           const isActive = highlightedTab === tab.id;
           const iconColor = isActive ? dock.activeAccent : dock.inactive;
@@ -138,7 +217,6 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
                     paddingHorizontal: layoutMetrics.contentInsetHorizontal,
                     borderRadius: layoutMetrics.activeRadius,
                   },
-                  isActive && styles.tabInnerActive,
                 ]}
               >
                 <Ionicons
@@ -180,17 +258,26 @@ const styles = StyleSheet.create({
   },
   dockSurface: {
     backgroundColor: dock.background,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: dock.border,
+  },
+  dockOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+  },
+  glassCapsule: {
+    position: 'absolute',
+    left: GLASS_DOCK_INSET_H,
+    right: GLASS_DOCK_INSET_H,
+    top: GLASS_DOCK_INSET_TOP,
+    borderRadius: 999,
     ...Platform.select({
       ios: {
         shadowColor: '#000000',
-        shadowOpacity: 0.18,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: -2 },
-      },
-      android: {
-        elevation: 6,
+        shadowOpacity: 0.35,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 6 },
       },
       default: {},
     }),
@@ -198,7 +285,12 @@ const styles = StyleSheet.create({
   tabRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    width: '100%',
+    alignSelf: 'stretch',
+  },
+  slider: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
   },
   tabButton: {
     flex: 1,
@@ -213,9 +305,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'stretch',
     width: '100%',
-  },
-  tabInnerActive: {
-    backgroundColor: dock.elevated,
   },
   label: {
     alignSelf: 'stretch',

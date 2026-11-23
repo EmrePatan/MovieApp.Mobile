@@ -14,6 +14,7 @@ import {
 } from '@/features/search/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 interface DiscoverPreviewPosterCardProps {
   item: SearchResultItem;
@@ -48,7 +49,7 @@ export const DiscoverPreviewPosterCard = memo(function DiscoverPreviewPosterCard
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={POSTER_CARD_ROLE}
       accessibilityLabel={item.title}
       onPress={() => onPress(item)}
       onLongPress={onLongPress}

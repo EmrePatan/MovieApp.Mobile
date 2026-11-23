@@ -7,12 +7,13 @@ import {
   Text,
   ViewStyle,
 } from 'react-native';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { typography } from '@/theme/typography';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostDestructive' | 'destructive';
 
 interface AppButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   title: string;
@@ -46,6 +47,12 @@ export function AppButton({
       ]}
       {...props}
     >
+      {variant === 'secondary' ? (
+        <GlassSurface
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, styles.glassLayer]}
+        />
+      ) : null}
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? colors.textPrimary : colors.accent} />
       ) : (
@@ -53,7 +60,11 @@ export function AppButton({
           style={[
             styles.label,
             variant === 'destructive' && styles.labelDestructive,
-            variant !== 'primary' && variant !== 'destructive' && styles.labelSecondary,
+            variant === 'ghostDestructive' && styles.labelGhostDestructive,
+            variant !== 'primary' &&
+              variant !== 'destructive' &&
+              variant !== 'ghostDestructive' &&
+              styles.labelSecondary,
           ]}
         >
           {title}
@@ -67,20 +78,27 @@ const styles = StyleSheet.create({
   base: {
     minHeight: 48,
     minWidth: interaction.touchTarget,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
+    overflow: 'hidden',
   },
   primary: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.accentStrong,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 240, 200, 0.55)',
   },
   secondary: {
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: 'transparent',
+  },
+  glassLayer: {
+    borderRadius: borderRadius.full,
   },
   ghost: {
+    backgroundColor: 'transparent',
+  },
+  ghostDestructive: {
     backgroundColor: 'transparent',
   },
   destructive: {
@@ -101,5 +119,8 @@ const styles = StyleSheet.create({
   },
   labelDestructive: {
     color: colors.textPrimary,
+  },
+  labelGhostDestructive: {
+    color: colors.error,
   },
 });

@@ -6,6 +6,8 @@ import { UserAvatar } from '@/components/common/UserAvatar';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { ReviewStarRow } from '@/features/reviews/components/ReviewStarRow';
 import { backendScoreToStarRating, formatStarRatingDisplay } from '@/features/ratings/utils/star-rating';
+import { authTypography } from '@/features/auth/auth-typography';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { shouldShowOriginalTitle } from '@/utils/format';
@@ -252,11 +254,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingLeft: spacing.sm,
     paddingRight: spacing.xs,
-    borderRadius: borderRadius.md,
-    backgroundColor: socialFeedTheme.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: socialFeedTheme.border,
+    borderRadius: borderRadius.lg,
+    backgroundColor: glass.panel,
+    borderWidth: 1,
+    borderColor: glass.hairline,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   titlePoster: {
     width: SOCIAL_POSTER_FEED.width,
@@ -280,9 +287,9 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   title: {
-    fontSize: 14,
-    lineHeight: 18,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 16,
+    lineHeight: 21,
     color: socialFeedTheme.textPrimary,
   },
   originalTitle: {

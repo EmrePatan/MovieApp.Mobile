@@ -26,7 +26,7 @@ const stage1Es = {
     emptyFollowing: 'Aún no hay nada de las personas que sigues. Busca a alguien para seguir.',
     emptyDiscover: 'No hay nada para descubrir ahora mismo. Vuelve pronto.',
     feedTabs: {
-      forYou: 'Explorar',
+      forYou: 'Todos',
       following: 'Siguiendo',
       explore: 'Explorar',
       discover: 'Explorar',
@@ -127,6 +127,7 @@ const stage1Es = {
     storiesSelfShort: 'Tú',
     storiesFindPeople: 'Encuentra personas para seguir',
     findPeople: 'Buscar personas',
+    feedSubtitle: 'Lo último del mundo del cine',
     episodeBingeSummary: '{{show}} · {{countLabel}}',
     profileCoverEdit: 'Imagen de portada',
     profileCoverEditHint: 'Sube una foto de portada o elige un póster de tu biblioteca como fondo.',

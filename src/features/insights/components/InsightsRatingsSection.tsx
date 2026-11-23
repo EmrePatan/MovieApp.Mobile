@@ -8,6 +8,7 @@ import { formatAverageStarRating } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsRatingsSectionProps {
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
     height: 80,
     justifyContent: 'flex-end',
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     overflow: 'hidden',
   },
   distributionFill: {

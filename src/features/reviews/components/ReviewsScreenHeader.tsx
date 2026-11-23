@@ -9,6 +9,7 @@ import { AppText } from '@/components/common/AppText';
 import { PosterImage } from '@/components/common/PosterImage';
 import { formatCommunityStarRatingDisplay } from '@/features/ratings/utils/star-rating';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     width: POSTER_WIDTH,
     height: POSTER_HEIGHT,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   titleMeta: {
     flex: 1,

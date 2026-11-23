@@ -1,21 +1,22 @@
 import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 
 /**
  * Shared premium dark bottom-sheet tokens.
  * Sheet-scoped — do not fold into global theme colors.
  */
 export const premiumSheet = {
-  background: '#0C0C0F',
-  elevated: '#141419',
-  secondary: '#111115',
-  border: '#29272D',
-  rowBorder: '#28262C',
+  background: 'rgba(14, 14, 20, 0.9)',
+  elevated: 'rgba(255, 255, 255, 0.1)',
+  secondary: 'rgba(255, 255, 255, 0.06)',
+  border: 'rgba(255, 255, 255, 0.14)',
+  rowBorder: 'rgba(255, 255, 255, 0.12)',
   textPrimary: '#F5F2ED',
   textSecondary: '#92909A',
   mutedGold: '#D2A451',
-  goldBorder: '#B98B43',
-  handle: '#7A7884',
+  goldBorder: 'rgba(236, 210, 150, 0.5)',
+  handle: 'rgba(255, 255, 255, 0.4)',
   iconSurface: '#0A0A0D',
   cornerRadius: 30,
   handleWidth: 64,
@@ -36,12 +37,17 @@ export const premiumSheetChrome = StyleSheet.create({
     flex: 1,
   },
   sheet: {
-    backgroundColor: premiumSheet.background,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
     borderTopLeftRadius: premiumSheet.cornerRadius,
     borderTopRightRadius: premiumSheet.cornerRadius,
     paddingHorizontal: premiumSheet.contentPaddingH,
     paddingTop: premiumSheet.contentPaddingTop,
     paddingBottom: premiumSheet.contentPaddingBottom,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.border,
   },
   handle: {
     alignSelf: 'center',

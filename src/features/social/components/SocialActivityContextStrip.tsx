@@ -8,6 +8,8 @@ import { backendScoreToStarRating } from '@/features/ratings/utils/star-rating';
 import { shouldShowOriginalTitle } from '@/utils/format';
 import type { SocialFeedItem } from '../types';
 import { socialContentTypeLabel } from '../utils/social-feed-embed';
+import { authTypography } from '@/features/auth/auth-typography';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { socialFeedTheme } from './social-feed-theme';
 import { socialUi } from './social-ui-tokens';
@@ -84,10 +86,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingLeft: spacing.sm,
     paddingRight: spacing.xs,
-    borderRadius: borderRadius.md,
-    backgroundColor: socialFeedTheme.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: socialFeedTheme.border,
+    borderRadius: borderRadius.lg,
+    backgroundColor: glass.panel,
+    borderWidth: 1,
+    borderColor: glass.hairline,
     overflow: 'hidden',
   },
   poster: {
@@ -105,9 +107,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 15,
-    lineHeight: 19,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 16,
+    lineHeight: 21,
     color: socialFeedTheme.textPrimary,
   },
   original: {

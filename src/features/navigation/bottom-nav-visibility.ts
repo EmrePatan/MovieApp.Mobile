@@ -36,6 +36,11 @@ export function resolveBottomNavVisibility(segments: readonly string[]): BottomN
     return 'hide';
   }
 
+  // An open conversation owns the bottom edge for its composer.
+  if (segments.includes('messages') && leafRoute === '[conversationId]') {
+    return 'hide';
+  }
+
   if (segments.includes('(tabs)')) {
     return 'show';
   }

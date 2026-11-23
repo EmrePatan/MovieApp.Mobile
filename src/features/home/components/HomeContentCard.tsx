@@ -20,6 +20,7 @@ import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import type { ImageSize } from '@/utils/image-url';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 interface HomeContentCardProps {
   item: HomeItem;
@@ -65,7 +66,7 @@ export const HomeContentCard = memo(function HomeContentCard({
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={POSTER_CARD_ROLE}
       accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(item)}
       onLongPress={onLongPress}

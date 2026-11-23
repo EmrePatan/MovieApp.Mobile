@@ -22,7 +22,9 @@ import {
 import { LibraryStatusIndicator } from './LibraryStatusIndicator';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 interface LibraryGridCardProps {
   item: LibraryItem;
@@ -128,7 +130,7 @@ export const LibraryGridCard = memo(function LibraryGridCard({
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={POSTER_CARD_ROLE}
       accessibilityLabel={accessibilityLabel}
       accessibilityActions={onRemove ? [{ name: 'remove', label: removeActionLabel }] : undefined}
       onAccessibilityAction={onRemove ? handleAccessibilityAction : undefined}
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   watchingDetail: {
     lineHeight: 14,

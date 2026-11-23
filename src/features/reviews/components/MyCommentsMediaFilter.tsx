@@ -5,6 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '@/features/library/types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 const FILTER_VALUES: CatalogMediaFilter[] = ['all', 'movie', 'tv'];
 
@@ -57,9 +58,12 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'stretch',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    backgroundColor: colors.background,
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
   },
   tab: {
     flex: 1,
@@ -67,12 +71,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    marginBottom: -StyleSheet.hairlineWidth,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   tabSelected: {
-    borderBottomColor: colors.textPrimary,
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
   },
   label: {
     color: colors.textMuted,

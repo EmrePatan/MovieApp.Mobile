@@ -6,6 +6,7 @@ import type { InsightsV3Records } from '../types';
 import { formatAverageStarRating, formatWeekdayName } from '../utils/insights-format';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsRecordsSectionProps {
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     width: '48%',
     minWidth: 148,
     flexGrow: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     gap: spacing.sm,
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   funFactText: {
     flex: 1,

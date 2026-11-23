@@ -4,6 +4,7 @@ import { formatNotificationRelativeTime } from '@/features/notifications/utils/f
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import type { DirectMessageItem } from '../types';
+import { glass } from '@/theme/glass';
 
 interface DirectMessageBubbleProps {
   message: DirectMessageItem;
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
   },
   bubbleTheirs: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderBottomLeftRadius: 6,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,

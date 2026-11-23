@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { EXTERNAL_RATING_CARD_LAYOUT } from '../config/external-rating-card-visuals';
 import { resolveRottenTomatoesCardIcons } from '../config/external-rating-provider-brand-config';
 import type {
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
     minHeight: layout.minHeight,
     paddingHorizontal: layout.paddingHorizontal,
     paddingVertical: layout.paddingVertical,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     gap: layout.brandScoreGap,
   },
   brandSlot: {

@@ -6,6 +6,7 @@ import { AppText } from '@/components/common/AppText';
 import { WatchlistCoverCollage } from '@/features/watchlists/components/WatchlistCoverCollage';
 import type { WatchlistSummaryResponse } from '@/features/watchlists/types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -71,8 +72,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
     gap: spacing.sm,
   },
   pressed: {

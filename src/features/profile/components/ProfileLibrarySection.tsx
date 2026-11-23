@@ -9,7 +9,7 @@ import {
   formatWatchlistSubtitle,
 } from '../utils/library-copy';
 import { ProfileSectionHeader } from './ProfileSectionHeader';
-import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ProfileLibrarySectionProps {
@@ -50,10 +50,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     overflow: 'hidden',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,

@@ -21,6 +21,7 @@ import {
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface FollowPreferencesModalProps {
   visible: boolean;
@@ -191,6 +192,7 @@ function FollowPreferencesSheet({
       <View style={premiumSheetChrome.overlay}>
         <SafeAreaView style={styles.sheetContainer}>
           <View style={styles.sheet}>
+            <GlassSheetLayer />
             <View style={premiumSheetChrome.handle} />
             <View style={styles.hero}>
               <View style={styles.iconBadge}>

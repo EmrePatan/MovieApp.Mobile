@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { translateLibraryCategory } from '@/i18n/catalog-labels';
 import type { LibraryCategory } from '../types/library';
+import { glass } from '@/theme/glass';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
@@ -57,21 +58,22 @@ export function LibraryCategoryControl({ value, onChange }: LibraryCategoryContr
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: premiumSheet.border,
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: spacing.xs,
   },
   chip: {
-    minHeight: 44,
+    minHeight: 36,
     justifyContent: 'center',
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    marginBottom: -StyleSheet.hairlineWidth,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
   },
   chipSelected: {
-    borderBottomColor: premiumSheet.goldBorder,
+    borderColor: glass.accentBorder,
+    backgroundColor: glass.accentFill,
   },
   label: {
     color: premiumSheet.textSecondary,

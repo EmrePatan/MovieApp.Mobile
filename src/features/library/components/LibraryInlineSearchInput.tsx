@@ -3,6 +3,7 @@ import { Pressable, TextInput, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { interaction } from '@/theme/interaction';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -89,12 +90,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    minHeight: 40,
+    minHeight: 44,
     paddingHorizontal: spacing.md,
-    borderRadius: 12,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    borderRadius: 999,
+    backgroundColor: glass.panelInput,
+    borderWidth: 1,
+    borderColor: glass.hairline,
   },
   input: {
     flex: 1,

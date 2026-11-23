@@ -333,6 +333,7 @@ export const stage2Tr = {
     },
     header: {
       back: 'Geri',
+      title: 'Ara',
     },
     filter: {
       all: 'Tümü',
@@ -707,7 +708,7 @@ export const stage2Tr = {
     title: 'Yakında',
     tabs: {
       forYou: 'Sana Özel',
-      upcoming: 'Tümü',
+      upcoming: 'Katalog',
     },
     subtitleForYouAuth: 'Yaklaşan yayınları veya bölümleri olan takip ettiğin film ve diziler',
     subtitleForYouGuest: 'Takip ettiğin yaklaşan yayınları görmek için giriş yap',
@@ -872,6 +873,7 @@ export const stage2Tr = {
       createWatchlist: 'İzleme listesi oluştur',
       selectNamed: '{{name}} seç',
       yourWatchlists: 'İzleme Listelerin',
+      selectedList: 'Seçili liste',
     },
   },
   details: {

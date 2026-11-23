@@ -17,6 +17,7 @@ import type { GalleryFilter, GalleryImage, GalleryResponse } from '@/features/ga
 import { getMovieTvGalleryImages } from '@/features/gallery/utils/gallery-images';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface SocialCatalogImagePickerSheetProps {
   visible: boolean;
@@ -55,6 +56,7 @@ export function SocialCatalogImagePickerSheet({
       <View style={premiumSheetChrome.overlay}>
         <Pressable style={premiumSheetChrome.backdrop} onPress={onClose} accessibilityRole="button" />
         <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, premiumSheet.contentPaddingBottom) }]}>
+          <GlassSheetLayer />
           <View style={premiumSheetChrome.handle} />
           <View style={styles.header}>
             <AppText variant="subtitle" style={styles.headerTitle}>{t('social.pickPhoto')}</AppText>

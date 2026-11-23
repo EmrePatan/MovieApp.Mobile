@@ -8,6 +8,7 @@ import { CatalogImage } from '@/features/details/shared/components/CatalogImage'
 import { buildCollectionDetailRoute } from '@/features/details/shared/routes';
 import type { CollectionSummary } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
     minHeight: layout.touchTarget,

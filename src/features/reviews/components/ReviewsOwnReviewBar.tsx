@@ -13,6 +13,7 @@ import {
 } from '../utils/review-content-length';
 import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
     borderLeftWidth: 3,

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { SocialFollowStatus } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface SocialProfileActionRowProps {
@@ -115,17 +116,18 @@ const styles = StyleSheet.create({
   },
   pill: {
     minHeight: 36,
-    minWidth: 96,
+    minWidth: 0,
+    flexShrink: 1,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pillPrimary: {
-    backgroundColor: colors.textPrimary,
+    backgroundColor: colors.accentStrong,
   },
   pillMuted: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },

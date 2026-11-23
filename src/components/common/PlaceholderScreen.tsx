@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface PlaceholderScreenProps {
@@ -43,10 +43,10 @@ const styles = StyleSheet.create({
   description: {
     marginTop: spacing.md,
     maxWidth: 320,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     padding: spacing.lg,
   },
 });

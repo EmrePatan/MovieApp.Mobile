@@ -5,6 +5,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface PersonalRatingUnwatchConfirmSheetProps {
   visible: boolean;
@@ -32,6 +33,7 @@ export function PersonalRatingUnwatchConfirmSheet({
             onPress={onCancel}
           />
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <GlassSheetLayer />
             <View style={premiumSheetChrome.handle} />
             <AppText variant="subtitle" style={styles.title}>
               {t('ratings.unwatchConfirm.title')}

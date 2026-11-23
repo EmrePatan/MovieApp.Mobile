@@ -72,6 +72,10 @@ jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(() => ({ isAuthenticated: true, user: { id: 'user-1' }, logout: jest.fn() })),
 }));
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), navigate: jest.fn() }),
   useFocusEffect: jest.fn(),

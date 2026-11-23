@@ -22,8 +22,10 @@ import { formatRating } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
 import type { LibraryRemoveIcon } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 const SWIPE_REMOVE_ACTION_SIZE = 40;
 
@@ -146,7 +148,7 @@ export const LibraryContentCard = memo(function LibraryContentCard({
   const cardContent = (
     <>
       <Pressable
-        accessibilityRole="button"
+        accessibilityRole={POSTER_CARD_ROLE}
         accessibilityLabel={accessibilityLabel}
         accessibilityActions={
           usesSwipeRemove || onRemove
@@ -279,7 +281,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   typeBadge: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
@@ -301,7 +303,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   removePressed: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   swipeRemoveAction: {
     width: SWIPE_REMOVE_ACTION_SIZE,

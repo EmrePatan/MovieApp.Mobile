@@ -10,6 +10,7 @@ import { InsightsDonutRing } from './InsightsDonutRing';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsTimeInStoriesSectionProps {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.xl,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   donutWrap: {
     alignItems: 'center',
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   breakdownValue: {
     color: colors.accentStrong,

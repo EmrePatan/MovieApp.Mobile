@@ -49,6 +49,7 @@ import { scrollFlatListToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<HomeSectionModel>);
 
@@ -299,9 +300,13 @@ export default function HomeScreen() {
 
   const topChrome = useMemo(() => <HomeTopChrome />, []);
 
+  const tabBarInset = useTabBarOverlayInset();
   const listContentStyle = useMemo(
-    () => (sections.length === 0 && !showColdWelcome ? styles.emptyContent : styles.content),
-    [sections.length, showColdWelcome],
+    () => [
+      sections.length === 0 && !showColdWelcome ? styles.emptyContent : styles.content,
+      { paddingBottom: spacing.xl + tabBarInset },
+    ],
+    [sections.length, showColdWelcome, tabBarInset],
   );
 
   const isRefreshing = isManualRefreshing;

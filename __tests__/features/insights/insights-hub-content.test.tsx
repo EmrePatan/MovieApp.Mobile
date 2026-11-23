@@ -7,6 +7,10 @@ import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 const mockPush = jest.fn();
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));

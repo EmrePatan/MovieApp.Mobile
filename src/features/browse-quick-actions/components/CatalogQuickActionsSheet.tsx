@@ -20,6 +20,7 @@ import {
 import { interaction } from '@/theme/interaction';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import type { BrowseQuickActionsTarget } from '../types';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 const sheet = premiumSheet;
 
@@ -72,6 +73,7 @@ export function CatalogQuickActionsSheet({
             onPress={onClose}
           />
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <GlassSheetLayer />
             <View style={styles.handle} />
 
             <ScrollView
@@ -224,7 +226,9 @@ export function CatalogQuickActionsSheet({
 const styles = StyleSheet.create({
   overlay: premiumSheetChrome.overlay,
   backdrop: premiumSheetChrome.backdrop,
-  sheet: premiumSheetChrome.sheet,
+  sheet: {
+    ...premiumSheetChrome.sheet,
+  },
   handle: premiumSheetChrome.handle,
   body: {
     paddingTop: 18,

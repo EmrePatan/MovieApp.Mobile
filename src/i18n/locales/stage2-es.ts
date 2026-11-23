@@ -333,6 +333,7 @@ export const stage2Es = {
     },
     header: {
       back: 'Atrás',
+      title: 'Buscar',
     },
     filter: {
       all: 'Todo',
@@ -872,6 +873,7 @@ export const stage2Es = {
       createWatchlist: 'Crear lista de seguimiento',
       selectNamed: 'Seleccionar {{name}}',
       yourWatchlists: 'Tus listas de seguimiento',
+      selectedList: 'Lista seleccionada',
     },
   },
   details: {

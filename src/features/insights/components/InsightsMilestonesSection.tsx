@@ -11,6 +11,7 @@ import {
 } from '../utils/insights-format';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsMilestonesSectionProps {
@@ -105,8 +106,8 @@ function AchievementBadge({ achievement }: { achievement: InsightsAchievement })
         <LinearGradient
           colors={
             achievement.achieved
-              ? [colors.accentTint18, colors.surfaceElevated, colors.surface]
-              : [colors.surfaceElevated, colors.surface]
+              ? [colors.accentTint18, glass.panelElevated, glass.panel]
+              : [glass.panelElevated, glass.panel]
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

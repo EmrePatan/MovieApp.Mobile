@@ -7,7 +7,9 @@ import { backendScoreToStarRating } from '@/features/ratings/utils/star-rating';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { SOCIAL_TWITTER_AVATAR, socialFeedSpacing, socialUi } from './social-ui-tokens';
 import { socialFeedPremiumStyles } from './social-feed-premium-styles';
+import { authTypography } from '@/features/auth/auth-typography';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 
@@ -182,7 +184,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: socialFeedSpacing.rowPaddingVertical,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: glass.hairline,
   },
   row: {
     flexDirection: 'row',
@@ -225,11 +227,17 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
     maxWidth: '100%',
+    backgroundColor: glass.panel,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   cardText: {
     flex: 1,
@@ -237,7 +245,7 @@ const styles = StyleSheet.create({
     paddingVertical: socialFeedSpacing.blockGap,
     justifyContent: 'center',
     gap: 2,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panelElevated,
   },
   kickerRow: {
     flexDirection: 'row',
@@ -249,7 +257,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   cardTitle: {
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
     color: colors.textPrimary,
     fontSize: 17,
     lineHeight: 22,

@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { SearchBar } from './SearchBar';
+import { authTypography } from '@/features/auth/auth-typography';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
@@ -30,6 +32,7 @@ export function SearchScreenHeader({
   autoFocus = false,
   children,
 }: SearchScreenHeaderProps) {
+  useAuthFonts();
   const { t } = useTranslation();
 
   return (
@@ -46,8 +49,8 @@ export function SearchScreenHeader({
             <AppText variant="body">{t('search.header.back')}</AppText>
           </Pressable>
         ) : (
-          <AppText variant="bodySmall" muted style={styles.eyebrow} accessibilityRole="header">
-            Search
+          <AppText style={styles.title} accessibilityRole="header">
+            {t('search.header.title')}
           </AppText>
         )}
       </View>
@@ -86,10 +89,11 @@ const styles = StyleSheet.create({
     paddingRight: spacing.md,
     marginLeft: -spacing.sm,
   },
-  eyebrow: {
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-    fontWeight: '600',
+  title: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.4,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

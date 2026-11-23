@@ -5,6 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { CastMember } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 interface CastRailItemProps {
@@ -61,14 +62,14 @@ const styles = StyleSheet.create({
   },
   portrait: {
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   name: {
     color: colors.textPrimary,

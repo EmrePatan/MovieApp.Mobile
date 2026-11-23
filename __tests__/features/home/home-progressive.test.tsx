@@ -21,6 +21,10 @@ jest.mock('@/features/home/hooks/useHomeFeed', () => ({
   useHomeFeed: jest.fn(),
 }));
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
   useFocusEffect: jest.fn(),

@@ -6,6 +6,7 @@ import { AppText } from '@/components/common/AppText';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { PosterImage } from '@/components/common/PosterImage';
+import { DetailAmbientGlow } from './DetailAmbientGlow';
 import { DetailHeroPosterFrame } from './DetailHeroPosterFrame';
 import { DetailMetadataRow } from './DetailMetadataRow';
 import { DetailHeroMedia } from './DetailHeroMedia';
@@ -117,6 +118,7 @@ export const DetailHero = memo(function DetailHero({
 
   return (
     <View>
+      <DetailAmbientGlow path={posterPath ?? backdropPath} top={Math.round(heroHeight * 0.45)} />
       <DetailHeroMedia
         key={trailer?.contentId ?? 'detail-hero-media'}
         heroImagePath={heroImagePath}

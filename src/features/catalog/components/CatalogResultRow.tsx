@@ -14,7 +14,9 @@ import { formatCatalogYear, formatContentType, formatRating } from '@/utils/form
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 export interface CatalogResultRowProps {
   contentId?: string;
@@ -92,7 +94,7 @@ export const CatalogResultRow = memo(function CatalogResultRow({
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={POSTER_CARD_ROLE}
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       onLongPress={onLongPress}
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: interaction.pressedOpacity,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   body: {
     flex: 1,

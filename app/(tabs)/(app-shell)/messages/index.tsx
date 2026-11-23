@@ -15,6 +15,7 @@ import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infin
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 export default function MessagesInboxScreen() {
   const router = useRouter();
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
   },

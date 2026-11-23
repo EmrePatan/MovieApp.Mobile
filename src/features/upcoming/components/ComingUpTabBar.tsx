@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { ComingUpTab } from '../navigation/coming-up-navigation';
+import { glass } from '@/theme/glass';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -30,7 +31,7 @@ export function ComingUpTabBar({ activeTab, onTabChange }: ComingUpTabBarProps) 
             accessibilityState={{ selected }}
             accessibilityLabel={label}
             onPress={() => onTabChange(tabId)}
-            style={styles.tabButton}
+            style={[styles.tabButton, selected && styles.tabButtonSelected]}
           >
             <AppText
               variant="body"
@@ -38,7 +39,6 @@ export function ComingUpTabBar({ activeTab, onTabChange }: ComingUpTabBarProps) 
             >
               {label}
             </AppText>
-            {selected ? <View style={styles.indicator} /> : <View style={styles.indicatorSpacer} />}
           </Pressable>
         );
       })}
@@ -49,14 +49,28 @@ export function ComingUpTabBar({ activeTab, onTabChange }: ComingUpTabBarProps) 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: spacing.lg,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.sm,
+    gap: spacing.xs,
+    padding: spacing.xs,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    marginTop: spacing.sm,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
   },
   tabButton: {
-    minHeight: layout.touchTarget,
+    flex: 1,
+    minHeight: 40,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  tabButtonSelected: {
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
   },
   tabLabel: {
     color: premiumSheet.textSecondary,
@@ -65,16 +79,5 @@ const styles = StyleSheet.create({
   tabLabelSelected: {
     color: premiumSheet.textPrimary,
     fontWeight: '600',
-  },
-  indicator: {
-    marginTop: spacing.sm,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: premiumSheet.mutedGold,
-  },
-
-  indicatorSpacer: {
-    marginTop: spacing.sm,
-    height: 2,
   },
 });

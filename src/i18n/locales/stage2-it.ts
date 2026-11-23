@@ -333,6 +333,7 @@ export const stage2It = {
     },
     header: {
       back: 'Indietro',
+      title: 'Cerca',
     },
     filter: {
       all: 'Tutto',
@@ -872,6 +873,7 @@ export const stage2It = {
       createWatchlist: 'Crea lista da vedere',
       selectNamed: 'Seleziona {{name}}',
       yourWatchlists: 'Le tue liste da vedere',
+      selectedList: 'Elenco selezionato',
     },
   },
   details: {

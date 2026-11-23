@@ -20,6 +20,7 @@ import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useCreateWatchlistForLibrary } from '../hooks/useWatchlistMutations';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface CreateWatchlistModalProps {
   visible: boolean;
@@ -104,6 +105,7 @@ export function CreateWatchlistModal({
           style={styles.keyboardAvoid}
         >
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <GlassSheetLayer />
             <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>
               <AppText variant="subtitle" style={styles.headerTitle}>{t('watchlists.createModal.title')}</AppText>

@@ -7,6 +7,7 @@ import type { SearchReturnOrigin } from '../search-navigation';
 import { openSearch } from '../search-navigation';
 import { HOME_HEADER_COMPACT_TARGET } from '@/features/home/components/home-header-styles';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -113,16 +114,16 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
   },
   entryDiscover: {
     marginHorizontal: 0,
     minHeight: 50,
     paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
+    borderRadius: borderRadius.full,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
   },
   placeholder: {
     flex: 1,

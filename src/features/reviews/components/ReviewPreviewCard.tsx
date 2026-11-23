@@ -16,13 +16,14 @@ import {
 import { ReviewStarRow } from './ReviewStarRow';
 import { ReviewRichBody } from './ReviewRichBody';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
 const AVATAR_SIZE = 32;
 
 /** Detail rail cards: soft lift on page background, no shadows or section chrome. */
-const PREVIEW_CARD_SURFACE = colors.surfaceElevated;
+const PREVIEW_CARD_SURFACE = glass.panelElevated;
 const PREVIEW_CARD_BORDER = colors.borderSubtle;
 
 interface ReviewPreviewCardProps {

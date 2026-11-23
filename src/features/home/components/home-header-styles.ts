@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { HOME_HEADER_BAR_HEIGHT } from '../utils/home-header-layout';
@@ -33,7 +34,7 @@ export const homeHeaderStyles = StyleSheet.create({
   },
   /** Social feed: chrome secondary — no gold outline (gold stays on content). */
   headerBarQuiet: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderColor: colors.borderSubtle,
   },
   headerBarOverlay: {

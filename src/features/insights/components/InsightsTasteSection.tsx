@@ -9,6 +9,7 @@ import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsTasteSectionProps {
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.sm,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   risingIcon: {
     width: 28,

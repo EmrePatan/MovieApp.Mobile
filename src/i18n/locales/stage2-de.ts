@@ -333,6 +333,7 @@ export const stage2De = {
     },
     header: {
       back: 'Zurück',
+      title: 'Suche',
     },
     filter: {
       all: 'Alle',
@@ -872,6 +873,7 @@ export const stage2De = {
       createWatchlist: 'Merkliste erstellen',
       selectNamed: '{{name}} auswählen',
       yourWatchlists: 'Deine Merklisten',
+      selectedList: 'Ausgewählte Liste',
     },
   },
   details: {

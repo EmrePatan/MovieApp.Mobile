@@ -12,6 +12,10 @@ const mockRefetch = jest.fn();
 const mockInvalidateQueries = jest.fn();
 const mockPrefetchQuery = jest.fn();
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: mockPush,

@@ -285,7 +285,7 @@ function CommunityZeroSegment({ onPress }: { onPress?: () => void }) {
       <Ionicons
         name="star"
         size={DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.communityStarSize}
-        color={colors.accentStrong}
+        color={colors.textMuted}
         accessibilityElementsHidden
         importantForAccessibility="no"
       />

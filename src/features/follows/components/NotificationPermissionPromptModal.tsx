@@ -5,6 +5,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface NotificationPermissionPromptModalProps {
   visible: boolean;
@@ -28,6 +29,7 @@ export function NotificationPermissionPromptModal({
       <View style={premiumSheetChrome.overlay}>
         <Pressable style={premiumSheetChrome.backdrop} onPress={onDismiss} accessibilityRole="button" />
         <SafeAreaView edges={['bottom']} style={styles.sheet}>
+          <GlassSheetLayer />
           <View style={premiumSheetChrome.handle} />
           <AppText variant="title" style={premiumSheetChrome.title}>
             {t('details.notificationsPermission.title')}

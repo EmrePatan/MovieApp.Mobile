@@ -6,3 +6,4 @@ export { layout } from './layout';
 export { interaction } from './interaction';
 export { shadows, overlay } from './shadows';
 export { radii } from './radii';
+export { glass } from './glass';

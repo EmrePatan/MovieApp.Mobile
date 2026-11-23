@@ -7,7 +7,6 @@ import type { SocialFeedItem } from '../types';
 import { socialActivityFeedVerbI18nKey } from '../utils/social-activity-feed-verb';
 import { SocialCinemaSpotlight } from './SocialCinemaSpotlight';
 import { SocialSpotlightContent } from './SocialSpotlightContent';
-import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 

@@ -4,6 +4,7 @@ import type { ProfileSocialLinks } from '../types';
 import { filledSocialLinks } from '../utils/profile-social-links';
 import { ProfileSocialPlatformIcon } from './ProfileSocialPlatformIcon';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 interface ProfileSocialLinksRowProps {
@@ -29,13 +30,13 @@ export function ProfileSocialLinksRow({
             key={platform}
             accessibilityRole="link"
             accessibilityLabel={`${label}: ${value}`}
-            hitSlop={8}
+            hitSlop={4}
             onPress={() => {
               void Linking.openURL(url);
             }}
             style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
           >
-            <ProfileSocialPlatformIcon platform={platform} size={18} color={color} />
+            <ProfileSocialPlatformIcon platform={platform} size={16} color={color} />
           </Pressable>
         );
       })}
@@ -51,10 +52,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   iconHit: {
-    minWidth: 24,
-    minHeight: 24,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: glass.panelElevated,
+    borderWidth: 1,
+    borderColor: glass.hairline,
   },
   pressed: {
     opacity: 0.65,

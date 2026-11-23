@@ -7,6 +7,10 @@ import { trackProductMetric } from '@/features/metrics/track-product-metric';
 const mockPush = jest.fn();
 const mockOpenCatalogDetailFromTab = jest.fn();
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));

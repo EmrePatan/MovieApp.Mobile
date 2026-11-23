@@ -6,6 +6,7 @@ import { formatDecadeLabel } from '../utils/insights-format';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsErasSectionProps {
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     height: 88,
     justifyContent: 'flex-end',
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     overflow: 'hidden',
   },
   timelineFill: {

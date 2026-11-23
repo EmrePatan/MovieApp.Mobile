@@ -13,6 +13,7 @@ import { isContentInAnyWatchlist } from '../utils/watchlist-membership';
 import { WatchlistPickerModal } from './WatchlistPickerModal';
 import type { WatchlistContentType } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -110,7 +111,7 @@ export function AddToWatchlistButton({
             borderRadius={borderRadius.md}
             variant={active ? 'gold' : 'neutral'}
             glow={active}
-            surfaceColor={active ? colors.accentTint12 : colors.surfaceElevated}
+            surfaceColor={active ? colors.accentTint12 : glass.panelElevated}
           >
             {isBusy ? (
               <ActivityIndicator color={colors.accent} size="small" />

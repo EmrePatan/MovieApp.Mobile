@@ -20,6 +20,7 @@ import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRenameWatchlistMutation } from '../hooks/useWatchlistMutations';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface RenameWatchlistModalProps {
   visible: boolean;
@@ -128,6 +129,7 @@ export function RenameWatchlistModal({
           style={styles.keyboardAvoid}
         >
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <GlassSheetLayer />
             <View style={premiumSheetChrome.handle} />
             <View style={styles.header}>
               <AppText variant="subtitle" style={styles.headerTitle}>{t('watchlists.renameModal.title')}</AppText>

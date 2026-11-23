@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -60,9 +60,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: layout.screenPaddingHorizontal,
     marginBottom: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(196, 163, 90, 0.14)',
-    backgroundColor: colors.background,
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.border,
+    backgroundColor: glass.fill,
   },
   tab: {
     flex: 1,
@@ -70,11 +73,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 40,
     paddingHorizontal: spacing.sm,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: premiumSheet.goldBorder,
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
   },
   label: {
     fontSize: 14,

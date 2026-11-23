@@ -14,6 +14,7 @@ import { SOCIAL_TWITTER_AVATAR, socialFeedSpacing, socialUi } from './social-ui-
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+import { glass } from '@/theme/glass';
 
 const POSTER_W = 44;
 const POSTER_H = 66;
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: socialFeedSpacing.rowPaddingVertical,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: glass.hairline,
   },
   row: {
     flexDirection: 'row',

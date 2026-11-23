@@ -14,8 +14,10 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import type { WatchlistSummaryResponse } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface WatchlistSelectorProps {
   watchlists: WatchlistSummaryResponse[];
@@ -65,7 +67,7 @@ export function WatchlistSelector({
         >
           <View style={styles.selectorMeta}>
             <AppText variant="caption" muted>
-              Selected list
+              {t('watchlists.selector.selectedList')}
             </AppText>
             <AppText variant="body">
               {selectedWatchlist?.name ?? t('common.chooseWatchlist')}
@@ -86,6 +88,7 @@ export function WatchlistSelector({
       <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setVisible(false)}>
         <View style={premiumSheetChrome.overlay}>
           <SafeAreaView style={styles.sheet} edges={['bottom']}>
+            <GlassSheetLayer />
             <View style={premiumSheetChrome.handle} />
             <View style={styles.sheetHeader}>
               <AppText variant="subtitle" style={styles.sheetTitle}>{t('watchlists.selector.yourWatchlists')}</AppText>
@@ -182,8 +185,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelElevated,
   },
   selectorMeta: {
     flex: 1,
@@ -194,8 +197,8 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },

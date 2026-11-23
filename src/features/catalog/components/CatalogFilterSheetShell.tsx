@@ -6,6 +6,7 @@ import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 export type CatalogFilterSheetHeaderAction = 'close' | 'back';
 
@@ -57,6 +58,7 @@ export function CatalogFilterSheetShell({
           edges={['bottom']}
           testID={testID}
         >
+            <GlassSheetLayer />
           <View style={premiumSheetChrome.handle} />
           <View style={styles.header}>
             <Pressable

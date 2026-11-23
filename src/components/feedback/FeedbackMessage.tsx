@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 export type FeedbackTone = 'success' | 'error' | 'info';
 
@@ -66,9 +67,9 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   info: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
   },
   text: {
     flex: 1,

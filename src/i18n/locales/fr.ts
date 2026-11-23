@@ -26,7 +26,7 @@ const stage1Fr = {
     emptyFollowing: 'Rien de la part des personnes que tu suis pour l’instant. Trouve quelqu’un à suivre.',
     emptyDiscover: 'Rien à découvrir pour le moment. Reviens bientôt.',
     feedTabs: {
-      forYou: 'Explorer',
+      forYou: 'Tous',
       following: 'Abonnements',
       explore: 'Explorer',
       discover: 'Explorer',
@@ -127,6 +127,7 @@ const stage1Fr = {
     storiesSelfShort: 'Toi',
     storiesFindPeople: 'Trouver des personnes à suivre',
     findPeople: 'Trouver des personnes',
+    feedSubtitle: 'Les dernières nouvelles du cinéma',
     episodeBingeSummary: '{{show}} · {{countLabel}}',
     profileCoverEdit: 'Image de couverture',
     profileCoverEditHint: 'Importe une photo de couverture ou choisis une affiche de ta bibliothèque comme fond.',
