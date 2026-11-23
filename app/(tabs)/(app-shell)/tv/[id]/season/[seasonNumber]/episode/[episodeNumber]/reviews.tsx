@@ -39,6 +39,7 @@ export default function EpisodeReviewsScreen() {
   return (
     <DetailQueryState
       query={query}
+      contentLayout="list"
       invalidParamsMessage={invalidParamsMessage}
       notFoundTitle={t('details.queryState.invalidRequestTitle')}
       notFoundMessage={t('details.queryState.invalidRequestMessage')}

@@ -13,6 +13,7 @@ export default function SocialProfileUserLayout() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="reviews" />
+      <Stack.Screen name="watchlist/[watchlistId]" />
     </Stack>
   );
 }
