@@ -105,7 +105,7 @@ export function SocialProfileHeader({
 
   const memberSinceLabel = useMemo(() => {
     const date = new Date(profile.createdAt).toLocaleDateString(i18n.language, {
-      month: 'short',
+      month: 'long',
       year: 'numeric',
     });
     return { date, full: t('profile.memberSince', { date }) };

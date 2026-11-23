@@ -65,7 +65,7 @@ export function OwnProfileTabHeader() {
     const createdAt = profile?.createdAt ?? currentProfile.data?.createdAt;
     if (!createdAt) return null;
     const date = new Date(createdAt).toLocaleDateString(i18n.language, {
-      month: 'short',
+      month: 'long',
       year: 'numeric',
     });
     return { date, full: t('profile.memberSince', { date }) };

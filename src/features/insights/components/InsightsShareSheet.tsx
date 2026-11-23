@@ -18,11 +18,36 @@ import { spacing } from '@/theme/spacing';
 import type { InsightsV3Response } from '../types';
 import {
   formatAverageStarRating,
-  formatMonthName,
+  formatDecadeLabel,
+  formatMonthLongName,
   formatMovieDnaDisplayTitle,
   formatWatchTimeBreakdown,
   formatWeekdayName,
 } from '../utils/insights-format';
+
+/**
+ * Font size that keeps `text` on one line in a box that fits `maxChars` characters at `base` size.
+ * adjustsFontSizeToFit is ignored on web and by the screenshot path, so the size is computed.
+ */
+function fitFont(text: string, base: number, maxChars: number, minScale = 0.6, spaced = false) {
+  const scale = Math.max(minScale, Math.min(1, maxChars / Math.max(1, text.length)));
+  const fontSize = Math.round(base * scale * 10) / 10;
+  // Uppercase labels carry letter spacing; shrink it with the font so it cannot push the text out.
+  return spaced ? { fontSize, letterSpacing: Math.min(1, fontSize / 10) } : { fontSize };
+}
+
+function MiniStat({ value, label }: { value: string; label: string }) {
+  return (
+    <View style={styles.mini}>
+      <AppText style={[styles.miniValue, fitFont(value, 17, 7, 0.5)]} numberOfLines={1}>
+        {value}
+      </AppText>
+      <AppText variant="caption" style={[styles.statLabel, fitFont(label, 10, 11, 0.5, true)]} numberOfLines={1}>
+        {label}
+      </AppText>
+    </View>
+  );
+}
 
 interface InsightsShareSheetProps {
   visible: boolean;
@@ -49,6 +74,7 @@ export function InsightsShareSheet({
   const { t } = useTranslation();
   const cardRef = useRef<View>(null);
   const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
 
   const dnaTitle = formatMovieDnaDisplayTitle(insights.movieDna);
   const duration = formatWatchTimeBreakdown(insights.timeInStories.totalMinutes);
@@ -74,6 +100,32 @@ export function InsightsShareSheet({
     }));
   }, [insights.yourYear.months]);
 
+  // Second stat row: era, streak and movie/series split — each only when the data exists.
+  const extraStats = useMemo(() => {
+    const stats: { key: string; value: string; label: string }[] = [];
+    const decade = insights.yourEra.favoriteDecade;
+    if (decade) {
+      stats.push({ key: 'era', value: formatDecadeLabel(decade), label: t('insights.share.favoriteEra') });
+    }
+    const streak = insights.yourRecords.longestStreakDays;
+    if (streak != null && streak > 0) {
+      stats.push({
+        key: 'streak',
+        value: t('insights.share.streakDays', { days: streak }),
+        label: t('insights.share.longestStreak'),
+      });
+    }
+    const mix = insights.movieDna.watchingMix;
+    if (mix.movieTitleCount + mix.seriesTitleCount > 0) {
+      stats.push({
+        key: 'mix',
+        value: `${Math.round(mix.movieSharePercent)}/${Math.round(mix.seriesSharePercent)}`,
+        label: t('insights.share.mixLabel'),
+      });
+    }
+    return stats;
+  }, [insights.movieDna.watchingMix, insights.yourEra.favoriteDecade, insights.yourRecords.longestStreakDays, t]);
+
   const shareText = useCallback(async () => {
     await Share.share({ message: t('insights.hub.shareMessage', { dna: dnaTitle, duration }) });
   }, [dnaTitle, duration, t]);
@@ -83,6 +135,7 @@ export function InsightsShareSheet({
       return;
     }
     setBusy(true);
+    setFailure(null);
     try {
       // Optional native modules: absent in a dev client built before they were added.
       /* eslint-disable @typescript-eslint/no-require-imports */
@@ -95,7 +148,13 @@ export function InsightsShareSheet({
         return;
       }
       await shareText();
-    } catch {
+    } catch (error) {
+      if (__DEV__) {
+        console.warn('Insights share image failed, falling back to text', error);
+      }
+      // Say why the image failed instead of silently degrading to text.
+      const reason = error instanceof Error ? error.message : String(error);
+      setFailure(t('extras.shareImageFailed', { reason: reason.slice(0, 140) }));
       try {
         await shareText();
       } catch {
@@ -104,7 +163,7 @@ export function InsightsShareSheet({
     } finally {
       setBusy(false);
     }
-  }, [busy, shareText]);
+  }, [busy, shareText, t]);
 
   return (
     <AppBottomSheet
@@ -135,7 +194,7 @@ export function InsightsShareSheet({
               </AppText>
               <View style={styles.levelTag}>
                 <LevelSeal level={level.level} size={22} />
-                <AppText variant="caption" style={styles.levelName} numberOfLines={1}>
+                <AppText variant="caption" style={styles.levelName} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                   {levelName(level.level)}
                 </AppText>
               </View>
@@ -181,7 +240,11 @@ export function InsightsShareSheet({
                 <AppText style={styles.statValue} numberOfLines={2}>
                   {duration}
                 </AppText>
-                <AppText variant="caption" style={styles.statLabel}>
+                <AppText
+                  variant="caption"
+                  style={[styles.statLabel, fitFont(t('insights.timeInStories.watchTimeLabel'), 10, 18, 0.6, true)]}
+                  numberOfLines={1}
+                >
                   {t('insights.timeInStories.watchTimeLabel')}
                 </AppText>
               </View>
@@ -191,40 +254,41 @@ export function InsightsShareSheet({
                     <Ionicons name="star" size={16} color={colors.accentStrong} />
                     <AppText style={styles.statValue}>{formatAverageStarRating(average)}</AppText>
                   </View>
-                  <AppText variant="caption" style={styles.statLabel}>
+                  <AppText
+                    variant="caption"
+                    style={[styles.statLabel, fitFont(t('insights.share.avgRating'), 10, 12, 0.6, true)]}
+                    numberOfLines={1}
+                  >
                     {t('insights.share.avgRating')}
                   </AppText>
                 </View>
               ) : null}
             </View>
             <View style={styles.miniRow}>
-              <View style={styles.mini}>
-                <AppText style={styles.miniValue}>{insights.yourYear.activeDays}</AppText>
-                <AppText variant="caption" style={styles.statLabel} numberOfLines={1}>
-                  {t('insights.share.activeDays')}
-                </AppText>
-              </View>
+              <MiniStat
+                value={String(insights.yourYear.activeDays)}
+                label={t('insights.share.activeDays')}
+              />
               {insights.yourYear.peakMonth ? (
-                <View style={styles.mini}>
-                  <AppText style={styles.miniValue}>
-                    {formatMonthName(insights.yourYear.peakMonth.month)}
-                  </AppText>
-                  <AppText variant="caption" style={styles.statLabel} numberOfLines={1}>
-                    {t('insights.share.peakMonth')}
-                  </AppText>
-                </View>
+                <MiniStat
+                  value={formatMonthLongName(insights.yourYear.peakMonth.month)}
+                  label={t('insights.share.peakMonth')}
+                />
               ) : null}
               {insights.yourYear.favoriteWeekday != null ? (
-                <View style={styles.mini}>
-                  <AppText style={styles.miniValue} numberOfLines={1}>
-                    {formatWeekdayName(insights.yourYear.favoriteWeekday)}
-                  </AppText>
-                  <AppText variant="caption" style={styles.statLabel} numberOfLines={1}>
-                    {t('insights.share.favoriteDay')}
-                  </AppText>
-                </View>
+                <MiniStat
+                  value={formatWeekdayName(insights.yourYear.favoriteWeekday)}
+                  label={t('insights.share.favoriteDay')}
+                />
               ) : null}
             </View>
+            {extraStats.length > 0 ? (
+              <View style={styles.miniRow} testID="insights-share-extra-stats">
+                {extraStats.map((stat) => (
+                  <MiniStat key={stat.key} value={stat.value} label={stat.label} />
+                ))}
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -245,6 +309,11 @@ export function InsightsShareSheet({
             </>
           )}
         </Pressable>
+        {failure ? (
+          <AppText variant="caption" style={styles.failure} testID="insights-share-failure">
+            {failure}
+          </AppText>
+        ) : null}
       </View>
     </AppBottomSheet>
   );
@@ -259,7 +328,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 300,
-    aspectRatio: 2 / 3,
+    aspectRatio: 3 / 5,
     borderRadius: 28,
     overflow: 'hidden',
     padding: spacing.lg,
@@ -417,5 +486,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.88,
+  },
+  failure: {
+    color: colors.textMuted,
+    textAlign: 'center',
   },
 });
