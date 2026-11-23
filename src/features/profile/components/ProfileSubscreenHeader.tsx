@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { authTypography } from '@/features/auth/auth-typography';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { MY_COMMENTS_HORIZONTAL_INSET } from '@/features/reviews/utils/my-comments-layout';
 import { layout } from '@/theme/layout';
@@ -33,7 +34,11 @@ const styles = StyleSheet.create({
   },
   title: {
     flexShrink: 1,
-    fontWeight: '600',
+    // Editorial serif, like every other screen title.
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: 'normal',
     textAlign: 'left',
   },
 });

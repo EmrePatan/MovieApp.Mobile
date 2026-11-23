@@ -54,8 +54,13 @@ export const RecentHistoryCard = memo(function RecentHistoryCard({
 
 const styles = StyleSheet.create({
   card: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.xs,
+    padding: spacing.md,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   pressed: {
     opacity: 0.85,

@@ -3,6 +3,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
+import { authTypography } from '@/features/auth/auth-typography';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { socialFeedTheme } from './social-feed-theme';
@@ -21,19 +24,22 @@ export function SocialSubscreenHeader({
   trailing,
 }: SocialSubscreenHeaderProps) {
   const { t } = useTranslation();
+  useAuthFonts();
 
   return (
     <View style={styles.wrap}>
       <View style={styles.row}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('social.back')}
-          onPress={onBack}
-          hitSlop={8}
-          style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}
-        >
-          <Ionicons name="chevron-back" size={20} color={socialFeedTheme.textPrimary} />
-        </Pressable>
+        <GlassSurface style={styles.backBtn}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('social.back')}
+            onPress={onBack}
+            hitSlop={8}
+            style={({ pressed }) => [styles.backHit, pressed && styles.pressed]}
+          >
+            <Ionicons name="chevron-back" size={20} color={socialFeedTheme.textPrimary} />
+          </Pressable>
+        </GlassSurface>
         <View style={styles.copy}>
           <AppText numberOfLines={1} style={styles.title} maxFontSizeMultiplier={1.25}>
             {title}
@@ -55,8 +61,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: socialFeedTheme.border,
     backgroundColor: socialFeedTheme.background,
   },
   row: {
@@ -66,15 +70,15 @@ const styles = StyleSheet.create({
     minHeight: layout.touchTarget,
   },
   backBtn: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: borderRadius.full,
+    flexShrink: 0,
+  },
+  backHit: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: socialFeedTheme.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: socialFeedTheme.border,
-    flexShrink: 0,
   },
   copy: {
     flex: 1,
@@ -82,11 +86,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    fontSize: 18,
-    lineHeight: 22,
-    fontWeight: '700',
+    // Editorial serif, same voice as the feed title.
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 24,
+    lineHeight: 30,
     color: socialFeedTheme.textPrimary,
-    letterSpacing: -0.2,
   },
   subtitle: {
     fontSize: 12,
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
     color: socialFeedTheme.textSecondary,
   },
   trailingSpacer: {
-    width: 36,
+    width: 40,
     flexShrink: 0,
   },
   pressed: {

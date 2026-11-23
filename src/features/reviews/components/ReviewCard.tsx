@@ -15,7 +15,6 @@ import {
   formatStarRatingDisplay,
   isValidBackendScore,
 } from '@/features/ratings/utils/star-rating';
-import { ReviewStarRow } from './ReviewStarRow';
 import { ReviewRichBody } from './ReviewRichBody';
 import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import { colors } from '@/theme/colors';
@@ -136,8 +135,10 @@ export const ReviewCard = memo(function ReviewCard({
               accessibilityLabel={t('reviews.ratedOutOfFiveStars', {
                 label: formatStarRatingDisplay(starRating),
               })}
+              style={styles.ratingBadge}
             >
-              <ReviewStarRow starRating={starRating} size={13} />
+              <Ionicons name="star" size={12} color={colors.accentStrong} />
+              <AppText style={styles.ratingText}>{formatStarRatingDisplay(starRating)}</AppText>
             </View>
           ) : null}
         </View>
@@ -239,21 +240,38 @@ export const ReviewCard = memo(function ReviewCard({
 });
 
 const styles = StyleSheet.create({
+  // Every review is a soft glass card, matching the feed and comment cards.
   card: {
     gap: spacing.sm,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: glass.hairline,
-  },
-  cardSurface: {
     marginHorizontal: layout.screenPaddingHorizontal,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.lg,
-    backgroundColor: glass.panelElevated,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: glass.hairline,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  cardSurface: {
+    backgroundColor: glass.panelElevated,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    height: 24,
+    paddingHorizontal: spacing.sm,
+    borderRadius: 12,
+    backgroundColor: 'rgba(212, 179, 106, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+  },
+  ratingText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+    color: colors.accentStrong,
+    fontVariant: ['tabular-nums'],
   },
   header: {
     flexDirection: 'row',

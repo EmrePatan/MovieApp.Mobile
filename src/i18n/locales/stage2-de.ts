@@ -1200,6 +1200,8 @@ export const stage2De = {
       title: 'Statistiken',
       subtitle: 'Was dein Wiedergabeverlauf verrät',
       loadError: 'Statistiken konnten nicht geladen werden. Bitte versuche es erneut.',
+      share: 'Teilen',
+      shareMessage: '{{dna}} — Ich habe {{duration}} auf Movie Cave geschaut.',
     },
     movieDna: {
       kicker: 'Deine Movie-DNA',

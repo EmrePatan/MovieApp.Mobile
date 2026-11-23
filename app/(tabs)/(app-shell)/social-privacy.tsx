@@ -8,7 +8,9 @@ import { SocialUserListRow } from '@/features/social/components/SocialUserListRo
 import { useSocialBlockedUsers, useSocialPrivacy } from '@/features/social/hooks/useSocialQueries';
 import { useUnblockSocialUser, useUpdateSocialPrivacy } from '@/features/social/hooks/useSocialMutations';
 import type { SocialPrivacySettings } from '@/features/social/types';
+import { authTypography } from '@/features/auth/auth-typography';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -147,9 +149,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.lg,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   copy: { flex: 1, gap: 4 },
   rowTitle: {
@@ -166,8 +171,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: spacing.xl,
     marginBottom: spacing.md,
-    fontSize: 16,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 20,
     color: colors.textPrimary,
   },
   blockedList: { gap: spacing.sm },

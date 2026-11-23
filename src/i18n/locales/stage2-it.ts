@@ -1200,6 +1200,8 @@ export const stage2It = {
       title: 'Statistiche',
       subtitle: 'Cosa rivela la tua cronologia di visione',
       loadError: 'Impossibile caricare le statistiche. Riprova.',
+      share: 'Condividi',
+      shareMessage: '{{dna}} — Ho guardato {{duration}} su Movie Cave.',
     },
     movieDna: {
       kicker: 'Il tuo Movie DNA',

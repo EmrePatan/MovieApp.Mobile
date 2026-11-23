@@ -17,6 +17,7 @@ import { useCatalogDeepLinkNavigation } from '@/hooks/useCatalogDeepLinkNavigati
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { LoadingView } from '@/components/loading/LoadingView';
 import { useAuth } from '@/auth/useAuth';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { NotificationBootstrapProvider } from '@/features/notifications/services/notification-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
@@ -28,6 +29,7 @@ void SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const { t } = useTranslation();
   const { isLoading } = useAuth();
+  useAuthFonts();
   useAuthDeepLinkNavigation();
   useCatalogDeepLinkNavigation();
   useProtectedRoute();

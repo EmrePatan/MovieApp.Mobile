@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3Records } from '../types';
 import { formatAverageStarRating, formatWeekdayName } from '../utils/insights-format';
+import { authTypography } from '@/features/auth/auth-typography';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
 import { glass } from '@/theme/glass';
@@ -70,6 +71,7 @@ export function InsightsRecordsSection({
       <InsightsSectionHeader
         title={t('insights.records.title')}
         subtitle={t('insights.records.subtitle')}
+        index={6}
       />
       <View style={styles.grid}>
         {cards.map((card) => (
@@ -111,7 +113,9 @@ const styles = StyleSheet.create({
     minWidth: 148,
     flexGrow: 1,
     backgroundColor: glass.panel,
-    borderRadius: borderRadius.lg,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
     padding: spacing.md,
     gap: spacing.sm,
     minHeight: 132,
@@ -132,7 +136,10 @@ const styles = StyleSheet.create({
   value: {
     color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
+    fontSize: 30,
+    lineHeight: 36,
   },
   label: {
     lineHeight: 16,
@@ -143,8 +150,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing.sm,
     padding: spacing.md,
-    borderRadius: borderRadius.lg,
+    borderRadius: 20,
     backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 210, 150, 0.35)',
   },
   funFactText: {
     flex: 1,

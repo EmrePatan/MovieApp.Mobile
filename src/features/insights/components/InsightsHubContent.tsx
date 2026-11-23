@@ -1,6 +1,7 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
@@ -9,12 +10,17 @@ import { useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { HomeHeaderProfileAvatar } from '@/features/home/components/HomeHeaderProfileAvatar';
 import { useInsightsV3 } from '../hooks/useInsightsV3';
 import { beginInsightsTrace, markInsightsPerfEvent, resetInsightsTrace } from '@/perf/insights-trace';
 import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
-import { buildSelectableYears } from '../utils/insights-format';
+import {
+  buildSelectableYears,
+  formatMovieDnaDisplayTitle,
+  formatWatchTimeBreakdown,
+} from '../utils/insights-format';
 import { InsightsErasSection } from './InsightsErasSection';
 import { InsightsLoadingSkeleton } from './InsightsLoadingSkeleton';
 import { InsightsMilestonesSection } from './InsightsMilestonesSection';
@@ -24,6 +30,7 @@ import { InsightsRecordsSection } from './InsightsRecordsSection';
 import { InsightsTasteSection } from './InsightsTasteSection';
 import { InsightsTimeInStoriesSection } from './InsightsTimeInStoriesSection';
 import { InsightsYourYearSection } from './InsightsYourYearSection';
+import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
@@ -78,6 +85,20 @@ export function InsightsHubContent() {
   const handleRefresh = useCallback(() => {
     void insightsQuery.refetch();
   }, [insightsQuery]);
+
+  // Hands the DNA title and total watch time to the OS share sheet.
+  const handleShare = useCallback(() => {
+    const data = insightsQuery.data;
+    if (!data) {
+      return;
+    }
+    void Share.share({
+      message: t('insights.hub.shareMessage', {
+        dna: formatMovieDnaDisplayTitle(data.movieDna),
+        duration: formatWatchTimeBreakdown(data.timeInStories.totalMinutes),
+      }),
+    }).catch(() => undefined);
+  }, [insightsQuery.data, t]);
 
   const scrollInsightsToTop = useCallback(() => {
     scrollScrollViewToTop(scrollRef);
@@ -135,7 +156,10 @@ export function InsightsHubContent() {
       scrollEventThrottle={16}
     >
       {androidPullToRefresh.RefreshHeader}
-      <InsightsScreenHeader onOpenProfile={() => router.push('/(tabs)/profile')} />
+      <InsightsScreenHeader
+        onOpenProfile={() => router.push('/(tabs)/profile')}
+        onShare={handleShare}
+      />
       <InsightsMovieDnaHero
         movieDna={insights.movieDna}
         backdropImagePath={insights.yourEra.oldestTitle?.posterPath}
@@ -171,7 +195,13 @@ export function InsightsHubContent() {
   );
 }
 
-function InsightsScreenHeader({ onOpenProfile }: { onOpenProfile: () => void }) {
+function InsightsScreenHeader({
+  onOpenProfile,
+  onShare,
+}: {
+  onOpenProfile: () => void;
+  onShare?: () => void;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -182,6 +212,20 @@ function InsightsScreenHeader({ onOpenProfile }: { onOpenProfile: () => void }) 
           {t('insights.hub.subtitle')}
         </AppText>
       </View>
+      {onShare ? (
+        <GlassSurface style={styles.shareGlass}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('insights.hub.share')}
+            onPress={onShare}
+            hitSlop={8}
+            style={styles.shareHit}
+            testID="insights-share"
+          >
+            <Ionicons name="share-outline" size={18} color={colors.textPrimary} />
+          </Pressable>
+        </GlassSurface>
+      ) : null}
       <HomeHeaderProfileAvatar compact onPress={onOpenProfile} />
     </View>
   );
@@ -199,6 +243,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
     paddingTop: spacing.xs,
+  },
+  shareGlass: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  shareHit: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerCopy: {
     flex: 1,

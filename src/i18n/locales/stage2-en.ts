@@ -1178,6 +1178,8 @@ export const stage2En = {
       title: 'Insights',
       subtitle: 'What your watching history reveals',
       loadError: 'Unable to load your insights. Please try again.',
+      share: 'Share',
+      shareMessage: '{{dna}} — I\'ve watched {{duration}} on Movie Cave.',
     },
     movieDna: {
       kicker: 'Your Movie DNA',

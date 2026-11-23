@@ -71,10 +71,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    borderRadius: 14,
+    borderRadius: 20,
     backgroundColor: glass.panel,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    borderColor: glass.hairline,
   },
   copy: {
     flex: 1,

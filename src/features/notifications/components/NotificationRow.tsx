@@ -14,6 +14,7 @@ import { formatNotificationBody } from '../utils/format-notification-body';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
 import type { NotificationItem } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -85,7 +86,11 @@ export const NotificationRow = memo(function NotificationRow({
       accessibilityActions={onDelete ? [{ name: 'delete', label: t('notifications.row.delete') }] : undefined}
       onAccessibilityAction={onDelete ? handleAccessibilityAction : undefined}
       onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.mainPressable, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.mainPressable,
+        isUnread && styles.mainPressableUnread,
+        pressed && styles.pressed,
+      ]}
     >
       <View style={styles.posterWrap}>
         <CatalogImage
@@ -142,17 +147,27 @@ export const NotificationRow = memo(function NotificationRow({
 const styles = StyleSheet.create({
   row: {
     minHeight: POSTER_HEIGHT + spacing.sm * 2,
+    marginBottom: spacing.sm,
   },
   swipeableContent: {
     backgroundColor: colors.background,
   },
+  // Each notification is a glass card; unread ones get a faint gold edge.
   mainPressable: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.sm,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    padding: spacing.md,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
+  },
+  mainPressableUnread: {
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+    backgroundColor: 'rgba(212, 179, 106, 0.08)',
   },
   pressed: {
     opacity: 0.85,

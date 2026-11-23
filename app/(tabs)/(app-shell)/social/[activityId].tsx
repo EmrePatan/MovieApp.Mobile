@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
 import { useAuth } from '@/auth/useAuth';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { useSocialActivity, useSocialComments } from '@/features/social/hooks/useSocialQueries';
 import { openSocialActivityCatalog } from '@/features/social/navigation/open-social-activity-catalog';
 import {
@@ -69,6 +70,7 @@ export default function SocialCommentsScreen() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { t } = useTranslation();
+  useAuthFonts();
   const params = useLocalSearchParams<{
     activityId: string | string[];
     parentCommentId?: string | string[];

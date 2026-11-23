@@ -9,6 +9,8 @@ import {
   formatAchievementCategoryLabel,
   getAchievementIconName,
 } from '../utils/insights-format';
+import { authTypography } from '@/features/auth/auth-typography';
+import { InsightsCard } from './InsightsCard';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
 import { glass } from '@/theme/glass';
@@ -33,6 +35,7 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
       <InsightsSectionHeader
         title={t('insights.milestones.title')}
         subtitle={t('insights.milestones.subtitle')}
+        index={7}
       />
       <ScrollView
         horizontal
@@ -44,6 +47,7 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
           <AchievementBadge key={achievement.id} achievement={achievement} />
         ))}
       </ScrollView>
+      <InsightsCard style={styles.summaryCard}>
       <View style={styles.summaryBlock}>
         <View style={styles.summaryRow}>
           <View style={styles.trophyBadge}>
@@ -73,6 +77,7 @@ export function InsightsMilestonesSection({ achievements }: InsightsMilestonesSe
           ]}
         />
       </View>
+      </InsightsCard>
     </View>
   );
 }
@@ -199,7 +204,9 @@ const styles = StyleSheet.create({
   },
   badgeNumber: {
     color: colors.textPrimary,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
+    fontSize: 17,
     fontVariant: ['tabular-nums'],
     textAlign: 'center',
   },
@@ -211,6 +218,9 @@ const styles = StyleSheet.create({
   },
   badgeTextLocked: {
     color: colors.textMuted,
+  },
+  summaryCard: {
+    gap: spacing.sm,
   },
   summaryBlock: {
     gap: 4,

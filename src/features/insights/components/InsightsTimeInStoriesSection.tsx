@@ -6,12 +6,13 @@ import { AppText } from '@/components/common/AppText';
 import type { InsightsV3TimeInStories } from '../types';
 import { formatWatchTimeBreakdown } from '../utils/insights-format';
 import { resolveImageUri } from '@/utils/image-url';
+import { authTypography } from '@/features/auth/auth-typography';
 import { InsightsDonutRing } from './InsightsDonutRing';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
 import { glass } from '@/theme/glass';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 interface InsightsTimeInStoriesSectionProps {
   timeInStories: InsightsV3TimeInStories;
@@ -32,6 +33,7 @@ export function InsightsTimeInStoriesSection({
         <InsightsSectionHeader
           title={t('insights.timeInStories.title')}
           subtitle={t('insights.timeInStories.subtitle')}
+          index={3}
         />
         <InsightsEmptyState message={t('insights.timeInStories.empty')} />
       </View>
@@ -49,6 +51,7 @@ export function InsightsTimeInStoriesSection({
       <InsightsSectionHeader
         title={t('insights.timeInStories.title')}
         subtitle={t('insights.timeInStories.subtitle')}
+        index={3}
       />
       <View style={styles.hero}>
         <View style={styles.donutWrap}>
@@ -126,10 +129,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   hero: {
-    borderRadius: borderRadius.xl,
+    borderRadius: 24,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
     backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   donutWrap: {
     alignItems: 'center',
@@ -161,9 +166,10 @@ const styles = StyleSheet.create({
   duration: {
     color: colors.accentStrong,
     fontVariant: ['tabular-nums'],
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
     fontSize: 28,
-    lineHeight: 32,
+    lineHeight: 34,
   },
   durationLabel: {
     color: colors.textMuted,
@@ -180,12 +186,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingVertical: spacing.md,
-    borderRadius: borderRadius.lg,
+    borderRadius: 20,
     backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   breakdownValue: {
     color: colors.accentStrong,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
     fontVariant: ['tabular-nums'],
     fontSize: 15,
     lineHeight: 20,

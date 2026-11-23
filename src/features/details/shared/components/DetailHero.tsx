@@ -6,6 +6,8 @@ import { AppText } from '@/components/common/AppText';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { PosterImage } from '@/components/common/PosterImage';
+import { authTypography } from '@/features/auth/auth-typography';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { DetailAmbientGlow } from './DetailAmbientGlow';
 import { DetailHeroPosterFrame } from './DetailHeroPosterFrame';
 import { DetailMetadataRow } from './DetailMetadataRow';
@@ -59,6 +61,7 @@ export const DetailHero = memo(function DetailHero({
   share,
 }: DetailHeroProps) {
   const { t } = useTranslation();
+  useAuthFonts();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -151,7 +154,7 @@ export const DetailHero = memo(function DetailHero({
               <DetailHeroPosterFrame>{posterNode}</DetailHeroPosterFrame>
             ) : null}
             <View style={styles.titleBlock}>
-              <AppText variant="title" numberOfLines={3}>
+              <AppText variant="title" numberOfLines={3} style={styles.title}>
                 {title}
               </AppText>
               {shouldShowOriginalTitle(title, originalTitle) ? (
@@ -201,6 +204,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     alignItems: 'flex-end',
+  },
+  // Editorial serif, matching the feed and profile display type.
+  title: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 28,
+    lineHeight: 34,
   },
   titleBlock: {
     flex: 1,

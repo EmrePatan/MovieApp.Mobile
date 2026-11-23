@@ -45,33 +45,6 @@ export function SocialProfileActionRow({
 
   return (
     <View style={styles.row}>
-      {onBlockPress ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('social.blockUser')}
-          onPress={onBlockPress}
-          style={({ pressed }) => [styles.circleDark, pressed && styles.pressed]}
-        >
-          <Ionicons name="ban-outline" size={16} color={colors.textPrimary} />
-        </Pressable>
-      ) : null}
-      {onMessagePress ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('social.message')}
-          disabled={isMessageLoading}
-          onPress={onMessagePress}
-          style={({ pressed }) => [styles.pill, styles.pillMuted, pressed && styles.pressed]}
-        >
-          {isMessageLoading ? (
-            <ActivityIndicator color={colors.textPrimary} />
-          ) : (
-            <AppText style={[styles.pillLabel, styles.pillLabelMuted]} numberOfLines={1}>
-              {t('social.message')}
-            </AppText>
-          )}
-        </Pressable>
-      ) : null}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={followLabel}
@@ -94,6 +67,33 @@ export function SocialProfileActionRow({
           </AppText>
         )}
       </Pressable>
+      {onMessagePress ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('social.message')}
+          disabled={isMessageLoading}
+          onPress={onMessagePress}
+          style={({ pressed }) => [styles.pill, styles.pillMuted, pressed && styles.pressed]}
+        >
+          {isMessageLoading ? (
+            <ActivityIndicator color={colors.textPrimary} />
+          ) : (
+            <AppText style={[styles.pillLabel, styles.pillLabelMuted]} numberOfLines={1}>
+              {t('social.message')}
+            </AppText>
+          )}
+        </Pressable>
+      ) : null}
+      {onBlockPress ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('social.blockUser')}
+          onPress={onBlockPress}
+          style={({ pressed }) => [styles.circleDark, pressed && styles.pressed]}
+        >
+          <Ionicons name="ban-outline" size={16} color={colors.textPrimary} />
+        </Pressable>
+      ) : null}
       {onReportPress ? (
         <Pressable
           accessibilityRole="button"
@@ -115,9 +115,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   pill: {
-    minHeight: 36,
+    flex: 1,
+    minHeight: 42,
     minWidth: 0,
-    flexShrink: 1,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     alignItems: 'center',
@@ -150,9 +150,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.textPrimary,
   },
   circleDark: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: glass.panelElevated,

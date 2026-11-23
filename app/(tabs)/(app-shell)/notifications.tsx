@@ -6,6 +6,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/useAuth';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
+import { authTypography } from '@/features/auth/auth-typography';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
 import { NotificationsInboxSegmentTabs } from '@/features/notifications/components/NotificationsInboxSegmentTabs';
 import { ReleasesNotificationsPane } from '@/features/notifications/components/ReleasesNotificationsPane';
@@ -26,6 +28,7 @@ import { spacing } from '@/theme/spacing';
 
 export default function NotificationsScreen() {
   const { t } = useTranslation();
+  useAuthFonts();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
@@ -70,7 +73,9 @@ export default function NotificationsScreen() {
       <View style={styles.header}>
         <DetailBackButton />
         <View style={styles.titleRow}>
-          <AppText variant="title">{t('notifications.title')}</AppText>
+          <AppText variant="title" style={styles.title}>
+            {t('notifications.title')}
+          </AppText>
           {isAuthenticated ? (
             <Pressable
               accessibilityRole="button"
@@ -147,6 +152,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+  },
+  // Editorial serif, same voice as the feed and comments screens.
+  title: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 28,
+    lineHeight: 34,
   },
   markAllButton: {
     minHeight: layout.touchTarget,

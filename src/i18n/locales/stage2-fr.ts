@@ -1200,6 +1200,8 @@ export const stage2Fr = {
       title: 'Statistiques',
       subtitle: 'Ce que révèle votre historique de visionnage',
       loadError: 'Impossible de charger vos statistiques. Veuillez réessayer.',
+      share: 'Partager',
+      shareMessage: '{{dna}} — J\'ai regardé {{duration}} sur Movie Cave.',
     },
     movieDna: {
       kicker: 'Votre ADN cinéma',

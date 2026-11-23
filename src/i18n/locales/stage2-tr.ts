@@ -1202,6 +1202,8 @@ export const stage2Tr = {
       title: 'İstatistikler',
       subtitle: 'İzleme geçmişinin ortaya çıkardıkları',
       loadError: 'İstatistikler yüklenemedi. Lütfen tekrar dene.',
+      share: 'Paylaş',
+      shareMessage: '{{dna}} — Movie Cave\'de {{duration}} izledim.',
     },
     movieDna: {
       kicker: 'Film DNA\'n',

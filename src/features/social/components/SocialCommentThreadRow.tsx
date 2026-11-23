@@ -9,6 +9,7 @@ import type { SocialComment } from '../types';
 import { SocialCommentTranslationBody } from './SocialCommentTranslationBody';
 import { socialFeedTheme } from './social-feed-theme';
 import { SOCIAL_AVATAR_FEED_ROW, socialUi } from './social-ui-tokens';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -177,10 +178,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    backgroundColor: 'transparent',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: socialFeedTheme.borderSubtle,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    // Each comment is its own soft glass card instead of a hairline-separated row.
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   body: {
     flex: 1,

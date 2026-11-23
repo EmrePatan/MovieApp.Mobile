@@ -1200,6 +1200,8 @@ export const stage2Es = {
       title: 'Estadísticas',
       subtitle: 'Lo que revela tu historial de visionado',
       loadError: 'No se pudieron cargar tus estadísticas. Inténtalo de nuevo.',
+      share: 'Compartir',
+      shareMessage: '{{dna}} — He visto {{duration}} en Movie Cave.',
     },
     movieDna: {
       kicker: 'Tu ADN cinematográfico',

@@ -249,12 +249,18 @@ const styles = StyleSheet.create({
   swipeContent: {
     backgroundColor: colors.background,
   },
+  // Each library title is a soft glass card, like the feed and notification cards.
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.sm,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    marginVertical: spacing.xs,
+    padding: spacing.sm,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   content: {
     flex: 1,

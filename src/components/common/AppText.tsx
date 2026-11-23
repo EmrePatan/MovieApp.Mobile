@@ -1,4 +1,5 @@
 import { Text, TextProps, StyleSheet } from 'react-native';
+import { authTypography } from '@/features/auth/auth-typography';
 import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 
@@ -33,6 +34,7 @@ export function AppText({
       maxFontSizeMultiplier={maxFontSizeMultiplier ?? maxFontSizeMultipliers[variant]}
       style={[
         typography[variant],
+        variant === 'title' && styles.serifTitle,
         styles.base,
         muted && styles.muted,
         center && styles.center,
@@ -46,6 +48,11 @@ export function AppText({
 const styles = StyleSheet.create({
   base: {
     color: colors.textPrimary,
+  },
+  // Page titles use the editorial serif everywhere; the root layout loads the font.
+  serifTitle: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
   },
   muted: {
     color: colors.textSecondary,

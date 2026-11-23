@@ -10,6 +10,7 @@ import { formatRelativeAirDateLocalized } from '@/utils/format-relative-air-date
 import { formatCatalogYear, formatContentType, formatIsoDate } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 
 interface UpcomingListCardProps {
@@ -120,8 +121,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.sm,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    marginVertical: spacing.xs,
+    padding: spacing.sm,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
     minHeight: layout.posterList.height + spacing.md,
   },
   pressed: {

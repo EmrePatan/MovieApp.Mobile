@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
+import { authTypography } from '@/features/auth/auth-typography';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3MovieDna } from '../types';
 import {
@@ -196,7 +197,7 @@ export function InsightsMovieDnaHero({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: borderRadius.xl,
+    borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.borderAccent,
@@ -245,9 +246,10 @@ const styles = StyleSheet.create({
   headline: {
     color: colors.accentStrong,
     letterSpacing: -0.6,
-    fontWeight: '700',
-    fontSize: 34,
-    lineHeight: 40,
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
+    fontSize: 38,
+    lineHeight: 44,
     ...TEXT_LIFT,
   },
   description: {
@@ -296,8 +298,10 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
     padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: 'rgba(10, 10, 15, 0.68)',
+    borderRadius: 16,
+    backgroundColor: 'rgba(10, 10, 15, 0.62)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 210, 150, 0.35)',
   },
   mixHeader: {
     flexDirection: 'row',

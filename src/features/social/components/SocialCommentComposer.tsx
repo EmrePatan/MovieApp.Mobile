@@ -2,6 +2,7 @@ import { ActivityIndicator, Platform, Pressable, StyleSheet, TextInput, View } f
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { socialFeedTheme } from './social-feed-theme';
@@ -40,7 +41,7 @@ export function SocialCommentComposer({
   return (
     <View style={[styles.dock, { paddingBottom: bottomPad }]}>
       <View style={styles.row}>
-        <View style={styles.inputShell}>
+        <GlassSurface style={styles.inputShell}>
           <Ionicons name="pencil-outline" size={15} color={socialFeedTheme.textMuted} />
           <TextInput
             accessibilityLabel={placeholder}
@@ -54,7 +55,7 @@ export function SocialCommentComposer({
             textAlignVertical="center"
             {...(Platform.OS === 'android' ? { includeFontPadding: false } : null)}
           />
-        </View>
+        </GlassSurface>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('social.send')}
@@ -81,8 +82,6 @@ const styles = StyleSheet.create({
   dock: {
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: socialFeedTheme.border,
     backgroundColor: socialFeedTheme.background,
   },
   row: {
@@ -99,9 +98,6 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
-    backgroundColor: socialFeedTheme.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: socialFeedTheme.border,
   },
   input: {
     flex: 1,
