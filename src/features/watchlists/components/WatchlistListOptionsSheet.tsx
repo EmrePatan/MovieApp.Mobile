@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -105,9 +105,9 @@ function WatchlistListOptionsSheetContent({
         style={premiumSheetChrome.backdrop}
         onPress={onClose}
       />
-      <SafeAreaView style={styles.sheet} edges={['bottom']}>
+      <SwipeSheet onClose={onClose} style={styles.sheet} bottomInset>
         <GlassSheetLayer />
-        <View style={premiumSheetChrome.handle} />
+        <SheetHandle />
 
         {isConfirmView ? (
           <View style={styles.confirmContent}>
@@ -187,7 +187,7 @@ function WatchlistListOptionsSheetContent({
             </View>
           </>
         )}
-      </SafeAreaView>
+      </SwipeSheet>
     </View>
   );
 }

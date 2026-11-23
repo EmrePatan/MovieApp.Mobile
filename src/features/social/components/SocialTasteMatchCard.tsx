@@ -11,6 +11,7 @@ import { AppBottomSheet } from '@/components/layout/AppBottomSheet';
 import { authTypography } from '@/features/auth/auth-typography';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { useAuth } from '@/auth/useAuth';
+import { ProfileLine } from '@/features/profile/components/ProfileIdentityHeader';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { useInsightsCompare } from '@/features/insights/hooks/useInsightsCompare';
 import { translateGenreName } from '@/i18n/catalog-labels';
@@ -34,9 +35,14 @@ interface SocialTasteMatchCardProps {
   userId: string;
   /** Skip the request when the profile's activity is hidden from the viewer. */
   enabled: boolean;
+  /** Display name of the other member; labels their bars in the legend. */
+  otherName?: string;
   /** Opens a shared title's detail page. */
   onOpenTitle?: (item: SocialProfileShelfItem) => void;
 }
+
+// Production-metadata tags ('duringcreditsstinger') read as noise next to real themes.
+const NOISE_KEYWORD = /stinger|^\s*\d+\s*$/i;
 
 function bandKey(percent: number) {
   if (percent >= 75) return 'tasteMatchTwin';
@@ -80,7 +86,12 @@ function useReveal(active: boolean) {
  * Compact "taste match" badge for someone else's profile header. Tapping it opens a showcase
  * sheet: the two taste circles slide together, the percentage counts up and the shared genres fill.
  */
-export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTasteMatchCardProps) {
+export function SocialTasteMatchCard({
+  userId,
+  enabled,
+  otherName,
+  onOpenTitle,
+}: SocialTasteMatchCardProps) {
   useAuthFonts();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -108,10 +119,24 @@ export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTas
   );
 
   // A match needs watch history on both sides; otherwise "0%" would read as "opposite tastes".
+  // The row stays (dimmed, not tappable) so every profile has the same layout.
   if (!data || data.myTopGenres.length === 0 || data.theirTopGenres.length === 0) {
-    return null;
+    return (
+      <ProfileLine
+        testID="social-taste-match-empty"
+        left={
+          <AppText style={[styles.lineText, styles.lineDisabled]} numberOfLines={1}>
+            <AppText style={[styles.linePercent, styles.lineDisabled]}>%—</AppText>
+            {`  ${t('social.tasteMatchTitle').toLowerCase()}`}
+          </AppText>
+        }
+      />
+    );
   }
 
+  const keywords = (data.sharedKeywords ?? []).filter(
+    (keyword) => !NOISE_KEYWORD.test(keyword.name),
+  );
   const percent = Math.max(0, Math.min(100, data.matchPercent));
   // Circles start far apart and settle: near-coincident at 100%, just touching at 0%.
   const settledGap = 2 * VENN_R * (1 - (percent / 100) * 0.82);
@@ -122,22 +147,18 @@ export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTas
 
   return (
     <>
-      <View style={styles.badgeColumn}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${t('social.tasteMatchTitle')} %${percent}`}
-          onPress={() => setOpen(true)}
-          hitSlop={8}
-          style={({ pressed }) => [styles.badge, pressed && styles.pressed]}
-          testID="social-taste-match"
-        >
-          <Ionicons name="heart" size={16} color={colors.accentStrong} />
-          <AppText style={styles.badgePercent}>{`%${percent}`}</AppText>
-        </Pressable>
-        <AppText style={styles.badgeCaption} numberOfLines={2}>
-          {t('social.tasteMatchCaption')}
-        </AppText>
-      </View>
+      <ProfileLine
+        testID="social-taste-match"
+        accessibilityLabel={`${t('social.tasteMatchTitle')} %${percent}`}
+        onPress={() => setOpen(true)}
+        left={
+          <AppText style={styles.lineText} numberOfLines={1}>
+            <AppText style={styles.linePercent}>{`%${percent}`}</AppText>
+            {`  ${t('social.tasteMatchTitle').toLowerCase()}`}
+          </AppText>
+        }
+        right={<Ionicons name="chevron-forward" size={16} color={colors.textMuted} />}
+      />
 
       <AppBottomSheet visible={open} onClose={() => setOpen(false)}>
         <View style={styles.sheetBody}>
@@ -202,7 +223,7 @@ export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTas
                   </AppText>
                   <View style={[styles.legendDot, styles.theyFill]} />
                   <AppText variant="caption" muted>
-                    {t('social.tasteMatchThey')}
+                    {otherName?.trim().split(/\s+/)[0] || t('social.tasteMatchThey')}
                   </AppText>
                 </View>
               </View>
@@ -232,19 +253,19 @@ export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTas
                     </View>
                   </View>
                   <AppText variant="caption" muted style={styles.genreValues}>
-                    {`${Math.round(genre.myShare)} · ${Math.round(genre.theirShare)}`}
+                    {`%${Math.round(genre.myShare)} · %${Math.round(genre.theirShare)}`}
                   </AppText>
                 </View>
               ))}
             </View>
           ) : null}
-          {data.sharedKeywords && data.sharedKeywords.length > 0 ? (
+          {keywords.length > 0 ? (
             <View style={styles.keywords}>
               <AppText variant="caption" muted>
                 {t('social.tasteMatchKeywords')}
               </AppText>
               <View style={styles.keywordRow}>
-                {data.sharedKeywords.map((keyword) => (
+                {keywords.map((keyword) => (
                   <View key={keyword.keywordId} style={styles.keywordChip}>
                     <AppText variant="caption" style={styles.keywordText}>
                       {titleCase(keyword.name)}
@@ -317,33 +338,18 @@ export function SocialTasteMatchCard({ userId, enabled, onOpenTitle }: SocialTas
 }
 
 const styles = StyleSheet.create({
-  badgeColumn: {
-    alignItems: 'center',
-    gap: 4,
-    maxWidth: 84,
-  },
-  badgeCaption: {
-    fontSize: 10,
-    lineHeight: 13,
+  lineText: {
+    fontSize: 13,
+    lineHeight: 18,
     color: colors.textSecondary,
-    textAlign: 'center',
   },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    height: 40,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: glass.panelElevated,
-    borderWidth: 1,
-    borderColor: 'rgba(236, 210, 150, 0.45)',
+  lineDisabled: {
+    opacity: 0.4,
   },
-  badgePercent: {
-    color: colors.accentStrong,
+  linePercent: {
+    fontSize: 15,
     fontWeight: '800',
-    fontSize: 14,
+    color: colors.accentStrong,
   },
   pressed: {
     opacity: 0.75,
@@ -496,7 +502,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   genreValues: {
-    width: 44,
+    width: 64,
     textAlign: 'right',
     fontSize: 11,
   },

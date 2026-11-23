@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
@@ -191,9 +192,9 @@ function FollowPreferencesSheet({
   return (
       <View style={premiumSheetChrome.overlay}>
         <SafeAreaView style={styles.sheetContainer}>
-          <View style={styles.sheet}>
+          <SwipeSheet onClose={onClose} style={styles.sheet}>
             <GlassSheetLayer />
-            <View style={premiumSheetChrome.handle} />
+            <SheetHandle />
             <View style={styles.hero}>
               <View style={styles.iconBadge}>
                 <Ionicons name="notifications" size={22} color={premiumSheet.mutedGold} />
@@ -254,7 +255,7 @@ function FollowPreferencesSheet({
               loading={isBusy}
               disabled={isBusy}
             />
-          </View>
+          </SwipeSheet>
         </SafeAreaView>
       </View>
   );

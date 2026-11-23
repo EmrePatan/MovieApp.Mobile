@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -24,7 +24,8 @@ export function SpoilerGate({ spoiler, children }: SpoilerGateProps) {
 
   return (
     <Pressable
-      accessibilityRole="button"
+      // On web a button role renders a <button>, which is invalid inside the review card's own button.
+      accessibilityRole={Platform.OS === 'web' ? undefined : 'button'}
       accessibilityLabel={`${t('reviews.spoilerHidden')}. ${t('reviews.spoilerReveal')}`}
       onPress={() => setRevealed(true)}
       style={({ pressed }) => [styles.gate, pressed && styles.pressed]}

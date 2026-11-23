@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -53,13 +53,14 @@ export function CatalogFilterSheetShell({
           accessibilityRole="button"
           accessibilityLabel={headerActionLabel}
         />
-        <SafeAreaView
+        <SwipeSheet
+          onClose={onHeaderAction}
           style={[styles.sheet, keywordDrillDown && styles.sheetKeywordDrillDown]}
-          edges={['bottom']}
+          bottomInset
           testID={testID}
         >
-            <GlassSheetLayer />
-          <View style={premiumSheetChrome.handle} />
+          <GlassSheetLayer />
+          <SheetHandle />
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
@@ -96,7 +97,7 @@ export function CatalogFilterSheetShell({
               <AppButton title={applyLabel} onPress={onApply} />
             </View>
           ) : null}
-        </SafeAreaView>
+        </SwipeSheet>
       </View>
     </Modal>
   );

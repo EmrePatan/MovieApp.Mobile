@@ -201,7 +201,12 @@ export default function SocialProfileScreen() {
           onEditCover={() => setCoverPickerVisible(true)}
           onBack={() => router.back()}
           identityTrailing={
-            !isSelf && canViewLibrary ? <SocialTasteMatchCard userId={userId} enabled onOpenTitle={handleOpenTitle} /> : undefined
+            !isSelf ? <SocialTasteMatchCard
+                userId={userId}
+                enabled={canViewLibrary}
+                otherName={profile.data?.displayName}
+                onOpenTitle={handleOpenTitle}
+              /> : undefined
           }
           actions={
             <SocialProfileActionRow

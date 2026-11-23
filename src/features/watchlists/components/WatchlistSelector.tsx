@@ -8,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -87,9 +87,9 @@ export function WatchlistSelector({
 
       <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setVisible(false)}>
         <View style={premiumSheetChrome.overlay}>
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={() => setVisible(false)} style={styles.sheet} bottomInset>
             <GlassSheetLayer />
-            <View style={premiumSheetChrome.handle} />
+            <SheetHandle />
             <View style={styles.sheetHeader}>
               <AppText variant="subtitle" style={styles.sheetTitle}>{t('watchlists.selector.yourWatchlists')}</AppText>
               <Pressable
@@ -161,7 +161,7 @@ export function WatchlistSelector({
                 })}
               </ScrollView>
             )}
-          </SafeAreaView>
+          </SwipeSheet>
         </View>
       </Modal>
     </>

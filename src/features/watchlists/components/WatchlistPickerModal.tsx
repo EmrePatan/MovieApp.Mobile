@@ -12,7 +12,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -278,9 +278,9 @@ function WatchlistPickerBody({
           style={styles.backdrop}
           onPress={handleClose}
         />
-        <SafeAreaView style={styles.sheet} edges={['bottom']}>
+        <SwipeSheet onClose={handleClose} style={styles.sheet} bottomInset>
           <GlassSheetLayer />
-          <View style={styles.handle} />
+          <SheetHandle />
 
           <View style={styles.body}>
             <AppText variant="title" style={styles.sheetTitle}>
@@ -387,7 +387,7 @@ function WatchlistPickerBody({
               </View>
             </View>
           </View>
-        </SafeAreaView>
+        </SwipeSheet>
       </View>
     </KeyboardAvoidingView>
   );

@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { fetchTrendingGiphy, isFetchCanceled, searchGiphy, type GiphyResult } from '../api/giphy';
 import { getGiphyApiKey } from '../utils/giphy-api-key';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
@@ -94,9 +95,9 @@ export function SocialGifPickerSheet({ visible, onClose, onSelect }: SocialGifPi
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={premiumSheetChrome.overlay}>
-        <View style={styles.sheet}>
+        <SwipeSheet onClose={onClose} style={styles.sheet}>
           <GlassSheetLayer />
-          <View style={premiumSheetChrome.handle} />
+          <SheetHandle />
           <View style={styles.header}>
             <AppText variant="subtitle" style={styles.headerTitle}>{t('social.pickGif')}</AppText>
             <Pressable accessibilityRole="button" accessibilityLabel={t('social.cancel')} onPress={onClose}>
@@ -154,7 +155,7 @@ export function SocialGifPickerSheet({ visible, onClose, onSelect }: SocialGifPi
               ) : null
             }
           />
-        </View>
+        </SwipeSheet>
       </View>
     </Modal>
   );

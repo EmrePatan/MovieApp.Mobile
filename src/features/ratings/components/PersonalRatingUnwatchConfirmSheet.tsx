@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
@@ -32,9 +32,9 @@ export function PersonalRatingUnwatchConfirmSheet({
             style={premiumSheetChrome.backdrop}
             onPress={onCancel}
           />
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={onCancel} style={styles.sheet} bottomInset>
             <GlassSheetLayer />
-            <View style={premiumSheetChrome.handle} />
+            <SheetHandle />
             <AppText variant="subtitle" style={styles.title}>
               {t('ratings.unwatchConfirm.title')}
             </AppText>
@@ -57,7 +57,7 @@ export function PersonalRatingUnwatchConfirmSheet({
                 onPress={onCancel}
               />
             </View>
-          </SafeAreaView>
+          </SwipeSheet>
         </View>
       ) : null}
     </Modal>

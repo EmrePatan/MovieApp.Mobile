@@ -7,7 +7,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
@@ -72,9 +72,9 @@ export function CatalogQuickActionsSheet({
             style={styles.backdrop}
             onPress={onClose}
           />
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={onClose} style={styles.sheet} bottomInset>
             <GlassSheetLayer />
-            <View style={styles.handle} />
+            <SheetHandle />
 
             <ScrollView
               bounces={false}
@@ -216,7 +216,7 @@ export function CatalogQuickActionsSheet({
                 </Pressable>
               </View>
             </ScrollView>
-          </SafeAreaView>
+          </SwipeSheet>
         </View>
       ) : null}
     </Modal>

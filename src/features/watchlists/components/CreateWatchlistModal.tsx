@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -104,9 +104,9 @@ export function CreateWatchlistModal({
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboardAvoid}
         >
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={handleClose} style={styles.sheet} bottomInset>
             <GlassSheetLayer />
-            <View style={premiumSheetChrome.handle} />
+            <SheetHandle />
             <View style={styles.header}>
               <AppText variant="subtitle" style={styles.headerTitle}>{t('watchlists.createModal.title')}</AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
@@ -151,7 +151,7 @@ export function CreateWatchlistModal({
               disabled={createWatchlist.isPending}
               onPress={handleCreate}
             />
-          </SafeAreaView>
+          </SwipeSheet>
         </KeyboardAvoidingView>
       </View>
     </Modal>

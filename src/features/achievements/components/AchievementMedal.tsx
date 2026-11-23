@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Svg, { Defs, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
 import { LOCKED_LOOK, getFamilyHue, getFamilyIcon, getRimFinish } from '../achievement-model';
 
 interface AchievementMedalProps {
@@ -43,7 +43,7 @@ function sparklePath(x: number, y: number, r: number) {
 }
 
 /**
- * Faceted seal: a rounded hexagon whose colour belongs to the achievement family and whose rim
+ * Round medal: a disc whose colour belongs to the achievement family and whose rim
  * finish tells the tier (enamel → hue metal → champagne foil → foil + inlay → iridescent foil).
  * Glyphs are custom drawn. Locked seals go matte with a progress arc around the rim.
  */
@@ -68,7 +68,7 @@ export function AchievementMedal({
   const rim = Math.max(3, size * 0.085);
   const inner = outer - rim - join * 0.25;
   const arcRadius = outer - rim / 2;
-  const perimeter = 6 * arcRadius;
+  const perimeter = 2 * Math.PI * arcRadius;
   const showArc = locked && progress > 0;
   const glows = !locked && tier >= 3;
   const sparkles = !locked && tier >= 5;
@@ -76,7 +76,7 @@ export function AchievementMedal({
   return (
     <View
       style={[
-        { width: size, height: size, borderRadius: size * 0.28 },
+        { width: size, height: size, borderRadius: size / 2 },
         glows && {
           shadowColor: tier >= 5 ? '#F6DFA0' : hue.base,
           shadowOpacity: tier >= 4 ? 0.55 : 0.4,
@@ -110,57 +110,64 @@ export function AchievementMedal({
         </Defs>
 
         {/* rim */}
-        <Path
-          d={hexPath(half, half, outer)}
+        <Circle
+          cx={half}
+          cy={half}
+          r={outer}
           fill={`url(#rim${uid})`}
           stroke={`url(#rim${uid})`}
           strokeWidth={join}
-          strokeLinejoin="round"
         />
         {/* inlay line (tier 4+) */}
         {!locked && finish.inlay ? (
-          <Path
-            d={hexPath(half, half, outer - rim * 0.5)}
+          <Circle
+            cx={half}
+            cy={half}
+            r={outer - rim * 0.5}
             fill="none"
             stroke={hue.base}
             strokeWidth={Math.max(1, size * 0.018)}
-            strokeLinejoin="round"
             opacity={0.9}
           />
         ) : null}
         {/* disk */}
-        <Path
-          d={hexPath(half, half, inner)}
+        <Circle
+          cx={half}
+          cy={half}
+          r={inner}
           fill={`url(#disk${uid})`}
           stroke={`url(#disk${uid})`}
           strokeWidth={join * 0.7}
-          strokeLinejoin="round"
         />
-        <Path
-          d={hexPath(half, half, inner)}
+        <Circle
+          cx={half}
+          cy={half}
+          r={inner}
           fill="none"
           stroke={`url(#bevel${uid})`}
           strokeWidth={1.2}
-          strokeLinejoin="round"
         />
-        <Path
-          d={hexPath(half, half, inner * 0.92)}
+        <Circle
+          cx={half}
+          cy={half}
+          r={inner * 0.92}
           fill={`url(#shine${uid})`}
           stroke={`url(#shine${uid})`}
           strokeWidth={join * 0.5}
-          strokeLinejoin="round"
         />
 
         {showArc ? (
-          <Path
-            d={hexPath(half, half, arcRadius)}
+          <Circle
+            cx={half}
+            cy={half}
+            r={arcRadius}
             fill="none"
             stroke={hue.base}
             strokeWidth={rim * 0.8}
             strokeLinecap="round"
-            strokeLinejoin="round"
             strokeDasharray={`${perimeter} ${perimeter}`}
             strokeDashoffset={perimeter * (1 - Math.min(1, progress))}
+            transform={`rotate(-90 ${half} ${half})`}
           />
         ) : null}
 

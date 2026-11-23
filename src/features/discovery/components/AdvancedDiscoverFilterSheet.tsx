@@ -13,7 +13,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -326,10 +326,10 @@ export function AdvancedDiscoverFilterSheet({
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={premiumSheetChrome.overlay}>
-        <SafeAreaView style={styles.sheet} edges={['bottom']}>
+        <SwipeSheet onClose={onClose} style={styles.sheet} bottomInset>
           <GlassSheetLayer />
           <View style={styles.sheetInner}>
-            <View style={premiumSheetChrome.handle} />
+            <SheetHandle />
             <View style={styles.header}>
               <AppText variant="subtitle" style={styles.headerTitle}>{t('discovery.advancedDiscover.sheetTitle')}</AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={onClose}>
@@ -781,7 +781,7 @@ export function AdvancedDiscoverFilterSheet({
               <AppButton title={t('discovery.filterSheet.showResults')} onPress={handleApply} />
             </View>
           </View>
-        </SafeAreaView>
+        </SwipeSheet>
       </View>
     </Modal>
   );

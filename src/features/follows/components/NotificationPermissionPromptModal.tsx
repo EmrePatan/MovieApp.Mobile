@@ -1,5 +1,5 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -28,9 +28,9 @@ export function NotificationPermissionPromptModal({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onDismiss}>
       <View style={premiumSheetChrome.overlay}>
         <Pressable style={premiumSheetChrome.backdrop} onPress={onDismiss} accessibilityRole="button" />
-        <SafeAreaView edges={['bottom']} style={styles.sheet}>
+        <SwipeSheet onClose={onDismiss} style={styles.sheet} bottomInset>
           <GlassSheetLayer />
-          <View style={premiumSheetChrome.handle} />
+          <SheetHandle />
           <AppText variant="title" style={premiumSheetChrome.title}>
             {t('details.notificationsPermission.title')}
           </AppText>
@@ -54,7 +54,7 @@ export function NotificationPermissionPromptModal({
               loading={busy}
             />
           </View>
-        </SafeAreaView>
+        </SwipeSheet>
       </View>
     </Modal>
   );

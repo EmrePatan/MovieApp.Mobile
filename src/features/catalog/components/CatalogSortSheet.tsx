@@ -1,5 +1,5 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
@@ -40,10 +40,10 @@ export function CatalogSortSheet<T extends string>({
         accessibilityRole="button"
         accessibilityLabel={closeLabel}
       >
-        <SafeAreaView style={styles.sheet} edges={['bottom']}>
+        <SwipeSheet onClose={onClose} style={styles.sheet} bottomInset>
           <GlassSheetLayer />
           <Pressable onPress={(event) => event.stopPropagation()} testID={testID}>
-            <View style={premiumSheetChrome.handle} />
+            <SheetHandle />
             <View style={styles.header}>
               <AppText variant="subtitle" style={styles.title}>
                 {title}
@@ -87,7 +87,7 @@ export function CatalogSortSheet<T extends string>({
               })}
             </View>
           </Pressable>
-        </SafeAreaView>
+        </SwipeSheet>
       </Pressable>
     </Modal>
   );

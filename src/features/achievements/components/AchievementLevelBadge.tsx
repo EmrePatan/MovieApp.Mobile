@@ -9,11 +9,13 @@ import { computeLevel } from '../achievement-model';
 import { useAchievementCopy } from '../useAchievementCopy';
 import { useAchievementLevel } from '../useAchievementLevel';
 import { AchievementLevelCard } from './AchievementLevelCard';
-import { hexPath } from './AchievementMedal';
+import { AchievementMedal, hexPath } from './AchievementMedal';
+import type { SocialRecentAchievement } from '@/features/social/types';
+import { colors } from '@/theme/colors';
 
 const SEAL = 28;
 
-/** Gold hexagon carrying the level number: same shape language as the achievement medals. */
+/** Gold hexagon carrying the level number. */
 export function LevelSeal({ level, size = SEAL }: { level: number; size?: number }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const half = size / 2;
@@ -72,9 +74,17 @@ export function OwnAchievementLevelBadge() {
 }
 
 /** Another member's level seal; taps open a small sheet with their level card. */
-export function AchievementLevelBadge({ points }: { points: number | null | undefined }) {
+export function AchievementLevelBadge({
+  points,
+  recent,
+}: {
+  points: number | null | undefined;
+  /** Newest unlocked tiers, newest first; the sheet shows up to five. */
+  recent?: readonly SocialRecentAchievement[] | null;
+}) {
   const [open, setOpen] = useState(false);
-  const { t, levelName } = useAchievementCopy();
+  const { t, levelName, familyName, tierName } = useAchievementCopy();
+  const recentItems = recent?.slice(0, 5) ?? [];
   const level = useMemo(() => (points == null ? null : computeLevel(points)), [points]);
   if (!level) return null;
 
@@ -93,6 +103,28 @@ export function AchievementLevelBadge({ points }: { points: number | null | unde
       <AppBottomSheet visible={open} onClose={() => setOpen(false)} testID="profile-level-sheet">
         <View style={styles.sheet}>
           <AchievementLevelCard level={level} />
+          {recentItems.length > 0 ? (
+            <View style={styles.recentBlock} testID="profile-level-recent">
+              <AppText variant="caption" style={styles.recentTitle}>
+                {t('achievements.recent')}
+              </AppText>
+              <View style={styles.recentRow}>
+                {recentItems.map((item) => (
+                  <View
+                    key={item.id}
+                    style={styles.recentItem}
+                    accessible
+                    accessibilityLabel={`${familyName(item.category)}, ${tierName(item.tier)}`}
+                  >
+                    <AchievementMedal category={item.category} tier={item.tier} size={48} />
+                    <AppText variant="caption" style={styles.recentLabel} numberOfLines={1}>
+                      {familyName(item.category)}
+                    </AppText>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
         </View>
       </AppBottomSheet>
     </>
@@ -110,6 +142,29 @@ const styles = StyleSheet.create({
   },
   sheet: {
     paddingVertical: 20,
+    gap: 22,
+  },
+  recentBlock: {
+    gap: 12,
+  },
+  recentTitle: {
+    color: colors.textMuted,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+    fontWeight: '700',
+  },
+  recentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  recentItem: {
+    width: 62,
+    alignItems: 'center',
+    gap: 4,
+  },
+  recentLabel: {
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
   pressed: {
     opacity: 0.8,

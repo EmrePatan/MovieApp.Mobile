@@ -15,6 +15,7 @@ import { CatalogImage } from '@/features/details/shared/components/CatalogImage'
 import { GalleryFilterTabs } from '@/features/gallery/components/GalleryFilterTabs';
 import type { GalleryFilter, GalleryImage, GalleryResponse } from '@/features/gallery/types';
 import { getMovieTvGalleryImages } from '@/features/gallery/utils/gallery-images';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
@@ -55,9 +56,12 @@ export function SocialCatalogImagePickerSheet({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent>
       <View style={premiumSheetChrome.overlay}>
         <Pressable style={premiumSheetChrome.backdrop} onPress={onClose} accessibilityRole="button" />
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, premiumSheet.contentPaddingBottom) }]}>
+        <SwipeSheet
+          onClose={onClose}
+          style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, premiumSheet.contentPaddingBottom) }]}
+        >
           <GlassSheetLayer />
-          <View style={premiumSheetChrome.handle} />
+          <SheetHandle />
           <View style={styles.header}>
             <AppText variant="subtitle" style={styles.headerTitle}>{t('social.pickPhoto')}</AppText>
             <Pressable
@@ -116,7 +120,7 @@ export function SocialCatalogImagePickerSheet({
               )}
             />
           )}
-        </View>
+        </SwipeSheet>
       </View>
     </Modal>
   );

@@ -65,6 +65,8 @@ export function SocialProfileLibrary({
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>(DEFAULT_MEDIA);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+  // Switching to a shorter tab would shrink the page and yank the scroll position to the top.
+  const [bodyMinHeight, setBodyMinHeight] = useState(0);
 
   const isWatchlistCategory = category === 'watchlist';
   const watchlistsQuery = useSocialProfileWatchlists(userId, isWatchlistCategory);
@@ -216,7 +218,15 @@ export function SocialProfileLibrary({
         )}
       </View>
 
-      {isWatchlistCategory ? renderWatchlists() : renderTitleGrid()}
+      <View
+        style={{ minHeight: bodyMinHeight }}
+        onLayout={(event) => {
+          const height = Math.ceil(event.nativeEvent.layout.height);
+          setBodyMinHeight((current) => (height > current ? height : current));
+        }}
+      >
+        {isWatchlistCategory ? renderWatchlists() : renderTitleGrid()}
+      </View>
     </View>
   );
 }

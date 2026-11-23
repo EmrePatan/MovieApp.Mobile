@@ -167,7 +167,7 @@ export const stage2Tr = {
     favorites: 'Favoriler',
     watched: 'İzlendi',
     watchlist: 'İzleme listesi',
-    watching: 'İzleniyor',
+    watching: 'Devam ediyor',
     watchProgress: 'İzleme İlerlemesi',
     follow: 'Takip Et',
     notify: 'Bildir',
@@ -324,7 +324,7 @@ export const stage2Tr = {
   },
   search: {
     library: {
-      idleHint: 'İzleniyor, İzlendi ve Favoriler\'deki başlıkları ara.',
+      idleHint: 'Devam ediyor, İzlendi ve Favoriler\'deki başlıkları ara.',
     },
     bar: {
       placeholder: 'Film, dizi ve kişi ara',
@@ -765,10 +765,10 @@ export const stage2Tr = {
       scrollToTopAccessibility: 'Kütüphanenin başına dön',
     },
     categories: {
-      watching: 'İzleniyor',
+      watching: 'Devam ediyor',
       watched: 'İzlendi',
       favorites: 'Favoriler',
-      watchlists: 'İzleme listeleri',
+      watchlists: 'Listeler',
       categoryAccessibility: '{{label}} kategorisi',
     },
     mediaFilter: {
@@ -782,7 +782,7 @@ export const stage2Tr = {
       ratingDesc: 'Puan',
     },
     status: {
-      watching: 'İzleniyor',
+      watching: 'Devam ediyor',
       watched: 'İzlendi',
       favorite: 'Favori',
       watchlist: 'İzleme listesi',

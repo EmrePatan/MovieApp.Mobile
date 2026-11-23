@@ -2,6 +2,15 @@ import type { ProfileSocialLinks } from '@/features/profile/types';
 
 export type SocialFollowStatus = 'None' | 'Pending' | 'Accepted' | 'Self';
 
+export interface SocialRecentAchievement {
+  id: string;
+  category: string;
+  /** 1..5 */
+  tier: number;
+  targetValue: number;
+  achievedAt: string;
+}
+
 export interface SocialProfile {
   id: string;
   userName: string;
@@ -16,6 +25,8 @@ export interface SocialProfile {
   followsViewer?: boolean;
   /** Total achievement points, null/absent when the viewer may not see this member's activity. */
   achievementPoints?: number | null;
+  /** Newest unlocked achievement tiers (up to 5), absent when the viewer may not see them. */
+  recentAchievements?: SocialRecentAchievement[] | null;
   coverPosterPath?: string | null;
   coverImageUrl?: string | null;
   /** Optional until backend ships. */

@@ -41,7 +41,7 @@ export function SocialSubscreenHeader({
           </Pressable>
         </GlassSurface>
         <View style={styles.copy}>
-          <AppText numberOfLines={1} style={styles.title} maxFontSizeMultiplier={1.25}>
+          <AppText numberOfLines={2} style={styles.title} maxFontSizeMultiplier={1.25}>
             {title}
           </AppText>
           {subtitle ? (
