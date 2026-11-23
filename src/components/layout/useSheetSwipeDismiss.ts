@@ -14,6 +14,8 @@ export function useSheetSwipeDismiss(onClose: () => void) {
   const [translateY] = useState(() => new Animated.Value(0));
   const closeRef = useRef(onClose);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The refs are only read inside gesture callbacks, never while rendering.
+  // eslint-disable-next-line react-hooks/refs
   const [responder] = useState(() => {
     const useNativeDriver = Platform.OS !== 'web';
     const springBack = () =>
