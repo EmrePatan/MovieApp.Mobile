@@ -76,6 +76,7 @@ export function ReviewsOwnReviewBar({ review, onEdit, onOpenComments }: ReviewsO
         <ReviewRichBody
           content={content}
           plain
+          revealSpoiler
           textVariant="bodySmall"
           numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
         />

@@ -26,7 +26,9 @@ import {
   useToggleSocialCommentLike,
 } from '@/features/social/hooks/useSocialMutations';
 import type { SocialComment } from '@/features/social/types';
+import { buildSocialCommentBody } from '@/features/social/utils/social-comment-media';
 import { SocialActivityContextStrip } from '@/features/social/components/SocialActivityContextStrip';
+import { SocialCommentContent } from '@/features/social/components/SocialCommentContent';
 import { SocialCommentThreadRow } from '@/features/social/components/SocialCommentThreadRow';
 import { SocialCommentParentBanner } from '@/features/social/components/SocialCommentParentBanner';
 import { SocialCommentComposer } from '@/features/social/components/SocialCommentComposer';
@@ -85,6 +87,7 @@ export default function SocialCommentsScreen() {
   const drilledInFromCommentsRef = useRef(false);
 
   const [draftText, setDraftText] = useState('');
+  const [draftSpoiler, setDraftSpoiler] = useState(false);
 
   const comments = useSocialComments(activityId, parentCommentId);
   const rootComments = useSocialComments(activityId, null);
@@ -122,14 +125,15 @@ export default function SocialCommentsScreen() {
     const content = draftText.trim();
     if (!content || createComment.isPending) return;
     createComment.mutate(
-      { content, parentCommentId },
+      { content: buildSocialCommentBody(content, null, draftSpoiler), parentCommentId },
       {
         onSuccess: () => {
           setDraftText('');
+          setDraftSpoiler(false);
         },
       },
     );
-  }, [createComment, draftText, parentCommentId]);
+  }, [createComment, draftSpoiler, draftText, parentCommentId]);
 
   const openReplies = useCallback(
     (comment: SocialComment) => {
@@ -258,6 +262,11 @@ export default function SocialCommentsScreen() {
                 {activity ? (
                   <SocialActivityContextStrip activity={activity} onPress={handleOpenCatalog} />
                 ) : null}
+                {activity?.reviewExcerpt?.trim() && !thread ? (
+                  <View style={styles.reviewBody} testID="social-activity-review-body">
+                    <SocialCommentContent content={activity.reviewExcerpt} density="thread" />
+                  </View>
+                ) : null}
                 {thread ? <SocialCommentParentBanner comment={thread.parent} /> : null}
                 {thread && commentItems.length > 0 ? (
                   <AppText style={styles.repliesLabel}>{t('social.replies')}</AppText>
@@ -294,6 +303,8 @@ export default function SocialCommentsScreen() {
           isSending={createComment.isPending}
           onChangeText={setDraftText}
           onSend={handleSubmit}
+          isSpoiler={draftSpoiler}
+          onToggleSpoiler={() => setDraftSpoiler((current) => !current)}
         />
       </KeyboardAvoidingView>
       <SocialReportReasonSheet {...reportSheetProps} />
@@ -326,6 +337,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginBottom: spacing.xs,
     paddingTop: spacing.sm,
+  },
+  reviewBody: {
+    paddingHorizontal: spacing.xs,
   },
   repliesLabel: {
     fontSize: 11,

@@ -53,15 +53,21 @@ type TabConfig = {
   id: PrimaryTabId;
   labelKey: 'tabs.home' | 'tabs.discover' | 'tabs.social' | 'tabs.profile' | 'tabs.insights';
   icon: keyof typeof Ionicons.glyphMap;
+  activeIcon: keyof typeof Ionicons.glyphMap;
 };
 
 /** Exact order: Ana Sayfa · Keşfet · Akış · Profil · İstatistikler */
 const PRIMARY_TABS: TabConfig[] = [
-  { id: 'home', labelKey: 'tabs.home', icon: 'home-outline' },
-  { id: 'discover', labelKey: 'tabs.discover', icon: 'compass-outline' },
-  { id: 'social', labelKey: 'tabs.social', icon: 'people-outline' },
-  { id: 'library', labelKey: 'tabs.profile', icon: 'person-outline' },
-  { id: 'insights', labelKey: 'tabs.insights', icon: 'stats-chart-outline' },
+  { id: 'home', labelKey: 'tabs.home', icon: 'home-outline', activeIcon: 'home' },
+  { id: 'discover', labelKey: 'tabs.discover', icon: 'compass-outline', activeIcon: 'compass' },
+  { id: 'social', labelKey: 'tabs.social', icon: 'people-outline', activeIcon: 'people' },
+  { id: 'library', labelKey: 'tabs.profile', icon: 'person-outline', activeIcon: 'person' },
+  {
+    id: 'insights',
+    labelKey: 'tabs.insights',
+    icon: 'stats-chart-outline',
+    activeIcon: 'stats-chart',
+  },
 ];
 
 interface PrimaryTabBarProps {
@@ -222,29 +228,31 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
                 ]}
               >
                 <Ionicons
-                  name={tab.icon}
-                  size={layoutMetrics.iconSize}
+                  name={isActive ? tab.activeIcon : tab.icon}
+                  size={isActive ? layoutMetrics.iconSize : layoutMetrics.iconSize + 2}
                   color={iconColor}
                 />
-                <AppText
-                  variant="caption"
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={TAB_BAR_LABEL_MINIMUM_FONT_SCALE}
-                  maxFontSizeMultiplier={1.2}
-                  style={[
-                    tabBarLabelStyle,
-                    styles.label,
-                    {
-                      color: labelColor,
-                      marginTop: layoutMetrics.labelGap,
-                      fontSize: layoutMetrics.labelFontSize,
-                      lineHeight: layoutMetrics.labelLineHeight,
-                    },
-                  ]}
-                >
-                  {t(tab.labelKey)}
-                </AppText>
+                {isActive ? (
+                  <AppText
+                    variant="caption"
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={TAB_BAR_LABEL_MINIMUM_FONT_SCALE}
+                    maxFontSizeMultiplier={1.2}
+                    style={[
+                      tabBarLabelStyle,
+                      styles.label,
+                      {
+                        color: labelColor,
+                        marginTop: layoutMetrics.labelGap,
+                        fontSize: layoutMetrics.labelFontSize,
+                        lineHeight: layoutMetrics.labelLineHeight,
+                      },
+                    ]}
+                  >
+                    {t(tab.labelKey)}
+                  </AppText>
+                ) : null}
               </View>
             </Pressable>
           );

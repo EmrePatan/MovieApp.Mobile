@@ -100,16 +100,12 @@ export default function ProfileScreen() {
 
         <ProfileSection title={t('profile.preferences')}>
           <ProfileMenuRow
-            label={t('profile.language')}
-            subtitle={t('profile.languageSubtitle', {
+            label={t('extras.languageRegion')}
+            subtitle={t('extras.languageRegionSubtitle', {
               language: getLanguageLabel(language, language),
+              region: getRegionLabel(userRegion),
             })}
             onPress={() => router.push('/profile/language')}
-          />
-          <ProfileMenuRow
-            label={t('profile.region')}
-            subtitle={t('profile.regionSubtitle', { region: getRegionLabel(userRegion) })}
-            onPress={() => router.push('/profile/region')}
           />
         </ProfileSection>
 

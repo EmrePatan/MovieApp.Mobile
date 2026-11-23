@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ReviewRichBody } from '@/features/reviews/components/ReviewRichBody';
 import { formatNotificationRelativeTime } from '@/features/notifications/utils/format-notification-relative-time';
 import { socialFeedItemToReviewStub } from '../utils/social-feed-review-stub';
+import { resolveExcerptPreview } from '../utils/resolve-excerpt-preview';
 import {
   formatSocialEmbedSubtitle,
   socialContentTypeLabel,
@@ -43,7 +44,7 @@ export const SocialFeedMoment = memo(function SocialFeedMoment({
   const { t } = useTranslation();
   const time = formatNotificationRelativeTime(item.createdAt);
   const title = item.targetTitle || t('social.contentFallback');
-  const quote = item.reviewExcerpt?.trim() ?? '';
+  const quote = resolveExcerptPreview(item.reviewExcerpt, t('reviews.spoilerHidden')).trim();
   const reviewStub = socialFeedItemToReviewStub(item);
   const subtitle = formatSocialEmbedSubtitle(item, t);
   const titleOpenLabel = t('social.openInCatalog');

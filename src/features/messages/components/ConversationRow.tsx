@@ -11,6 +11,7 @@ import { layout } from '@/theme/layout';
 import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import type { DirectConversationListItem } from '../types';
+import { describeChatMessagePreview } from '../utils/chat-title-share';
 
 const DELETE_ACTION_SIZE = 40;
 
@@ -26,8 +27,8 @@ export function ConversationRow({ item, currentUserId, onPress, onDelete }: Conv
   const swipeableRef = useRef<Swipeable>(null);
   const preview = item.lastMessage
     ? item.lastMessage.senderId === currentUserId
-      ? `${t('messages.youPrefix')} ${item.lastMessage.body}`
-      : item.lastMessage.body
+      ? `${t('messages.youPrefix')} ${describeChatMessagePreview(item.lastMessage.body, t('extras.sharedTitle'))}`
+      : describeChatMessagePreview(item.lastMessage.body, t('extras.sharedTitle'))
     : t('messages.noPreview');
   const relativeTime = item.lastMessage
     ? formatNotificationRelativeTime(item.lastMessage.createdAt)

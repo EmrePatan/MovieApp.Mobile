@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ContentTranslationControls } from '@/features/reviews/components/ContentTranslationControls';
+import { SpoilerGate } from '@/features/reviews/components/SpoilerGate';
 import { parseSocialCommentContent } from '../utils/social-comment-media';
 import { useSocialCommentTranslation } from '../hooks/useSocialCommentTranslation';
 import type { SocialComment } from '../types';
@@ -48,10 +49,15 @@ export function SocialCommentTranslationBody({
   ) : null;
 
   if (!parsed.text.trim()) {
-    return media ? <View style={styles.mediaOnly}>{media}</View> : null;
+    return media ? (
+      <SpoilerGate spoiler={parsed.spoiler}>
+        <View style={styles.mediaOnly}>{media}</View>
+      </SpoilerGate>
+    ) : null;
   }
 
   return (
+    <SpoilerGate spoiler={parsed.spoiler}>
     <View
       style={[
         styles.wrap,
@@ -76,6 +82,7 @@ export function SocialCommentTranslationBody({
       />
       {media}
     </View>
+    </SpoilerGate>
   );
 }
 

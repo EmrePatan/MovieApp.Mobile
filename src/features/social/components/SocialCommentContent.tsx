@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { parseSocialCommentContent } from '../utils/social-comment-media';
+import { SpoilerGate } from '@/features/reviews/components/SpoilerGate';
 import { SocialGifFrame } from './SocialGifFrame';
 import { SocialCommentPosterFrame } from './SocialCommentPosterFrame';
 import { colors } from '@/theme/colors';
@@ -28,17 +29,21 @@ export function SocialCommentContent({
   const textVariant = density === 'quote' ? 'caption' : density === 'feed' ? 'body' : 'bodySmall';
 
   return (
-    <View style={[styles.wrap, styles[`wrap_${density}`]]}>
-      {parsed.text ? (
-        <AppText variant={textVariant} style={textStyle}>
-          {parsed.text}
-        </AppText>
-      ) : null}
-      {parsed.gifUrl ? (
-        <SocialGifFrame uri={parsed.gifUrl} size={density === 'feed' ? 'feed' : density} />
-      ) : null}
-      {parsed.posterPath ? <SocialCommentPosterFrame path={parsed.posterPath} size="thread" /> : null}
-    </View>
+    <SpoilerGate spoiler={parsed.spoiler}>
+      <View style={[styles.wrap, styles[`wrap_${density}`]]}>
+        {parsed.text ? (
+          <AppText variant={textVariant} style={textStyle}>
+            {parsed.text}
+          </AppText>
+        ) : null}
+        {parsed.gifUrl ? (
+          <SocialGifFrame uri={parsed.gifUrl} size={density === 'feed' ? 'feed' : density} />
+        ) : null}
+        {parsed.posterPath ? (
+          <SocialCommentPosterFrame path={parsed.posterPath} size="thread" />
+        ) : null}
+      </View>
+    </SpoilerGate>
   );
 }
 

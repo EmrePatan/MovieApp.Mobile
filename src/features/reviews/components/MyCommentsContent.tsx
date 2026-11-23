@@ -135,7 +135,9 @@ export function MyCommentsContent({
       ref={listRef}
       data={items}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <MyCommentRow item={item} onPress={handleOpenReviews} />}
+      renderItem={({ item }) => (
+        <MyCommentRow item={item} onPress={handleOpenReviews} gateSpoiler={Boolean(userId)} />
+      )}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       contentContainerStyle={[
         styles.listContent,

@@ -15,6 +15,11 @@ interface SocialCommentComposerProps {
   sitAboveTabBar?: boolean;
   onChangeText: (text: string) => void;
   onSend: () => void;
+  /** Spoiler flag for the comment being written. */
+  isSpoiler?: boolean;
+  onToggleSpoiler?: () => void;
+  /** Opens a title picker (chat only); shows a film button before the field. */
+  onAttachTitle?: () => void;
 }
 
 const INPUT_LINE = 20;
@@ -32,6 +37,9 @@ export function SocialCommentComposer({
   sitAboveTabBar = true,
   onChangeText,
   onSend,
+  isSpoiler = false,
+  onToggleSpoiler,
+  onAttachTitle,
 }: SocialCommentComposerProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -41,6 +49,18 @@ export function SocialCommentComposer({
   return (
     <View style={[styles.dock, { paddingBottom: bottomPad }]}>
       <View style={styles.row}>
+        {onAttachTitle ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('extras.shareTitleSheet')}
+            onPress={onAttachTitle}
+            hitSlop={6}
+            testID="composer-attach-title"
+            style={({ pressed }) => [styles.attach, pressed && styles.pressed]}
+          >
+            <Ionicons name="film-outline" size={18} color={socialFeedTheme.textSecondary} />
+          </Pressable>
+        ) : null}
         <GlassSurface style={styles.inputShell}>
           <Ionicons name="pencil-outline" size={15} color={socialFeedTheme.textMuted} />
           <TextInput
@@ -48,13 +68,30 @@ export function SocialCommentComposer({
             value={draftText}
             onChangeText={onChangeText}
             placeholder={placeholder}
-            placeholderTextColor={socialFeedTheme.textMuted}
+            placeholderTextColor={socialFeedTheme.placeholder}
             multiline
             maxLength={2000}
             style={styles.input}
             textAlignVertical="center"
             {...(Platform.OS === 'android' ? { includeFontPadding: false } : null)}
           />
+          {onToggleSpoiler ? (
+            <Pressable
+              accessibilityRole="switch"
+              accessibilityLabel={t('reviews.spoilerChip')}
+              accessibilityState={{ checked: isSpoiler }}
+              onPress={onToggleSpoiler}
+              hitSlop={8}
+              testID="comment-composer-spoiler"
+              style={({ pressed }) => [styles.spoilerToggle, pressed && styles.pressed]}
+            >
+              <Ionicons
+                name={isSpoiler ? 'eye-off' : 'eye-off-outline'}
+                size={18}
+                color={isSpoiler ? socialFeedTheme.accent : socialFeedTheme.textMuted}
+              />
+            </Pressable>
+          ) : null}
         </GlassSurface>
         <Pressable
           accessibilityRole="button"
@@ -101,6 +138,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    // Keeps the field above GlassSurface's absolutely positioned blur layers on web.
+    position: 'relative',
+    zIndex: 1,
     margin: 0,
     paddingTop: INPUT_PAD_V,
     paddingBottom: INPUT_PAD_V,
@@ -109,6 +149,23 @@ const styles = StyleSheet.create({
     color: socialFeedTheme.textPrimary,
     fontSize: 15,
     lineHeight: INPUT_LINE,
+  },
+  attach: {
+    width: SHELL_MIN,
+    height: SHELL_MIN,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    backgroundColor: socialFeedTheme.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: socialFeedTheme.border,
+  },
+  spoilerToggle: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   send: {
     width: SHELL_MIN,

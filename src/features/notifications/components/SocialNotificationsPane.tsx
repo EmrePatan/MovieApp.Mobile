@@ -15,6 +15,10 @@ import type { SocialNotificationItem } from '@/features/social/types';
 import { openSocialProfile } from '@/features/social/navigation/open-social-profile';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { socialNotificationText } from '../utils/social-notification-copy';
+import {
+  groupSocialNotifications,
+  type SocialNotificationGroup,
+} from '../utils/group-social-notifications';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
 import { layout } from '@/theme/layout';
 import { premiumSheet } from '@/theme/premium-sheet';
@@ -75,29 +79,49 @@ export function SocialNotificationsPane({
     [markRead, openDirectMessage, router],
   );
 
+  const groups = useMemo(() => groupSocialNotifications(notifications), [notifications]);
+
+  const handleGroupPress = useCallback(
+    (group: SocialNotificationGroup) => {
+      // The lead press marks itself read; the rest of the merged rows follow it.
+      for (const entry of group.items) {
+        if (entry.id !== group.lead.id && !entry.isRead) {
+          markRead.mutate(entry.id);
+        }
+      }
+      handlePress(group.lead);
+    },
+    [handlePress, markRead],
+  );
+
   const renderItem = useCallback(
-    ({ item }: { item: SocialNotificationItem }) => {
+    ({ item: group }: { item: SocialNotificationGroup }) => {
+      const item = group.lead;
       const relativeTime = formatNotificationRelativeTime(item.createdAt);
       const meta = relativeTime
         ? `${socialNotificationText(item.notificationType, t)} · ${relativeTime}`
         : socialNotificationText(item.notificationType, t);
+      const displayName =
+        group.otherActorCount > 0
+          ? `${item.displayName} ${t('extras.notificationOthers', { count: group.otherActorCount })}`
+          : item.displayName;
 
       return (
         <View style={styles.rowWrap}>
-          <View style={!item.isRead ? styles.unreadWrap : undefined}>
+          <View style={group.hasUnread ? styles.unreadWrap : undefined}>
             <SocialUserListRow
-              displayName={item.displayName}
+              displayName={displayName}
               userName={item.userName}
               avatarUrl={item.avatarUrl}
               meta={meta}
-              onPress={() => handlePress(item)}
-              trailing={!item.isRead ? <View style={styles.dot} /> : undefined}
+              onPress={() => handleGroupPress(group)}
+              trailing={group.hasUnread ? <View style={styles.dot} /> : undefined}
             />
           </View>
         </View>
       );
     },
-    [handlePress, t],
+    [handleGroupPress, t],
   );
 
   if (query.isLoading && notifications.length === 0) {
@@ -127,8 +151,8 @@ export function SocialNotificationsPane({
       ref={resolvedRef}
       refreshing={query.isRefetching && !query.isFetchingNextPage}
       onRefresh={() => void query.refetch()}
-      data={notifications}
-      keyExtractor={(item) => item.id}
+      data={groups}
+      keyExtractor={(group) => group.key}
       renderItem={renderItem}
       contentContainerStyle={styles.listContent}
       onEndReached={() => {

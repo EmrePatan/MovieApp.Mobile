@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { ContentTranslationControls } from './ContentTranslationControls';
+import { SpoilerGate } from './SpoilerGate';
 import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import {
   SocialGifFrame,
@@ -26,6 +27,8 @@ interface ReviewRichBodyProps {
   textVariant?: 'body' | 'bodySmall' | 'caption';
   /** Skip translation UI (own review). */
   plain?: boolean;
+  /** Show spoiler-flagged content without the warning (the viewer's own content). */
+  revealSpoiler?: boolean;
   /** Detail rail preview: tiny GIF/photo thumb + clamped text. */
   compactMedia?: boolean;
   /** Override media frame size (defaults: rail when compact, otherwise feed). */
@@ -38,6 +41,7 @@ export function ReviewRichBody({
   numberOfLines,
   textVariant = 'bodySmall',
   plain = false,
+  revealSpoiler = false,
   compactMedia = false,
   mediaSize,
 }: ReviewRichBodyProps) {
@@ -93,13 +97,19 @@ export function ReviewRichBody({
     <SocialCommentPosterFrame path={parsed.posterPath} size={resolvedMediaSize} />
   ) : null;
 
+  // Own reviews stay readable; everyone else gets the spoiler warning first.
+  const gated = parsed.spoiler && !revealSpoiler;
+
   if (!parsed.text.trim()) {
     return media ? (
-      <View style={[styles.wrap, compactMedia && styles.wrapCompact]}>{media}</View>
+      <SpoilerGate spoiler={gated}>
+        <View style={[styles.wrap, compactMedia && styles.wrapCompact]}>{media}</View>
+      </SpoilerGate>
     ) : null;
   }
 
   return (
+    <SpoilerGate spoiler={gated}>
     <View style={[styles.wrap, compactMedia && styles.wrapCompact]}>
       {skipTranslation || !review ? (
         <AppText
@@ -121,6 +131,7 @@ export function ReviewRichBody({
       )}
       {media}
     </View>
+    </SpoilerGate>
   );
 }
 

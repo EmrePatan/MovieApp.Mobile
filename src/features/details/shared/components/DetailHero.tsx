@@ -44,6 +44,15 @@ export interface DetailHeroProps {
   };
 }
 
+/** Longer titles step the type size down so they read as a compact block, not a tall column. */
+export function resolveHeroTitleSize(title: string): { fontSize: number; lineHeight: number } {
+  const length = title.trim().length;
+  if (length <= 16) return { fontSize: 28, lineHeight: 34 };
+  if (length <= 26) return { fontSize: 25, lineHeight: 31 };
+  if (length <= 38) return { fontSize: 22, lineHeight: 28 };
+  return { fontSize: 20, lineHeight: 25 };
+}
+
 export const DetailHero = memo(function DetailHero({
   title,
   originalTitle,
@@ -154,7 +163,13 @@ export const DetailHero = memo(function DetailHero({
               <DetailHeroPosterFrame>{posterNode}</DetailHeroPosterFrame>
             ) : null}
             <View style={styles.titleBlock}>
-              <AppText variant="title" numberOfLines={3} style={styles.title}>
+              <AppText
+                variant="title"
+                numberOfLines={4}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+                style={[styles.title, resolveHeroTitleSize(title)]}
+              >
                 {title}
               </AppText>
               {shouldShowOriginalTitle(title, originalTitle) ? (

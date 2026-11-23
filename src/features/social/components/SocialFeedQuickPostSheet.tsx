@@ -64,6 +64,7 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
   const [stars, setStars] = useState<number | null>(null);
   const [text, setText] = useState('');
   const [media, setMedia] = useState<SocialCommentMediaDraft | null>(null);
+  const [isSpoiler, setIsSpoiler] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +91,7 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
 
   const reset = useCallback(() => {
     setMedia(null);
+    setIsSpoiler(false);
     setQuery('');
     setSelected(null);
     setStars(null);
@@ -116,8 +118,8 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
       if (stars != null) {
         await rate.mutateAsync(starRatingToBackendScore(stars));
       }
-      const body = buildSocialCommentBody(text, media);
-      if (body) {
+      const body = buildSocialCommentBody(text, media, isSpoiler);
+      if (text.trim() || media) {
         await createReview.mutateAsync({ content: body });
       }
       handleClose();
@@ -125,7 +127,7 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
       setError(t('social.composerError'));
       setIsSubmitting(false);
     }
-  }, [canShare, createReview, handleClose, media, rate, selected, stars, t, text]);
+  }, [canShare, createReview, handleClose, isSpoiler, media, rate, selected, stars, t, text]);
 
   const showResults = !selected && debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
 
@@ -181,7 +183,7 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
                 value={text}
                 onChangeText={setText}
                 placeholder={t('social.composerThoughts')}
-                placeholderTextColor={socialFeedTheme.textMuted}
+                placeholderTextColor={socialFeedTheme.placeholder}
                 multiline
                 maxLength={MAX_REVIEW_CONTENT_LENGTH}
                 style={styles.input}
@@ -248,6 +250,25 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
                   <Ionicons name="images-outline" size={16} color={socialFeedTheme.textPrimary} />
                   <AppText style={styles.mediaChipLabel}>{t('social.posterChip')}</AppText>
                 </Pressable>
+                <Pressable
+                  accessibilityRole="switch"
+                  accessibilityLabel={t('reviews.spoilerChip')}
+                  accessibilityState={{ checked: isSpoiler }}
+                  onPress={() => setIsSpoiler((current) => !current)}
+                  testID="quick-post-spoiler"
+                  style={({ pressed }) => [
+                    styles.mediaChip,
+                    isSpoiler && styles.mediaChipActive,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Ionicons
+                    name={isSpoiler ? 'eye-off' : 'eye-off-outline'}
+                    size={16}
+                    color={isSpoiler ? socialFeedTheme.accent : socialFeedTheme.textPrimary}
+                  />
+                  <AppText style={styles.mediaChipLabel}>{t('reviews.spoilerChip')}</AppText>
+                </Pressable>
               </View>
 
               {error ? <AppText style={styles.error}>{error}</AppText> : null}
@@ -267,7 +288,7 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
                   value={query}
                   onChangeText={setQuery}
                   placeholder={t('social.composerSearchPlaceholder')}
-                  placeholderTextColor={socialFeedTheme.textMuted}
+                  placeholderTextColor={socialFeedTheme.placeholder}
                   style={styles.searchInput}
                   autoFocus
                   autoCorrect={false}

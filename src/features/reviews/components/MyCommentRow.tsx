@@ -30,9 +30,15 @@ const MY_COMMENT_PREVIEW_LINE_COUNT = 2;
 interface MyCommentRowProps {
   item: UserReviewListItem;
   onPress: (item: UserReviewListItem) => void;
+  /** Hide spoiler-flagged comments behind a warning (someone else's profile). */
+  gateSpoiler?: boolean;
 }
 
-export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyCommentRowProps) {
+export const MyCommentRow = memo(function MyCommentRow({
+  item,
+  onPress,
+  gateSpoiler = false,
+}: MyCommentRowProps) {
   const [expanded, setExpanded] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
   const { width: posterWidth, height: posterHeight } = getMyCommentPosterSize(screenWidth);
@@ -99,6 +105,7 @@ export const MyCommentRow = memo(function MyCommentRow({ item, onPress }: MyComm
             <ReviewRichBody
               content={preview}
               plain
+              revealSpoiler={!gateSpoiler}
               textVariant="bodySmall"
               mediaSize="quote"
               numberOfLines={

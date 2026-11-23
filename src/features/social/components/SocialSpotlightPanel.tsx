@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { SocialFeedItem } from '../types';
+import { resolveExcerptPreview } from '../utils/resolve-excerpt-preview';
 import { colors } from '@/theme/colors';
 import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
@@ -36,6 +37,7 @@ export const SocialSpotlightPanel = memo(function SocialSpotlightPanel({
   const { t } = useTranslation();
   const title = item.targetTitle || titleFallback || t('social.contentFallback');
   const typeLabel = contentTypeLabel(item.targetContentType, t);
+  const excerpt = resolveExcerptPreview(item.reviewExcerpt, t('reviews.spoilerHidden'));
 
   return (
     <View style={styles.panel}>
@@ -68,9 +70,9 @@ export const SocialSpotlightPanel = memo(function SocialSpotlightPanel({
             {item.targetSubtitle}
           </AppText>
         ) : null}
-        {item.reviewExcerpt ? (
+        {excerpt ? (
           <AppText variant="bodySmall" muted numberOfLines={4} style={styles.excerpt}>
-            {item.reviewExcerpt}
+            {excerpt}
           </AppText>
         ) : null}
       </View>

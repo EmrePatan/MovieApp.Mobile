@@ -3,7 +3,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import {
+  backendScoreToStarRating,
+  formatStarRatingDisplay,
+} from '@/features/ratings/utils/star-rating';
 import type { SocialFeedItem } from '../types';
+import { resolveExcerptPreview } from '../utils/resolve-excerpt-preview';
 import { SOCIAL_POSTER, socialUi } from './social-ui-tokens';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -19,6 +24,7 @@ interface SocialMomentBodyProps {
 export const SocialMomentBody = memo(function SocialMomentBody({ item, onPress }: SocialMomentBodyProps) {
   const { t } = useTranslation();
   const title = item.targetTitle || t('social.contentFallback');
+  const excerpt = resolveExcerptPreview(item.reviewExcerpt, t('reviews.spoilerHidden'));
 
   return (
     <Pressable
@@ -46,12 +52,12 @@ export const SocialMomentBody = memo(function SocialMomentBody({ item, onPress }
         ) : null}
         {item.ratingScore !== null ? (
           <AppText variant="caption" style={styles.rating}>
-            ★ {item.ratingScore.toFixed(1)}/10
+            ★ {formatStarRatingDisplay(backendScoreToStarRating(item.ratingScore))}
           </AppText>
         ) : null}
-        {item.reviewExcerpt ? (
+        {excerpt ? (
           <AppText variant="bodySmall" muted numberOfLines={3} style={styles.quote}>
-            {item.reviewExcerpt}
+            {excerpt}
           </AppText>
         ) : null}
       </View>

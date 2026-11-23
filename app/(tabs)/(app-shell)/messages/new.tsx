@@ -9,6 +9,7 @@ import { useCreateDirectConversation } from '@/features/messages/hooks/useMessag
 import { SocialSubscreenHeader } from '@/features/social/components/SocialSubscreenHeader';
 import { SocialUserListRow } from '@/features/social/components/SocialUserListRow';
 import { useSocialUserSearch } from '@/features/social/hooks/useSocialQueries';
+import { useSuggestedPeople } from '@/features/social/hooks/useSuggestedPeople';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
@@ -27,6 +28,8 @@ export default function NewDirectMessageScreen() {
   }, [query]);
   const results = useSocialUserSearch(debouncedQuery);
   const resultItems = results.data?.pages.flatMap((page) => page) ?? [];
+  const suggested = useSuggestedPeople();
+  const showSuggestions = debouncedQuery.length < 2;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -50,7 +53,12 @@ export default function NewDirectMessageScreen() {
         <ActivityIndicator color={colors.accent} style={styles.loading} />
       ) : null}
       <FlatList
-        data={resultItems}
+        data={showSuggestions ? suggested.people : resultItems}
+        ListHeaderComponent={
+          showSuggestions && suggested.people.length > 0 ? (
+            <AppText style={styles.sectionLabel}>{t('extras.suggestedPeople')}</AppText>
+          ) : null
+        }
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
@@ -126,6 +134,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   loading: { padding: spacing.md },
+  sectionLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    paddingBottom: spacing.xs,
+  },
   empty: {
     textAlign: 'center',
     color: colors.textMuted,

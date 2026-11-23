@@ -1,5 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter, type Href } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { buildCatalogDetailRoute } from '@/features/details/shared/routes';
+import { parseChatMessage } from '../utils/chat-title-share';
 import { formatNotificationRelativeTime } from '@/features/notifications/utils/format-notification-relative-time';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -13,11 +18,47 @@ interface DirectMessageBubbleProps {
 
 export function DirectMessageBubble({ message, isMine }: DirectMessageBubbleProps) {
   const relativeTime = formatNotificationRelativeTime(message.createdAt);
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { text, share } = parseChatMessage(message.body);
 
   return (
     <View style={[styles.row, isMine ? styles.rowMine : styles.rowTheirs]}>
       <View style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleTheirs]}>
-        <AppText style={[styles.body, isMine ? styles.bodyMine : styles.bodyTheirs]}>{message.body}</AppText>
+        {share ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${share.title}. ${t('extras.openTitle')}`}
+            onPress={() =>
+              router.push(buildCatalogDetailRoute(share.id, share.contentType) as Href)
+            }
+            style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+            testID="chat-title-card"
+          >
+            <View style={styles.cardPoster}>
+              <CatalogImage
+                path={share.posterPath}
+                width={48}
+                height={72}
+                accessibilityLabel={share.title}
+                rounded={false}
+              />
+            </View>
+            <View style={styles.cardCopy}>
+              <AppText style={styles.cardTitle} numberOfLines={2}>
+                {share.title}
+              </AppText>
+              <AppText style={styles.cardMeta} numberOfLines={1}>
+                {[share.contentType === 'tv' ? t('common.tv') : t('social.movies'), share.year]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </AppText>
+            </View>
+          </Pressable>
+        ) : null}
+        {text ? (
+          <AppText style={[styles.body, isMine ? styles.bodyMine : styles.bodyTheirs]}>{text}</AppText>
+        ) : null}
         {relativeTime ? (
           <AppText style={[styles.time, isMine ? styles.timeMine : styles.timeTheirs]}>{relativeTime}</AppText>
         ) : null}
@@ -63,6 +104,38 @@ const styles = StyleSheet.create({
   },
   bodyTheirs: {
     color: colors.textPrimary,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.xs,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.28)',
+  },
+  cardPressed: {
+    opacity: 0.85,
+  },
+  cardPoster: {
+    width: 48,
+    height: 72,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  cardCopy: {
+    flexShrink: 1,
+    gap: 2,
+    paddingRight: spacing.xs,
+  },
+  cardTitle: {
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  cardMeta: {
+    fontSize: 12,
+    color: colors.textSecondary,
   },
   time: {
     fontSize: 11,

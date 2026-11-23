@@ -119,21 +119,64 @@ const KNOWN_PROVIDER_THEMES: Record<number, StreamingProviderBrandTheme> = {
   },
 };
 
-const DEFAULT_THEME: StreamingProviderBrandTheme = {
-  base: ['#3A3A4A', '#242430', '#14141C', colors.background],
-  baseLocations: [0, 0.34, 0.72, 1],
-  glow: colors.accentTint18,
-  mesh: 'rgba(196, 163, 90, 0.12)',
-  beam: 'rgba(255, 255, 255, 0.08)',
-  edge: colors.borderSubtle,
-  fill: colors.surfaceElevated,
-  backdropBottom: 'rgba(10, 10, 15, 0.65)',
-};
+function hslToHex(hue: number, saturation: number, lightness: number): string {
+  const s = saturation / 100;
+  const l = lightness / 100;
+  const a = s * Math.min(l, 1 - l);
+  const channel = (n: number) => {
+    const k = (n + hue / 30) % 12;
+    const value = l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+    return Math.round(value * 255)
+      .toString(16)
+      .padStart(2, '0');
+  };
+  return `#${channel(0)}${channel(8)}${channel(4)}`;
+}
+
+function hslToRgba(hue: number, saturation: number, lightness: number, alpha: number): string {
+  const hex = hslToHex(hue, saturation, lightness);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const generatedThemeCache = new Map<number, StreamingProviderBrandTheme>();
+
+/**
+ * Providers without a curated palette get a stable hue derived from their id,
+ * so unknown platforms read as distinct colored tiles instead of identical grey ones.
+ */
+function buildGeneratedTheme(providerId: number): StreamingProviderBrandTheme {
+  const cached = generatedThemeCache.get(providerId);
+  if (cached) {
+    return cached;
+  }
+
+  const hue = Math.abs(Math.imul(providerId, 2654435761)) % 360;
+  const theme: StreamingProviderBrandTheme = {
+    base: [
+      hslToHex(hue, 62, 52),
+      hslToHex(hue, 66, 38),
+      hslToHex(hue, 70, 22),
+      hslToHex(hue, 60, 8),
+    ],
+    baseLocations: [0, 0.32, 0.68, 1],
+    glow: hslToRgba(hue, 80, 68, 0.4),
+    mesh: hslToRgba(hue, 80, 55, 0.3),
+    beam: hslToRgba(hue, 90, 85, 0.18),
+    edge: hslToRgba(hue, 80, 70, 0.55),
+    fill: hslToHex(hue, 66, 30),
+    backdropBottom: hslToRgba(hue, 60, 14, 0.72),
+  };
+  generatedThemeCache.set(providerId, theme);
+  return theme;
+}
 
 export function getStreamingProviderBrandTheme(
   providerId: number,
 ): StreamingProviderBrandTheme {
-  return KNOWN_PROVIDER_THEMES[providerId] ?? DEFAULT_THEME;
+  return KNOWN_PROVIDER_THEMES[providerId] ?? buildGeneratedTheme(providerId);
 }
 
 export function getStreamingProviderBrandGradient(

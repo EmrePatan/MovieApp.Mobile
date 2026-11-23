@@ -15,6 +15,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { useAuth } from '@/auth/useAuth';
 import { DirectMessageBubble } from '@/features/messages/components/DirectMessageBubble';
+import { ChatTitlePickerSheet } from '@/features/messages/components/ChatTitlePickerSheet';
+import {
+  buildTitleShareMessage,
+  type ChatTitleShare,
+} from '@/features/messages/utils/chat-title-share';
 import { useSendDirectMessage } from '@/features/messages/hooks/useMessageMutations';
 import {
   useDirectConversation,
@@ -41,6 +46,7 @@ export default function DirectMessageThreadScreen() {
   const thread = useDirectMessageThread(conversationId);
   const send = useSendDirectMessage(conversationId);
   const [draft, setDraft] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
   // The composer owns the bottom safe-area inset; with the keyboard up it must not add it again.
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   useEffect(() => {
@@ -68,6 +74,18 @@ export default function DirectMessageThreadScreen() {
       onSuccess: () => setDraft(''),
     });
   }, [draft, send]);
+
+  const handleShareTitle = useCallback(
+    (share: ChatTitleShare) => {
+      if (send.isPending) {
+        return;
+      }
+      send.mutate(buildTitleShareMessage(share, draft), {
+        onSuccess: () => setDraft(''),
+      });
+    },
+    [draft, send],
+  );
 
   const otherUser = conversation.data?.otherUser;
 
@@ -143,6 +161,12 @@ export default function DirectMessageThreadScreen() {
           sitAboveTabBar={keyboardOpen}
           onChangeText={setDraft}
           onSend={handleSend}
+          onAttachTitle={() => setPickerOpen(true)}
+        />
+        <ChatTitlePickerSheet
+          visible={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelect={handleShareTitle}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>

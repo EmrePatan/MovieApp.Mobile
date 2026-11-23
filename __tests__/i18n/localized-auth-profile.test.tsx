@@ -104,8 +104,7 @@ describe('localized auth and profile rendering', () => {
     renderProfile();
 
     expect(screen.getByText('Tercihler')).toBeTruthy();
-    expect(screen.getByText('Dil')).toBeTruthy();
-    expect(screen.getByText('Bölge')).toBeTruthy();
+    expect(screen.getByText('Dil ve bölge')).toBeTruthy();
     expect(screen.getByText('Çıkış yap')).toBeTruthy();
   });
 });

@@ -2,10 +2,16 @@ const GIF_TOKEN = /\[gif\](https?:\/\/[^\]]+)\[\/gif\]/i;
 /** Catalog still — posters or backdrops (legacy tag: poster). */
 const IMAGE_TOKEN = /\[(?:poster|image)\]([^\]]+)\[\/(?:poster|image)\]/i;
 
+/** Client-side spoiler flag: stored as a leading tag inside the content string. */
+const SPOILER_TOKEN_TEXT = '[spoiler]';
+const SPOILER_TOKEN = /^\s*\[spoiler\]\s*/i;
+
 export type SocialCommentMediaKind = 'gif' | 'image';
 
 export interface ParsedSocialCommentContent {
   text: string;
+  /** True when the author marked the content as containing spoilers. */
+  spoiler: boolean;
   gifUrl: string | null;
   /** Catalog file path (poster or backdrop). */
   posterPath: string | null;
@@ -39,14 +45,26 @@ const GIPHY_URL = /https?:\/\/(?:media\d*\.)?giphy\.com\/\S+/i;
 export function buildSocialCommentBody(
   text: string,
   media: SocialCommentMediaDraft | null,
+  spoiler = false,
 ): string {
   const trimmedText = text.trim();
-  if (!media?.value.trim()) return trimmedText;
-  if (media.kind === 'gif') return embedGifInComment(media.value.trim(), trimmedText);
-  return embedCatalogImageInComment(media.value.trim(), trimmedText);
+  let body = trimmedText;
+  if (media?.value.trim()) {
+    body =
+      media.kind === 'gif'
+        ? embedGifInComment(media.value.trim(), trimmedText)
+        : embedCatalogImageInComment(media.value.trim(), trimmedText);
+  }
+  return spoiler ? `${SPOILER_TOKEN_TEXT}${body}` : body;
 }
 
-export function parseSocialCommentContent(content: string): ParsedSocialCommentContent {
+export function parseSocialCommentContent(rawContent: string): ParsedSocialCommentContent {
+  const spoiler = SPOILER_TOKEN.test(rawContent);
+  const parsed = parseMediaContent(spoiler ? rawContent.replace(SPOILER_TOKEN, '') : rawContent);
+  return { ...parsed, spoiler };
+}
+
+function parseMediaContent(content: string): Omit<ParsedSocialCommentContent, 'spoiler'> {
   const gifMatch = content.match(GIF_TOKEN);
   if (gifMatch) {
     const gifUrl = gifMatch[1];

@@ -9,6 +9,8 @@ export const socialFeedTheme = {
   textPrimary: '#F1F0F2',
   textSecondary: '#92929D',
   textMuted: '#6E6E78',
+  /** Input placeholder — readable on glass/dark fields (textMuted is too dim there). */
+  placeholder: '#A2A2AE',
   border: '#292930',
   borderSubtle: 'rgba(255, 255, 255, 0.08)',
   accent: '#B9A276',

@@ -197,7 +197,7 @@ describe('detail UI', () => {
       voteCount: 10,
     };
 
-    render(<EpisodeDetailContent episode={episode} />);
+    renderWithProviders(<EpisodeDetailContent episode={episode} />);
     expect(screen.getByText('Pilot')).toBeTruthy();
     expect(screen.getByText('Season 1 · Episode 1')).toBeTruthy();
   });

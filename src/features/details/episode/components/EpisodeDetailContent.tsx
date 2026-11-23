@@ -8,6 +8,7 @@ import {
   formatEpisodeDetailMetadataLine,
 } from '../../shared/utils/format-detail-metadata';
 import type { EpisodeResponse } from '../types';
+import { EpisodeSiblingNav } from './EpisodeSiblingNav';
 
 interface EpisodeDetailContentProps {
   episode: EpisodeResponse;
@@ -39,6 +40,11 @@ export function EpisodeDetailContent({ episode }: EpisodeDetailContentProps) {
         episodeId={episode.id}
         tvShowId={episode.tvShowId}
         seasonNumber={episode.seasonNumber}
+      />
+      <EpisodeSiblingNav
+        tvShowId={episode.tvShowId}
+        seasonNumber={episode.seasonNumber}
+        episodeNumber={episode.episodeNumber}
       />
       <DetailOverview overview={episode.overview} />
       <ReviewsLinkRow

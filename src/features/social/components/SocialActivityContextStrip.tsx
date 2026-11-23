@@ -7,6 +7,10 @@ import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { resolveImageUri } from '@/utils/image-url';
 import { shouldShowOriginalTitle } from '@/utils/format';
+import {
+  backendScoreToStarRating,
+  formatStarRatingDisplay,
+} from '@/features/ratings/utils/star-rating';
 import type { SocialFeedItem } from '../types';
 import { socialContentTypeLabel } from '../utils/social-feed-embed';
 import { authTypography } from '@/features/auth/auth-typography';
@@ -33,9 +37,10 @@ export function SocialActivityContextStrip({ activity, onPress }: SocialActivity
     activity.targetSubtitle?.trim() || socialContentTypeLabel(activity.targetContentType, t);
   const metaLine = `${activity.displayName} · ${metaSecondary}`;
   const glowUri = activity.posterPath?.trim() ? resolveImageUri(activity.posterPath, 'w300') : null;
+  // Same 5-star scale as the feed cards, so one review never shows two different numbers.
   const scoreLabel =
     showStars && activity.ratingScore != null
-      ? `${Number(activity.ratingScore).toFixed(1)}/10`
+      ? formatStarRatingDisplay(backendScoreToStarRating(activity.ratingScore))
       : null;
 
   return (

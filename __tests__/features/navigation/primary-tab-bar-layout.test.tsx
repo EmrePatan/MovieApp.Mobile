@@ -27,12 +27,14 @@ describe('PrimaryTabBar layout', () => {
     await initI18nForTests('tr');
   });
 
-  it('renders Turkish home, profile, and insights labels', () => {
+  it('shows the visible label only on the active tab and keeps accessible names on all', () => {
     render(<PrimaryTabBar />);
 
     expect(screen.getByText('Ana Sayfa')).toBeTruthy();
-    expect(screen.getByText('Profil')).toBeTruthy();
-    expect(screen.getByText('İstatistikler')).toBeTruthy();
+    expect(screen.queryByText('Profil')).toBeNull();
+    expect(screen.queryByText('İstatistikler')).toBeNull();
+    expect(screen.getByLabelText('Profil')).toBeTruthy();
+    expect(screen.getByLabelText('İstatistikler')).toBeTruthy();
   });
 
   it('does not add extra bottom margin on tab labels', () => {

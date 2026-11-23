@@ -149,6 +149,7 @@ export const ReviewCard = memo(function ReviewCard({
           content={content}
           review={isOwnReview ? undefined : review}
           plain={isOwnReview}
+          revealSpoiler={isOwnReview}
           numberOfLines={
             expanded ? undefined : canExpand ? REVIEW_LIST_COLLAPSED_LINE_COUNT : undefined
           }

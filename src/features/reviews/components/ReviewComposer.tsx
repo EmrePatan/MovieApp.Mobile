@@ -106,15 +106,20 @@ function ComposerMutedButton({
 function seedFromContent(initialContent: string): {
   text: string;
   media: SocialCommentMediaDraft | null;
+  spoiler: boolean;
 } {
   const parsed = parseSocialCommentContent(initialContent);
   if (parsed.mediaKind === 'gif' && parsed.gifUrl) {
-    return { text: parsed.text, media: { kind: 'gif', value: parsed.gifUrl } };
+    return { text: parsed.text, media: { kind: 'gif', value: parsed.gifUrl }, spoiler: parsed.spoiler };
   }
   if (parsed.mediaKind === 'image' && parsed.posterPath) {
-    return { text: parsed.text, media: { kind: 'image', value: parsed.posterPath } };
+    return {
+      text: parsed.text,
+      media: { kind: 'image', value: parsed.posterPath },
+      spoiler: parsed.spoiler,
+    };
   }
-  return { text: initialContent, media: null };
+  return { text: parsed.text, media: null, spoiler: parsed.spoiler };
 }
 
 const NEAR_LIMIT_RATIO = 0.9;
@@ -138,6 +143,7 @@ function ReviewComposerInner({
   const seeded = useMemo(() => seedFromContent(initialContent), [initialContent]);
   const [content, setContent] = useState(seeded.text);
   const [draftMedia, setDraftMedia] = useState<SocialCommentMediaDraft | null>(seeded.media);
+  const [isSpoiler, setIsSpoiler] = useState(seeded.spoiler);
   const [gifPickerOpen, setGifPickerOpen] = useState(false);
   const [photoPickerOpen, setPhotoPickerOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<ReviewFormErrors>({});
@@ -176,7 +182,7 @@ function ReviewComposerInner({
   };
 
   const handleSubmit = () => {
-    const body = buildSocialCommentBody(content, draftMedia);
+    const body = buildSocialCommentBody(content, draftMedia, isSpoiler);
     const errors = validateReviewContent(body);
     setFieldErrors(errors);
 
@@ -294,6 +300,31 @@ function ReviewComposerInner({
               ]}
             >
               GIF
+            </AppText>
+          </Pressable>
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel={t('reviews.spoilerChip')}
+            accessibilityState={{ checked: isSpoiler }}
+            disabled={isSubmitting}
+            onPress={() => setIsSpoiler((current) => !current)}
+            testID="review-composer-spoiler"
+            style={({ pressed }) => [
+              styles.mediaChip,
+              isSpoiler && styles.mediaChipActive,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Ionicons
+              name={isSpoiler ? 'eye-off' : 'eye-off-outline'}
+              size={16}
+              color={isSpoiler ? sheet.mutedGold : sheet.textPrimary}
+            />
+            <AppText
+              variant="caption"
+              style={[styles.mediaChipLabel, isSpoiler && styles.mediaChipLabelActive]}
+            >
+              {t('reviews.spoilerChip')}
             </AppText>
           </Pressable>
           {canAttachPhoto ? (

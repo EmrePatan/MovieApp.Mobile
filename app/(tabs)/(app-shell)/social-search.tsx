@@ -8,6 +8,7 @@ import { AppText } from '@/components/common/AppText';
 import { SocialSubscreenHeader } from '@/features/social/components/SocialSubscreenHeader';
 import { SocialUserListRow } from '@/features/social/components/SocialUserListRow';
 import { useSocialUserSearch } from '@/features/social/hooks/useSocialQueries';
+import { useSuggestedPeople } from '@/features/social/hooks/useSuggestedPeople';
 import { openSocialProfile } from '@/features/social/navigation/open-social-profile';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -26,6 +27,8 @@ export default function SocialSearchScreen() {
   }, [query]);
   const results = useSocialUserSearch(debouncedQuery);
   const resultItems = results.data?.pages.flatMap((page) => page) ?? [];
+  const suggested = useSuggestedPeople();
+  const showSuggestions = debouncedQuery.length < 2;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -49,20 +52,27 @@ export default function SocialSearchScreen() {
         <ActivityIndicator color={colors.accent} style={styles.loading} />
       ) : null}
       <FlatList
-        data={resultItems}
+        data={showSuggestions ? suggested.people : resultItems}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          showSuggestions && suggested.people.length > 0 ? (
+            <AppText style={styles.sectionLabel}>{t('extras.suggestedPeople')}</AppText>
+          ) : null
+        }
         renderItem={({ item }) => (
           <SocialUserListRow
             displayName={item.displayName}
             userName={item.userName}
             avatarUrl={item.avatarUrl}
             meta={
-              item.followStatus === 'Accepted'
-                ? t('social.followed')
-                : item.followStatus === 'Pending'
-                  ? t('social.requestSent')
-                  : undefined
+              'followStatus' in item
+                ? item.followStatus === 'Accepted'
+                  ? t('social.followed')
+                  : item.followStatus === 'Pending'
+                    ? t('social.requestSent')
+                    : undefined
+                : undefined
             }
             onPress={() => openSocialProfile(router, item.id)}
           />
@@ -125,6 +135,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   loading: { padding: spacing.md },
+  sectionLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    paddingBottom: spacing.xs,
+  },
   empty: {
     textAlign: 'center',
     color: colors.textMuted,
