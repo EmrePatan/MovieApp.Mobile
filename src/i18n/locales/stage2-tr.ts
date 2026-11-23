@@ -1205,6 +1205,17 @@ export const stage2Tr = {
       share: 'Paylaş',
       shareMessage: '{{dna}} — Movie Cave\'de {{duration}} izledim.',
     },
+    celebration: {
+      kicker: 'Yeni başarı',
+      subtitle: 'Yeni bir dönüm noktasını geçtin.',
+      more: 've {{count}} başarı daha açıldı.',
+      cta: 'Harika',
+    },
+    share: {
+      title: 'Yıl özetin',
+      cta: 'Görsel olarak paylaş',
+      avgRating: 'ortalama puan',
+    },
     movieDna: {
       kicker: 'Film DNA\'n',
       defaultTitle: 'Perde Kaşifi',
@@ -1268,6 +1279,9 @@ export const stage2Tr = {
       watchingMixLine: '%{{movies}} film · %{{series}} dizi',
     },
     yourYear: {
+      heatmapTitle: 'Günlük ritim',
+      heatmapLess: 'Az',
+      heatmapMore: 'Çok',
       title: 'Senin Yılın',
       empty: 'Başlıkları izleyip takip ettikçe yılın şekillenecek.',
       legendMovies: 'Filmler',

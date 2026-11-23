@@ -16,6 +16,7 @@ import {
 import { useCreateDirectConversation } from '@/features/messages/hooks/useMessageMutations';
 import { SocialProfileCoverPickerSheet } from '@/features/social/components/SocialProfileCoverPickerSheet';
 import { SocialProfileHeader } from '@/features/social/components/SocialProfileHeader';
+import { SocialTasteMatchCard } from '@/features/social/components/SocialTasteMatchCard';
 import { useSocialProfileCoverEditor } from '@/features/social/hooks/useSocialProfileCoverEditor';
 import { SocialProfileActionRow } from '@/features/social/components/SocialProfileActionRow';
 import { SocialProfileLibrary } from '@/features/social/components/SocialProfileLibrary';
@@ -209,6 +210,10 @@ export default function SocialProfileScreen() {
                 : undefined
           }
         />
+
+        {!isSelf && canViewLibrary ? (
+          <SocialTasteMatchCard userId={userId} enabled />
+        ) : null}
 
         {showPrivateNotice ? (
           <AppText variant="bodySmall" muted style={styles.privateNotice}>

@@ -1,6 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
@@ -13,20 +13,19 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { GlassSurface } from '@/components/common/GlassSurface';
 import { HomeHeaderProfileAvatar } from '@/features/home/components/HomeHeaderProfileAvatar';
 import { useInsightsV3 } from '../hooks/useInsightsV3';
+import { useNewAchievements } from '../hooks/useNewAchievements';
 import { beginInsightsTrace, markInsightsPerfEvent, resetInsightsTrace } from '@/perf/insights-trace';
 import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
-import {
-  buildSelectableYears,
-  formatMovieDnaDisplayTitle,
-  formatWatchTimeBreakdown,
-} from '../utils/insights-format';
+import { buildSelectableYears } from '../utils/insights-format';
+import { InsightsAchievementCelebration } from './InsightsAchievementCelebration';
 import { InsightsErasSection } from './InsightsErasSection';
 import { InsightsLoadingSkeleton } from './InsightsLoadingSkeleton';
 import { InsightsMilestonesSection } from './InsightsMilestonesSection';
 import { InsightsMovieDnaHero } from './InsightsMovieDnaHero';
 import { InsightsRatingsSection } from './InsightsRatingsSection';
 import { InsightsRecordsSection } from './InsightsRecordsSection';
+import { InsightsShareSheet } from './InsightsShareSheet';
 import { InsightsTasteSection } from './InsightsTasteSection';
 import { InsightsTimeInStoriesSection } from './InsightsTimeInStoriesSection';
 import { InsightsYourYearSection } from './InsightsYourYearSection';
@@ -43,6 +42,11 @@ export function InsightsHubContent() {
   const router = useRouter();
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const insightsQuery = useInsightsV3(selectedYear);
+  const [shareOpen, setShareOpen] = useState(false);
+  const newAchievements = useNewAchievements(
+    insightsQuery.data?.achievements,
+    insightsQuery.data?.meta.memberSinceUtc,
+  );
   const hasMarkedApiStart = useRef(false);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -86,19 +90,7 @@ export function InsightsHubContent() {
     void insightsQuery.refetch();
   }, [insightsQuery]);
 
-  // Hands the DNA title and total watch time to the OS share sheet.
-  const handleShare = useCallback(() => {
-    const data = insightsQuery.data;
-    if (!data) {
-      return;
-    }
-    void Share.share({
-      message: t('insights.hub.shareMessage', {
-        dna: formatMovieDnaDisplayTitle(data.movieDna),
-        duration: formatWatchTimeBreakdown(data.timeInStories.totalMinutes),
-      }),
-    }).catch(() => undefined);
-  }, [insightsQuery.data, t]);
+  const handleShare = useCallback(() => setShareOpen(true), []);
 
   const scrollInsightsToTop = useCallback(() => {
     scrollScrollViewToTop(scrollRef);
@@ -183,6 +175,16 @@ export function InsightsHubContent() {
         favoriteWeekday={insights.yourYear.favoriteWeekday}
       />
       <InsightsMilestonesSection achievements={insights.achievements} />
+      <InsightsAchievementCelebration
+        achievements={newAchievements.fresh}
+        onClose={newAchievements.dismiss}
+      />
+      <InsightsShareSheet
+        visible={shareOpen}
+        onClose={() => setShareOpen(false)}
+        insights={insights}
+        year={activeYear}
+      />
     </AnimatedScrollView>
   );
 

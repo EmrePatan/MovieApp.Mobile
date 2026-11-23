@@ -42,8 +42,15 @@ export interface InsightsV3MonthHighlight {
   total: number;
 }
 
+export interface InsightsV3DayActivity {
+  dayOfYear: number;
+  total: number;
+}
+
 export interface InsightsV3YourYear {
   months: InsightsV3MonthlyActivity[];
+  /** Per-day watch counts for the heatmap; absent on older backends. */
+  days?: InsightsV3DayActivity[];
   activeDays: number;
   peakMonth: InsightsV3MonthHighlight | null;
   favoriteWeekday: number | string | null;
@@ -139,6 +146,22 @@ export interface InsightsV3Meta {
   generatedAtUtc: string;
   timeZone: string;
   year: number;
+}
+
+export interface InsightsCompareGenre {
+  genreId: string;
+  name: string;
+  myShare: number;
+  theirShare: number;
+}
+
+export interface InsightsCompareResponse {
+  matchPercent: number;
+  sharedGenres: InsightsCompareGenre[];
+  myTopGenres: string[];
+  theirTopGenres: string[];
+  myWatchMinutes: number;
+  theirWatchMinutes: number;
 }
 
 export interface InsightsV3Response {

@@ -11,6 +11,7 @@ import {
   formatWeekdayName,
 } from '../utils/insights-format';
 import { authTypography } from '@/features/auth/auth-typography';
+import { InsightsActivityHeatmap } from './InsightsActivityHeatmap';
 import { InsightsCard } from './InsightsCard';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
@@ -96,6 +97,10 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
               />
             ) : null}
           </View>
+
+          {yourYear.days && yourYear.days.length > 0 ? (
+            <InsightsActivityHeatmap year={year} days={yourYear.days} />
+          ) : null}
 
           {activeDayPercent != null ? (
             <View style={styles.callout} accessibilityRole="text">

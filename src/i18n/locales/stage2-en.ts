@@ -1181,6 +1181,17 @@ export const stage2En = {
       share: 'Share',
       shareMessage: '{{dna}} — I\'ve watched {{duration}} on Movie Cave.',
     },
+    celebration: {
+      kicker: 'New milestone',
+      subtitle: 'You just hit a new milestone.',
+      more: 'and {{count}} more unlocked.',
+      cta: 'Nice',
+    },
+    share: {
+      title: 'Your year in film',
+      cta: 'Share as image',
+      avgRating: 'average rating',
+    },
     movieDna: {
       kicker: 'Your Movie DNA',
       defaultTitle: 'Screen Explorer',
@@ -1241,6 +1252,9 @@ export const stage2En = {
       watchingMixLine: '{{movies}}% films · {{series}}% series',
     },
     yourYear: {
+      heatmapTitle: 'Daily rhythm',
+      heatmapLess: 'Less',
+      heatmapMore: 'More',
       title: 'Your Year',
       empty: 'Your year will take shape as you watch and track titles.',
       legendMovies: 'Movies',

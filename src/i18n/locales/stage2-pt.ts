@@ -1203,6 +1203,17 @@ export const stage2Pt = {
       share: 'Compartilhar',
       shareMessage: '{{dna}} — Assisti {{duration}} no Movie Cave.',
     },
+    celebration: {
+      kicker: 'Nova conquista',
+      subtitle: 'Você acabou de atingir um novo marco.',
+      more: 'e mais {{count}} desbloqueadas.',
+      cta: 'Ótimo',
+    },
+    share: {
+      title: 'Seu ano no cinema',
+      cta: 'Compartilhar como imagem',
+      avgRating: 'nota média',
+    },
     movieDna: {
       kicker: 'Seu DNA cinematográfico',
       defaultTitle: 'Explorador de telas',
@@ -1266,6 +1277,9 @@ export const stage2Pt = {
       watchingMixLine: '{{movies}}% filmes · {{series}}% séries',
     },
     yourYear: {
+      heatmapTitle: 'Ritmo diário',
+      heatmapLess: 'Menos',
+      heatmapMore: 'Mais',
       title: 'Seu ano',
       empty: 'Seu ano tomará forma conforme você assiste e acompanha títulos.',
       legendMovies: 'Filmes',

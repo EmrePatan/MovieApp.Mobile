@@ -7,6 +7,7 @@ import { formatDominantGenreHeadline } from '../utils/insights-format';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
 import { InsightsCard } from './InsightsCard';
 import { InsightsEmptyState } from './InsightsEmptyState';
+import { InsightsTasteRadar } from './InsightsTasteRadar';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
@@ -20,6 +21,7 @@ interface InsightsTasteSectionProps {
 export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
   const { t } = useTranslation();
   const genres = taste.genres.slice(0, 4);
+  const radarGenres = taste.genres.slice(0, 6);
   const dominantGenre = genres[0]?.name ?? null;
 
   return (
@@ -33,6 +35,7 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
         <InsightsEmptyState message={t('insights.taste.empty')} />
       ) : (
         <InsightsCard style={styles.card}>
+          <InsightsTasteRadar genres={radarGenres} />
           {genres.map((genre, index) => (
             <InsightsAffinityBar
               key={genre.genreId}
