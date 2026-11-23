@@ -16,6 +16,7 @@ import type { WatchlistSummaryResponse } from '@/features/watchlists/types';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryLoadingState } from './LibraryLoadingState';
 import { LibraryWatchlistCard } from './LibraryWatchlistCard';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { colors } from '@/theme/colors';
@@ -43,7 +44,7 @@ export function LibraryWatchlistsOverview({ listRef }: LibraryWatchlistsOverview
 
   const handleOpenWatchlist = useCallback(
     (watchlistId: string) => {
-      router.push(`/watchlist/${watchlistId}`);
+      openLibraryStackScreen(router, `/watchlist/${watchlistId}`, '/(tabs)/library');
     },
     [router],
   );
@@ -51,7 +52,7 @@ export function LibraryWatchlistsOverview({ listRef }: LibraryWatchlistsOverview
   const handleCreatedWatchlist = useCallback(
     (watchlistId: string) => {
       setCreateModalVisible(false);
-      router.push(`/watchlist/${watchlistId}`);
+      openLibraryStackScreen(router, `/watchlist/${watchlistId}`, '/(tabs)/library');
     },
     [router],
   );

@@ -1,4 +1,5 @@
 import type { ImperativeRouter } from 'expo-router';
+import { clearAppShellTabOrigin } from '@/features/navigation/app-shell-tab-origin';
 import { emitPrimaryTabReselect } from '@/features/navigation/primary-tab-reselect';
 import {
   isPrimaryTabRootPath,
@@ -58,6 +59,9 @@ export function handlePrimaryTabPress(params: {
     emitReselect(tabId);
     return 'reselect';
   }
+
+  // Leaving for a tab root: stale origin must not tint the next shared route.
+  clearAppShellTabOrigin();
 
   // Sibling tab navigator ignores POP_TO — leave settings with replace.
   if (isSettingsHubPath(pathname)) {

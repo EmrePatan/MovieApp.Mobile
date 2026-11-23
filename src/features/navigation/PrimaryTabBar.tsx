@@ -151,7 +151,7 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
       {overlayActive ? (
         <LinearGradient
           pointerEvents="none"
-          colors={['rgba(5, 5, 8, 0)', 'rgba(5, 5, 8, 0.92)']}
+          colors={['rgba(5, 5, 8, 0)', 'rgba(5, 5, 8, 0.96)']}
           style={StyleSheet.absoluteFill}
         />
       ) : null}
@@ -166,7 +166,9 @@ export function PrimaryTabBar({ insets: navigationInsets }: PrimaryTabBarProps =
             ),
           },
         ]}
-      />
+      >
+        <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.glassScrim]} />
+      </GlassSurface>
       <View
         style={[
           styles.tabRow,
@@ -281,6 +283,10 @@ const styles = StyleSheet.create({
       },
       default: {},
     }),
+  },
+  /** Dark scrim keeps labels legible when scrolling content passes behind the dock. */
+  glassScrim: {
+    backgroundColor: 'rgba(12, 12, 16, 0.55)',
   },
   tabRow: {
     flexDirection: 'row',

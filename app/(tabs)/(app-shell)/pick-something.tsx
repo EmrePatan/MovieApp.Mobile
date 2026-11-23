@@ -104,6 +104,7 @@ export default function PickSomethingScreen() {
 
   const pickQuery = usePickSomething(mediaType, sessionExcludedIds);
   const pick = pickQuery.data?.item ?? null;
+  const pickId = pick?.id;
 
   useEffect(() => {
     if (pick?.id && pickQuery.isSuccess && lastTrackedPickIdRef.current !== pick.id) {
@@ -118,14 +119,14 @@ export default function PickSomethingScreen() {
   }, []);
 
   const handleTryAnother = useCallback(() => {
-    if (!pick?.id) {
+    if (!pickId) {
       return;
     }
 
     setSessionExcludedIds((current) =>
-      current.includes(pick.id) ? current : [...current, pick.id],
+      current.includes(pickId) ? current : [...current, pickId],
     );
-  }, [pick?.id]);
+  }, [pickId]);
 
   const handleViewDetails = useCallback(() => {
     if (!pick) {
