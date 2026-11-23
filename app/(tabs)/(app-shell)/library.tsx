@@ -11,7 +11,7 @@ export default function LibraryTabScreen() {
   useTrackProductMetricOnFocus(PRODUCT_METRICS.libraryOpened);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.screen} edges={['left', 'right']}>
       <LibraryHubSearchProvider>
         <View style={styles.content}>
           <LibraryHubContent banner={<OwnProfileTabHeader />} quickActionsEnabled={false} />

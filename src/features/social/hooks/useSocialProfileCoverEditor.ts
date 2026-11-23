@@ -68,10 +68,41 @@ export function useSocialProfileCoverEditor(userId: string) {
     await uploadCover.mutateAsync(file);
   }, [t, uploadCover]);
 
+  /** Picks a photo without the system cropper so the in-app adjuster can frame it. */
+  const pickPhotoUri = useCallback(async (): Promise<string | null> => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(t('profile.avatarPermissionDenied'));
+      return null;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (pickerResult.canceled || !pickerResult.assets[0]) {
+      return null;
+    }
+
+    return pickerResult.assets[0].uri;
+  }, [t]);
+
+  const uploadCroppedCover = useCallback(
+    async (file: { uri: string; name: string; type: string }) => {
+      await uploadCover.mutateAsync(file);
+    },
+    [uploadCover],
+  );
+
   const isBusy = uploadCover.isPending || setPoster.isPending || removeCover.isPending;
 
   return {
     pickAndUploadPhoto,
+    pickPhotoUri,
+    uploadCroppedCover,
+    isUploading: uploadCover.isPending,
     setPoster: (posterPath: string) => setPoster.mutate(posterPath),
     removeCover: () => removeCover.mutate(),
     isBusy,

@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
-import { ReviewStarRow } from '@/features/reviews/components/ReviewStarRow';
 import { backendScoreToStarRating, formatStarRatingDisplay } from '@/features/ratings/utils/star-rating';
 import { authTypography } from '@/features/auth/auth-typography';
 import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { shouldShowOriginalTitle } from '@/utils/format';
+import { resolveImageUri } from '@/utils/image-url';
 import { socialFeedTheme } from './social-feed-theme';
 import {
   SOCIAL_AVATAR_FEED_ROW,
@@ -68,10 +70,27 @@ export function SocialFeedEntry({
   const chips = (metaChips ?? []).map((chip) => chip.trim()).filter(Boolean);
   const isFlat = chrome === 'flat';
   const showOriginal = shouldShowOriginalTitle(title, originalTitle);
-  const hasCatalogMeta = chips.length > 0 || starRating != null;
+  const hasCatalogMeta = chips.length > 0;
+  const ratingLabel = starRating != null ? formatStarRatingDisplay(starRating) : null;
+  const glowUri = !isFlat && posterPath?.trim() ? resolveImageUri(posterPath, 'w300') : null;
 
   return (
     <View style={[styles.wrap, isFlat ? styles.wrapFlat : styles.wrapCard]}>
+      {glowUri ? (
+        <View pointerEvents="none" style={styles.glow} accessibilityElementsHidden>
+          <Image
+            source={{ uri: glowUri }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            blurRadius={45}
+            cachePolicy="memory-disk"
+          />
+          <LinearGradient
+            colors={['rgba(8,8,10,0.30)', 'rgba(8,8,10,0.74)']}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+      ) : null}
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
@@ -103,6 +122,13 @@ export function SocialFeedEntry({
             </AppText>
           ) : null}
         </Pressable>
+
+        {ratingLabel ? (
+          <View style={styles.ratingBadge} accessibilityRole="text" accessibilityLabel={ratingA11y}>
+            <Ionicons name="star" size={12} color={socialFeedTheme.accent} />
+            <AppText style={styles.ratingText}>{ratingLabel}</AppText>
+          </View>
+        ) : null}
 
         {onMenuPress ? (
           <Pressable
@@ -156,7 +182,6 @@ export function SocialFeedEntry({
                   {chip}
                 </AppText>
               ))}
-              {starRating != null ? <ReviewStarRow starRating={starRating} size={11} /> : null}
             </View>
           ) : null}
         </View>
@@ -193,12 +218,17 @@ const styles = StyleSheet.create({
   },
   wrapCard: {
     marginHorizontal: layout.screenPaddingHorizontal,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
     padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    backgroundColor: socialFeedTheme.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: socialFeedTheme.border,
+    borderRadius: 26,
+    overflow: 'hidden',
+    backgroundColor: glass.panel,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+  },
+  glow: {
+    ...StyleSheet.absoluteFill,
+    opacity: 0.9,
   },
   header: {
     flexDirection: 'row',
@@ -227,6 +257,24 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: socialFeedTheme.textMuted,
   },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 28,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: 14,
+    backgroundColor: 'rgba(212, 179, 106, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+  },
+  ratingText: {
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: '700',
+    color: socialFeedTheme.accent,
+    fontVariant: ['tabular-nums'],
+  },
   menu: {
     width: layout.touchTarget,
     height: layout.touchTarget,
@@ -251,19 +299,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    paddingLeft: spacing.sm,
+    padding: spacing.sm,
     paddingRight: spacing.xs,
-    borderRadius: borderRadius.lg,
-    backgroundColor: glass.panel,
-    borderWidth: 1,
-    borderColor: glass.hairline,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.34)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.10)',
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
   },
   titlePoster: {
     width: SOCIAL_POSTER_FEED.width,
@@ -313,5 +355,8 @@ const styles = StyleSheet.create({
   },
   engagement: {
     marginTop: spacing.xs / 2,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: glass.hairline,
   },
 });

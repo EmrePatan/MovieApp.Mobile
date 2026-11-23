@@ -1,11 +1,20 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { AppButton } from '@/components/buttons/AppButton';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { useAuth } from '@/auth/useAuth';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { authTypography } from '@/features/auth/auth-typography';
@@ -30,6 +39,8 @@ import {
 } from '@/features/social/components/SocialFeedSegmentTabs';
 import { SocialFeedHeader } from '@/features/social/components/SocialFeedHeader';
 import { SocialFeedFindPeopleButton } from '@/features/social/components/SocialFeedChrome';
+import { SocialFeedComposerPrompt } from '@/features/social/components/SocialFeedComposerPrompt';
+import { SocialFeedQuickPostSheet } from '@/features/social/components/SocialFeedQuickPostSheet';
 import { SocialFeedFilmTexture } from '@/features/social/components/SocialFeedFilmTexture';
 import { SocialFeedTimelineRowView } from '@/features/social/components/SocialFeedTimelineRowView';
 import { SocialReportReasonSheet } from '@/features/social/components/SocialReportReasonSheet';
@@ -49,6 +60,9 @@ export default function SocialFeedScreen() {
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuth();
   const [feedSegment, setFeedSegment] = useState<SocialFeedSegment>('forYou');
+  const [titleHeight, setTitleHeight] = useState(0);
+  const [pinned, setPinned] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
   const feedMode = feedModeForSegment(feedSegment);
   const feed = useSocialFeed(feedMode);
   const toggleLike = useToggleSocialActivityLike();
@@ -103,16 +117,36 @@ export default function SocialFeedScreen() {
   const emptyCopy =
     feedSegment === 'following' ? t('social.emptyFollowing') : t('social.emptyDiscover');
 
+  const openComposer = useCallback(() => setComposerOpen(true), []);
+  const closeComposer = useCallback(() => setComposerOpen(false), []);
+
   const openMessages = useCallback(() => {
     router.push('/(tabs)/(app-shell)/messages');
   }, [router]);
 
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      setPinned(titleHeight > 0 && event.nativeEvent.contentOffset.y > titleHeight);
+    },
+    [titleHeight],
+  );
+
+  const segmentTabs = <SocialFeedSegmentTabs active={feedSegment} onChange={setFeedSegment} />;
+
   const chrome = (
     <>
       <SocialFeedHeader onSearchPress={openPeopleSearch} onMessagesPress={openMessages} />
-      <SocialFeedSegmentTabs active={feedSegment} onChange={setFeedSegment} />
+      {segmentTabs}
     </>
   );
+
+  /** Title scrolls away; the segment control then pins as a glass bar. */
+  const pinnedBar = pinned ? (
+    <GlassSurface style={styles.pinnedBar} testID="social-feed-pinned-bar">
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pinnedScrim]} />
+      {segmentTabs}
+    </GlassSurface>
+  ) : null;
 
   const renderRow = useCallback(
     ({ item: row }: { item: SocialFeedTimelineRow }) => (
@@ -183,7 +217,6 @@ export default function SocialFeedScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.content}>
         <SocialFeedFilmTexture />
-        {chrome}
         <FlatList
           style={styles.list}
           data={feedRows}
@@ -200,20 +233,34 @@ export default function SocialFeedScreen() {
           removeClippedSubviews
           refreshing={feed.isRefetching && !feed.isFetchingNextPage}
           onRefresh={() => void feed.refetch()}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           ListHeaderComponent={
-            feed.isError && items.length > 0 ? (
-              <View style={styles.inlineError}>
-                <AppText style={styles.inlineErrorText}>{t('social.loadError')}</AppText>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('common.retry')}
-                  onPress={() => void feed.refetch()}
-                  hitSlop={8}
-                >
-                  <AppText style={styles.retry}>{t('common.retry')}</AppText>
-                </Pressable>
+            <>
+              <View onLayout={(event) => setTitleHeight(event.nativeEvent.layout.height)}>
+                <SocialFeedHeader onSearchPress={openPeopleSearch} onMessagesPress={openMessages} />
               </View>
-            ) : null
+              {segmentTabs}
+              <View style={styles.composerGap} />
+              <SocialFeedComposerPrompt
+                displayName={user?.displayName ?? ''}
+                avatarUrl={user?.effectiveAvatarUrl}
+                onPress={openComposer}
+              />
+              {feed.isError && items.length > 0 ? (
+                <View style={styles.inlineError}>
+                  <AppText style={styles.inlineErrorText}>{t('social.loadError')}</AppText>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('common.retry')}
+                    onPress={() => void feed.refetch()}
+                    hitSlop={8}
+                  >
+                    <AppText style={styles.retry}>{t('common.retry')}</AppText>
+                  </Pressable>
+                </View>
+              ) : null}
+            </>
           }
           ListEmptyComponent={
             <View style={styles.emptyInline}>
@@ -238,8 +285,10 @@ export default function SocialFeedScreen() {
             ) : null
           }
         />
+        {pinnedBar}
       </View>
       <SocialReportReasonSheet {...reportSheetProps} />
+      <SocialFeedQuickPostSheet visible={composerOpen} onClose={closeComposer} />
     </SafeAreaView>
   );
 }
@@ -248,9 +297,23 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: socialFeedTheme.background },
   content: { flex: 1 },
   list: { flex: 1 },
+  composerGap: { height: spacing.sm },
+  pinnedBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingVertical: spacing.xs,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  pinnedScrim: {
+    backgroundColor: 'rgba(10, 10, 14, 0.72)',
+  },
   listContent: {
     flexGrow: 1,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
   },
   inlineError: {

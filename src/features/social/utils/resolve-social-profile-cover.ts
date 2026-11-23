@@ -1,4 +1,5 @@
 import { resolveImageUri } from '@/utils/image-url';
+import { rewriteLoopbackMediaUrl } from '@/utils/loopback-media-url';
 import { colors } from '@/theme/colors';
 
 export function resolveSocialProfileCoverUri(
@@ -6,7 +7,8 @@ export function resolveSocialProfileCoverUri(
   coverPosterPath: string | null | undefined,
   fallbackPosterPath: string | null | undefined,
 ): string | null {
-  if (coverImageUrl?.trim()) return coverImageUrl.trim();
+  const customCover = rewriteLoopbackMediaUrl(coverImageUrl);
+  if (customCover) return customCover;
   const poster = coverPosterPath?.trim() || fallbackPosterPath?.trim();
   return poster ? resolveImageUri(poster, 'w1280') : null;
 }

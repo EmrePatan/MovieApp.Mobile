@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
@@ -15,6 +15,8 @@ interface AppBottomSheetProps {
   subtitle?: string;
   align?: AppBottomSheetAlign;
   testID?: string;
+  /** Lift the sheet above the software keyboard (for sheets that contain text inputs). */
+  avoidKeyboard?: boolean;
   children: ReactNode;
 }
 
@@ -26,12 +28,19 @@ function AppBottomSheetFrame({
   subtitle,
   align = 'stretch',
   testID,
+  avoidKeyboard = false,
   children,
 }: AppBottomSheetFrameProps) {
   const { t } = useTranslation();
+  // The sheet is bottom-anchored inside a Modal, so a KeyboardAvoidingView nested in the sheet
+  // cannot lift it: the overlay itself has to make room for the keyboard.
+  const Overlay = avoidKeyboard ? KeyboardAvoidingView : View;
+  const overlayProps = avoidKeyboard
+    ? { behavior: Platform.OS === 'ios' ? ('padding' as const) : undefined }
+    : {};
 
   return (
-    <View style={premiumSheetChrome.overlay} testID={testID}>
+    <Overlay style={premiumSheetChrome.overlay} testID={testID} {...overlayProps}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('common.cancel')}
@@ -56,7 +65,7 @@ function AppBottomSheetFrame({
         ) : null}
         {children}
       </SafeAreaView>
-    </View>
+    </Overlay>
   );
 }
 
@@ -67,6 +76,7 @@ export function AppBottomSheet({
   subtitle,
   align,
   testID,
+  avoidKeyboard,
   children,
 }: AppBottomSheetProps) {
   return (
@@ -78,6 +88,7 @@ export function AppBottomSheet({
           subtitle={subtitle}
           align={align}
           testID={testID}
+          avoidKeyboard={avoidKeyboard}
         >
           {children}
         </AppBottomSheetFrame>

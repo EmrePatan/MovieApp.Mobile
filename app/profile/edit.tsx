@@ -9,6 +9,8 @@ import { AppInput } from '@/components/inputs/AppInput';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { Screen } from '@/components/common/Screen';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
+import { ProfileAvatarEditor } from '@/features/profile/components/ProfileAvatarEditor';
+import { ProfileCoverEditor } from '@/features/profile/components/ProfileCoverEditor';
 import { ProfileSocialLinksEditor } from '@/features/profile/components/ProfileSocialLinksEditor';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useUpdateProfileMutation } from '@/features/profile/hooks/useProfileMutations';
@@ -74,8 +76,12 @@ export default function EditProfileScreen() {
       },
       {
         onSuccess: () => {
-          setFeedback({ message: t('profile.profileUpdated'), tone: 'success' });
-          setTimeout(() => router.back(), 800);
+          // No success banner: returning to the updated profile is the confirmation.
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/(tabs)/profile');
+          }
         },
         onError: (error) => {
           setFeedback({
@@ -106,6 +112,9 @@ export default function EditProfileScreen() {
           tone={feedback?.tone}
           onDismiss={() => setFeedback(null)}
         />
+
+        <ProfileCoverEditor />
+        <ProfileAvatarEditor />
 
         <View style={styles.form}>
           <AppInput

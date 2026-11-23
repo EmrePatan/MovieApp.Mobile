@@ -123,10 +123,6 @@ export default function ProfileScreen() {
 
         <ProfileSection title={t('profile.account')}>
           <ProfileMenuRow
-            label={t('profile.editProfile')}
-            onPress={() => router.push('/profile/edit')}
-          />
-          <ProfileMenuRow
             label={t('social.managePrivacy')}
             subtitle={t('social.privacyDescription')}
             onPress={() => router.push('/(tabs)/(app-shell)/social-privacy')}

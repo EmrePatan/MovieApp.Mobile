@@ -7,12 +7,19 @@ const mockBack = jest.fn();
 const mockMutate = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: mockBack, push: jest.fn(), navigate: jest.fn() }),
+  useRouter: () => ({ back: mockBack, canGoBack: () => true, replace: jest.fn(), push: jest.fn(), navigate: jest.fn() }),
   useSegments: jest.fn(() => []),
 }));
 
 jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
   useCurrentProfile: jest.fn(),
+}));
+
+jest.mock('@/features/profile/components/ProfileCoverEditor', () => ({
+  ProfileCoverEditor: () => null,
+}));
+jest.mock('@/features/profile/components/ProfileAvatarEditor', () => ({
+  ProfileAvatarEditor: () => null,
 }));
 
 jest.mock('@/features/profile/hooks/useProfileMutations', () => ({

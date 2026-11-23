@@ -59,7 +59,12 @@ export function DetailBackButton({
       return;
     }
 
-    router.back();
+    // Opened directly (deep link, web reload): no history, so back would be an unhandled GO_BACK.
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
   }, [router, segments]);
 
   if (variant === 'overlay') {

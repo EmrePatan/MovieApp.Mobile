@@ -45,8 +45,7 @@ export function SocialFeedSegmentTabs({ active, onChange }: SocialFeedSegmentTab
 
 const styles = StyleSheet.create({
   outer: {
-    backgroundColor: socialFeedTheme.background,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xs,
   },
   row: {

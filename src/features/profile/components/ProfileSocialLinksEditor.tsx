@@ -1,4 +1,6 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { ProfileSocialPlatform } from '../types';
@@ -15,6 +17,14 @@ interface ProfileSocialLinksEditorProps {
   onChange: (platform: ProfileSocialPlatform, value: string) => void;
 }
 
+/** Always visible; everything else sits behind "more" unless it already has a value. */
+const PRIMARY_PLATFORMS: readonly ProfileSocialPlatform[] = [
+  'instagram',
+  'snapchat',
+  'tiktok',
+  'youtube',
+];
+
 function platformLabelKey(platform: ProfileSocialPlatform): string {
   return `profile.socialPlatform${platform.charAt(0).toUpperCase()}${platform.slice(1)}`;
 }
@@ -25,6 +35,16 @@ export function ProfileSocialLinksEditor({
   onChange,
 }: ProfileSocialLinksEditorProps) {
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+
+  const secondary = PROFILE_SOCIAL_PLATFORMS.filter((p) => !PRIMARY_PLATFORMS.includes(p));
+  // Filled secondary platforms must stay visible so existing data is never hidden.
+  const filledSecondary = secondary.filter((p) => values[p].trim().length > 0 || errors?.[p]);
+  const visible = expanded
+    ? [...PRIMARY_PLATFORMS, ...secondary]
+    : [...PRIMARY_PLATFORMS, ...filledSecondary];
+  const hiddenCount = secondary.length - (expanded ? secondary.length : filledSecondary.length);
+  const canToggle = expanded || hiddenCount > 0;
 
   return (
     <View style={styles.wrap}>
@@ -32,7 +52,7 @@ export function ProfileSocialLinksEditor({
         {t('profile.socialLinksTitle')}
       </AppText>
       <View style={styles.card}>
-        {PROFILE_SOCIAL_PLATFORMS.map((platform, index) => {
+        {visible.map((platform, index) => {
           const isWebsite = platform === 'website';
           const label = t(platformLabelKey(platform));
           const error = errors?.[platform];
@@ -66,6 +86,19 @@ export function ProfileSocialLinksEditor({
           );
         })}
       </View>
+      {canToggle ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={expanded ? t('profile.socialLinksLess') : t('profile.socialLinksMore')}
+          onPress={() => setExpanded((v) => !v)}
+          style={({ pressed }) => [styles.more, pressed && styles.pressed]}
+        >
+          <Ionicons name={expanded ? 'chevron-up' : 'add'} size={16} color={colors.accent} />
+          <AppText variant="bodySmall" style={styles.moreLabel}>
+            {expanded ? t('profile.socialLinksLess') : t('profile.socialLinksMore')}
+          </AppText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -99,6 +132,20 @@ const styles = StyleSheet.create({
   },
   inputError: {
     color: colors.error,
+  },
+  more: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    paddingVertical: spacing.xs,
+  },
+  moreLabel: {
+    color: colors.accent,
+    fontWeight: '600',
+  },
+  pressed: {
+    opacity: 0.8,
   },
   divider: {
     height: StyleSheet.hairlineWidth,

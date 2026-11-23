@@ -4,6 +4,8 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -17,6 +19,8 @@ import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/o
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import type { CatalogMediaFilter } from '../types';
 import type { LibraryCategory, LibraryItem } from '../types/library';
 import { useLibrary } from '../hooks/useLibrary';
@@ -56,6 +60,7 @@ export function LibraryHubContent({
   quickActionsEnabled = true,
 }: LibraryHubContentProps) {
   const tabBarInset = useTabBarOverlayInset();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -92,6 +97,23 @@ export function LibraryHubContent({
   const listRef = useRef<FlatList>(null);
   const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
     useFlatListScrollToTopControl(listRef);
+  const [bannerHeight, setBannerHeight] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
+  /** Pin a compact glass bar once the profile banner has scrolled out of view. */
+  const handleScrollOffset = useCallback(
+    (offsetY: number) => {
+      setPinned(bannerHeight > 0 && offsetY > bannerHeight);
+    },
+    [bannerHeight],
+  );
+  const handleGridScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      onListScroll(event);
+      handleScrollOffset(event.nativeEvent.contentOffset.y);
+    },
+    [handleScrollOffset, onListScroll],
+  );
 
   const itemWidth = useMemo(
     () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
@@ -116,6 +138,7 @@ export function LibraryHubContent({
     }
 
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    setPinned(false);
     setCategory(nextCategory);
     trackProductMetric(PRODUCT_METRICS.libraryFilterSelected);
   }, [category]);
@@ -225,27 +248,41 @@ export function LibraryHubContent({
     [handleItemPress, itemHeight, itemWidth, quickActionsEnabled, resolveGridCategory],
   );
 
+  const hubHeader = (
+    <LibraryHubHeader
+      category={category}
+      mediaType={mediaType}
+      onCategoryChange={handleCategoryChange}
+      onMediaTypeChange={handleMediaTypeChange}
+      searchOpen={searchOpen}
+      searchInput={searchInput}
+      onSearchChange={setSearchInput}
+      onClearSearch={clearSearch}
+      onOpenSearch={handleOpenSearch}
+      onCloseSearch={handleCloseSearch}
+    />
+  );
+
   const chrome = (
     <View style={styles.chrome}>
-      {banner}
-      <LibraryHubHeader
-        category={category}
-        mediaType={mediaType}
-        onCategoryChange={handleCategoryChange}
-        onMediaTypeChange={handleMediaTypeChange}
-        searchOpen={searchOpen}
-        searchInput={searchInput}
-        onSearchChange={setSearchInput}
-        onClearSearch={clearSearch}
-        onOpenSearch={handleOpenSearch}
-        onCloseSearch={handleCloseSearch}
-      />
+      <View onLayout={(event) => setBannerHeight(event.nativeEvent.layout.height)}>{banner}</View>
+      {hubHeader}
     </View>
   );
 
+  const pinnedBar = pinned ? (
+    <GlassSurface
+      style={[styles.pinnedBar, { paddingTop: insets.top + spacing.xs }]}
+      testID="library-pinned-bar"
+    >
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pinnedScrim]} />
+      <View style={styles.pinnedInner}>{hubHeader}</View>
+    </GlassSurface>
+  ) : null;
+
   if (!isAuthenticated) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { paddingTop: insets.top }]}>
         <AppText variant="title">{t('library.hub.title')}</AppText>
         <AppText variant="bodySmall" muted style={styles.signInCopy}>
           {t('library.hub.signInCopy')}
@@ -258,10 +295,15 @@ export function LibraryHubContent({
   if (isWatchlistsCategory && !isSearchActive) {
     return (
       <View style={styles.screen}>
-        {chrome}
-        <View style={styles.bodyPad}>
-          <LibraryWatchlistsOverview listRef={listRef} />
+        <View style={styles.listBody}>
+          <LibraryWatchlistsOverview
+            listRef={listRef}
+            header={chrome}
+            onScrollOffset={handleScrollOffset}
+            bottomInset={tabBarInset}
+          />
         </View>
+        {pinnedBar}
       </View>
     );
   }
@@ -269,7 +311,7 @@ export function LibraryHubContent({
   if (isSearchActive && librarySearchQuery.isLoading && gridItems.length === 0) {
     return (
       <View style={styles.screen}>
-        {chrome}
+        <View style={styles.chromePad}>{chrome}</View>
         <View style={[styles.bodyPad, styles.centered]}>
           <ActivityIndicator color={colors.accent} />
           <AppText variant="bodySmall" muted>{t('library.hub.searchLoading')}</AppText>
@@ -285,7 +327,7 @@ export function LibraryHubContent({
 
     return (
       <View style={styles.screen}>
-        {chrome}
+        <View style={styles.chromePad}>{chrome}</View>
         <View style={[styles.bodyPad, styles.centered]}>
           <ErrorView
             message={message}
@@ -299,7 +341,7 @@ export function LibraryHubContent({
   if (!isSearchActive && libraryQuery.isLoading && displayItems.length === 0) {
     return (
       <View style={styles.screen}>
-        {chrome}
+        <View style={styles.chromePad}>{chrome}</View>
         <View style={[styles.bodyPad, styles.centered]}>
           <ActivityIndicator color={colors.accent} />
           <AppText variant="bodySmall" muted>{t('common.loadingYourLibrary')}</AppText>
@@ -315,7 +357,7 @@ export function LibraryHubContent({
 
     return (
       <View style={styles.screen}>
-        {chrome}
+        <View style={styles.chromePad}>{chrome}</View>
         <View style={[styles.bodyPad, styles.centered]}>
           <ErrorView message={message} onRetry={handleRefresh} />
         </View>
@@ -344,10 +386,10 @@ export function LibraryHubContent({
 
   return (
     <View style={styles.screen}>
-      {chrome}
-      <View style={styles.bodyPad}>
+      <View style={styles.listBody}>
         <FlatList
           ref={listRef}
+          ListHeaderComponent={chrome}
           testID="library-grid-three-column"
           data={gridItems}
           keyboardShouldPersistTaps="handled"
@@ -379,7 +421,7 @@ export function LibraryHubContent({
           contentContainerStyle={[styles.listContent, { paddingBottom: spacing.xxl + tabBarInset }]}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
-          onScroll={onListScroll}
+          onScroll={handleGridScroll}
           scrollEventThrottle={scrollEventThrottle}
           initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
           maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
@@ -387,6 +429,7 @@ export function LibraryHubContent({
         />
         <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
       </View>
+      {pinnedBar}
     </View>
   );
 }
@@ -396,7 +439,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   chrome: {
+    paddingBottom: spacing.xs,
+  },
+  chromePad: {
     paddingHorizontal: spacing.lg,
+  },
+  pinnedBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  pinnedScrim: {
+    backgroundColor: 'rgba(10, 10, 14, 0.72)',
+  },
+  pinnedInner: {
+    paddingHorizontal: spacing.lg,
+  },
+  listBody: {
+    flex: 1,
   },
   bodyPad: {
     flex: 1,
@@ -404,6 +468,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     flexGrow: 1,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     gap: GRID_GAP,
   },

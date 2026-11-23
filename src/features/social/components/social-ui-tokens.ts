@@ -6,7 +6,7 @@ import { socialFeedTheme } from './social-feed-theme';
 export const SOCIAL_POSTER = layout.posterCatalogRow;
 
 /** Compact catalog reference poster — 2:3, sized relative to feed density. */
-export const SOCIAL_POSTER_FEED = { width: 48, height: 72 } as const;
+export const SOCIAL_POSTER_FEED = { width: 58, height: 87 } as const;
 
 /** @deprecated Unused side-media token; feed uses aspect-ratio bands. */
 export const SOCIAL_FEED_SIDE_MEDIA = { width: 120, height: 88 } as const;

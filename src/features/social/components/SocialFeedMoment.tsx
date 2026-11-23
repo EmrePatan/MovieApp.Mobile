@@ -60,7 +60,7 @@ export const SocialFeedMoment = memo(function SocialFeedMoment({
 
   return (
     <SocialFeedEntry
-      chrome="flat"
+      chrome="card"
       displayName={item.displayName}
       avatarUrl={item.avatarUrl}
       timeLabel={time}

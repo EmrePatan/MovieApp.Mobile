@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -13,88 +14,48 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { useAuth } from '@/auth/useAuth';
 import { useAuthFonts } from '@/features/auth/useAuthFonts';
 import { authTypography } from '@/features/auth/auth-typography';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useProfileAvatarEditor } from '@/features/profile/hooks/useProfileAvatarEditor';
-import { ProfileCountStrip } from '@/features/profile/components/ProfileCountStrip';
+import { ProfileInlineCounts } from '@/features/profile/components/ProfileInlineCounts';
 import { OwnProfileCinemaStats } from '@/features/profile/components/OwnProfileCinemaStats';
 import { ProfileSocialLinksRow } from '@/features/profile/components/ProfileSocialLinksRow';
 import { filledSocialLinks } from '@/features/profile/utils/profile-social-links';
-import { SocialProfileCoverPickerSheet } from '@/features/social/components/SocialProfileCoverPickerSheet';
-import { useSocialProfileCoverEditor } from '@/features/social/hooks/useSocialProfileCoverEditor';
+import { COVER_ASPECT } from '@/features/profile/utils/cover-crop';
+import { useOwnProfileCover } from '@/features/profile/hooks/useOwnProfileCover';
 import { useSocialProfile, useSocialProfileStatistics } from '@/features/social/hooks/useSocialQueries';
-import { resolveProfileLibraryTitles } from '@/features/social/utils/resolve-profile-library-titles';
-import { resolveSocialProfileCoverUri } from '@/features/social/utils/resolve-social-profile-cover';
 import { colors } from '@/theme/colors';
-import { glass } from '@/theme/glass';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
-const GRID_COLUMNS = 3;
-const GRID_GAP = spacing.sm;
-const TAB_BAR_CLEARANCE = 84;
-const HUB_CHROME_CLEARANCE = 56;
-const IDENTITY_BLOCK_ESTIMATE = 168;
-const AVATAR_SIZE = 72;
-
-function resolveCoverHeight(windowWidth: number, windowHeight: number, topInset: number, bottomInset: number) {
-  const itemWidth =
-    (windowWidth - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
-  const rowHeight = itemWidth / layout.posterAspectRatio;
-  const twoPosterRows = rowHeight * 2 + GRID_GAP;
-  const budget =
-    windowHeight
-    - topInset
-    - bottomInset
-    - TAB_BAR_CLEARANCE
-    - HUB_CHROME_CLEARANCE
-    - twoPosterRows
-    - IDENTITY_BLOCK_ESTIMATE;
-
-  return Math.round(Math.min(132, Math.max(96, budget)));
-}
+const AVATAR_SIZE = 76;
+const ACTION_SIZE = 38;
 
 export function OwnProfileTabHeader() {
   useAuthFonts();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
+  const { width: windowWidth } = useWindowDimensions();
   const { user } = useAuth();
   const userId = user?.id ?? '';
   const profileQuery = useSocialProfile(userId);
   const statistics = useSocialProfileStatistics(userId);
   const currentProfile = useCurrentProfile();
-  const coverEditor = useSocialProfileCoverEditor(userId);
   const { openAvatarActions, isAvatarBusy } = useProfileAvatarEditor(currentProfile.data);
-  const [coverPickerVisible, setCoverPickerVisible] = useState(false);
 
-  const coverHeight = useMemo(
-    () => resolveCoverHeight(width, height, insets.top, insets.bottom),
-    [height, insets.bottom, insets.top, width],
-  );
+  const coverImageHeight = Math.round(windowWidth / COVER_ASPECT);
+  const coverHeight = insets.top + coverImageHeight;
   const avatarOverlap = Math.round(AVATAR_SIZE / 2);
 
   const profile = profileQuery.data;
   const displayName = profile?.displayName ?? user?.displayName ?? '';
   const userName = profile?.userName ?? user?.userName ?? '';
   const avatarUrl = profile?.avatarUrl ?? user?.effectiveAvatarUrl ?? null;
-  const shelfPosters = useMemo(() => {
-    const items = resolveProfileLibraryTitles(statistics.data);
-    return items
-      .map((item) => item.posterPath)
-      .filter((path): path is string => Boolean(path?.trim()));
-  }, [statistics.data]);
-  const coverUri = resolveSocialProfileCoverUri(
-    profile?.coverImageUrl,
-    profile?.coverPosterPath,
-    shelfPosters[0] ?? null,
-  );
-  const isCustomPhotoCover = Boolean(profile?.coverImageUrl?.trim())
-    && coverUri === profile?.coverImageUrl?.trim();
+  const { coverUri, isCustomPhotoCover } = useOwnProfileCover();
 
   const memberSinceLabel = useMemo(() => {
     const createdAt = profile?.createdAt ?? currentProfile.data?.createdAt;
@@ -117,19 +78,40 @@ export function OwnProfileTabHeader() {
     router.push(`/(tabs)/(app-shell)/social-people/${profile.id}?type=${type}`);
   };
 
+  const counts = profile
+    ? [
+        {
+          key: 'followers',
+          value: profile.followersCount,
+          label: t('social.followersCountLabel'),
+          onPress: () => openPeople('followers'),
+        },
+        {
+          key: 'following',
+          value: profile.followingCount,
+          label: t('social.followingCountLabel'),
+          onPress: () => openPeople('following'),
+        },
+        ...(statistics.data
+          ? [
+              {
+                key: 'reviews',
+                value: statistics.data.reviewsCount,
+                label: t('social.reviewCount'),
+                onPress: () => router.push('/profile/my-comments'),
+              },
+            ]
+          : []),
+      ]
+    : [];
+
   return (
-    <View style={styles.stage} testID="own-profile-program-card">
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('social.profileCoverEdit')}
-        onPress={() => setCoverPickerVisible(true)}
-        disabled={coverEditor.isBusy}
-        style={[styles.coverBleed, { height: coverHeight }]}
-      >
+    <View style={[styles.stage, { width: windowWidth }]} testID="own-profile-program-card">
+      <View style={[styles.coverBleed, { height: coverHeight }]}>
         {coverUri ? (
           <Image
             source={{ uri: coverUri }}
-            style={StyleSheet.absoluteFill}
+            style={[styles.coverImage, { height: coverImageHeight }]}
             contentFit="cover"
             contentPosition={isCustomPhotoCover ? 'center' : 'top'}
             cachePolicy="memory-disk"
@@ -144,19 +126,25 @@ export function OwnProfileTabHeader() {
           />
         )}
         <LinearGradient
-          colors={['rgba(10,10,15,0.05)', 'rgba(10,10,15,0.35)', colors.background]}
-          locations={[0.15, 0.55, 1]}
+          colors={['rgba(10,10,15,0.35)', 'rgba(10,10,15,0.15)', colors.background]}
+          locations={[0, 0.4, 1]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
-        <View style={styles.coverEdit}>
-          {coverEditor.isBusy ? (
-            <ActivityIndicator color={colors.textPrimary} size="small" />
-          ) : (
-            <Ionicons name="camera-outline" size={16} color={colors.textPrimary} />
-          )}
-        </View>
-      </Pressable>
+      </View>
+
+      <View style={[styles.floatingActions, { top: insets.top + spacing.sm }]}>
+        <GlassSurface style={styles.actionGlass}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('profile.signInSecurityTitle')}
+            onPress={() => router.push('/(tabs)/profile')}
+            style={({ pressed }) => [styles.actionHit, pressed && styles.pressed]}
+          >
+            <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
+          </Pressable>
+        </GlassSurface>
+      </View>
 
       <View style={[styles.body, { marginTop: -avatarOverlap }]}>
         <View style={styles.identityRow}>
@@ -175,65 +163,43 @@ export function OwnProfileTabHeader() {
                 textVariant="subtitle"
                 accessibilityLabel={displayName}
               />
-              <View style={styles.avatarBadge}>
+              <GlassSurface style={styles.avatarBadge}>
                 {isAvatarBusy ? (
                   <ActivityIndicator color={colors.textPrimary} size="small" />
                 ) : (
-                  <Ionicons name="camera" size={11} color={colors.textPrimary} />
+                  <Ionicons name="camera" size={12} color={colors.textPrimary} />
                 )}
-              </View>
+              </GlassSurface>
             </View>
           </Pressable>
 
-          <View style={styles.identityActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('profile.signInSecurityTitle')}
-              onPress={() => router.push('/(tabs)/profile')}
-              style={({ pressed }) => [styles.settingsBtn, pressed && styles.pressed]}
-            >
-              <Ionicons name="settings-outline" size={18} color={colors.textPrimary} />
-            </Pressable>
+          <View style={[styles.identityCopy, { paddingTop: avatarOverlap + spacing.xs }]}>
+            <AppText numberOfLines={1} style={styles.name}>
+              {displayName}
+            </AppText>
+            {userName ? (
+              <AppText numberOfLines={1} style={styles.handle}>
+                @{userName}
+              </AppText>
+            ) : null}
           </View>
         </View>
 
-        <AppText numberOfLines={1} style={styles.name}>
-          {displayName}
-        </AppText>
-        {userName ? (
-          <AppText numberOfLines={1} style={styles.handle}>
-            @{userName}
-          </AppText>
-        ) : null}
-
-        {profile ? (
-          <ProfileCountStrip
-            counts={[
-              {
-                key: 'followers',
-                value: profile.followersCount,
-                label: t('social.followersCountLabel'),
-                onPress: () => openPeople('followers'),
-              },
-              {
-                key: 'following',
-                value: profile.followingCount,
-                label: t('social.followingCountLabel'),
-                onPress: () => openPeople('following'),
-              },
-              ...(statistics.data
-                ? [
-                    {
-                      key: 'reviews',
-                      value: statistics.data.reviewsCount,
-                      label: t('social.reviewCount'),
-                      onPress: () => router.push('/profile/my-comments'),
-                    },
-                  ]
-                : []),
-            ]}
-          />
-        ) : null}
+        <ProfileInlineCounts
+          counts={counts}
+          trailing={
+            <GlassSurface style={styles.editPill}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.editProfile')}
+                onPress={() => router.push('/profile/edit')}
+                style={({ pressed }) => [styles.editPillHit, pressed && styles.pressed]}
+              >
+                <Ionicons name="create-outline" size={17} color={colors.textPrimary} />
+              </Pressable>
+            </GlassSurface>
+          }
+        />
 
         {bio ? (
           <AppText style={styles.bio} numberOfLines={4}>
@@ -242,78 +208,70 @@ export function OwnProfileTabHeader() {
         ) : null}
 
         {hasSocialLinks || memberSinceLabel ? (
-          <View style={styles.linksJoinedRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.rail}
+            contentContainerStyle={styles.railContent}
+          >
             {hasSocialLinks ? <ProfileSocialLinksRow links={socialLinks} /> : null}
-            {hasSocialLinks && memberSinceLabel ? <View style={styles.linksDivider} /> : null}
             {memberSinceLabel ? (
-              <View style={styles.joined}>
-                <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
-                <AppText style={styles.joinedText}>{memberSinceLabel}</AppText>
-              </View>
+              <GlassSurface style={styles.joinedChip}>
+                <Ionicons name="calendar-outline" size={13} color={colors.textSecondary} />
+                <AppText style={styles.joinedText} numberOfLines={1}>
+                  {memberSinceLabel}
+                </AppText>
+              </GlassSurface>
             ) : null}
-          </View>
+          </ScrollView>
         ) : null}
 
-        {statistics.data ? (
-          <View style={styles.statsBlock}>
-            <OwnProfileCinemaStats statistics={statistics.data} />
-          </View>
-        ) : null}
+        {statistics.data ? <OwnProfileCinemaStats statistics={statistics.data} /> : null}
+
       </View>
 
-      <SocialProfileCoverPickerSheet
-        visible={coverPickerVisible}
-        posterPaths={shelfPosters}
-        isBusy={coverEditor.isBusy}
-        onClose={() => setCoverPickerVisible(false)}
-        onPickPhoto={() => {
-          setCoverPickerVisible(false);
-          void coverEditor.pickAndUploadPhoto();
-        }}
-        onPickPoster={(path) => {
-          coverEditor.setPoster(path);
-          setCoverPickerVisible(false);
-        }}
-        onRemoveCover={() => {
-          coverEditor.removeCover();
-          setCoverPickerVisible(false);
-        }}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   stage: {
-    marginHorizontal: -spacing.lg,
+    marginLeft: -spacing.lg,
     marginBottom: spacing.sm,
+  },
+  coverImage: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   coverBleed: {
     backgroundColor: '#120E16',
     overflow: 'hidden',
   },
-  coverEdit: {
+  floatingActions: {
     position: 'absolute',
-    top: spacing.sm,
     right: spacing.lg,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionGlass: {
+    width: ACTION_SIZE,
+    height: ACTION_SIZE,
+    borderRadius: ACTION_SIZE / 2,
+  },
+  actionHit: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.16)',
   },
   body: {
     paddingHorizontal: spacing.lg,
-    gap: 2,
   },
   identityRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    alignItems: 'flex-start',
+    gap: spacing.md,
   },
   avatarHit: {
     borderRadius: 999,
@@ -327,34 +285,23 @@ const styles = StyleSheet.create({
   },
   avatarBadge: {
     position: 'absolute',
-    right: 1,
-    bottom: 1,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    right: -2,
+    bottom: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: glass.panelElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
   },
-  identityActions: {
-    paddingBottom: 2,
-  },
-  settingsBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: glass.panelElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+  identityCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
   },
   name: {
     fontFamily: authTypography.wordmarkSemibold,
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 26,
+    lineHeight: 32,
     color: colors.textPrimary,
     letterSpacing: -0.4,
   },
@@ -364,38 +311,45 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   bio: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     color: colors.textSecondary,
-    paddingTop: spacing.xs,
-  },
-  linksJoinedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    paddingTop: spacing.sm,
-  },
-  linksDivider: {
-    width: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch',
-    minHeight: 14,
-    backgroundColor: colors.borderSubtle,
-  },
-  joined: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  joinedText: {
-    fontSize: 11,
-    lineHeight: 14,
-    color: colors.textSecondary,
-  },
-  statsBlock: {
     paddingTop: spacing.md,
   },
-
+  editPill: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  editPillHit: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rail: {
+    marginTop: spacing.md,
+    marginHorizontal: -spacing.lg,
+    flexGrow: 0,
+  },
+  railContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+  },
+  joinedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 34,
+    paddingHorizontal: spacing.md,
+    borderRadius: 17,
+  },
+  joinedText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textSecondary,
+  },
   pressed: {
     opacity: 0.88,
   },

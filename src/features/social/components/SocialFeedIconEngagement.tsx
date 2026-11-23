@@ -1,8 +1,15 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { AppText } from '@/components/common/AppText';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { socialFeedTheme } from './social-feed-theme';
 import { socialUi } from './social-ui-tokens';
 
@@ -22,7 +29,7 @@ interface SocialFeedIconEngagementProps {
   trailingAction?: ReactNode;
 }
 
-const ICON_SIZE = 16;
+const ICON_SIZE = 20;
 
 function ActionPill({
   active,
@@ -43,6 +50,25 @@ function ActionPill({
   onPress?: () => void;
   disabled?: boolean;
 }) {
+  const pop = useSharedValue(1);
+  const ring = useSharedValue(0);
+  const wasActive = useRef(Boolean(active));
+
+  useEffect(() => {
+    // Pop the icon and flash a ring only on the transition to liked, never on first render.
+    if (active && !wasActive.current) {
+      pop.set(withSequence(withSpring(1.45, { damping: 6, stiffness: 400 }), withSpring(1)));
+      ring.set(withSequence(withTiming(1, { duration: 0 }), withTiming(0, { duration: 420 })));
+    }
+    wasActive.current = Boolean(active);
+  }, [active, pop, ring]);
+
+  const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.get() }] }));
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: ring.get() * 0.7,
+    transform: [{ scale: 1 + (1 - ring.get()) * 1.1 }],
+  }));
+
   const iconColor = muted
     ? socialFeedTheme.textMuted
     : active
@@ -54,7 +80,12 @@ function ActionPill({
         <ActivityIndicator color={socialFeedTheme.textMuted} size="small" />
       ) : (
         <>
-          <Ionicons name={icon} size={ICON_SIZE} color={iconColor} />
+          <View style={styles.iconSlot}>
+            <Animated.View pointerEvents="none" style={[styles.ring, ringStyle]} />
+            <Animated.View style={iconStyle}>
+              <Ionicons name={icon} size={ICON_SIZE} color={iconColor} />
+            </Animated.View>
+          </View>
           <AppText style={[styles.count, active && styles.countActive, muted && styles.countMuted]}>
             {count}
           </AppText>
@@ -136,7 +167,7 @@ const styles = StyleSheet.create({
   cluster: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.lg,
     flexShrink: 1,
   },
   trailing: {
@@ -147,24 +178,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     minHeight: 34,
-    paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    backgroundColor: socialFeedTheme.pillBackground,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: socialFeedTheme.pillBorder,
   },
-  pillActive: {
-    backgroundColor: socialFeedTheme.pillActiveBackground,
-    borderColor: socialFeedTheme.accentMuted,
+  iconSlot: {
+    width: ICON_SIZE + 6,
+    height: ICON_SIZE + 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  pillMuted: {
-    borderColor: socialFeedTheme.borderSubtle,
-    backgroundColor: socialFeedTheme.surfaceSecondary,
+  ring: {
+    position: 'absolute',
+    width: ICON_SIZE + 6,
+    height: ICON_SIZE + 6,
+    borderRadius: (ICON_SIZE + 6) / 2,
+    borderWidth: 2,
+    borderColor: socialFeedTheme.accent,
   },
+  pillActive: {},
+  pillMuted: {},
   count: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: '600',
     letterSpacing: 0.2,
     color: socialFeedTheme.textSecondary,

@@ -2,8 +2,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { authTypography } from '@/features/auth/auth-typography';
-import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 import { socialFeedTheme } from './social-feed-theme';
 
@@ -27,22 +27,26 @@ export function SocialFeedHeader({ onSearchPress, onMessagesPress }: SocialFeedH
         </AppText>
       </View>
       <View style={styles.actions}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('social.findPeople')}
-          onPress={onSearchPress}
-          style={({ pressed }) => [styles.circle, pressed && styles.pressed]}
-        >
-          <Ionicons name="search" size={18} color={socialFeedTheme.textPrimary} />
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('messages.inbox')}
-          onPress={onMessagesPress}
-          style={({ pressed }) => [styles.circle, pressed && styles.pressed]}
-        >
-          <Ionicons name="chatbubble-outline" size={18} color={socialFeedTheme.textPrimary} />
-        </Pressable>
+        <GlassSurface style={styles.circle}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('social.findPeople')}
+            onPress={onSearchPress}
+            style={({ pressed }) => [styles.circleHit, pressed && styles.pressed]}
+          >
+            <Ionicons name="search" size={18} color={socialFeedTheme.textPrimary} />
+          </Pressable>
+        </GlassSurface>
+        <GlassSurface style={styles.circle}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('messages.inbox')}
+            onPress={onMessagesPress}
+            style={({ pressed }) => [styles.circleHit, pressed && styles.pressed]}
+          >
+            <Ionicons name="chatbubble-outline" size={18} color={socialFeedTheme.textPrimary} />
+          </Pressable>
+        </GlassSurface>
       </View>
     </View>
   );
@@ -78,14 +82,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+  circleHit: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: glass.panelElevated,
-    borderWidth: 1,
-    borderColor: glass.hairline,
   },
   pressed: {
     opacity: 0.85,

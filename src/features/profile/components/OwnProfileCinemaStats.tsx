@@ -3,11 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import type { SocialProfileStatistics } from '@/features/social/types';
 import { formatWatchDuration } from '@/features/social/utils/format-watch-duration';
-import { authTypography } from '@/features/auth/auth-typography';
 import { colors } from '@/theme/colors';
-import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 interface OwnProfileCinemaStatsProps {
@@ -18,10 +17,33 @@ function formatCount(value: number, locale: string): string {
   return new Intl.NumberFormat(locale).format(value);
 }
 
-/**
- * Flat watch ledger under identity — no card chrome.
- * Two columns (film / dizi), same type language as followers meta.
- */
+interface TileProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  value: string;
+  unit: string;
+  runtime: string;
+}
+
+function StatTile({ icon, value, unit, runtime }: TileProps) {
+  return (
+    <GlassSurface style={styles.tile}>
+      <View style={styles.iconWrap}>
+        <Ionicons name={icon} size={18} color={colors.textPrimary} />
+      </View>
+      <View style={styles.copy}>
+        <AppText style={styles.primary} numberOfLines={1}>
+          {value}
+          <AppText style={styles.unit}>{` ${unit}`}</AppText>
+        </AppText>
+        <AppText style={styles.runtime} numberOfLines={1}>
+          {runtime}
+        </AppText>
+      </View>
+    </GlassSurface>
+  );
+}
+
+/** Two compact glass tiles: films and episodes watched, each with total runtime. */
 export function OwnProfileCinemaStats({ statistics }: OwnProfileCinemaStatsProps) {
   const { t, i18n } = useTranslation();
   const durationLabels = useMemo(
@@ -36,110 +58,67 @@ export function OwnProfileCinemaStats({ statistics }: OwnProfileCinemaStatsProps
     [t],
   );
 
-  const movieCount = formatCount(statistics.moviesWatched, i18n.language);
-  const episodeCount = formatCount(statistics.episodesWatched, i18n.language);
-  const movieRuntime = formatWatchDuration(statistics.movieRuntimeMinutes ?? 0, durationLabels);
-  const showRuntime = formatWatchDuration(statistics.episodeRuntimeMinutes ?? 0, durationLabels);
-
   return (
-    <View style={styles.wrap} accessibilityRole="summary">
-      <View style={styles.filmColumn}>
-        <Ionicons name="film-outline" size={26} color={colors.textMuted} style={styles.icon} />
-        <View style={styles.copy}>
-          <AppText style={styles.heading} numberOfLines={1}>
-            {t('social.movies')}
-          </AppText>
-          <AppText style={styles.number} numberOfLines={1}>
-            {movieCount}
-          </AppText>
-          <AppText style={styles.muted} numberOfLines={1}>
-            {movieRuntime}
-          </AppText>
-        </View>
-      </View>
-      <View style={styles.divider} />
-      <View style={styles.tvColumn}>
-        <Ionicons name="tv-outline" size={26} color={colors.textMuted} style={styles.icon} />
-        <View style={styles.copy}>
-          <AppText style={styles.heading} numberOfLines={1}>
-            {t('common.tv')}
-          </AppText>
-          <AppText style={styles.number} numberOfLines={1}>
-            {episodeCount}
-            <AppText style={styles.unit}>{` ${t('social.episodes').toLowerCase()}`}</AppText>
-          </AppText>
-          <AppText style={styles.muted} numberOfLines={1}>
-            {showRuntime}
-          </AppText>
-        </View>
-      </View>
+    <View style={styles.row} accessibilityRole="summary">
+      <StatTile
+        icon="film-outline"
+        value={formatCount(statistics.moviesWatched, i18n.language)}
+        unit={t('social.movies').toLowerCase()}
+        runtime={formatWatchDuration(statistics.movieRuntimeMinutes ?? 0, durationLabels)}
+      />
+      <StatTile
+        icon="tv-outline"
+        value={formatCount(statistics.episodesWatched, i18n.language)}
+        unit={t('social.episodes').toLowerCase()}
+        runtime={formatWatchDuration(statistics.episodeRuntimeMinutes ?? 0, durationLabels)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
+  row: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingTop: spacing.md,
+  },
+  tile: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
+    gap: spacing.sm,
+    paddingVertical: spacing.sm + 2,
     paddingHorizontal: spacing.md,
+    borderRadius: 18,
+  },
+  iconWrap: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: glass.hairline,
-    backgroundColor: glass.panel,
-  },
-  filmColumn: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    minWidth: 0,
-  },
-  tvColumn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minWidth: 0,
-  },
-  icon: {
-    marginTop: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   copy: {
-    gap: 3,
-    flexShrink: 1,
+    flex: 1,
+    minWidth: 0,
+    gap: 1,
   },
-  divider: {
-    width: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch',
-    backgroundColor: glass.hairline,
-    marginVertical: 2,
-  },
-  heading: {
-    fontSize: 11,
-    lineHeight: 14,
-    fontWeight: '600',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: colors.textMuted,
-  },
-  number: {
-    fontFamily: authTypography.wordmarkSemibold,
-    fontSize: 22,
-    lineHeight: 28,
+  primary: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '700',
     color: colors.textPrimary,
     fontVariant: ['tabular-nums'],
   },
   unit: {
-    fontFamily: undefined,
     fontSize: 12,
-    lineHeight: 28,
-    fontWeight: '600',
+    lineHeight: 20,
+    fontWeight: '500',
     color: colors.textSecondary,
   },
-  muted: {
+  runtime: {
     fontSize: 12,
     lineHeight: 16,
     color: colors.textSecondary,
