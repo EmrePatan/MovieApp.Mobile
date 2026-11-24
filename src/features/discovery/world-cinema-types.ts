@@ -1,7 +1,8 @@
-import type {
-  AdvancedDiscoverMediaType,
-  AdvancedDiscoverSort,
-  GenreMatchMode,
+import {
+  ADVANCED_DISCOVER_SORT_OPTIONS,
+  type AdvancedDiscoverMediaType,
+  type AdvancedDiscoverSort,
+  type GenreMatchMode,
 } from './advanced-discover-types';
 import type { TvDiscoverStatus } from './tv-discover-status';
 
@@ -28,6 +29,8 @@ export interface WorldCinemaFilters {
   maxRuntimeMinutes: number | null;
   originalLanguage: string | null;
   keywordIds: string[];
+  /** Names for `keywordIds`, kept so the filter sheet does not show raw ids. Omitted when empty. */
+  keywordLabels?: Record<string, string>;
   tvStatuses: TvDiscoverStatus[];
 }
 
@@ -42,12 +45,8 @@ export interface WorldCinemaRequest extends WorldCinemaState {
   pageSize?: number;
 }
 
-export const WORLD_CINEMA_SORT_OPTIONS: AdvancedDiscoverSort[] = [
-  'popularity_desc',
-  'rating_desc',
-  'newest',
-  'oldest',
-];
+/** Same options as every other discover screen. */
+export const WORLD_CINEMA_SORT_OPTIONS: AdvancedDiscoverSort[] = ADVANCED_DISCOVER_SORT_OPTIONS;
 
 export function createDefaultWorldCinemaFilters(): WorldCinemaFilters {
   return {

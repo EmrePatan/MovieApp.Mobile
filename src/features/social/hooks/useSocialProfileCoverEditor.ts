@@ -47,12 +47,7 @@ export function useSocialProfileCoverEditor(userId: string) {
   });
 
   const pickAndUploadPhoto = useCallback(async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(t('profile.avatarPermissionDenied'));
-      return;
-    }
-
+    // The system image picker needs no library permission for images (Expo ImagePicker docs).
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -66,16 +61,10 @@ export function useSocialProfileCoverEditor(userId: string) {
 
     const file = await prepareCoverImage(pickerResult.assets[0].uri);
     await uploadCover.mutateAsync(file);
-  }, [t, uploadCover]);
+  }, [uploadCover]);
 
   /** Picks a photo without the system cropper so the in-app adjuster can frame it. */
   const pickPhotoUri = useCallback(async (): Promise<string | null> => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(t('profile.avatarPermissionDenied'));
-      return null;
-    }
-
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
@@ -87,7 +76,7 @@ export function useSocialProfileCoverEditor(userId: string) {
     }
 
     return pickerResult.assets[0].uri;
-  }, [t]);
+  }, []);
 
   const uploadCroppedCover = useCallback(
     async (file: { uri: string; name: string; type: string }) => {

@@ -14,6 +14,10 @@ export function buildMovieWatchStatusPath(movieId: string): string {
   return `/api/watch-history/movies/${encodePathSegment(movieId)}/me`;
 }
 
+export function buildWatchStatusBatchPath(): string {
+  return '/api/watch-history/status/batch';
+}
+
 export function buildWatchedMoviesPath(page = 1, pageSize = 20): string {
   const params = new URLSearchParams({
     page: String(page),

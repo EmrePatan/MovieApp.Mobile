@@ -63,7 +63,8 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    // Dark ground under every screen so a transition or keyboard gap never flashes the white window.
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <QueryClientProvider client={queryClient}>
         <LocalePreferenceProvider>
           <RegionalPreferenceProvider>

@@ -20,6 +20,54 @@ export function parseCommaSeparatedIds(
   return Array.from(new Set(ids));
 }
 
+/** Keyword names ride along in the URL so a reopened filter sheet shows names, not ids. */
+export function parseKeywordLabelsParam(raw: string | undefined): Record<string, string> {
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') {
+      return {};
+    }
+
+    const labels: Record<string, string> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === 'string' && value.length > 0) {
+        labels[key] = value;
+      }
+    }
+
+    return labels;
+  } catch {
+    return {};
+  }
+}
+
+export function serializeKeywordLabelsParam(
+  labels: Record<string, string>,
+  keywordIds: string[],
+): string | undefined {
+  if (keywordIds.length === 0) {
+    return undefined;
+  }
+
+  const subset: Record<string, string> = {};
+  for (const id of keywordIds) {
+    const label = labels[id];
+    if (label) {
+      subset[id] = label;
+    }
+  }
+
+  if (Object.keys(subset).length === 0) {
+    return undefined;
+  }
+
+  return JSON.stringify(subset);
+}
+
 export function parseYearParam(value: string | undefined): number | null {
   if (!value) {
     return null;

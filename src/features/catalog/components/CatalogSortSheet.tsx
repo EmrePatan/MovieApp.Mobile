@@ -102,6 +102,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    // Title and close sit closer to the drag handle (tester feedback: too low).
+    marginTop: -8,
   },
   title: {
     color: premiumSheet.textPrimary,

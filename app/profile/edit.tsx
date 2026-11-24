@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
@@ -96,11 +96,10 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <Screen scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
-      >
+    // The scroll view lifts its own content above the keyboard. A KeyboardAvoidingView inside a
+    // ScrollView keeps adding padding while a field is focused, so the page scrolled forever.
+    <Screen scrollable keyboardAware>
+      <View style={styles.container}>
         <DetailBackButton />
         <AppText variant="title">{t('profile.editProfileTitle')}</AppText>
         <AppText variant="bodySmall" muted>
@@ -137,6 +136,9 @@ export default function EditProfileScreen() {
             placeholder={t('profile.profileAboutPlaceholder')}
             style={styles.bioInput}
           />
+          <AppText variant="caption" muted style={styles.bioCounter} testID="profile-bio-counter">
+            {`${bio.length}/${PROFILE_BIO_MAX}`}
+          </AppText>
 
           <ProfileSocialLinksEditor
             values={socialLinks}
@@ -151,7 +153,7 @@ export default function EditProfileScreen() {
             onPress={handleSubmit}
           />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }
@@ -164,6 +166,10 @@ const styles = StyleSheet.create({
   form: {
     gap: spacing.md,
     marginTop: spacing.sm,
+  },
+  bioCounter: {
+    alignSelf: 'flex-end',
+    marginTop: -spacing.sm,
   },
   bioInput: {
     minHeight: 96,

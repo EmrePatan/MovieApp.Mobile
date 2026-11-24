@@ -1,5 +1,23 @@
 export const DEFAULT_WATCH_HISTORY_PAGE_SIZE = 20;
 
+/** One round trip for the watch state of many posters (POST /api/watch-history/status/batch). */
+export interface WatchStatusBatchRequest {
+  movieIds: string[];
+  tvShowIds: string[];
+}
+
+export interface TvShowWatchStatusBatchItem {
+  tvShowId: string;
+  isFullyWatched: boolean;
+  regularTotalEpisodes: number;
+  regularWatchedEpisodes: number;
+}
+
+export interface WatchStatusBatchResponse {
+  movies: MovieWatchStatusResponse[];
+  tvShows: TvShowWatchStatusBatchItem[];
+}
+
 export interface WatchMovieResponse {
   movieId: string;
   watchedAt: string;

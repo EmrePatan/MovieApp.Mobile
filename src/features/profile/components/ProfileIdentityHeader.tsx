@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   Linking,
   Pressable,
@@ -81,8 +81,49 @@ export function ProfileLine({
   );
 }
 
-/** All platforms, always in the same slots: filled ones open the link, empty ones stay dimmed. */
-function SocialLinksStrip({ links }: { links: ProfileSocialLinks | null | undefined }) {
+const BIO_PREVIEW_LINES = 4;
+/** About four lines of text; shorter bios never need the toggle. */
+const BIO_COLLAPSE_CHARS = 150;
+
+/** Bio capped at four lines with a toggle, so a long bio is never cut off with no way to read it. */
+function ProfileBio({ bio }: { bio: string }) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const collapsible = bio.length > BIO_COLLAPSE_CHARS || bio.split('\n').length > BIO_PREVIEW_LINES;
+
+  return (
+    <View>
+      <AppText style={styles.bio} numberOfLines={expanded ? undefined : BIO_PREVIEW_LINES}>
+        {bio}
+      </AppText>
+      {collapsible ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setExpanded((value) => !value)}
+          hitSlop={8}
+          style={({ pressed }) => [styles.bioToggle, pressed && styles.pressed]}
+          testID="profile-bio-toggle"
+        >
+          <AppText style={styles.bioToggleLabel}>
+            {expanded ? t('common.showLess') : t('common.readMore')}
+          </AppText>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * All platforms, always in the same slots: filled ones open the link, empty ones stay dimmed.
+ * With `hideEmpty` (someone else's profile) only the linked platforms are drawn.
+ */
+function SocialLinksStrip({
+  links,
+  hideEmpty = false,
+}: {
+  links: ProfileSocialLinks | null | undefined;
+  hideEmpty?: boolean;
+}) {
   const { t } = useTranslation();
   const filled = useMemo(() => {
     const map = new Map<string, { url: string; value: string }>();
@@ -92,10 +133,17 @@ function SocialLinksStrip({ links }: { links: ProfileSocialLinks | null | undefi
     return map;
   }, [links]);
 
+  if (hideEmpty && filled.size === 0) {
+    return null;
+  }
+
   return (
     <View style={styles.icons} testID="profile-social-strip">
       {PROFILE_SOCIAL_PLATFORMS.map((platform) => {
         const entry = filled.get(platform);
+        if (!entry && hideEmpty) {
+          return null;
+        }
         const labelKey = `profile.socialPlatform${platform.charAt(0).toUpperCase()}${platform.slice(1)}`;
         const label = t(labelKey, { defaultValue: platform });
         if (!entry) {
@@ -210,6 +258,8 @@ interface ProfileIdentityHeaderProps {
   isPrivate?: boolean;
   bio?: string | null;
   socialLinks?: ProfileSocialLinks | null;
+  /** Someone else's profile: draw only the platforms they linked (own profile keeps dimmed slots). */
+  hideEmptySocialLinks?: boolean;
   counts: ProfileHeaderCount[];
   /** Follow / message buttons (omitted on your own profile). */
   actions?: ReactNode;
@@ -239,6 +289,7 @@ export function ProfileIdentityHeader({
   isPrivate = false,
   bio,
   socialLinks,
+  hideEmptySocialLinks = false,
   counts,
   actions,
   extraLines,
@@ -321,13 +372,9 @@ export function ProfileIdentityHeader({
           </View>
         </View>
 
-        {bio ? (
-          <AppText style={styles.bio} numberOfLines={4}>
-            {bio}
-          </AppText>
-        ) : null}
+        {bio ? <ProfileBio bio={bio} /> : null}
 
-        <SocialLinksStrip links={socialLinks} />
+        <SocialLinksStrip links={socialLinks} hideEmpty={hideEmptySocialLinks} />
         <CountsLine counts={counts} />
 
         <View style={styles.lines}>
@@ -422,6 +469,15 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     opacity: 0.9,
     marginTop: spacing.sm,
+  },
+  bioToggle: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.xs,
+  },
+  bioToggleLabel: {
+    color: colors.accent,
+    fontWeight: '600',
+    fontSize: 12,
   },
   icons: {
     flexDirection: 'row',

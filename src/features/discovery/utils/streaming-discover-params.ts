@@ -1,4 +1,7 @@
-import type { AdvancedDiscoverSort } from '../advanced-discover-types';
+import {
+  ADVANCED_DISCOVER_SORT_OPTIONS,
+  type AdvancedDiscoverSort,
+} from '../advanced-discover-types';
 import {
   createDefaultStreamingDiscoverState,
   type StreamingDiscoverMediaType,
@@ -8,6 +11,7 @@ import { parseTvDiscoverStatuses } from '../tv-discover-status';
 import type { WatchMonetizationType } from '../watch-provider-types';
 import {
   parseCommaSeparatedIds,
+  parseKeywordLabelsParam,
   parseLanguageCodeParam,
   parseOriginCountryParam,
   parseRatingParam,
@@ -15,16 +19,12 @@ import {
   parseVoteCountParam,
   parseYearParam,
   readRouteParam,
+  serializeKeywordLabelsParam,
 } from './parse-route-helpers';
 
 const MEDIA_TYPES = new Set<StreamingDiscoverMediaType>(['movie', 'tv']);
 const MONETIZATION_TYPES = new Set<WatchMonetizationType>(['stream', 'free', 'ads', 'rent', 'buy']);
-const SORT_VALUES = new Set<AdvancedDiscoverSort>([
-  'popularity_desc',
-  'rating_desc',
-  'newest',
-  'oldest',
-]);
+const SORT_VALUES = new Set<AdvancedDiscoverSort>(ADVANCED_DISCOVER_SORT_OPTIONS);
 
 function parseMediaType(value: string | undefined): StreamingDiscoverMediaType {
   if (value && MEDIA_TYPES.has(value as StreamingDiscoverMediaType)) {
@@ -78,6 +78,8 @@ export function parseStreamingDiscoverParams(
   const defaults = createDefaultStreamingDiscoverState(defaultWatchRegion);
   const mediaType = parseMediaType(readRouteParam(params.mediaType));
   const monetizationTypes = parseMonetizationTypes(params.watchMonetizationType);
+  const keywordIds = parseCommaSeparatedIds(params.keywords ?? params.keywordId);
+  const keywordLabels = parseKeywordLabelsParam(readRouteParam(params.keywordLabels));
 
   return {
     mediaType,
@@ -95,7 +97,8 @@ export function parseStreamingDiscoverParams(
     maxRuntimeMinutes: parseRuntimeParam(readRouteParam(params.maxRuntime)),
     originalLanguage: parseLanguageCodeParam(readRouteParam(params.language)),
     originCountry: parseOriginCountryParam(readRouteParam(params.originCountry)),
-    keywordIds: parseCommaSeparatedIds(params.keywords ?? params.keywordId),
+    keywordIds,
+    ...(keywordIds.length > 0 && Object.keys(keywordLabels).length > 0 ? { keywordLabels } : {}),
     tvStatuses: mediaType === 'tv' ? parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses) : [],
     sort: parseSort(readRouteParam(params.sort)),
   };
@@ -159,6 +162,10 @@ export function serializeStreamingDiscoverParams(
 
   if (state.keywordIds.length > 0) {
     params.keywords = state.keywordIds.join(',');
+    const keywordLabels = serializeKeywordLabelsParam(state.keywordLabels ?? {}, state.keywordIds);
+    if (keywordLabels) {
+      params.keywordLabels = keywordLabels;
+    }
   }
 
   if (state.mediaType === 'tv' && state.tvStatuses.length > 0) {

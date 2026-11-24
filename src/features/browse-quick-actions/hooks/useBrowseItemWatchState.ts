@@ -1,7 +1,6 @@
 import { useAuth } from '@/auth/useAuth';
 import { useMovieWatchStatus } from '@/features/watch-history/hooks/useMovieWatchStatus';
-import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
-import { isTvShowFullyWatched } from '@/features/watch-history/utils/tv-show-watch-status';
+import { useTvShowCardWatchStatus } from '@/features/watch-history/hooks/useTvShowCardWatchStatus';
 import type { BrowseQuickActionsMediaType } from '../types';
 
 export function useBrowseItemWatchState(
@@ -11,10 +10,13 @@ export function useBrowseItemWatchState(
   const { isAuthenticated } = useAuth();
   const enabled = isAuthenticated && contentId.length > 0;
 
+  // Both lookups are batched with the other posters on screen (one request per screen,
+  // not one per card).
   const movieStatus = useMovieWatchStatus(contentId, {
     enabled: enabled && contentType === 'movie',
+    batched: true,
   });
-  const tvProgress = useTvShowProgress(contentType === 'tv' && enabled ? contentId : '');
+  const tvStatus = useTvShowCardWatchStatus(contentType === 'tv' && enabled ? contentId : '');
 
   if (!enabled) {
     return { isWatched: false, isLoading: false };
@@ -28,7 +30,7 @@ export function useBrowseItemWatchState(
   }
 
   return {
-    isWatched: isTvShowFullyWatched(tvProgress.data),
-    isLoading: tvProgress.isLoading,
+    isWatched: tvStatus.data?.isFullyWatched === true,
+    isLoading: tvStatus.isLoading,
   };
 }

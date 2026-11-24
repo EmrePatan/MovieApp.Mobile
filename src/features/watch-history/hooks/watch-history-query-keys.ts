@@ -26,6 +26,15 @@ export function tvShowProgressQueryKey(tvShowId: string) {
   return ['watch-history', 'tv', tvShowId, 'progress'] as const;
 }
 
+/**
+ * Light poster-card status (isFullyWatched + regular totals). Nested under the full progress key
+ * on purpose: every existing invalidation of tvShowProgressQueryKey also refreshes it, while the
+ * detail screen's exact-key reads and optimistic writes never see this smaller shape.
+ */
+export function tvShowCardWatchStatusQueryKey(tvShowId: string) {
+  return [...tvShowProgressQueryKey(tvShowId), 'card'] as const;
+}
+
 export function seasonProgressQueryKey(tvShowId: string, seasonNumber: number) {
   return ['watch-history', 'tv', tvShowId, 'season', seasonNumber, 'progress'] as const;
 }

@@ -24,6 +24,7 @@ import type {
   SeasonWatchedEpisodesResponse,
   TvShowWatchProgressResponse,
 } from '../types';
+import { removeWatchedMovieFromHomeRecommendations } from '@/features/home/utils/remove-watched-from-home-recommendations';
 import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
@@ -220,6 +221,9 @@ export function useToggleMovieWatched(movieId: string) {
     },
     onSuccess: (nextValue) => {
       queryClient.setQueryData(movieWatchStatusQueryKey(movieId), nextValue);
+      if (nextValue.isWatched) {
+        removeWatchedMovieFromHomeRecommendations(queryClient, movieId);
+      }
       invalidateMovieWatchHistoryQueries(queryClient, movieId);
     },
   });

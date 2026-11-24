@@ -15,17 +15,20 @@ import {
   markMovieWatched,
   unmarkMovieWatched,
 } from '@/features/watch-history/api/watch-history-api';
+import { removeWatchedMovieFromHomeRecommendations } from '@/features/home/utils/remove-watched-from-home-recommendations';
 import {
   invalidateMovieWatchHistoryQueries,
   invalidateWatchStateDependents,
 } from '@/features/watch-history/hooks/useWatchHistoryMutations';
 import {
   movieWatchStatusQueryKey,
+  tvShowCardWatchStatusQueryKey,
   tvShowProgressQueryKey,
 } from '@/features/watch-history/hooks/watch-history-query-keys';
 import type {
   MovieWatchStatusResponse,
   TvShowWatchProgressResponse,
+  TvShowWatchStatusBatchItem,
 } from '@/features/watch-history/types';
 import { updateTvShowAggregateAllSeasonsWatched } from '@/features/watch-history/utils/tv-show-progress-cache';
 import { requestTvShowCompletionCelebration } from '@/features/watch-history/utils/tv-show-completion-celebration-requests';
@@ -153,6 +156,10 @@ export function useToggleBrowseWatched() {
           isWatched: !isWatched,
           watchedAt: !isWatched ? new Date().toISOString() : null,
         });
+        if (!isWatched) {
+          // Leaves "Recommended for you" now instead of after the server round trip.
+          removeWatchedMovieFromHomeRecommendations(queryClient, target.contentId);
+        }
         return {
           contentType: 'movie' as const,
           contentId: target.contentId,
@@ -170,10 +177,23 @@ export function useToggleBrowseWatched() {
         updateTvShowAggregateAllSeasonsWatched(queryClient, target.contentId, !isWatched);
       }
 
+      // Poster cards read the light card status, not the full progress above.
+      const cardKey = tvShowCardWatchStatusQueryKey(target.contentId);
+      await queryClient.cancelQueries({ queryKey: cardKey });
+      const previousCardStatus = queryClient.getQueryData<TvShowWatchStatusBatchItem>(cardKey);
+      if (previousCardStatus) {
+        queryClient.setQueryData<TvShowWatchStatusBatchItem>(cardKey, {
+          ...previousCardStatus,
+          isFullyWatched: !isWatched,
+          regularWatchedEpisodes: !isWatched ? previousCardStatus.regularTotalEpisodes : 0,
+        });
+      }
+
       return {
         contentType: 'tv' as const,
         contentId: target.contentId,
         previousTvProgress,
+        previousCardStatus,
         previousRating,
         myRatingKey,
       };
@@ -194,6 +214,8 @@ export function useToggleBrowseWatched() {
         } else {
           queryClient.setQueryData(key, context.previous);
         }
+        // The optimistic removal from home recommendations is undone by refetching them.
+        void queryClient.invalidateQueries({ queryKey: ['home', 'personalized'] });
         return;
       }
 
@@ -201,6 +223,13 @@ export function useToggleBrowseWatched() {
         queryClient.setQueryData(
           tvShowProgressQueryKey(context.contentId),
           context.previousTvProgress,
+        );
+      }
+
+      if (context.previousCardStatus) {
+        queryClient.setQueryData(
+          tvShowCardWatchStatusQueryKey(context.contentId),
+          context.previousCardStatus,
         );
       }
     },

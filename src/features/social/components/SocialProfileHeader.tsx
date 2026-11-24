@@ -181,6 +181,7 @@ export function SocialProfileHeader({
         isPrivate={profile.isPrivate}
         bio={profile.bio?.trim() || null}
         socialLinks={profile.socialLinks}
+        hideEmptySocialLinks
         counts={counts}
         actions={actions}
         extraLines={identityTrailing}

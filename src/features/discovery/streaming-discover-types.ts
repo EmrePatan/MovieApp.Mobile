@@ -24,6 +24,8 @@ export interface StreamingDiscoverState {
   originalLanguage: string | null;
   originCountry: string | null;
   keywordIds: string[];
+  /** Names for `keywordIds`, kept so the filter sheet does not show raw ids. Omitted when empty. */
+  keywordLabels?: Record<string, string>;
   tvStatuses: TvDiscoverStatus[];
   sort: AdvancedDiscoverSort | null;
 }

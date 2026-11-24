@@ -3,10 +3,12 @@ import { parseTvDiscoverStatuses } from '../tv-discover-status';
 import {
   createDefaultWorldCinemaState,
   DEFAULT_WORLD_CINEMA_SORT,
+  WORLD_CINEMA_SORT_OPTIONS,
   type WorldCinemaState,
 } from '../world-cinema-types';
 import {
   parseCommaSeparatedIds,
+  parseKeywordLabelsParam,
   parseLanguageCodeParam,
   parseOriginCountryParam,
   parseRatingParam,
@@ -14,6 +16,7 @@ import {
   parseVoteCountParam,
   parseYearParam,
   readRouteParam,
+  serializeKeywordLabelsParam,
 } from './parse-route-helpers';
 
 function parseMediaType(value: string | undefined): AdvancedDiscoverMediaType {
@@ -22,16 +25,11 @@ function parseMediaType(value: string | undefined): AdvancedDiscoverMediaType {
 }
 
 function parseSort(value: string | undefined): AdvancedDiscoverSort {
-  const normalized = value?.trim().toLowerCase();
+  const normalized = value?.trim().toLowerCase() as AdvancedDiscoverSort | undefined;
 
-  switch (normalized) {
-    case 'rating_desc':
-    case 'newest':
-    case 'oldest':
-      return normalized;
-    default:
-      return DEFAULT_WORLD_CINEMA_SORT;
-  }
+  return normalized && WORLD_CINEMA_SORT_OPTIONS.includes(normalized)
+    ? normalized
+    : DEFAULT_WORLD_CINEMA_SORT;
 }
 
 export function parseWorldCinemaParams(
@@ -39,6 +37,8 @@ export function parseWorldCinemaParams(
 ): WorldCinemaState {
   const defaults = createDefaultWorldCinemaState();
   const mediaType = parseMediaType(readRouteParam(params.mediaType) ?? defaults.mediaType);
+  const keywordIds = parseCommaSeparatedIds(params.keywords ?? params.keywordId);
+  const keywordLabels = parseKeywordLabelsParam(readRouteParam(params.keywordLabels));
 
   return {
     mediaType,
@@ -59,7 +59,8 @@ export function parseWorldCinemaParams(
     minRuntimeMinutes: parseRuntimeParam(readRouteParam(params.minRuntime)),
     maxRuntimeMinutes: parseRuntimeParam(readRouteParam(params.maxRuntime)),
     originalLanguage: parseLanguageCodeParam(readRouteParam(params.language)),
-    keywordIds: parseCommaSeparatedIds(params.keywords ?? params.keywordId),
+    keywordIds,
+    ...(keywordIds.length > 0 && Object.keys(keywordLabels).length > 0 ? { keywordLabels } : {}),
     tvStatuses: mediaType === 'tv' ? parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses) : [],
   };
 }
@@ -122,6 +123,10 @@ export function serializeWorldCinemaParams(
 
   if (state.keywordIds.length > 0) {
     params.keywords = state.keywordIds.join(',');
+    const keywordLabels = serializeKeywordLabelsParam(state.keywordLabels ?? {}, state.keywordIds);
+    if (keywordLabels) {
+      params.keywordLabels = keywordLabels;
+    }
   }
 
   if (state.mediaType === 'tv' && state.tvStatuses.length > 0) {

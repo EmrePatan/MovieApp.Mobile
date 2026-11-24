@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -43,10 +51,17 @@ export function CatalogFilterSheetShell({
   testID,
 }: CatalogFilterSheetShellProps) {
   const headerIcon = headerAction === 'back' ? 'chevron-back' : 'close';
+  // The sheet is bottom-anchored inside a Modal, so the overlay itself has to make room for the
+  // keyboard (custom year range inputs sit low in the list). The keyword drill-down handles its
+  // own keyboard, so it is left alone to avoid padding twice.
+  const Overlay = keywordDrillDown ? View : KeyboardAvoidingView;
+  const overlayProps = keywordDrillDown
+    ? {}
+    : { behavior: Platform.OS === 'ios' ? ('padding' as const) : undefined };
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onHeaderAction}>
-      <View style={premiumSheetChrome.overlay}>
+      <Overlay style={premiumSheetChrome.overlay} {...overlayProps}>
         <Pressable
           style={StyleSheet.absoluteFill}
           onPress={onHeaderAction}
@@ -98,7 +113,7 @@ export function CatalogFilterSheetShell({
             </View>
           ) : null}
         </SwipeSheet>
-      </View>
+      </Overlay>
     </Modal>
   );
 }
