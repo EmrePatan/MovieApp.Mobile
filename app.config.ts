@@ -34,7 +34,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: APP_IDENTITY.iosBundleIdentifier,
-    buildNumber: '12',
+    buildNumber: '13',
     usesAppleSignIn: true,
     associatedDomains: UNIVERSAL_LINK_HOSTS.map((host) => `applinks:${host}`),
     infoPlist: {
@@ -48,7 +48,7 @@ const config: ExpoConfig = {
       monochromeImage: './assets/branding/monochrome-icon.png',
     },
     package: APP_IDENTITY.androidPackage,
-    versionCode: 4,
+    versionCode: 5,
     predictiveBackGestureEnabled: false,
     softwareKeyboardLayoutMode: 'resize',
     intentFilters: [
