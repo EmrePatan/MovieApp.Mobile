@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 
 const OPTIONAL_UPDATE_DISMISSAL_KEY = 'movieapp.optionalUpdateDismissal.v1';
 

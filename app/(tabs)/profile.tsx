@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +19,6 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { getRegionLabel } from '@/features/regions/region-options';
 import { getLanguageLabel } from '@/i18n/locale-tags';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
-import { useProfileAvatarEditor } from '@/features/profile/hooks/useProfileAvatarEditor';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -31,7 +32,6 @@ export default function ProfileScreen() {
 
   const profile = profileQuery.data;
   const isRefreshing = profileQuery.isRefetching && !profileQuery.isLoading;
-  const { openAvatarActions, isAvatarBusy } = useProfileAvatarEditor(profile);
 
   const handleRefresh = useCallback(() => {
     void profileQuery.refetch();
@@ -40,6 +40,22 @@ export default function ProfileScreen() {
   const handleLogout = useCallback(() => {
     void logout();
   }, [logout]);
+
+  const goBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  }, [router]);
+
+  // Right swipe anywhere on the settings hub returns to the previous screen.
+  const swipeBackGesture = Gesture.Pan()
+    .activeOffsetX(24)
+    .failOffsetY([-16, 16])
+    .onEnd((event) => {
+      if (event.translationX > 90 && event.velocityX > 300) {
+        runOnJS(goBack)();
+      }
+    });
 
   if (profileQuery.isLoading && !profile) {
     return (
@@ -69,6 +85,7 @@ export default function ProfileScreen() {
 
   return (
     <Screen padded={false}>
+      <GestureDetector gesture={swipeBackGesture}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -79,26 +96,29 @@ export default function ProfileScreen() {
         })}
       >
         <DetailBackButton />
-        {profile ? (
-          <ProfileHero
-            profile={profile}
-            onEditAvatar={openAvatarActions}
-            isAvatarBusy={isAvatarBusy}
-          />
-        ) : null}
+        {profile ? <ProfileHero profile={profile} /> : null}
 
         <ProfileSection title={t('profile.preferences')}>
           <ProfileMenuRow
-            label={t('profile.language')}
-            subtitle={t('profile.languageSubtitle', {
+            label={t('extras.languageRegion')}
+            subtitle={t('extras.languageRegionSubtitle', {
               language: getLanguageLabel(language, language),
+              region: getRegionLabel(userRegion),
             })}
             onPress={() => router.push('/profile/language')}
           />
           <ProfileMenuRow
-            label={t('profile.region')}
-            subtitle={t('profile.regionSubtitle', { region: getRegionLabel(userRegion) })}
-            onPress={() => router.push('/profile/region')}
+            label={t('extras.notificationPrefsTitle')}
+            subtitle={t('extras.notificationPrefsSubtitle')}
+            onPress={() => router.push('/profile/notifications')}
+          />
+        </ProfileSection>
+
+        <ProfileSection title={t('extras.libraryActivity')}>
+          <ProfileMenuRow
+            label={t('extras.watchHistoryTitle')}
+            subtitle={t('extras.watchHistorySubtitle')}
+            onPress={() => router.push('/profile/history')}
           />
         </ProfileSection>
 
@@ -112,18 +132,18 @@ export default function ProfileScreen() {
 
         <ProfileSection title={t('profile.account')}>
           <ProfileMenuRow
-            label={t('profile.myComments.menuLabel')}
-            onPress={() => router.push('/profile/my-comments')}
-          />
-          <ProfileMenuRow
-            label={t('profile.editProfile')}
-            onPress={() => router.push('/profile/edit')}
+            label={t('social.managePrivacy')}
+            subtitle={t('social.privacyDescription')}
+            onPress={() => router.push('/profile/privacy')}
           />
           <ProfileMenuRow
             label={t('profile.signInSecurityTitle')}
             subtitle={t('profile.signInSecurityMenuSubtitle')}
             onPress={() => router.push('/profile/security')}
           />
+        </ProfileSection>
+
+        <ProfileSection>
           <ProfileMenuRow
             label={t('profile.deleteAccount')}
             destructive
@@ -133,6 +153,7 @@ export default function ProfileScreen() {
 
         <AppButton title={t('profile.signOut')} variant="ghost" onPress={handleLogout} />
       </ScrollView>
+      </GestureDetector>
     </Screen>
   );
 }

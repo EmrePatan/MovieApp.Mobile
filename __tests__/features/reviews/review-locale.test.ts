@@ -19,9 +19,12 @@ describe('review-locale', () => {
   it('shows translation when authoring locale differs from current locale', () => {
     expect(shouldShowReviewTranslationAction('es-ES', 'tr-TR')).toBe(true);
     expect(shouldShowReviewTranslationAction('tr', 'tr-TR')).toBe(false);
+    expect(shouldShowReviewTranslationAction('en-GB', 'en-US')).toBe(false);
   });
 
-  it('shows translation for legacy null authoring locale', () => {
-    expect(shouldShowReviewTranslationAction(null, 'en-US')).toBe(true);
+  it('hides translation when authoring locale is missing', () => {
+    expect(shouldShowReviewTranslationAction(null, 'en-US')).toBe(false);
+    expect(shouldShowReviewTranslationAction(undefined, 'tr-TR')).toBe(false);
+    expect(shouldShowReviewTranslationAction('   ', 'tr-TR')).toBe(false);
   });
 });

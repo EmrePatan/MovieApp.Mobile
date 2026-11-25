@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ColdHomeWelcomeProps {
@@ -47,12 +48,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
   },
   iconWrap: {
     width: 44,
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     marginBottom: spacing.xs,
   },
   title: {
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   ctaPressed: {
     opacity: 0.85,

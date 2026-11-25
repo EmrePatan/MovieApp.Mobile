@@ -1,4 +1,6 @@
 import {
+  episodeMyReviewQueryKey,
+  episodeReviewsQueryKey,
   movieMyReviewQueryKey,
   movieReviewsQueryKey,
   tvMyReviewQueryKey,
@@ -32,5 +34,18 @@ describe('review query keys', () => {
       null,
     ]);
     expect(tvMyReviewQueryKey(id)).toEqual(['reviews', 'tv', id, 'me']);
+  });
+
+  it('uses episode review keys', () => {
+    expect(episodeReviewsQueryKey(id, 1, 10, 'newest', null)).toEqual([
+      'reviews',
+      'episode',
+      id,
+      1,
+      10,
+      'newest',
+      null,
+    ]);
+    expect(episodeMyReviewQueryKey(id)).toEqual(['reviews', 'episode', id, 'me']);
   });
 });

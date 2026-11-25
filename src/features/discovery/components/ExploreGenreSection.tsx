@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import type { Genre } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ExploreGenreSectionProps {
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   title: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
   },
   chipGrid: {
     flexDirection: 'row',
@@ -62,16 +62,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
+    backgroundColor: premiumSheet.secondary,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: premiumSheet.rowBorder,
     minHeight: 40,
     justifyContent: 'center',
   },
   chipPressed: {
     opacity: 0.85,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   chipLabel: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
   },
 });
+

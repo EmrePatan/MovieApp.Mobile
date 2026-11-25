@@ -1,8 +1,9 @@
-import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/common/AppText';
+import { authTypography } from '@/features/auth/auth-typography';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3MovieDna } from '../types';
 import {
@@ -25,6 +26,8 @@ const TEXT_LIFT = {
 interface InsightsMovieDnaHeroProps {
   movieDna: InsightsV3MovieDna;
   backdropImagePath?: string | null;
+  /** When set, a small "change cover" pill is shown on the card. */
+  onChangeCover?: () => void;
 }
 
 function HeroScrimLayers() {
@@ -88,6 +91,7 @@ function MixCard({
 export function InsightsMovieDnaHero({
   movieDna,
   backdropImagePath,
+  onChangeCover,
 }: InsightsMovieDnaHeroProps) {
   const { t } = useTranslation();
   const visibleGenres = movieDna.topGenres.slice(0, 3);
@@ -176,6 +180,18 @@ export function InsightsMovieDnaHero({
 
   return (
     <View style={styles.container}>
+      {onChangeCover ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('insights.share.changeCover')}
+          onPress={onChangeCover}
+          hitSlop={8}
+          style={({ pressed }) => [styles.coverButton, pressed && styles.coverButtonPressed]}
+          testID="insights-dna-change-cover"
+        >
+          <Ionicons name="images-outline" size={16} color={colors.accentStrong} />
+        </Pressable>
+      ) : null}
       {resolvedBackdrop ? (
         <ImageBackground
           source={{ uri: resolvedBackdrop }}
@@ -195,8 +211,25 @@ export function InsightsMovieDnaHero({
 }
 
 const styles = StyleSheet.create({
+  coverButton: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    zIndex: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(10, 10, 15, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+  },
+  coverButtonPressed: {
+    opacity: 0.8,
+  },
   container: {
-    borderRadius: borderRadius.xl,
+    borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.borderAccent,
@@ -245,9 +278,10 @@ const styles = StyleSheet.create({
   headline: {
     color: colors.accentStrong,
     letterSpacing: -0.6,
-    fontWeight: '700',
-    fontSize: 34,
-    lineHeight: 40,
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
+    fontSize: 38,
+    lineHeight: 44,
     ...TEXT_LIFT,
   },
   description: {
@@ -296,8 +330,10 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
     padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: 'rgba(10, 10, 15, 0.68)',
+    borderRadius: 16,
+    backgroundColor: 'rgba(10, 10, 15, 0.62)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 210, 150, 0.35)',
   },
   mixHeader: {
     flexDirection: 'row',

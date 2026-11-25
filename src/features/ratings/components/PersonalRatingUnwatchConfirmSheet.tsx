@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface PersonalRatingUnwatchConfirmSheetProps {
   visible: boolean;
@@ -24,14 +25,16 @@ export function PersonalRatingUnwatchConfirmSheet({
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onCancel}>
       {visible ? (
-        <View style={styles.overlay} testID="personal-rating-unwatch-confirm">
+        <View style={premiumSheetChrome.overlay} testID="personal-rating-unwatch-confirm">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.cancel')}
-            style={styles.backdrop}
+            style={premiumSheetChrome.backdrop}
             onPress={onCancel}
           />
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={onCancel} style={styles.sheet} bottomInset>
+            <GlassSheetLayer />
+            <SheetHandle />
             <AppText variant="subtitle" style={styles.title}>
               {t('ratings.unwatchConfirm.title')}
             </AppText>
@@ -54,7 +57,7 @@ export function PersonalRatingUnwatchConfirmSheet({
                 onPress={onCancel}
               />
             </View>
-          </SafeAreaView>
+          </SwipeSheet>
         </View>
       ) : null}
     </Modal>
@@ -62,25 +65,15 @@ export function PersonalRatingUnwatchConfirmSheet({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  backdrop: {
-    flex: 1,
-  },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
   },
   title: {
     textAlign: 'center',
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   message: {
     textAlign: 'center',

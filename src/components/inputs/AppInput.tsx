@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
@@ -46,10 +47,10 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   input: {
-    backgroundColor: colors.inputBackground,
-    borderRadius: borderRadius.md,
+    backgroundColor: glass.fill,
+    borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.border,
     color: colors.textPrimary,
     minHeight: 48,
     paddingHorizontal: spacing.md,

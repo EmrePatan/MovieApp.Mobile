@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 import type { CachedAppConfigRecord, RemoteAppConfig } from './types';
 import { mergeWithDefaultRemoteAppConfig, parseRemoteAppConfig } from './parse-remote-app-config';
 

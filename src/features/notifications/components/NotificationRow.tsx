@@ -14,8 +14,11 @@ import { formatNotificationBody } from '../utils/format-notification-body';
 import { formatNotificationRelativeTime } from '../utils/format-notification-relative-time';
 import type { NotificationItem } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
+
 
 const POSTER_WIDTH = 48;
 const POSTER_HEIGHT = 72;
@@ -70,10 +73,11 @@ export const NotificationRow = memo(function NotificationRow({
         onPress={handleDelete}
         style={({ pressed }) => [styles.deleteAction, pressed && styles.pressed]}
       >
-        <Ionicons name="trash-outline" size={18} color={colors.accent} />
+        <Ionicons name="trash-outline" size={18} color={premiumSheet.mutedGold} />
       </Pressable>
     );
   }, [handleDelete, onDelete, t]);
+
 
   const rowContent = (
     <Pressable
@@ -82,7 +86,11 @@ export const NotificationRow = memo(function NotificationRow({
       accessibilityActions={onDelete ? [{ name: 'delete', label: t('notifications.row.delete') }] : undefined}
       onAccessibilityAction={onDelete ? handleAccessibilityAction : undefined}
       onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.mainPressable, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.mainPressable,
+        isUnread && styles.mainPressableUnread,
+        pressed && styles.pressed,
+      ]}
     >
       <View style={styles.posterWrap}>
         <CatalogImage
@@ -139,17 +147,27 @@ export const NotificationRow = memo(function NotificationRow({
 const styles = StyleSheet.create({
   row: {
     minHeight: POSTER_HEIGHT + spacing.sm * 2,
+    marginBottom: spacing.sm,
   },
   swipeableContent: {
     backgroundColor: colors.background,
   },
+  // Each notification is a glass card; unread ones get a faint gold edge.
   mainPressable: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.sm,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    padding: spacing.md,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
+  },
+  mainPressableUnread: {
+    borderColor: 'rgba(236, 210, 150, 0.45)',
+    backgroundColor: 'rgba(212, 179, 106, 0.08)',
   },
   pressed: {
     opacity: 0.85,
@@ -164,10 +182,11 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.accent,
+    backgroundColor: premiumSheet.mutedGold,
     borderWidth: 2,
     borderColor: colors.background,
   },
+
   content: {
     flex: 1,
     gap: spacing.xs,
@@ -192,9 +211,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.accentTint12,
+    backgroundColor: 'rgba(210, 164, 81, 0.12)',
     borderWidth: 1,
-    borderColor: colors.borderAccent,
+    borderColor: premiumSheet.goldBorder,
     marginRight: layout.screenPaddingHorizontal,
     borderRadius: borderRadius.full,
   },

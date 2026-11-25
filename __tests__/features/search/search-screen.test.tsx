@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { Keyboard, TextInput } from 'react-native';
 import SearchScreen from '../../../app/(tabs)/(app-shell)/search';
 import { t } from '../../i18n/i18n-test-utils';

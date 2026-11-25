@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { translateLibraryCategory } from '@/i18n/catalog-labels';
 import type { LibraryCategory } from '../types/library';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
+import { premiumSheet } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
 
 const CATEGORY_VALUES: LibraryCategory[] = ['watching', 'watched', 'liked', 'watchlist'];
 
@@ -57,29 +58,30 @@ export function LibraryCategoryControl({ value, onChange }: LibraryCategoryContr
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: spacing.xs,
   },
   chip: {
-    minHeight: 32,
-    paddingHorizontal: spacing.sm + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
+    minHeight: 36,
     justifyContent: 'center',
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
   },
   chipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    borderColor: glass.accentBorder,
+    backgroundColor: glass.accentFill,
   },
   label: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
   },
   labelSelected: {
-    color: colors.textPrimary,
-    fontWeight: '600',
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
 });
+

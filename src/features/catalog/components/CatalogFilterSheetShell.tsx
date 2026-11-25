@@ -1,11 +1,20 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 export type CatalogFilterSheetHeaderAction = 'close' | 'back';
 
@@ -42,21 +51,31 @@ export function CatalogFilterSheetShell({
   testID,
 }: CatalogFilterSheetShellProps) {
   const headerIcon = headerAction === 'back' ? 'chevron-back' : 'close';
+  // The sheet is bottom-anchored inside a Modal, so the overlay itself has to make room for the
+  // keyboard (custom year range inputs sit low in the list). The keyword drill-down handles its
+  // own keyboard, so it is left alone to avoid padding twice.
+  const Overlay = keywordDrillDown ? View : KeyboardAvoidingView;
+  const overlayProps = keywordDrillDown
+    ? {}
+    : { behavior: Platform.OS === 'ios' ? ('padding' as const) : undefined };
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onHeaderAction}>
-      <View style={styles.overlay}>
+      <Overlay style={premiumSheetChrome.overlay} {...overlayProps}>
         <Pressable
           style={StyleSheet.absoluteFill}
           onPress={onHeaderAction}
           accessibilityRole="button"
           accessibilityLabel={headerActionLabel}
         />
-        <SafeAreaView
+        <SwipeSheet
+          onClose={onHeaderAction}
           style={[styles.sheet, keywordDrillDown && styles.sheetKeywordDrillDown]}
-          edges={['bottom']}
+          bottomInset
           testID={testID}
         >
+          <GlassSheetLayer />
+          <SheetHandle />
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
@@ -66,7 +85,7 @@ export function CatalogFilterSheetShell({
               style={styles.headerIconButton}
               testID={testID ? `${testID}-header-action` : undefined}
             >
-              <Ionicons name={headerIcon} size={24} color={colors.textPrimary} />
+              <Ionicons name={headerIcon} size={24} color={premiumSheet.textPrimary} />
             </Pressable>
             <AppText variant="subtitle" style={styles.headerTitle} numberOfLines={1}>
               {title}
@@ -93,25 +112,16 @@ export function CatalogFilterSheetShell({
               <AppButton title={applyLabel} onPress={onApply} />
             </View>
           ) : null}
-        </SafeAreaView>
-      </View>
+        </SwipeSheet>
+      </Overlay>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   sheet: {
+    ...premiumSheetChrome.sheet,
     maxHeight: '85%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
     paddingBottom: spacing.md,
   },
   sheetKeywordDrillDown: {
@@ -136,6 +146,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: 'center',
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   scroll: {
     flexGrow: 0,
@@ -148,7 +160,7 @@ const styles = StyleSheet.create({
   actions: {
     gap: spacing.sm,
     paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
+    borderTopWidth: 1,
+    borderTopColor: premiumSheet.border,
   },
 });

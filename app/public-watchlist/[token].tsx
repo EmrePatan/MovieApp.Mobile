@@ -21,12 +21,13 @@ export default function PublicWatchlistScreen() {
   const decodedToken = decodeURIComponent(token ?? '');
   const query = usePublicWatchlistShare(decodedToken);
 
+  const sharedItems = query.data?.items;
   const items = useMemo<LibraryItem[]>(() => {
-    if (!query.data?.items) {
+    if (!sharedItems) {
       return [];
     }
 
-    return query.data.items.map((item) => ({
+    return sharedItems.map((item) => ({
       id: item.contentId,
       type: item.contentType,
       title: item.title,
@@ -35,7 +36,7 @@ export default function PublicWatchlistScreen() {
       voteAverage: item.voteAverage,
       createdAt: new Date(0).toISOString(),
     }));
-  }, [query.data?.items]);
+  }, [sharedItems]);
 
   const heading = useMemo(() => {
     const listName = query.data?.watchlistName?.trim();
@@ -88,6 +89,11 @@ export default function PublicWatchlistScreen() {
         <AppText variant="caption" muted>
           {t('watchlistShare.publicItemCount', { count: items.length })}
         </AppText>
+        {query.data?.description ? (
+          <AppText variant="bodySmall" muted>
+            {query.data.description}
+          </AppText>
+        ) : null}
       </View>
       {items.length === 0 ? (
         <LibraryEmptyState

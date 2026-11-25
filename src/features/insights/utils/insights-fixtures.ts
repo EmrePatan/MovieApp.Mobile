@@ -112,6 +112,7 @@ export const insightsV3Fixture: InsightsV3Response = {
       targetValue: 1,
       achieved: true,
       achievedAt: '2025-11-01T10:00:00Z',
+      tier: 1,
     },
     {
       id: 'movies-10',
@@ -121,6 +122,7 @@ export const insightsV3Fixture: InsightsV3Response = {
       targetValue: 10,
       achieved: false,
       achievedAt: null,
+      tier: 2,
     },
   ],
 };

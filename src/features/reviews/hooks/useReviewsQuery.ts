@@ -1,3 +1,4 @@
+import { useEpisodeReviews } from './useEpisodeReviews';
 import { useMovieReviews } from './useMovieReviews';
 import { useTvShowReviews } from './useTvShowReviews';
 import type { ReviewContentType, ReviewsQueryOptions } from '../types';
@@ -9,5 +10,15 @@ export function useReviewsQuery(
 ) {
   const movieQuery = useMovieReviews(contentType === 'movie' ? contentId : '', options);
   const tvQuery = useTvShowReviews(contentType === 'tv' ? contentId : '', options);
-  return contentType === 'movie' ? movieQuery : tvQuery;
+  const episodeQuery = useEpisodeReviews(contentType === 'episode' ? contentId : '', options);
+
+  if (contentType === 'movie') {
+    return movieQuery;
+  }
+
+  if (contentType === 'tv') {
+    return tvQuery;
+  }
+
+  return episodeQuery;
 }

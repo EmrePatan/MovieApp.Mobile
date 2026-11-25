@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type AccessibilityActionEvent,
@@ -11,13 +11,21 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
+import { BrowsePosterFrame } from '@/features/browse-quick-actions/components/BrowsePosterFrame';
+import {
+  buildBrowseQuickActionsTarget,
+  useBrowsePosterQuickActions,
+} from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
 import { translateContentType } from '@/i18n/catalog-labels';
 import type { LibraryItem } from '@/features/watchlists/utils/library-items';
 import { formatRating } from '@/utils/format';
+import { resolveImageUri } from '@/utils/image-url';
 import type { LibraryRemoveIcon } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
+import { POSTER_CARD_ROLE } from '@/utils/poster-card-role';
 
 const SWIPE_REMOVE_ACTION_SIZE = 40;
 
@@ -63,6 +71,20 @@ export const LibraryContentCard = memo(function LibraryContentCard({
   const { t } = useTranslation();
   const swipeableRef = useRef<Swipeable>(null);
   const year = formatYear(item);
+  const quickTarget = useMemo(
+    () =>
+      buildBrowseQuickActionsTarget({
+        contentId: item.id,
+        contentType: item.type,
+        title: item.title,
+        posterUrl: resolveImageUri(item.posterPath, 'w300'),
+        releaseDate: item.airDate,
+        voteAverage: item.voteAverage,
+      }),
+    [item.airDate, item.id, item.posterPath, item.title, item.type, item.voteAverage],
+  );
+  const { isWatched, watchedBusy, onLongPress, onToggleWatched } =
+    useBrowsePosterQuickActions(quickTarget);
   const accessibilityDetails = [
     formatContentType(item.type),
     year,
@@ -126,23 +148,33 @@ export const LibraryContentCard = memo(function LibraryContentCard({
   const cardContent = (
     <>
       <Pressable
-        accessibilityRole="button"
+        accessibilityRole={POSTER_CARD_ROLE}
         accessibilityLabel={accessibilityLabel}
         accessibilityActions={
-          usesSwipeRemove
+          usesSwipeRemove || onRemove
             ? [{ name: 'remove', label: removeActionLabel }]
             : undefined
         }
-        onAccessibilityAction={usesSwipeRemove ? handleAccessibilityAction : undefined}
+        onAccessibilityAction={
+          usesSwipeRemove || onRemove ? handleAccessibilityAction : undefined
+        }
         onPress={() => onPress?.(item)}
+        onLongPress={onLongPress}
+        delayLongPress={380}
         style={({ pressed }) => [styles.content, pressed && styles.pressed]}
       >
-        <CatalogImage
-          path={item.posterPath}
-          width={layout.posterList.width}
-          height={layout.posterList.height}
-          accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
-        />
+        <BrowsePosterFrame
+          watched={isWatched}
+          busy={watchedBusy}
+          onToggleWatched={onToggleWatched}
+        >
+          <CatalogImage
+            path={item.posterPath}
+            width={layout.posterList.width}
+            height={layout.posterList.height}
+            accessibilityLabel={t('common.posterAccessibility', { title: item.title })}
+          />
+        </BrowsePosterFrame>
         <View style={styles.meta}>
           <AppText variant="body" numberOfLines={2} style={styles.title}>
             {item.title}
@@ -217,12 +249,18 @@ const styles = StyleSheet.create({
   swipeContent: {
     backgroundColor: colors.background,
   },
+  // Each library title is a soft glass card, like the feed and notification cards.
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingVertical: spacing.sm,
+    marginHorizontal: layout.screenPaddingHorizontal,
+    marginVertical: spacing.xs,
+    padding: spacing.sm,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   content: {
     flex: 1,
@@ -249,7 +287,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   typeBadge: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
@@ -271,7 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   removePressed: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   swipeRemoveAction: {
     width: SWIPE_REMOVE_ACTION_SIZE,

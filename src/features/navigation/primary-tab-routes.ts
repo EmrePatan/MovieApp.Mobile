@@ -6,6 +6,7 @@ export type { HighlightedPrimaryTab, PrimaryTabId } from '@/features/navigation/
 export const PRIMARY_TAB_HREFS: Record<PrimaryTabId, `/${string}`> = {
   home: '/home',
   discover: '/discover',
+  social: '/social',
   library: '/library',
   insights: '/insights',
 };
@@ -33,6 +34,7 @@ const DISCOVER_ROUTE_PREFIXES = [
 
 const LIBRARY_ROUTE_PREFIXES = [
   '/library',
+  '/profile',
   '/favorites',
   '/following',
   '/watch-history',
@@ -41,7 +43,18 @@ const LIBRARY_ROUTE_PREFIXES = [
   '/notifications',
 ] as const;
 
-const INSIGHTS_ROUTE_PREFIXES = ['/insights'] as const;
+const SOCIAL_ROUTE_PREFIXES = [
+  '/messages',
+  '/social',
+  '/social-notifications',
+  '/social-requests',
+  '/social-search',
+  '/social-profile',
+  '/social-people',
+  '/social-privacy',
+] as const;
+
+const INSIGHTS_ROUTE_PREFIXES = ['/insights', '/achievements'] as const;
 
 function matchesRoutePrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -71,6 +84,10 @@ export function resolveActivePrimaryTab(pathname: string): HighlightedPrimaryTab
 
   if (LIBRARY_ROUTE_PREFIXES.some((prefix) => matchesRoutePrefix(pathname, prefix))) {
     return 'library';
+  }
+
+  if (SOCIAL_ROUTE_PREFIXES.some((prefix) => matchesRoutePrefix(pathname, prefix))) {
+    return 'social';
   }
 
   if (INSIGHTS_ROUTE_PREFIXES.some((prefix) => matchesRoutePrefix(pathname, prefix))) {

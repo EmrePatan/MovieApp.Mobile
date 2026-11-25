@@ -11,6 +11,7 @@ import { useDeleteRating, useRateContent } from '../hooks/useRatingMutations';
 import { useMyRating, useRatingAggregate } from '../hooks/useRatings';
 import type { RatingContentType } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 const RATING_SCALE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -184,8 +185,8 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelElevated,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
@@ -201,9 +202,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     padding: spacing.sm,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
   },
   pressed: {
     opacity: 0.85,

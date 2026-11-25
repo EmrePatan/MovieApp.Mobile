@@ -5,6 +5,10 @@ import { t } from '../../i18n/i18n-test-utils';
 const mockPush = jest.fn();
 const mockOpenLibraryStackScreen = jest.fn();
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
@@ -12,6 +16,27 @@ jest.mock('expo-router', () => ({
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({}),
   useQueries: () => [],
+}));
+
+jest.mock('@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions', () => ({
+  buildBrowseQuickActionsTarget: (input: {
+    contentId: string;
+    contentType: 'movie' | 'tv';
+    title: string;
+    posterUrl: string | null | undefined;
+  }) => ({
+    contentId: input.contentId,
+    contentType: input.contentType,
+    title: input.title,
+    posterUrl: input.posterUrl ?? null,
+  }),
+  useBrowsePosterQuickActions: () => ({
+    supported: false,
+    isWatched: false,
+    watchedBusy: false,
+    onLongPress: undefined,
+    onToggleWatched: undefined,
+  }),
 }));
 
 jest.mock('@/features/discovery/hooks/useExplorePreview', () => ({

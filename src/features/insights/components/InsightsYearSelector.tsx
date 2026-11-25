@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsYearSelectorProps {
@@ -68,29 +68,30 @@ const styles = StyleSheet.create({
   },
   chip: {
     borderRadius: borderRadius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderWidth: 1,
+    borderColor: premiumSheet.rowBorder,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    backgroundColor: colors.surface,
+    backgroundColor: premiumSheet.secondary,
   },
   chipCompact: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
   chipSelected: {
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint14,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   chipPressed: {
     opacity: 0.85,
   },
   chipText: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
   chipTextSelected: {
-    color: colors.accentStrong,
+    color: premiumSheet.mutedGold,
   },
 });
+

@@ -23,6 +23,7 @@ import {
 import { openReviewsDetail } from '../navigation/reviews-detail-navigation';
 import { buildMovieReviewsRoute, buildTvReviewsRoute } from '../routes';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -43,7 +44,7 @@ export const DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT = {
 } as const;
 
 interface DetailUltraThinRatingRailProps {
-  contentType: RatingContentType;
+  contentType: Exclude<RatingContentType, 'episode'>;
   contentId: string;
   showCommunityScore?: boolean;
   /** Catalog TMDB vote average when external-ratings snapshot has no TMDB row. */
@@ -219,7 +220,7 @@ function CommunitySegmentChrome({
   if (!onPress) {
     return (
       <View
-        style={styles.segment}
+        style={[styles.segment, testID === 'detail-rail-community-score' && styles.communityPressable]}
         accessibilityRole="text"
         accessibilityLabel={label}
         testID={testID}
@@ -235,7 +236,11 @@ function CommunitySegmentChrome({
       accessibilityLabel={label}
       onPress={onPress}
       hitSlop={COMMUNITY_RAIL_HIT_SLOP}
-      style={({ pressed }) => [styles.segment, styles.communityPressable, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.segment,
+        testID === 'detail-rail-community-score' && styles.communityPressable,
+        pressed && styles.pressed,
+      ]}
       testID="detail-rail-community-button"
     >
       {children}
@@ -285,7 +290,7 @@ function CommunityZeroSegment({ onPress }: { onPress?: () => void }) {
       <Ionicons
         name="star"
         size={DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.communityStarSize}
-        color={colors.accentStrong}
+        color={colors.textMuted}
         accessibilityElementsHidden
         importantForAccessibility="no"
       />
@@ -373,24 +378,32 @@ const styles = StyleSheet.create({
     gap: DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.itemGap,
     paddingRight: spacing.sm,
   },
+  // Every score is a small glass chip; the community score is the gold one.
   segment: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.rtPairGap,
     flexShrink: 0,
+    height: 30,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: 15,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   communityPressable: {
-    marginVertical: -spacing.xs,
-    paddingVertical: spacing.xs,
+    backgroundColor: 'rgba(212, 179, 106, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 210, 150, 0.45)',
   },
   pressed: {
     opacity: interaction.pressedOpacity,
   },
+  // Chips carry their own borders, so the old hairline divider is collapsed.
   separator: {
-    width: StyleSheet.hairlineWidth,
-    height: DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.separatorHeight,
-    backgroundColor: colors.borderSubtle,
-    flexShrink: 0,
+    width: 0,
+    height: 0,
+    marginHorizontal: -DETAIL_ULTRA_THIN_RATING_RAIL_LAYOUT.itemGap / 2,
   },
   communityScore: {
     color: colors.textPrimary,

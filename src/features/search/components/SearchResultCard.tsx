@@ -14,6 +14,7 @@ import { formatContentType, formatKnownForDepartment } from '@/utils/format';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 interface SearchResultCardProps {
@@ -104,6 +105,7 @@ const CatalogSearchResultCard = memo(function CatalogSearchResultCard({
 
   return (
     <CatalogResultRow
+      contentId={item.id}
       title={item.title}
       posterUrl={item.posterUrl}
       mediaType={mediaType}
@@ -135,22 +137,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingHorizontal,
     paddingVertical: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: glass.hairline,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   portrait: {
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   portraitFallback: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   personMeta: {
     flex: 1,

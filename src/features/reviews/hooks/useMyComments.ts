@@ -5,8 +5,12 @@ import { getCurrentUserReviews } from '../api/reviews-api';
 import { myCommentsInfiniteQueryKey } from './review-query-keys';
 import { DEFAULT_MY_COMMENTS_PAGE_SIZE } from '../types/my-comments';
 
-export function useMyComments(mediaType: CatalogMediaFilter) {
+export function useMyComments(
+  mediaType: CatalogMediaFilter,
+  options?: { enabled?: boolean },
+) {
   const { isAuthenticated } = useAuth();
+  const enabled = options?.enabled ?? true;
 
   return useInfiniteQuery({
     queryKey: myCommentsInfiniteQueryKey(mediaType),
@@ -15,7 +19,7 @@ export function useMyComments(mediaType: CatalogMediaFilter) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.hasNextPage ? lastPage.page + 1 : undefined,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && enabled,
     staleTime: 30_000,
   });
 }

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import type { GalleryFilter } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
 interface GalleryFilterTabsProps {
@@ -58,16 +58,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: 999,
-    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
   },
   tabActive: {
-    backgroundColor: colors.accent,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   tabLabel: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '600',
   },
   tabLabelActive: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
   },
 });
+

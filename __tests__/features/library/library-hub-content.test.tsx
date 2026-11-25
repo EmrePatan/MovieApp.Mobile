@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+﻿import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { LibraryHubContent } from '@/features/library/components/LibraryHubContent';
 import { LibraryHubSearchProvider } from '@/features/library/context/LibraryHubSearchContext';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
@@ -6,12 +7,12 @@ import { trackProductMetric } from '@/features/metrics/track-product-metric';
 const mockPush = jest.fn();
 const mockOpenCatalogDetailFromTab = jest.fn();
 
-jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush }),
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
 }));
 
-jest.mock('@tanstack/react-query', () => ({
-  useQueryClient: jest.fn(() => ({})),
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
 }));
 
 jest.mock('@/auth/useAuth', () => ({
@@ -40,11 +41,10 @@ jest.mock('@/features/navigation/usePrimaryTabReselectHandler', () => ({
 }));
 
 jest.mock('@/features/library/components/LibraryWatchlistsOverview', () => ({
-  LibraryWatchlistsOverview: ({ listHeader }: { listHeader: React.ReactNode }) => {
+  LibraryWatchlistsOverview: () => {
     const { View, Text } = require('react-native');
     return (
       <View testID="library-watchlists-overview">
-        {listHeader}
         <Text>Watchlists overview</Text>
       </View>
     );

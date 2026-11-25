@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { translateDiscoveryBrowseMode } from '@/i18n/catalog-labels';
 import { DISCOVERY_BROWSE_MODES, type DiscoveryBrowseMode } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface DiscoveryModeControlProps {
@@ -58,24 +58,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   pressed: {
     opacity: 0.85,
   },
   label: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
   },
   labelSelected: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
 });

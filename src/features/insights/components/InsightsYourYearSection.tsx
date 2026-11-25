@@ -10,10 +10,14 @@ import {
   formatMonthYear,
   formatWeekdayName,
 } from '../utils/insights-format';
+import { authTypography } from '@/features/auth/auth-typography';
+import { InsightsActivityHeatmap } from './InsightsActivityHeatmap';
+import { InsightsCard } from './InsightsCard';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { InsightsYearSelector } from './InsightsYearSelector';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsYourYearSectionProps {
@@ -42,6 +46,7 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
     <View style={styles.section}>
       <InsightsSectionHeader
         title={t('insights.yourYear.title')}
+        index={1}
         trailing={
           years.length > 1 ? (
             <InsightsYearSelector
@@ -58,7 +63,7 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
       {!hasActivity ? (
         <InsightsEmptyState message={t('insights.yourYear.empty')} />
       ) : (
-        <View style={styles.body}>
+        <InsightsCard glow style={styles.body}>
           <View style={styles.chart} accessibilityRole="summary">
             {yourYear.months.map((month) => (
               <MonthlyStackedBar
@@ -93,6 +98,10 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
             ) : null}
           </View>
 
+          {yourYear.days && yourYear.days.length > 0 ? (
+            <InsightsActivityHeatmap year={year} days={yourYear.days} />
+          ) : null}
+
           {activeDayPercent != null ? (
             <View style={styles.callout} accessibilityRole="text">
               <Ionicons name="calendar-outline" size={16} color={colors.accent} />
@@ -103,7 +112,7 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
               </AppText>
             </View>
           ) : null}
-        </View>
+        </InsightsCard>
       )}
     </View>
   );
@@ -213,6 +222,7 @@ const styles = StyleSheet.create({
   },
   body: {
     gap: spacing.md,
+    padding: spacing.md,
   },
   chart: {
     flexDirection: 'row',
@@ -285,33 +295,45 @@ const styles = StyleSheet.create({
   },
   summaryRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.lg,
+    gap: spacing.sm,
     paddingTop: spacing.xs,
   },
+  // Each headline number sits in its own raised glass tile.
   summaryStat: {
+    flex: 1,
     gap: 2,
-    minWidth: 88,
+    minWidth: 0,
+    alignItems: 'center',
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.xs,
+    borderRadius: 16,
+    backgroundColor: glass.panelElevated,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   summaryValue: {
     color: colors.textPrimary,
-    fontWeight: '700',
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
+    fontSize: 20,
+    lineHeight: 26,
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.2,
   },
   summaryValueAccent: {
     color: colors.accentStrong,
   },
   summaryLabel: {
     color: colors.textMuted,
+    textAlign: 'center',
+    fontSize: 11,
   },
   callout: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
     padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
+    borderRadius: 16,
+    backgroundColor: glass.panelElevated,
   },
   calloutText: {
     flex: 1,

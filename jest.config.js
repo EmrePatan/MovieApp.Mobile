@@ -4,6 +4,8 @@ module.exports = {
     {
       displayName: 'unit',
       testEnvironment: 'node',
+      // react-native's entry references __DEV__, which is normally injected by the RN preset.
+      globals: { __DEV__: true },
       testMatch: [
         '<rootDir>/__tests__/api/**/*.test.ts',
         '<rootDir>/__tests__/auth/**/*.test.ts',
@@ -23,7 +25,8 @@ module.exports = {
         '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
       },
       transform: {
-        '^.+\\.(ts|tsx)$': [
+        // .js is included so Flow-typed react-native entry files (e.g. index.js) are transpiled in the node project.
+        '^.+\\.(js|jsx|ts|tsx)$': [
           'babel-jest',
           {
             presets: ['babel-preset-expo'],

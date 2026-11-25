@@ -18,23 +18,26 @@ const HIDDEN_BOTTOM_NAV_ROUTE_NAMES = new Set([
   'gallery',
 ]);
 
-const MAIN_TAB_ROUTE_NAMES = new Set(['home', 'discover', 'library', 'insights']);
+const MAIN_TAB_ROUTE_NAMES = new Set(['home', 'discover', 'social', 'library', 'insights']);
 
 export function resolveBottomNavVisibility(segments: readonly string[]): BottomNavVisibility {
   if (segments.includes('(auth)')) {
     return 'hide';
   }
 
+  // Nested account screens under /profile/* stay fullscreen; the settings hub at
+  // /(tabs)/profile keeps the primary tab bar so users can jump to other tabs.
   if (segments.includes('profile') && !segments.includes('(tabs)')) {
-    return 'hide';
-  }
-
-  if (segments.includes('(tabs)') && segments.includes('profile')) {
     return 'hide';
   }
 
   const leafRoute = segments.at(-1);
   if (leafRoute && HIDDEN_BOTTOM_NAV_ROUTE_NAMES.has(leafRoute)) {
+    return 'hide';
+  }
+
+  // An open conversation owns the bottom edge for its composer.
+  if (segments.includes('messages') && leafRoute === '[conversationId]') {
     return 'hide';
   }
 

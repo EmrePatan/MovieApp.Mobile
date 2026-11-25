@@ -4,7 +4,7 @@ export const REVIEW_COUNT_PAGE_SIZE = 1;
 export const DETAIL_REVIEWS_PREVIEW_PAGE_SIZE = 5;
 export const MAX_REVIEW_CONTENT_LENGTH = 5000;
 
-export type ReviewContentType = 'movie' | 'tv';
+export type ReviewContentType = 'movie' | 'tv' | 'episode';
 
 export type ReviewSortOption = 'newest' | 'oldest' | 'ratingDesc' | 'ratingAsc';
 
@@ -31,6 +31,11 @@ export interface ReviewResponse {
   updatedAt: string;
   userRating?: number | null;
   authoringLocale?: string | null;
+  /** Social activity backing this review (likes / comments thread). */
+  socialActivityId?: string | null;
+  likesCount?: number;
+  commentsCount?: number;
+  isLikedByMe?: boolean;
 }
 
 export type ReviewTranslationOutcome = 'Translated' | 'SourceMatchesTarget';
@@ -57,8 +62,10 @@ export interface ReviewListResponse {
 
 export interface CreateReviewRequest {
   content: string;
+  authoringLocale?: string | null;
 }
 
 export interface UpdateReviewRequest {
   content: string;
+  authoringLocale?: string | null;
 }

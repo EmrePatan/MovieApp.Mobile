@@ -42,7 +42,7 @@ export function worldCinemaStateToFilterDraft(state: WorldCinemaState): CatalogF
     originalLanguage: state.originalLanguage,
     originCountry: state.originCountry,
     keywordIds: state.keywordIds,
-    keywordLabels: {},
+    keywordLabels: state.keywordLabels ?? {},
     tvStatuses: state.mediaType === 'tv' ? state.tvStatuses : [],
   };
 }
@@ -67,6 +67,7 @@ export function filterDraftToWorldCinemaPatch(
     maxRuntimeMinutes: draft.maxRuntimeMinutes,
     originalLanguage: draft.originalLanguage,
     keywordIds: draft.keywordIds,
+    keywordLabels: draft.keywordLabels,
     tvStatuses: mediaType === 'tv' ? draft.tvStatuses : [],
   };
 }

@@ -80,6 +80,45 @@ export function buildDeleteTvReviewPath(tvShowId: string): string {
   return `/api/reviews/tvshows/${encodePathSegment(tvShowId)}`;
 }
 
+export function buildEpisodeReviewsPath(
+  episodeId: string,
+  page = 1,
+  pageSize = 20,
+  sort?: string,
+  ratingStars?: number | null,
+): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  if (sort) {
+    params.set('sort', sort);
+  }
+
+  if (ratingStars) {
+    params.set('ratingStars', String(ratingStars));
+  }
+
+  return `/api/reviews/episodes/${encodePathSegment(episodeId)}?${params.toString()}`;
+}
+
+export function buildEpisodeMyReviewPath(episodeId: string): string {
+  return `/api/reviews/episodes/${encodePathSegment(episodeId)}/me`;
+}
+
+export function buildCreateEpisodeReviewPath(episodeId: string): string {
+  return `/api/reviews/episodes/${encodePathSegment(episodeId)}`;
+}
+
+export function buildUpdateEpisodeReviewPath(episodeId: string): string {
+  return `/api/reviews/episodes/${encodePathSegment(episodeId)}`;
+}
+
+export function buildDeleteEpisodeReviewPath(episodeId: string): string {
+  return `/api/reviews/episodes/${encodePathSegment(episodeId)}`;
+}
+
 export function buildReviewTranslationPath(reviewId: string): string {
   return `/api/reviews/${encodePathSegment(reviewId)}/translation`;
 }
@@ -99,4 +138,22 @@ export function buildCurrentUserReviewsPath(
   }
 
   return `/api/reviews/me?${params.toString()}`;
+}
+
+export function buildUserReviewsPath(
+  userId: string,
+  page = 1,
+  pageSize = 15,
+  mediaType?: 'all' | 'movie' | 'tv',
+): string {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  if (mediaType && mediaType !== 'all') {
+    params.set('type', mediaType);
+  }
+
+  return `/api/reviews/users/${encodePathSegment(userId)}?${params.toString()}`;
 }

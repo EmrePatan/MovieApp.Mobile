@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
 import { FlatList, Platform, ScrollView } from 'react-native';
-import { act, render } from '@testing-library/react-native';
+import { act } from '@testing-library/react-native';
 import { renderWithProviders } from '../../utils/render-with-providers';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import HomeScreen from '../../../app/(tabs)/(app-shell)/home';
@@ -27,7 +27,12 @@ const androidPullRefreshSurfaceFiles = [
   'src/features/insights/components/InsightsHubContent.tsx',
 ];
 
-const sharedRefreshSurfaceFiles = ['app/(tabs)/(app-shell)/notifications.tsx'];
+// Notifications intentionally has no native/shared refresh control (see commit 2cd90366), so it is not listed here.
+const sharedRefreshSurfaceFiles = [
+  'app/(tabs)/(app-shell)/following.tsx',
+  'app/(tabs)/(app-shell)/favorites.tsx',
+  'app/(tabs)/(app-shell)/watch-history.tsx',
+];
 
 jest.mock('@tanstack/react-query', () => {
   const actual = jest.requireActual<typeof import('@tanstack/react-query')>('@tanstack/react-query');
@@ -67,23 +72,58 @@ jest.mock('@/auth/useAuth', () => ({
   useAuth: jest.fn(() => ({ isAuthenticated: true, user: { id: 'user-1' }, logout: jest.fn() })),
 }));
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), navigate: jest.fn() }),
   useFocusEffect: jest.fn(),
   useSegments: jest.fn(() => []),
+  useLocalSearchParams: () => ({ tab: 'releases' }),
+}));
+
+jest.mock('@/features/messages/hooks/useMessageQueries', () => ({
+  useDirectMessageUnreadCount: () => ({ data: 0, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/notifications/hooks/useCombinedUnreadNotificationCount', () => ({
+  useCombinedUnreadNotificationCount: jest.fn(() => ({
+    unreadCount: 0,
+    releasesUnread: 0,
+    socialUnread: 0,
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
+jest.mock('@/features/social/hooks/useSocialQueries', () => ({
+  useSocialNotifications: jest.fn(() => ({
+    data: { pages: [{ items: [], page: 1, pageSize: 20, unreadCount: 0 }] },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    isRefetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+  })),
+  useSocialUnreadNotificationCount: jest.fn(() => ({ data: 0 })),
+}));
+
+jest.mock('@/features/social/hooks/useSocialMutations', () => ({
+  useMarkSocialNotificationRead: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
+  useMarkAllSocialNotificationsRead: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }));
 
 jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
 }));
 
-jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
-  useUnreadNotificationCount: jest.fn(() => ({ data: { unreadCount: 0 } })),
-}));
-
 jest.mock('@/features/profile/hooks/useCurrentProfile', () => ({
   useCurrentProfile: jest.fn(),
 }));
+
 
 jest.mock('@/features/profile/hooks/useProfileAvatarEditor', () => ({
   useProfileAvatarEditor: () => ({
@@ -219,7 +259,7 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_getByType } = render(<HomeScreen />);
+    const { UNSAFE_getByType } = renderWithProviders(<HomeScreen />);
     const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(false);
@@ -274,7 +314,7 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_getByType, getByTestId } = render(<HomeScreen />);
+    const { UNSAFE_getByType, getByTestId } = renderWithProviders(<HomeScreen />);
     expect(UNSAFE_getByType(FlatList).props.refreshControl).toBeUndefined();
     expect(getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
@@ -289,7 +329,7 @@ describe('primary surface refresh presentation', () => {
       }),
     );
 
-    const { UNSAFE_queryByType } = render(<HomeScreen />);
+    const { UNSAFE_queryByType } = renderWithProviders(<HomeScreen />);
     expect(UNSAFE_queryByType(FlatList)).toBeNull();
   });
 
@@ -355,7 +395,7 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType } = render(<InsightsHubContent />);
+    const { UNSAFE_getByType } = renderWithProviders(<InsightsHubContent />);
     const refreshControl = UNSAFE_getByType(ScrollView).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(true);
@@ -377,7 +417,7 @@ describe('primary surface refresh presentation', () => {
       refetch,
     });
 
-    const { UNSAFE_getByType, getByTestId } = render(<InsightsHubContent />);
+    const { UNSAFE_getByType, getByTestId } = renderWithProviders(<InsightsHubContent />);
     expect(UNSAFE_getByType(ScrollView).props.refreshControl).toBeUndefined();
     expect(getByTestId('android-pull-refresh-header')).toBeTruthy();
   });
@@ -409,7 +449,7 @@ describe('primary surface refresh presentation', () => {
       fetchNextPage: jest.fn(),
     });
 
-    const { UNSAFE_getByType } = render(<NotificationsScreen />);
+    const { UNSAFE_getByType } = renderWithProviders(<NotificationsScreen />);
     const refreshControl = UNSAFE_getByType(FlatList).props.refreshControl as React.ReactElement;
     expectMovieAppRefreshControl(refreshControl);
     expect(refreshControl.props.refreshing).toBe(true);

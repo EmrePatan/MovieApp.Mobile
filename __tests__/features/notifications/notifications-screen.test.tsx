@@ -5,6 +5,7 @@ import { useDeleteNotification } from '@/features/notifications/hooks/useDeleteN
 import { useMarkAllNotificationsRead } from '@/features/notifications/hooks/useMarkAllNotificationsRead';
 import { useMarkNotificationRead } from '@/features/notifications/hooks/useMarkNotificationRead';
 import { useNotificationsInbox } from '@/features/notifications/hooks/useNotificationsInbox';
+import { useCombinedUnreadNotificationCount } from '@/features/notifications/hooks/useCombinedUnreadNotificationCount';
 import NotificationsScreen from '../../../app/(tabs)/(app-shell)/notifications';
 
 const mockPush = jest.fn();
@@ -12,6 +13,7 @@ const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, navigate: jest.fn() }),
   useSegments: jest.fn(() => []),
+  useLocalSearchParams: () => ({ tab: 'releases' }),
 }));
 
 jest.mock('@/auth/useAuth', () => ({
@@ -32,6 +34,29 @@ jest.mock('@/features/notifications/hooks/useMarkAllNotificationsRead', () => ({
 
 jest.mock('@/features/notifications/hooks/useDeleteNotification', () => ({
   useDeleteNotification: jest.fn(),
+}));
+
+jest.mock('@/features/notifications/hooks/useCombinedUnreadNotificationCount', () => ({
+  useCombinedUnreadNotificationCount: jest.fn(),
+}));
+
+jest.mock('@/features/social/hooks/useSocialQueries', () => ({
+  useSocialNotifications: jest.fn(() => ({
+    data: { pages: [{ items: [], page: 1, pageSize: 20, unreadCount: 0 }] },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    isRefetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+  })),
+  useSocialUnreadNotificationCount: jest.fn(() => ({ data: 0 })),
+}));
+
+jest.mock('@/features/social/hooks/useSocialMutations', () => ({
+  useMarkSocialNotificationRead: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
+  useMarkAllSocialNotificationsRead: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }));
 
 const unreadNotification = {
@@ -109,6 +134,13 @@ describe('NotificationsScreen', () => {
       isPending: false,
     });
     (useDeleteNotification as jest.Mock).mockReturnValue(createDeleteMutationMock());
+    (useCombinedUnreadNotificationCount as jest.Mock).mockReturnValue({
+      unreadCount: 1,
+      releasesUnread: 1,
+      socialUnread: 0,
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('renders logged-out state', () => {
@@ -133,6 +165,14 @@ describe('NotificationsScreen', () => {
 
     expect(screen.getByLabelText('Loading notifications')).toBeTruthy();
   });
+
+  it('renders social and releases segments', () => {
+    render(<NotificationsScreen />);
+
+    expect(screen.getByTestId('notifications-segment-social')).toBeTruthy();
+    expect(screen.getByTestId('notifications-segment-releases')).toBeTruthy();
+  });
+
 
   it('marks unread notification read and navigates on tap', () => {
     const markRead = createMarkReadMutationMock();

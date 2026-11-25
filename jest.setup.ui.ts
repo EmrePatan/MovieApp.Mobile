@@ -4,6 +4,12 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
+// expo-constants is ESM-only and needs native modules; the UI tests only read config values from it.
+jest.mock('expo-constants', () => ({
+  __esModule: true,
+  default: { expoConfig: { extra: {} }, manifest: null, executionEnvironment: 'storeClient' },
+}));
+
 jest.mock('expo-image-manipulator', () => ({
   manipulateAsync: jest.fn(async (uri: string) => ({ uri, width: 1, height: 1 })),
   SaveFormat: { JPEG: 'jpeg', PNG: 'png', WEBP: 'webp' },
@@ -49,7 +55,9 @@ jest.mock('react-native-gesture-handler', () => {
 
   const createMockGesture = () => {
     const gesture = {
+      activeOffsetX: jest.fn(() => gesture),
       activeOffsetY: jest.fn(() => gesture),
+      failOffsetY: jest.fn(() => gesture),
       failOffsetX: jest.fn(() => gesture),
       manualActivation: jest.fn(() => gesture),
       onTouchesMove: jest.fn(() => gesture),
@@ -156,10 +164,21 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
-jest.mock('@expo/vector-icons', () => ({
-  Ionicons: ({ name, ...props }: { name: string }) =>
-    mockReact.createElement('Icon', { ...props, accessibilityLabel: name }),
-}));
+jest.mock('@expo/vector-icons', () => {
+  // Each icon family keeps its own display name so tests can locate e.g. the Ionicons element by type name.
+  const createIcon = (displayName: string) => {
+    const Icon = ({ name, ...props }: { name: string }) =>
+      mockReact.createElement('Icon', { ...props, accessibilityLabel: name });
+    Object.defineProperty(Icon, 'name', { value: displayName });
+    return Icon;
+  };
+  return {
+    Ionicons: createIcon('Ionicons'),
+    FontAwesome5: createIcon('FontAwesome5'),
+    FontAwesome6: createIcon('FontAwesome6'),
+    MaterialCommunityIcons: createIcon('MaterialCommunityIcons'),
+  };
+});
 
 jest.mock('expo-linear-gradient', () => ({
   LinearGradient: ({

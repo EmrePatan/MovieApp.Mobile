@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 
 const DISMISSED_KEY = 'notification_permission_prompt_dismissed';
 

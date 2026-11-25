@@ -1,8 +1,10 @@
 import { useCallback, useEffect, type ReactNode } from 'react';
+import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
+import { markSocialNotificationRead } from '@/features/social/api/social-api';
 import { markNotificationRead } from '../api/notifications-api';
 import { buildNotificationRoute } from '../utils/notification-navigation';
 
@@ -34,6 +36,25 @@ export function getNotificationResponseKey(
   );
 
   return notificationId ?? response.notification.request.identifier;
+}
+
+function readPushId(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
+/** Where a tapped social push (like, comment, reply, follow) should open. */
+export function buildSocialPushRoute(data: Record<string, unknown>): string | null {
+  const activityId = readPushId(data.activityId);
+  if (activityId) {
+    return `/(tabs)/(app-shell)/social/${activityId}`;
+  }
+
+  if (data.notificationType === 'FollowRequest') {
+    return '/(tabs)/(app-shell)/social-requests';
+  }
+
+  const actorId = readPushId(data.actorId);
+  return actorId ? `/(tabs)/(app-shell)/social-profile/${actorId}` : null;
 }
 
 let pendingNotificationResponse: Notifications.NotificationResponse | null = null;
@@ -82,9 +103,46 @@ export async function processNotificationResponse(
     return;
   }
 
-  const notificationId = parseNotificationIdFromPushData(
-    response.notification.request.content.data as Record<string, unknown> | undefined,
-  );
+  const data = response.notification.request.content.data as Record<string, unknown> | undefined;
+  if (data?.type === 'direct-message') {
+    const conversationId = data.conversationId == null ? '' : String(data.conversationId).trim();
+    inFlightNotificationResponseKeys.add(responseKey);
+    try {
+      lastProcessedNotificationResponseKey = responseKey;
+      if (!conversationId) {
+        return;
+      }
+
+      options.invalidateNotifications();
+      options.navigate(`/(tabs)/(app-shell)/messages/${conversationId}`);
+    } finally {
+      inFlightNotificationResponseKeys.delete(responseKey);
+    }
+    return;
+  }
+
+  if (data?.type === 'social') {
+    inFlightNotificationResponseKeys.add(responseKey);
+    try {
+      lastProcessedNotificationResponseKey = responseKey;
+      const socialNotificationId = parseNotificationIdFromPushData(data);
+      if (socialNotificationId) {
+        // Best effort: opening the target matters more than the unread flag.
+        void markSocialNotificationRead(socialNotificationId).catch(() => undefined);
+      }
+
+      options.invalidateNotifications();
+      const route = buildSocialPushRoute(data);
+      if (route) {
+        options.navigate(route);
+      }
+    } finally {
+      inFlightNotificationResponseKeys.delete(responseKey);
+    }
+    return;
+  }
+
+  const notificationId = parseNotificationIdFromPushData(data);
 
   if (!notificationId) {
     return;
@@ -119,6 +177,8 @@ export function NotificationBootstrapProvider({
 
   const invalidateNotifications = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    void queryClient.invalidateQueries({ queryKey: ['messages'] });
+    void queryClient.invalidateQueries({ queryKey: ['social', 'notifications'] });
   }, [queryClient]);
 
   const navigate = useCallback(
@@ -140,6 +200,10 @@ export function NotificationBootstrapProvider({
   );
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
     const receivedSubscription = Notifications.addNotificationReceivedListener(() => {
       invalidateNotifications();
     });
@@ -161,6 +225,26 @@ export function NotificationBootstrapProvider({
       responseSubscription.remove();
     };
   }, [invalidateNotifications, processResponse]);
+
+  // Query timers do not run while the app is suspended and window-focus refetch is off, so the
+  // bell would stay stale until the app was killed and reopened. Refresh it on every return.
+  useEffect(() => {
+    if (Platform.OS === 'web' || !isAuthenticated) {
+      return;
+    }
+
+    let previousState = AppState.currentState;
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (previousState !== 'active' && nextState === 'active') {
+        invalidateNotifications();
+      }
+      previousState = nextState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [invalidateNotifications, isAuthenticated]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || !pendingNotificationResponse) {

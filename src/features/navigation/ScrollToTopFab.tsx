@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { resolveTabBarLayoutMetrics } from '@/features/navigation/tab-bar-layout-metrics';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
@@ -43,6 +44,10 @@ export function ScrollToTopFab({
         style={({ pressed }) => [styles.button, pressed && styles.pressed]}
         testID={testID}
       >
+        <GlassSurface
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, styles.buttonGlass]}
+        />
         <Ionicons name="chevron-up" size={22} color={colors.textPrimary} />
       </Pressable>
     </View>
@@ -61,10 +66,10 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
     ...shadows.card,
+  },
+  buttonGlass: {
+    borderRadius: borderRadius.full,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

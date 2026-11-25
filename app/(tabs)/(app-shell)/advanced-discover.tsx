@@ -65,6 +65,7 @@ import { colors } from '@/theme/colors';
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 function getMediaTypeLabel(mediaType: AdvancedDiscoverMediaType): string {
   return translateAdvancedDiscoverMediaType(mediaType);
@@ -386,8 +387,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
   },
   filtersButtonText: {
     fontWeight: '600',

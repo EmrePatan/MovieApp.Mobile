@@ -39,8 +39,12 @@ export async function getWatchlists(signal?: AbortSignal): Promise<WatchlistSumm
   return api.get<WatchlistSummaryResponse[]>(buildWatchlistsPath(), { signal });
 }
 
-export async function createWatchlist(name: string): Promise<WatchlistSummaryResponse> {
-  const body: CreateWatchlistRequest = { name };
+export async function createWatchlist(
+  name: string,
+  description?: string | null,
+): Promise<WatchlistSummaryResponse> {
+  const body: CreateWatchlistRequest =
+    description === undefined ? { name } : { name, description };
   return api.post<WatchlistSummaryResponse>(buildWatchlistsPath(), body);
 }
 
@@ -54,8 +58,10 @@ export async function getWatchlist(
 export async function updateWatchlist(
   watchlistId: string,
   name: string,
+  description?: string | null,
 ): Promise<WatchlistSummaryResponse> {
-  const body: UpdateWatchlistRequest = { name };
+  const body: UpdateWatchlistRequest =
+    description === undefined ? { name } : { name, description };
   return api.patch<WatchlistSummaryResponse>(buildWatchlistPath(watchlistId), body);
 }
 

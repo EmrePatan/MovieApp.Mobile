@@ -6,6 +6,9 @@ import { AppText } from '@/components/common/AppText';
 import { ImageViewerModal } from '@/features/gallery/components/ImageViewerModal';
 import { createGalleryImageFromPath } from '@/features/gallery/utils/gallery-images';
 import { PosterImage } from '@/components/common/PosterImage';
+import { authTypography } from '@/features/auth/auth-typography';
+import { useAuthFonts } from '@/features/auth/useAuthFonts';
+import { DetailAmbientGlow } from './DetailAmbientGlow';
 import { DetailHeroPosterFrame } from './DetailHeroPosterFrame';
 import { DetailMetadataRow } from './DetailMetadataRow';
 import { DetailHeroMedia } from './DetailHeroMedia';
@@ -41,6 +44,15 @@ export interface DetailHeroProps {
   };
 }
 
+/** Longer titles step the type size down so they read as a compact block, not a tall column. */
+export function resolveHeroTitleSize(title: string): { fontSize: number; lineHeight: number } {
+  const length = title.trim().length;
+  if (length <= 16) return { fontSize: 28, lineHeight: 34 };
+  if (length <= 26) return { fontSize: 25, lineHeight: 31 };
+  if (length <= 38) return { fontSize: 22, lineHeight: 28 };
+  return { fontSize: 20, lineHeight: 25 };
+}
+
 export const DetailHero = memo(function DetailHero({
   title,
   originalTitle,
@@ -58,6 +70,7 @@ export const DetailHero = memo(function DetailHero({
   share,
 }: DetailHeroProps) {
   const { t } = useTranslation();
+  useAuthFonts();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -117,6 +130,7 @@ export const DetailHero = memo(function DetailHero({
 
   return (
     <View>
+      <DetailAmbientGlow path={posterPath ?? backdropPath} top={Math.round(heroHeight * 0.45)} />
       <DetailHeroMedia
         key={trailer?.contentId ?? 'detail-hero-media'}
         heroImagePath={heroImagePath}
@@ -149,7 +163,13 @@ export const DetailHero = memo(function DetailHero({
               <DetailHeroPosterFrame>{posterNode}</DetailHeroPosterFrame>
             ) : null}
             <View style={styles.titleBlock}>
-              <AppText variant="title" numberOfLines={3}>
+              <AppText
+                variant="title"
+                numberOfLines={4}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+                style={[styles.title, resolveHeroTitleSize(title)]}
+              >
                 {title}
               </AppText>
               {shouldShowOriginalTitle(title, originalTitle) ? (
@@ -199,6 +219,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     alignItems: 'flex-end',
+  },
+  // Editorial serif, matching the feed and profile display type.
+  title: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 28,
+    lineHeight: 34,
   },
   titleBlock: {
     flex: 1,

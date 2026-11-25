@@ -33,3 +33,19 @@ export function buildMovieRatingAggregatePath(movieId: string): string {
 export function buildTvRatingAggregatePath(tvShowId: string): string {
   return `/api/ratings/tvshows/${encodePathSegment(tvShowId)}`;
 }
+
+export function buildRateEpisodePath(episodeId: string): string {
+  return `/api/ratings/episodes/${encodePathSegment(episodeId)}`;
+}
+
+export function buildDeleteEpisodeRatingPath(episodeId: string): string {
+  return `/api/ratings/episodes/${encodePathSegment(episodeId)}`;
+}
+
+export function buildEpisodeMyRatingPath(episodeId: string): string {
+  return `/api/ratings/episodes/${encodePathSegment(episodeId)}/me`;
+}
+
+export function buildEpisodeRatingAggregatePath(episodeId: string): string {
+  return `/api/ratings/episodes/${encodePathSegment(episodeId)}`;
+}

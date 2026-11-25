@@ -2,7 +2,7 @@ import type { SearchTypeFilter } from '../types';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 const CATALOG_FILTERS: SearchTypeFilter[] = ['all', 'movie', 'tv', 'person'];
@@ -77,21 +77,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   label: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
   },
   labelSelected: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
 });
+

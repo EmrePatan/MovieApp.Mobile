@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { ReviewSortOption } from '../types';
 import { getReviewSortLabel, REVIEW_SORT_OPTIONS } from '../utils/review-sort';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ReviewsSortChipsProps {
@@ -65,21 +65,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipOutlined: {
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   chipOutlinedSelected: {
-    backgroundColor: colors.accentTint12,
-    borderColor: colors.borderAccent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   label: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '500',
     fontSize: 11,
     lineHeight: 14,
   },
   labelOutlinedSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
 });
+

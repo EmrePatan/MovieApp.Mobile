@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { spacing } from '@/theme/spacing';
@@ -48,13 +49,20 @@ export function DetailCircularAction({
           borderRadius={DETAIL_ACTION_SIZE / 2}
           style={styles.frame}
         >
-          <View style={styles.buttonSurface}>
-            {busy ? (
+          {(() => {
+            const content = busy ? (
               <ActivityIndicator color={active ? colors.accent : colors.textPrimary} size="small" />
             ) : (
               children
-            )}
-          </View>
+            );
+            return active ? (
+              <View style={[styles.buttonSurface, styles.activeSurface]}>{content}</View>
+            ) : (
+              <GlassSurface style={[styles.buttonSurface, styles.glassSurface]}>
+                {content}
+              </GlassSurface>
+            );
+          })()}
         </DetailDirectionalFrame>
       </Pressable>
       <AppText
@@ -82,9 +90,14 @@ const styles = StyleSheet.create({
     width: ACTION_INNER_SIZE,
     height: ACTION_INNER_SIZE,
     borderRadius: ACTION_INNER_SIZE / 2,
-    backgroundColor: 'rgba(12, 12, 18, 0.78)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeSurface: {
+    backgroundColor: 'rgba(12, 12, 18, 0.78)',
+  },
+  glassSurface: {
+    borderWidth: 0,
   },
   pressed: {
     transform: [{ scale: 0.94 }],

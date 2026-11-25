@@ -5,10 +5,13 @@ import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3Taste } from '../types';
 import { formatDominantGenreHeadline } from '../utils/insights-format';
 import { InsightsAffinityBar } from './InsightsAffinityBar';
+import { InsightsCard } from './InsightsCard';
 import { InsightsEmptyState } from './InsightsEmptyState';
+import { InsightsTasteRadar } from './InsightsTasteRadar';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsTasteSectionProps {
@@ -18,18 +21,21 @@ interface InsightsTasteSectionProps {
 export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
   const { t } = useTranslation();
   const genres = taste.genres.slice(0, 4);
+  const radarGenres = taste.genres.slice(0, 6);
   const dominantGenre = genres[0]?.name ?? null;
 
   return (
     <View style={styles.section}>
       <InsightsSectionHeader
         title={t('insights.taste.title')}
+        index={2}
         subtitle={dominantGenre ? formatDominantGenreHeadline(dominantGenre) : undefined}
       />
       {genres.length === 0 ? (
         <InsightsEmptyState message={t('insights.taste.empty')} />
       ) : (
-        <View style={styles.card}>
+        <InsightsCard style={styles.card}>
+          <InsightsTasteRadar genres={radarGenres} />
           {genres.map((genre, index) => (
             <InsightsAffinityBar
               key={genre.genreId}
@@ -63,7 +69,7 @@ export function InsightsTasteSection({ taste }: InsightsTasteSectionProps) {
               </View>
             </View>
           ) : null}
-        </View>
+        </InsightsCard>
       )}
     </View>
   );
@@ -75,14 +81,17 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: spacing.sm,
+    padding: spacing.md,
   },
   risingCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
     padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
+    borderRadius: 16,
+    backgroundColor: glass.panelElevated,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 210, 150, 0.35)',
   },
   risingIcon: {
     width: 28,

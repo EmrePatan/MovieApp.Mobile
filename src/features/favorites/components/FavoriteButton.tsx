@@ -15,6 +15,7 @@ import { useFavoriteStatus } from '../hooks/useFavoriteStatus';
 import { useToggleFavorite } from '../hooks/useFavoriteMutations';
 import type { FavoriteContentType } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -134,7 +135,7 @@ export function FavoriteButton({
           borderRadius={borderRadius.md}
           variant={active ? 'gold' : 'neutral'}
           glow={active}
-          surfaceColor={active ? colors.accentTint12 : colors.surfaceElevated}
+          surfaceColor={active ? colors.accentTint12 : glass.panelElevated}
         >
           {isInitialLoading ? (
             <ActivityIndicator color={colors.accent} size="small" />

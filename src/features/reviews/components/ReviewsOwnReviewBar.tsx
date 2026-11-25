@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { UserAvatar } from '@/components/common/UserAvatar';
 import { ReviewAuthorRating } from './ReviewAuthorRating';
+import { ReviewRichBody } from './ReviewRichBody';
 import type { ReviewResponse } from '../types';
 import {
   likelyExceedsCollapsedLines,
   REVIEW_OWN_COLLAPSED_LINE_COUNT,
 } from '../utils/review-content-length';
+import { parseSocialCommentContent } from '@/features/social/utils/social-comment-media';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { interaction } from '@/theme/interaction';
@@ -19,13 +23,19 @@ const AVATAR_SIZE = 40;
 interface ReviewsOwnReviewBarProps {
   review: ReviewResponse;
   onEdit: () => void;
+  onOpenComments?: () => void;
 }
 
-export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps) {
+export function ReviewsOwnReviewBar({ review, onEdit, onOpenComments }: ReviewsOwnReviewBarProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const content = review.content.trim();
-  const canExpand = likelyExceedsCollapsedLines(content, REVIEW_OWN_COLLAPSED_LINE_COUNT);
+  const textOnly = parseSocialCommentContent(content).text;
+  const canExpand = likelyExceedsCollapsedLines(textOnly, REVIEW_OWN_COLLAPSED_LINE_COUNT);
+  const likesCount = review.likesCount ?? 0;
+  const commentsCount = review.commentsCount ?? 0;
+  const isLiked = Boolean(review.isLikedByMe);
+  const canEngage = Boolean(review.socialActivityId);
 
   return (
     <View style={styles.wrapper} testID="reviews-own-review-bar">
@@ -63,13 +73,13 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
           </View>
         </View>
 
-        <AppText
-          variant="bodySmall"
-          style={styles.preview}
+        <ReviewRichBody
+          content={content}
+          plain
+          revealSpoiler
+          textVariant="bodySmall"
           numberOfLines={expanded ? undefined : REVIEW_OWN_COLLAPSED_LINE_COUNT}
-        >
-          {content}
-        </AppText>
+        />
 
         {canExpand ? (
           <Pressable
@@ -87,6 +97,36 @@ export function ReviewsOwnReviewBar({ review, onEdit }: ReviewsOwnReviewBarProps
             </AppText>
           </Pressable>
         ) : null}
+
+        {canEngage ? (
+          <View style={styles.engagement}>
+            <View
+              style={styles.engageHit}
+              accessibilityRole="text"
+              accessibilityLabel={`${t('social.like')}: ${likesCount}`}
+            >
+              <Ionicons
+                name={isLiked ? 'heart' : 'heart-outline'}
+                size={16}
+                color={isLiked ? colors.accentStrong : colors.textMuted}
+              />
+              <AppText style={[styles.engageCount, isLiked && styles.engageCountActive]}>
+                {likesCount}
+              </AppText>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('social.commentsCount')}
+              onPress={onOpenComments}
+              disabled={!onOpenComments}
+              hitSlop={8}
+              style={({ pressed }) => [styles.engageHit, pressed && styles.pressed]}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={15} color={colors.textMuted} />
+              <AppText style={styles.engageCount}>{commentsCount}</AppText>
+            </Pressable>
+          </View>
+        ) : null}
       </View>
     </View>
   );
@@ -101,7 +141,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.borderSubtle,
     borderLeftWidth: 3,
@@ -139,11 +179,6 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     letterSpacing: 0.3,
   },
-  preview: {
-    lineHeight: 20,
-    color: colors.textPrimary,
-    fontSize: 13,
-  },
   expandButton: {
     alignSelf: 'flex-start',
   },
@@ -163,6 +198,28 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontWeight: '600',
     fontSize: 12,
+  },
+  engagement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginTop: spacing.xs,
+  },
+  engageHit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 32,
+  },
+  engageCount: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: colors.textMuted,
+    fontVariant: ['tabular-nums'],
+  },
+  engageCountActive: {
+    color: colors.accentStrong,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

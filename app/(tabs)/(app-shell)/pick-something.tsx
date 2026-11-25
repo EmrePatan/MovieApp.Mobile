@@ -35,6 +35,7 @@ import { formatCatalogYear, formatRating } from '@/utils/format';
 import { resolveImageUri } from '@/utils/image-url';
 import { colors } from '@/theme/colors';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 const RETURN_ROUTE = '/pick-something';
 
 interface PickSomethingHeroPick {
@@ -103,6 +104,7 @@ export default function PickSomethingScreen() {
 
   const pickQuery = usePickSomething(mediaType, sessionExcludedIds);
   const pick = pickQuery.data?.item ?? null;
+  const pickId = pick?.id;
 
   useEffect(() => {
     if (pick?.id && pickQuery.isSuccess && lastTrackedPickIdRef.current !== pick.id) {
@@ -117,14 +119,14 @@ export default function PickSomethingScreen() {
   }, []);
 
   const handleTryAnother = useCallback(() => {
-    if (!pick?.id) {
+    if (!pickId) {
       return;
     }
 
     setSessionExcludedIds((current) =>
-      current.includes(pick.id) ? current : [...current, pick.id],
+      current.includes(pickId) ? current : [...current, pickId],
     );
-  }, [pick?.id]);
+  }, [pickId]);
 
   const handleViewDetails = useCallback(() => {
     if (!pick) {
@@ -297,8 +299,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
   heroWrap: {
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
   },
   heroCoverMedia: {
     width: '100%',
@@ -343,7 +345,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   resultCopy: {
     gap: spacing.sm,

@@ -5,22 +5,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { homeHeaderStyles } from './home-header-styles';
 import { HomeHeaderIconButton } from './HomeHeaderIconButton';
-import { HomeHeaderProfileAvatar } from './HomeHeaderProfileAvatar';
+import { useDirectMessageUnreadCount } from '@/features/messages/hooks/useMessageQueries';
 import {
   openSearch,
   type SearchReturnOrigin,
 } from '@/features/navigation/search-navigation';
-import { LibraryInlineSearchInput } from '@/features/library/components/LibraryInlineSearchInput';
-import { useOptionalLibraryHubSearch } from '@/features/library/context/LibraryHubSearchContext';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
-import { useUnreadNotificationCount } from '@/features/notifications/hooks/useUnreadNotificationCount';
+import { useCombinedUnreadNotificationCount } from '@/features/notifications/hooks/useCombinedUnreadNotificationCount';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
+
 
 const TAB_RETURN_HREFS: Record<SearchReturnOrigin, `/(tabs)/${string}`> = {
   home: '/(tabs)/home',
   discover: '/(tabs)/discover',
   library: '/(tabs)/library',
+  social: '/(tabs)/social',
 };
 
 interface HomeHeaderActionClusterProps {
@@ -46,43 +46,39 @@ export function HomeHeaderActionCluster({
 }: HomeHeaderActionClusterProps) {
   const { t } = useTranslation();
   const router = useRouter();
-  const unreadCountQuery = useUnreadNotificationCount();
-  const unreadCount = unreadCountQuery.data?.unreadCount ?? 0;
+  const { unreadCount } = useCombinedUnreadNotificationCount();
+  const messageUnread = useDirectMessageUnreadCount();
+  const messageUnreadCount = typeof messageUnread.data === 'number' ? messageUnread.data : 0;
   const badgeLabel = formatUnreadBadgeCount(unreadCount);
+  const messageBadgeLabel = formatUnreadBadgeCount(messageUnreadCount);
   const notificationsAccessibilityLabel =
     badgeLabel == null
       ? t('common.openNotifications')
       : t('common.openNotificationsUnread', { count: badgeLabel });
+  const messagesAccessibilityLabel =
+    messageBadgeLabel == null
+      ? t('common.openMessages')
+      : t('common.openMessagesUnread', { count: messageBadgeLabel });
   const iconSize = overlay ? 20 : 23;
+  /** Library + social: no search field and no trailing action icons. */
+  const hideSearchAndActions = searchOrigin === 'library' || searchOrigin === 'social';
   const headerActionIconColor = overlay ? colors.accentStrong : colors.accent;
-  const isLibraryOrigin = searchOrigin === 'library';
-  const libraryHubSearch = useOptionalLibraryHubSearch();
-  const searchPlaceholder = isLibraryOrigin
-    ? t('library.hub.searchPlaceholder')
-    : t('home.search.placeholder');
-  const openTabSearch = () => {
-    openSearch(router, searchOrigin);
-  };
 
   return (
     <View
       style={[
         homeHeaderStyles.headerBar,
+        searchOrigin === 'social' && homeHeaderStyles.headerBarQuiet,
         overlay && homeHeaderStyles.headerBarOverlay,
       ]}
     >
-      {isLibraryOrigin && libraryHubSearch ? (
-        <LibraryInlineSearchInput
-          overlay={overlay}
-          value={libraryHubSearch.searchInput}
-          onChangeText={libraryHubSearch.setSearchInput}
-          onClear={libraryHubSearch.clearSearch}
-        />
+      {hideSearchAndActions ? (
+        <View style={homeHeaderStyles.searchSection} />
       ) : (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('home.search.accessibility')}
-          onPress={openTabSearch}
+          onPress={() => openSearch(router, searchOrigin)}
           style={({ pressed }) => [
             homeHeaderStyles.searchSection,
             pressed && { opacity: interaction.subtlePressedOpacity },
@@ -90,13 +86,13 @@ export function HomeHeaderActionCluster({
         >
           <Ionicons name="search-outline" size={iconSize} color={colors.textMuted} />
           <AppText variant="bodySmall" numberOfLines={1} style={homeHeaderStyles.searchPlaceholder}>
-            {searchPlaceholder}
+            {t('home.search.placeholder')}
           </AppText>
         </Pressable>
       )}
-      {!isLibraryOrigin ? (
+      {!hideSearchAndActions ? (
         <>
-          <View style={homeHeaderStyles.actionDivider} />
+          <View style={{ width: 4 }} />
           <HomeHeaderIconButton
             accessibilityLabel={notificationsAccessibilityLabel}
             badgeLabel={badgeLabel}
@@ -108,12 +104,18 @@ export function HomeHeaderActionCluster({
           >
             <Ionicons name="notifications-outline" size={iconSize} color={headerActionIconColor} />
           </HomeHeaderIconButton>
-          <View style={homeHeaderStyles.actionDivider} />
-          <HomeHeaderProfileAvatar
+          <View style={{ width: 4 }} />
+          <HomeHeaderIconButton
+            accessibilityLabel={messagesAccessibilityLabel}
+            badgeLabel={messageBadgeLabel}
             overlay={overlay}
             compact
-            onPress={() => router.push('/(tabs)/profile')}
-          />
+            onPress={() =>
+              openLibraryStackScreen(router, '/messages', TAB_RETURN_HREFS[searchOrigin])
+            }
+          >
+            <Ionicons name="chatbox-outline" size={iconSize} color={headerActionIconColor} />
+          </HomeHeaderIconButton>
         </>
       ) : null}
     </View>

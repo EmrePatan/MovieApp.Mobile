@@ -1,10 +1,19 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Animated,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { GlassSurface } from '@/components/common/GlassSurface';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { useSheetSwipeDismiss } from './useSheetSwipeDismiss';
 
 type AppBottomSheetAlign = 'center' | 'stretch';
 
@@ -15,6 +24,8 @@ interface AppBottomSheetProps {
   subtitle?: string;
   align?: AppBottomSheetAlign;
   testID?: string;
+  /** Lift the sheet above the software keyboard (for sheets that contain text inputs). */
+  avoidKeyboard?: boolean;
   children: ReactNode;
 }
 
@@ -26,36 +37,53 @@ function AppBottomSheetFrame({
   subtitle,
   align = 'stretch',
   testID,
+  avoidKeyboard = false,
   children,
 }: AppBottomSheetFrameProps) {
   const { t } = useTranslation();
+  const swipe = useSheetSwipeDismiss(onClose);
+  // The sheet is bottom-anchored inside a Modal, so a KeyboardAvoidingView nested in the sheet
+  // cannot lift it: the overlay itself has to make room for the keyboard.
+  const Overlay = avoidKeyboard ? KeyboardAvoidingView : View;
+  const overlayProps = avoidKeyboard
+    ? { behavior: Platform.OS === 'ios' ? ('padding' as const) : undefined }
+    : {};
 
   return (
-    <View style={styles.overlay} testID={testID}>
+    <Overlay style={premiumSheetChrome.overlay} testID={testID} {...overlayProps}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('common.cancel')}
-        style={styles.backdrop}
+        style={premiumSheetChrome.backdrop}
         onPress={onClose}
       />
-      <SafeAreaView
-        style={[styles.sheet, align === 'center' && styles.sheetCentered]}
-        edges={['bottom']}
-      >
-        <View style={styles.handle} />
-        {title ? (
-          <AppText variant="subtitle" style={styles.title}>
-            {title}
-          </AppText>
-        ) : null}
-        {subtitle ? (
-          <AppText variant="caption" muted center style={styles.subtitle}>
-            {subtitle}
-          </AppText>
-        ) : null}
-        {children}
-      </SafeAreaView>
-    </View>
+      <Animated.View style={swipe.sheetStyle}>
+        <SafeAreaView
+          style={[styles.sheet, align === 'center' && styles.sheetCentered]}
+          edges={['bottom']}
+        >
+          <GlassSurface pointerEvents="none" style={[StyleSheet.absoluteFill, styles.glassLayer]} />
+          <View
+            {...swipe.dragHandlers}
+            style={[styles.dragZone, align === 'center' && styles.dragZoneCentered]}
+            testID={testID ? `${testID}-drag` : undefined}
+          >
+            <View style={premiumSheetChrome.handle} />
+            {title ? (
+              <AppText variant="subtitle" style={styles.title}>
+                {title}
+              </AppText>
+            ) : null}
+            {subtitle ? (
+              <AppText variant="caption" center style={styles.subtitle}>
+                {subtitle}
+              </AppText>
+            ) : null}
+          </View>
+          {children}
+        </SafeAreaView>
+      </Animated.View>
+    </Overlay>
   );
 }
 
@@ -66,6 +94,7 @@ export function AppBottomSheet({
   subtitle,
   align,
   testID,
+  avoidKeyboard,
   children,
 }: AppBottomSheetProps) {
   return (
@@ -77,6 +106,7 @@ export function AppBottomSheet({
           subtitle={subtitle}
           align={align}
           testID={testID}
+          avoidKeyboard={avoidKeyboard}
         >
           {children}
         </AppBottomSheetFrame>
@@ -108,38 +138,34 @@ export function AppBottomSheetChrome({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  backdrop: {
-    flex: 1,
-  },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
-    gap: spacing.lg,
+    ...premiumSheetChrome.sheet,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+    gap: 16,
+  },
+  glassLayer: {
+    borderTopLeftRadius: premiumSheet.cornerRadius,
+    borderTopRightRadius: premiumSheet.cornerRadius,
   },
   sheetCentered: {
     alignItems: 'center',
   },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.border,
-    marginBottom: spacing.xs,
+  // Grab area for the swipe-down gesture: handle + title, stretched into the sheet's top padding.
+  dragZone: {
+    gap: 16,
+    marginTop: -premiumSheet.contentPaddingTop,
+    paddingTop: premiumSheet.contentPaddingTop,
+  },
+  dragZoneCentered: {
+    alignSelf: 'stretch',
   },
   title: {
+    ...premiumSheetChrome.title,
     textAlign: 'center',
   },
   subtitle: {
-    marginTop: -spacing.sm,
+    color: premiumSheet.textSecondary,
+    marginTop: -4,
   },
 });

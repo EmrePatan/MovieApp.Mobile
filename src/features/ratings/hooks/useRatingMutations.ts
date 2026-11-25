@@ -1,26 +1,36 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  deleteEpisodeRating,
   deleteMovieRating,
   deleteTvRating,
+  rateEpisode,
   rateMovie,
   rateTvShow,
 } from '../api/ratings-api';
 import {
+  episodeMyRatingQueryKey,
+  episodeRatingAggregateQueryKey,
   movieMyRatingQueryKey,
   movieRatingAggregateQueryKey,
   tvMyRatingQueryKey,
   tvRatingAggregateQueryKey,
 } from './rating-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
+import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import type { RatingContentType, RatingResponse } from '../types';
 
 function getMyRatingQueryKey(contentType: RatingContentType, contentId: string) {
-  return contentType === 'movie'
-    ? movieMyRatingQueryKey(contentId)
-    : tvMyRatingQueryKey(contentId);
+  switch (contentType) {
+    case 'movie':
+      return movieMyRatingQueryKey(contentId);
+    case 'tv':
+      return tvMyRatingQueryKey(contentId);
+    case 'episode':
+      return episodeMyRatingQueryKey(contentId);
+  }
 }
 
 function invalidateAggregateQueries(
@@ -28,14 +38,21 @@ function invalidateAggregateQueries(
   contentType: RatingContentType,
   contentId: string,
 ) {
-  if (contentType === 'movie') {
-    void queryClient.invalidateQueries({ queryKey: movieRatingAggregateQueryKey(contentId) });
-  } else {
-    void queryClient.invalidateQueries({ queryKey: tvRatingAggregateQueryKey(contentId) });
+  switch (contentType) {
+    case 'movie':
+      void queryClient.invalidateQueries({ queryKey: movieRatingAggregateQueryKey(contentId) });
+      break;
+    case 'tv':
+      void queryClient.invalidateQueries({ queryKey: tvRatingAggregateQueryKey(contentId) });
+      break;
+    case 'episode':
+      void queryClient.invalidateQueries({ queryKey: episodeRatingAggregateQueryKey(contentId) });
+      break;
   }
 
   invalidateRecommendationQueries(queryClient);
   invalidateProfileStatistics(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 function buildOptimisticRating(
@@ -50,6 +67,7 @@ function buildOptimisticRating(
     id: previous?.id ?? 'optimistic-rating',
     movieId: contentType === 'movie' ? contentId : null,
     tvShowId: contentType === 'tv' ? contentId : null,
+    episodeId: contentType === 'episode' ? contentId : null,
     score,
     createdAt: previous?.createdAt ?? now,
     updatedAt: now,
@@ -62,11 +80,14 @@ export function useRateContent(contentType: RatingContentType, contentId: string
 
   return useMutation({
     mutationFn: async (score: number) => {
-      if (contentType === 'movie') {
-        return rateMovie(contentId, score);
+      switch (contentType) {
+        case 'movie':
+          return rateMovie(contentId, score);
+        case 'tv':
+          return rateTvShow(contentId, score);
+        case 'episode':
+          return rateEpisode(contentId, score);
       }
-
-      return rateTvShow(contentId, score);
     },
     onMutate: async (score) => {
       await queryClient.cancelQueries({ queryKey: myRatingKey });
@@ -97,12 +118,17 @@ export function useDeleteRating(contentType: RatingContentType, contentId: strin
 
   return useMutation({
     mutationFn: async () => {
-      if (contentType === 'movie') {
-        await deleteMovieRating(contentId);
-        return;
+      switch (contentType) {
+        case 'movie':
+          await deleteMovieRating(contentId);
+          return;
+        case 'tv':
+          await deleteTvRating(contentId);
+          return;
+        case 'episode':
+          await deleteEpisodeRating(contentId);
+          return;
       }
-
-      await deleteTvRating(contentId);
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: myRatingKey });

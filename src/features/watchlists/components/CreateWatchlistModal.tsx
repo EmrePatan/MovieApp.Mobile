@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -18,8 +18,9 @@ import { AppText } from '@/components/common/AppText';
 import { AppInput } from '@/components/inputs/AppInput';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useCreateWatchlistForLibrary } from '../hooks/useWatchlistMutations';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface CreateWatchlistModalProps {
   visible: boolean;
@@ -36,6 +37,7 @@ export function CreateWatchlistModal({
   const createWatchlist = useCreateWatchlistForLibrary();
   const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export function CreateWatchlistModal({
   const handleClose = () => {
     dismissKeyboard();
     setName('');
+    setDescription('');
     setFeedback(null);
     onClose();
   };
@@ -73,9 +76,13 @@ export function CreateWatchlistModal({
 
     dismissKeyboard();
 
-    createWatchlist.mutate(trimmed, {
+    const trimmedDescription = description.trim();
+    createWatchlist.mutate(
+      { name: trimmed, description: trimmedDescription.length > 0 ? trimmedDescription : null },
+      {
       onSuccess: (created) => {
         setName('');
+        setDescription('');
         setFeedback(null);
         onCreated(created.id);
         onClose();
@@ -92,16 +99,18 @@ export function CreateWatchlistModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={styles.overlay}>
+      <View style={premiumSheetChrome.overlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboardAvoid}
         >
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={handleClose} style={styles.sheet} bottomInset>
+            <GlassSheetLayer />
+            <SheetHandle />
             <View style={styles.header}>
-              <AppText variant="subtitle">{t('watchlists.createModal.title')}</AppText>
+              <AppText variant="subtitle" style={styles.headerTitle}>{t('watchlists.createModal.title')}</AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -125,13 +134,24 @@ export function CreateWatchlistModal({
               onSubmitEditing={handleCreate}
             />
 
+            <AppInput
+              label={t('watchlists.descriptionLabel')}
+              value={description}
+              onChangeText={setDescription}
+              placeholder={t('watchlists.descriptionPlaceholder')}
+              maxLength={280}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
             <AppButton
               title={t('common.createWatchlist')}
               loading={createWatchlist.isPending}
               disabled={createWatchlist.isPending}
               onPress={handleCreate}
             />
-          </SafeAreaView>
+          </SwipeSheet>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -139,26 +159,21 @@ export function CreateWatchlistModal({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   keyboardAvoid: {
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
 });

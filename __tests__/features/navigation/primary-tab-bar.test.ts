@@ -9,6 +9,7 @@ describe('PrimaryTabBar presentation semantics', () => {
     expect(resolveActivePrimaryTab('/home')).toBe('home');
     expect(resolveActivePrimaryTab('/discover')).toBe('discover');
     expect(resolveActivePrimaryTab('/library')).toBe('library');
+    expect(resolveActivePrimaryTab('/profile')).toBe('library');
     expect(resolveActivePrimaryTab('/insights')).toBe('insights');
     expect(resolveActivePrimaryTab('/movie/123')).toBeNull();
     expect(resolveActivePrimaryTab('/tv/123')).toBeNull();
@@ -43,7 +44,7 @@ describe('PrimaryTabBar presentation semantics', () => {
       emitReselect: jest.fn(),
     });
 
-    expect(router.dismissAll).toHaveBeenCalledTimes(1);
     expect(router.dismissTo).toHaveBeenCalledWith('/home');
   });
 });
+

@@ -114,12 +114,15 @@ export function SeasonListItem({
   const label = season.name ?? t('common.seasonNumber', { number: season.seasonNumber });
   const airYear = season.airDate ? season.airDate.slice(0, 4) : null;
   // Progress totals are the authoritative count of released episodes. Catalog episodeCount
-  // can include unaired episodes and must not inflate watch progress or bulk actions.
+  // can include unaired episodes and must not inflate watch progress display.
   const totalEpisodes = seasonProgress?.totalEpisodes ?? 0;
   const watchedEpisodes = seasonProgress?.watchedEpisodes ?? 0;
+  const catalogEpisodeCount = season.episodeCount ?? 0;
   const showProgress = showWatchedControl && progressReady && totalEpisodes > 0;
   const isFullyWatched = getSeasonProgressState(watchedEpisodes, totalEpisodes) === 'completed';
-  const canToggleSeason = totalEpisodes > 0;
+  // Allow toggle when catalog lists episodes even if progress map hasn't hydrated yet —
+  // the mutation resolves released episode IDs itself.
+  const canToggleSeason = totalEpisodes > 0 || catalogEpisodeCount > 0;
 
   const metadata = [
     t('common.seasonNumber', { number: season.seasonNumber }),
@@ -145,7 +148,7 @@ export function SeasonListItem({
     toggleSeasonWatched.mutate(
       {
         isFullyWatched,
-        totalEpisodes,
+        totalEpisodes: totalEpisodes > 0 ? totalEpisodes : catalogEpisodeCount,
         episodeIds: [],
       },
       {
@@ -168,9 +171,9 @@ export function SeasonListItem({
           <WaxSealMedallion
             completed={isFullyWatched && showProgress}
             pending={toggleSeasonWatched.isPending}
-            disabled={!canToggleSeason}
+            disabled={showWatchedControl ? !canToggleSeason : true}
             onPress={
-              showWatchedControl
+              showWatchedControl && canToggleSeason
                 ? handleToggleSeasonWatched
                 : undefined
             }

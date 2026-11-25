@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { FlatList } from 'react-native';
 import { MovieAppRefreshControl } from '@/components/refresh/MovieAppRefreshControl';
 import { ApiError } from '@/api/errors';

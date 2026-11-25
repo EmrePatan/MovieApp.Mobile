@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -54,18 +54,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.accent,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
     fontSize: 11,
     lineHeight: 14,
     fontVariant: ['tabular-nums'],
   },
+
   pressed: {
     opacity: interaction.pressedOpacity,
   },

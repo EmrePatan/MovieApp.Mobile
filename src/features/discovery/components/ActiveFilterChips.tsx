@@ -5,7 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import { i18n } from '@/i18n';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import type { Genre } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 export interface ActiveFilterChip {
@@ -117,7 +117,7 @@ export function ActiveFilterChips({ chips }: ActiveFilterChipsProps) {
             hitSlop={8}
             style={styles.removeButton}
           >
-            <Ionicons name="close" size={14} color={colors.textSecondary} />
+            <Ionicons name="close" size={14} color={premiumSheet.textSecondary} />
           </Pressable>
         </View>
       ))}
@@ -139,11 +139,11 @@ const styles = StyleSheet.create({
     paddingRight: spacing.xs,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   label: {
-    color: colors.textPrimary,
+    color: premiumSheet.mutedGold,
     fontWeight: '500',
   },
   removeButton: {

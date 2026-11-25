@@ -34,6 +34,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
+import { glass } from '@/theme/glass';
 
 function filterUpcomingItems(
   items: UpcomingCatalogItem[],
@@ -147,13 +148,13 @@ export default function UpcomingScreen() {
             onPress={handleSignIn}
           />
         ) : null}
-        {items.length > 0 ? (
-          <View style={styles.controls}>
-            <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
-          </View>
-        ) : null}
       </LibraryStackHeader>
       <ComingUpTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+      {items.length > 0 ? (
+        <View style={styles.controls}>
+          <LibraryMediaFilterControl value={typeFilter} onChange={setTypeFilter} />
+        </View>
+      ) : null}
     </>
   ) : (
     <LibraryStackHeader title={t('upcoming.title')} subtitle={t('upcoming.subtitleCatalog')} />
@@ -288,7 +289,9 @@ const styles = StyleSheet.create({
   },
   controls: {
     gap: spacing.sm,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   listContent: {
     flexGrow: 1,
@@ -296,7 +299,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
+    backgroundColor: glass.hairline,
     marginHorizontal: layout.screenPaddingHorizontal,
   },
   errorContainer: {

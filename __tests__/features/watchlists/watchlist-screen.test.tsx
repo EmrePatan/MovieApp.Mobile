@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { FlatList } from 'react-native';
 import { ApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';

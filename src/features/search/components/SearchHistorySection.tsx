@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { RecentSearchStoredItem } from '../recent-searches/recent-search-types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
   },
   list: {
     borderRadius: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     overflow: 'hidden',
   },
   row: {
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: glass.hairline,
   },
   historyButton: {
     flex: 1,

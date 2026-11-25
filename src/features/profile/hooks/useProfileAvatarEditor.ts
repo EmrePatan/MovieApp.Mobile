@@ -30,12 +30,8 @@ export function useProfileAvatarEditor(profile: UserProfileResponse | undefined)
   const removeAvatar = useRemoveAvatarMutation();
 
   const pickAndUpload = useCallback(async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(t('profile.avatarPermissionDenied'));
-      return;
-    }
-
+    // The system image picker needs no library permission for images (Expo ImagePicker docs).
+    // Gating on it blocked users who had denied or limited photo access earlier.
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,

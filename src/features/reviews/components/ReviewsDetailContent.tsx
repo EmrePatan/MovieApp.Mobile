@@ -11,6 +11,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isApiError } from '@/api/errors';
 import { useAuth } from '@/auth/useAuth';
@@ -19,6 +21,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useMyRating, useRatingAggregate } from '@/features/ratings/hooks/useRatings';
+import { useToggleSocialActivityLike } from '@/features/social/hooks/useSocialMutations';
 import { ReviewCard } from './ReviewCard';
 import { ReviewComposer } from './ReviewComposer';
 import { ReviewsOwnReviewBar } from './ReviewsOwnReviewBar';
@@ -30,6 +33,7 @@ import { ReviewsScreenHeader } from './ReviewsScreenHeader';
 import { ReviewsWriteFab } from './ReviewsWriteFab';
 import { useMovieDetails } from '@/features/details/movie/hooks/useMovieDetails';
 import { useTvShowDetails } from '@/features/details/tv/hooks/useTvShowDetails';
+import { useMovieGallery, useTvShowGallery } from '@/features/gallery/hooks/useGallery';
 import { useMyReview } from '../hooks/useMyReview';
 import {
   useCreateReviewMutation,
@@ -38,6 +42,11 @@ import {
 } from '../hooks/useReviewMutations';
 import { useReviewsQuery } from '../hooks/useReviewsQuery';
 import { useReviewsExternalReturnBack } from '../hooks/useReviewsExternalReturnBack';
+import {
+  episodeMyReviewQueryKey,
+  movieMyReviewQueryKey,
+  tvMyReviewQueryKey,
+} from '../hooks/review-query-keys';
 import type { ReviewContentType, ReviewResponse, ReviewSortOption } from '../types';
 import { DEFAULT_REVIEW_SORT } from '../types';
 import {
@@ -45,7 +54,9 @@ import {
   reviewMatchesStarFilter,
   sumStarBuckets,
 } from '../utils/rating-star-buckets';
+import { getUiFormatLocaleTag } from '@/i18n';
 import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -55,23 +66,34 @@ interface ReviewsDetailContentProps {
   contentType: ReviewContentType;
   contentId: string;
   contentTitle?: string;
+  posterPath?: string | null;
 }
 
 export function ReviewsDetailContent({
   contentType,
   contentId,
   contentTitle,
+  posterPath: posterPathOverride,
 }: ReviewsDetailContentProps) {
   const { t } = useTranslation();
   useReviewsExternalReturnBack();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const movieDetailsQuery = useMovieDetails(contentType === 'movie' ? contentId : undefined);
   const tvShowDetailsQuery = useTvShowDetails(contentType === 'tv' ? contentId : undefined);
+  const movieGalleryQuery = useMovieGallery(contentType === 'movie' ? contentId : '');
+  const tvGalleryQuery = useTvShowGallery(contentType === 'tv' ? contentId : '');
+  const catalogGallery =
+    contentType === 'movie' ? movieGalleryQuery : contentType === 'tv' ? tvGalleryQuery : null;
   const posterPath =
-    contentType === 'movie'
+    posterPathOverride ??
+    (contentType === 'movie'
       ? movieDetailsQuery.data?.posterPath ?? null
-      : tvShowDetailsQuery.data?.posterPath ?? null;
+      : contentType === 'tv'
+        ? tvShowDetailsQuery.data?.posterPath ?? null
+        : null);
   const { requireAuth } = useRequireAuth();
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<ReviewSortOption>(DEFAULT_REVIEW_SORT);
@@ -83,6 +105,7 @@ export function ReviewsDetailContent({
   const createReview = useCreateReviewMutation(contentType, contentId);
   const updateReview = useUpdateReviewMutation(contentType, contentId);
   const deleteReview = useDeleteReviewMutation(contentType, contentId);
+  const toggleActivityLike = useToggleSocialActivityLike();
 
   const [composerMode, setComposerMode] = useState<ComposerMode>('hidden');
   const [mutationError, setMutationError] = useState<string | null>(null);
@@ -188,10 +211,51 @@ export function ReviewsDetailContent({
     setMutationError(null);
   }, []);
 
+  const invalidateReviewEngagement = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['reviews', contentType, contentId] });
+    void queryClient.invalidateQueries({
+      queryKey:
+        contentType === 'movie'
+          ? movieMyReviewQueryKey(contentId)
+          : contentType === 'tv'
+            ? tvMyReviewQueryKey(contentId)
+            : episodeMyReviewQueryKey(contentId),
+    });
+  }, [contentId, contentType, queryClient]);
+
+  const handleOpenReviewComments = useCallback(
+    (review: ReviewResponse) => {
+      const activityId = review.socialActivityId?.trim();
+      if (!activityId) return;
+      if (!requireAuth()) {
+        setAuthFeedback(t('reviews.signInRequired'));
+        return;
+      }
+      router.push(`/(tabs)/(app-shell)/social/${activityId}`);
+    },
+    [requireAuth, router, t],
+  );
+
+  const handleLikeReview = useCallback(
+    (review: ReviewResponse) => {
+      const activityId = review.socialActivityId?.trim();
+      if (!activityId) return;
+      if (!requireAuth()) {
+        setAuthFeedback(t('reviews.signInRequired'));
+        return;
+      }
+      toggleActivityLike.mutate(
+        { activityId, isLiked: Boolean(review.isLikedByMe) },
+        { onSettled: invalidateReviewEngagement },
+      );
+    },
+    [invalidateReviewEngagement, requireAuth, t, toggleActivityLike],
+  );
+
   const handleCreate = useCallback(
     (content: string) => {
       createReview.mutate(
-        { content },
+        { content, authoringLocale: getUiFormatLocaleTag() },
         {
           onSuccess: () => {
             setComposerMode('hidden');
@@ -215,7 +279,7 @@ export function ReviewsDetailContent({
   const handleUpdate = useCallback(
     (content: string) => {
       updateReview.mutate(
-        { content },
+        { content, authoringLocale: getUiFormatLocaleTag() },
         {
           onSuccess: () => {
             setComposerMode('hidden');
@@ -327,7 +391,11 @@ export function ReviewsDetailContent({
       ) : null}
 
       {myReview && composerMode !== 'edit' ? (
-        <ReviewsOwnReviewBar review={myReview} onEdit={handleEditReview} />
+        <ReviewsOwnReviewBar
+          review={myReview}
+          onEdit={handleEditReview}
+          onOpenComments={() => handleOpenReviewComments(myReview)}
+        />
       ) : null}
 
       {!isInitialLoading && !reviewsQuery.isError && showCommunityControls ? (
@@ -354,6 +422,8 @@ export function ReviewsDetailContent({
             isSubmitting={createReview.isPending}
             errorMessage={mutationError}
             autoFocus
+            gallery={catalogGallery?.data}
+            galleryLoading={catalogGallery?.isLoading ?? false}
             onSubmit={handleCreate}
             onCancel={handleCancelComposer}
           />
@@ -367,6 +437,8 @@ export function ReviewsDetailContent({
             isDeleting={deleteReview.isPending}
             errorMessage={mutationError}
             autoFocus
+            gallery={catalogGallery?.data}
+            galleryLoading={catalogGallery?.isLoading ?? false}
             onSubmit={handleUpdate}
             onCancel={handleCancelComposer}
             onDelete={handleDelete}
@@ -380,9 +452,15 @@ export function ReviewsDetailContent({
       <ReviewCard
         review={item}
         isOwnReview={Boolean(user && item.user.id === user.id)}
+        isLikePending={
+          toggleActivityLike.isPending &&
+          toggleActivityLike.variables?.activityId === item.socialActivityId
+        }
+        onLike={() => handleLikeReview(item)}
+        onOpenComments={() => handleOpenReviewComments(item)}
       />
     ),
-    [user],
+    [handleLikeReview, handleOpenReviewComments, toggleActivityLike.isPending, toggleActivityLike.variables?.activityId, user],
   );
 
   const listFooter = (
@@ -532,17 +610,15 @@ const styles = StyleSheet.create({
   },
   composerDismissBackdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'transparent',
+    backgroundColor: colors.overlay,
   },
   composerDock: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.surface,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: premiumSheet.background,
+    borderTopLeftRadius: premiumSheet.cornerRadius,
+    borderTopRightRadius: premiumSheet.cornerRadius,
+    overflow: 'hidden',
+    borderTopWidth: 1,
+    borderColor: premiumSheet.border,
   },
   container: {
     flex: 1,

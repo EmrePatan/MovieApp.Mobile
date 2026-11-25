@@ -1,8 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
+import { SocialGifFrame } from '@/features/social/components/SocialGifFrame';
+import { SocialCommentPosterFrame } from '@/features/social/components/SocialCommentPosterFrame';
+import { SocialGifPickerSheet } from '@/features/social/components/SocialGifPickerSheet';
+import { SocialCatalogImagePickerSheet } from '@/features/social/components/SocialCatalogImagePickerSheet';
+import {
+  buildSocialCommentBody,
+  parseSocialCommentContent,
+  type SocialCommentMediaDraft,
+} from '@/features/social/utils/social-comment-media';
+import type { GalleryResponse } from '@/features/gallery/types';
 import { MAX_REVIEW_CONTENT_LENGTH } from '../types';
 import { getReviewContentLength } from '../utils/review-content-length';
 import {
@@ -11,10 +22,11 @@ import {
   type ReviewFormErrors,
 } from '../utils/review-validation';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
 import { interaction } from '@/theme/interaction';
-import { layout } from '@/theme/layout';
+import { premiumSheet } from '@/theme/premium-sheet';
+import { typography } from '@/theme/typography';
+
+const sheet = premiumSheet;
 
 interface ReviewComposerProps {
   initialContent?: string;
@@ -23,13 +35,14 @@ interface ReviewComposerProps {
   isSubmitting?: boolean;
   errorMessage?: string | null;
   autoFocus?: boolean;
+  /** Catalog gallery for photo attach (posters + backdrops). */
+  gallery?: GalleryResponse | null;
+  galleryLoading?: boolean;
   onSubmit: (content: string) => void;
   onCancel?: () => void;
   onDelete?: () => void;
   isDeleting?: boolean;
 }
-
-const NEAR_LIMIT_RATIO = 0.9;
 
 interface ComposerMutedButtonProps {
   label: string;
@@ -71,7 +84,7 @@ function ComposerMutedButton({
     >
       {loading ? (
         <ActivityIndicator
-          color={tone === 'accent' ? colors.accentStrong : colors.textMuted}
+          color={tone === 'accent' ? sheet.mutedGold : sheet.textSecondary}
           size="small"
         />
       ) : (
@@ -90,6 +103,27 @@ function ComposerMutedButton({
   );
 }
 
+function seedFromContent(initialContent: string): {
+  text: string;
+  media: SocialCommentMediaDraft | null;
+  spoiler: boolean;
+} {
+  const parsed = parseSocialCommentContent(initialContent);
+  if (parsed.mediaKind === 'gif' && parsed.gifUrl) {
+    return { text: parsed.text, media: { kind: 'gif', value: parsed.gifUrl }, spoiler: parsed.spoiler };
+  }
+  if (parsed.mediaKind === 'image' && parsed.posterPath) {
+    return {
+      text: parsed.text,
+      media: { kind: 'image', value: parsed.posterPath },
+      spoiler: parsed.spoiler,
+    };
+  }
+  return { text: parsed.text, media: null, spoiler: parsed.spoiler };
+}
+
+const NEAR_LIMIT_RATIO = 0.9;
+
 function ReviewComposerInner({
   initialContent = '',
   toolbarTitle,
@@ -97,6 +131,8 @@ function ReviewComposerInner({
   isSubmitting = false,
   errorMessage = null,
   autoFocus = false,
+  gallery = null,
+  galleryLoading = false,
   onSubmit,
   onCancel,
   onDelete,
@@ -104,7 +140,12 @@ function ReviewComposerInner({
 }: ReviewComposerProps) {
   const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
-  const [content, setContent] = useState(initialContent);
+  const seeded = useMemo(() => seedFromContent(initialContent), [initialContent]);
+  const [content, setContent] = useState(seeded.text);
+  const [draftMedia, setDraftMedia] = useState<SocialCommentMediaDraft | null>(seeded.media);
+  const [isSpoiler, setIsSpoiler] = useState(seeded.spoiler);
+  const [gifPickerOpen, setGifPickerOpen] = useState(false);
+  const [photoPickerOpen, setPhotoPickerOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<ReviewFormErrors>({});
   const [isFocused, setIsFocused] = useState(false);
 
@@ -124,7 +165,10 @@ function ReviewComposerInner({
 
   const contentLength = getReviewContentLength(content);
   const isNearLimit = contentLength >= MAX_REVIEW_CONTENT_LENGTH * NEAR_LIMIT_RATIO;
-  const hasContent = contentLength > 0;
+  const hasContent = contentLength > 0 || draftMedia !== null;
+  const gifSelected = draftMedia?.kind === 'gif';
+  const photoSelected = draftMedia?.kind === 'image';
+  const canAttachPhoto = Boolean(gallery) || galleryLoading;
 
   const handleChangeText = (next: string) => {
     if (getReviewContentLength(next) > MAX_REVIEW_CONTENT_LENGTH) {
@@ -138,14 +182,15 @@ function ReviewComposerInner({
   };
 
   const handleSubmit = () => {
-    const errors = validateReviewContent(content);
+    const body = buildSocialCommentBody(content, draftMedia, isSpoiler);
+    const errors = validateReviewContent(body);
     setFieldErrors(errors);
 
     if (hasReviewValidationErrors(errors)) {
       return;
     }
 
-    onSubmit(content.trim());
+    onSubmit(body);
   };
 
   const handleClose = () => {
@@ -156,6 +201,8 @@ function ReviewComposerInner({
 
   return (
     <View style={styles.container} testID="review-composer">
+      <View style={styles.handle} />
+
       <View style={styles.toolbar}>
         {onCancel ? (
           <ComposerMutedButton
@@ -186,25 +233,138 @@ function ReviewComposerInner({
 
       <FeedbackMessage message={errorMessage} tone="error" onDismiss={undefined} />
 
-      <View style={styles.inputShell}>
-      <TextInput
-        ref={inputRef}
-        accessibilityLabel={t('reviews.reviewFieldLabel')}
-        multiline
-        value={content}
-        onChangeText={handleChangeText}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        placeholder={t('reviews.placeholder')}
-        placeholderTextColor={colors.textMuted}
-        autoCorrect
-        style={[
-          styles.input,
-          isFocused && styles.inputFocused,
-          fieldErrors.content && styles.inputError,
-        ]}
-        textAlignVertical="top"
-      />
+      {draftMedia?.kind === 'gif' ? (
+        <View style={styles.preview}>
+          <SocialGifFrame uri={draftMedia.value} size="preview" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('social.removeGif')}
+            onPress={() => setDraftMedia(null)}
+            style={styles.removeMedia}
+            hitSlop={8}
+          >
+            <Ionicons name="close" size={16} color={sheet.textPrimary} />
+          </Pressable>
+        </View>
+      ) : null}
+      {draftMedia?.kind === 'image' ? (
+        <View style={styles.preview}>
+          <SocialCommentPosterFrame path={draftMedia.value} size="preview" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('social.removePoster')}
+            onPress={() => setDraftMedia(null)}
+            style={styles.removeMedia}
+            hitSlop={8}
+          >
+            <Ionicons name="close" size={16} color={sheet.textPrimary} />
+          </Pressable>
+        </View>
+      ) : null}
+
+      <View style={[styles.inputShell, isFocused && styles.inputShellFocused, fieldErrors.content && styles.inputShellError]}>
+        <TextInput
+          ref={inputRef}
+          accessibilityLabel={t('reviews.reviewFieldLabel')}
+          multiline
+          value={content}
+          onChangeText={handleChangeText}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder={t('reviews.placeholder')}
+          placeholderTextColor={sheet.textSecondary}
+          autoCorrect
+          style={styles.input}
+          textAlignVertical="top"
+        />
+        <View style={styles.mediaTools}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('social.addGif')}
+            accessibilityState={{ selected: gifSelected, disabled: photoSelected }}
+            disabled={photoSelected || isSubmitting}
+            onPress={() => setGifPickerOpen(true)}
+            style={({ pressed }) => [
+              styles.mediaChip,
+              gifSelected && styles.mediaChipActive,
+              photoSelected && styles.mediaChipDisabled,
+              pressed && !photoSelected && styles.pressed,
+            ]}
+          >
+            <AppText
+              variant="caption"
+              style={[
+                styles.mediaChipLabel,
+                gifSelected && styles.mediaChipLabelActive,
+                photoSelected && styles.mediaChipLabelDisabled,
+              ]}
+            >
+              GIF
+            </AppText>
+          </Pressable>
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel={t('reviews.spoilerChip')}
+            accessibilityState={{ checked: isSpoiler }}
+            disabled={isSubmitting}
+            onPress={() => setIsSpoiler((current) => !current)}
+            testID="review-composer-spoiler"
+            style={({ pressed }) => [
+              styles.mediaChip,
+              isSpoiler && styles.mediaChipActive,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Ionicons
+              name={isSpoiler ? 'eye-off' : 'eye-off-outline'}
+              size={16}
+              color={isSpoiler ? sheet.mutedGold : sheet.textPrimary}
+            />
+            <AppText
+              variant="caption"
+              style={[styles.mediaChipLabel, isSpoiler && styles.mediaChipLabelActive]}
+            >
+              {t('reviews.spoilerChip')}
+            </AppText>
+          </Pressable>
+          {canAttachPhoto ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('social.addPoster')}
+              accessibilityState={{ selected: photoSelected, disabled: gifSelected }}
+              disabled={gifSelected || isSubmitting}
+              onPress={() => setPhotoPickerOpen(true)}
+              style={({ pressed }) => [
+                styles.mediaChip,
+                photoSelected && styles.mediaChipActive,
+                gifSelected && styles.mediaChipDisabled,
+                pressed && !gifSelected && styles.pressed,
+              ]}
+            >
+              <Ionicons
+                name="images-outline"
+                size={16}
+                color={
+                  gifSelected
+                    ? sheet.textSecondary
+                    : photoSelected
+                      ? sheet.mutedGold
+                      : sheet.textPrimary
+                }
+              />
+              <AppText
+                variant="caption"
+                style={[
+                  styles.mediaChipLabel,
+                  photoSelected && styles.mediaChipLabelActive,
+                  gifSelected && styles.mediaChipLabelDisabled,
+                ]}
+              >
+                {t('social.posterChip')}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
       {fieldErrors.content ? (
@@ -241,6 +401,19 @@ function ReviewComposerInner({
           </AppText>
         </View>
       </View>
+
+      <SocialGifPickerSheet
+        visible={gifPickerOpen}
+        onClose={() => setGifPickerOpen(false)}
+        onSelect={(gifUrl) => setDraftMedia({ kind: 'gif', value: gifUrl })}
+      />
+      <SocialCatalogImagePickerSheet
+        visible={photoPickerOpen}
+        gallery={gallery}
+        isLoading={galleryLoading}
+        onClose={() => setPhotoPickerOpen(false)}
+        onSelect={(filePath) => setDraftMedia({ kind: 'image', value: filePath })}
+      />
     </View>
   );
 }
@@ -251,56 +424,65 @@ export function ReviewComposer(props: ReviewComposerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.md,
-    paddingHorizontal: layout.screenPaddingHorizontal,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    gap: 14,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 20,
+    backgroundColor: sheet.background,
+  },
+  handle: {
+    alignSelf: 'center',
+    width: 64,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: sheet.handle,
+    marginBottom: 4,
   },
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 44,
-    paddingBottom: spacing.xs,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
+    gap: 10,
+    minHeight: 40,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: sheet.border,
   },
   toolbarSpacer: {
     width: 72,
   },
   mutedButton: {
-    minHeight: 36,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.inputBackground,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    minHeight: 34,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: sheet.secondary,
+    borderWidth: 1,
+    borderColor: '#28262C',
     justifyContent: 'center',
     alignItems: 'center',
   },
   mutedButtonAccent: {
-    backgroundColor: colors.accentTint18,
-    borderColor: colors.borderAccent,
+    backgroundColor: 'rgba(210, 164, 81, 0.14)',
+    borderColor: sheet.goldBorder,
   },
   mutedButtonDestructive: {
-    backgroundColor: 'rgba(200, 90, 75, 0.14)',
-    borderColor: 'rgba(196, 140, 100, 0.38)',
+    backgroundColor: 'rgba(200, 90, 75, 0.12)',
+    borderColor: 'rgba(196, 140, 100, 0.35)',
   },
   mutedButtonDisabled: {
     opacity: interaction.disabledOpacity,
   },
   mutedButtonLabel: {
-    color: colors.textSecondary,
+    color: sheet.textSecondary,
     fontWeight: '600',
     fontSize: 13,
     letterSpacing: 0.15,
   },
   mutedButtonLabelAccent: {
-    color: colors.accentStrong,
+    color: sheet.mutedGold,
   },
   mutedButtonLabelDestructive: {
-    color: '#D9A192',
+    color: colors.danger,
   },
   toolbarMeta: {
     flex: 1,
@@ -308,59 +490,105 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toolbarTitle: {
-    textAlign: 'center',
-    fontWeight: '600',
-    color: colors.textSecondary,
+    color: sheet.textPrimary,
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  preview: {
+    alignSelf: 'flex-start',
+  },
+  removeMedia: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(10,10,15,0.72)',
   },
   inputShell: {
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
+    borderRadius: 18,
+    backgroundColor: sheet.elevated,
+    borderWidth: 1,
+    borderColor: sheet.border,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 12,
+    gap: 10,
+  },
+  inputShellFocused: {
+    borderColor: sheet.goldBorder,
+  },
+  inputShellError: {
+    borderColor: colors.danger,
   },
   input: {
-    minHeight: 112,
-    maxHeight: 176,
-    color: colors.textPrimary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    minHeight: 96,
+    maxHeight: 180,
+    color: sheet.textPrimary,
     fontSize: typography.body.fontSize,
-    lineHeight: 24,
-    letterSpacing: 0.1,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.inputBackground,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    lineHeight: typography.body.lineHeight,
+    padding: 0,
   },
-  inputFocused: {
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.surface,
+  mediaTools: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  inputError: {
-    borderColor: colors.error,
+  mediaChip: {
+    minHeight: 30,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: '#28262C',
+    backgroundColor: sheet.secondary,
+  },
+  mediaChipActive: {
+    borderColor: sheet.goldBorder,
+    backgroundColor: 'rgba(210, 164, 81, 0.14)',
+  },
+  mediaChipDisabled: {
+    borderColor: '#28262C',
+    backgroundColor: sheet.secondary,
+    opacity: 0.55,
+  },
+  mediaChipLabel: {
+    color: sheet.textPrimary,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
+  mediaChipLabelActive: {
+    color: sheet.mutedGold,
+  },
+  mediaChipLabelDisabled: {
+    color: sheet.textSecondary,
+  },
+  error: {
+    color: colors.danger,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 36,
+    minHeight: 34,
   },
   metaRowSide: {
     flex: 1,
-    justifyContent: 'center',
+    alignItems: 'flex-end',
   },
   metaRowCenter: {
-    flexShrink: 0,
     alignItems: 'center',
   },
   counter: {
-    color: colors.textMuted,
-    fontVariant: ['tabular-nums'],
-    textAlign: 'right',
-    alignSelf: 'flex-end',
+    color: sheet.textSecondary,
   },
   counterWarning: {
     color: colors.warning,
-  },
-  error: {
-    color: colors.error,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

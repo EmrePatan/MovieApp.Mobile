@@ -13,6 +13,8 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
+jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
+
 describe('recent-search-storage', () => {
   const store = new Map<string, string>();
 

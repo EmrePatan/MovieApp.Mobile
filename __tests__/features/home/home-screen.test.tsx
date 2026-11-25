@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { ApiError } from '@/api/errors';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
 import { presentHomeSections } from '@/features/home/utils/present-home-sections';
@@ -20,6 +21,7 @@ function mockHomeFeed(options: Parameters<typeof createHomeFeedMockReturnValue>[
 }
 
 jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: () => ({
     invalidateQueries: mockInvalidateQueries,
   }),
@@ -27,6 +29,10 @@ jest.mock('@tanstack/react-query', () => ({
 
 jest.mock('@/features/home/hooks/useHomeFeed', () => ({
   useHomeFeed: jest.fn(),
+}));
+
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
 }));
 
 jest.mock('expo-router', () => ({
@@ -38,11 +44,20 @@ jest.mock('@/features/favorites/components/FavoriteButton', () => ({
   FavoriteButton: () => null,
 }));
 
-jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
-  useUnreadNotificationCount: jest.fn(() => ({
-    data: { unreadCount: 0 },
+jest.mock('@/features/notifications/hooks/useCombinedUnreadNotificationCount', () => ({
+  useCombinedUnreadNotificationCount: jest.fn(() => ({
+    unreadCount: 0,
+    releasesUnread: 0,
+    socialUnread: 0,
+    isLoading: false,
+    isError: false,
   })),
 }));
+
+jest.mock('@/features/messages/hooks/useMessageQueries', () => ({
+  useDirectMessageUnreadCount: () => ({ data: 0, isLoading: false, isError: false }),
+}));
+
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({

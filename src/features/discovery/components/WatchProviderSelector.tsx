@@ -5,7 +5,7 @@ import { ErrorView } from '@/components/common/ErrorView';
 import { SkeletonBlock } from '@/components/loading/SkeletonBlock';
 import type { DiscoveryWatchProvider } from '../watch-provider-types';
 import { WatchProviderLogo } from './WatchProviderLogo';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 import { watchProviderLogoSize } from './WatchProviderLogo';
 
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
   },
   providerName: {
     textAlign: 'center',
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
   },
 });
+

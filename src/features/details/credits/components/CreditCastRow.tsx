@@ -6,6 +6,7 @@ import { AppText } from '@/components/common/AppText';
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import type { CastMember } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
     height: PORTRAIT_SIZE,
     borderRadius: PORTRAIT_SIZE / 2,
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderRadius: borderRadius.full,
   },
   meta: {

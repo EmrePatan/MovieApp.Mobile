@@ -1,10 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { SearchBar } from '@/features/search/components/SearchBar';
 import { SearchScreenHeader } from '@/features/search/components/SearchScreenHeader';
 import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
 import { SearchFilterControl } from '@/features/search/components/SearchFilterControl';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import type { SearchResultItem } from '@/features/search/types';
+
+jest.mock('@/auth/useAuth', () => ({ useAuth: jest.fn(() => ({ isAuthenticated: true, logout: jest.fn() })) }));
 
 describe('search UI components', () => {
   it('shows the Search label only when there is no back affordance', () => {

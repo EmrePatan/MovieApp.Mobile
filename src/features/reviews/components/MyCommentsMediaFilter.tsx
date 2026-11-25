@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { CatalogMediaFilter } from '@/features/library/types';
 import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 const FILTER_VALUES: CatalogMediaFilter[] = ['all', 'movie', 'tv'];
 
@@ -36,7 +37,7 @@ export function MyCommentsMediaFilter({ value, onChange }: MyCommentsMediaFilter
             accessibilityState={{ selected }}
             accessibilityLabel={t('common.filterLabel', { label: filter.label })}
             onPress={() => onChange(filter.value)}
-            style={[styles.chip, selected && styles.chipSelected]}
+            style={[styles.tab, selected && styles.tabSelected]}
           >
             <AppText
               variant="caption"
@@ -56,28 +57,27 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'stretch',
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     gap: spacing.xs,
     padding: spacing.xs,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentTint12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-  },
-  chip: {
-    flex: 1,
-    minHeight: 34,
-    borderRadius: borderRadius.full,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'transparent',
-    backgroundColor: 'transparent',
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
+  },
+  tab: {
+    flex: 1,
+    minHeight: 40,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  chipSelected: {
-    backgroundColor: colors.accentSurface,
-    borderColor: colors.borderAccent,
+  tabSelected: {
+    backgroundColor: glass.accentFill,
+    borderColor: glass.accentBorder,
   },
   label: {
     color: colors.textMuted,

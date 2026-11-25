@@ -5,9 +5,13 @@ export type AdvancedDiscoverMediaType = 'movie' | 'tv';
 
 export type AdvancedDiscoverSort =
   | 'popularity_desc'
+  | 'popularity_asc'
   | 'rating_desc'
+  | 'rating_asc'
   | 'newest'
-  | 'oldest';
+  | 'oldest'
+  | 'title_asc'
+  | 'title_desc';
 
 export type GenreMatchMode = 'all' | 'any';
 
@@ -62,9 +66,13 @@ export const ADVANCED_DISCOVER_MEDIA_OPTIONS: AdvancedDiscoverMediaType[] = ['mo
 
 export const ADVANCED_DISCOVER_SORT_OPTIONS: AdvancedDiscoverSort[] = [
   'popularity_desc',
+  'popularity_asc',
   'rating_desc',
+  'rating_asc',
   'newest',
   'oldest',
+  'title_asc',
+  'title_desc',
 ];
 
 export const ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS: (number | null)[] = [

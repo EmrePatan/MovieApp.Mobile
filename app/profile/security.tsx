@@ -63,6 +63,7 @@ import type { SocialAuthProvider } from '@/models/api/auth';
 import { colors } from '@/theme/colors';
 
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 
 
@@ -717,13 +718,13 @@ const styles = StyleSheet.create({
 
   groupCard: {
 
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
 
     borderRadius: borderRadius.lg,
 
     borderWidth: 1,
 
-    borderColor: colors.border,
+    borderColor: glass.hairline,
 
     overflow: 'hidden',
 
@@ -795,7 +796,7 @@ const styles = StyleSheet.create({
 
     height: StyleSheet.hairlineWidth,
 
-    backgroundColor: colors.border,
+    backgroundColor: glass.hairline,
 
     marginLeft: spacing.md + 22 + spacing.sm,
 

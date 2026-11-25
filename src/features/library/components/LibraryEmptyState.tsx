@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
+import { authTypography } from '@/features/auth/auth-typography';
 import type { LibraryRemoveIcon } from '../types';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -14,20 +14,7 @@ interface LibraryEmptyStateProps {
   onAction?: () => void;
 }
 
-function resolveIconName(icon: LibraryEmptyStateProps['icon']): keyof typeof Ionicons.glyphMap {
-  switch (icon) {
-    case 'heart':
-      return 'heart-outline';
-    case 'bookmark':
-      return 'bookmark-outline';
-    case 'library':
-    default:
-      return 'albums-outline';
-  }
-}
-
 export function LibraryEmptyState({
-  icon = 'library',
   title,
   message,
   actionLabel,
@@ -35,14 +22,11 @@ export function LibraryEmptyState({
 }: LibraryEmptyStateProps) {
   return (
     <View style={styles.container} accessibilityRole="text">
-      <View style={styles.iconWrap}>
-        <Ionicons name={resolveIconName(icon)} size={40} color={colors.textMuted} />
-      </View>
-      <AppText variant="subtitle" center>
+      <AppText style={styles.title} center>
         {title}
       </AppText>
       {message ? (
-        <AppText variant="bodySmall" muted center>
+        <AppText style={styles.message} center>
           {message}
         </AppText>
       ) : null}
@@ -60,14 +44,19 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     alignItems: 'center',
   },
-  iconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.surfaceElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
+  title: {
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 26,
+    lineHeight: 30,
+    color: colors.textPrimary,
+    letterSpacing: -0.2,
+  },
+  message: {
+    fontFamily: authTypography.editorialRegular,
+    fontSize: 16,
+    lineHeight: 22,
+    color: colors.textSecondary,
+    maxWidth: 280,
   },
   button: {
     marginTop: spacing.md,

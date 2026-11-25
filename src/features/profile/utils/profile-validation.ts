@@ -1,9 +1,17 @@
 import { i18n } from '@/i18n';
+import type { ProfileSocialLinks, ProfileSocialPlatform } from '../types';
+import {
+  PROFILE_BIO_MAX,
+  PROFILE_SOCIAL_PLATFORMS,
+  isValidSocialDraftValue,
+} from './profile-social-links';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface UpdateProfileFormErrors {
   displayName?: string;
+  bio?: string;
+  socialLinks?: Partial<Record<ProfileSocialPlatform, string>>;
 }
 
 export interface ChangeEmailFormErrors {
@@ -21,7 +29,11 @@ export interface DeleteAccountFormErrors {
   currentPassword?: string;
 }
 
-export function validateUpdateProfile(displayName: string): UpdateProfileFormErrors {
+export function validateUpdateProfile(
+  displayName: string,
+  bio = '',
+  socialDraft?: Partial<Record<ProfileSocialPlatform, string>> | ProfileSocialLinks | null,
+): UpdateProfileFormErrors {
   const errors: UpdateProfileFormErrors = {};
   const trimmed = displayName.trim();
 
@@ -29,6 +41,27 @@ export function validateUpdateProfile(displayName: string): UpdateProfileFormErr
     errors.displayName = i18n.t('validation.displayNameRequired');
   } else if (trimmed.length > 100) {
     errors.displayName = i18n.t('validation.displayNameTooLong');
+  }
+
+  if (bio.length > PROFILE_BIO_MAX) {
+    errors.bio = i18n.t('validation.bioTooLong');
+  }
+
+  if (socialDraft) {
+    const linkErrors: Partial<Record<ProfileSocialPlatform, string>> = {};
+    for (const platform of PROFILE_SOCIAL_PLATFORMS) {
+      const raw = socialDraft[platform];
+      if (raw == null || !String(raw).trim()) continue;
+      if (!isValidSocialDraftValue(platform, String(raw))) {
+        linkErrors[platform] =
+          platform === 'website'
+            ? i18n.t('validation.websiteInvalid')
+            : i18n.t('validation.socialHandleInvalid');
+      }
+    }
+    if (Object.keys(linkErrors).length > 0) {
+      errors.socialLinks = linkErrors;
+    }
   }
 
   return errors;
@@ -132,5 +165,12 @@ export function hasProfileValidationErrors(
     | ChangePasswordFormErrors
     | DeleteAccountFormErrors,
 ): boolean {
-  return Object.values(errors).some(Boolean);
+  return Object.values(errors).some((value) => {
+    if (!value) return false;
+    if (typeof value === 'object') {
+      return Object.values(value).some(Boolean);
+    }
+    return true;
+  });
 }
+

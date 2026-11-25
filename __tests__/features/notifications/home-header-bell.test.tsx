@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
-import { useUnreadNotificationCount } from '@/features/notifications/hooks/useUnreadNotificationCount';
+import { useCombinedUnreadNotificationCount } from '@/features/notifications/hooks/useCombinedUnreadNotificationCount';
 
 const mockPush = jest.fn();
 
@@ -8,9 +8,19 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-jest.mock('@/features/notifications/hooks/useUnreadNotificationCount', () => ({
-  useUnreadNotificationCount: jest.fn(),
+jest.mock('@/features/notifications/hooks/useCombinedUnreadNotificationCount', () => ({
+  useCombinedUnreadNotificationCount: jest.fn(),
 }));
+
+jest.mock('@/features/messages/hooks/useMessageQueries', () => ({
+  useDirectMessageUnreadCount: () => ({ data: 0, isLoading: false, isError: false }),
+}));
+
+jest.mock('@/features/social/hooks/useSocialQueries', () => ({
+  useSocialPendingFollowRequestCount: () => ({ data: 0 }),
+  useSocialUnreadNotificationCount: () => ({ data: 0 }),
+}));
+
 
 jest.mock('@/auth/useAuth', () => ({
   useAuth: () => ({
@@ -27,8 +37,12 @@ jest.mock('@/auth/useAuth', () => ({
 describe('HomeHeader notification bell', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useUnreadNotificationCount as jest.Mock).mockReturnValue({
-      data: { unreadCount: 0 },
+    (useCombinedUnreadNotificationCount as jest.Mock).mockReturnValue({
+      unreadCount: 0,
+      releasesUnread: 0,
+      socialUnread: 0,
+      isLoading: false,
+      isError: false,
     });
   });
 
@@ -41,8 +55,12 @@ describe('HomeHeader notification bell', () => {
   });
 
   it('shows the unread count badge for 1 through 9', () => {
-    (useUnreadNotificationCount as jest.Mock).mockReturnValue({
-      data: { unreadCount: 3 },
+    (useCombinedUnreadNotificationCount as jest.Mock).mockReturnValue({
+      unreadCount: 3,
+      releasesUnread: 2,
+      socialUnread: 1,
+      isLoading: false,
+      isError: false,
     });
 
     render(<HomeHeader />);
@@ -51,15 +69,20 @@ describe('HomeHeader notification bell', () => {
     expect(screen.getByText('3', { includeHiddenElements: true })).toBeTruthy();
   });
 
-  it('renders profile avatar initials', () => {
+  it('opens messages from the header', () => {
     render(<HomeHeader />);
 
-    expect(screen.getAllByLabelText('Open Emre User profile').length).toBeGreaterThan(0);
+    fireEvent.press(screen.getByLabelText('Open messages'));
+    expect(mockPush).toHaveBeenCalledWith('/messages');
   });
 
   it('shows 9+ when unread count exceeds nine', () => {
-    (useUnreadNotificationCount as jest.Mock).mockReturnValue({
-      data: { unreadCount: 12 },
+    (useCombinedUnreadNotificationCount as jest.Mock).mockReturnValue({
+      unreadCount: 12,
+      releasesUnread: 5,
+      socialUnread: 7,
+      isLoading: false,
+      isError: false,
     });
 
     render(<HomeHeader />);
@@ -68,10 +91,12 @@ describe('HomeHeader notification bell', () => {
     expect(screen.getByText('9+', { includeHiddenElements: true })).toBeTruthy();
   });
 
-  it('hides notifications and profile on the library tab chrome', () => {
+
+  it('hides search, notifications and messages on the library tab chrome', () => {
     render(<HomeHeader searchOrigin="library" />);
 
+    expect(screen.queryByLabelText('Search movies or series')).toBeNull();
     expect(screen.queryByLabelText('Open notifications')).toBeNull();
-    expect(screen.queryByLabelText('Open Emre User profile')).toBeNull();
+    expect(screen.queryByLabelText('Open messages')).toBeNull();
   });
 });

@@ -12,6 +12,7 @@ import {
 import { ProfileEmptyInsight } from './ProfileEmptyInsight';
 import { ProfileSectionHeader } from './ProfileSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -174,10 +175,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     padding: spacing.sm,
     gap: spacing.sm,
   },
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   detail: {
     paddingTop: spacing.xs,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: glass.hairline,
     gap: 2,
   },
   detailTitle: {
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingTop: spacing.xs,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: glass.hairline,
   },
   insightRow: {
     flexDirection: 'row',

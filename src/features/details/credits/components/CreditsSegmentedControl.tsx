@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
@@ -62,23 +62,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: premiumSheet.secondary,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: premiumSheet.rowBorder,
     minHeight: 36,
     justifyContent: 'center',
   },
   chipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: premiumSheet.elevated,
+    borderColor: premiumSheet.goldBorder,
   },
   label: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
     fontWeight: '600',
   },
   labelActive: {
-    color: colors.background,
+    color: premiumSheet.mutedGold,
   },
+
   pressed: {
     opacity: interaction.pressedOpacity,
   },

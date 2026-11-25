@@ -12,7 +12,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
@@ -30,8 +30,9 @@ import {
   type DiscoveryTypeFilter,
   type Genre,
 } from '../types';
-import { colors } from '@/theme/colors';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface DiscoverFilterSheetProps {
   visible: boolean;
@@ -218,12 +219,14 @@ export function DiscoverFilterSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={styles.overlay}>
-        <SafeAreaView style={styles.sheet} edges={['bottom']}>
+      <View style={premiumSheetChrome.overlay}>
+        <SwipeSheet onClose={handleClose} style={styles.sheet} bottomInset>
+          <GlassSheetLayer />
+          <SheetHandle />
           <View style={styles.header}>
-            <AppText variant="subtitle">{t('discovery.filterSheet.title')}</AppText>
+            <AppText variant="subtitle" style={styles.headerTitle}>{t('discovery.filterSheet.title')}</AppText>
             <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
-              <Ionicons name="close" size={24} color={colors.textPrimary} />
+              <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
             </Pressable>
           </View>
 
@@ -244,7 +247,7 @@ export function DiscoverFilterSheet({
             <View style={styles.section}>
               <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.genresSection')}</AppText>
               {genresQuery.isLoading ? (
-                <ActivityIndicator color={colors.accent} />
+                <ActivityIndicator color={premiumSheet.mutedGold} />
               ) : (
                 <GenreSelector
                   genres={genresQuery.data ?? []}
@@ -320,32 +323,27 @@ export function DiscoverFilterSheet({
             <AppButton title={t('discovery.filterSheet.reset')} variant="secondary" onPress={handleClear} />
             <AppButton title={t('discovery.filterSheet.showResults')} onPress={handleApply} />
           </View>
-        </SafeAreaView>
+        </SwipeSheet>
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   sheet: {
+    ...premiumSheetChrome.sheet,
     maxHeight: '88%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   scroll: {
     flexGrow: 0,
@@ -358,7 +356,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sectionLabel: {
-    color: colors.textSecondary,
+    color: premiumSheet.textSecondary,
     fontWeight: '600',
   },
   chipGrid: {
@@ -371,23 +369,26 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     minHeight: 36,
     justifyContent: 'center',
   },
   filterChipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentMuted,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   filterChipLabel: {
-    color: colors.textPrimary,
+    color: premiumSheet.textPrimary,
   },
   filterChipLabelSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   actions: {
     gap: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: premiumSheet.border,
+    paddingTop: spacing.sm,
   },
 });

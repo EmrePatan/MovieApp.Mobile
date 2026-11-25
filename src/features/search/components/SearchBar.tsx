@@ -3,6 +3,7 @@ import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { interaction } from '@/theme/interaction';
@@ -84,9 +85,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: 48,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
+    paddingHorizontal: spacing.lg,
   },
   searchIcon: {
     marginRight: spacing.sm,

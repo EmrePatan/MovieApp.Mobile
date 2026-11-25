@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   StyleSheet,
   View,
 } from 'react-native';
@@ -201,11 +202,14 @@ export default function FollowingScreen() {
             </View>
           ) : null
         }
+        // RN-web renders an empty list when a RefreshControl is attached.
         refreshControl={
-          <MovieAppRefreshControl
-            refreshing={followingQuery.isRefetching && !followingQuery.isFetchingNextPage}
-            onRefresh={handleRefresh}
-          />
+          Platform.OS === 'web' ? undefined : (
+            <MovieAppRefreshControl
+              refreshing={followingQuery.isRefetching && !followingQuery.isFetchingNextPage}
+              onRefresh={handleRefresh}
+            />
+          )
         }
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}

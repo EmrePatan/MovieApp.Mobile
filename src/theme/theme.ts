@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './colors';
+import { glass } from './glass';
 import { interaction } from './interaction';
 import { layout } from './layout';
 import { borderRadius, spacing } from './spacing';
@@ -27,48 +28,50 @@ export const commonStyles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
+    backgroundColor: glass.fill,
+    borderRadius: borderRadius.xl,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.border,
     padding: spacing.lg,
   },
   surfaceCardCentered: {
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
+    backgroundColor: glass.fill,
+    borderRadius: borderRadius.xl,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.border,
     gap: spacing.sm,
   },
   pressed: {
     opacity: interaction.pressedOpacity,
   },
   buttonPrimary: {
-    backgroundColor: colors.accent,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.accentStrong,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 240, 200, 0.55)',
     minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
   buttonSecondary: {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: borderRadius.md,
+    backgroundColor: glass.fill,
+    borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.border,
     minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
   input: {
-    backgroundColor: colors.inputBackground,
-    borderRadius: borderRadius.md,
+    backgroundColor: glass.fill,
+    borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.border,
     color: colors.textPrimary,
     minHeight: 48,
     paddingHorizontal: spacing.md,

@@ -42,6 +42,11 @@ export function formatWeekdayName(dayOfWeek: number | string | null | undefined)
   return i18n.t('common.unknown');
 }
 
+/** Full month name ("Kasım"), for places with room; formatMonthName gives the abbreviation. */
+export function formatMonthLongName(month: number): string {
+  return new Date(2000, month - 1, 1).toLocaleString(getUiFormatLocaleTag(), { month: 'long' });
+}
+
 export function formatMonthName(month: number): string {
   const key = `insights.format.monthsShort.${month}`;
   if (i18n.exists(key)) {

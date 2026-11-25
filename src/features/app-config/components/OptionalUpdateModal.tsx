@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AppText } from '@/components/common/AppText';
+import { GlassSurface } from '@/components/common/GlassSurface';
 
 import { DETAIL_ACTION_SIZE } from '@/features/details/shared/components/DetailCircularAction';
 
@@ -326,6 +327,10 @@ export function OptionalUpdateModal() {
         ]}
       >
         <View style={styles.card} accessibilityRole="alert" accessibilityLabel={title}>
+          <GlassSurface
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, styles.cardGlass]}
+          />
             <View
               style={styles.iconSlot}
 
@@ -423,7 +428,7 @@ const styles = StyleSheet.create({
 
     borderRadius: borderRadius.lg,
 
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: 'transparent',
 
     borderWidth: 1,
 
@@ -438,6 +443,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: spacing.xs },
 
     elevation: spacing.sm,
+  },
+
+  cardGlass: {
+    borderRadius: borderRadius.lg,
   },
 
   iconSlot: {

@@ -5,6 +5,7 @@ import { AppText } from '@/components/common/AppText';
 import type { ProfileMilestoneResponse } from '../types';
 import { ProfileSectionHeader } from './ProfileSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ProfileMilestonesSectionProps {
@@ -61,10 +62,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     padding: spacing.sm,
   },
   icon: {

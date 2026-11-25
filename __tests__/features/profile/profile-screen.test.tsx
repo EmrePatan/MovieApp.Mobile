@@ -12,7 +12,7 @@ const mockBack = jest.fn();
 const mockLogout = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, back: mockBack }),
+  useRouter: () => ({ push: mockPush, back: mockBack, canGoBack: () => true, replace: jest.fn() }),
   useSegments: () => ['(tabs)', 'profile'],
 }));
 
@@ -99,16 +99,16 @@ describe('ProfileScreen', () => {
   it('navigates to account settings', () => {
     renderProfileScreen();
 
-    fireEvent.press(screen.getByLabelText('Edit profile'));
+    fireEvent.press(screen.getByLabelText('Sign-in & Security'));
 
-    expect(mockPush).toHaveBeenCalledWith('/profile/edit');
+    expect(mockPush).toHaveBeenCalledWith('/profile/security');
     expect(mockPush).not.toHaveBeenCalledWith('/(tabs)/library');
   });
 
   it('renders account settings rows', () => {
     renderProfileScreen();
 
-    expect(screen.getByLabelText('Edit profile')).toBeTruthy();
+    expect(screen.queryByLabelText('Edit profile')).toBeNull();
     expect(screen.getByLabelText('Sign-in & Security')).toBeTruthy();
     expect(screen.getByLabelText('Delete account')).toBeTruthy();
   });

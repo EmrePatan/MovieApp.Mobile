@@ -147,3 +147,32 @@ jest.mock('react', () => {
 });
 
 export {};
+
+jest.mock('expo-blur', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return { BlurView: (props: object) => React.createElement(View, props) };
+});
+
+jest.mock('expo-glass-effect', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    GlassView: (props: object) => React.createElement(View, props),
+    GlassContainer: (props: object) => React.createElement(View, props),
+    isGlassEffectAPIAvailable: () => false,
+    isLiquidGlassAvailable: () => false,
+  };
+});
+
+jest.mock('expo-haptics', () => ({
+  selectionAsync: jest.fn().mockResolvedValue(undefined),
+  impactAsync: jest.fn().mockResolvedValue(undefined),
+  notificationAsync: jest.fn().mockResolvedValue(undefined),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
+  NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
+}));
+
+jest.mock('@/features/auth/useAuthFonts', () => ({
+  useAuthFonts: () => ({ fontsLoaded: true, fontError: null }),
+}));

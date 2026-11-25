@@ -1,21 +1,26 @@
-/** Keep in sync with `tab-bar-layout-metrics` / `PrimaryTabBar`. */
-const TAB_BAR_ICON_SIZE = 22;
-const TAB_BAR_LABEL_GAP = 2;
+import {
+  TAB_BAR_CONTENT_INSET_H,
+  TAB_BAR_ICON_SIZE,
+  TAB_BAR_LABEL_FONT_SIZE,
+  TAB_BAR_LABEL_GAP,
+  TAB_BAR_ROW_PADDING_H,
+} from '@/features/navigation/tab-bar-layout-metrics';
 
 /** Primary tab count in `PrimaryTabBar` — keep in sync. */
-export const PRIMARY_TAB_COUNT = 4;
+export const PRIMARY_TAB_COUNT = 5;
 
 /** `minimumFontScale` on tab labels — keep in sync with `PrimaryTabBar`. */
-export const TAB_BAR_LABEL_MINIMUM_FONT_SCALE = 0.85;
+/** Dense 5-tab Turkish labels may scale slightly below 0.8 on compact widths. */
+export const TAB_BAR_LABEL_MINIMUM_FONT_SCALE = 0.75;
 
-/** Tab label typography — keep in sync with `tabBarLabelStyle` (caption 12 + semibold). */
-export const TAB_BAR_LABEL_FONT_SIZE = 12;
+/** Tab label typography — keep in sync with PrimaryTabBar label style. */
+export const TAB_BAR_LABEL_FONT_SIZE_AUDIT = TAB_BAR_LABEL_FONT_SIZE;
 
 /**
- * Conservative max intrinsic width for 12pt semibold (layout audit).
+ * Conservative max intrinsic width for caption-sized text (layout audit).
  * Used to validate `adjustsFontSizeToFit` headroom, not runtime measurement.
  */
-export const TAB_BAR_LABEL_CONSERVATIVE_CHAR_WIDTH = 7.8;
+export const TAB_BAR_LABEL_CONSERVATIVE_CHAR_WIDTH = 7.0;
 
 export const TURKISH_EDGE_TAB_LABELS = {
   home: 'Ana Sayfa',
@@ -26,17 +31,14 @@ export const TURKISH_EDGE_TAB_LABELS = {
  * Horizontal layout contract mirrored from `PrimaryTabBar` + `getTabBarStyle`.
  *
  * Hierarchy:
- * shell (getTabBarStyle) → tabRow → Pressable tabButton → Ionicons + AppText label
- *
- * Vertical-only (no horizontal deduction): paddingTop/Bottom on shell, marginTop on label,
- * TAB_BAR_LABEL_GAP, icon height stacked above label.
+ * shell → tabRow → Pressable tabButton → pill → Ionicons + AppText label
  */
 export const PRIMARY_TAB_BAR_HORIZONTAL_LAYOUT = {
   shellPaddingHorizontal: 0,
-  tabRowPaddingHorizontal: 0,
+  tabRowPaddingHorizontal: TAB_BAR_ROW_PADDING_H,
   tabButtonPaddingHorizontal: 0,
   tabButtonMinWidth: 0,
-  labelPaddingHorizontal: 0,
+  labelPaddingHorizontal: TAB_BAR_CONTENT_INSET_H,
   labelMarginHorizontal: 0,
   /** Icon is above the label; width does not reduce label line width. */
   iconWidth: TAB_BAR_ICON_SIZE,

@@ -9,6 +9,7 @@ import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPrefe
 import { useMovieWatchProviders, useTvShowWatchProviders } from '../hooks/useWatchProviders';
 import type { WatchProvider } from '../types';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 const PROVIDER_LOGO_SIZE = 54;
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     height: PROVIDER_LOGO_SIZE,
     borderRadius: PROVIDER_LOGO_SIZE / 2,
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     alignItems: 'center',

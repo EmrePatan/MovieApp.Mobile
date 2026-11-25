@@ -49,7 +49,7 @@ describe('CreateWatchlistModal', () => {
   });
 
   it('creates watchlist and notifies parent', () => {
-    mutate.mockImplementation((_name, options) => {
+    mutate.mockImplementation((_input, options) => {
       options?.onSuccess?.({ id: 'new-watchlist-id', name: 'Sci-Fi' });
     });
 
@@ -60,7 +60,10 @@ describe('CreateWatchlistModal', () => {
     fireEvent.changeText(screen.getByLabelText('Watchlist name'), 'Sci-Fi');
     fireEvent.press(screen.getByRole('button', { name: 'Create Watchlist' }));
 
-    expect(mutate).toHaveBeenCalledWith('Sci-Fi', expect.any(Object));
+    expect(mutate).toHaveBeenCalledWith(
+      { name: 'Sci-Fi', description: null },
+      expect.any(Object),
+    );
     expect(onCreated).toHaveBeenCalledWith('new-watchlist-id');
     expect(onClose).toHaveBeenCalled();
   });

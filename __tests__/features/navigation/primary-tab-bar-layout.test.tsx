@@ -2,7 +2,11 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { View } from 'react-native';
 import { PrimaryTabBar } from '@/features/navigation/PrimaryTabBar';
-import { resolveTabBarLayoutMetrics } from '@/features/navigation/tab-bar-layout-metrics';
+import {
+  resolveTabBarLayoutMetrics,
+  TAB_BAR_PADDING_TOP,
+  TAB_BAR_ROW_HEIGHT,
+} from '@/features/navigation/tab-bar-layout-metrics';
 import { getTabBarTotalMinHeight, tabBarLabelStyle } from '@/features/navigation/tab-bar-style';
 import { initI18nForTests } from '../../i18n/i18n-test-utils';
 
@@ -23,11 +27,14 @@ describe('PrimaryTabBar layout', () => {
     await initI18nForTests('tr');
   });
 
-  it('renders Turkish home and insights labels', () => {
+  it('shows the visible label only on the active tab and keeps accessible names on all', () => {
     render(<PrimaryTabBar />);
 
     expect(screen.getByText('Ana Sayfa')).toBeTruthy();
-    expect(screen.getByText('İstatistikler')).toBeTruthy();
+    expect(screen.queryByText('Profil')).toBeNull();
+    expect(screen.queryByText('İstatistikler')).toBeNull();
+    expect(screen.getByLabelText('Profil')).toBeTruthy();
+    expect(screen.getByLabelText('İstatistikler')).toBeTruthy();
   });
 
   it('does not add extra bottom margin on tab labels', () => {
@@ -52,8 +59,8 @@ describe('PrimaryTabBar layout', () => {
 
     const expectedHeight = getTabBarTotalMinHeight(mockInsets);
     expect(expectedHeight).toBe(resolveTabBarLayoutMetrics(mockInsets).totalHeight);
-
-    expect(expectedHeight).toBeLessThan(44 + mockInsets.bottom);
+    expect(expectedHeight).toBe(TAB_BAR_PADDING_TOP + TAB_BAR_ROW_HEIGHT + mockInsets.bottom);
+    expect(expectedHeight).toBeGreaterThan(TAB_BAR_ROW_HEIGHT + mockInsets.bottom);
 
     fireEvent(tabBarContainer!, 'layout', {
       nativeEvent: { layout: { height: expectedHeight, width: 390 } },

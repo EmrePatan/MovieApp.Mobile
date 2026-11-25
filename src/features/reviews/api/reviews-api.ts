@@ -1,18 +1,24 @@
 import { api } from '@/api/client';
 import { isApiError } from '@/api/errors';
 import {
+  buildCreateEpisodeReviewPath,
   buildCreateMovieReviewPath,
   buildCreateTvReviewPath,
+  buildDeleteEpisodeReviewPath,
   buildDeleteMovieReviewPath,
   buildDeleteTvReviewPath,
+  buildEpisodeMyReviewPath,
+  buildEpisodeReviewsPath,
   buildMovieMyReviewPath,
   buildMovieReviewsPath,
   buildTvMyReviewPath,
   buildTvReviewsPath,
+  buildUpdateEpisodeReviewPath,
   buildUpdateMovieReviewPath,
   buildUpdateTvReviewPath,
   buildReviewTranslationPath,
   buildCurrentUserReviewsPath,
+  buildUserReviewsPath,
 } from './routes';
 import type {
   CreateReviewRequest,
@@ -128,6 +134,56 @@ export async function deleteTvReview(tvShowId: string): Promise<void> {
   await api.delete<void>(buildDeleteTvReviewPath(tvShowId));
 }
 
+export async function getEpisodeReviews(
+  episodeId: string,
+  page = 1,
+  pageSize = 20,
+  sort?: ReviewSortOption,
+  ratingStars?: number | null,
+  signal?: AbortSignal,
+): Promise<ReviewListResponse> {
+  return api.get<ReviewListResponse>(
+    buildEpisodeReviewsPath(episodeId, page, pageSize, sort, ratingStars),
+    {
+      authenticated: false,
+      signal,
+    },
+  );
+}
+
+export async function getEpisodeMyReview(
+  episodeId: string,
+  signal?: AbortSignal,
+): Promise<ReviewResponse | null> {
+  try {
+    return await api.get<ReviewResponse>(buildEpisodeMyReviewPath(episodeId), { signal });
+  } catch (error) {
+    if (isApiError(error) && error.kind === 'not_found') {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+export async function createEpisodeReview(
+  episodeId: string,
+  payload: CreateReviewRequest,
+): Promise<ReviewResponse> {
+  return api.post<ReviewResponse>(buildCreateEpisodeReviewPath(episodeId), payload);
+}
+
+export async function updateEpisodeReview(
+  episodeId: string,
+  payload: UpdateReviewRequest,
+): Promise<ReviewResponse> {
+  return api.put<ReviewResponse>(buildUpdateEpisodeReviewPath(episodeId), payload);
+}
+
+export async function deleteEpisodeReview(episodeId: string): Promise<void> {
+  await api.delete<void>(buildDeleteEpisodeReviewPath(episodeId));
+}
+
 export async function translateReview(
   reviewId: string,
   signal?: AbortSignal,
@@ -155,4 +211,17 @@ export async function getCurrentUserReviews(
       signal,
     },
   );
+}
+
+export async function getUserReviews(
+  userId: string,
+  page = 1,
+  pageSize = DEFAULT_MY_COMMENTS_PAGE_SIZE,
+  mediaType: CatalogMediaFilter = 'all',
+  signal?: AbortSignal,
+): Promise<UserReviewListResponse> {
+  return api.get<UserReviewListResponse>(buildUserReviewsPath(userId, page, pageSize, mediaType), {
+    authenticated: true,
+    signal,
+  });
 }

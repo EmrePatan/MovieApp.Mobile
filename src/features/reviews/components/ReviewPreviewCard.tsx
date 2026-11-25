@@ -14,15 +14,16 @@ import {
   isValidBackendScore,
 } from '@/features/ratings/utils/star-rating';
 import { ReviewStarRow } from './ReviewStarRow';
-import { ReviewTranslationControls } from './ReviewTranslationControls';
+import { ReviewRichBody } from './ReviewRichBody';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 
 const AVATAR_SIZE = 32;
 
 /** Detail rail cards: soft lift on page background, no shadows or section chrome. */
-const PREVIEW_CARD_SURFACE = colors.surfaceElevated;
+const PREVIEW_CARD_SURFACE = glass.panelElevated;
 const PREVIEW_CARD_BORDER = colors.borderSubtle;
 
 interface ReviewPreviewCardProps {
@@ -74,9 +75,11 @@ export const ReviewPreviewCard = memo(function ReviewPreviewCard({
       </View>
 
       <View style={styles.body}>
-        <ReviewTranslationControls
+        <ReviewRichBody
+          content={review.content}
           review={review}
           numberOfLines={DETAIL_REVIEW_PREVIEW_LINE_COUNT}
+          compactMedia
         />
       </View>
 
@@ -149,6 +152,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     minHeight: 0,
+    overflow: 'hidden',
   },
   date: {
     alignSelf: 'flex-end',

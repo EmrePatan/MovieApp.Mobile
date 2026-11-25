@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { getSeason } from '@/features/details/season/api/season-api';
 import {
   bulkUpdateEpisodeWatchState,
+  bulkUpdateSeasonWatchState,
   bulkUpdateTvShowWatchState,
+  getTvShowProgress,
   markEpisodeWatched,
   markMovieWatched,
   markThroughEpisode,
@@ -23,14 +24,17 @@ import type {
   SeasonWatchedEpisodesResponse,
   TvShowWatchProgressResponse,
 } from '../types';
+import { removeWatchedMovieFromHomeRecommendations } from '@/features/home/utils/remove-watched-from-home-recommendations';
 import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
+import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import { calculateSeasonProgressPercentage } from '../utils/season-progress';
 import {
   updateTvShowAggregateAllSeasonsWatched,
   updateTvShowAggregateSeasonProgress,
 } from '../utils/tv-show-progress-cache';
+import { requestTvShowCompletionCelebration } from '../utils/tv-show-completion-celebration-requests';
 
 function restoreQuerySnapshot<T>(
   queryClient: QueryClient,
@@ -60,6 +64,7 @@ export function invalidateWatchStateDependents(queryClient: ReturnType<typeof us
   invalidateRecentWatchHistory(queryClient);
   invalidateHomeQueries(queryClient);
   invalidateLibraryQueries(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 export function invalidateMovieWatchHistoryQueries(
@@ -91,6 +96,7 @@ export function invalidateEpisodeWatchHistoryQueries(
   void queryClient.invalidateQueries({ queryKey: ['home', 'personalized'] });
   void queryClient.invalidateQueries({ queryKey: ['recommendations'] });
   invalidateProfileStatistics(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 export function applySeasonWatchedEpisodeIds(
@@ -215,6 +221,9 @@ export function useToggleMovieWatched(movieId: string) {
     },
     onSuccess: (nextValue) => {
       queryClient.setQueryData(movieWatchStatusQueryKey(movieId), nextValue);
+      if (nextValue.isWatched) {
+        removeWatchedMovieFromHomeRecommendations(queryClient, movieId);
+      }
       invalidateMovieWatchHistoryQueries(queryClient, movieId);
     },
   });
@@ -415,19 +424,14 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
 
   return useMutation({
     mutationFn: async ({ isFullyWatched, episodeIds }: ToggleSeasonWatchedVariables) => {
-      let resolvedEpisodeIds = episodeIds;
-
-      if (resolvedEpisodeIds.length === 0) {
-        const season = await getSeason(tvShowId, seasonNumber);
-        resolvedEpisodeIds = season.episodes.map((episode) => episode.id);
-      }
-
-      if (resolvedEpisodeIds.length === 0) {
-        throw new Error('No episodes found for this season.');
+      if (episodeIds.length === 0) {
+        // The server resolves the season's aired episodes itself. Sending catalog episode IDs from
+        // the client broke on seasons whose episodes were not ingested yet or were still unaired.
+        return bulkUpdateSeasonWatchState(tvShowId, seasonNumber, !isFullyWatched);
       }
 
       return bulkUpdateEpisodeWatchState(tvShowId, {
-        episodeIds: resolvedEpisodeIds,
+        episodeIds,
         watched: !isFullyWatched,
       });
     },
@@ -507,11 +511,37 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
   });
 }
 
+export type ToggleTvShowWatchedResult = {
+  markingWatched: boolean;
+  celebrated: boolean;
+};
+
 export function useToggleTvShowWatched(tvShowId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (isFullyWatched: boolean) => bulkUpdateTvShowWatchState(tvShowId, !isFullyWatched),
+    mutationFn: async (isFullyWatched: boolean): Promise<ToggleTvShowWatchedResult> => {
+      const markingWatched = !isFullyWatched;
+      await bulkUpdateTvShowWatchState(tvShowId, markingWatched);
+
+      await queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
+      await queryClient.invalidateQueries({
+        queryKey: ['watch-history', 'tv', tvShowId, 'season'],
+      });
+      invalidateWatchStateDependents(queryClient);
+
+      const progress = await queryClient.fetchQuery({
+        queryKey: tvShowProgressQueryKey(tvShowId),
+        queryFn: ({ signal }) => getTvShowProgress(tvShowId, signal),
+      });
+
+      const celebrated = markingWatched && progress.isCompleted === true;
+      if (celebrated) {
+        requestTvShowCompletionCelebration(tvShowId);
+      }
+
+      return { markingWatched, celebrated };
+    },
     onMutate: async (isFullyWatched) => {
       const tvKey = tvShowProgressQueryKey(tvShowId);
       await queryClient.cancelQueries({ queryKey: tvKey });
@@ -528,13 +558,6 @@ export function useToggleTvShowWatched(tvShowId: string) {
       if (context?.previousTvProgress) {
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
-      void queryClient.invalidateQueries({
-        queryKey: ['watch-history', 'tv', tvShowId, 'season'],
-      });
-      invalidateWatchStateDependents(queryClient);
     },
   });
 }

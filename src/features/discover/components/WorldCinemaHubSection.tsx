@@ -19,7 +19,7 @@ import { createWorldCinemaHref } from '@/features/discovery/utils/world-cinema-p
 import type { SearchResultItem } from '@/features/search/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { DiscoverPreviewSection } from './DiscoverPreviewSection';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 export function WorldCinemaHubSection() {
@@ -62,7 +62,7 @@ export function WorldCinemaHubSection() {
     <View style={styles.section} testID="world-cinema-hub">
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Ionicons name="earth-outline" size={18} color={colors.accent} />
+          <Ionicons name="earth-outline" size={18} color={premiumSheet.mutedGold} />
           <AppText variant="subtitle" accessibilityRole="header">
             {t('discover.worldCinemaHub.title')}
           </AppText>
@@ -76,7 +76,7 @@ export function WorldCinemaHubSection() {
           <AppText variant="bodySmall" style={styles.exploreLabel}>
             {t('discover.worldCinemaHub.seeAll')}
           </AppText>
-          <Ionicons name="chevron-forward" size={16} color={colors.accent} />
+          <Ionicons name="chevron-forward" size={16} color={premiumSheet.mutedGold} />
         </Pressable>
       </View>
 
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   exploreLabel: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   chipList: {
@@ -162,9 +162,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chip: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -179,13 +179,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   chipSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentTint12,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   chipLabelSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
+
   pressed: {
     opacity: 0.85,
   },

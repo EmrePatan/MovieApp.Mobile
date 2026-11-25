@@ -42,8 +42,15 @@ export interface InsightsV3MonthHighlight {
   total: number;
 }
 
+export interface InsightsV3DayActivity {
+  dayOfYear: number;
+  total: number;
+}
+
 export interface InsightsV3YourYear {
   months: InsightsV3MonthlyActivity[];
+  /** Per-day watch counts for the heatmap; absent on older backends. */
+  days?: InsightsV3DayActivity[];
   activeDays: number;
   peakMonth: InsightsV3MonthHighlight | null;
   favoriteWeekday: number | string | null;
@@ -132,6 +139,8 @@ export interface InsightsAchievement {
   targetValue: number;
   achieved: boolean;
   achievedAt: string | null;
+  /** Rung of the family ladder (1 = bronze … 5 = legend). Absent on older servers. */
+  tier?: number;
 }
 
 export interface InsightsV3Meta {
@@ -139,6 +148,29 @@ export interface InsightsV3Meta {
   generatedAtUtc: string;
   timeZone: string;
   year: number;
+}
+
+export interface InsightsCompareGenre {
+  genreId: string;
+  name: string;
+  myShare: number;
+  theirShare: number;
+}
+
+export interface InsightsCompareKeyword {
+  keywordId: string;
+  name: string;
+}
+
+export interface InsightsCompareResponse {
+  matchPercent: number;
+  sharedGenres: InsightsCompareGenre[];
+  myTopGenres: string[];
+  theirTopGenres: string[];
+  myWatchMinutes: number;
+  theirWatchMinutes: number;
+  keywordMatchPercent?: number | null;
+  sharedKeywords?: InsightsCompareKeyword[];
 }
 
 export interface InsightsV3Response {

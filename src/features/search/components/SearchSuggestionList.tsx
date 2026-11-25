@@ -11,6 +11,7 @@ import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { glass } from '@/theme/glass';
 
 const AUTOCOMPLETE_THUMB_WIDTH = 36;
 const AUTOCOMPLETE_THUMB_HEIGHT = 54;
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   suggestionsCard: {
     marginTop: spacing.xs,
     borderRadius: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     overflow: 'hidden',
     paddingBottom: spacing.md,
   },
@@ -216,15 +217,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     alignItems: 'center',
     borderRadius: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   leadingIcon: {
     width: AUTOCOMPLETE_THUMB_WIDTH,
     height: AUTOCOMPLETE_THUMB_HEIGHT,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.inputBackground,
+    backgroundColor: glass.panelInput,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -232,9 +233,9 @@ const styles = StyleSheet.create({
     width: AUTOCOMPLETE_PERSON_THUMB_SIZE,
     height: AUTOCOMPLETE_PERSON_THUMB_SIZE,
     borderRadius: AUTOCOMPLETE_PERSON_THUMB_SIZE / 2,
-    backgroundColor: colors.inputBackground,
+    backgroundColor: glass.panelInput,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -248,10 +249,10 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: glass.hairline,
   },
   pressed: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     opacity: interaction.pressedOpacity,
   },
   title: {

@@ -5,9 +5,12 @@ import { AppText } from '@/components/common/AppText';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import type { InsightsV3Ratings } from '../types';
 import { formatAverageStarRating } from '../utils/insights-format';
+import { authTypography } from '@/features/auth/auth-typography';
+import { InsightsCard } from './InsightsCard';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsRatingsSectionProps {
@@ -24,11 +27,12 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
       <InsightsSectionHeader
         title={t('insights.ratingsSection.title')}
         subtitle={t('insights.ratingsSection.subtitle')}
+        index={4}
       />
       {ratings.count === 0 ? (
         <InsightsEmptyState message={t('insights.ratingsSection.empty')} />
       ) : (
-        <View style={styles.card}>
+        <InsightsCard glow style={styles.card}>
           <View style={styles.summaryPanel}>
             <View style={styles.scoreColumn}>
               <AppText variant="hero" style={styles.average}>
@@ -76,7 +80,13 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
                     })}
                   >
                     <View style={styles.distributionTrack}>
-                      <View style={[styles.distributionFill, { height: `${heightPercent}%` }]} />
+                      <View
+                        style={[
+                          styles.distributionFill,
+                          { height: `${heightPercent}%` },
+                          item.count !== maxCount && styles.distributionFillMuted,
+                        ]}
+                      />
                     </View>
                     <AppText variant="caption" muted style={styles.starLabel}>
                       {item.stars}
@@ -86,7 +96,7 @@ export function InsightsRatingsSection({ ratings }: InsightsRatingsSectionProps)
               })}
             </View>
           ) : null}
-        </View>
+        </InsightsCard>
       )}
     </View>
   );
@@ -131,6 +141,7 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: spacing.md,
+    padding: spacing.md,
   },
   summaryPanel: {
     flexDirection: 'row',
@@ -143,9 +154,10 @@ const styles = StyleSheet.create({
   average: {
     color: colors.textPrimary,
     fontVariant: ['tabular-nums'],
-    fontWeight: '700',
-    fontSize: 40,
-    lineHeight: 44,
+    fontFamily: authTypography.wordmarkSemibold,
+    fontWeight: 'normal',
+    fontSize: 56,
+    lineHeight: 62,
   },
   starRow: {
     flexDirection: 'row',
@@ -192,7 +204,7 @@ const styles = StyleSheet.create({
     height: 80,
     justifyContent: 'flex-end',
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     overflow: 'hidden',
   },
   distributionFill: {
@@ -200,6 +212,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderTopLeftRadius: borderRadius.sm,
     borderTopRightRadius: borderRadius.sm,
+  },
+  distributionFillMuted: {
+    backgroundColor: colors.accentMuted,
+    opacity: 0.7,
   },
   starLabel: {
     fontVariant: ['tabular-nums'],

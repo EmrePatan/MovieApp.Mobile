@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
   FlatList,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   Pressable,
   StyleSheet,
   View,
@@ -17,6 +18,7 @@ import type { WatchlistSummaryResponse } from '@/features/watchlists/types';
 import { LibraryEmptyState } from './LibraryEmptyState';
 import { LibraryLoadingState } from './LibraryLoadingState';
 import { LibraryWatchlistCard } from './LibraryWatchlistCard';
+import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { colors } from '@/theme/colors';
@@ -24,11 +26,20 @@ import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LibraryWatchlistsOverviewProps {
-  listHeader: ReactNode;
   listRef?: RefObject<FlatList | null>;
+  /** Scrolls with the list (profile banner + controls). */
+  header?: ReactNode;
+  onScrollOffset?: (offsetY: number) => void;
+  /** Extra bottom padding so the last row clears the floating tab bar. */
+  bottomInset?: number;
 }
 
-export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchlistsOverviewProps) {
+export function LibraryWatchlistsOverview({
+  listRef,
+  header = null,
+  onScrollOffset,
+  bottomInset = 0,
+}: LibraryWatchlistsOverviewProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const watchlistsQuery = useWatchlists();
@@ -38,6 +49,14 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
     useFlatListScrollToTopControl(effectiveListRef);
 
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      onListScroll(event);
+      onScrollOffset?.(event.nativeEvent.contentOffset.y);
+    },
+    [onListScroll, onScrollOffset],
+  );
+
   const watchlists = useMemo(() => {
     const items = watchlistsQuery.data ?? [];
     return [...items].sort((a, b) => b.itemCount - a.itemCount);
@@ -45,7 +64,7 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   const handleOpenWatchlist = useCallback(
     (watchlistId: string) => {
-      router.push(`/watchlist/${watchlistId}`);
+      openLibraryStackScreen(router, `/watchlist/${watchlistId}`, '/(tabs)/library');
     },
     [router],
   );
@@ -53,7 +72,7 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   const handleCreatedWatchlist = useCallback(
     (watchlistId: string) => {
       setCreateModalVisible(false);
-      router.push(`/watchlist/${watchlistId}`);
+      openLibraryStackScreen(router, `/watchlist/${watchlistId}`, '/(tabs)/library');
     },
     [router],
   );
@@ -91,8 +110,8 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   if (watchlistsQuery.isLoading && watchlists.length === 0) {
     return (
-      <View style={styles.screen}>
-        {listHeader}
+      <View style={[styles.body, styles.padded]}>
+        {header}
         <LibraryLoadingState accessibilityLabel={t('common.loadingWatchlists')} />
         {createModal}
       </View>
@@ -101,8 +120,8 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   if (watchlistsQuery.isError && watchlists.length === 0) {
     return (
-      <View style={styles.screen}>
-        {listHeader}
+      <View style={[styles.body, styles.padded]}>
+        {header}
         <View style={styles.centered}>
           <ErrorView
             message={t('library.watchlistsOverview.loadError')}
@@ -116,8 +135,8 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 
   if (watchlists.length === 0) {
     return (
-      <View style={styles.screen}>
-        {listHeader}
+      <View style={[styles.body, styles.padded]}>
+        {header}
         <LibraryEmptyState
           icon="bookmark"
           title={t('library.watchlistsOverview.emptyTitle')}
@@ -131,21 +150,17 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.body}>
       <FlatList
         ref={effectiveListRef}
         testID="library-watchlists-overview"
         data={watchlists}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            {listHeader}
-          </View>
-        }
+        ListHeaderComponent={header ? <View>{header}</View> : null}
         ListFooterComponent={createListFooter}
-        contentContainerStyle={styles.listContent}
-        onScroll={onListScroll}
+        contentContainerStyle={[styles.listContent, { paddingBottom: spacing.xxl + bottomInset }]}
+        onScroll={handleScroll}
         scrollEventThrottle={scrollEventThrottle}
         initialNumToRender={layout.verticalList.initialNumToRender}
         maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch}
@@ -158,12 +173,11 @@ export function LibraryWatchlistsOverview({ listHeader, listRef }: LibraryWatchl
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  body: {
     flex: 1,
   },
-  listHeader: {
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
+  padded: {
+    paddingHorizontal: spacing.lg,
   },
   listContent: {
     flexGrow: 1,
@@ -174,7 +188,6 @@ const styles = StyleSheet.create({
   centered: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
   },
   newListAction: {
     flexDirection: 'row',

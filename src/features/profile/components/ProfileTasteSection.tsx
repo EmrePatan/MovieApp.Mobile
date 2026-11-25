@@ -8,6 +8,7 @@ import { ProfileBarRow } from './ProfileBarRow';
 import { ProfileEmptyInsight } from './ProfileEmptyInsight';
 import { ProfileSectionHeader } from './ProfileSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ProfileTasteSectionProps {
@@ -77,16 +78,16 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     padding: spacing.sm,
     gap: spacing.sm,
   },
   insight: {
     paddingTop: spacing.xs,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: glass.hairline,
   },
 });

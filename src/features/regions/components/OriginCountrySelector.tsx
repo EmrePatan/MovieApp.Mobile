@@ -6,7 +6,7 @@ import {
   getOriginCountryLabel,
   getOriginCountryOptions,
 } from '@/features/discovery/world-cinema-collections';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface OriginCountrySelectorProps {
@@ -44,7 +44,7 @@ export function OriginCountrySelector({
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={colors.textSecondary}
+          color={premiumSheet.textSecondary}
         />
       </Pressable>
       {expanded ? (
@@ -69,7 +69,7 @@ export function OriginCountrySelector({
                   {option.label}
                 </AppText>
                 {selected ? (
-                  <Ionicons name="checkmark" size={16} color={colors.accent} />
+                  <Ionicons name="checkmark" size={16} color={premiumSheet.mutedGold} />
                 ) : null}
               </Pressable>
             );
@@ -89,10 +89,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: premiumSheet.rowBorder,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    backgroundColor: premiumSheet.secondary,
   },
   options: {
     gap: spacing.xs,
@@ -102,20 +103,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: premiumSheet.rowBorder,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    backgroundColor: premiumSheet.secondary,
   },
   optionSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   optionLabelSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   pressed: {
     opacity: 0.85,
   },
 });
+

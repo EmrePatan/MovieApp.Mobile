@@ -12,23 +12,25 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
-import { AppBottomSheetChrome } from '@/components/layout/AppBottomSheet';
 import { useCreateWatchlist, useWatchlistItemMutation } from '../hooks/useWatchlistMutations';
 import { useWatchlistMembership, useWatchlists } from '../hooks/useWatchlists';
 import type { WatchlistContentType } from '../types';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { typography } from '@/theme/typography';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 import {
   getVisibleWatchlists,
   shouldCollapseWatchlistPicker,
 } from '../utils/watchlist-picker-collapse';
+
+const sheet = premiumSheet;
 
 interface WatchlistPickerModalProps {
   visible: boolean;
@@ -97,24 +99,6 @@ function WatchlistPickerBody({
   );
   const canCollapseLists = shouldCollapseWatchlistPicker(sortedWatchlists.length);
   const visibleWatchlists = getVisibleWatchlists(sortedWatchlists, listsExpanded);
-  const handleToggleItem = (watchlistId: string, isInWatchlist: boolean) => {
-    setPendingWatchlistId(watchlistId);
-    watchlistItemMutation.mutate(
-      { watchlistId, isInWatchlist },
-      {
-        onSuccess: () => {
-          setErrorMessage(null);
-          void refetchMembership();
-        },
-        onError: () => {
-          setErrorMessage(t('watchlists.picker.updateError'));
-        },
-        onSettled: () => {
-          setPendingWatchlistId(null);
-        },
-      },
-    );
-  };
 
   const dismissCreateKeyboard = useCallback(() => {
     createInputRef.current?.blur();
@@ -125,6 +109,29 @@ function WatchlistPickerBody({
     dismissCreateKeyboard();
     onClose();
   }, [dismissCreateKeyboard, onClose]);
+
+  const handleToggleItem = (watchlistId: string, isInWatchlist: boolean) => {
+    const isAdding = !isInWatchlist;
+    setPendingWatchlistId(watchlistId);
+    watchlistItemMutation.mutate(
+      { watchlistId, isInWatchlist },
+      {
+        onSuccess: () => {
+          setErrorMessage(null);
+          void refetchMembership();
+          if (isAdding) {
+            handleClose();
+          }
+        },
+        onError: () => {
+          setErrorMessage(t('watchlists.picker.updateError'));
+        },
+        onSettled: () => {
+          setPendingWatchlistId(null);
+        },
+      },
+    );
+  };
 
   const handleCreateFocus = useCallback(() => {
     setIsCreateFocused(true);
@@ -138,7 +145,7 @@ function WatchlistPickerBody({
 
     dismissCreateKeyboard();
 
-    createWatchlistMutation.mutate(trimmedWatchlistName, {
+    createWatchlistMutation.mutate({ name: trimmedWatchlistName }, {
       onSuccess: (created) => {
         setNewWatchlistName('');
         setErrorMessage(null);
@@ -149,6 +156,7 @@ function WatchlistPickerBody({
               setErrorMessage(null);
               void refetch();
               void refetchMembership();
+              handleClose();
             },
             onError: () => {
               setErrorMessage(t('watchlists.picker.updateError'));
@@ -170,55 +178,53 @@ function WatchlistPickerBody({
     watchlistsToRender: typeof sortedWatchlists,
   ) => (
     <View style={styles.listContainer}>
-      {watchlistsToRender.map((watchlist, index) => {
+      {watchlistsToRender.map((watchlist) => {
         const isInWatchlist = membership[watchlist.id] ?? false;
         const rowBusy = pendingWatchlistId === watchlist.id && watchlistItemMutation.isPending;
 
         return (
-          <View key={watchlist.id}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                isInWatchlist
-                  ? t('common.removeFromNamedWatchlist', { name: watchlist.name })
-                  : t('common.addToNamedWatchlist', { name: watchlist.name })
-              }
-              accessibilityState={{ selected: isInWatchlist, disabled: isBusy }}
-              disabled={isBusy}
-              onPress={() => handleToggleItem(watchlist.id, isInWatchlist)}
-              style={({ pressed }) => [
-                styles.row,
-                isInWatchlist && styles.rowSelected,
-                pressed && !isBusy && styles.pressed,
-              ]}
-            >
-              <View style={[styles.rowIcon, isInWatchlist && styles.rowIconSelected]}>
-                <Ionicons
-                  name={isInWatchlist ? 'bookmark' : 'bookmark-outline'}
-                  size={18}
-                  color={isInWatchlist ? colors.accent : colors.textMuted}
-                />
-              </View>
-              <View style={styles.rowMeta}>
-                <AppText variant="bodySmall" style={styles.rowTitle} numberOfLines={1}>
-                  {watchlist.name}
-                </AppText>
-                <AppText variant="caption" muted>
-                  {t('watchlists.picker.itemCount', { count: watchlist.itemCount })}
-                </AppText>
-              </View>
-              {rowBusy ? (
-                <ActivityIndicator color={colors.accent} size="small" />
-              ) : (
-                <Ionicons
-                  name={isInWatchlist ? 'checkmark-circle' : 'add-circle-outline'}
-                  size={22}
-                  color={isInWatchlist ? colors.accent : colors.textMuted}
-                />
-              )}
-            </Pressable>
-            {index < watchlistsToRender.length - 1 ? <View style={styles.rowDivider} /> : null}
-          </View>
+          <Pressable
+            key={watchlist.id}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isInWatchlist
+                ? t('common.removeFromNamedWatchlist', { name: watchlist.name })
+                : t('common.addToNamedWatchlist', { name: watchlist.name })
+            }
+            accessibilityState={{ selected: isInWatchlist, disabled: isBusy }}
+            disabled={isBusy}
+            onPress={() => handleToggleItem(watchlist.id, isInWatchlist)}
+            style={({ pressed }) => [
+              styles.row,
+              isInWatchlist && styles.rowSelected,
+              pressed && !isBusy && styles.pressed,
+            ]}
+          >
+            <View style={[styles.rowIcon, isInWatchlist && styles.rowIconSelected]}>
+              <Ionicons
+                name={isInWatchlist ? 'bookmark' : 'bookmark-outline'}
+                size={18}
+                color={isInWatchlist ? sheet.mutedGold : sheet.textSecondary}
+              />
+            </View>
+            <View style={styles.rowMeta}>
+              <AppText variant="bodySmall" style={styles.rowTitle} numberOfLines={1}>
+                {watchlist.name}
+              </AppText>
+              <AppText variant="caption" style={styles.rowSubtitle} numberOfLines={1}>
+                {t('watchlists.picker.itemCount', { count: watchlist.itemCount })}
+              </AppText>
+            </View>
+            {rowBusy ? (
+              <ActivityIndicator color={sheet.mutedGold} size="small" />
+            ) : (
+              <Ionicons
+                name={isInWatchlist ? 'checkmark-circle' : 'add-circle-outline'}
+                size={20}
+                color={isInWatchlist ? sheet.mutedGold : sheet.textSecondary}
+              />
+            )}
+          </Pressable>
         );
       })}
     </View>
@@ -226,11 +232,11 @@ function WatchlistPickerBody({
 
   const listContent = isLoading ? (
     <View style={styles.stateBlock}>
-      <ActivityIndicator color={colors.accent} />
+      <ActivityIndicator color={sheet.mutedGold} />
     </View>
   ) : isError ? (
     <View style={styles.stateBlock}>
-      <AppText variant="caption" muted center>
+      <AppText variant="caption" style={styles.stateMuted} center>
         {t('library.watchlistsOverview.loadError')}
       </AppText>
       <AppButton title={t('common.retry')} variant="ghost" onPress={() => void refetch()} />
@@ -238,12 +244,12 @@ function WatchlistPickerBody({
   ) : sortedWatchlists.length === 0 ? (
     <View style={styles.stateBlock} accessibilityRole="text">
       <View style={styles.emptyIcon}>
-        <Ionicons name="albums-outline" size={22} color={colors.textMuted} />
+        <Ionicons name="albums-outline" size={22} color={sheet.textSecondary} />
       </View>
       <AppText variant="bodySmall" style={styles.emptyTitle}>
         {t('library.watchlistsOverview.emptyTitle')}
       </AppText>
-      <AppText variant="caption" muted center>
+      <AppText variant="caption" style={styles.stateMuted} center>
         {t('library.watchlistsOverview.emptyMessage')}
       </AppText>
     </View>
@@ -265,21 +271,31 @@ function WatchlistPickerBody({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.keyboardAvoidRoot}
     >
-      <AppBottomSheetChrome
-        onClose={handleClose}
-        title={t('common.addToWatchlist')}
-        align="stretch"
-        testID="watchlist-picker-sheet"
-      >
-        {errorMessage ? (
-          <FeedbackMessage
-            message={errorMessage}
-            tone="error"
-            onDismiss={() => setErrorMessage(null)}
-          />
-        ) : null}
+      <View style={styles.overlay} testID="watchlist-picker-sheet">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.cancel')}
+          style={styles.backdrop}
+          onPress={handleClose}
+        />
+        <SwipeSheet onClose={handleClose} style={styles.sheet} bottomInset>
+          <GlassSheetLayer />
+          <SheetHandle />
 
-        <View style={styles.listsSection}>
+          <View style={styles.body}>
+            <AppText variant="title" style={styles.sheetTitle}>
+              {t('common.addToWatchlist')}
+            </AppText>
+
+            {errorMessage ? (
+              <FeedbackMessage
+                message={errorMessage}
+                tone="error"
+                onDismiss={() => setErrorMessage(null)}
+              />
+            ) : null}
+
+            <View style={styles.listsSection}>
               <AppText variant="caption" style={styles.sectionLabel}>
                 {t('watchlists.selector.yourWatchlists')}
               </AppText>
@@ -303,7 +319,7 @@ function WatchlistPickerBody({
                   <Ionicons
                     name={listsExpanded ? 'chevron-up' : 'chevron-down'}
                     size={14}
-                    color={colors.textSecondary}
+                    color={sheet.textSecondary}
                   />
                 </Pressable>
               ) : null}
@@ -319,14 +335,14 @@ function WatchlistPickerBody({
                   isCreateFocused && styles.createComposerFocused,
                 ]}
               >
-                <Ionicons name="add" size={16} color={colors.accent} />
+                <Ionicons name="add" size={16} color={sheet.mutedGold} />
                 <TextInput
                   ref={createInputRef}
                   accessibilityLabel={t('common.newWatchlist')}
                   value={newWatchlistName}
                   onChangeText={setNewWatchlistName}
                   placeholder={t('watchlists.picker.listNamePlaceholder')}
-                  placeholderTextColor={colors.textMuted}
+                  placeholderTextColor={sheet.textSecondary}
                   style={styles.createInput}
                   maxLength={100}
                   autoCorrect={false}
@@ -355,7 +371,7 @@ function WatchlistPickerBody({
                   ]}
                 >
                   {createWatchlistMutation.isPending ? (
-                    <ActivityIndicator color={colors.textPrimary} size="small" />
+                    <ActivityIndicator color={sheet.textPrimary} size="small" />
                   ) : (
                     <AppText
                       variant="caption"
@@ -369,8 +385,10 @@ function WatchlistPickerBody({
                   )}
                 </Pressable>
               </View>
-        </View>
-      </AppBottomSheetChrome>
+            </View>
+          </View>
+        </SwipeSheet>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -380,8 +398,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
   },
+  overlay: premiumSheetChrome.overlay,
+  backdrop: premiumSheetChrome.backdrop,
+  sheet: {
+    ...premiumSheetChrome.sheet,
+  },
+  handle: premiumSheetChrome.handle,
+  body: {
+    paddingTop: 18,
+    paddingBottom: 20,
+    gap: 16,
+  },
+  sheetTitle: premiumSheetChrome.title,
   listsSection: {
-    gap: spacing.xs,
+    gap: 10,
   },
   expandedListScroll: {
     maxHeight: 220,
@@ -390,134 +420,139 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: 4,
     minHeight: 36,
     paddingVertical: 2,
   },
   expandListsLabel: {
-    color: colors.textSecondary,
+    color: sheet.textSecondary,
     fontWeight: '500',
   },
   createFooter: {
-    gap: spacing.xs,
-    paddingTop: spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    gap: 10,
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: sheet.border,
   },
   sectionLabel: {
-    color: colors.textMuted,
+    color: sheet.textSecondary,
     fontWeight: '600',
     letterSpacing: 0.3,
     textTransform: 'uppercase',
+    fontSize: 11,
   },
   createComposer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    paddingLeft: spacing.sm,
-    paddingRight: spacing.xs,
-    minHeight: 40,
+    gap: 8,
+    backgroundColor: sheet.elevated,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: sheet.border,
+    paddingLeft: 12,
+    paddingRight: 6,
+    minHeight: 48,
   },
   createComposerFocused: {
-    borderColor: colors.accentTint18,
-    backgroundColor: colors.inputBackground,
+    borderColor: sheet.goldBorder,
   },
   createInput: {
     flex: 1,
-    color: colors.textPrimary,
+    color: sheet.textPrimary,
     fontSize: typography.bodySmall.fontSize,
     lineHeight: 20,
     paddingVertical: 0,
     paddingHorizontal: 0,
   },
   createAction: {
-    minWidth: 48,
-    minHeight: 30,
-    borderRadius: borderRadius.full,
+    minWidth: 56,
+    minHeight: 34,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
+    paddingHorizontal: 12,
+    backgroundColor: sheet.secondary,
   },
   createActionReady: {
-    backgroundColor: colors.accent,
+    backgroundColor: 'rgba(210, 164, 81, 0.18)',
+    borderWidth: 1,
+    borderColor: sheet.goldBorder,
   },
   createActionLabel: {
-    color: colors.textMuted,
+    color: sheet.textSecondary,
     fontWeight: '600',
     letterSpacing: 0.2,
   },
   createActionLabelReady: {
-    color: colors.textPrimary,
+    color: sheet.mutedGold,
   },
   listContainer: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    overflow: 'hidden',
+    gap: 8,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    minHeight: interaction.touchTarget,
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    minHeight: 64,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#28262C',
+    backgroundColor: sheet.secondary,
   },
   rowSelected: {
-    backgroundColor: colors.accentTint12,
+    borderColor: sheet.goldBorder,
+    backgroundColor: sheet.elevated,
   },
   rowIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: sheet.iconSurface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rowIconSelected: {
-    backgroundColor: colors.accentTint18,
+    backgroundColor: 'rgba(210, 164, 81, 0.12)',
   },
   rowMeta: {
     flex: 1,
     gap: 2,
+    minWidth: 0,
   },
   rowTitle: {
     fontWeight: '600',
-    color: colors.textPrimary,
+    color: sheet.textPrimary,
   },
-  rowDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-    marginLeft: spacing.sm + 28 + spacing.xs,
+  rowSubtitle: {
+    color: sheet.textSecondary,
   },
   stateBlock: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    gap: 8,
+    paddingVertical: 20,
+    paddingHorizontal: 14,
+    backgroundColor: sheet.secondary,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: sheet.border,
   },
   emptyIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceElevated,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: sheet.iconSurface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyTitle: {
-    color: colors.textPrimary,
+    color: sheet.textPrimary,
     fontWeight: '600',
+  },
+  stateMuted: {
+    color: sheet.textSecondary,
   },
   pressed: {
     opacity: interaction.pressedOpacity,

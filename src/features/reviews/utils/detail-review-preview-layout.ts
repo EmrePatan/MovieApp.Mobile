@@ -2,12 +2,15 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 export const DETAIL_REVIEW_PREVIEW_MAX_ITEMS = 5;
+/** Text-only preview cards can show a short tease. */
 export const DETAIL_REVIEW_PREVIEW_LINE_COUNT = 3;
+/** When a GIF/photo thumb is present, keep a single line so the card never overflows. */
+export const DETAIL_REVIEW_PREVIEW_LINE_COUNT_WITH_MEDIA = 1;
 
 const CARD_WIDTH_MIN = 280;
 const CARD_WIDTH_MAX = 320;
-const CARD_HEIGHT_MIN = 140;
-const CARD_HEIGHT_MAX = 160;
+const CARD_HEIGHT_MIN = 148;
+const CARD_HEIGHT_MAX = 168;
 const CARD_WIDTH_SCREEN_RATIO = 0.84;
 
 /** Extra trailing space so the next card peeks on the right edge. */

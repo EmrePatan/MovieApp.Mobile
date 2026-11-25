@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   StyleSheet,
   View,
 } from 'react-native';
@@ -21,10 +22,13 @@ import { useRecentWatchHistory } from '@/features/watch-history/hooks/useRecentW
 import type { RecentWatchHistoryItemResponse } from '@/features/watch-history/types';
 import { openDetailFromLibraryStack } from '@/features/details/shared/navigation/catalog-detail-navigation';
 import { buildRecentHistoryRoute } from '@/features/watch-history/utils/history-navigation';
+import { flattenRecentWatchHistoryPages } from '@/features/watch-history/utils/flatten-recent-watch-history-pages';
 import {
-  flattenRecentWatchHistoryPages,
-  recentWatchHistoryItemKey,
-} from '@/features/watch-history/utils/flatten-recent-watch-history-pages';
+  groupRecentWatchHistory,
+  type WatchHistoryRow,
+} from '@/features/watch-history/utils/group-recent-watch-history';
+import { RecentHistoryGroupCard } from '@/features/watch-history/components/RecentHistoryGroupCard';
+import { buildTvDetailRoute } from '@/features/details/shared/routes';
 import { shouldRequestNextInfinitePage } from '@/utils/should-request-next-infinite-page';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -71,19 +75,35 @@ export default function WatchHistoryScreen() {
     void historyQuery.refetch();
   }, [historyQuery]);
 
+  const rows = useMemo(() => groupRecentWatchHistory(items), [items]);
+
+  const handleOpenShow = useCallback(
+    (tvShowId: string) => {
+      openDetailFromLibraryStack(router, buildTvDetailRoute(tvShowId), 'watch-history');
+    },
+    [router],
+  );
+
   const renderItem = useCallback(
-    ({ item }: { item: RecentWatchHistoryItemResponse }) => (
-      <RecentHistoryCard item={item} onPress={handleItemPress} />
-    ),
-    [handleItemPress],
+    ({ item }: { item: WatchHistoryRow }) =>
+      item.kind === 'show' ? (
+        <RecentHistoryGroupCard
+          group={item}
+          onOpenEpisode={handleItemPress}
+          onOpenShow={handleOpenShow}
+        />
+      ) : (
+        <RecentHistoryCard item={item.item} onPress={handleItemPress} />
+      ),
+    [handleItemPress, handleOpenShow],
   );
 
   const listHeader = (
     <View style={styles.header}>
       <DetailBackButton />
-      <AppText variant="title">{t('common.watched')}</AppText>
+      <AppText variant="title">{t('extras.watchHistoryTitle')}</AppText>
       <AppText variant="bodySmall" muted>
-        {t('library.empty.watchedMessage')}
+        {t('extras.watchHistorySubtitle')}
       </AppText>
     </View>
   );
@@ -134,8 +154,8 @@ export default function WatchHistoryScreen() {
       <View style={styles.listHost}>
       <FlatList
         ref={listRef}
-        data={items}
-        keyExtractor={recentWatchHistoryItemKey}
+        data={rows}
+        keyExtractor={(row) => row.key}
         renderItem={renderItem}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
@@ -151,11 +171,14 @@ export default function WatchHistoryScreen() {
             </View>
           ) : null
         }
+        // RN-web renders an empty list when a RefreshControl is attached.
         refreshControl={
-          <MovieAppRefreshControl
-            refreshing={historyQuery.isRefetching && !historyQuery.isFetchingNextPage}
-            onRefresh={handleRefresh}
-          />
+          Platform.OS === 'web' ? undefined : (
+            <MovieAppRefreshControl
+              refreshing={historyQuery.isRefetching && !historyQuery.isFetchingNextPage}
+              onRefresh={handleRefresh}
+            />
+          )
         }
         contentContainerStyle={styles.listContent}
         onEndReached={handleLoadMore}

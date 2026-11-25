@@ -11,6 +11,7 @@ import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
 import { borderRadius, spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 const DEFAULT_BLOCKING_ICON_GLYPH_SIZE = 32;
 const FORCED_UPDATE_ICON_GLYPH_SIZE = 36;
@@ -157,9 +158,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
   },
   body: {
     maxWidth: 320,

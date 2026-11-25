@@ -29,6 +29,7 @@ function invalidateProfileQueries(queryClient: ReturnType<typeof useQueryClient>
   void queryClient.invalidateQueries({ queryKey: currentProfileQueryKey() });
   void queryClient.invalidateQueries({ queryKey: profileStatisticsQueryKey() });
   void queryClient.invalidateQueries({ queryKey: ['reviews'] });
+  void queryClient.invalidateQueries({ queryKey: ['social', 'profile'] });
 }
 
 export function useUpdateProfileMutation() {
@@ -130,7 +131,7 @@ export function useCreatePasswordMutation() {
   return useMutation({
     mutationFn: (payload: CreatePasswordRequest) => createPassword(payload),
     onSuccess: async (response) => {
-      queryClient.setQueryData(currentProfileQueryKey(), response.user);
+      // Auth payload omits bio/socialLinks — refresh profile instead of seeding a partial cache.
       await updateSession(response.accessToken, response.refreshToken, response.user);
       invalidateProfileQueries(queryClient);
     },
@@ -144,7 +145,7 @@ export function useChangePasswordMutation() {
   return useMutation({
     mutationFn: (payload: ChangePasswordRequest) => changePassword(payload),
     onSuccess: async (response) => {
-      queryClient.setQueryData(currentProfileQueryKey(), response.user);
+      // Auth payload omits bio/socialLinks — refresh profile instead of seeding a partial cache.
       await updateSession(response.accessToken, response.refreshToken, response.user);
       invalidateProfileQueries(queryClient);
     },

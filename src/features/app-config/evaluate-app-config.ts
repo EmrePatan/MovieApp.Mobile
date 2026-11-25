@@ -1,6 +1,11 @@
+import { getAppEnvironment } from '@/api/environment';
 import { Platform } from 'react-native';
 import { resolveStoreUrlForPlatform } from './store-urls';
 import type { AppConfigEvaluation, RemoteAppConfig } from './types';
+
+function shouldEnforceForcedUpdate(): boolean {
+  return getAppEnvironment() !== 'development';
+}
 
 function getPlatformVersions(config: RemoteAppConfig) {
   return Platform.OS === 'ios' ? config.versions.ios : config.versions.android;
@@ -30,7 +35,7 @@ export function evaluateAppConfig(
 
   const { minimumBuild, latestBuild } = getPlatformVersions(config);
 
-  if (installedBuild < minimumBuild) {
+  if (installedBuild < minimumBuild && shouldEnforceForcedUpdate()) {
     return {
       blocking: 'forced',
       updatePrompt: 'none',
@@ -66,7 +71,7 @@ export function evaluateCachedBlockingOnly(
   }
 
   const { minimumBuild } = getPlatformVersions(config);
-  if (installedBuild < minimumBuild) {
+  if (installedBuild < minimumBuild && shouldEnforceForcedUpdate()) {
     return 'forced';
   }
 

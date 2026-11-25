@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/storage/secure-storage';
 
 const ACCESS_TOKEN_KEY = 'movieapp.access_token';
 const REFRESH_TOKEN_KEY = 'movieapp.refresh_token';

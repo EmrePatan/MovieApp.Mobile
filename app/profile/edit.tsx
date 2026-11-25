@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { isApiError } from '@/api/errors';
@@ -9,8 +9,17 @@ import { AppInput } from '@/components/inputs/AppInput';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { Screen } from '@/components/common/Screen';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
+import { ProfileAvatarEditor } from '@/features/profile/components/ProfileAvatarEditor';
+import { ProfileCoverEditor } from '@/features/profile/components/ProfileCoverEditor';
+import { ProfileSocialLinksEditor } from '@/features/profile/components/ProfileSocialLinksEditor';
 import { useCurrentProfile } from '@/features/profile/hooks/useCurrentProfile';
 import { useUpdateProfileMutation } from '@/features/profile/hooks/useProfileMutations';
+import type { ProfileSocialPlatform } from '@/features/profile/types';
+import {
+  PROFILE_BIO_MAX,
+  serializeSocialLinksForUpdate,
+  socialLinksToDraft,
+} from '@/features/profile/utils/profile-social-links';
 import {
   hasProfileValidationErrors,
   validateUpdateProfile,
@@ -23,16 +32,36 @@ export default function EditProfileScreen() {
   const { t } = useTranslation();
   const profileQuery = useCurrentProfile();
   const updateProfile = useUpdateProfileMutation();
-  const profileDisplayName = profileQuery.data?.displayName ?? '';
+  const profile = profileQuery.data;
+
+  const profileDisplayName = profile?.displayName ?? '';
+  const profileBio = profile?.bio ?? '';
+  const profileLinksDraft = useMemo(
+    () => socialLinksToDraft(profile?.socialLinks),
+    [profile?.socialLinks],
+  );
+
   const [displayNameDraft, setDisplayNameDraft] = useState<string | null>(null);
+  const [bioDraft, setBioDraft] = useState<string | null>(null);
+  const [linksDraft, setLinksDraft] = useState<Record<ProfileSocialPlatform, string> | null>(null);
   const displayName = displayNameDraft ?? profileDisplayName;
+  const bio = bioDraft ?? profileBio;
+  const socialLinks = linksDraft ?? profileLinksDraft;
+
   const [fieldErrors, setFieldErrors] = useState<UpdateProfileFormErrors>({});
   const [feedback, setFeedback] = useState<{ message: string; tone: 'success' | 'error' } | null>(
     null,
   );
 
+  const handleLinkChange = (platform: ProfileSocialPlatform, value: string) => {
+    setLinksDraft((prev) => ({
+      ...(prev ?? profileLinksDraft),
+      [platform]: value,
+    }));
+  };
+
   const handleSubmit = () => {
-    const errors = validateUpdateProfile(displayName);
+    const errors = validateUpdateProfile(displayName, bio, socialLinks);
     setFieldErrors(errors);
 
     if (hasProfileValidationErrors(errors)) {
@@ -40,11 +69,19 @@ export default function EditProfileScreen() {
     }
 
     updateProfile.mutate(
-      { displayName: displayName.trim() },
+      {
+        displayName: displayName.trim(),
+        bio: bio.trim() ? bio.trim() : null,
+        socialLinks: serializeSocialLinksForUpdate(socialLinks),
+      },
       {
         onSuccess: () => {
-          setFeedback({ message: t('profile.profileUpdated'), tone: 'success' });
-          setTimeout(() => router.back(), 800);
+          // No success banner: returning to the updated profile is the confirmation.
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/(tabs)/profile');
+          }
         },
         onError: (error) => {
           setFeedback({
@@ -59,11 +96,10 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <Screen scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
-      >
+    // The scroll view lifts its own content above the keyboard. A KeyboardAvoidingView inside a
+    // ScrollView keeps adding padding while a field is focused, so the page scrolled forever.
+    <Screen scrollable keyboardAware>
+      <View style={styles.container}>
         <DetailBackButton />
         <AppText variant="title">{t('profile.editProfileTitle')}</AppText>
         <AppText variant="bodySmall" muted>
@@ -76,6 +112,9 @@ export default function EditProfileScreen() {
           onDismiss={() => setFeedback(null)}
         />
 
+        <ProfileCoverEditor />
+        <ProfileAvatarEditor />
+
         <View style={styles.form}>
           <AppInput
             label={t('auth.displayName')}
@@ -85,6 +124,28 @@ export default function EditProfileScreen() {
             maxLength={100}
             autoCapitalize="words"
           />
+
+          <AppInput
+            label={t('profile.profileAbout')}
+            value={bio}
+            onChangeText={setBioDraft}
+            error={fieldErrors.bio}
+            maxLength={PROFILE_BIO_MAX}
+            multiline
+            textAlignVertical="top"
+            placeholder={t('profile.profileAboutPlaceholder')}
+            style={styles.bioInput}
+          />
+          <AppText variant="caption" muted style={styles.bioCounter} testID="profile-bio-counter">
+            {`${bio.length}/${PROFILE_BIO_MAX}`}
+          </AppText>
+
+          <ProfileSocialLinksEditor
+            values={socialLinks}
+            errors={fieldErrors.socialLinks}
+            onChange={handleLinkChange}
+          />
+
           <AppButton
             title={t('common.saveChanges')}
             loading={updateProfile.isPending}
@@ -92,7 +153,7 @@ export default function EditProfileScreen() {
             onPress={handleSubmit}
           />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }
@@ -105,5 +166,14 @@ const styles = StyleSheet.create({
   form: {
     gap: spacing.md,
     marginTop: spacing.sm,
+  },
+  bioCounter: {
+    alignSelf: 'flex-end',
+    marginTop: -spacing.sm,
+  },
+  bioInput: {
+    minHeight: 96,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
   },
 });

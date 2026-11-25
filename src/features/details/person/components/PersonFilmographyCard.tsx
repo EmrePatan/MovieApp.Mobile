@@ -8,6 +8,7 @@ import { PosterImage } from '@/components/common/PosterImage';
 import type { PersonFilmographyEntry } from '../types';
 import { formatCatalogYear } from '@/utils/format';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
 import { layout } from '@/theme/layout';
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
     minHeight: layout.touchTarget,

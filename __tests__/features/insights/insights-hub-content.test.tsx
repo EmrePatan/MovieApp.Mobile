@@ -7,6 +7,10 @@ import { insightsV3Fixture } from '@/features/insights/utils/insights-fixtures';
 
 const mockPush = jest.fn();
 
+jest.mock('@/features/navigation/useTabBarOverlayInset', () => ({
+  useTabBarOverlayInset: () => 0,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
@@ -89,7 +93,7 @@ describe('InsightsHubContent', () => {
     expect(screen.getByText('Time in Stories')).toBeTruthy();
     expect(screen.getByText('Your Ratings')).toBeTruthy();
     expect(screen.getByText('Your Era')).toBeTruthy();
-    expect(screen.getByText('Your Records')).toBeTruthy();
+    expect(screen.queryByText('Your Records')).toBeNull();
     expect(screen.getByText('Achievements')).toBeTruthy();
   });
 

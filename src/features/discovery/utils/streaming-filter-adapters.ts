@@ -40,7 +40,7 @@ export function streamingStateToFilterDraft(state: StreamingDiscoverState): Cata
     originalLanguage: state.originalLanguage,
     originCountry: state.originCountry,
     keywordIds: state.keywordIds,
-    keywordLabels: {},
+    keywordLabels: state.keywordLabels ?? {},
     tvStatuses: state.mediaType === 'tv' ? state.tvStatuses : [],
   };
 }
@@ -65,6 +65,7 @@ export function filterDraftToStreamingPatch(
     originalLanguage: draft.originalLanguage,
     originCountry: draft.originCountry,
     keywordIds: draft.keywordIds,
+    keywordLabels: draft.keywordLabels,
     tvStatuses: mediaType === 'tv' ? draft.tvStatuses : [],
   };
 }

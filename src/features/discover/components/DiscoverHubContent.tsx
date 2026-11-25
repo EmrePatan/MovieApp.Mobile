@@ -24,8 +24,10 @@ import { scrollScrollViewToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { useAppConfig } from '@/features/app-config/hooks/useAppConfig';
 import type { DiscoveryBrowseMode } from '@/features/discovery/types';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 export function DiscoverHubContent() {
+  const tabBarInset = useTabBarOverlayInset();
   const { t } = useTranslation();
   const headerLayout = useHomeHeaderLayout();
   const { config } = useAppConfig();
@@ -88,7 +90,10 @@ export function DiscoverHubContent() {
       style={styles.scroll}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: headerLayout.heroOffsetCompensation + spacing.sm },
+        {
+          paddingTop: headerLayout.heroOffsetCompensation + spacing.sm,
+          paddingBottom: spacing.xxl + tabBarInset,
+        },
       ]}
       showsVerticalScrollIndicator={false}
     >

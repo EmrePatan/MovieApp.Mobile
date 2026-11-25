@@ -1,11 +1,14 @@
 import React from 'react';
 import { Image } from 'react-native';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent } from '@testing-library/react-native';
+import { renderWithProviders as render } from '../../utils/render-with-providers';
 import { HomeContentCard } from '@/features/home/components/HomeContentCard';
 import { HomeTypeFilterControl } from '@/features/home/components/HomeTypeFilterControl';
 import { HomeEmptyState } from '@/features/home/components/HomeEmptyState';
 import { HomeSection } from '@/features/home/components/HomeSection';
 import type { HomeSection as HomeSectionModel } from '@/features/home/types';
+
+jest.mock('@/auth/useAuth', () => ({ useAuth: jest.fn(() => ({ isAuthenticated: true, logout: jest.fn() })) }));
 
 describe('Home UI components', () => {
   it('renders the type filter control', () => {
@@ -94,7 +97,7 @@ describe('Home UI components', () => {
     expect(screen.getByText('Trending Now')).toBeTruthy();
     expect(screen.getByText('See All')).toBeTruthy();
     expect(screen.getByText('Interstellar')).toBeTruthy();
-    expect(screen.getByText('Movie · 2014 · ★ 8.4')).toBeTruthy();
+    expect(screen.getByText('Movie · 2014')).toBeTruthy();
   });
 
   it('does not render empty sections', () => {
@@ -142,7 +145,7 @@ describe('Home UI components', () => {
     );
 
     expect(screen.getByText('Breaking Bad')).toBeTruthy();
-    expect(screen.getByText('TV · 2008 · ★ 8.9')).toBeTruthy();
+    expect(screen.getByText('TV · 2008')).toBeTruthy();
     expect(screen.queryByText(/%/)).toBeNull();
   });
 });

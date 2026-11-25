@@ -3,10 +3,11 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface ProfileSectionProps {
-  title: string;
+  title?: string;
   children: ReactNode;
   variant?: 'card' | 'plain';
 }
@@ -14,7 +15,7 @@ interface ProfileSectionProps {
 export function ProfileSection({ title, children, variant = 'card' }: ProfileSectionProps) {
   return (
     <View style={styles.section}>
-      <AppText variant="subtitle">{title}</AppText>
+      {title ? <AppText variant="subtitle">{title}</AppText> : null}
       {variant === 'card' ? <View style={styles.content}>{children}</View> : children}
     </View>
   );
@@ -80,10 +81,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   content: {
-    backgroundColor: colors.surface,
+    backgroundColor: glass.panel,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     overflow: 'hidden',
   },
   row: {
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: glass.hairline,
   },
   pressed: {
     opacity: 0.85,

@@ -35,6 +35,7 @@ export const STREAMING_DISCOVER_PARAM_KEYS = [
   'language',
   'originCountry',
   'keywords',
+  'keywordLabels',
   'tvStatus',
   'sort',
 ] as const;
@@ -82,6 +83,7 @@ export const WORLD_CINEMA_PARAM_KEYS = [
   'maxRuntime',
   'language',
   'keywords',
+  'keywordLabels',
   'tvStatus',
 ] as const;
 

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface DiscoverFeatureEntryProps {
@@ -107,8 +108,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panel,
     overflow: 'hidden',
   },
   cardWithArt: {
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentTint12,
   },
   iconWrapMuted: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   copy: {
     flex: 1,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
   },
   soonBadgeText: {
     color: colors.textMuted,

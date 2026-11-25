@@ -1,9 +1,11 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -17,6 +19,8 @@ import { openCatalogDetailFromTab } from '@/features/details/shared/navigation/o
 import { PRODUCT_METRICS } from '@/features/metrics/product-metric-types';
 import { trackProductMetric } from '@/features/metrics/track-product-metric';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GlassSurface } from '@/components/common/GlassSurface';
 import type { CatalogMediaFilter } from '../types';
 import type { LibraryCategory, LibraryItem } from '../types/library';
 import { useLibrary } from '../hooks/useLibrary';
@@ -38,13 +42,25 @@ import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTa
 import { ScrollToTopFab } from '@/features/navigation/ScrollToTopFab';
 import { useFlatListScrollToTopControl } from '@/features/navigation/useFlatListScrollToTopControl';
 import { useWatchlists } from '@/features/watchlists/hooks/useWatchlists';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = spacing.sm;
 const DEFAULT_CATEGORY: LibraryCategory = 'watching';
 const DEFAULT_MEDIA_FILTER: CatalogMediaFilter = 'all';
 
-export function LibraryHubContent() {
+interface LibraryHubContentProps {
+  banner?: ReactNode;
+  /** Long-press quick actions and watched badges on posters. */
+  quickActionsEnabled?: boolean;
+}
+
+export function LibraryHubContent({
+  banner = null,
+  quickActionsEnabled = true,
+}: LibraryHubContentProps) {
+  const tabBarInset = useTabBarOverlayInset();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -52,10 +68,26 @@ export function LibraryHubContent() {
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState<LibraryCategory>(DEFAULT_CATEGORY);
   const [mediaType, setMediaType] = useState<CatalogMediaFilter>(DEFAULT_MEDIA_FILTER);
-  const { debouncedSearch, isSearchActive, clearSearch } = useLibraryHubSearch();
+  const {
+    searchInput,
+    setSearchInput,
+    debouncedSearch,
+    isSearchActive,
+    clearSearch,
+  } = useLibraryHubSearch();
+  const [searchOpen, setSearchOpen] = useState(false);
   const isWatchlistsCategory = category === 'watchlist';
   const effectiveMediaType = category === 'watching' ? 'all' : mediaType;
   const searchMediaType = mediaType;
+
+  // Open the search field when a search becomes active (adjust state during render, not in an effect).
+  const [wasSearchActive, setWasSearchActive] = useState(isSearchActive);
+  if (wasSearchActive !== isSearchActive) {
+    setWasSearchActive(isSearchActive);
+    if (isSearchActive) {
+      setSearchOpen(true);
+    }
+  }
 
   const libraryQuery = useLibrary(category, effectiveMediaType, {
     enabled: !isWatchlistsCategory && !isSearchActive,
@@ -65,6 +97,23 @@ export function LibraryHubContent() {
   const listRef = useRef<FlatList>(null);
   const { fabVisible, onListScroll, scrollToTop, scrollEventThrottle } =
     useFlatListScrollToTopControl(listRef);
+  const [bannerHeight, setBannerHeight] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
+  /** Pin a compact glass bar once the profile banner has scrolled out of view. */
+  const handleScrollOffset = useCallback(
+    (offsetY: number) => {
+      setPinned(bannerHeight > 0 && offsetY > bannerHeight);
+    },
+    [bannerHeight],
+  );
+  const handleGridScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      onListScroll(event);
+      handleScrollOffset(event.nativeEvent.contentOffset.y);
+    },
+    [handleScrollOffset, onListScroll],
+  );
 
   const itemWidth = useMemo(
     () => (width - spacing.lg * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
@@ -88,9 +137,20 @@ export function LibraryHubContent() {
       return;
     }
 
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    setPinned(false);
     setCategory(nextCategory);
     trackProductMetric(PRODUCT_METRICS.libraryFilterSelected);
   }, [category]);
+
+  const handleOpenSearch = useCallback(() => {
+    setSearchOpen(true);
+  }, []);
+
+  const handleCloseSearch = useCallback(() => {
+    clearSearch();
+    setSearchOpen(false);
+  }, [clearSearch]);
 
   const handleMediaTypeChange = useCallback((nextMediaType: CatalogMediaFilter) => {
     if (nextMediaType === mediaType) {
@@ -107,6 +167,7 @@ export function LibraryHubContent() {
 
   const refreshLibraryHub = useCallback(() => {
     clearSearch();
+    setSearchOpen(false);
 
     if (isWatchlistsCategory) {
       void watchlistsQuery.refetch();
@@ -180,24 +241,48 @@ export function LibraryHubContent() {
         category={resolveGridCategory(item)}
         width={itemWidth}
         height={itemHeight}
+        quickActionsEnabled={quickActionsEnabled}
         onPress={handleItemPress}
       />
     ),
-    [handleItemPress, itemHeight, itemWidth, resolveGridCategory],
+    [handleItemPress, itemHeight, itemWidth, quickActionsEnabled, resolveGridCategory],
   );
 
-  const listHeader = isSearchActive ? null : (
+  const hubHeader = (
     <LibraryHubHeader
       category={category}
       mediaType={mediaType}
       onCategoryChange={handleCategoryChange}
       onMediaTypeChange={handleMediaTypeChange}
+      searchOpen={searchOpen}
+      searchInput={searchInput}
+      onSearchChange={setSearchInput}
+      onClearSearch={clearSearch}
+      onOpenSearch={handleOpenSearch}
+      onCloseSearch={handleCloseSearch}
     />
   );
 
+  const chrome = (
+    <View style={styles.chrome}>
+      <View onLayout={(event) => setBannerHeight(event.nativeEvent.layout.height)}>{banner}</View>
+      {hubHeader}
+    </View>
+  );
+
+  const pinnedBar = pinned ? (
+    <GlassSurface
+      style={[styles.pinnedBar, { paddingTop: insets.top + spacing.xs }]}
+      testID="library-pinned-bar"
+    >
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pinnedScrim]} />
+      <View style={styles.pinnedInner}>{hubHeader}</View>
+    </GlassSurface>
+  ) : null;
+
   if (!isAuthenticated) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { paddingTop: insets.top }]}>
         <AppText variant="title">{t('library.hub.title')}</AppText>
         <AppText variant="bodySmall" muted style={styles.signInCopy}>
           {t('library.hub.signInCopy')}
@@ -208,13 +293,26 @@ export function LibraryHubContent() {
   }
 
   if (isWatchlistsCategory && !isSearchActive) {
-    return <LibraryWatchlistsOverview listHeader={listHeader} listRef={listRef} />;
+    return (
+      <View style={styles.screen}>
+        <View style={styles.listBody}>
+          <LibraryWatchlistsOverview
+            listRef={listRef}
+            header={chrome}
+            onScrollOffset={handleScrollOffset}
+            bottomInset={tabBarInset}
+          />
+        </View>
+        {pinnedBar}
+      </View>
+    );
   }
 
   if (isSearchActive && librarySearchQuery.isLoading && gridItems.length === 0) {
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        <View style={styles.chromePad}>{chrome}</View>
+        <View style={[styles.bodyPad, styles.centered]}>
           <ActivityIndicator color={colors.accent} />
           <AppText variant="bodySmall" muted>{t('library.hub.searchLoading')}</AppText>
         </View>
@@ -228,8 +326,9 @@ export function LibraryHubContent() {
       : t('library.hub.searchError');
 
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        <View style={styles.chromePad}>{chrome}</View>
+        <View style={[styles.bodyPad, styles.centered]}>
           <ErrorView
             message={message}
             onRetry={() => void librarySearchQuery.refetch()}
@@ -241,9 +340,9 @@ export function LibraryHubContent() {
 
   if (!isSearchActive && libraryQuery.isLoading && displayItems.length === 0) {
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        {listHeader}
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        <View style={styles.chromePad}>{chrome}</View>
+        <View style={[styles.bodyPad, styles.centered]}>
           <ActivityIndicator color={colors.accent} />
           <AppText variant="bodySmall" muted>{t('common.loadingYourLibrary')}</AppText>
         </View>
@@ -257,9 +356,9 @@ export function LibraryHubContent() {
       : t('library.hub.loadError');
 
     return (
-      <View style={[styles.screen, styles.screenPadding]}>
-        {listHeader}
-        <View style={styles.centered}>
+      <View style={styles.screen}>
+        <View style={styles.chromePad}>{chrome}</View>
+        <View style={[styles.bodyPad, styles.centered]}>
           <ErrorView message={message} onRetry={handleRefresh} />
         </View>
       </View>
@@ -287,47 +386,50 @@ export function LibraryHubContent() {
 
   return (
     <View style={styles.screen}>
-      <FlatList
-        ref={listRef}
-        testID="library-grid-three-column"
-        data={gridItems}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        keyExtractor={getLibraryGridItemKey}
-        numColumns={GRID_COLUMNS}
-        columnWrapperStyle={styles.row}
-        renderItem={renderItem}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={emptyComponent}
-        removeClippedSubviews
-        ListFooterComponent={
-          activeQuery.isFetchingNextPage ? (
-            <View style={styles.footerLoading}>
-              <ActivityIndicator color={colors.accent} />
-            </View>
-          ) : activeQuery.isFetchNextPageError ? (
-            <View style={styles.footerError}>
-              <AppText variant="bodySmall" muted center>
-                {t('common.unableToLoadMore')}
-              </AppText>
-              <AppButton
-                title={t('common.retry')}
-                variant="secondary"
-                onPress={() => void activeQuery.fetchNextPage()}
-              />
-            </View>
-          ) : null
-        }
-        contentContainerStyle={styles.listContent}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.4}
-        onScroll={onListScroll}
-        scrollEventThrottle={scrollEventThrottle}
-        initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
-        maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
-        windowSize={layout.verticalList.windowSize}
-      />
-      <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
+      <View style={styles.listBody}>
+        <FlatList
+          ref={listRef}
+          ListHeaderComponent={chrome}
+          testID="library-grid-three-column"
+          data={gridItems}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          keyExtractor={getLibraryGridItemKey}
+          numColumns={GRID_COLUMNS}
+          columnWrapperStyle={styles.row}
+          renderItem={renderItem}
+          ListEmptyComponent={emptyComponent}
+          removeClippedSubviews
+          ListFooterComponent={
+            activeQuery.isFetchingNextPage ? (
+              <View style={styles.footerLoading}>
+                <ActivityIndicator color={colors.accent} />
+              </View>
+            ) : activeQuery.isFetchNextPageError ? (
+              <View style={styles.footerError}>
+                <AppText variant="bodySmall" muted center>
+                  {t('common.unableToLoadMore')}
+                </AppText>
+                <AppButton
+                  title={t('common.retry')}
+                  variant="secondary"
+                  onPress={() => void activeQuery.fetchNextPage()}
+                />
+              </View>
+            ) : null
+          }
+          contentContainerStyle={[styles.listContent, { paddingBottom: spacing.xxl + tabBarInset }]}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.4}
+          onScroll={handleGridScroll}
+          scrollEventThrottle={scrollEventThrottle}
+          initialNumToRender={layout.verticalList.initialNumToRender * GRID_COLUMNS}
+          maxToRenderPerBatch={layout.verticalList.maxToRenderPerBatch * GRID_COLUMNS}
+          windowSize={layout.verticalList.windowSize}
+        />
+        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} testID="library-scroll-to-top-fab" />
+      </View>
+      {pinnedBar}
     </View>
   );
 }
@@ -336,7 +438,32 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  screenPadding: {
+  chrome: {
+    paddingBottom: spacing.xs,
+  },
+  chromePad: {
+    paddingHorizontal: spacing.lg,
+  },
+  pinnedBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  pinnedScrim: {
+    backgroundColor: 'rgba(10, 10, 14, 0.72)',
+  },
+  pinnedInner: {
+    paddingHorizontal: spacing.lg,
+  },
+  listBody: {
+    flex: 1,
+  },
+  bodyPad: {
+    flex: 1,
     paddingHorizontal: spacing.lg,
   },
   listContent: {
@@ -352,7 +479,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
   signInCopy: {

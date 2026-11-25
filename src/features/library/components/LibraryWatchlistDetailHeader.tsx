@@ -11,6 +11,7 @@ import { borderRadius, spacing } from '@/theme/spacing';
 interface LibraryWatchlistDetailHeaderProps {
   title: string;
   subtitle?: string;
+  description?: string | null;
   onOverflowPress?: () => void;
   overflowAccessibilityLabel?: string;
   children?: ReactNode;
@@ -19,6 +20,7 @@ interface LibraryWatchlistDetailHeaderProps {
 export function LibraryWatchlistDetailHeader({
   title,
   subtitle,
+  description,
   onOverflowPress,
   overflowAccessibilityLabel,
   children,
@@ -59,6 +61,11 @@ export function LibraryWatchlistDetailHeader({
           )}
         </View>
       </View>
+      {description ? (
+        <AppText variant="bodySmall" muted style={styles.description}>
+          {description}
+        </AppText>
+      ) : null}
       {children}
     </View>
   );
@@ -93,6 +100,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '600',
+  },
+  description: {
+    paddingHorizontal: spacing.xs,
   },
   overflowButton: {
     width: layout.touchTarget,

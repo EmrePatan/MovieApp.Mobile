@@ -3,6 +3,7 @@ import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-n
 import { AppText } from '@/components/common/AppText';
 import { useRemoteImageLoadState } from '@/hooks/useRemoteImageLoadState';
 import { colors } from '@/theme/colors';
+import { rewriteLoopbackMediaUrl } from '@/utils/loopback-media-url';
 import { borderRadius } from '@/theme/spacing';
 
 export function getDisplayInitials(displayName: string, fallback = '?'): string {
@@ -40,7 +41,7 @@ export const UserAvatar = memo(function UserAvatar({
   textVariant = 'caption',
 }: UserAvatarProps) {
   const initials = getDisplayInitials(displayName, initialsFallback);
-  const resolvedUri = effectiveAvatarUrl?.trim() || null;
+  const resolvedUri = rewriteLoopbackMediaUrl(effectiveAvatarUrl);
   const { hasError, imageKey, onImageError, onImageLoad, onImageLoadEnd } =
     useRemoteImageLoadState(resolvedUri);
   const showImage = Boolean(resolvedUri) && !hasError;

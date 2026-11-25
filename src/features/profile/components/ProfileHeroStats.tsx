@@ -5,6 +5,7 @@ import type { UserStatisticsSummaryResponse } from '../types';
 import { formatAverageRating } from '../utils/profile-analytics';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { glass } from '@/theme/glass';
 
 interface ProfileHeroStatsProps {
   summary: UserStatisticsSummaryResponse;
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
   },
   item: {
     flex: 1,
@@ -91,6 +92,6 @@ const styles = StyleSheet.create({
   divider: {
     width: StyleSheet.hairlineWidth,
     alignSelf: 'stretch',
-    backgroundColor: colors.border,
+    backgroundColor: glass.hairline,
   },
 });

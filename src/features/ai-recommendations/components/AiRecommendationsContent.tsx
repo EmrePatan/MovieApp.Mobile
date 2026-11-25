@@ -38,6 +38,7 @@ import { mapAiRecommendationToRecommendationItem } from '../utils/map-ai-recomme
 import { validateAiRecommendationMessage } from '../utils/validate-ai-message';
 import { AiRecommendationResultCard } from './AiRecommendationResultCard';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
@@ -474,8 +475,8 @@ const styles = StyleSheet.create({
     minHeight: 120,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.inputBackground,
+    borderColor: glass.hairline,
+    backgroundColor: glass.panelInput,
     color: colors.textPrimary,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -508,7 +509,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },

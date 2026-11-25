@@ -205,7 +205,7 @@ export default function WatchlistScreen() {
 
   const listHeader = (
     <View style={styles.header}>
-      <AppText variant="title">{t('common.watchlist')}</AppText>
+      <AppText variant="title" style={styles.title}>{t('common.watchlist')}</AppText>
       <WatchlistSelector
         watchlists={watchlists}
         selectedWatchlistId={selectedWatchlistId}
@@ -220,12 +220,12 @@ export default function WatchlistScreen() {
           <View style={styles.selectedMeta}>
             <AppText variant="subtitle">{selectedWatchlist.name}</AppText>
             <AppText variant="caption" muted>
-              {selectedWatchlist.itemCount} items
+              {t('watchlists.picker.itemCount', { count: selectedWatchlist.itemCount })}
             </AppText>
           </View>
           <AppButton
             title={t('common.delete')}
-            variant="ghost"
+            variant="ghostDestructive"
             loading={deleteWatchlist.isPending}
             disabled={deleteWatchlist.isPending}
             onPress={handleDeleteWatchlist}
@@ -248,7 +248,7 @@ export default function WatchlistScreen() {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
-          <AppText variant="title">{t('common.watchlist')}</AppText>
+          <AppText variant="title" style={styles.title}>{t('common.watchlist')}</AppText>
         </View>
         <LibraryEmptyState
           icon="bookmark"
@@ -395,6 +395,9 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: spacing.md,
     gap: spacing.sm,
+  },
+  title: {
+    paddingHorizontal: layout.screenPaddingHorizontal,
   },
   titleRow: {
     flexDirection: 'row',

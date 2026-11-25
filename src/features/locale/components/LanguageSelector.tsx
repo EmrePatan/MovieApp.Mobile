@@ -5,7 +5,7 @@ import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
 import { getLanguageFlagEmoji, getLanguageLabel } from '@/i18n/locale-tags';
 import type { UiLanguage } from '@/i18n/types';
 import { SUPPORTED_UI_LANGUAGES } from '@/i18n/types';
-import { colors } from '@/theme/colors';
+import { premiumSheet } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface LanguageSelectorProps {
@@ -48,7 +48,7 @@ export function LanguageSelector({
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={colors.textSecondary}
+          color={premiumSheet.textSecondary}
         />
       </Pressable>
 
@@ -80,7 +80,9 @@ export function LanguageSelector({
                     {optionLabel}
                   </AppText>
                 </View>
-                {selected ? <Ionicons name="checkmark" size={16} color={colors.accent} /> : null}
+                {selected ? (
+                  <Ionicons name="checkmark" size={16} color={premiumSheet.mutedGold} />
+                ) : null}
               </Pressable>
             );
           })}
@@ -102,8 +104,8 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
   },
   selectorContent: {
     flexDirection: 'row',
@@ -122,12 +124,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: premiumSheet.rowBorder,
+    backgroundColor: premiumSheet.secondary,
   },
   optionSelected: {
-    borderColor: colors.borderAccent,
-    backgroundColor: colors.accentTint12,
+    borderColor: premiumSheet.goldBorder,
+    backgroundColor: premiumSheet.elevated,
   },
   optionContent: {
     flexDirection: 'row',
@@ -136,10 +138,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionLabelSelected: {
-    color: colors.accent,
+    color: premiumSheet.mutedGold,
     fontWeight: '600',
   },
   pressed: {
     opacity: 0.85,
   },
 });
+

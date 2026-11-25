@@ -11,6 +11,7 @@ import {
   favoritesListQueryKey,
 } from './favorite-query-keys';
 import { invalidateProfileStatistics } from '@/features/profile/utils/invalidate-profile-statistics';
+import { invalidateSocialActivityQueries } from '@/features/social/utils/invalidate-social-activity-queries';
 import { invalidateRecommendationQueries } from '@/features/recommendations/utils/invalidate-recommendation-queries';
 import { invalidateLibraryQueries } from '@/features/library/utils/invalidate-library-queries';
 import { removeFavoriteFromCache } from '@/features/library/utils/optimistic-favorites-cache';
@@ -27,6 +28,7 @@ function invalidateFavoriteQueries(
   invalidateLibraryQueries(queryClient);
   invalidateRecommendationQueries(queryClient);
   invalidateProfileStatistics(queryClient);
+  invalidateSocialActivityQueries(queryClient);
 }
 
 export function invalidateAllFavoriteListQueries(
@@ -140,6 +142,7 @@ export function useRemoveFavoriteMutation() {
       invalidateAllFavoriteListQueries(queryClient);
       invalidateFavoriteStatus(queryClient, variables.contentType, variables.contentId);
       invalidateRecommendationQueries(queryClient);
+      invalidateSocialActivityQueries(queryClient);
     },
   });
 }

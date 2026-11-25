@@ -26,14 +26,24 @@ describe('bottom navigation visibility matrix', () => {
     ).toBe('show');
   });
 
-  it('hides the bottom bar on root detail stacks, auth/profile routes, and fullscreen gallery', () => {
+  it('hides the bottom bar inside an open conversation but keeps it on the inbox', () => {
+    expect(
+      resolveBottomNavVisibility(['(tabs)', '(app-shell)', 'messages', '[conversationId]']),
+    ).toBe('hide');
+    expect(resolveBottomNavVisibility(['(tabs)', '(app-shell)', 'messages'])).toBe('show');
+  });
+
+  it('shows the bottom bar on the settings hub inside tabs', () => {
+    expect(resolveBottomNavVisibility(['(tabs)', 'profile'])).toBe('show');
+  });
+
+  it('hides the bottom bar on root detail stacks, auth/nested profile routes, and fullscreen gallery', () => {
     expect(resolveBottomNavVisibility(['movie', '[id]'])).toBe('hide');
     expect(resolveBottomNavVisibility(['tv', '[id]'])).toBe('hide');
     expect(resolveBottomNavVisibility(['person', '[tmdbId]'])).toBe('hide');
     expect(resolveBottomNavVisibility(['(auth)', 'login'])).toBe('hide');
     expect(resolveBottomNavVisibility(['(auth)', 'verify-email'])).toBe('hide');
     expect(resolveBottomNavVisibility(['profile', 'edit'])).toBe('hide');
-    expect(resolveBottomNavVisibility(['(tabs)', 'profile'])).toBe('hide');
     expect(
       resolveBottomNavVisibility(['(tabs)', '(app-shell)', 'movie', '[id]', 'gallery']),
     ).toBe('hide');

@@ -47,6 +47,16 @@ export function normalizeContentLocale(locale: string | null | undefined): strin
   return trimmed;
 }
 
+function contentLanguageKey(locale: string): string {
+  const primary = locale.split(/[-_]/)[0]?.trim().toLowerCase();
+  return primary || locale.toLowerCase();
+}
+
+/**
+ * Show "See translation" only when we know the authoring language and it differs
+ * from the viewer's UI language. Missing locale → hide (avoid false positives
+ * on same-language content that never stored authoringLocale).
+ */
 export function shouldShowReviewTranslationAction(
   authoringLocale: string | null | undefined,
   currentContentLocale: string,
@@ -54,9 +64,9 @@ export function shouldShowReviewTranslationAction(
   const normalizedAuthoring = normalizeContentLocale(authoringLocale);
   const normalizedCurrent = normalizeContentLocale(currentContentLocale);
 
-  if (!normalizedAuthoring) {
-    return true;
+  if (!normalizedAuthoring || !normalizedCurrent) {
+    return false;
   }
 
-  return normalizedAuthoring !== normalizedCurrent;
+  return contentLanguageKey(normalizedAuthoring) !== contentLanguageKey(normalizedCurrent);
 }

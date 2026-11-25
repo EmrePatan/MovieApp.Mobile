@@ -16,6 +16,7 @@ import {
   buildUnmarkMovieWatchedPath,
   buildWatchedEpisodesPath,
   buildWatchedMoviesPath,
+  buildWatchStatusBatchPath,
 } from './routes';
 import type {
   EpisodeWatchStatusResponse,
@@ -29,6 +30,8 @@ import type {
   TvShowWatchProgressResponse,
   WatchEpisodeResponse,
   WatchMovieResponse,
+  WatchStatusBatchRequest,
+  WatchStatusBatchResponse,
   WatchedEpisodesListResponse,
   WatchedMoviesListResponse,
 } from '../types';
@@ -46,6 +49,13 @@ export async function getMovieWatchStatus(
   signal?: AbortSignal,
 ): Promise<MovieWatchStatusResponse> {
   return api.get<MovieWatchStatusResponse>(buildMovieWatchStatusPath(movieId), { signal });
+}
+
+export async function getWatchStatusBatch(
+  request: WatchStatusBatchRequest,
+  signal?: AbortSignal,
+): Promise<WatchStatusBatchResponse> {
+  return api.post<WatchStatusBatchResponse>(buildWatchStatusBatchPath(), request, { signal });
 }
 
 export async function getWatchedMovies(

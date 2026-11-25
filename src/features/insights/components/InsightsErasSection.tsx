@@ -3,9 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import type { InsightsV3Era } from '../types';
 import { formatDecadeLabel } from '../utils/insights-format';
+import { authTypography } from '@/features/auth/auth-typography';
+import { InsightsCard } from './InsightsCard';
 import { InsightsEmptyState } from './InsightsEmptyState';
 import { InsightsSectionHeader } from './InsightsSectionHeader';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface InsightsErasSectionProps {
@@ -23,11 +26,12 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
       <InsightsSectionHeader
         title={t('insights.eras.title')}
         subtitle={t('insights.eras.subtitle')}
+        index={5}
       />
       {!hasKnownEras ? (
         <InsightsEmptyState message={t('insights.eras.empty')} />
       ) : (
-        <View style={styles.body}>
+        <InsightsCard style={styles.body}>
           {era.favoriteDecade ? (
             <AppText variant="bodySmall" style={styles.favoriteCopy}>
               {t('insights.eras.favoriteDecade', { decade: era.favoriteDecade })}
@@ -69,7 +73,7 @@ export function InsightsErasSection({ era }: InsightsErasSectionProps) {
               {t('insights.eras.unknownMetadata', { count: era.unknownCount })}
             </AppText>
           ) : null}
-        </View>
+        </InsightsCard>
       )}
     </View>
   );
@@ -81,10 +85,13 @@ const styles = StyleSheet.create({
   },
   body: {
     gap: spacing.sm,
+    padding: spacing.md,
   },
   favoriteCopy: {
-    lineHeight: 20,
-    color: colors.textMuted,
+    fontFamily: authTypography.wordmarkSemibold,
+    fontSize: 17,
+    lineHeight: 24,
+    color: colors.accentStrong,
   },
   favoriteDecade: {
     color: colors.accentStrong,
@@ -108,7 +115,7 @@ const styles = StyleSheet.create({
     height: 88,
     justifyContent: 'flex-end',
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     overflow: 'hidden',
   },
   timelineFill: {

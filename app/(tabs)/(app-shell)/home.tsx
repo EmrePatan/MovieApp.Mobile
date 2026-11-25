@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { createIosRefreshControl } from '@/components/refresh/createIosRefreshControl';
@@ -29,6 +29,11 @@ import type {
   HomeSection as HomeSectionModel,
 } from '@/features/home/types';
 import { DEFAULT_HOME_SECTION_SIZE } from '@/features/home/types';
+import { dismissRecommendation } from '@/features/recommendations/api/recommendations-api';
+import {
+  getHomeRecommendationDismissKey,
+  omitDismissedRecommendations,
+} from '@/features/home/utils/omit-dismissed-recommendations';
 import { homeSectionKeyExtractor } from '@/features/home/utils/home-list-keys';
 import { getHomeSectionRowLayout } from '@/features/home/utils/home-list-layout';
 import {
@@ -44,6 +49,7 @@ import { scrollFlatListToTop } from '@/features/navigation/scroll-to-top';
 import { usePrimaryTabReselectHandler } from '@/features/navigation/usePrimaryTabReselectHandler';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { useTabBarOverlayInset } from '@/features/navigation/useTabBarOverlayInset';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<HomeSectionModel>);
 
@@ -55,6 +61,9 @@ export default function HomeScreen() {
   const hasLoggedMeaningfulRender = useRef(false);
   const hasLoggedPersonalizedRender = useRef(false);
   const listRef = useRef<FlatList<HomeSectionModel>>(null);
+  const [dismissedRecommendationKeys, setDismissedRecommendationKeys] = useState<
+    ReadonlySet<string>
+  >(() => new Set());
 
   useEffect(() => {
     markHomePerfEvent('home_mount');
@@ -91,9 +100,10 @@ export default function HomeScreen() {
     heroItems,
     showColdWelcome,
   } = useMemo(() => {
-    const nonEmptySections = mergedSections.filter((section) => section.items.length > 0);
+    const visibleSections = omitDismissedRecommendations(mergedSections, dismissedRecommendationKeys);
+    const nonEmptySections = visibleSections.filter((section) => section.items.length > 0);
     return presentHomeSections(nonEmptySections, personalization);
-  }, [mergedSections, personalization]);
+  }, [dismissedRecommendationKeys, mergedSections, personalization]);
 
   const sections = useMemo(
     () => buildHomeListSections(presentedSections, showPersonalizedLoadingSlot),
@@ -173,6 +183,23 @@ export default function HomeScreen() {
     [queryClient, router],
   );
 
+  const handleRecommendationDismiss = useCallback(
+    (item: HomeItem) => {
+      const key = getHomeRecommendationDismissKey(item);
+      setDismissedRecommendationKeys((previous) => new Set(previous).add(key));
+
+      dismissRecommendation(item.contentType === 'movie' ? 'movie' : 'tv', item.id).catch(() => {
+        setDismissedRecommendationKeys((previous) => {
+          const next = new Set(previous);
+          next.delete(key);
+          return next;
+        });
+        Alert.alert(t('home.dismissRecommendationFailed'));
+      });
+    },
+    [t],
+  );
+
   const handleComingUpItemPress = useCallback(
     (item: HomeItem) => {
       openCatalogDetailFromTab(
@@ -239,13 +266,19 @@ export default function HomeScreen() {
               : undefined;
 
       return (
-        <HomeSection section={item} onItemPress={handleItemPress} onSeeAllPress={onSeeAllPress} />
+        <HomeSection
+          section={item}
+          onItemPress={handleItemPress}
+          onSeeAllPress={onSeeAllPress}
+          onItemDismiss={item.type === 'RecommendedForYou' ? handleRecommendationDismiss : undefined}
+        />
       );
     },
     [
       handleComingUpItemPress,
       handleComingUpSeeAll,
       handleItemPress,
+      handleRecommendationDismiss,
       handleNowInTheatersSeeAll,
       handleOnTvSeeAll,
       handleTrendingSeeAll,
@@ -267,9 +300,13 @@ export default function HomeScreen() {
 
   const topChrome = useMemo(() => <HomeTopChrome />, []);
 
+  const tabBarInset = useTabBarOverlayInset();
   const listContentStyle = useMemo(
-    () => (sections.length === 0 && !showColdWelcome ? styles.emptyContent : styles.content),
-    [sections.length, showColdWelcome],
+    () => [
+      sections.length === 0 && !showColdWelcome ? styles.emptyContent : styles.content,
+      { paddingBottom: spacing.xl + tabBarInset },
+    ],
+    [sections.length, showColdWelcome, tabBarInset],
   );
 
   const isRefreshing = isManualRefreshing;

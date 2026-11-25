@@ -58,6 +58,11 @@ function invalidateWatchlistQueries(
   invalidateProfileStatistics(queryClient);
 }
 
+export interface CreateWatchlistInput {
+  name: string;
+  description?: string | null;
+}
+
 export function useCreateWatchlist(
   contentType: WatchlistContentType,
   contentId: string,
@@ -65,7 +70,7 @@ export function useCreateWatchlist(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (name: string) => createWatchlist(name),
+    mutationFn: ({ name, description }: CreateWatchlistInput) => createWatchlist(name, description),
     onSuccess: () => {
       trackProductMetric(PRODUCT_METRICS.watchlistCreated);
       invalidateWatchlistQueries(queryClient, contentType, contentId);
@@ -77,7 +82,7 @@ export function useCreateWatchlistForLibrary() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (name: string) => createWatchlist(name),
+    mutationFn: ({ name, description }: CreateWatchlistInput) => createWatchlist(name, description),
     onSuccess: () => {
       trackProductMetric(PRODUCT_METRICS.watchlistCreated);
       invalidateAllWatchlistItemQueries(queryClient);
@@ -103,8 +108,15 @@ export function useRenameWatchlistMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ watchlistId, name }: { watchlistId: string; name: string }) =>
-      updateWatchlist(watchlistId, name),
+    mutationFn: ({
+      watchlistId,
+      name,
+      description,
+    }: {
+      watchlistId: string;
+      name: string;
+      description?: string | null;
+    }) => updateWatchlist(watchlistId, name, description),
     onSuccess: (_result, variables) => {
       invalidateAllWatchlistItemQueries(queryClient, variables.watchlistId);
       invalidateLibraryQueries(queryClient);

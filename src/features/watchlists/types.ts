@@ -2,10 +2,14 @@ import type { PaginationMeta } from '@/models/api/pagination';
 
 export interface CreateWatchlistRequest {
   name: string;
+  /** Omitted or null means no description. */
+  description?: string | null;
 }
 
 export interface UpdateWatchlistRequest {
   name: string;
+  /** Omitted or null keeps the description; an empty string clears it. */
+  description?: string | null;
 }
 
 export interface WatchlistSummaryResponse {
@@ -14,6 +18,9 @@ export interface WatchlistSummaryResponse {
   createdAt: string;
   updatedAt: string;
   itemCount: number;
+  description?: string | null;
+  /** Newest poster paths for the list cover (up to 4). Absent on older API responses. */
+  coverPosterPaths?: string[];
 }
 
 export interface WatchlistMovieItemResponse {

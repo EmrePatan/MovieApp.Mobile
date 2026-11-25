@@ -8,12 +8,15 @@ interface ScreenProps extends ViewProps {
   children: ReactNode;
   scrollable?: boolean;
   padded?: boolean;
+  /** Scrollable forms: the scroll view lifts focused fields above the keyboard (iOS). */
+  keyboardAware?: boolean;
 }
 
 export function Screen({
   children,
   scrollable = false,
   padded = true,
+  keyboardAware = false,
   style,
   ...props
 }: ScreenProps) {
@@ -29,6 +32,7 @@ export function Screen({
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={keyboardAware}
           showsVerticalScrollIndicator={false}
         >
           {content}

@@ -8,6 +8,7 @@ import {
   getRecentHistoryTitle,
 } from '../utils/history-navigation';
 import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 interface RecentHistoryCardProps {
@@ -53,8 +54,13 @@ export const RecentHistoryCard = memo(function RecentHistoryCard({
 
 const styles = StyleSheet.create({
   card: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.xs,
+    padding: spacing.md,
+    borderRadius: 20,
+    backgroundColor: glass.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: glass.hairline,
   },
   pressed: {
     opacity: 0.85,
@@ -69,7 +75,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   badge: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,

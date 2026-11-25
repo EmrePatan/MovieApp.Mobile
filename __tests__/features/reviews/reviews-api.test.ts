@@ -1,8 +1,11 @@
 import {
+  buildCreateEpisodeReviewPath,
   buildCreateMovieReviewPath,
   buildCreateTvReviewPath,
   buildDeleteMovieReviewPath,
   buildDeleteTvReviewPath,
+  buildEpisodeMyReviewPath,
+  buildEpisodeReviewsPath,
   buildMovieMyReviewPath,
   buildMovieReviewsPath,
   buildTvMyReviewPath,
@@ -64,6 +67,15 @@ describe('reviews api routes', () => {
     expect(buildCreateTvReviewPath(tvShowId)).toBe(`/api/reviews/tvshows/${tvShowId}`);
     expect(buildUpdateTvReviewPath(tvShowId)).toBe(`/api/reviews/tvshows/${tvShowId}`);
     expect(buildDeleteTvReviewPath(tvShowId)).toBe(`/api/reviews/tvshows/${tvShowId}`);
+  });
+
+  it('builds episode review routes', () => {
+    const episodeId = '11111111-1111-4111-8111-111111111111';
+    expect(buildEpisodeReviewsPath(episodeId, 1, 20)).toBe(
+      `/api/reviews/episodes/${episodeId}?page=1&pageSize=20`,
+    );
+    expect(buildEpisodeMyReviewPath(episodeId)).toBe(`/api/reviews/episodes/${episodeId}/me`);
+    expect(buildCreateEpisodeReviewPath(episodeId)).toBe(`/api/reviews/episodes/${episodeId}`);
   });
 });
 

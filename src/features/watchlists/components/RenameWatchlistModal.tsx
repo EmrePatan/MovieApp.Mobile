@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { isApiError } from '@/api/errors';
 import { AppButton } from '@/components/buttons/AppButton';
@@ -18,13 +18,15 @@ import { AppText } from '@/components/common/AppText';
 import { AppInput } from '@/components/inputs/AppInput';
 import { FeedbackMessage } from '@/components/feedback/FeedbackMessage';
 import { useRenameWatchlistMutation } from '../hooks/useWatchlistMutations';
-import { colors } from '@/theme/colors';
-import { borderRadius, spacing } from '@/theme/spacing';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { spacing } from '@/theme/spacing';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 interface RenameWatchlistModalProps {
   visible: boolean;
   watchlistId: string | null;
   initialName: string;
+  initialDescription?: string | null;
   onClose: () => void;
   onRenamed?: () => void;
 }
@@ -33,6 +35,7 @@ export function RenameWatchlistModal({
   visible,
   watchlistId,
   initialName,
+  initialDescription,
   onClose,
   onRenamed,
 }: RenameWatchlistModalProps) {
@@ -40,15 +43,25 @@ export function RenameWatchlistModal({
   const renameWatchlist = useRenameWatchlistMutation();
   const nameInputRef = useRef<TextInput>(null);
   const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription ?? '');
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  // Reset the form whenever the sheet opens or its initial values change (adjust state during render).
+  const resetKey = visible ? `${initialName}\u0000${initialDescription ?? ''}` : null;
+  const [appliedResetKey, setAppliedResetKey] = useState<string | null>(null);
+  if (resetKey !== appliedResetKey) {
+    setAppliedResetKey(resetKey);
+    if (resetKey !== null) {
+      setName(initialName);
+      setDescription(initialDescription ?? '');
+      setFeedback(null);
+    }
+  }
 
   useEffect(() => {
     if (!visible) {
       return;
     }
-
-    setName(initialName);
-    setFeedback(null);
 
     const focusTimer = setTimeout(() => {
       nameInputRef.current?.focus();
@@ -57,7 +70,7 @@ export function RenameWatchlistModal({
     return () => {
       clearTimeout(focusTimer);
     };
-  }, [initialName, visible]);
+  }, [initialDescription, initialName, visible]);
 
   const dismissKeyboard = () => {
     nameInputRef.current?.blur();
@@ -81,7 +94,8 @@ export function RenameWatchlistModal({
       return;
     }
 
-    if (trimmed === initialName.trim()) {
+    const trimmedDescription = description.trim();
+    if (trimmed === initialName.trim() && trimmedDescription === (initialDescription ?? '').trim()) {
       handleClose();
       return;
     }
@@ -89,7 +103,7 @@ export function RenameWatchlistModal({
     dismissKeyboard();
 
     renameWatchlist.mutate(
-      { watchlistId, name: trimmed },
+      { watchlistId, name: trimmed, description: trimmedDescription },
       {
         onSuccess: () => {
           setFeedback(null);
@@ -109,16 +123,18 @@ export function RenameWatchlistModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={styles.overlay}>
+      <View style={premiumSheetChrome.overlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboardAvoid}
         >
-          <SafeAreaView style={styles.sheet} edges={['bottom']}>
+          <SwipeSheet onClose={handleClose} style={styles.sheet} bottomInset>
+            <GlassSheetLayer />
+            <SheetHandle />
             <View style={styles.header}>
-              <AppText variant="subtitle">{t('watchlists.renameModal.title')}</AppText>
+              <AppText variant="subtitle" style={styles.headerTitle}>{t('watchlists.renameModal.title')}</AppText>
               <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={handleClose}>
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -142,13 +158,24 @@ export function RenameWatchlistModal({
               onSubmitEditing={handleSave}
             />
 
+            <AppInput
+              label={t('watchlists.descriptionLabel')}
+              value={description}
+              onChangeText={setDescription}
+              placeholder={t('watchlists.descriptionPlaceholder')}
+              maxLength={280}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
             <AppButton
               title={t('common.save')}
               loading={renameWatchlist.isPending}
               disabled={renameWatchlist.isPending}
               onPress={handleSave}
             />
-          </SafeAreaView>
+          </SwipeSheet>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -156,26 +183,21 @@ export function RenameWatchlistModal({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
   keyboardAvoid: {
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
 });

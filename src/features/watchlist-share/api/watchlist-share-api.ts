@@ -71,6 +71,8 @@ export interface PublicWatchlistShareResponse {
 
   watchlistName: string | null;
 
+  description?: string | null;
+
   items: PublicWatchlistShareItemResponse[];
 
 }

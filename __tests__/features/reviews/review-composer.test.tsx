@@ -3,6 +3,19 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ReviewComposer } from '@/features/reviews/components/ReviewComposer';
 import { MAX_REVIEW_CONTENT_LENGTH } from '@/features/reviews/types';
 
+jest.mock('@/features/social/components/SocialGifPickerSheet', () => ({
+  SocialGifPickerSheet: () => null,
+}));
+jest.mock('@/features/social/components/SocialCatalogImagePickerSheet', () => ({
+  SocialCatalogImagePickerSheet: () => null,
+}));
+jest.mock('@/features/social/components/SocialGifFrame', () => ({
+  SocialGifFrame: () => null,
+}));
+jest.mock('@/features/social/components/SocialCommentPosterFrame', () => ({
+  SocialCommentPosterFrame: () => null,
+}));
+
 describe('ReviewComposer', () => {
   beforeEach(() => {
     jest.useFakeTimers();

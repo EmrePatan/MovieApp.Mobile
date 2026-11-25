@@ -1,8 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { ProviderLogoImage } from '@/components/common/ProviderLogoImage';
 import type { DiscoveryWatchProvider } from '../watch-provider-types';
-import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { premiumSheet } from '@/theme/premium-sheet';
 
 const PROVIDER_LOGO_SIZE = 54;
 
@@ -32,13 +31,13 @@ const styles = StyleSheet.create({
     width: PROVIDER_LOGO_SIZE,
     height: PROVIDER_LOGO_SIZE,
     borderRadius: PROVIDER_LOGO_SIZE / 2,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: premiumSheet.elevated,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'transparent',
   },
   logoCircleSelected: {
-    borderColor: colors.accent,
+    borderColor: premiumSheet.goldBorder,
   },
 });

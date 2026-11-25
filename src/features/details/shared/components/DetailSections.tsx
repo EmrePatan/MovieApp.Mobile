@@ -4,7 +4,7 @@ import { AppText } from '@/components/common/AppText';
 import { CollapsibleText } from '@/components/common/CollapsibleText';
 import { HomeSectionHeader } from '@/features/home/components/HomeSectionHeader';
 import { translateGenreName } from '@/i18n/catalog-labels';
-import { colors } from '@/theme/colors';
+import { glass } from '@/theme/glass';
 import { borderRadius, spacing } from '@/theme/spacing';
 
 export { DetailKeywords } from './DetailKeywordRail';
@@ -137,10 +137,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   genreChip: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: glass.panelElevated,
     borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: glass.hairline,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },

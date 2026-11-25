@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { colors } from '@/theme/colors';
+import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
 import { borderRadius, spacing } from '@/theme/spacing';
 import { interaction } from '@/theme/interaction';
+import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
 
 type SheetView = 'options' | 'confirmDelete';
 
@@ -42,7 +44,7 @@ function OptionRow({ icon, label, destructive = false, onPress, testID }: Option
         <Ionicons
           name={icon}
           size={20}
-          color={destructive ? colors.error : colors.accent}
+          color={destructive ? colors.error : premiumSheet.mutedGold}
         />
       </View>
       <AppText
@@ -51,7 +53,7 @@ function OptionRow({ icon, label, destructive = false, onPress, testID }: Option
       >
         {label}
       </AppText>
-      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      <Ionicons name="chevron-forward" size={18} color={premiumSheet.textSecondary} />
     </Pressable>
   );
 }
@@ -96,22 +98,23 @@ function WatchlistListOptionsSheetContent({
   const isConfirmView = view === 'confirmDelete';
 
   return (
-    <View style={styles.overlay} testID="watchlist-list-options-sheet">
+    <View style={premiumSheetChrome.overlay} testID="watchlist-list-options-sheet">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('common.closeListOptions')}
-        style={styles.backdrop}
+        style={premiumSheetChrome.backdrop}
         onPress={onClose}
       />
-      <SafeAreaView style={styles.sheet} edges={['bottom']}>
-        <View style={styles.handle} />
+      <SwipeSheet onClose={onClose} style={styles.sheet} bottomInset>
+        <GlassSheetLayer />
+        <SheetHandle />
 
         {isConfirmView ? (
           <View style={styles.confirmContent}>
             <View style={styles.confirmIconWrap}>
               <Ionicons name="trash-outline" size={28} color={colors.error} />
             </View>
-            <AppText variant="subtitle" style={styles.confirmTitle}>
+            <AppText variant="subtitle" style={[styles.confirmTitle, styles.sheetTitle]}>
               {t('watchlists.optionsSheet.confirmTitle')}
             </AppText>
             <AppText variant="bodySmall" muted style={styles.confirmMessage}>
@@ -139,7 +142,7 @@ function WatchlistListOptionsSheetContent({
           <>
             <View style={styles.header}>
               <View style={styles.headerText}>
-                <AppText variant="subtitle">{t('watchlists.optionsSheet.listOptions')}</AppText>
+                <AppText variant="subtitle" style={styles.sheetTitle}>{t('watchlists.optionsSheet.listOptions')}</AppText>
                 <AppText variant="bodySmall" muted numberOfLines={1}>
                   {listName}
                 </AppText>
@@ -151,7 +154,7 @@ function WatchlistListOptionsSheetContent({
                 hitSlop={8}
                 style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
               >
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
               </Pressable>
             </View>
 
@@ -184,7 +187,7 @@ function WatchlistListOptionsSheetContent({
             </View>
           </>
         )}
-      </SafeAreaView>
+      </SwipeSheet>
     </View>
   );
 }
@@ -215,30 +218,14 @@ export function WatchlistListOptionsSheet({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: colors.overlay,
-  },
-  backdrop: {
-    flex: 1,
-  },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
+    ...premiumSheetChrome.sheet,
     gap: spacing.md,
+    paddingBottom: spacing.xl,
   },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.border,
-    marginBottom: spacing.xs,
+  sheetTitle: {
+    color: premiumSheet.textPrimary,
+    fontWeight: '700',
   },
   header: {
     flexDirection: 'row',
@@ -257,10 +244,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   optionsGroup: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: premiumSheet.secondary,
     borderRadius: borderRadius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
+    borderWidth: 1,
+    borderColor: premiumSheet.rowBorder,
     overflow: 'hidden',
   },
   optionRow: {
@@ -273,7 +260,7 @@ const styles = StyleSheet.create({
   },
   optionRowPressed: {
     opacity: interaction.pressedOpacity,
-    backgroundColor: colors.accentTint12,
+    backgroundColor: 'rgba(210, 164, 81, 0.12)',
   },
   optionIconWrap: {
     width: 36,
@@ -281,7 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.accentTint12,
+    backgroundColor: 'rgba(210, 164, 81, 0.12)',
   },
   optionIconWrapDestructive: {
     backgroundColor: colors.errorTint15,
@@ -293,8 +280,8 @@ const styles = StyleSheet.create({
     color: colors.error,
   },
   optionDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
+    height: 1,
+    backgroundColor: premiumSheet.border,
     marginHorizontal: spacing.md,
   },
   confirmContent: {
