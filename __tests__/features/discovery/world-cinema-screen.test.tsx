@@ -22,6 +22,11 @@ jest.mock('@/features/discovery/hooks/useWorldCinema', () => ({
   useWorldCinema: jest.fn(),
 }));
 
+// Needs auth and query providers; covered by watch-platforms.test.tsx.
+jest.mock('@/features/discovery/components/CatalogMyPlatformsFilter', () => ({
+  CatalogMyPlatformsFilter: () => null,
+}));
+
 jest.mock('@/features/discovery/hooks/useGenres', () => ({
   useGenres: jest.fn(() => ({
     data: [{ id: 'genre-1', name: 'Drama' }],
@@ -121,7 +126,7 @@ describe('WorldCinemaScreen', () => {
 
     fireEvent.press(screen.getByLabelText(t('discovery.catalogFilters.sortAction')));
     fireEvent.press(
-      screen.getByLabelText(t('discovery.worldCinemaScreen.sortOptions.rating_desc')),
+      screen.getByLabelText(t('discovery.sortOptions.rating_desc')),
     );
 
     expect(mockSetParams).toHaveBeenCalled();

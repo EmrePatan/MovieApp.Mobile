@@ -140,3 +140,11 @@ export function parseOriginCountryParam(
 
   return fallback;
 }
+
+export function parseWatchProviderIdsParam(value: string | string[] | undefined): number[] {
+  const ids = parseCommaSeparatedIds(value)
+    .map((part) => Number(part))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  return [...new Set(ids)];
+}

@@ -117,7 +117,7 @@ export default function SocialProfileScreen() {
 
   const openReviews = useCallback(() => {
     if (!userId) return;
-    router.push(`/profile/user-comments/${userId}`);
+    router.push(`/user-comments/${userId}`);
   }, [router, userId]);
 
   const followStatus = profile.data?.followStatus;
@@ -229,7 +229,7 @@ export default function SocialProfileScreen() {
           }
           onReviewsPress={
             isSelf
-              ? () => router.push('/profile/my-comments')
+              ? () => router.push('/my-comments')
               : canViewLibrary
                 ? openReviews
                 : undefined

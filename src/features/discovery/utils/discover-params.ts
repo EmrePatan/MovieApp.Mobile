@@ -4,6 +4,7 @@ import {
   DISCOVERY_BROWSE_MODES,
   DISCOVERY_SORT_VALUES,
   getDefaultSortForMode,
+  supportsWatchPlatforms,
   type DiscoveryBrowseFilters,
   type DiscoveryBrowseMode,
   type DiscoveryBrowseState,
@@ -20,6 +21,7 @@ import {
   parseRatingParam,
   parseRuntimeParam,
   parseVoteCountParam,
+  parseWatchProviderIdsParam,
   parseYearParam,
   readRouteParam,
 } from './parse-route-helpers';
@@ -76,6 +78,9 @@ export function parseDiscoverParams(params: DiscoverRouteParams): DiscoveryBrows
     keywordIds: parseCommaSeparatedIds(params.keywords ?? params.keywordId),
     keywordLabels: parseKeywordLabelsParam(readRouteParam(params.keywordLabels)),
     tvStatuses,
+    watchProviderIds: supportsWatchPlatforms(mode)
+      ? parseWatchProviderIdsParam(params.watchProviderId)
+      : [],
     sort: parseSort(readRouteParam(params.sort), mode),
   };
 
@@ -141,6 +146,10 @@ export function serializeDiscoverParams(state: DiscoveryBrowseState): Record<str
 
   if (state.type !== 'movie' && state.filters.tvStatuses.length > 0) {
     params.tvStatus = state.filters.tvStatuses.join(',');
+  }
+
+  if (state.filters.watchProviderIds.length > 0) {
+    params.watchProviderId = state.filters.watchProviderIds.join(',');
   }
 
   const defaultSort = getDefaultSortForMode(state.mode);

@@ -31,7 +31,7 @@ function createSection(
 }
 
 describe('applyHomeSectionPolicy', () => {
-  it('orders cold-start sections as Coming Up, week trending, On TV, then theaters', () => {
+  it('orders cold-start sections as Coming Up, theaters, week trending, then On TV', () => {
     const sections = [
       createSection('NowInTheaters', 'Now in Theaters', [createItem({ id: 'theaters' })]),
       createSection('TopRated', 'Top Rated', [createItem({ id: 'top' })]),
@@ -48,9 +48,9 @@ describe('applyHomeSectionPolicy', () => {
 
     expect(presented.map((section) => section.type)).toEqual([
       'ComingUp',
+      'NowInTheaters',
       'Trending',
       'OnTvThisWeek',
-      'NowInTheaters',
     ]);
   });
 
@@ -77,9 +77,9 @@ describe('applyHomeSectionPolicy', () => {
     expect(presented.map((section) => section.type)).toEqual([
       'RecommendedForYou',
       'ComingUp',
+      'NowInTheaters',
       'Trending',
       'OnTvThisWeek',
-      'NowInTheaters',
     ]);
   });
 

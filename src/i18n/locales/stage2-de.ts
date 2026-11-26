@@ -1,6 +1,14 @@
 import { crewJobsDe } from './crew-jobs/de';
 
 export const stage2De = {
+  leavingSoon: {
+    title: 'Bald nicht mehr da',
+    lastDay: 'Letzter Tag: {{date}}',
+    emptyTitle: 'Nichts läuft bald aus',
+    emptyMessage: 'Für diese Region gibt es gerade nichts anzuzeigen.',
+    loadError: 'Die Liste konnte nicht geladen werden.',
+    sortLeaving: 'Läuft zuerst aus',
+  },
   common: {
     seeAll: 'Alle anzeigen',
     seeAllTitle: 'Alle {{title}} anzeigen',
@@ -577,16 +585,6 @@ export const stage2De = {
         movie: 'Filme',
         tv: 'Serien',
       },
-      sortOptions: {
-        popularity_desc: 'Beliebt',
-        rating_desc: 'Top bewertet',
-        newest: 'Neueste',
-        oldest: 'Älteste',
-        popularity_asc: 'Am wenigsten beliebt',
-        rating_asc: 'Am schlechtesten bewertet',
-        title_asc: 'Titel A–Z',
-        title_desc: 'Titel Z–A',
-      },
       runtimePresets: {
         any: 'Beliebig',
         under90: 'Unter 90 Min.',
@@ -693,16 +691,6 @@ export const stage2De = {
       emptyTitle: 'Keine Titel gefunden',
       emptyMessage: 'Probiere ein anderes Herkunftsland oder einen anderen Medientyp.',
       loadError: 'Weltkino-Ergebnisse konnten gerade nicht geladen werden.',
-      sortOptions: {
-        popularity_desc: 'Beliebt',
-        rating_desc: 'Top bewertet',
-        newest: 'Neueste',
-        oldest: 'Älteste',
-        popularity_asc: 'Am wenigsten beliebt',
-        rating_asc: 'Am schlechtesten bewertet',
-        title_asc: 'Titel A–Z',
-        title_desc: 'Titel Z–A',
-      },
     },
   },
   date: {
@@ -1151,6 +1139,17 @@ export const stage2De = {
     watchHistoryTitle: 'Verlauf',
     watchHistorySubtitle: 'Gesehene Filme und Folgen',
     watchHistoryCountLabel: 'gesehen',
+    myPlatformsTitle: 'Meine Plattformen',
+    myPlatformsSubtitle: 'Deine Streaming-Abos',
+    myPlatformsDescription: 'Wähle die Dienste, die du abonniert hast. Liste für deine Region: {{region}}.',
+    myPlatformsError: 'Plattformen konnten nicht geladen werden.',
+    myPlatformsSaveError: 'Auswahl konnte nicht gespeichert werden. Versuche es erneut.',
+    myPlatformsLimit: 'Du kannst bis zu {{max}} Plattformen wählen.',
+    myPlatformsOnly: 'Nur auf meinen Plattformen',
+    filterPlatforms: 'Plattformen',
+    filterWatchType: 'Art des Angebots',
+    myPlatformsChoose: 'Meine Plattformen wählen',
+    myPlatformsUnavailable: 'Deine Plattformen sind für diese Region oder Art nicht verfügbar.',
     notificationPrefsTitle: 'Benachrichtigungen',
     notificationPrefsSubtitle: 'Nachrichten und Neuerscheinungen',
     notificationPrefsDescription: 'Wähle, welche Benachrichtigungen dein Handy erreichen.',

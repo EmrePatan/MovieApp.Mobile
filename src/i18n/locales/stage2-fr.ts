@@ -1,6 +1,14 @@
 import { crewJobsFr } from './crew-jobs/fr';
 
 export const stage2Fr = {
+  leavingSoon: {
+    title: 'Bientôt retirés',
+    lastDay: 'Dernier jour : {{date}}',
+    emptyTitle: 'Aucun retrait prochain',
+    emptyMessage: 'Rien à afficher pour cette région pour le moment.',
+    loadError: 'Impossible de charger la liste.',
+    sortLeaving: 'Retirés en premier',
+  },
   common: {
     seeAll: 'Tout voir',
     seeAllTitle: 'Tout voir {{title}}',
@@ -577,16 +585,6 @@ export const stage2Fr = {
         movie: 'Films',
         tv: 'Séries',
       },
-      sortOptions: {
-        popularity_desc: 'Populaires',
-        rating_desc: 'Les mieux notés',
-        newest: 'Plus récents',
-        oldest: 'Plus anciens',
-        popularity_asc: 'Les moins populaires',
-        rating_asc: 'Les moins bien notés',
-        title_asc: 'Titre A–Z',
-        title_desc: 'Titre Z–A',
-      },
       runtimePresets: {
         any: 'Tout',
         under90: 'Moins de 90 min',
@@ -693,16 +691,6 @@ export const stage2Fr = {
       emptyTitle: 'Aucun titre trouvé',
       emptyMessage: 'Essayez un autre pays d\'origine ou type de contenu.',
       loadError: 'Impossible de charger les résultats de cinéma mondial pour le moment.',
-      sortOptions: {
-        popularity_desc: 'Populaires',
-        rating_desc: 'Les mieux notés',
-        newest: 'Plus récents',
-        oldest: 'Plus anciens',
-        popularity_asc: 'Les moins populaires',
-        rating_asc: 'Les moins bien notés',
-        title_asc: 'Titre A–Z',
-        title_desc: 'Titre Z–A',
-      },
     },
   },
   date: {
@@ -1151,6 +1139,17 @@ export const stage2Fr = {
     watchHistoryTitle: 'Historique',
     watchHistorySubtitle: 'Films et épisodes vus',
     watchHistoryCountLabel: 'vus',
+    myPlatformsTitle: 'Mes plateformes',
+    myPlatformsSubtitle: 'Vos abonnements de streaming',
+    myPlatformsDescription: 'Choisissez les services auxquels vous êtes abonné. Liste pour votre région : {{region}}.',
+    myPlatformsError: 'Impossible de charger les plateformes.',
+    myPlatformsSaveError: 'Impossible d’enregistrer votre choix. Réessayez.',
+    myPlatformsLimit: 'Vous pouvez choisir jusqu’à {{max}} plateformes.',
+    myPlatformsOnly: 'Uniquement sur mes plateformes',
+    filterPlatforms: 'Plateformes',
+    filterWatchType: 'Mode de visionnage',
+    myPlatformsChoose: 'Choisir mes plateformes',
+    myPlatformsUnavailable: 'Vos plateformes ne sont pas disponibles pour cette région ou ce type.',
     notificationPrefsTitle: 'Préférences de notification',
     notificationPrefsSubtitle: 'Messages et sorties',
     notificationPrefsDescription: 'Choisissez les notifications reçues sur votre téléphone.',

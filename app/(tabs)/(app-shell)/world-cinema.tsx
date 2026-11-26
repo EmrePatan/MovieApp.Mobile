@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { translateWorldCinemaSort } from '@/i18n/catalog-labels';
+import { translateAdvancedDiscoverSort } from '@/i18n/catalog-labels';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ActivityIndicator,
@@ -41,11 +41,13 @@ import {
   clearWorldCinemaUserFilters,
   hasActiveWorldCinemaUserFilters,
   hasNonDefaultWorldCinemaSort,
-  WORLD_CINEMA_SORT_OPTIONS,
   type WorldCinemaState,
 } from '@/features/discovery/world-cinema-types';
-import type { AdvancedDiscoverSort } from '@/features/discovery/advanced-discover-types';
-import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
+import {
+  ADVANCED_DISCOVER_SORT_OPTIONS,
+  type AdvancedDiscoverSort,
+} from '@/features/discovery/advanced-discover-types';
+import { CatalogEmptyState } from '@/features/discovery/components/CatalogEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import {
@@ -118,9 +120,9 @@ export default function WorldCinemaScreen() {
 
   const sortOptions = useMemo(
     () =>
-      WORLD_CINEMA_SORT_OPTIONS.map((value) => ({
+      ADVANCED_DISCOVER_SORT_OPTIONS.map((value) => ({
         value,
-        label: translateWorldCinemaSort(value),
+        label: translateAdvancedDiscoverSort(value),
       })),
     [],
   );
@@ -168,7 +170,9 @@ export default function WorldCinemaScreen() {
 
     if (items.length === 0) {
       return (
-        <SearchEmptyState
+        <CatalogEmptyState
+          filtered={hasActiveWorldCinemaUserFilters(discoverState)}
+          onClearFilters={() => replaceState(clearWorldCinemaUserFilters(discoverState))}
           title={t('discovery.worldCinemaScreen.emptyTitle')}
           message={t('discovery.worldCinemaScreen.emptyMessage')}
         />
@@ -176,7 +180,7 @@ export default function WorldCinemaScreen() {
     }
 
     return null;
-  }, [items.length, resultsQuery, t]);
+  }, [discoverState, items.length, replaceState, resultsQuery, t]);
 
   return (
     <StackListScreen

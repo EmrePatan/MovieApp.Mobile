@@ -11,6 +11,8 @@ import {
   useBrowsePosterQuickActions,
 } from '@/features/browse-quick-actions/hooks/useBrowsePosterQuickActions';
 import type { HomeItem } from '../types';
+import { LeavingPlatformFlags } from '@/features/leaving-soon/LeavingPlatformFlags';
+import { formatLeavingLastDay } from '@/features/leaving-soon/leaving-soon-items';
 import { formatCatalogYear, formatContentType, formatRating } from '@/utils/format';
 import { colors } from '@/theme/colors';
 import { interaction } from '@/theme/interaction';
@@ -59,7 +61,15 @@ export const HomeContentCard = memo(function HomeContentCard({
   }, [item.contentType, item.releaseDate]);
   const rating = item.voteAverage > 0 ? formatRating(item.voteAverage) : null;
 
-  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.contentType)}${rating ? `, ★ ${rating}` : ''}`;
+  // Replaces the type and year line, so the card keeps its height.
+  const lastDayLine = item.leaving
+    ? formatLeavingLastDay(item.leaving.leavesAtUtc, 'short')
+    : null;
+  const leavingLabel = item.leaving
+    ? `, ${lastDayLine}, ${item.leaving.platforms.map((platform) => platform.name).join(', ')}`
+    : '';
+
+  const accessibilityLabel = `${item.title}, ${metadataLine || formatContentType(item.contentType)}${rating ? `, ★ ${rating}` : ''}${leavingLabel}`;
 
   return (
     <Pressable
@@ -83,6 +93,11 @@ export const HomeContentCard = memo(function HomeContentCard({
         voteAverage={item.voteAverage}
         posterHeight={layout.posterCarousel.height}
       />
+      {item.leaving ? (
+        <View style={styles.platformAnchor} pointerEvents="none">
+          <LeavingPlatformFlags platforms={item.leaving.platforms} />
+        </View>
+      ) : null}
       {onDismiss ? (
         <Pressable
           accessibilityRole="button"
@@ -101,7 +116,11 @@ export const HomeContentCard = memo(function HomeContentCard({
         <AppText variant="bodySmall" numberOfLines={2} style={styles.title}>
           {item.title}
         </AppText>
-        {metadataLine ? (
+        {lastDayLine ? (
+          <AppText variant="caption" numberOfLines={1} style={styles.lastDay}>
+            {lastDayLine}
+          </AppText>
+        ) : metadataLine ? (
           <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
             {metadataLine}
           </AppText>
@@ -139,6 +158,16 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 1 },
     elevation: 4,
+  },
+  platformAnchor: {
+    position: 'absolute',
+    top: spacing.xs,
+    left: spacing.xs,
+    zIndex: 3,
+  },
+  lastDay: {
+    color: colors.accent,
+    fontWeight: '600',
   },
   meta: {
     marginTop: spacing.sm,

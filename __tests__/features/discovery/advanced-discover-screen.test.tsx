@@ -20,6 +20,11 @@ jest.mock('@/features/discovery/hooks/useAdvancedDiscover', () => ({
   useAdvancedDiscover: jest.fn(),
 }));
 
+// Needs auth and query providers; covered by watch-platforms.test.tsx.
+jest.mock('@/features/watch-platforms/MyPlatformsFilter', () => ({
+  MyPlatformsFilter: () => null,
+}));
+
 jest.mock('@/features/discovery/hooks/useGenres', () => ({
   useGenres: jest.fn(),
 }));
@@ -184,7 +189,7 @@ describe('AdvancedDiscoverScreen', () => {
   it('returns to discover when closing filters before results exist', () => {
     render(<AdvancedDiscoverScreen />);
 
-    fireEvent.press(screen.getByLabelText('Close'));
+    fireEvent.press(screen.getByTestId('advanced-discover-filter-sheet-header-action'));
 
     expect(mockReplace).toHaveBeenCalledWith('/discover');
   });

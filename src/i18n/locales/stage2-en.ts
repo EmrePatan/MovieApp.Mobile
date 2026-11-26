@@ -1,6 +1,14 @@
 import { crewJobsEn } from './crew-jobs/en';
 
 export const stage2En = {
+  leavingSoon: {
+    title: 'Leaving Soon',
+    lastDay: 'Last day: {{date}}',
+    emptyTitle: 'Nothing leaving soon',
+    emptyMessage: 'There is nothing to show for this region right now.',
+    loadError: 'The list could not be loaded.',
+    sortLeaving: 'Leaving first',
+  },
   common: {
     seeAll: 'See All',
     seeAllTitle: 'See all {{title}}',
@@ -571,16 +579,6 @@ export const stage2En = {
       noTitlesFound: 'No titles found.',
       loadError: 'Unable to load discovery results. Please try again.',
       mediaOptions: { movie: 'Movies', tv: 'TV Shows' },
-      sortOptions: {
-        popularity_desc: 'Popular',
-        rating_desc: 'Top Rated',
-        newest: 'Newest',
-        oldest: 'Oldest',
-        popularity_asc: 'Least Popular',
-        rating_asc: 'Lowest Rated',
-        title_asc: 'Title A–Z',
-        title_desc: 'Title Z–A',
-      },
       runtimePresets: {
         any: 'Any',
         under90: 'Under 90 min',
@@ -684,16 +682,6 @@ export const stage2En = {
       emptyTitle: 'No titles found',
       emptyMessage: 'Try another origin country or media type.',
       loadError: 'Unable to load world cinema results right now.',
-      sortOptions: {
-        popularity_desc: 'Popular',
-        rating_desc: 'Top Rated',
-        newest: 'Newest',
-        oldest: 'Oldest',
-        popularity_asc: 'Least Popular',
-        rating_asc: 'Lowest Rated',
-        title_asc: 'Title A–Z',
-        title_desc: 'Title Z–A',
-      },
     },
   },
   date: {
@@ -1129,6 +1117,17 @@ export const stage2En = {
     watchHistoryTitle: 'Watch history',
     watchHistorySubtitle: 'Movies and episodes you watched',
     watchHistoryCountLabel: 'watched',
+    myPlatformsTitle: 'My platforms',
+    myPlatformsSubtitle: 'Streaming services you subscribe to',
+    myPlatformsDescription: 'Choose the services you subscribe to. List for your region: {{region}}.',
+    myPlatformsError: 'Could not load platforms.',
+    myPlatformsSaveError: 'Could not save your choice. Try again.',
+    myPlatformsLimit: 'You can choose up to {{max}} platforms.',
+    myPlatformsOnly: 'Only on my platforms',
+    filterPlatforms: 'Platforms',
+    filterWatchType: 'Watch type',
+    myPlatformsChoose: 'Choose my platforms',
+    myPlatformsUnavailable: 'Your platforms are not available for this region or type.',
     notificationPrefsTitle: 'Notification preferences',
     notificationPrefsSubtitle: 'Message and release alerts',
     notificationPrefsDescription: 'Choose which notifications reach your phone.',

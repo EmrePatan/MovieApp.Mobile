@@ -28,7 +28,7 @@ export default function StreamingDiscoverScreen() {
   );
 
   const providersQuery = useDiscoveryWatchProviders(
-    discoverState.mediaType,
+    discoverState.mediaType === 'tv' ? 'tv' : 'movie',
     discoverState.watchRegion,
     isHydrated,
   );

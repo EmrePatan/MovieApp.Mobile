@@ -28,6 +28,7 @@ const DISCOVER_ROUTE_PREFIXES = [
   '/world-cinema',
   '/now-in-theaters',
   '/on-tv-this-week',
+  '/leaving-soon',
   '/ai-recommendations',
   '/pick-something',
 ] as const;
@@ -35,6 +36,7 @@ const DISCOVER_ROUTE_PREFIXES = [
 const LIBRARY_ROUTE_PREFIXES = [
   '/library',
   '/profile',
+  '/my-comments',
   '/favorites',
   '/following',
   '/watch-history',
@@ -52,6 +54,7 @@ const SOCIAL_ROUTE_PREFIXES = [
   '/social-profile',
   '/social-people',
   '/social-privacy',
+  '/user-comments',
 ] as const;
 
 const INSIGHTS_ROUTE_PREFIXES = ['/insights', '/achievements'] as const;

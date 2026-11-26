@@ -16,6 +16,7 @@ export const BROWSE_DISCOVER_PARAM_KEYS = [
   'keywords',
   'keywordLabels',
   'tvStatus',
+  'watchProviderId',
   'sort',
 ] as const;
 
@@ -85,6 +86,7 @@ export const WORLD_CINEMA_PARAM_KEYS = [
   'keywords',
   'keywordLabels',
   'tvStatus',
+  'watchProviderId',
 ] as const;
 
 export function setDiscoveryRouteParams(

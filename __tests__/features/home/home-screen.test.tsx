@@ -548,8 +548,8 @@ describe('HomeScreen', () => {
 
     expect(presented.sections.map((section) => section.type)).toEqual([
       'RecommendedForYou',
-      'OnTvThisWeek',
       'NowInTheaters',
+      'OnTvThisWeek',
     ]);
 
     render(<HomeScreen />);

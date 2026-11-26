@@ -1,6 +1,14 @@
 import { crewJobsIt } from './crew-jobs/it';
 
 export const stage2It = {
+  leavingSoon: {
+    title: 'In scadenza',
+    lastDay: 'Ultimo giorno: {{date}}',
+    emptyTitle: 'Niente in scadenza',
+    emptyMessage: 'Al momento non c’è nulla da mostrare per questa regione.',
+    loadError: 'Impossibile caricare l’elenco.',
+    sortLeaving: 'In scadenza per primi',
+  },
   common: {
     seeAll: 'Vedi tutto',
     seeAllTitle: 'Vedi tutto {{title}}',
@@ -577,16 +585,6 @@ export const stage2It = {
         movie: 'Film',
         tv: 'Serie TV',
       },
-      sortOptions: {
-        popularity_desc: 'Popolari',
-        rating_desc: 'Più votati',
-        newest: 'Più recenti',
-        oldest: 'Più vecchi',
-        popularity_asc: 'Meno popolari',
-        rating_asc: 'Meno votati',
-        title_asc: 'Titolo A–Z',
-        title_desc: 'Titolo Z–A',
-      },
       runtimePresets: {
         any: 'Qualsiasi',
         under90: 'Sotto i 90 min',
@@ -693,16 +691,6 @@ export const stage2It = {
       emptyTitle: 'Nessun titolo trovato',
       emptyMessage: 'Prova un altro paese di origine o tipo di contenuto.',
       loadError: 'Impossibile caricare i risultati del cinema mondiale al momento.',
-      sortOptions: {
-        popularity_desc: 'Popolari',
-        rating_desc: 'Più votati',
-        newest: 'Più recenti',
-        oldest: 'Più vecchi',
-        popularity_asc: 'Meno popolari',
-        rating_asc: 'Meno votati',
-        title_asc: 'Titolo A–Z',
-        title_desc: 'Titolo Z–A',
-      },
     },
   },
   date: {
@@ -1151,6 +1139,17 @@ export const stage2It = {
     watchHistoryTitle: 'Cronologia',
     watchHistorySubtitle: 'Film ed episodi visti',
     watchHistoryCountLabel: 'visti',
+    myPlatformsTitle: 'Le mie piattaforme',
+    myPlatformsSubtitle: 'I servizi di streaming a cui sei abbonato',
+    myPlatformsDescription: 'Scegli i servizi a cui sei abbonato. Elenco per la tua regione: {{region}}.',
+    myPlatformsError: 'Impossibile caricare le piattaforme.',
+    myPlatformsSaveError: 'Impossibile salvare la scelta. Riprova.',
+    myPlatformsLimit: 'Puoi scegliere fino a {{max}} piattaforme.',
+    myPlatformsOnly: 'Solo sulle mie piattaforme',
+    filterPlatforms: 'Piattaforme',
+    filterWatchType: 'Modalità di visione',
+    myPlatformsChoose: 'Scegli le mie piattaforme',
+    myPlatformsUnavailable: 'Le tue piattaforme non sono disponibili per questa regione o questo tipo.',
     notificationPrefsTitle: 'Preferenze notifiche',
     notificationPrefsSubtitle: 'Messaggi e uscite',
     notificationPrefsDescription: 'Scegli quali notifiche arrivano sul telefono.',

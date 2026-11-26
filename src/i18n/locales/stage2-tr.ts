@@ -1,6 +1,14 @@
 import { crewJobsTr } from './crew-jobs/tr';
 
 export const stage2Tr = {
+  leavingSoon: {
+    title: 'İzlemek için son şans',
+    lastDay: 'Son gün: {{date}}',
+    emptyTitle: 'Yakında kalkacak içerik yok',
+    emptyMessage: 'Bu bölgede şu an gösterilecek içerik bulunamadı.',
+    loadError: 'Liste yüklenemedi.',
+    sortLeaving: 'En yakın son gün',
+  },
   common: {
     seeAll: 'Tümünü Gör',
     seeAllTitle: 'Tüm {{title}} içeriğini gör',
@@ -577,16 +585,6 @@ export const stage2Tr = {
         movie: 'Filmler',
         tv: 'Diziler',
       },
-      sortOptions: {
-        popularity_desc: 'Popüler',
-        rating_desc: 'En Yüksek Puanlı',
-        newest: 'En yeni',
-        oldest: 'En eski',
-        popularity_asc: 'En Az Popüler',
-        rating_asc: 'En Düşük Puanlı',
-        title_asc: 'Başlık A–Z',
-        title_desc: 'Başlık Z–A',
-      },
       runtimePresets: {
         any: 'Tümü',
         under90: '90 dk altı',
@@ -693,16 +691,6 @@ export const stage2Tr = {
       emptyTitle: 'Başlık bulunamadı',
       emptyMessage: 'Başka bir menşe ülke veya medya türü dene.',
       loadError: 'Dünya sineması sonuçları şu anda yüklenemedi.',
-      sortOptions: {
-        popularity_desc: 'Popüler',
-        rating_desc: 'En Yüksek Puanlı',
-        newest: 'En yeni',
-        oldest: 'En eski',
-        popularity_asc: 'En Az Popüler',
-        rating_asc: 'En Düşük Puanlı',
-        title_asc: 'Başlık A–Z',
-        title_desc: 'Başlık Z–A',
-      },
     },
   },
   date: {
@@ -1153,6 +1141,17 @@ export const stage2Tr = {
     watchHistoryTitle: 'İzleme geçmişi',
     watchHistorySubtitle: 'İzlediğin film ve bölümler',
     watchHistoryCountLabel: 'izleme',
+    myPlatformsTitle: 'Platformlarım',
+    myPlatformsSubtitle: 'Üye olduğun yayın platformları',
+    myPlatformsDescription: 'Üye olduğun platformları seç. Liste bölgene göre: {{region}}.',
+    myPlatformsError: 'Platformlar yüklenemedi.',
+    myPlatformsSaveError: 'Seçimin kaydedilemedi. Tekrar dene.',
+    myPlatformsLimit: 'En fazla {{max}} platform seçebilirsin.',
+    myPlatformsOnly: 'Yalnız platformlarımda',
+    filterPlatforms: 'Platformlar',
+    filterWatchType: 'İzleme şekli',
+    myPlatformsChoose: 'Platformlarımı seç',
+    myPlatformsUnavailable: 'Seçtiğin platformlar bu bölgede veya bu türde yok.',
     notificationPrefsTitle: 'Bildirim tercihleri',
     notificationPrefsSubtitle: 'Mesaj ve yayın bildirimleri',
     notificationPrefsDescription: 'Hangi bildirimlerin telefonuna geleceğini seç.',

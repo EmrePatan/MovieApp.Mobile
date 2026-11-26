@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
 import { getBrowseDiscovery } from '../api/discovery-api';
 import { discoveryBrowseInfiniteQueryKey } from './discovery-query-keys';
 import type {
@@ -14,8 +15,13 @@ export function useDiscoveryBrowse(
   filters: DiscoveryBrowseFilters,
   pageSize = DEFAULT_DISCOVERY_PAGE_SIZE,
 ) {
+  const { region, isHydrated } = useRegionalPreference();
+  const filtersByPlatform = filters.watchProviderIds.length > 0;
+  const watchRegion = filtersByPlatform ? region : undefined;
+
   return useInfiniteQuery({
-    queryKey: discoveryBrowseInfiniteQueryKey(mode, typeFilter, filters, pageSize),
+    queryKey: discoveryBrowseInfiniteQueryKey(mode, typeFilter, filters, pageSize, watchRegion),
+    enabled: !filtersByPlatform || isHydrated,
     queryFn: ({ pageParam, signal }) =>
       getBrowseDiscovery(
         {
@@ -24,6 +30,7 @@ export function useDiscoveryBrowse(
           page: pageParam,
           pageSize,
           ...filters,
+          watchRegion,
           tvStatuses: typeFilter === 'movie' ? [] : filters.tvStatuses,
         },
         signal,

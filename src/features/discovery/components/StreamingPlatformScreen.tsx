@@ -42,7 +42,7 @@ import {
   streamingStateToFilterDraft,
 } from '@/features/discovery/utils/streaming-filter-adapters';
 import { serializeStreamingDiscoverRoute } from '@/features/discovery/utils/streaming-discover-params';
-import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
+import { CatalogEmptyState } from '@/features/discovery/components/CatalogEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import {
@@ -79,8 +79,9 @@ export function StreamingPlatformScreen({
 
   const primaryProviderId = discoverState.watchProviderIds[0] ?? null;
 
+  // Provider catalogs exist per media type; the movie one names the platform for "all".
   const providersQuery = useDiscoveryWatchProviders(
-    discoverState.mediaType,
+    discoverState.mediaType === 'tv' ? 'tv' : 'movie',
     discoverState.watchRegion,
     isRegionHydrated,
   );
@@ -239,7 +240,9 @@ export function StreamingPlatformScreen({
 
     if (items.length === 0) {
       return (
-        <SearchEmptyState
+        <CatalogEmptyState
+          filtered={hasActiveStreamingUserFilters(platformState)}
+          onClearFilters={() => onReplaceState(clearStreamingUserFilters(platformState))}
           title={t('discovery.streamingDiscover.noMatchesTitle')}
           message={t('discovery.streamingDiscover.noMatchesMessage')}
         />
@@ -247,7 +250,7 @@ export function StreamingPlatformScreen({
     }
 
     return null;
-  }, [items.length, primaryProviderId, resultsQuery, t]);
+  }, [items.length, onReplaceState, platformState, primaryProviderId, resultsQuery, t]);
 
   const listFooter = resultsQuery.isFetchingNextPage ? (
     <View style={catalogBrowseListStyles.footerLoading}>

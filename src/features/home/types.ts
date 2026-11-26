@@ -18,6 +18,7 @@ export type HomeSectionType =
   | 'Trending'
   | 'OnTvThisWeek'
   | 'NowInTheaters'
+  | 'LeavingSoon'
   | 'Popular'
   | 'NewReleases'
   | 'TopRated'
@@ -41,6 +42,11 @@ export interface HomeItem {
   seasonNumber?: number | null;
   episodeNumber?: number | null;
   episodeName?: string | null;
+  /** Set on the "leaving soon" rail: the card shows the last day and the platforms. */
+  leaving?: {
+    leavesAtUtc: string;
+    platforms: { serviceId: string; name: string }[];
+  };
 }
 
 export type HomeComingUpSource = 'for-you' | 'upcoming' | 'personalized' | 'catalog';

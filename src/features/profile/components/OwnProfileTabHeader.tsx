@@ -80,7 +80,7 @@ export function OwnProfileTabHeader() {
                 key: 'reviews',
                 value: statistics.data.reviewsCount,
                 label: t('social.reviewCount'),
-                onPress: () => router.push('/profile/my-comments'),
+                onPress: () => router.push('/my-comments'),
               },
             ]
           : []),

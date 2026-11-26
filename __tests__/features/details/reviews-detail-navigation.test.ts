@@ -91,7 +91,7 @@ describe('reviews detail navigation', () => {
     const movieId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 
     openReviewsDetail(router, `/movie/${movieId}/reviews`, {
-      returnHref: '/profile/my-comments',
+      returnHref: '/my-comments',
     });
 
     openCatalogDetailFromReviews(router, 'movie', movieId);
@@ -106,13 +106,13 @@ describe('reviews detail navigation', () => {
     const router = { push, dismissTo } as never;
 
     openReviewsDetail(router, '/movie/id/reviews', {
-      returnHref: '/profile/my-comments',
+      returnHref: '/my-comments',
     });
 
     expect(push).toHaveBeenCalledWith('/movie/id/reviews');
 
     expect(returnFromReviewsScreen(router)).toBe(true);
-    expect(dismissTo).toHaveBeenCalledWith('/profile/my-comments');
+    expect(dismissTo).toHaveBeenCalledWith('/my-comments');
     expect(returnFromReviewsScreen(router)).toBe(false);
   });
 });

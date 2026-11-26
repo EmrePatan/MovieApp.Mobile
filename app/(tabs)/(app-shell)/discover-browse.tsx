@@ -12,7 +12,6 @@ import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFla
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { isApiError } from '@/api/errors';
-import { AppButton } from '@/components/buttons/AppButton';
 import { AppText } from '@/components/common/AppText';
 import { ErrorView } from '@/components/common/ErrorView';
 import { DetailBackButton } from '@/features/details/shared/components/DetailScreenScaffold';
@@ -36,9 +35,9 @@ import {
   type DiscoveryTypeFilter,
 } from '@/features/discovery/types';
 import {
-  BROWSE_FILTER_SHEET_CONFIG,
   browseStateToFilterDraft,
   filterDraftToBrowsePatch,
+  getBrowseFilterSheetConfig,
 } from '@/features/discovery/utils/browse-filter-adapters';
 import {
   parseDiscoverParams,
@@ -49,7 +48,7 @@ import {
   BROWSE_DISCOVER_PARAM_KEYS,
   setDiscoveryRouteParams,
 } from '@/features/navigation/discovery-route-params';
-import { SearchEmptyState } from '@/features/search/components/SearchEmptyState';
+import { CatalogEmptyState } from '@/features/discovery/components/CatalogEmptyState';
 import { SearchLoadingState } from '@/features/search/components/SearchLoadingState';
 import { SearchResultCard } from '@/features/search/components/SearchResultCard';
 import {
@@ -209,21 +208,16 @@ export default function DiscoverScreen() {
     [filterActive, filters, mode, sortActive, t],
   );
 
-  const emptyState = useMemo(() => {
-    if (hasActiveDiscoveryUserFilters(filters, typeFilter)) {
-      return (
-        <View style={catalogBrowseListStyles.emptyWithAction}>
-          <SearchEmptyState
-            title={t('discovery.browseScreen.noTitlesMatchFiltersTitle')}
-            message={t('discovery.browseScreen.noTitlesMatchFiltersMessage')}
-          />
-          <AppButton title={t('common.clearFilters')} variant="secondary" onPress={clearFilters} />
-        </View>
-      );
-    }
-
-    return <SearchEmptyState title={t('discovery.browseScreen.noTitlesForMode')} />;
-  }, [clearFilters, filters, t, typeFilter]);
+  const emptyState = useMemo(
+    () => (
+      <CatalogEmptyState
+        filtered={hasActiveDiscoveryUserFilters(filters, typeFilter)}
+        onClearFilters={clearFilters}
+        title={t('discovery.browseScreen.noTitlesForMode')}
+      />
+    ),
+    [clearFilters, filters, t, typeFilter],
+  );
 
   const listEmptyComponent = useMemo(() => {
     if (browseQuery.isLoading && items.length === 0) {
@@ -306,7 +300,7 @@ export default function DiscoverScreen() {
       <CatalogDiscoveryFilterSheet
         visible={filterSheetVisible}
         draft={browseStateToFilterDraft(typeFilter, filters)}
-        config={BROWSE_FILTER_SHEET_CONFIG}
+        config={getBrowseFilterSheetConfig(mode)}
         onClose={() => setFilterSheetVisible(false)}
         onApply={(draft) => {
           const patch = filterDraftToBrowsePatch(draft);

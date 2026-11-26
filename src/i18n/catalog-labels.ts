@@ -207,8 +207,13 @@ export function translateAdvancedDiscoverMediaType(type: AdvancedDiscoverMediaTy
   return i18n.t(`discovery.advancedDiscover.mediaOptions.${type}`);
 }
 
+/** Same sorts as the browse lists; only the two date sorts have other API names. */
 export function translateAdvancedDiscoverSort(sort: AdvancedDiscoverSort): string {
-  return i18n.t(`discovery.advancedDiscover.sortOptions.${sort}`);
+  if (sort === 'newest') {
+    return translateDiscoverySort('release_desc');
+  }
+
+  return translateDiscoverySort(sort === 'oldest' ? 'release_asc' : sort);
 }
 
 export function translateAdvancedDiscoverRuntimePreset(presetKey: string): string {
@@ -225,10 +230,6 @@ export function translateDiscoverReleaseType(releaseType: string): string {
       ? 'theatricalLimited'
       : releaseType;
   return i18n.t(`discovery.advancedDiscover.releaseTypes.${key}`);
-}
-
-export function translateWorldCinemaSort(sort: AdvancedDiscoverSort): string {
-  return i18n.t(`discovery.worldCinemaScreen.sortOptions.${sort}`);
 }
 
 export function translateOriginCountryLabel(countryCode: string): string {

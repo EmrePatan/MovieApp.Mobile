@@ -1,25 +1,23 @@
-import type { DiscoveryBrowseFilters, DiscoveryTypeFilter } from '../types';
 import {
+  supportsWatchPlatforms,
+  type DiscoveryBrowseFilters,
+  type DiscoveryBrowseMode,
+  type DiscoveryTypeFilter,
+} from '../types';
+import {
+  createCatalogFilterSheetConfig,
   createEmptyCatalogFilterDraft,
   type CatalogFilterDraft,
   type CatalogFilterSheetConfig,
 } from '../utils/catalog-filter-draft';
 
-export const BROWSE_FILTER_SHEET_CONFIG: CatalogFilterSheetConfig = {
-  contentTypeOptions: ['all', 'movie', 'tv'],
-  fields: [
-    'contentType',
-    'genre',
-    'year',
-    'minRating',
-    'originalLanguage',
-    'originCountry',
-    'runtime',
-    'minVoteCount',
-    'keywords',
-    'tvStatus',
-  ],
-};
+export const BROWSE_FILTER_SHEET_CONFIG = createCatalogFilterSheetConfig();
+
+export function getBrowseFilterSheetConfig(mode: DiscoveryBrowseMode): CatalogFilterSheetConfig {
+  return supportsWatchPlatforms(mode)
+    ? { ...BROWSE_FILTER_SHEET_CONFIG, supportsMyPlatforms: true }
+    : BROWSE_FILTER_SHEET_CONFIG;
+}
 
 export function browseStateToFilterDraft(
   type: DiscoveryTypeFilter,
@@ -44,6 +42,7 @@ export function browseStateToFilterDraft(
     keywordIds: filters.keywordIds,
     keywordLabels: filters.keywordLabels,
     tvStatuses: contentType === 'movie' ? [] : filters.tvStatuses,
+    watchProviderIds: filters.watchProviderIds,
   };
 }
 
@@ -67,6 +66,7 @@ export function filterDraftToBrowsePatch(draft: CatalogFilterDraft): {
       keywordIds: draft.keywordIds,
       keywordLabels: draft.keywordLabels,
       tvStatuses: draft.contentType === 'movie' ? [] : draft.tvStatuses,
+      watchProviderIds: draft.watchProviderIds,
     },
   };
 }

@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { AppInput } from '@/components/inputs/AppInput';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
 import { translateGenreName } from '@/i18n/catalog-labels';
 import {
@@ -11,20 +10,20 @@ import {
   CatalogOptionList,
   FilterSelectorRow,
 } from '@/features/catalog/components';
-import {
-  CATALOG_MIN_RATING_OPTIONS,
-  CATALOG_RUNTIME_PRESETS,
-  CATALOG_VOTE_COUNT_OPTIONS,
-  CATALOG_YEAR_PRESETS,
-  resolveCatalogRuntimePresetKey,
-  resolveCatalogYearPresetKey,
-  type CatalogRuntimePresetKey,
-  type CatalogYearPresetKey,
-} from '../catalog-filter-presets';
-import { CATALOG_LANGUAGE_OPTIONS } from '../catalog-language-options';
+import { CatalogMyPlatformsFilter } from './CatalogMyPlatformsFilter';
 import { useGenres } from '../hooks/useGenres';
-import { countryCodeToFlagEmoji } from '../utils/country-flag';
-import { getOriginCountryOptions } from '../world-cinema-collections';
+import {
+  CountryFilterList,
+  flagEmojiForOriginCountry,
+  formatFilterList,
+  GenreFilterList,
+  LanguageFilterList,
+  RatingFilterList,
+  RuntimeFilterPanel,
+  useFilterSummaries,
+  VoteCountFilterList,
+  YearFilterPanel,
+} from './filter-selectors';
 import { TV_DISCOVER_STATUS_OPTIONS, type TvDiscoverStatus } from '../tv-discover-status';
 import {
   clearTvStatusesIfNeeded,
@@ -34,7 +33,7 @@ import {
   type CatalogFilterField,
   type CatalogFilterSheetConfig,
 } from '../utils/catalog-filter-draft';
-import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
+import { premiumSheetChrome } from '@/theme/premium-sheet';
 import { spacing } from '@/theme/spacing';
 
 type SelectorKind =
@@ -59,32 +58,6 @@ interface CatalogDiscoveryFilterSheetProps {
   testID?: string;
 }
 
-function flagEmojiForOriginCountry(code: string | null | undefined): string | undefined {
-  if (!code) {
-    return undefined;
-  }
-
-  const normalized = code.trim().toUpperCase();
-  if (normalized.length !== 2) {
-    return undefined;
-  }
-
-  const emoji = countryCodeToFlagEmoji(normalized);
-  return emoji.length > 0 ? emoji : undefined;
-}
-
-function formatList(values: string[], fallback: string): string {
-  if (values.length === 0) {
-    return fallback;
-  }
-
-  if (values.length <= 2) {
-    return values.join(', ');
-  }
-
-  return `${values.slice(0, 2).join(', ')} +${values.length - 2}`;
-}
-
 export function CatalogDiscoveryFilterSheet(props: CatalogDiscoveryFilterSheetProps) {
   if (!props.visible) {
     return null;
@@ -107,23 +80,20 @@ function CatalogDiscoveryFilterSheetBody({
   const wasVisibleRef = useRef(false);
   const [draft, setDraft] = useState<CatalogFilterDraft>(appliedDraft);
   const [selector, setSelector] = useState<SelectorKind>(null);
-  const [yearMode, setYearMode] = useState<CatalogYearPresetKey>('any');
-  const [runtimeMode, setRuntimeMode] = useState<CatalogRuntimePresetKey>('any');
+  const [yearPanelKey, setYearPanelKey] = useState(0);
 
   useEffect(() => {
     if (visible && !wasVisibleRef.current) {
       setDraft(appliedDraft);
       setSelector(null);
-      setYearMode(resolveCatalogYearPresetKey(appliedDraft));
-      setRuntimeMode(resolveCatalogRuntimePresetKey(appliedDraft));
     }
 
     wasVisibleRef.current = visible;
   }, [visible, appliedDraft]);
 
-  const anyLabel = t('discovery.catalogFilters.any');
+  const summaries = useFilterSummaries();
+  const { anyLabel } = summaries;
   const genres = useMemo(() => genresQuery.data ?? [], [genresQuery.data]);
-  const countryOptions = useMemo(() => getOriginCountryOptions(), []);
 
   const genreNamesById = useMemo(() => {
     const map: Record<string, string> = {};
@@ -134,7 +104,17 @@ function CatalogDiscoveryFilterSheetBody({
   }, [genres]);
 
   const updateDraft = (patch: Partial<CatalogFilterDraft>) => {
-    setDraft((current) => clearTvStatusesIfNeeded({ ...current, ...patch }));
+    setDraft((current) => {
+      // Platform catalogs differ per content type, so a change starts the platform filter over.
+      const contentTypeChanged =
+        patch.contentType !== undefined && patch.contentType !== current.contentType;
+
+      return clearTvStatusesIfNeeded({
+        ...current,
+        ...(contentTypeChanged ? { watchProviderIds: [] } : null),
+        ...patch,
+      });
+    });
   };
 
   const contentTypeLabel = (type: CatalogContentType) => {
@@ -148,60 +128,6 @@ function CatalogDiscoveryFilterSheetBody({
     }
   };
 
-  const yearSummary = () => {
-    if (draft.year != null) {
-      return String(draft.year);
-    }
-
-    if (draft.yearFrom != null || draft.yearTo != null) {
-      return `${draft.yearFrom ?? '…'}–${draft.yearTo ?? '…'}`;
-    }
-
-    return anyLabel;
-  };
-
-  const ratingSummary = () =>
-    draft.minRating != null
-      ? t('discovery.catalogFilters.ratingOption', { rating: draft.minRating })
-      : anyLabel;
-
-  const languageSummary = () => {
-    if (!draft.originalLanguage) {
-      return anyLabel;
-    }
-
-    return t(`discovery.catalogFilters.languageNames.${draft.originalLanguage}`, {
-      defaultValue: draft.originalLanguage,
-    });
-  };
-
-  const countrySummary = () => {
-    if (!draft.originCountry) {
-      return anyLabel;
-    }
-
-    const match = countryOptions.find((option) => option.code === draft.originCountry);
-    return match?.label ?? draft.originCountry;
-  };
-
-  const runtimeSummary = () => {
-    const key = resolveCatalogRuntimePresetKey(draft);
-    if (key === 'any') {
-      return anyLabel;
-    }
-
-    if (key === 'custom') {
-      return `${draft.minRuntimeMinutes ?? '…'}–${draft.maxRuntimeMinutes ?? '…'}`;
-    }
-
-    return t(`discovery.advancedDiscover.runtimePresets.${key}`);
-  };
-
-  const voteCountSummary = () =>
-    draft.minVoteCount != null
-      ? t('discovery.catalogFilters.voteCountOption', { count: draft.minVoteCount })
-      : anyLabel;
-
   const keywordsSummary = () => {
     if (draft.keywordIds.length === 0) {
       return anyLabel;
@@ -210,7 +136,7 @@ function CatalogDiscoveryFilterSheetBody({
     const names = draft.keywordIds.map(
       (id) => draft.keywordLabels[id] ?? t('discovery.catalogFilters.keywordFallback'),
     );
-    return formatList(names, anyLabel);
+    return formatFilterList(names, anyLabel);
   };
 
   const tvStatusSummary = () => {
@@ -218,14 +144,14 @@ function CatalogDiscoveryFilterSheetBody({
       return anyLabel;
     }
 
-    return formatList(
+    return formatFilterList(
       draft.tvStatuses.map((status) => t(`discovery.catalogFilters.tvStatusOptions.${status}`)),
       anyLabel,
     );
   };
 
   const genreSummary = () =>
-    formatList(
+    formatFilterList(
       draft.genreIds.map((id) => genreNamesById[id] ?? t('discovery.activeFilterChips.genreFallback')),
       anyLabel,
     );
@@ -267,78 +193,36 @@ function CatalogDiscoveryFilterSheetBody({
     switch (selector) {
       case 'genre':
         return (
-          <>
-            {genresQuery.isLoading ? <ActivityIndicator color={premiumSheet.mutedGold} /> : null}
-            <CatalogOptionList
-              multi
-              values={draft.genreIds}
-              options={genres.map((genre) => ({
-                value: genre.id,
-                label: translateGenreName(genre.name),
-              }))}
-              onChange={(genreIds) => updateDraft({ genreIds })}
-              testID="catalog-genre-selector"
-            />
-          </>
+          <GenreFilterList
+            genres={genres}
+            isLoading={genresQuery.isLoading}
+            selectedIds={draft.genreIds}
+            onChange={(genreIds) => updateDraft({ genreIds })}
+          />
         );
       case 'rating':
         return (
-          <CatalogOptionList
-            values={[String(draft.minRating ?? '')]}
-            options={CATALOG_MIN_RATING_OPTIONS.map((rating) => ({
-              value: rating == null ? '' : String(rating),
-              label:
-                rating == null
-                  ? anyLabel
-                  : t('discovery.catalogFilters.ratingOption', { rating }),
-            }))}
-            onChange={(values) => {
-              const raw = values[0];
-              updateDraft({
-                minRating: raw && raw.length > 0 ? Number.parseFloat(raw) : null,
-              });
-            }}
-            onSingleSelectComplete={() => setSelector(null)}
+          <RatingFilterList
+            value={draft.minRating}
+            onChange={(minRating) => updateDraft({ minRating })}
+            onComplete={() => setSelector(null)}
           />
         );
       case 'language':
         return (
-          <CatalogOptionList
-            values={[draft.originalLanguage ?? '']}
-            options={[
-              { value: '', label: anyLabel },
-              ...CATALOG_LANGUAGE_OPTIONS.map((option) => ({
-                value: option.code,
-                label: t(`discovery.catalogFilters.languageNames.${option.labelKey}`),
-              })),
-            ]}
-            onChange={(values) =>
-              updateDraft({
-                originalLanguage: values[0] && values[0].length > 0 ? values[0] : null,
-              })
-            }
-            onSingleSelectComplete={() => setSelector(null)}
+          <LanguageFilterList
+            value={draft.originalLanguage}
+            onChange={(originalLanguage) => updateDraft({ originalLanguage })}
+            onComplete={() => setSelector(null)}
           />
         );
       case 'country':
         return (
-          <CatalogOptionList
-            values={[draft.originCountry ?? config.defaultOriginCountry ?? '']}
-            options={[
-              ...(config.defaultOriginCountry ? [] : [{ value: '', label: anyLabel }]),
-              ...countryOptions.map((option) => ({
-                value: option.code,
-                label: option.label,
-                flagEmoji: flagEmojiForOriginCountry(option.code),
-              })),
-            ]}
-            onChange={(values) => {
-              const next = values[0] && values[0].length > 0 ? values[0] : null;
-              updateDraft({
-                originCountry: next ?? config.defaultOriginCountry ?? null,
-              });
-            }}
-            onSingleSelectComplete={() => setSelector(null)}
+          <CountryFilterList
+            value={draft.originCountry}
+            defaultCountry={config.defaultOriginCountry}
+            onChange={(originCountry) => updateDraft({ originCountry })}
+            onComplete={() => setSelector(null)}
           />
         );
       case 'tvStatus':
@@ -355,22 +239,10 @@ function CatalogDiscoveryFilterSheetBody({
         );
       case 'voteCount':
         return (
-          <CatalogOptionList
-            values={[String(draft.minVoteCount ?? '')]}
-            options={CATALOG_VOTE_COUNT_OPTIONS.map((count) => ({
-              value: count == null ? '' : String(count),
-              label:
-                count == null
-                  ? anyLabel
-                  : t('discovery.catalogFilters.voteCountOption', { count }),
-            }))}
-            onChange={(values) => {
-              const raw = values[0];
-              updateDraft({
-                minVoteCount: raw && raw.length > 0 ? Number.parseInt(raw, 10) : null,
-              });
-            }}
-            onSingleSelectComplete={() => setSelector(null)}
+          <VoteCountFilterList
+            value={draft.minVoteCount}
+            onChange={(minVoteCount) => updateDraft({ minVoteCount })}
+            onComplete={() => setSelector(null)}
           />
         );
       case 'keywords':
@@ -384,101 +256,9 @@ function CatalogDiscoveryFilterSheetBody({
           />
         );
       case 'year':
-        return (
-          <>
-            <CatalogChipRow
-              options={[
-                ...CATALOG_YEAR_PRESETS.map((preset) => ({
-                  value: preset.key,
-                  label:
-                    preset.key === 'any'
-                      ? anyLabel
-                      : t(`discovery.catalogFilters.yearPresets.${preset.key}`),
-                })),
-                {
-                  value: 'custom' as CatalogYearPresetKey,
-                  label: t('discovery.catalogFilters.customRange'),
-                },
-              ]}
-              value={yearMode}
-              onChange={(key) => {
-                setYearMode(key);
-                if (key === 'custom') {
-                  updateDraft({ year: null });
-                  return;
-                }
-
-                const preset = CATALOG_YEAR_PRESETS.find((item) => item.key === key);
-                if (!preset) {
-                  return;
-                }
-
-                updateDraft({
-                  year: preset.year,
-                  yearFrom: preset.yearFrom,
-                  yearTo: preset.yearTo,
-                });
-              }}
-            />
-            {yearMode === 'custom' ? (
-              <View style={styles.rangeInputs}>
-                <AppInput
-                  label={t('common.from')}
-                  value={draft.yearFrom != null ? String(draft.yearFrom) : ''}
-                  onChangeText={(text) => {
-                    const trimmed = text.trim();
-                    updateDraft({
-                      year: null,
-                      yearFrom: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                    });
-                  }}
-                  placeholder={t('common.placeholderYearFromExample')}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                />
-                <AppInput
-                  label={t('common.to')}
-                  value={draft.yearTo != null ? String(draft.yearTo) : ''}
-                  onChangeText={(text) => {
-                    const trimmed = text.trim();
-                    updateDraft({
-                      year: null,
-                      yearTo: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                    });
-                  }}
-                  placeholder={t('common.placeholderYearToExample')}
-                  keyboardType="number-pad"
-                  maxLength={4}
-                />
-              </View>
-            ) : null}
-          </>
-        );
+        return <YearFilterPanel key={yearPanelKey} value={draft} onChange={updateDraft} />;
       case 'runtime':
-        return (
-          <CatalogChipRow
-            options={CATALOG_RUNTIME_PRESETS.map((preset) => ({
-              value: preset.key,
-              label:
-                preset.key === 'any'
-                  ? anyLabel
-                  : t(`discovery.advancedDiscover.runtimePresets.${preset.key}`),
-            }))}
-            value={runtimeMode === 'custom' ? 'any' : runtimeMode}
-            onChange={(key) => {
-              setRuntimeMode(key);
-              const preset = CATALOG_RUNTIME_PRESETS.find((item) => item.key === key);
-              if (!preset) {
-                return;
-              }
-
-              updateDraft({
-                minRuntimeMinutes: preset.minRuntimeMinutes,
-                maxRuntimeMinutes: preset.maxRuntimeMinutes,
-              });
-            }}
-          />
-        );
+        return <RuntimeFilterPanel value={draft} onChange={updateDraft} />;
       default:
         return null;
     }
@@ -517,7 +297,7 @@ function CatalogDiscoveryFilterSheetBody({
           <FilterSelectorRow
             key={field}
             label={t('common.year')}
-            valueLabel={yearSummary()}
+            valueLabel={summaries.year(draft)}
             onPress={() => setSelector('year')}
           />
         );
@@ -526,7 +306,7 @@ function CatalogDiscoveryFilterSheetBody({
           <FilterSelectorRow
             key={field}
             label={t('common.minimumRating')}
-            valueLabel={ratingSummary()}
+            valueLabel={summaries.rating(draft.minRating)}
             onPress={() => setSelector('rating')}
           />
         );
@@ -535,7 +315,7 @@ function CatalogDiscoveryFilterSheetBody({
           <FilterSelectorRow
             key={field}
             label={t('common.originalLanguage')}
-            valueLabel={languageSummary()}
+            valueLabel={summaries.language(draft.originalLanguage)}
             onPress={() => setSelector('language')}
           />
         );
@@ -544,7 +324,7 @@ function CatalogDiscoveryFilterSheetBody({
           <FilterSelectorRow
             key={field}
             label={t('common.originCountry')}
-            valueLabel={countrySummary()}
+            valueLabel={summaries.country(draft.originCountry)}
             valueFlagEmoji={flagEmojiForOriginCountry(draft.originCountry)}
             onPress={() => setSelector('country')}
           />
@@ -554,7 +334,7 @@ function CatalogDiscoveryFilterSheetBody({
           <FilterSelectorRow
             key={field}
             label={t('discovery.catalogFilters.runtime')}
-            valueLabel={runtimeSummary()}
+            valueLabel={summaries.runtime(draft)}
             onPress={() => setSelector('runtime')}
           />
         );
@@ -563,7 +343,7 @@ function CatalogDiscoveryFilterSheetBody({
           <FilterSelectorRow
             key={field}
             label={t('discovery.catalogFilters.minVoteCount')}
-            valueLabel={voteCountSummary()}
+            valueLabel={summaries.voteCount(draft.minVoteCount)}
             onPress={() => setSelector('voteCount')}
           />
         );
@@ -626,10 +406,10 @@ function CatalogDiscoveryFilterSheetBody({
         showSelectorFooter
           ? () => {
               if (selector === 'year') {
-                setYearMode('any');
+                // Remount so the panel drops its custom-range mode.
+                setYearPanelKey((key) => key + 1);
                 updateDraft({ year: null, yearFrom: null, yearTo: null });
               } else if (selector === 'runtime') {
-                setRuntimeMode('any');
                 updateDraft({ minRuntimeMinutes: null, maxRuntimeMinutes: null });
               }
             }
@@ -650,7 +430,21 @@ function CatalogDiscoveryFilterSheetBody({
       {inSelector ? (
         renderSelectorContent()
       ) : (
-        visibleFields.map(renderField)
+        visibleFields.map((field) =>
+          field === 'genre' && config.supportsMyPlatforms ? (
+            <Fragment key={field}>
+              <CatalogMyPlatformsFilter
+                contentType={draft.contentType}
+                selectedProviderIds={draft.watchProviderIds}
+                onChange={(watchProviderIds) => updateDraft({ watchProviderIds })}
+                onChoose={onClose}
+              />
+              {renderField(field)}
+            </Fragment>
+          ) : (
+            renderField(field)
+          ),
+        )
       )}
     </CatalogFilterSheetShell>
   );
@@ -660,8 +454,5 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.sm,
     paddingVertical: spacing.xs,
-  },
-  rangeInputs: {
-    gap: spacing.sm,
   },
 });

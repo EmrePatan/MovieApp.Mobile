@@ -33,12 +33,15 @@ export default function AppShellLayout() {
       <Stack.Screen name="discover-genres" />
       <Stack.Screen name="now-in-theaters" />
       <Stack.Screen name="on-tv-this-week" />
+      <Stack.Screen name="leaving-soon" />
       <Stack.Screen name="world-cinema" />
       <Stack.Screen name="favorites" />
       <Stack.Screen name="following" />
       <Stack.Screen name="upcoming" />
       <Stack.Screen name="watch-history" />
       <Stack.Screen name="watchlist" />
+      <Stack.Screen name="my-comments" />
+      <Stack.Screen name="user-comments/[userId]" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="messages" />
       <Stack.Screen name="pick-something" />

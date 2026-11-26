@@ -1,29 +1,11 @@
+import type { StreamingDiscoverState } from '../streaming-discover-types';
 import {
-  DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE,
-  type StreamingDiscoverState,
-} from '../streaming-discover-types';
-import {
+  createCatalogFilterSheetConfig,
   createEmptyCatalogFilterDraft,
   type CatalogFilterDraft,
-  type CatalogFilterSheetConfig,
 } from './catalog-filter-draft';
 
-export const STREAMING_FILTER_SHEET_CONFIG: CatalogFilterSheetConfig = {
-  contentTypeOptions: ['movie', 'tv'],
-  fields: [
-    'contentType',
-    'genre',
-    'year',
-    'minRating',
-    'originalLanguage',
-    'originCountry',
-    'runtime',
-    'minVoteCount',
-    'keywords',
-    'tvStatus',
-  ],
-  defaultContentType: DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE,
-};
+export const STREAMING_FILTER_SHEET_CONFIG = createCatalogFilterSheetConfig();
 
 export function streamingStateToFilterDraft(state: StreamingDiscoverState): CatalogFilterDraft {
   return {
@@ -41,7 +23,7 @@ export function streamingStateToFilterDraft(state: StreamingDiscoverState): Cata
     originCountry: state.originCountry,
     keywordIds: state.keywordIds,
     keywordLabels: state.keywordLabels ?? {},
-    tvStatuses: state.mediaType === 'tv' ? state.tvStatuses : [],
+    tvStatuses: state.mediaType === 'movie' ? [] : state.tvStatuses,
   };
 }
 
@@ -49,7 +31,7 @@ export function filterDraftToStreamingPatch(
   draft: CatalogFilterDraft,
   current: StreamingDiscoverState,
 ): StreamingDiscoverState {
-  const mediaType = draft.contentType === 'all' ? current.mediaType : draft.contentType;
+  const mediaType = draft.contentType;
 
   return {
     ...current,
@@ -66,6 +48,6 @@ export function filterDraftToStreamingPatch(
     originCountry: draft.originCountry,
     keywordIds: draft.keywordIds,
     keywordLabels: draft.keywordLabels,
-    tvStatuses: mediaType === 'tv' ? draft.tvStatuses : [],
+    tvStatuses: mediaType === 'movie' ? [] : draft.tvStatuses,
   };
 }

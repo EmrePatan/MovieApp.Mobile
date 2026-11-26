@@ -138,6 +138,8 @@ describe('action query keys', () => {
       [],
       [],
       'popularity_desc',
+      [],
+      null,
       20,
     ]);
   });

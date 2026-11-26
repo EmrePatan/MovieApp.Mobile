@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useOnTvThisWeekPreview } from '@/features/discovery/hooks/useOnTvThisWeekPreview';
 import { useNowInTheatersPreview } from '@/features/discovery/hooks/useNowInTheatersPreview';
 import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
+import { buildLeavingSoonSection } from '@/features/leaving-soon/leaving-soon-items';
+import { useLeavingSoonPreview } from '@/features/leaving-soon/useLeavingSoon';
 import {
   appendMissingHomeCatalogRails,
   homeResponseIncludesSection,
@@ -54,6 +56,9 @@ export function useHomeFeed(
     !homeResponseIncludesSection(browseSections, 'NowInTheaters');
   const onTvFallback = useOnTvThisWeekPreview(needsOnTvFallback);
   const theatersFallback = useNowInTheatersPreview(region, needsTheatersFallback);
+  // Its own request, so the rest of Home never waits for it. The rail mixes movies and TV.
+  const needsLeavingSoon = screenActive && isHydrated && type === 'all';
+  const leavingSoon = useLeavingSoonPreview(region, needsLeavingSoon);
 
   const personalization = useMemo<PersonalizationState>(
     () =>
@@ -135,8 +140,16 @@ export function useHomeFeed(
         : [],
     });
 
-    return omitHomeRailsForTypeFilter(withFallbackRails, type);
+    // A failed or short list simply means no rail.
+    const leavingSection =
+      type === 'all' ? buildLeavingSoonSection(leavingSoon.data?.items) : null;
+
+    return omitHomeRailsForTypeFilter(
+      leavingSection ? [...withFallbackRails, leavingSection] : withFallbackRails,
+      type,
+    );
   }, [
+    leavingSoon.data?.items,
     needsOnTvFallback,
     needsTheatersFallback,
     onTvFallback.data?.items,
@@ -151,8 +164,14 @@ export function useHomeFeed(
   const refetchOnTvFallback = onTvFallback.refetch;
   const refetchTheatersFallback = theatersFallback.refetch;
 
+  const refetchLeavingSoon = leavingSoon.refetch;
+
   const refetch = useCallback(async () => {
     const tasks: Promise<unknown>[] = [refetchBrowse(), refetchPersonalized()];
+
+    if (needsLeavingSoon) {
+      tasks.push(refetchLeavingSoon());
+    }
 
     if (!hasPersonalizedComingUp) {
       tasks.push(refetchComingUpFallback());
@@ -169,10 +188,12 @@ export function useHomeFeed(
     await Promise.all(tasks);
   }, [
     hasPersonalizedComingUp,
+    needsLeavingSoon,
     needsOnTvFallback,
     needsTheatersFallback,
     refetchBrowse,
     refetchComingUpFallback,
+    refetchLeavingSoon,
     refetchOnTvFallback,
     refetchPersonalized,
     refetchTheatersFallback,

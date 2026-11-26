@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CircularFlagBadge } from '@/components/common/CircularFlagBadge';
@@ -10,6 +11,7 @@ export interface CatalogOptionItem<T extends string> {
   label: string;
   /** ISO 3166-1 alpha-2 country flag emoji for origin-country rows */
   flagEmoji?: string;
+  leading?: ReactNode;
 }
 
 interface CatalogOptionListProps<T extends string> {
@@ -61,6 +63,7 @@ export function CatalogOptionList<T extends string>({
             ]}
           >
             <View style={styles.labelRow}>
+              {option.leading}
               {option.flagEmoji ? <CircularFlagBadge emoji={option.flagEmoji} /> : null}
               <AppText
                 variant="body"

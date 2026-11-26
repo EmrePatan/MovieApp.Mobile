@@ -1,31 +1,17 @@
 import {
-  DEFAULT_WORLD_CINEMA_MEDIA_TYPE,
   DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY,
   type WorldCinemaState,
 } from '../world-cinema-types';
 import {
+  createCatalogFilterSheetConfig,
   createEmptyCatalogFilterDraft,
   type CatalogFilterDraft,
-  type CatalogFilterSheetConfig,
 } from './catalog-filter-draft';
 
-export const WORLD_CINEMA_FILTER_SHEET_CONFIG: CatalogFilterSheetConfig = {
-  contentTypeOptions: ['movie', 'tv'],
-  fields: [
-    'contentType',
-    'originCountry',
-    'genre',
-    'year',
-    'minRating',
-    'originalLanguage',
-    'runtime',
-    'minVoteCount',
-    'keywords',
-    'tvStatus',
-  ],
+export const WORLD_CINEMA_FILTER_SHEET_CONFIG = createCatalogFilterSheetConfig({
   defaultOriginCountry: DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY,
-  defaultContentType: DEFAULT_WORLD_CINEMA_MEDIA_TYPE,
-};
+  supportsMyPlatforms: true,
+});
 
 export function worldCinemaStateToFilterDraft(state: WorldCinemaState): CatalogFilterDraft {
   return {
@@ -43,7 +29,8 @@ export function worldCinemaStateToFilterDraft(state: WorldCinemaState): CatalogF
     originCountry: state.originCountry,
     keywordIds: state.keywordIds,
     keywordLabels: state.keywordLabels ?? {},
-    tvStatuses: state.mediaType === 'tv' ? state.tvStatuses : [],
+    tvStatuses: state.mediaType === 'movie' ? [] : state.tvStatuses,
+    watchProviderIds: state.watchProviderIds,
   };
 }
 
@@ -51,7 +38,7 @@ export function filterDraftToWorldCinemaPatch(
   draft: CatalogFilterDraft,
   current: WorldCinemaState,
 ): WorldCinemaState {
-  const mediaType = draft.contentType === 'all' ? current.mediaType : draft.contentType;
+  const mediaType = draft.contentType;
 
   return {
     ...current,
@@ -68,6 +55,7 @@ export function filterDraftToWorldCinemaPatch(
     originalLanguage: draft.originalLanguage,
     keywordIds: draft.keywordIds,
     keywordLabels: draft.keywordLabels,
-    tvStatuses: mediaType === 'tv' ? draft.tvStatuses : [],
+    tvStatuses: mediaType === 'movie' ? [] : draft.tvStatuses,
+    watchProviderIds: draft.watchProviderIds,
   };
 }

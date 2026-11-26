@@ -2,52 +2,76 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   translateAdvancedDiscoverMediaType,
-  translateAdvancedDiscoverRuntimePreset,
   translateAdvancedDiscoverSort,
+  translateDiscoverReleaseType,
+  translateGenreName,
+  translateWatchProviderType,
 } from '@/i18n/catalog-labels';
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { SheetHandle, SwipeSheet } from '@/components/layout/SwipeableSheet';
-import { Ionicons } from '@expo/vector-icons';
-import { AppButton } from '@/components/buttons/AppButton';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/common/AppText';
-import { translateGenreName } from '@/i18n/catalog-labels';
-import { AppInput } from '@/components/inputs/AppInput';
+import { ErrorView } from '@/components/common/ErrorView';
+import {
+  CatalogChipRow,
+  CatalogFilterSheetShell,
+  CatalogOptionList,
+  FilterSelectorRow,
+} from '@/features/catalog/components';
+import { getRegionFlagEmoji, getRegionLabel, REGION_OPTIONS } from '@/features/regions/region-options';
+import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
+import { MyPlatformsFilter } from '@/features/watch-platforms/MyPlatformsFilter';
 import { useDiscoveryWatchProviders } from '../hooks/useDiscoveryWatchProviders';
 import { useGenres } from '../hooks/useGenres';
-import { useRegionalPreference } from '@/features/regions/hooks/useRegionalPreference';
-import { RegionSelector } from '@/features/regions/components/RegionSelector';
-import { WatchMonetizationSelector } from './WatchMonetizationSelector';
-import { WatchProviderSelector } from './WatchProviderSelector';
-import { WatchRegionSelector } from './WatchRegionSelector';
 import {
-  listCertificationOptions,
   isSupportedCertificationCountry,
+  listCertificationOptions,
 } from '../discover-certification-options';
 import { DISCOVER_RELEASE_TYPE_OPTIONS } from '../discover-release-type-options';
-import { translateDiscoverReleaseType } from '@/i18n/catalog-labels';
+import { CATALOG_MIN_RATING_OPTIONS } from '../catalog-filter-presets';
 import {
   ADVANCED_DISCOVER_MEDIA_OPTIONS,
-  ADVANCED_DISCOVER_RUNTIME_PRESETS,
   ADVANCED_DISCOVER_SORT_OPTIONS,
-  ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS,
   createDefaultAdvancedDiscoverFilters,
   ensureStreamingDraftDefaults,
   type AdvancedDiscoverFilters,
   type AdvancedDiscoverMediaType,
-  type AdvancedDiscoverSort,
   type GenreMatchMode,
 } from '../advanced-discover-types';
-import type { Genre } from '../types';
+import { WATCH_MONETIZATION_OPTIONS, type WatchMonetizationType } from '../watch-provider-types';
+import {
+  CountryFilterList,
+  flagEmojiForOriginCountry,
+  formatFilterList,
+  GenreFilterList,
+  LanguageFilterList,
+  RatingFilterList,
+  RuntimeFilterPanel,
+  useFilterSummaries,
+  VoteCountFilterList,
+  YearFilterPanel,
+} from './filter-selectors';
+import { WatchProviderLogo } from './WatchProviderLogo';
 import { premiumSheet, premiumSheetChrome } from '@/theme/premium-sheet';
-import { borderRadius, spacing } from '@/theme/spacing';
-import { GlassSheetLayer } from '@/components/common/GlassSheetLayer';
+import { spacing } from '@/theme/spacing';
+
+type SelectorKind =
+  | 'genre'
+  | 'year'
+  | 'minRating'
+  | 'maxRating'
+  | 'voteCount'
+  | 'runtime'
+  | 'language'
+  | 'country'
+  | 'certificationCountry'
+  | 'certification'
+  | 'releaseTypes'
+  | 'watchRegion'
+  | 'providers'
+  | 'watchType'
+  | 'sort';
+
+const MAX_RATING_OPTIONS: readonly (number | null)[] = [null, 5, 6, 7, 8, 9];
+const maxRatingLabel = (rating: number) => `≤ ${rating}`;
 
 interface AdvancedDiscoverFilterSheetProps {
   visible: boolean;
@@ -56,224 +80,6 @@ interface AdvancedDiscoverFilterSheetProps {
   onClose: () => void;
   onApply: (mediaType: AdvancedDiscoverMediaType, filters: AdvancedDiscoverFilters) => void;
   onClear: () => void;
-}
-
-const GENRE_CHIP_COLLAPSED_COUNT = 8;
-
-function toggleGenre(genreIds: string[], genreId: string): string[] {
-  return genreIds.includes(genreId)
-    ? genreIds.filter((id) => id !== genreId)
-    : [...genreIds, genreId];
-}
-
-function buildCollapsedGenreList(genres: Genre[], selectedIds: string[], expanded: boolean): Genre[] {
-  if (expanded || genres.length <= GENRE_CHIP_COLLAPSED_COUNT) {
-    return genres;
-  }
-
-  const visible = genres.slice(0, GENRE_CHIP_COLLAPSED_COUNT);
-  const visibleIds = new Set(visible.map((genre) => genre.id));
-
-  for (const genre of genres) {
-    if (selectedIds.includes(genre.id) && !visibleIds.has(genre.id)) {
-      visible.push(genre);
-      visibleIds.add(genre.id);
-    }
-  }
-
-  return visible;
-}
-
-function GenreSelector({
-  genres,
-  selectedIds,
-  expanded,
-  onToggleExpanded,
-  onToggle,
-  noGenresLabel,
-  genreAccessibilityLabel,
-  showAllLabel,
-  showLessLabel,
-}: {
-  genres: Genre[];
-  selectedIds: string[];
-  expanded: boolean;
-  onToggleExpanded: () => void;
-  onToggle: (genreId: string) => void;
-  noGenresLabel: string;
-  genreAccessibilityLabel: (name: string) => string;
-  showAllLabel: string;
-  showLessLabel: string;
-}) {
-  const displayGenres = useMemo(
-    () => buildCollapsedGenreList(genres, selectedIds, expanded),
-    [expanded, genres, selectedIds],
-  );
-
-  const canCollapse = genres.length > GENRE_CHIP_COLLAPSED_COUNT;
-
-  if (genres.length === 0) {
-    return (
-      <AppText variant="bodySmall" muted>
-        {noGenresLabel}
-      </AppText>
-    );
-  }
-
-  return (
-    <View style={styles.genreSection}>
-      <View style={styles.chipGrid}>
-        {displayGenres.map((genre) => {
-          const selected = selectedIds.includes(genre.id);
-
-          return (
-            <Pressable
-              key={genre.id}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              accessibilityLabel={genreAccessibilityLabel(translateGenreName(genre.name))}
-              onPress={() => onToggle(genre.id)}
-              style={[styles.filterChip, selected && styles.filterChipSelected]}
-            >
-              <AppText
-                variant="caption"
-                style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-              >
-                {translateGenreName(genre.name)}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
-      {canCollapse ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded }}
-          onPress={onToggleExpanded}
-          style={styles.genreToggle}
-        >
-          <AppText variant="bodySmall" style={styles.genreToggleText}>
-            {expanded ? showLessLabel : showAllLabel}
-          </AppText>
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
-
-function MediaTypeSelector({
-  value,
-  onChange,
-  mediaTypeAccessibilityLabel,
-}: {
-  value: AdvancedDiscoverMediaType;
-  onChange: (value: AdvancedDiscoverMediaType) => void;
-  mediaTypeAccessibilityLabel: (label: string) => string;
-}) {
-  return (
-    <View style={styles.chipGrid}>
-      {ADVANCED_DISCOVER_MEDIA_OPTIONS.map((mediaOption) => {
-        const selected = mediaOption === value;
-        const label = translateAdvancedDiscoverMediaType(mediaOption);
-
-        return (
-          <Pressable
-            key={mediaOption}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            accessibilityLabel={mediaTypeAccessibilityLabel(label)}
-            onPress={() => onChange(mediaOption)}
-            style={[styles.filterChip, selected && styles.filterChipSelected]}
-          >
-            <AppText
-              variant="caption"
-              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-            >
-              {label}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-function SortSelector({
-  value,
-  onChange,
-  sortAccessibilityLabel,
-}: {
-  value: AdvancedDiscoverSort;
-  onChange: (value: AdvancedDiscoverSort) => void;
-  sortAccessibilityLabel: (label: string) => string;
-}) {
-  return (
-    <View style={styles.chipGrid}>
-      {ADVANCED_DISCOVER_SORT_OPTIONS.map((sortOption) => {
-        const selected = sortOption === value;
-        const label = translateAdvancedDiscoverSort(sortOption);
-
-        return (
-          <Pressable
-            key={sortOption}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            accessibilityLabel={sortAccessibilityLabel(label)}
-            onPress={() => onChange(sortOption)}
-            style={[styles.filterChip, selected && styles.filterChipSelected]}
-          >
-            <AppText
-              variant="caption"
-              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-            >
-              {label}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-function RuntimeSelector({
-  minRuntimeMinutes,
-  maxRuntimeMinutes,
-  onChange,
-  runtimeAccessibilityLabel,
-}: {
-  minRuntimeMinutes: number | null;
-  maxRuntimeMinutes: number | null;
-  onChange: (min: number | null, max: number | null) => void;
-  runtimeAccessibilityLabel: (label: string) => string;
-}) {
-  return (
-    <View style={styles.chipGrid}>
-      {ADVANCED_DISCOVER_RUNTIME_PRESETS.map((preset) => {
-        const selected =
-          preset.minRuntimeMinutes === minRuntimeMinutes &&
-          preset.maxRuntimeMinutes === maxRuntimeMinutes;
-        const label = translateAdvancedDiscoverRuntimePreset(preset.key);
-
-        return (
-          <Pressable
-            key={preset.key}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            accessibilityLabel={runtimeAccessibilityLabel(label)}
-            onPress={() => onChange(preset.minRuntimeMinutes, preset.maxRuntimeMinutes)}
-            style={[styles.filterChip, selected && styles.filterChipSelected]}
-          >
-            <AppText
-              variant="caption"
-              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-            >
-              {label}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
 }
 
 export function AdvancedDiscoverFilterSheet({
@@ -286,31 +92,36 @@ export function AdvancedDiscoverFilterSheet({
 }: AdvancedDiscoverFilterSheetProps) {
   const { t } = useTranslation();
   const genresQuery = useGenres();
+  const genres = useMemo(() => genresQuery.data ?? [], [genresQuery.data]);
+  const summaries = useFilterSummaries();
+  const { anyLabel } = summaries;
   const wasVisibleRef = useRef(false);
   const [draftMediaType, setDraftMediaType] = useState<AdvancedDiscoverMediaType>(mediaType);
   const [draft, setDraft] = useState<AdvancedDiscoverFilters>(filters);
-  const [useYearRange, setUseYearRange] = useState(
-    filters.yearFrom != null || filters.yearTo != null,
-  );
+  const [selector, setSelector] = useState<SelectorKind | null>(null);
+  const [yearPanelKey, setYearPanelKey] = useState(0);
   const { region: userRegion, isHydrated } = useRegionalPreference();
-  const [watchRegionExpanded, setWatchRegionExpanded] = useState(false);
-  const [certificationCountryExpanded, setCertificationCountryExpanded] = useState(false);
-  const [genresExpanded, setGenresExpanded] = useState(false);
   const watchRegion = draft.watchRegion ?? userRegion;
   const certificationCountry = draft.certificationCountry ?? userRegion;
   const certificationOptions = listCertificationOptions(certificationCountry);
   const providersQuery = useDiscoveryWatchProviders(draftMediaType, watchRegion, isHydrated);
+  const providers = providersQuery.data?.providers ?? [];
 
   useEffect(() => {
     if (visible && !wasVisibleRef.current) {
       setDraftMediaType(mediaType);
       setDraft(filters);
-      setUseYearRange(filters.yearFrom != null || filters.yearTo != null);
-      setGenresExpanded(false);
+      setSelector(null);
     }
 
     wasVisibleRef.current = visible;
   }, [visible, filters, mediaType]);
+
+  const updateDraft = (patch: Partial<AdvancedDiscoverFilters>) => {
+    setDraft((current) => ({ ...current, ...patch }));
+  };
+
+  const closeSelector = () => setSelector(null);
 
   const handleApply = () => {
     onApply(draftMediaType, ensureStreamingDraftDefaults(draft, userRegion));
@@ -319,571 +130,414 @@ export function AdvancedDiscoverFilterSheet({
   const handleClear = () => {
     setDraftMediaType('movie');
     setDraft(createDefaultAdvancedDiscoverFilters());
-    setUseYearRange(false);
+    setSelector(null);
     onClear();
   };
 
-  return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={premiumSheetChrome.overlay}>
-        <SwipeSheet onClose={onClose} style={styles.sheet} bottomInset>
-          <GlassSheetLayer />
-          <View style={styles.sheetInner}>
-            <SheetHandle />
-            <View style={styles.header}>
-              <AppText variant="subtitle" style={styles.headerTitle}>{t('discovery.advancedDiscover.sheetTitle')}</AppText>
-              <Pressable accessibilityRole="button" accessibilityLabel={t('common.close')} onPress={onClose}>
-                <Ionicons name="close" size={24} color={premiumSheet.textPrimary} />
-              </Pressable>
-            </View>
+  const toggleProvider = (providerIds: number[]) => {
+    const added = providerIds.length > draft.watchProviderIds.length;
+    updateDraft({
+      watchProviderIds: providerIds,
+      // Picking a platform without a watch type means subscription.
+      watchMonetizationTypes:
+        added && draft.watchMonetizationTypes.length === 0
+          ? ['stream']
+          : draft.watchMonetizationTypes,
+    });
+  };
 
-            <ScrollView
-              style={styles.scroll}
-              contentContainerStyle={styles.scrollContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator
-            >
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.content')}
-            </AppText>
-            <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.mediaTypeSection')}</AppText>
-              <MediaTypeSelector
-                value={draftMediaType}
-                mediaTypeAccessibilityLabel={(label) => t('common.mediaTypeLabel', { label })}
-                onChange={(nextType) => {
-                  setDraftMediaType(nextType);
-                  setDraft((current) => ({
-                    ...current,
-                    genreIds: [],
-                    watchProviderIds: [],
-                    certification: null,
-                    certificationCountry: null,
-                    releaseTypes: [],
-                  }));
-                }}
+  const certificationLabel =
+    certificationOptions.find((option) => option.value === draft.certification)?.label ??
+    draft.certification ??
+    anyLabel;
+  const genreSummary = formatFilterList(
+    draft.genreIds.map((id) => {
+      const genre = genres.find((entry) => entry.id === id);
+      return genre
+        ? translateGenreName(genre.name)
+        : t('discovery.activeFilterChips.genreFallback');
+    }),
+    anyLabel,
+  );
+  const providerSummary = formatFilterList(
+    draft.watchProviderIds.map(
+      (id) => providers.find((provider) => provider.providerId === id)?.name ?? String(id),
+    ),
+    anyLabel,
+  );
+  const releaseTypeSummary = formatFilterList(
+    draft.releaseTypes.map((type) => translateDiscoverReleaseType(type)),
+    anyLabel,
+  );
+  const watchTypeSummary = formatFilterList(
+    draft.watchMonetizationTypes.map((type) => translateWatchProviderType(type)),
+    anyLabel,
+  );
+  const sort = draft.sort ?? 'popularity_desc';
+
+  const rows: {
+    kind: SelectorKind;
+    label: string;
+    value: string;
+    flagEmoji?: string;
+    movieOnly?: boolean;
+    testID?: string;
+  }[] = [
+    { kind: 'genre', label: t('common.genre'), value: genreSummary },
+    { kind: 'year', label: t('common.year'), value: summaries.year(draft) },
+    {
+      kind: 'certificationCountry',
+      label: t('discovery.advancedDiscover.certificationCountry'),
+      value: getRegionLabel(certificationCountry),
+      flagEmoji: getRegionFlagEmoji(certificationCountry),
+      movieOnly: true,
+    },
+    {
+      kind: 'certification',
+      label: t('discovery.advancedDiscover.certificationSection'),
+      value: certificationLabel,
+      movieOnly: true,
+    },
+    {
+      kind: 'releaseTypes',
+      label: t('discovery.advancedDiscover.releaseTypeSection'),
+      value: releaseTypeSummary,
+      movieOnly: true,
+    },
+    { kind: 'minRating', label: t('common.minimumRating'), value: summaries.rating(draft.minRating) },
+    {
+      kind: 'maxRating',
+      label: t('common.maximumRating'),
+      value: draft.maxRating != null ? maxRatingLabel(draft.maxRating) : anyLabel,
+    },
+    {
+      kind: 'voteCount',
+      label: t('discovery.catalogFilters.minVoteCount'),
+      value: summaries.voteCount(draft.minVoteCount),
+    },
+    { kind: 'runtime', label: t('discovery.catalogFilters.runtime'), value: summaries.runtime(draft) },
+    {
+      kind: 'language',
+      label: t('common.originalLanguage'),
+      value: summaries.language(draft.originalLanguage),
+    },
+    {
+      kind: 'country',
+      label: t('common.originCountry'),
+      value: summaries.country(draft.originCountry),
+      flagEmoji: flagEmojiForOriginCountry(draft.originCountry),
+    },
+    {
+      kind: 'watchRegion',
+      label: t('discovery.streamingDiscover.watchRegion'),
+      value: getRegionLabel(watchRegion),
+      flagEmoji: getRegionFlagEmoji(watchRegion),
+      testID: 'watch-region-selector',
+    },
+    { kind: 'providers', label: t('extras.filterPlatforms'), value: providerSummary },
+    { kind: 'watchType', label: t('extras.filterWatchType'), value: watchTypeSummary },
+    {
+      kind: 'sort',
+      label: t('discovery.filterSheet.sortSection'),
+      value: translateAdvancedDiscoverSort(sort),
+    },
+  ];
+
+  const regionOptions = REGION_OPTIONS.map((option) => ({
+    value: option.code,
+    label: getRegionLabel(option.code),
+    flagEmoji: getRegionFlagEmoji(option.code),
+  }));
+
+  const renderSelectorContent = (kind: SelectorKind) => {
+    switch (kind) {
+      case 'genre':
+        return (
+          <>
+            {draft.genreIds.length > 1 ? (
+              <CatalogChipRow<GenreMatchMode>
+                options={(['all', 'any'] as GenreMatchMode[]).map((mode) => ({
+                  value: mode,
+                  label: t(`discovery.advancedDiscover.genreMatch.${mode}`),
+                }))}
+                value={draft.genreMatch}
+                onChange={(genreMatch) => updateDraft({ genreMatch })}
               />
-            </View>
-
-            <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.genresSection')}</AppText>
-              {genresQuery.isLoading ? (
-                <ActivityIndicator color={premiumSheet.mutedGold} />
-              ) : (
-                <GenreSelector
-                  genres={genresQuery.data ?? []}
-                  selectedIds={draft.genreIds}
-                  expanded={genresExpanded}
-                  onToggleExpanded={() => setGenresExpanded((value) => !value)}
-                  showAllLabel={t('common.showAllCount', { count: genresQuery.data?.length ?? 0 })}
-                  showLessLabel={t('common.showLess')}
-                  noGenresLabel={t('common.noGenresAvailable')}
-                  genreAccessibilityLabel={(name) => t('common.genreLabel', { name })}
-                  onToggle={(genreId) =>
-                    setDraft((current) => ({
-                      ...current,
-                      genreIds: toggleGenre(current.genreIds, genreId),
-                    }))
-                  }
-                />
-              )}
-              {draft.genreIds.length > 1 ? (
-                <View style={styles.chipGrid}>
-                  {(['all', 'any'] as GenreMatchMode[]).map((mode) => {
-                    const selected = draft.genreMatch === mode;
-                    const label = t(`discovery.advancedDiscover.genreMatch.${mode}`);
-
-                    return (
-                      <Pressable
-                        key={mode}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected }}
-                        accessibilityLabel={label}
-                        onPress={() => setDraft((current) => ({ ...current, genreMatch: mode }))}
-                        style={[styles.filterChip, selected && styles.filterChipSelected]}
-                      >
-                        <AppText
-                          variant="caption"
-                          style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-                        >
-                          {label}
-                        </AppText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              ) : null}
-            </View>
-
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.release')}
-            </AppText>
-            <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.yearSection')}</AppText>
-              <View style={styles.chipGrid}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: !useYearRange }}
-                  accessibilityLabel={t('common.singleYear')}
-                  onPress={() => {
-                    setUseYearRange(false);
-                    setDraft((current) => ({ ...current, yearFrom: null, yearTo: null }));
-                  }}
-                  style={[styles.filterChip, !useYearRange && styles.filterChipSelected]}
-                >
-                  <AppText variant="caption">{t('common.singleYear')}</AppText>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: useYearRange }}
-                  accessibilityLabel={t('common.yearRange')}
-                  onPress={() => {
-                    setUseYearRange(true);
-                    setDraft((current) => ({ ...current, year: null }));
-                  }}
-                  style={[styles.filterChip, useYearRange && styles.filterChipSelected]}
-                >
-                  <AppText variant="caption">{t('common.yearRange')}</AppText>
-                </Pressable>
-              </View>
-            </View>
-
-            {useYearRange ? (
-              <View style={styles.row}>
-                <View style={styles.halfInput}>
-                  <AppInput
-                    label={t('common.from')}
-                    value={draft.yearFrom != null ? String(draft.yearFrom) : ''}
-                    onChangeText={(text) => {
-                      const trimmed = text.trim();
-                      setDraft((current) => ({
-                        ...current,
-                        yearFrom:
-                          trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                      }));
-                    }}
-                    placeholder={t('common.placeholderYearFromExample')}
-                    keyboardType="number-pad"
-                    maxLength={4}
-                  />
-                </View>
-                <View style={styles.halfInput}>
-                  <AppInput
-                    label={t('common.to')}
-                    value={draft.yearTo != null ? String(draft.yearTo) : ''}
-                    onChangeText={(text) => {
-                      const trimmed = text.trim();
-                      setDraft((current) => ({
-                        ...current,
-                        yearTo: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                      }));
-                    }}
-                    placeholder={t('common.placeholderYearToExample')}
-                    keyboardType="number-pad"
-                    maxLength={4}
-                  />
-                </View>
-              </View>
-            ) : (
-              <AppInput
-                label={t('common.year')}
-                value={draft.year != null ? String(draft.year) : ''}
-                onChangeText={(text) => {
-                  const trimmed = text.trim();
-                  setDraft((current) => ({
-                    ...current,
-                    year: trimmed.length === 0 ? null : Number.parseInt(trimmed, 10) || null,
-                  }));
-                }}
-                placeholder={t('common.placeholderYearExample')}
-                keyboardType="number-pad"
-                maxLength={4}
-              />
-            )}
-
-            {draftMediaType === 'movie' ? (
-              <>
-                <View style={styles.section}>
-                  <AppText variant="bodySmall" style={styles.sectionLabel}>
-                    {t('discovery.advancedDiscover.certificationSection')}
-                  </AppText>
-                  <RegionSelector
-                    label={t('discovery.advancedDiscover.certificationCountry')}
-                    value={certificationCountry}
-                    expanded={certificationCountryExpanded}
-                    onToggleExpanded={() => setCertificationCountryExpanded((value) => !value)}
-                    onSelect={(code) =>
-                      setDraft((current) => ({
-                        ...current,
-                        certificationCountry: code,
-                        certification: null,
-                      }))
-                    }
-                  />
-                  {isSupportedCertificationCountry(certificationCountry) ? (
-                    <View style={styles.chipGrid}>
-                      {certificationOptions.map((option) => {
-                        const selected = draft.certification === option.value;
-
-                        return (
-                          <Pressable
-                            key={option.value}
-                            accessibilityRole="button"
-                            accessibilityState={{ selected }}
-                            onPress={() =>
-                              setDraft((current) => ({
-                                ...current,
-                                certificationCountry,
-                                certification: selected ? null : option.value,
-                              }))
-                            }
-                            style={[styles.filterChip, selected && styles.filterChipSelected]}
-                          >
-                            <AppText
-                              variant="caption"
-                              style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-                            >
-                              {option.label}
-                            </AppText>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  ) : (
-                    <AppText variant="bodySmall" muted>
-                      {t('discovery.advancedDiscover.certificationUnavailable')}
-                    </AppText>
-                  )}
-                </View>
-                <View style={styles.section}>
-                  <AppText variant="bodySmall" style={styles.sectionLabel}>
-                    {t('discovery.advancedDiscover.releaseTypeSection')}
-                  </AppText>
-                  <View style={styles.chipGrid}>
-                    {DISCOVER_RELEASE_TYPE_OPTIONS.map((option) => {
-                      const selected = draft.releaseTypes.includes(option.value);
-
-                      return (
-                        <Pressable
-                          key={option.value}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected }}
-                          onPress={() =>
-                            setDraft((current) => ({
-                              ...current,
-                              releaseTypes: selected
-                                ? current.releaseTypes.filter((entry) => entry !== option.value)
-                                : [...current.releaseTypes, option.value],
-                            }))
-                          }
-                          style={[styles.filterChip, selected && styles.filterChipSelected]}
-                        >
-                          <AppText
-                            variant="caption"
-                            style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-                          >
-                            {translateDiscoverReleaseType(option.value)}
-                          </AppText>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </View>
-              </>
             ) : null}
-
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.quality')}
-            </AppText>
-            <AppInput
-              label={t('common.minimumRating')}
-              value={draft.minRating != null ? String(draft.minRating) : ''}
-              onChangeText={(text) => {
-                const trimmed = text.trim();
-                setDraft((current) => ({
-                  ...current,
-                  minRating: trimmed.length === 0 ? null : Number.parseFloat(trimmed) || null,
-                }));
-              }}
-              placeholder={t('common.placeholderRatingRange')}
-              keyboardType="decimal-pad"
-              maxLength={4}
+            <GenreFilterList
+              genres={genres}
+              isLoading={genresQuery.isLoading}
+              selectedIds={draft.genreIds}
+              onChange={(genreIds) => updateDraft({ genreIds })}
             />
-            <AppInput
-              label={t('common.maximumRating')}
-              value={draft.maxRating != null ? String(draft.maxRating) : ''}
-              onChangeText={(text) => {
-                const trimmed = text.trim();
-                setDraft((current) => ({
-                  ...current,
-                  maxRating: trimmed.length === 0 ? null : Number.parseFloat(trimmed) || null,
-                }));
-              }}
-              placeholder={t('common.placeholderRatingRange')}
-              keyboardType="decimal-pad"
-              maxLength={4}
-            />
-            <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>
-                {t('discovery.advancedDiscover.voteCount.section')}
-              </AppText>
-              <View style={styles.chipGrid}>
-                {ADVANCED_DISCOVER_VOTE_COUNT_OPTIONS.map((option) => {
-                  const selected = draft.minVoteCount === option;
-                  const label =
-                    option == null
-                      ? t('discovery.advancedDiscover.voteCount.any')
-                      : t('discovery.advancedDiscover.voteCount.option', { count: option });
-
-                  return (
-                    <Pressable
-                      key={String(option)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected }}
-                      onPress={() =>
-                        setDraft((current) => ({
-                          ...current,
-                          minVoteCount: option,
-                        }))
-                      }
-                      style={[styles.filterChip, selected && styles.filterChipSelected]}
-                    >
-                      <AppText
-                        variant="caption"
-                        style={[styles.filterChipLabel, selected && styles.filterChipLabelSelected]}
-                      >
-                        {label}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.duration')}
-            </AppText>
-            <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.advancedDiscover.runtimeSection')}</AppText>
-              <RuntimeSelector
-                minRuntimeMinutes={draft.minRuntimeMinutes}
-                maxRuntimeMinutes={draft.maxRuntimeMinutes}
-                runtimeAccessibilityLabel={(label) => t('common.runtimeLabel', { label })}
-                onChange={(min, max) =>
-                  setDraft((current) => ({
-                    ...current,
-                    minRuntimeMinutes: min,
-                    maxRuntimeMinutes: max,
-                  }))
-                }
-              />
-            </View>
-
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.origin')}
-            </AppText>
-            <AppInput
-              label={t('common.originalLanguage')}
-              value={draft.originalLanguage ?? ''}
-              onChangeText={(text) =>
-                setDraft((current) => ({
-                  ...current,
-                  originalLanguage: text.trim().length > 0 ? text.trim().toLowerCase() : null,
-                }))
+          </>
+        );
+      case 'year':
+        return <YearFilterPanel key={yearPanelKey} value={draft} onChange={updateDraft} />;
+      case 'minRating':
+        return (
+          <RatingFilterList
+            value={draft.minRating}
+            ratings={CATALOG_MIN_RATING_OPTIONS.filter(
+              (rating) => rating == null || draft.maxRating == null || rating <= draft.maxRating,
+            )}
+            onChange={(minRating) => updateDraft({ minRating })}
+            onComplete={closeSelector}
+          />
+        );
+      case 'maxRating':
+        return (
+          <RatingFilterList
+            value={draft.maxRating}
+            ratings={MAX_RATING_OPTIONS.filter(
+              (rating) => rating == null || draft.minRating == null || rating >= draft.minRating,
+            )}
+            labelFor={maxRatingLabel}
+            onChange={(maxRating) => updateDraft({ maxRating })}
+            onComplete={closeSelector}
+          />
+        );
+      case 'voteCount':
+        return (
+          <VoteCountFilterList
+            value={draft.minVoteCount}
+            onChange={(minVoteCount) => updateDraft({ minVoteCount })}
+            onComplete={closeSelector}
+          />
+        );
+      case 'runtime':
+        return <RuntimeFilterPanel value={draft} onChange={updateDraft} />;
+      case 'language':
+        return (
+          <LanguageFilterList
+            value={draft.originalLanguage}
+            onChange={(originalLanguage) => updateDraft({ originalLanguage })}
+            onComplete={closeSelector}
+          />
+        );
+      case 'country':
+        return (
+          <CountryFilterList
+            value={draft.originCountry}
+            onChange={(originCountry) => updateDraft({ originCountry })}
+            onComplete={closeSelector}
+          />
+        );
+      case 'certificationCountry':
+        return (
+          <CatalogOptionList
+            values={[certificationCountry]}
+            options={regionOptions}
+            onChange={(values) => {
+              const next = values[0];
+              if (next) {
+                updateDraft({ certificationCountry: next, certification: null });
               }
-              placeholder={t('common.placeholderLanguageExample')}
-              autoCapitalize="none"
-              autoCorrect={false}
-              maxLength={8}
-            />
-
-            <AppInput
-              label={t('common.originCountry')}
-              value={draft.originCountry ?? ''}
-              onChangeText={(text) =>
-                setDraft((current) => ({
-                  ...current,
-                  originCountry:
-                    text.trim().length === 2 ? text.trim().toUpperCase() : text.trim() || null,
-                }))
+            }}
+            onSingleSelectComplete={closeSelector}
+          />
+        );
+      case 'certification':
+        return isSupportedCertificationCountry(certificationCountry) ? (
+          <CatalogOptionList
+            values={[draft.certification ?? '']}
+            options={[{ value: '', label: anyLabel }, ...certificationOptions]}
+            onChange={(values) =>
+              updateDraft({ certificationCountry, certification: values[0] || null })
+            }
+            onSingleSelectComplete={closeSelector}
+          />
+        ) : (
+          <AppText variant="bodySmall" muted>
+            {t('discovery.advancedDiscover.certificationUnavailable')}
+          </AppText>
+        );
+      case 'releaseTypes':
+        return (
+          <CatalogOptionList
+            multi
+            values={draft.releaseTypes}
+            options={DISCOVER_RELEASE_TYPE_OPTIONS.map((option) => ({
+              value: option.value,
+              label: translateDiscoverReleaseType(option.value),
+            }))}
+            onChange={(releaseTypes) => updateDraft({ releaseTypes })}
+          />
+        );
+      case 'watchRegion':
+        return (
+          <CatalogOptionList
+            values={[watchRegion]}
+            options={regionOptions}
+            onChange={(values) => {
+              if (values[0]) {
+                updateDraft({ watchRegion: values[0] });
               }
-              placeholder={t('common.placeholderCountryExample')}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              maxLength={2}
+            }}
+            onSingleSelectComplete={closeSelector}
+          />
+        );
+      case 'providers':
+        if (providersQuery.isLoading) {
+          return <ActivityIndicator color={premiumSheet.mutedGold} />;
+        }
+
+        if (providersQuery.isError || providers.length === 0) {
+          return (
+            <ErrorView
+              message={t('discovery.streamingDiscover.providersLoadError')}
+              onRetry={() => void providersQuery.refetch()}
+              retryLabel={t('common.tryAgain')}
             />
+          );
+        }
 
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.streaming')}
+        return (
+          <CatalogOptionList
+            multi
+            values={draft.watchProviderIds.map(String)}
+            options={providers.map((provider) => ({
+              value: String(provider.providerId),
+              label: provider.name,
+              leading: (
+                <WatchProviderLogo
+                  provider={provider}
+                  selected={draft.watchProviderIds.includes(provider.providerId)}
+                />
+              ),
+            }))}
+            onChange={(values) => toggleProvider(values.map(Number))}
+            testID="discovery-provider-list"
+          />
+        );
+      case 'watchType':
+        return (
+          <CatalogOptionList<WatchMonetizationType>
+            multi
+            values={draft.watchMonetizationTypes}
+            options={WATCH_MONETIZATION_OPTIONS.map((type) => ({
+              value: type,
+              label: translateWatchProviderType(type),
+            }))}
+            onChange={(watchMonetizationTypes) => updateDraft({ watchMonetizationTypes })}
+          />
+        );
+      case 'sort':
+        return (
+          <CatalogOptionList
+            values={[sort]}
+            options={ADVANCED_DISCOVER_SORT_OPTIONS.map((option) => ({
+              value: option,
+              label: translateAdvancedDiscoverSort(option),
+            }))}
+            onChange={(values) => {
+              if (values[0]) {
+                updateDraft({ sort: values[0] });
+              }
+            }}
+            onSingleSelectComplete={closeSelector}
+          />
+        );
+    }
+  };
+
+  const inSelector = selector != null;
+  const showSelectorFooter = selector === 'year' || selector === 'runtime';
+  const selectedRow = rows.find((row) => row.kind === selector);
+
+  return (
+    <CatalogFilterSheetShell
+      visible={visible}
+      title={selectedRow?.label ?? t('discovery.advancedDiscover.sheetTitle')}
+      headerAction={inSelector ? 'back' : 'close'}
+      headerActionLabel={inSelector ? t('common.back') : t('common.close')}
+      onHeaderAction={inSelector ? closeSelector : onClose}
+      resetLabel={
+        showSelectorFooter ? t('discovery.catalogFilters.any') : t('discovery.filterSheet.reset')
+      }
+      applyLabel={
+        showSelectorFooter
+          ? t('discovery.catalogFilters.done')
+          : t('discovery.filterSheet.showResults')
+      }
+      onReset={
+        showSelectorFooter
+          ? () => {
+              if (selector === 'year') {
+                // Remount so the panel drops its custom-range mode.
+                setYearPanelKey((key) => key + 1);
+                updateDraft({ year: null, yearFrom: null, yearTo: null });
+              } else {
+                updateDraft({ minRuntimeMinutes: null, maxRuntimeMinutes: null });
+              }
+            }
+          : handleClear
+      }
+      onApply={showSelectorFooter ? closeSelector : handleApply}
+      testID="advanced-discover-filter-sheet"
+    >
+      {selector != null ? (
+        renderSelectorContent(selector)
+      ) : (
+        <>
+          <View style={styles.section}>
+            <AppText variant="bodySmall" style={premiumSheetChrome.sectionLabel}>
+              {t('discovery.advancedDiscover.mediaTypeSection')}
             </AppText>
-            <View style={styles.section}>
-              <WatchRegionSelector
-                value={watchRegion}
-                expanded={watchRegionExpanded}
-                onToggleExpanded={() => setWatchRegionExpanded((value) => !value)}
-                onSelect={(code) => setDraft((current) => ({ ...current, watchRegion: code }))}
-              />
-              <WatchProviderSelector
-                providers={providersQuery.data?.providers ?? []}
-                selectedProviderIds={draft.watchProviderIds}
-                isLoading={providersQuery.isLoading}
-                isError={providersQuery.isError}
-                onRetry={() => void providersQuery.refetch()}
-                onToggle={(providerId) =>
-                  setDraft((current) => {
-                    const removing = current.watchProviderIds.includes(providerId);
-                    const watchProviderIds = removing
-                      ? current.watchProviderIds.filter((id) => id !== providerId)
-                      : [...current.watchProviderIds, providerId];
-                    const watchMonetizationTypes =
-                      !removing &&
-                      watchProviderIds.length > 0 &&
-                      current.watchMonetizationTypes.length === 0
-                        ? (['stream'] as const)
-                        : current.watchMonetizationTypes;
-
-                    return {
-                      ...current,
-                      watchProviderIds,
-                      watchMonetizationTypes: [...watchMonetizationTypes],
-                    };
-                  })
-                }
-              />
-              <WatchMonetizationSelector
-                selectedTypes={draft.watchMonetizationTypes}
-                onToggle={(type) =>
-                  setDraft((current) => ({
-                    ...current,
-                    watchMonetizationTypes: current.watchMonetizationTypes.includes(type)
-                      ? current.watchMonetizationTypes.filter((entry) => entry !== type)
-                      : [...current.watchMonetizationTypes, type],
-                  }))
-                }
-              />
-            </View>
-
-            <AppText variant="bodySmall" style={styles.sectionHeading}>
-              {t('discovery.advancedDiscover.sections.sort')}
-            </AppText>
-            <View style={styles.section}>
-              <AppText variant="bodySmall" style={styles.sectionLabel}>{t('discovery.filterSheet.sortSection')}</AppText>
-              <SortSelector
-                value={draft.sort ?? 'popularity_desc'}
-                sortAccessibilityLabel={(label) => t('common.sortByLabel', { label })}
-                onChange={(sort) => setDraft((current) => ({ ...current, sort }))}
-              />
-            </View>
-            </ScrollView>
-
-            <View style={styles.footer}>
-              <AppButton title={t('discovery.filterSheet.reset')} variant="secondary" onPress={handleClear} />
-              <AppButton title={t('discovery.filterSheet.showResults')} onPress={handleApply} />
-            </View>
+            <CatalogChipRow
+              options={ADVANCED_DISCOVER_MEDIA_OPTIONS.map((option) => ({
+                value: option,
+                label: translateAdvancedDiscoverMediaType(option),
+              }))}
+              value={draftMediaType}
+              accessibilityLabelFor={(label) => t('common.mediaTypeLabel', { label })}
+              onChange={(nextType) => {
+                setDraftMediaType(nextType);
+                updateDraft({
+                  genreIds: [],
+                  watchProviderIds: [],
+                  certification: null,
+                  certificationCountry: null,
+                  releaseTypes: [],
+                });
+              }}
+            />
           </View>
-        </SwipeSheet>
-      </View>
-    </Modal>
+
+          <MyPlatformsFilter
+            availableProviders={providersQuery.data?.providers}
+            selectedProviderIds={draft.watchProviderIds}
+            onChoose={onClose}
+            onChange={(watchProviderIds) =>
+              updateDraft({
+                watchProviderIds,
+                // A subscription means streaming, so rent and buy are not mixed in.
+                watchMonetizationTypes: watchProviderIds.length > 0 ? ['stream'] : [],
+              })
+            }
+          />
+
+          {rows
+            .filter((row) => !row.movieOnly || draftMediaType === 'movie')
+            .map((row) => (
+              <FilterSelectorRow
+                key={row.kind}
+                label={row.label}
+                valueLabel={row.value}
+                valueFlagEmoji={row.flagEmoji}
+                onPress={() => setSelector(row.kind)}
+                testID={row.testID}
+              />
+            ))}
+        </>
+      )}
+    </CatalogFilterSheetShell>
   );
 }
 
 const styles = StyleSheet.create({
-  sheet: {
-    ...premiumSheetChrome.sheet,
-    maxHeight: '88%',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  sheetInner: {
-    flexShrink: 1,
-    maxHeight: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: premiumSheet.contentPaddingH,
-    paddingTop: premiumSheet.contentPaddingTop,
-    paddingBottom: spacing.sm,
-  },
-  headerTitle: {
-    color: premiumSheet.textPrimary,
-    fontWeight: '700',
-  },
-  scroll: {
-    flexGrow: 1,
-    flexShrink: 1,
-    paddingHorizontal: premiumSheet.contentPaddingH,
-  },
-  scrollContent: {
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
-  },
   section: {
-    gap: spacing.xs,
-  },
-  genreSection: {
-    gap: spacing.xs,
-  },
-  genreToggle: {
-    alignSelf: 'flex-start',
-    minHeight: 44,
-    justifyContent: 'center',
+    gap: spacing.sm,
     paddingVertical: spacing.xs,
-  },
-  genreToggleText: {
-    color: premiumSheet.mutedGold,
-    fontWeight: '600',
-  },
-  sectionLabel: {
-    color: premiumSheet.textSecondary,
-    fontWeight: '600',
-  },
-  sectionHeading: {
-    color: premiumSheet.textPrimary,
-    fontWeight: '700',
-    marginTop: spacing.sm,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  halfInput: {
-    flex: 1,
-  },
-  chipGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  filterChip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: premiumSheet.rowBorder,
-    backgroundColor: premiumSheet.secondary,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  filterChipSelected: {
-    borderColor: premiumSheet.goldBorder,
-    backgroundColor: premiumSheet.elevated,
-  },
-  filterChipLabel: {
-    color: premiumSheet.textPrimary,
-  },
-  filterChipLabelSelected: {
-    color: premiumSheet.mutedGold,
-    fontWeight: '600',
-  },
-  footer: {
-    gap: spacing.sm,
-    paddingHorizontal: premiumSheet.contentPaddingH,
-    paddingTop: spacing.md,
-    paddingBottom: premiumSheet.contentPaddingBottom,
-    borderTopWidth: 1,
-    borderTopColor: premiumSheet.border,
   },
 });

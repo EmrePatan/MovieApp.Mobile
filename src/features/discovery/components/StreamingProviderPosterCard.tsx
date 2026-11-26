@@ -6,6 +6,7 @@ import {
 } from '@/features/discovery/streaming-platform-hub-types';
 import { useStreamingProviderSpotlight } from '@/features/discovery/hooks/useStreamingProviderSpotlight';
 import { createStreamingDiscoverHref } from '@/features/discovery/utils/streaming-discover-params';
+import { DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE } from '@/features/discovery/streaming-discover-types';
 import { openLibraryStackScreen } from '@/features/library/navigation/library-stack-navigation';
 import type { DiscoveryWatchProvider } from '@/features/discovery/watch-provider-types';
 import { interaction } from '@/theme/interaction';
@@ -47,7 +48,7 @@ export function StreamingProviderPosterCard({
         {
           watchProviderIds: [provider.providerId],
           watchRegion,
-          mediaType: DEFAULT_STREAMING_HUB_MEDIA_TYPE,
+          mediaType: DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE,
           watchMonetizationTypes: ['stream'],
           sort: 'popularity_desc',
         },

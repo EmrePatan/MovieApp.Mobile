@@ -1,6 +1,14 @@
 import { crewJobsPt } from './crew-jobs/pt';
 
 export const stage2Pt = {
+  leavingSoon: {
+    title: 'Saindo em breve',
+    lastDay: 'Último dia: {{date}}',
+    emptyTitle: 'Nada saindo em breve',
+    emptyMessage: 'No momento não há nada para mostrar nesta região.',
+    loadError: 'Não foi possível carregar a lista.',
+    sortLeaving: 'Saem primeiro',
+  },
   common: {
     seeAll: 'Ver tudo',
     seeAllTitle: 'Ver tudo {{title}}',
@@ -577,16 +585,6 @@ export const stage2Pt = {
         movie: 'Filmes',
         tv: 'Séries',
       },
-      sortOptions: {
-        popularity_desc: 'Populares',
-        rating_desc: 'Mais bem avaliados',
-        newest: 'Mais recentes',
-        oldest: 'Mais antigos',
-        popularity_asc: 'Menos populares',
-        rating_asc: 'Menos bem avaliados',
-        title_asc: 'Título A–Z',
-        title_desc: 'Título Z–A',
-      },
       runtimePresets: {
         any: 'Qualquer',
         under90: 'Menos de 90 min',
@@ -693,16 +691,6 @@ export const stage2Pt = {
       emptyTitle: 'Nenhum título encontrado',
       emptyMessage: 'Tente outro país de origem ou tipo de mídia.',
       loadError: 'Não foi possível carregar os resultados de cinema mundial no momento.',
-      sortOptions: {
-        popularity_desc: 'Populares',
-        rating_desc: 'Mais bem avaliados',
-        newest: 'Mais recentes',
-        oldest: 'Mais antigos',
-        popularity_asc: 'Menos populares',
-        rating_asc: 'Menos bem avaliados',
-        title_asc: 'Título A–Z',
-        title_desc: 'Título Z–A',
-      },
     },
   },
   date: {
@@ -1151,6 +1139,17 @@ export const stage2Pt = {
     watchHistoryTitle: 'Histórico',
     watchHistorySubtitle: 'Filmes e episódios assistidos',
     watchHistoryCountLabel: 'assistidos',
+    myPlatformsTitle: 'Minhas plataformas',
+    myPlatformsSubtitle: 'Serviços de streaming que você assina',
+    myPlatformsDescription: 'Escolha os serviços que você assina. Lista da sua região: {{region}}.',
+    myPlatformsError: 'Não foi possível carregar as plataformas.',
+    myPlatformsSaveError: 'Não foi possível salvar sua escolha. Tente novamente.',
+    myPlatformsLimit: 'Você pode escolher até {{max}} plataformas.',
+    myPlatformsOnly: 'Só nas minhas plataformas',
+    filterPlatforms: 'Plataformas',
+    filterWatchType: 'Forma de assistir',
+    myPlatformsChoose: 'Escolher minhas plataformas',
+    myPlatformsUnavailable: 'Suas plataformas não estão disponíveis para esta região ou tipo.',
     notificationPrefsTitle: 'Preferências de notificação',
     notificationPrefsSubtitle: 'Mensagens e lançamentos',
     notificationPrefsDescription: 'Escolha quais notificações chegam ao seu celular.',

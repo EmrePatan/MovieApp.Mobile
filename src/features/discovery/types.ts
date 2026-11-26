@@ -48,6 +48,7 @@ export interface DiscoveryBrowseFilters {
   /** Display labels for keywordIds (client route state only; not sent to browse API). */
   keywordLabels: Record<string, string>;
   tvStatuses: TvDiscoverStatus[];
+  watchProviderIds: number[];
   sort: DiscoverySort | null;
 }
 
@@ -62,6 +63,13 @@ export interface DiscoveryBrowseRequest extends DiscoveryBrowseFilters {
   type?: DiscoveryTypeFilter;
   page?: number;
   pageSize?: number;
+  /** Required by the API together with watchProviderIds. */
+  watchRegion?: string;
+}
+
+/** Top rated and hidden gems come from the local catalog, which has no provider data. */
+export function supportsWatchPlatforms(mode: DiscoveryBrowseMode): boolean {
+  return mode === 'popular' || mode === 'trending' || mode === 'new_releases';
 }
 
 export const DEFAULT_DISCOVERY_PAGE_SIZE = 20;
@@ -139,6 +147,7 @@ export function createDefaultDiscoveryFilters(
     keywordIds: [],
     keywordLabels: {},
     tvStatuses: [],
+    watchProviderIds: [],
     sort: getDefaultSortForMode(mode),
   };
 }
@@ -195,6 +204,10 @@ export function countActiveDiscoveryUserFilters(
   }
 
   if (filters.tvStatuses.length > 0) {
+    count += 1;
+  }
+
+  if (filters.watchProviderIds.length > 0) {
     count += 1;
   }
 
