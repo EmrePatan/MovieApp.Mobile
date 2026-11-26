@@ -116,11 +116,10 @@ export default function SearchScreen() {
   const showAutocomplete = !isLibrarySearch && displayMode === 'autocomplete';
   const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
 
-  useEffect(() => {
-    if (isLibrarySearch && typeFilter === 'person') {
-      setTypeFilter('all');
-    }
-  }, [isLibrarySearch, typeFilter]);
+  // Library search has no person filter. Adjust during render instead of in an effect.
+  if (isLibrarySearch && typeFilter === 'person') {
+    setTypeFilter('all');
+  }
   const {
     items: recentSearchItems,
     isLoading: isRecentSearchesLoading,
