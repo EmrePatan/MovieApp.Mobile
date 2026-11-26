@@ -77,7 +77,9 @@ export function DetailHeroTrailerLayer({
   }, [closeTrailer, openTrailerExternally, t]);
 
   const closeTrailerRef = useRef(closeTrailer);
-  closeTrailerRef.current = closeTrailer;
+  useEffect(() => {
+    closeTrailerRef.current = closeTrailer;
+  }, [closeTrailer]);
 
   useFocusEffect(
     useCallback(() => {
