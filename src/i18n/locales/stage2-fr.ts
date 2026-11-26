@@ -1,6 +1,14 @@
 import { crewJobsFr } from './crew-jobs/fr';
 
 export const stage2Fr = {
+  leavingSoon: {
+    title: 'Bientôt retirés',
+    lastDay: 'Dernier jour : {{date}}',
+    emptyTitle: 'Aucun retrait prochain',
+    emptyMessage: 'Rien à afficher pour cette région pour le moment.',
+    loadError: 'Impossible de charger la liste.',
+    sortLeaving: 'Retirés en premier',
+  },
   common: {
     seeAll: 'Tout voir',
     seeAllTitle: 'Tout voir {{title}}',

@@ -10,6 +10,7 @@ const SECTION_TITLE_KEYS: Partial<Record<HomeSectionType, string>> = {
   ComingUp: 'home.sections.comingUp',
   OnTvThisWeek: 'home.sections.onTvThisWeek',
   NowInTheaters: 'home.sections.nowInTheaters',
+  LeavingSoon: 'leavingSoon.title',
 };
 
 export interface ResolveHomeSectionTitleOptions {

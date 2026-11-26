@@ -102,9 +102,9 @@ describe('presentHomeSections', () => {
     expect(presented.showColdWelcome).toBe(false);
     expect(presented.heroItems.map((item) => item.id)).toEqual(['hot-id']);
     expect(presented.sections.map((section) => section.type)).toEqual([
+      'NowInTheaters',
       'Trending',
       'OnTvThisWeek',
-      'NowInTheaters',
     ]);
   });
 

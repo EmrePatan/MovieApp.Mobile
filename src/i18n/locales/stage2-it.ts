@@ -1,6 +1,14 @@
 import { crewJobsIt } from './crew-jobs/it';
 
 export const stage2It = {
+  leavingSoon: {
+    title: 'In scadenza',
+    lastDay: 'Ultimo giorno: {{date}}',
+    emptyTitle: 'Niente in scadenza',
+    emptyMessage: 'Al momento non c’è nulla da mostrare per questa regione.',
+    loadError: 'Impossibile caricare l’elenco.',
+    sortLeaving: 'In scadenza per primi',
+  },
   common: {
     seeAll: 'Vedi tutto',
     seeAllTitle: 'Vedi tutto {{title}}',

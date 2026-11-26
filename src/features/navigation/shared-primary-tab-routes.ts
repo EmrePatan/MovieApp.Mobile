@@ -7,6 +7,7 @@ export const SHARED_PRIMARY_TAB_CONTEXT_PREFIXES = [
   '/upcoming',
   '/on-tv-this-week',
   '/now-in-theaters',
+  '/leaving-soon',
   '/streaming-discover',
   '/streaming-platforms',
   '/discover-genres',

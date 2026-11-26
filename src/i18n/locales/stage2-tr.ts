@@ -1,6 +1,14 @@
 import { crewJobsTr } from './crew-jobs/tr';
 
 export const stage2Tr = {
+  leavingSoon: {
+    title: 'İzlemek için son şans',
+    lastDay: 'Son gün: {{date}}',
+    emptyTitle: 'Yakında kalkacak içerik yok',
+    emptyMessage: 'Bu bölgede şu an gösterilecek içerik bulunamadı.',
+    loadError: 'Liste yüklenemedi.',
+    sortLeaving: 'En yakın son gün',
+  },
   common: {
     seeAll: 'Tümünü Gör',
     seeAllTitle: 'Tüm {{title}} içeriğini gör',

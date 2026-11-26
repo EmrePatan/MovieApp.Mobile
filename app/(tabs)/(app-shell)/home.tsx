@@ -240,6 +240,10 @@ export default function HomeScreen() {
     );
   }, [releaseRegion, router]);
 
+  const handleLeavingSoonSeeAll = useCallback(() => {
+    openLibraryStackScreen(router, '/leaving-soon', '/(tabs)/home');
+  }, [router]);
+
   const renderSection = useCallback(
     ({ item }: { item: HomeSectionModel }) => {
       if (isHomeRecommendedLoadingSection(item)) {
@@ -263,7 +267,9 @@ export default function HomeScreen() {
             ? handleOnTvSeeAll
             : item.type === 'NowInTheaters'
               ? handleNowInTheatersSeeAll
-              : undefined;
+              : item.type === 'LeavingSoon'
+                ? handleLeavingSoonSeeAll
+                : undefined;
 
       return (
         <HomeSection
@@ -278,6 +284,7 @@ export default function HomeScreen() {
       handleComingUpItemPress,
       handleComingUpSeeAll,
       handleItemPress,
+      handleLeavingSoonSeeAll,
       handleRecommendationDismiss,
       handleNowInTheatersSeeAll,
       handleOnTvSeeAll,

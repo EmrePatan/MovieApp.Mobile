@@ -28,6 +28,7 @@ const DISCOVER_ROUTE_PREFIXES = [
   '/world-cinema',
   '/now-in-theaters',
   '/on-tv-this-week',
+  '/leaving-soon',
   '/ai-recommendations',
   '/pick-something',
 ] as const;

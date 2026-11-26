@@ -1,6 +1,14 @@
 import { crewJobsDe } from './crew-jobs/de';
 
 export const stage2De = {
+  leavingSoon: {
+    title: 'Bald nicht mehr da',
+    lastDay: 'Letzter Tag: {{date}}',
+    emptyTitle: 'Nichts läuft bald aus',
+    emptyMessage: 'Für diese Region gibt es gerade nichts anzuzeigen.',
+    loadError: 'Die Liste konnte nicht geladen werden.',
+    sortLeaving: 'Läuft zuerst aus',
+  },
   common: {
     seeAll: 'Alle anzeigen',
     seeAllTitle: 'Alle {{title}} anzeigen',

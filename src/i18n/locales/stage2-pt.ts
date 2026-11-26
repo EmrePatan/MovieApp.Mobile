@@ -1,6 +1,14 @@
 import { crewJobsPt } from './crew-jobs/pt';
 
 export const stage2Pt = {
+  leavingSoon: {
+    title: 'Saindo em breve',
+    lastDay: 'Último dia: {{date}}',
+    emptyTitle: 'Nada saindo em breve',
+    emptyMessage: 'No momento não há nada para mostrar nesta região.',
+    loadError: 'Não foi possível carregar a lista.',
+    sortLeaving: 'Saem primeiro',
+  },
   common: {
     seeAll: 'Ver tudo',
     seeAllTitle: 'Ver tudo {{title}}',

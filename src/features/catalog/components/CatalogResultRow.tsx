@@ -27,6 +27,8 @@ export interface CatalogResultRowProps {
   year?: number | null;
   voteAverage?: number;
   genres?: string[];
+  /** Extra highlighted line, e.g. the last day on a platform. */
+  note?: string;
   onPress?: () => void;
   testID?: string;
 }
@@ -52,6 +54,7 @@ export const CatalogResultRow = memo(function CatalogResultRow({
   year,
   voteAverage = 0,
   genres = [],
+  note,
   onPress,
   testID,
 }: CatalogResultRowProps) {
@@ -81,13 +84,13 @@ export const CatalogResultRow = memo(function CatalogResultRow({
   const genreLine = genreLabels.length > 0 ? genreLabels.join(' · ') : null;
 
   const accessibilityLabel = useMemo(() => {
-    const parts = [title, metadataLine, genreLine];
+    const parts = [title, metadataLine, note, genreLine];
     if (showRating) {
       parts.push(formatRating(voteAverage));
     }
 
     return parts.filter(Boolean).join(', ');
-  }, [genreLine, metadataLine, showRating, title, voteAverage]);
+  }, [genreLine, metadataLine, note, showRating, title, voteAverage]);
 
   const posterWidth = layout.posterCatalogRow.width;
   const posterHeight = layout.posterCatalogRow.height;
@@ -123,6 +126,12 @@ export const CatalogResultRow = memo(function CatalogResultRow({
         {metadataLine ? (
           <AppText variant="caption" muted numberOfLines={1} style={styles.metadata}>
             {metadataLine}
+          </AppText>
+        ) : null}
+
+        {note ? (
+          <AppText variant="caption" numberOfLines={2} style={styles.rating}>
+            {note}
           </AppText>
         ) : null}
 

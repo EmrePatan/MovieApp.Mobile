@@ -14,6 +14,7 @@ const HOME_SECTION_HEADER_ICONS: Partial<
   Trending: 'flame-outline',
   OnTvThisWeek: 'calendar-outline',
   NowInTheaters: 'film-outline',
+  LeavingSoon: 'hourglass-outline',
 };
 
 export function resolveHomeSectionHeaderIcon(
