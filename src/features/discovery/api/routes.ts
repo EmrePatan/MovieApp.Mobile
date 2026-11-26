@@ -121,6 +121,21 @@ function appendSharedDiscoverFilters(
   }
 }
 
+function appendWatchPlatforms(
+  params: URLSearchParams,
+  watchRegion: string | undefined,
+  watchProviderIds: number[] | undefined,
+): void {
+  if (!watchRegion || !watchProviderIds?.length) {
+    return;
+  }
+
+  params.set('watchRegion', watchRegion);
+  for (const providerId of watchProviderIds) {
+    params.append('watchProviderId', String(providerId));
+  }
+}
+
 export function buildWorldCinemaPath(criteria: WorldCinemaRequest): string {
   const params = new URLSearchParams({
     mediaType: criteria.mediaType,
@@ -145,6 +160,7 @@ export function buildWorldCinemaPath(criteria: WorldCinemaRequest): string {
     tvStatuses: criteria.tvStatuses,
     sort: criteria.sort,
   });
+  appendWatchPlatforms(params, criteria.watchRegion, criteria.watchProviderIds);
 
   return `/api/discovery/world-cinema?${params.toString()}`;
 }
@@ -207,6 +223,7 @@ export function buildBrowsePath(criteria: DiscoveryBrowseRequest): string {
     },
     { languageParamName: 'language' },
   );
+  appendWatchPlatforms(params, criteria.watchRegion, criteria.watchProviderIds);
 
   return `/api/discovery/browse?${params.toString()}`;
 }

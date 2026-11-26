@@ -108,6 +108,11 @@ export default function ProfileScreen() {
             onPress={() => router.push('/profile/language')}
           />
           <ProfileMenuRow
+            label={t('extras.myPlatformsTitle')}
+            subtitle={t('extras.myPlatformsSubtitle')}
+            onPress={() => router.push('/profile/platforms')}
+          />
+          <ProfileMenuRow
             label={t('extras.notificationPrefsTitle')}
             subtitle={t('extras.notificationPrefsSubtitle')}
             onPress={() => router.push('/profile/notifications')}

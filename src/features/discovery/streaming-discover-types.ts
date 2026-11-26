@@ -2,10 +2,11 @@ import type { AdvancedDiscoverSort } from './advanced-discover-types';
 import { FALLBACK_USER_REGION } from '@/features/regions/region-options';
 import type { WatchMonetizationType } from './watch-provider-types';
 import type { TvDiscoverStatus } from './tv-discover-status';
+import type { CatalogContentType } from './utils/catalog-filter-draft';
 
-export type StreamingDiscoverMediaType = 'movie' | 'tv';
+export type StreamingDiscoverMediaType = CatalogContentType;
 
-export const DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE: StreamingDiscoverMediaType = 'movie';
+export const DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE: StreamingDiscoverMediaType = 'all';
 export const DEFAULT_STREAMING_DISCOVER_SORT: AdvancedDiscoverSort = 'popularity_desc';
 
 export interface StreamingDiscoverState {

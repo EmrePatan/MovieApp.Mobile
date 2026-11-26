@@ -5,10 +5,10 @@ import {
 } from '../routes';
 import { getMovieSegmentIndex, getTvSegmentIndex } from './catalog-route-segments';
 
-export const MY_COMMENTS_REVIEWS_RETURN_HREF = '/profile/my-comments' as const;
+export const MY_COMMENTS_REVIEWS_RETURN_HREF = '/my-comments' as const;
 
 export function buildUserCommentsReturnHref(userId: string): string {
-  return `/profile/user-comments/${userId}`;
+  return `/user-comments/${userId}`;
 }
 
 let reviewsReturnHref: string | null = null;

@@ -10,7 +10,7 @@ export default function SocialProfileReviewsRedirect() {
 
   useEffect(() => {
     if (!userId) return;
-    router.replace(`/profile/user-comments/${userId}`);
+    router.replace(`/user-comments/${userId}`);
   }, [router, userId]);
 
   return null;

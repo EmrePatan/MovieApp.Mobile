@@ -39,6 +39,8 @@ export default function AppShellLayout() {
       <Stack.Screen name="upcoming" />
       <Stack.Screen name="watch-history" />
       <Stack.Screen name="watchlist" />
+      <Stack.Screen name="my-comments" />
+      <Stack.Screen name="user-comments/[userId]" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="messages" />
       <Stack.Screen name="pick-something" />

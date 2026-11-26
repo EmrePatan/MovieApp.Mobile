@@ -23,6 +23,7 @@ export function discoveryBrowseInfiniteQueryKey(
   type: DiscoveryTypeFilter = 'all',
   filters: DiscoveryBrowseFilters,
   pageSize = DEFAULT_DISCOVERY_PAGE_SIZE,
+  watchRegion?: string,
 ) {
   return [
     'discovery',
@@ -42,6 +43,8 @@ export function discoveryBrowseInfiniteQueryKey(
     filters.keywordIds,
     filters.tvStatuses,
     filters.sort,
+    filters.watchProviderIds,
+    watchRegion ?? null,
     pageSize,
   ] as const;
 }
@@ -107,6 +110,7 @@ export function worldCinemaPreviewQueryKey(
 export function worldCinemaInfiniteQueryKey(
   state: WorldCinemaState,
   pageSize: number,
+  watchRegion?: string,
 ) {
   return [
     'discovery',
@@ -127,6 +131,8 @@ export function worldCinemaInfiniteQueryKey(
     state.originalLanguage,
     state.keywordIds,
     state.tvStatuses,
+    state.watchProviderIds,
+    watchRegion ?? null,
     pageSize,
   ] as const;
 }

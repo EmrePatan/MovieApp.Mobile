@@ -20,6 +20,11 @@ jest.mock('@/features/discovery/hooks/useDiscoveryBrowse', () => ({
   useDiscoveryBrowse: jest.fn(),
 }));
 
+// Needs auth and query providers; covered by watch-platforms.test.tsx.
+jest.mock('@/features/discovery/components/CatalogMyPlatformsFilter', () => ({
+  CatalogMyPlatformsFilter: () => null,
+}));
+
 jest.mock('@/features/discovery/hooks/useGenres', () => ({
   useGenres: jest.fn(),
 }));

@@ -29,10 +29,7 @@ export function WorldCinemaHubSection() {
   const [selectedOriginCountry, setSelectedOriginCountry] = useState(
     DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY,
   );
-  const previewQuery = useWorldCinemaPreview(
-    selectedOriginCountry,
-    DEFAULT_WORLD_CINEMA_MEDIA_TYPE,
-  );
+  const previewQuery = useWorldCinemaPreview(selectedOriginCountry, 'movie');
 
   const previewItems = (previewQuery.data?.items ?? []).filter(
     (item) => item.type === 'movie' || item.type === 'tv',

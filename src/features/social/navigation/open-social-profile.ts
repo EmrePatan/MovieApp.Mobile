@@ -23,7 +23,7 @@ export function openSocialProfile(
   const userId = resolveSocialUserId(userIdCandidate);
   if (!userId) return false;
   if (options?.section === 'reviews') {
-    router.push(`/profile/user-comments/${userId}`);
+    router.push(`/user-comments/${userId}`);
     return true;
   }
 

@@ -27,7 +27,7 @@ describe('world-cinema-params', () => {
       sort: 'unknown',
     });
 
-    expect(state.mediaType).toBe('movie');
+    expect(state.mediaType).toBe('all');
     expect(state.originCountry).toBe('KR');
     expect(state.sort).toBe('popularity_desc');
   });

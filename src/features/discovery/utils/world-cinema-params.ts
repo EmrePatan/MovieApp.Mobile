@@ -1,9 +1,12 @@
-import type { AdvancedDiscoverMediaType, AdvancedDiscoverSort } from '../advanced-discover-types';
+import {
+  ADVANCED_DISCOVER_SORT_OPTIONS,
+  type AdvancedDiscoverSort,
+} from '../advanced-discover-types';
+import type { CatalogContentType } from './catalog-filter-draft';
 import { parseTvDiscoverStatuses } from '../tv-discover-status';
 import {
   createDefaultWorldCinemaState,
   DEFAULT_WORLD_CINEMA_SORT,
-  WORLD_CINEMA_SORT_OPTIONS,
   type WorldCinemaState,
 } from '../world-cinema-types';
 import {
@@ -14,20 +17,21 @@ import {
   parseRatingParam,
   parseRuntimeParam,
   parseVoteCountParam,
+  parseWatchProviderIdsParam,
   parseYearParam,
   readRouteParam,
   serializeKeywordLabelsParam,
 } from './parse-route-helpers';
 
-function parseMediaType(value: string | undefined): AdvancedDiscoverMediaType {
+function parseMediaType(value: string | undefined): CatalogContentType {
   const normalized = value?.trim().toLowerCase();
-  return normalized === 'tv' ? 'tv' : 'movie';
+  return normalized === 'tv' || normalized === 'movie' ? normalized : 'all';
 }
 
 function parseSort(value: string | undefined): AdvancedDiscoverSort {
   const normalized = value?.trim().toLowerCase() as AdvancedDiscoverSort | undefined;
 
-  return normalized && WORLD_CINEMA_SORT_OPTIONS.includes(normalized)
+  return normalized && ADVANCED_DISCOVER_SORT_OPTIONS.includes(normalized)
     ? normalized
     : DEFAULT_WORLD_CINEMA_SORT;
 }
@@ -61,7 +65,8 @@ export function parseWorldCinemaParams(
     originalLanguage: parseLanguageCodeParam(readRouteParam(params.language)),
     keywordIds,
     ...(keywordIds.length > 0 && Object.keys(keywordLabels).length > 0 ? { keywordLabels } : {}),
-    tvStatuses: mediaType === 'tv' ? parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses) : [],
+    tvStatuses: mediaType === 'movie' ? [] : parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses),
+    watchProviderIds: parseWatchProviderIdsParam(params.watchProviderId),
   };
 }
 
@@ -129,8 +134,12 @@ export function serializeWorldCinemaParams(
     }
   }
 
-  if (state.mediaType === 'tv' && state.tvStatuses.length > 0) {
+  if (state.mediaType !== 'movie' && state.tvStatuses.length > 0) {
     params.tvStatus = state.tvStatuses.join(',');
+  }
+
+  if (state.watchProviderIds.length > 0) {
+    params.watchProviderId = state.watchProviderIds.join(',');
   }
 
   return params;

@@ -4,6 +4,7 @@ import {
 } from '../advanced-discover-types';
 import {
   createDefaultStreamingDiscoverState,
+  DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE,
   type StreamingDiscoverMediaType,
   type StreamingDiscoverState,
 } from '../streaming-discover-types';
@@ -22,7 +23,7 @@ import {
   serializeKeywordLabelsParam,
 } from './parse-route-helpers';
 
-const MEDIA_TYPES = new Set<StreamingDiscoverMediaType>(['movie', 'tv']);
+const MEDIA_TYPES = new Set<StreamingDiscoverMediaType>(['all', 'movie', 'tv']);
 const MONETIZATION_TYPES = new Set<WatchMonetizationType>(['stream', 'free', 'ads', 'rent', 'buy']);
 const SORT_VALUES = new Set<AdvancedDiscoverSort>(ADVANCED_DISCOVER_SORT_OPTIONS);
 
@@ -31,7 +32,7 @@ function parseMediaType(value: string | undefined): StreamingDiscoverMediaType {
     return value as StreamingDiscoverMediaType;
   }
 
-  return 'movie';
+  return DEFAULT_STREAMING_DISCOVER_MEDIA_TYPE;
 }
 
 function parseRegion(value: string | undefined, fallback: string): string {
@@ -99,7 +100,7 @@ export function parseStreamingDiscoverParams(
     originCountry: parseOriginCountryParam(readRouteParam(params.originCountry)),
     keywordIds,
     ...(keywordIds.length > 0 && Object.keys(keywordLabels).length > 0 ? { keywordLabels } : {}),
-    tvStatuses: mediaType === 'tv' ? parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses) : [],
+    tvStatuses: mediaType === 'movie' ? [] : parseTvDiscoverStatuses(params.tvStatus ?? params.tvStatuses),
     sort: parseSort(readRouteParam(params.sort)),
   };
 }
@@ -168,7 +169,7 @@ export function serializeStreamingDiscoverParams(
     }
   }
 
-  if (state.mediaType === 'tv' && state.tvStatuses.length > 0) {
+  if (state.mediaType !== 'movie' && state.tvStatuses.length > 0) {
     params.tvStatus = state.tvStatuses.join(',');
   }
 

@@ -55,6 +55,8 @@ describe('discovery query keys', () => {
       [],
       [],
       'rating_desc',
+      [],
+      null,
       20,
     ]);
   });

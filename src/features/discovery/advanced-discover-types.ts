@@ -53,7 +53,8 @@ export interface AdvancedDiscoverState {
 }
 
 export interface AdvancedDiscoverRequest extends AdvancedDiscoverFilters {
-  mediaType: AdvancedDiscoverMediaType;
+  /** "all" is used by the platform page; the advanced discover screen picks movie or TV. */
+  mediaType: AdvancedDiscoverMediaType | 'all';
   page?: number;
   pageSize?: number;
 }

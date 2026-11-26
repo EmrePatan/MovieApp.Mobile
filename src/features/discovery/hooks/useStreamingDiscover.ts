@@ -35,7 +35,7 @@ export function useStreamingDiscover(
           originalLanguage: state.originalLanguage,
           originCountry: state.originCountry,
           keywordIds: state.keywordIds,
-          tvStatuses: state.mediaType === 'tv' ? state.tvStatuses : [],
+          tvStatuses: state.mediaType === 'movie' ? [] : state.tvStatuses,
           watchRegion: state.watchRegion,
           watchProviderIds: state.watchProviderIds,
           watchMonetizationTypes: state.watchMonetizationTypes,

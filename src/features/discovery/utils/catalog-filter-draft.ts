@@ -17,6 +17,8 @@ export interface CatalogFilterDraft {
   keywordIds: string[];
   keywordLabels: Record<string, string>;
   tvStatuses: TvDiscoverStatus[];
+  /** Subscription platforms to filter by, set by "only on my platforms". */
+  watchProviderIds: number[];
 }
 
 export type CatalogFilterField =
@@ -37,6 +39,34 @@ export interface CatalogFilterSheetConfig {
   /** When set, origin country matching this value is treated as screen context (not a user filter). */
   defaultOriginCountry?: string | null;
   defaultContentType?: CatalogContentType;
+  /** Shows "only on my platforms". Only for lists the server can filter by provider. */
+  supportsMyPlatforms?: boolean;
+}
+
+/**
+ * One filter sheet for every discover list: same fields, order, content types and default.
+ * A screen only states what is truly special about it.
+ */
+export function createCatalogFilterSheetConfig(
+  overrides: Pick<CatalogFilterSheetConfig, 'defaultOriginCountry' | 'supportsMyPlatforms'> = {},
+): CatalogFilterSheetConfig {
+  return {
+    contentTypeOptions: ['all', 'movie', 'tv'],
+    fields: [
+      'contentType',
+      'genre',
+      'year',
+      'minRating',
+      'originalLanguage',
+      'originCountry',
+      'runtime',
+      'minVoteCount',
+      'keywords',
+      'tvStatus',
+    ],
+    defaultContentType: 'all',
+    ...overrides,
+  };
 }
 
 export function createEmptyCatalogFilterDraft(
@@ -57,6 +87,7 @@ export function createEmptyCatalogFilterDraft(
     keywordIds: [],
     keywordLabels: {},
     tvStatuses: [],
+    watchProviderIds: [],
   };
 }
 

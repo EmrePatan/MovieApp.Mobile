@@ -1,15 +1,14 @@
 import {
-  ADVANCED_DISCOVER_SORT_OPTIONS,
-  type AdvancedDiscoverMediaType,
   type AdvancedDiscoverSort,
   type GenreMatchMode,
 } from './advanced-discover-types';
 import type { TvDiscoverStatus } from './tv-discover-status';
+import type { CatalogContentType } from './utils/catalog-filter-draft';
 
 export const WORLD_CINEMA_PREVIEW_SIZE = 8;
 export const DEFAULT_WORLD_CINEMA_PAGE_SIZE = 20;
 export const DEFAULT_WORLD_CINEMA_ORIGIN_COUNTRY = 'KR';
-export const DEFAULT_WORLD_CINEMA_MEDIA_TYPE: AdvancedDiscoverMediaType = 'movie';
+export const DEFAULT_WORLD_CINEMA_MEDIA_TYPE: CatalogContentType = 'all';
 export const DEFAULT_WORLD_CINEMA_SORT: AdvancedDiscoverSort = 'popularity_desc';
 
 export interface WorldCinemaCollection {
@@ -32,10 +31,11 @@ export interface WorldCinemaFilters {
   /** Names for `keywordIds`, kept so the filter sheet does not show raw ids. Omitted when empty. */
   keywordLabels?: Record<string, string>;
   tvStatuses: TvDiscoverStatus[];
+  watchProviderIds: number[];
 }
 
 export interface WorldCinemaState extends WorldCinemaFilters {
-  mediaType: AdvancedDiscoverMediaType;
+  mediaType: CatalogContentType;
   originCountry: string;
   sort: AdvancedDiscoverSort;
 }
@@ -43,10 +43,9 @@ export interface WorldCinemaState extends WorldCinemaFilters {
 export interface WorldCinemaRequest extends WorldCinemaState {
   page?: number;
   pageSize?: number;
+  /** Required by the API together with watchProviderIds. */
+  watchRegion?: string;
 }
-
-/** Same options as every other discover screen. */
-export const WORLD_CINEMA_SORT_OPTIONS: AdvancedDiscoverSort[] = ADVANCED_DISCOVER_SORT_OPTIONS;
 
 export function createDefaultWorldCinemaFilters(): WorldCinemaFilters {
   return {
@@ -63,6 +62,7 @@ export function createDefaultWorldCinemaFilters(): WorldCinemaFilters {
     originalLanguage: null,
     keywordIds: [],
     tvStatuses: [],
+    watchProviderIds: [],
   };
 }
 
@@ -114,6 +114,10 @@ export function hasActiveWorldCinemaUserFilters(state: WorldCinemaState): boolea
   }
 
   if (state.tvStatuses.length > 0) {
+    return true;
+  }
+
+  if (state.watchProviderIds.length > 0) {
     return true;
   }
 
