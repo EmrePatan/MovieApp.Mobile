@@ -19,6 +19,7 @@ import {
 import { WatchHistoryTabs } from '@/features/watch-history/components/WatchHistoryTabs';
 import { useShowEpisodeCount } from '@/features/watch-history/hooks/useShowEpisodeCount';
 import { useUpdateWatchDates } from '@/features/watch-history/hooks/useUpdateWatchDates';
+import { markWatchHistoryHintLearned } from '@/features/watch-history/utils/watch-history-hint-storage';
 import {
   getSelectionKey,
   MAX_WATCH_DATE_SELECTION,
@@ -136,6 +137,9 @@ export default function WatchHistoryScreen() {
   );
 
   const toggleSelectionMode = () => {
+    if (!selection) {
+      void markWatchHistoryHintLearned();
+    }
     setNotice(null);
     setSelection((current) => (current ? null : new Set()));
   };

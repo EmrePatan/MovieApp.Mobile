@@ -1,3 +1,4 @@
+import { requestWatchHistoryHint } from '@/features/watch-history/utils/watch-history-hint-requests';
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import {
   bulkUpdateEpisodeWatchState,
@@ -400,7 +401,11 @@ export function useBulkUpdateEpisodeWatchState(tvShowId: string, seasonNumber: n
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_result, { episodeIds, watched }) => {
+      const markedCount = new Set(episodeIds).size;
+      if (watched && markedCount > 1) {
+        requestWatchHistoryHint(markedCount);
+      }
       void queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
       void queryClient.invalidateQueries({
         queryKey: ['watch-history', 'tv', tvShowId, 'season'],
@@ -497,7 +502,11 @@ export function useToggleSeasonWatched(tvShowId: string, seasonNumber: number) {
         queryClient.setQueryData(tvShowProgressQueryKey(tvShowId), context.previousTvProgress);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_result, { isFullyWatched, episodeIds }) => {
+      // With no ids the server marks every aired episode of the season.
+      if (!isFullyWatched && episodeIds.length !== 1) {
+        requestWatchHistoryHint(episodeIds.length || null);
+      }
       void queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
       void queryClient.invalidateQueries({
         queryKey: ['watch-history', 'tv', tvShowId, 'season'],
@@ -523,6 +532,9 @@ export function useToggleTvShowWatched(tvShowId: string) {
     mutationFn: async (isFullyWatched: boolean): Promise<ToggleTvShowWatchedResult> => {
       const markingWatched = !isFullyWatched;
       await bulkUpdateTvShowWatchState(tvShowId, markingWatched);
+      if (markingWatched) {
+        requestWatchHistoryHint();
+      }
 
       await queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
       await queryClient.invalidateQueries({
@@ -567,7 +579,10 @@ export function useMarkThroughEpisode(tvShowId: string, seasonNumber: number) {
 
   return useMutation({
     mutationFn: (episodeId: string) => markThroughEpisode(tvShowId, episodeId),
-    onSuccess: () => {
+    onSuccess: ({ affectedCount }) => {
+      if (affectedCount > 1) {
+        requestWatchHistoryHint(affectedCount);
+      }
       void queryClient.invalidateQueries({ queryKey: tvShowProgressQueryKey(tvShowId) });
       void queryClient.invalidateQueries({
         queryKey: ['watch-history', 'tv', tvShowId, 'season'],

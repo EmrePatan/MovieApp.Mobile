@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/auth/useAuth';
 import { ShowCompletedConfettiOverlay } from '@/features/watch-history/components/ShowCompletedConfettiOverlay';
+import { useHoldWatchHistoryHint } from '@/features/watch-history/hooks/useHoldWatchHistoryHint';
 import { useShowCompletionCelebration } from '@/features/watch-history/hooks/useShowCompletionCelebration';
 import { useTvShowProgress } from '@/features/watch-history/hooks/useTvShowProgress';
 import { useOptionalDetailPersonalRating } from '@/features/details/shared/components/DetailPersonalRatingExperience';
@@ -36,6 +37,7 @@ export function TvShowCompletionCelebrationLayer({
     onCompleted: personalRating?.handleMarkedWatched,
     forceToken,
   });
+  useHoldWatchHistoryHint(confettiVisible);
 
   return (
     <ShowCompletedConfettiOverlay visible={confettiVisible} onDismiss={dismissConfetti} />

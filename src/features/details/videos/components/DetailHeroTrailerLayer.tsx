@@ -60,13 +60,26 @@ export function DetailHeroTrailerLayer({
     }
   }, [t, watchUrl]);
 
+  // The video owner can block embeds or whole regions; leaving the app is the user's call.
   const handlePlaybackError = useCallback(() => {
     closeTrailer();
-    void openTrailerExternally();
-  }, [closeTrailer, openTrailerExternally]);
+    Alert.alert(
+      t('details.actions.trailerUnavailable'),
+      t('details.actions.trailerUnavailableMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('details.actions.trailerOpenYoutube'),
+          onPress: () => void openTrailerExternally(),
+        },
+      ],
+    );
+  }, [closeTrailer, openTrailerExternally, t]);
 
   const closeTrailerRef = useRef(closeTrailer);
-  closeTrailerRef.current = closeTrailer;
+  useEffect(() => {
+    closeTrailerRef.current = closeTrailer;
+  }, [closeTrailer]);
 
   useFocusEffect(
     useCallback(() => {

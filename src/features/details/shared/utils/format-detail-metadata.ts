@@ -10,11 +10,13 @@ import {
 export function formatMovieDetailMetadataLine(input: {
   releaseDate: string | null;
   runtimeMinutes: number | null;
+  certification?: string | null;
 }): string {
   const parts = [
     translateContentType('movie'),
     formatCatalogYear(input.releaseDate, null),
     formatRuntimeMinutes(input.runtimeMinutes),
+    input.certification,
   ].filter(Boolean);
 
   return parts.join(' · ');
@@ -23,6 +25,7 @@ export function formatMovieDetailMetadataLine(input: {
 export function formatTvDetailMetadataLine(input: {
   firstAirDate: string | null;
   seasonCount: number;
+  certification?: string | null;
 }): string {
   const parts = [
     translateContentType('tv'),
@@ -32,6 +35,7 @@ export function formatTvDetailMetadataLine(input: {
           count: input.seasonCount,
         })
       : null,
+    input.certification,
   ].filter(Boolean);
 
   return parts.join(' · ');
