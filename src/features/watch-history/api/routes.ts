@@ -48,11 +48,14 @@ export function buildWatchedEpisodesPath(page = 1, pageSize = 20): string {
   return `/api/watch-history/episodes?${params.toString()}`;
 }
 
-export function buildRecentWatchHistoryPath(page = 1, pageSize = 20): string {
+export function buildRecentWatchHistoryPath(page = 1, pageSize = 20, undated?: boolean): string {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),
   });
+  if (undated !== undefined) {
+    params.set('undated', String(undated));
+  }
 
   return `/api/watch-history/recent?${params.toString()}`;
 }

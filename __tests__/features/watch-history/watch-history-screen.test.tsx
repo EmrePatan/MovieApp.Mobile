@@ -19,7 +19,75 @@ jest.mock('@/features/watch-history/hooks/useRecentWatchHistory', () => ({
   useRecentWatchHistory: jest.fn(),
 }));
 
+const mockMutate = jest.fn();
+
+jest.mock('@/features/watch-history/hooks/useUpdateWatchDates', () => ({
+  useUpdateWatchDates: () => ({
+    mutate: mockMutate,
+    reset: jest.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
+}));
+
+jest.mock('@/features/watch-history/hooks/useShowEpisodeCount', () => ({
+  useShowEpisodeCount: (tvShowId: string | null) => ({
+    data: tvShowId ? 942 : undefined,
+    isError: false,
+  }),
+}));
+
 describe('WatchHistoryScreen', () => {
+  it('changes a whole show after showing how many episodes it covers', () => {
+    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
+    const episode = (episodeNumber: number) => ({
+      type: 'episode',
+      movieId: null,
+      episodeId: `ep-${episodeNumber}`,
+      tvShowId: 'show-id',
+      title: null,
+      tvShowTitle: 'Running Man',
+      seasonNumber: 1,
+      episodeNumber,
+      episodeTitle: null,
+      watchedAt: '2026-11-23T14:30:00Z',
+    });
+    (useRecentWatchHistory as jest.Mock).mockReturnValue({
+      data: { pages: [{ items: [episode(2), episode(1)] }] },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+      isRefetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+    });
+
+    render(<WatchHistoryScreen />);
+    fireEvent.press(screen.getByTestId('watch-history-edit'));
+    fireEvent.press(screen.getByTestId('watch-history-whole-show'));
+    expect(
+      screen.getByText(
+        t('extras.historyDatesWholeShowSubtitle', { title: 'Running Man', count: 942 }),
+      ),
+    ).toBeTruthy();
+
+    fireEvent.press(screen.getByLabelText(t('extras.historyDatesModeUnknown')));
+    fireEvent.press(screen.getByText(t('common.save')));
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        movieIds: [],
+        episodeIds: [],
+        tvShowId: 'show-id',
+        undated: false,
+        mode: 'unknown',
+      },
+      expect.anything(),
+    );
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -84,6 +152,57 @@ describe('WatchHistoryScreen', () => {
     render(<WatchHistoryScreen />);
     fireEvent.press(screen.getByLabelText(/Interstellar, Movie/));
     expect(mockPush).toHaveBeenCalledWith('/movie/movie-id');
+  });
+
+  it('selects entries and saves an unknown watch date', () => {
+    (useAuth as jest.Mock).mockReturnValue({ isAuthenticated: true });
+    const base = {
+      type: 'movie',
+      episodeId: null,
+      tvShowId: null,
+      tvShowTitle: null,
+      seasonNumber: null,
+      episodeNumber: null,
+      episodeTitle: null,
+      watchedAt: '2026-09-11T14:30:00Z',
+    };
+    (useRecentWatchHistory as jest.Mock).mockReturnValue({
+      data: {
+        pages: [
+          {
+            items: [
+              { ...base, movieId: 'dated', title: 'Interstellar' },
+              { ...base, movieId: 'undated', title: 'Matrix', watchedAtPrecision: 'unknown' },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+      isRefetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+    });
+
+    render(<WatchHistoryScreen />);
+    expect(useRecentWatchHistory).toHaveBeenLastCalledWith(false);
+    fireEvent.press(screen.getByTestId('watch-history-tab-undated'));
+    expect(useRecentWatchHistory).toHaveBeenLastCalledWith(true);
+
+    fireEvent.press(screen.getByTestId('watch-history-edit'));
+    fireEvent.press(screen.getByLabelText(/Interstellar, Movie/));
+    expect(mockPush).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByText(t('extras.historyDatesChange')));
+    fireEvent.press(screen.getByLabelText(t('extras.historyDatesModeUnknown')));
+    fireEvent.press(screen.getByText(t('common.save')));
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      { movieIds: ['dated'], episodeIds: [], mode: 'unknown' },
+      expect.anything(),
+    );
   });
 
   it('renders empty history state', () => {

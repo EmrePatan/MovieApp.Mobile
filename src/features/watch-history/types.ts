@@ -90,6 +90,35 @@ export interface RecentWatchHistoryItemResponse {
   episodeNumber: number | null;
   episodeTitle: string | null;
   watchedAt: string;
+  /** Absent on older API versions; treat as `exact`. */
+  watchedAtPrecision?: WatchDatePrecision;
+  /** Movie poster, or the show poster for an episode. */
+  posterPath?: string | null;
+}
+
+export type WatchDatePrecision = 'exact' | 'day' | 'year' | 'unknown';
+
+export type WatchDateMode = 'day' | 'year' | 'release' | 'unknown';
+
+export interface UpdateWatchDatesRequest {
+  movieIds: string[];
+  episodeIds: string[];
+  mode: WatchDateMode;
+  /** `yyyy-MM-dd`, required for mode `day`. */
+  date?: string;
+  /** Required for mode `year`. */
+  year?: number;
+  /** Every watched episode of this show, instead of individual ids. */
+  tvShowId?: string;
+  /** With `tvShowId`: only its "date unknown" episodes (true) or only the dated ones (false). */
+  undated?: boolean;
+  /** Count what would change without saving anything. */
+  dryRun?: boolean;
+}
+
+export interface UpdateWatchDatesResponse {
+  updatedCount: number;
+  skippedCount: number;
 }
 
 export interface RecentWatchHistoryResponse {

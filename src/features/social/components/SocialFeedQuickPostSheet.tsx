@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   Pressable,
   StyleSheet,
   TextInput,
@@ -17,8 +18,16 @@ import { useMovieGallery, useTvShowGallery } from '@/features/gallery/hooks/useG
 import { CatalogImage } from '@/features/details/shared/components/CatalogImage';
 import { StarRatingSelector } from '@/features/ratings/components/StarRatingSelector';
 import { useRateContent } from '@/features/ratings/hooks/useRatingMutations';
-import { starRatingToBackendScore } from '@/features/ratings/utils/star-rating';
-import { useCreateReviewMutation } from '@/features/reviews/hooks/useReviewMutations';
+import { useMyRating } from '@/features/ratings/hooks/useRatings';
+import {
+  backendScoreToStarRating,
+  starRatingToBackendScore,
+} from '@/features/ratings/utils/star-rating';
+import { useMyReview } from '@/features/reviews/hooks/useMyReview';
+import {
+  useCreateReviewMutation,
+  useUpdateReviewMutation,
+} from '@/features/reviews/hooks/useReviewMutations';
 import { MAX_REVIEW_CONTENT_LENGTH } from '@/features/reviews/types';
 import { useSearchResults } from '@/features/search/hooks/useSearch';
 import { isPersonSearchResult, type CatalogSearchResultItem } from '@/features/search/types';
@@ -29,6 +38,7 @@ import { SocialGifFrame } from './SocialGifFrame';
 import { SocialGifPickerSheet } from './SocialGifPickerSheet';
 import {
   buildSocialCommentBody,
+  parseSocialCommentContent,
   type SocialCommentMediaDraft,
 } from '../utils/social-comment-media';
 import { glass } from '@/theme/glass';
@@ -81,8 +91,41 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
   );
 
   const contentType = selected?.type === 'tv' ? 'tv' : 'movie';
-  const rate = useRateContent(contentType, selected?.id ?? '');
-  const createReview = useCreateReviewMutation(contentType, selected?.id ?? '');
+  const selectedId = selected?.id ?? '';
+  const rate = useRateContent(contentType, selectedId);
+  const createReview = useCreateReviewMutation(contentType, selectedId);
+  const updateReview = useUpdateReviewMutation(contentType, selectedId);
+  const myRating = useMyRating(contentType, selectedId);
+  const myReview = useMyReview(contentType, selectedId);
+  const existingReview = myReview.data ?? null;
+  const existingScore = myRating.data?.score ?? null;
+  const isLoadingExisting = Boolean(selected) && (myRating.isLoading || myReview.isLoading);
+
+  // Prefill the user's existing rating and review once per picked title. Without this the form
+  // always opened empty, and sharing a thought on an already-reviewed title hit the backend's
+  // one-review-per-title rule (409) instead of editing it.
+  // Adjusted during render (React's "reset state when a prop changes" pattern), not in an effect.
+  const [prefilledFor, setPrefilledFor] = useState<string | null>(null);
+  if (selected && !isLoadingExisting && prefilledFor !== selected.id) {
+    setPrefilledFor(selected.id);
+    setStars(existingScore != null ? backendScoreToStarRating(existingScore) : null);
+    if (existingReview) {
+      const parsed = parseSocialCommentContent(existingReview.content);
+      setText(parsed.text);
+      setIsSpoiler(parsed.spoiler);
+      setMedia(
+        parsed.gifUrl
+          ? { kind: 'gif', value: parsed.gifUrl }
+          : parsed.posterPath
+            ? { kind: 'image', value: parsed.posterPath }
+            : null,
+      );
+    } else {
+      setText('');
+      setIsSpoiler(false);
+      setMedia(null);
+    }
+  }
 
   // Gallery hooks only fire for a valid id, so the unused kind stays idle.
   const movieGallery = useMovieGallery(contentType === 'movie' ? (selected?.id ?? '') : '');
@@ -94,6 +137,7 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
     setIsSpoiler(false);
     setQuery('');
     setSelected(null);
+    setPrefilledFor(null);
     setStars(null);
     setText('');
     setError(null);
@@ -105,7 +149,11 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
     onClose();
   }, [onClose, reset]);
 
-  const canShare = Boolean(selected) && (stars != null || text.trim().length > 0 || media != null) && !isSubmitting;
+  const canShare =
+    Boolean(selected) &&
+    !isLoadingExisting &&
+    (stars != null || text.trim().length > 0 || media != null) &&
+    !isSubmitting;
 
   const handleShare = useCallback(async () => {
     if (!selected || !canShare) {
@@ -116,18 +164,41 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
     setError(null);
     try {
       if (stars != null) {
-        await rate.mutateAsync(starRatingToBackendScore(stars));
+        const score = starRatingToBackendScore(stars);
+        if (score !== existingScore) {
+          await rate.mutateAsync(score);
+        }
       }
       const body = buildSocialCommentBody(text, media, isSpoiler);
       if (text.trim() || media) {
-        await createReview.mutateAsync({ content: body });
+        if (existingReview) {
+          if (body !== existingReview.content) {
+            await updateReview.mutateAsync({ content: body });
+          }
+        } else {
+          await createReview.mutateAsync({ content: body });
+        }
       }
       handleClose();
     } catch {
       setError(t('social.composerError'));
       setIsSubmitting(false);
     }
-  }, [canShare, createReview, handleClose, isSpoiler, media, rate, selected, stars, t, text]);
+  }, [
+    canShare,
+    createReview,
+    existingReview,
+    existingScore,
+    handleClose,
+    isSpoiler,
+    media,
+    rate,
+    selected,
+    stars,
+    t,
+    text,
+    updateReview,
+  ]);
 
   const showResults = !selected && debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
 
@@ -304,7 +375,8 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
                   <FlatList
                     data={results}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
-                    keyboardShouldPersistTaps="handled"
+                    // Same first-tap-only-dismisses-keyboard issue as the DNA cover sheet.
+                    keyboardShouldPersistTaps="always"
                     style={styles.results}
                     ListEmptyComponent={
                       <AppText style={styles.empty}>{t('social.noSearchResults')}</AppText>
@@ -313,7 +385,10 @@ export function SocialFeedQuickPostSheet({ visible, onClose }: SocialFeedQuickPo
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={item.title}
-                        onPress={() => setSelected(item)}
+                        onPress={() => {
+                          Keyboard.dismiss();
+                          setSelected(item);
+                        }}
                         style={({ pressed }) => [styles.resultRow, pressed && styles.pressed]}
                       >
                         <View style={styles.resultPoster}>

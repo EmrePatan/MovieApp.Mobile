@@ -41,6 +41,7 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
   const hasActivity = yourYear.months.some((month) => month.total > 0);
   const activeDayPercent = formatActiveYearDayPercentDisplay(yourYear.activeDays, year);
   const peakMonthNumber = yourYear.peakMonth?.month ?? null;
+  const yearOnlyCount = yourYear.yearOnlyCount ?? 0;
 
   return (
     <View style={styles.section}>
@@ -60,8 +61,16 @@ export const InsightsYourYearSection = memo(function InsightsYourYearSection({
           )
         }
       />
+      {yearOnlyCount > 0 ? (
+        <View style={styles.callout} accessibilityRole="text">
+          <Ionicons name="time-outline" size={16} color={colors.accent} />
+          <AppText variant="bodySmall" style={styles.calloutText}>
+            {t('insights.yourYear.yearOnly', { count: yearOnlyCount })}
+          </AppText>
+        </View>
+      ) : null}
       {!hasActivity ? (
-        <InsightsEmptyState message={t('insights.yourYear.empty')} />
+        yearOnlyCount > 0 ? null : <InsightsEmptyState message={t('insights.yourYear.empty')} />
       ) : (
         <InsightsCard glow style={styles.body}>
           <View style={styles.chart} accessibilityRole="summary">

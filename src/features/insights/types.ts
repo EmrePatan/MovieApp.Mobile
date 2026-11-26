@@ -51,6 +51,8 @@ export interface InsightsV3YourYear {
   months: InsightsV3MonthlyActivity[];
   /** Per-day watch counts for the heatmap; absent on older backends. */
   days?: InsightsV3DayActivity[];
+  /** Watches that only have a year, so they are on no month or day; absent on older backends. */
+  yearOnlyCount?: number;
   activeDays: number;
   peakMonth: InsightsV3MonthHighlight | null;
   favoriteWeekday: number | string | null;

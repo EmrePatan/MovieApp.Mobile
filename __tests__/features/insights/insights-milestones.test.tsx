@@ -57,9 +57,9 @@ describe('achievement model', () => {
     const families = groupAchievements(list);
 
     expect(totalPoints(families)).toBe(1 + 2 + 3);
-    expect(computeLevel(6)).toMatchObject({ level: 2, pointsToNext: 4 });
+    expect(computeLevel(6)).toMatchObject({ level: 2, pointsToNext: 9 });
     expect(computeLevel(0).level).toBe(1);
-    expect(computeLevel(41)).toMatchObject({ level: 6, pointsToNext: 14 });
+    expect(computeLevel(41)).toMatchObject({ level: 5, pointsToNext: 11 });
     expect(computeLevel(120)).toMatchObject({ level: 10, ceiling: null, progress: 1 });
   });
 

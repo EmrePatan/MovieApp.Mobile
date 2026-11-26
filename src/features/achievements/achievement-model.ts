@@ -18,8 +18,12 @@ export const FAMILY_ORDER = [
 /** Points per tier: bronze → legend. A level is just the running total. */
 export const TIER_POINTS = [1, 2, 3, 5, 8] as const;
 
-/** Minimum points for levels 1..10 (Viewer … Masterpiece); the full set of tiers is worth 119. */
-export const LEVEL_FLOORS = [0, 4, 10, 18, 28, 40, 55, 72, 92, 112] as const;
+/**
+ * Minimum points for levels 1..10 (Viewer … Masterpiece); the full set of tiers is worth 119.
+ * Early floors are steeper than before: back-filling ~50 past movies used to reach level 4 in half
+ * an hour, now it lands around level 2-3 and the upper levels need time-based families.
+ */
+export const LEVEL_FLOORS = [0, 6, 15, 26, 38, 52, 67, 82, 97, 112] as const;
 
 /** Each family owns a hue: light (glyph top) → base (accent) → deep (glyph bottom / disk tint). */
 export interface FamilyHue {

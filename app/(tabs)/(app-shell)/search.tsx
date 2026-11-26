@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common/AppText';
 import { PlatformRefreshFlatList } from '@/components/refresh/PlatformRefreshFlatList';
 import { useQueryClient } from '@tanstack/react-query';
@@ -115,11 +116,10 @@ export default function SearchScreen() {
   const showAutocomplete = !isLibrarySearch && displayMode === 'autocomplete';
   const autocompleteQuery = useAutocomplete(debouncedInput, { enabled: showAutocomplete });
 
-  useEffect(() => {
-    if (isLibrarySearch && typeFilter === 'person') {
-      setTypeFilter('all');
-    }
-  }, [isLibrarySearch, typeFilter]);
+  // Library search has no person filter. Adjust during render instead of in an effect.
+  if (isLibrarySearch && typeFilter === 'person') {
+    setTypeFilter('all');
+  }
   const {
     items: recentSearchItems,
     isLoading: isRecentSearchesLoading,
@@ -394,7 +394,13 @@ export default function SearchScreen() {
 
   if (hasActiveSearch) {
     return (
-      <View style={commonStyles.screen} testID="search-screen">
+      // Same top/side safe-area edges as the StackListScreen branches below; without them the
+      // back button in the list header rendered under the iOS status bar.
+      <SafeAreaView
+        style={commonStyles.screen}
+        edges={['top', 'left', 'right']}
+        testID="search-screen"
+      >
         <View style={styles.listHost}>
         <PlatformRefreshFlatList
           ref={resultsListRef}
@@ -421,7 +427,7 @@ export default function SearchScreen() {
         />
         <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 

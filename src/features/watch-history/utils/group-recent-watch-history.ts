@@ -18,12 +18,22 @@ export interface WatchHistorySingle {
 
 export type WatchHistoryRow = WatchHistoryShowGroup | WatchHistorySingle;
 
-function dayKey(iso: string): string {
-  return iso.slice(0, 10);
+/**
+ * Rows only merge within one calendar month, one year-only year, or among undated entries.
+ * A month, not a day: dating a weekly show by air date puts every episode on its own day.
+ */
+function dateKey(item: RecentWatchHistoryItemResponse): string {
+  if (item.watchedAtPrecision === 'unknown') {
+    return 'unknown';
+  }
+
+  return item.watchedAtPrecision === 'year'
+    ? `year-${item.watchedAt.slice(0, 4)}`
+    : item.watchedAt.slice(0, 7);
 }
 
 /**
- * Collapses consecutive episodes of one show watched on the same day into a
+ * Collapses consecutive episodes of one show watched in the same month into a
  * single row, so a binge reads as "MacGyver · 6 episodes" instead of six cards.
  */
 export function groupRecentWatchHistory(
@@ -38,7 +48,7 @@ export function groupRecentWatchHistory(
       item.tvShowId != null &&
       last?.kind === 'show' &&
       last.tvShowId === item.tvShowId &&
-      dayKey(last.latestWatchedAt) === dayKey(item.watchedAt);
+      dateKey(last.episodes[0]!) === dateKey(item);
 
     if (canJoin && last?.kind === 'show') {
       last.episodes.push(item);
@@ -48,7 +58,7 @@ export function groupRecentWatchHistory(
     if (item.type === 'episode' && item.tvShowId != null) {
       rows.push({
         kind: 'show',
-        key: `show-${item.tvShowId}-${dayKey(item.watchedAt)}-${index}`,
+        key: `show-${item.tvShowId}-${dateKey(item)}-${index}`,
         tvShowId: item.tvShowId,
         tvShowTitle: item.tvShowTitle,
         episodes: [item],

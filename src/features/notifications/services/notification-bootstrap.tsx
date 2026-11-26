@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/useAuth';
+import { ensurePushDeviceRegisteredAsync } from '@/features/follows/services/push-device-service';
 import { markSocialNotificationRead } from '@/features/social/api/social-api';
 import { markNotificationRead } from '../api/notifications-api';
 import { buildNotificationRoute } from '../utils/notification-navigation';
@@ -173,7 +174,8 @@ export function NotificationBootstrapProvider({
 }: NotificationBootstrapProviderProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const userId = user?.id;
 
   const invalidateNotifications = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -225,6 +227,31 @@ export function NotificationBootstrapProvider({
       responseSubscription.remove();
     };
   }, [invalidateNotifications, processResponse]);
+
+  // Ask for notification permission once a signed-in user is known, and keep the backend's Expo
+  // token current. Registering only at login (without asking) left fresh installs with no
+  // permission prompt and restored sessions pointing at a dead install's token, so message and
+  // social pushes were accepted by APNs but never shown.
+  useEffect(() => {
+    if (Platform.OS === 'web' || !userId) {
+      return;
+    }
+
+    const syncPushDevice = () => {
+      void ensurePushDeviceRegisteredAsync().catch((error: unknown) => {
+        console.warn('[Push] Device registration failed', error);
+      });
+    };
+
+    syncPushDevice();
+    const tokenSubscription = Notifications.addPushTokenListener(() => {
+      syncPushDevice();
+    });
+
+    return () => {
+      tokenSubscription.remove();
+    };
+  }, [userId]);
 
   // Query timers do not run while the app is suspended and window-focus refetch is off, so the
   // bell would stay stale until the app was killed and reopened. Refresh it on every return.
