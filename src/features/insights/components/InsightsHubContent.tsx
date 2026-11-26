@@ -185,6 +185,14 @@ export function InsightsHubContent() {
         achievements={newAchievements.fresh}
         onClose={newAchievements.dismiss}
       />
+    </AnimatedScrollView>
+  );
+
+  // Sheets live outside the scroll view: JS touch handling follows the React tree, so a Modal
+  // nested in the ScrollView inherited its keyboardShouldPersistTaps="never" and the first tap on
+  // a DNA cover search result only dismissed the keyboard.
+  const sheets = (
+    <>
       <InsightsShareSheet
         visible={shareOpen}
         onClose={() => setShareOpen(false)}
@@ -199,15 +207,20 @@ export function InsightsHubContent() {
         onPick={dnaCover.setCover}
         onReset={() => dnaCover.setCover(null)}
       />
-    </AnimatedScrollView>
+    </>
   );
 
-  return androidPullToRefresh.enabled ? (
-    <GestureDetector gesture={androidPullToRefresh.composedGesture}>
-      {insightsScrollView}
-    </GestureDetector>
-  ) : (
-    insightsScrollView
+  return (
+    <>
+      {androidPullToRefresh.enabled ? (
+        <GestureDetector gesture={androidPullToRefresh.composedGesture}>
+          {insightsScrollView}
+        </GestureDetector>
+      ) : (
+        insightsScrollView
+      )}
+      {sheets}
+    </>
   );
 }
 

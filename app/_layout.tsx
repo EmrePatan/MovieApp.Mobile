@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SplashScreen, Stack } from 'expo-router';
+import { DarkTheme, SplashScreen, Stack, ThemeProvider } from 'expo-router';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -26,6 +26,21 @@ preloadExternalRatingBrandAssets();
 
 void SplashScreen.preventAutoHideAsync();
 
+// Without a navigation theme React Navigation falls back to its light DefaultTheme, whose white
+// scene/card background showed as a white strip under the floating tab bar while a tab or stack
+// transition was still painting the next screen.
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.accent,
+    background: colors.background,
+    card: colors.background,
+    text: colors.textPrimary,
+    border: colors.border,
+  },
+};
+
 function RootNavigator() {
   const { t } = useTranslation();
   const { isLoading } = useAuth();
@@ -39,7 +54,7 @@ function RootNavigator() {
   }
 
   return (
-    <>
+    <ThemeProvider value={navigationTheme}>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -57,7 +72,7 @@ function RootNavigator() {
         />
         <Stack.Screen name="profile" options={{ gestureEnabled: true }} />
       </Stack>
-    </>
+    </ThemeProvider>
   );
 }
 

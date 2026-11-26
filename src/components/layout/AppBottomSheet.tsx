@@ -8,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/common/AppText';
 import { GlassSurface } from '@/components/common/GlassSurface';
@@ -42,11 +42,17 @@ function AppBottomSheetFrame({
 }: AppBottomSheetFrameProps) {
   const { t } = useTranslation();
   const swipe = useSheetSwipeDismiss(onClose);
+  const insets = useSafeAreaInsets();
   // The sheet is bottom-anchored inside a Modal, so a KeyboardAvoidingView nested in the sheet
   // cannot lift it: the overlay itself has to make room for the keyboard.
   const Overlay = avoidKeyboard ? KeyboardAvoidingView : View;
   const overlayProps = avoidKeyboard
-    ? { behavior: Platform.OS === 'ios' ? ('padding' as const) : undefined }
+    ? {
+        behavior: Platform.OS === 'ios' ? ('padding' as const) : undefined,
+        // The sheet keeps its home-indicator padding (SafeAreaView bottom edge), which the
+        // keyboard already covers; lift it that much less so it sits flush on the keyboard.
+        keyboardVerticalOffset: -insets.bottom,
+      }
     : {};
 
   return (

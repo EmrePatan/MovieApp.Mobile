@@ -1263,7 +1263,7 @@ export const stage2Fr = {
       shows: { name: 'Finisseur', goal: 'Terminez {{count}} séries' },
       genres: { name: 'Explorateur', goal: 'Regardez {{count}} genres différents' },
       eras: { name: 'Voyageur du temps', goal: 'Regardez des titres de {{count}} décennies' },
-      classics: { name: 'Classique', goal: 'Regardez {{count}} titres d’avant 1980' },
+      classics: { name: 'Classique', goal: 'Regardez {{count}} titres d’avant 2000' },
       streak: { name: 'Série', goal: 'Regardez {{count}} jours de suite' },
       hours: { name: 'Marathonien', goal: 'Regardez {{count}} heures au total' },
       tenure: { name: 'Fidèle', goal: '{{count}} jours avec Movie Cave' },

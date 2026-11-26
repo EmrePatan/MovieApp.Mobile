@@ -1241,7 +1241,7 @@ export const stage2En = {
       shows: { name: 'Finisher', goal: 'Finish {{count}} series' },
       genres: { name: 'Explorer', goal: 'Watch across {{count}} genres' },
       eras: { name: 'Time Traveler', goal: 'Watch from {{count}} different decades' },
-      classics: { name: 'Classicist', goal: 'Watch {{count}} titles from before 1980' },
+      classics: { name: 'Classicist', goal: 'Watch {{count}} titles from before 2000' },
       streak: { name: 'Streak', goal: 'Watch {{count}} days in a row' },
       hours: { name: 'Marathoner', goal: 'Watch {{count}} hours in total' },
       tenure: { name: 'Loyalist', goal: '{{count}} days with Movie Cave' },

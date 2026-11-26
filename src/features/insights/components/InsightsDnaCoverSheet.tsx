@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +26,27 @@ import { glass } from '@/theme/glass';
 import { spacing } from '@/theme/spacing';
 
 const SEARCH_DEBOUNCE_MS = 350;
+/** Fixed body height while the keyboard is down, so the sheet does not jump as results load. */
+const BODY_HEIGHT = 420;
+/** Handle, title and paddings above the body, plus a gap kept free under the status bar. */
+const SHEET_CHROME_AND_TOP_GAP = 140;
+const MIN_BODY_HEIGHT = 200;
+
+/** Keyboard height while it is up (0 otherwise). */
+function useKeyboardHeight() {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, (event) => setHeight(event.endCoordinates.height));
+    const hide = Keyboard.addListener(hideEvent, () => setHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return height;
+}
 
 interface InsightsDnaCoverSheetProps {
   visible: boolean;
@@ -136,8 +168,24 @@ function CoverSheetBody({
   );
   const searching = query.trim().length >= 2;
 
+  // The fixed 420pt body plus the keyboard did not fit on a phone, so the sheet climbed to the
+  // status bar with a large empty area. Shrink the body to the room left above the keyboard.
+  const keyboardHeight = useKeyboardHeight();
+  const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const bodyHeight =
+    keyboardHeight > 0
+      ? Math.max(
+          MIN_BODY_HEIGHT,
+          Math.min(
+            BODY_HEIGHT,
+            windowHeight - keyboardHeight - insets.top - SHEET_CHROME_AND_TOP_GAP,
+          ),
+        )
+      : BODY_HEIGHT;
+
   return (
-    <View style={styles.body}>
+    <View style={[styles.body, { height: bodyHeight }]}>
       {chosen ? (
         <PosterStep
           item={chosen}
@@ -156,6 +204,8 @@ function CoverSheetBody({
               onChangeText={setText}
               placeholder={t('insights.share.coverSearch')}
               placeholderTextColor={colors.textMuted}
+              // Open with the keyboard up, like the quick-post and chat title pickers.
+              autoFocus
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="search"
@@ -232,7 +282,6 @@ function CoverSheetBody({
 const styles = StyleSheet.create({
   body: {
     gap: spacing.md,
-    height: 420,
     paddingBottom: spacing.sm,
   },
   search: {

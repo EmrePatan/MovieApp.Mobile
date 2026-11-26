@@ -1265,7 +1265,7 @@ export const stage2Tr = {
       shows: { name: 'Bitirici', goal: '{{count}} diziyi sonuna kadar izle' },
       genres: { name: 'Kaşif', goal: '{{count}} farklı türden izle' },
       eras: { name: 'Zaman Yolcusu', goal: '{{count}} farklı on yıldan izle' },
-      classics: { name: 'Klasikçi', goal: '1980 öncesinden {{count}} yapım izle' },
+      classics: { name: 'Klasikçi', goal: '2000 öncesinden {{count}} yapım izle' },
       streak: { name: 'Seri', goal: '{{count}} gün üst üste izle' },
       hours: { name: 'Maratoncu', goal: 'Toplam {{count}} saat izle' },
       tenure: { name: 'Sadık', goal: '{{count}} gündür Movie Cave\'desin' },

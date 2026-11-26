@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { PrimaryTabBar } from '@/features/navigation/PrimaryTabBar';
+import { colors } from '@/theme/colors';
 
 const hiddenTabScreenOptions = { href: null } as const;
 
@@ -9,6 +10,7 @@ export default function TabsLayout() {
       tabBar={(props) => <PrimaryTabBar insets={props.insets} />}
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: colors.background },
       }}
     >
       <Tabs.Screen name="(app-shell)" options={{ headerShown: false }} />

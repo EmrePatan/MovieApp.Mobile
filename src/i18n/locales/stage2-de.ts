@@ -1263,7 +1263,7 @@ export const stage2De = {
       shows: { name: 'Durchzieher', goal: '{{count}} Serien zu Ende sehen' },
       genres: { name: 'Entdecker', goal: 'Aus {{count}} Genres schauen' },
       eras: { name: 'Zeitreisender', goal: 'Aus {{count}} Jahrzehnten schauen' },
-      classics: { name: 'Klassiker-Fan', goal: '{{count}} Titel von vor 1980 ansehen' },
+      classics: { name: 'Klassiker-Fan', goal: '{{count}} Titel von vor 2000 ansehen' },
       streak: { name: 'Serie', goal: '{{count}} Tage in Folge schauen' },
       hours: { name: 'Marathonläufer', goal: 'Insgesamt {{count}} Stunden schauen' },
       tenure: { name: 'Treue Seele', goal: '{{count}} Tage bei Movie Cave' },

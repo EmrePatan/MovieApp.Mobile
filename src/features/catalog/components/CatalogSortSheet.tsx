@@ -104,6 +104,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // Title and close sit closer to the drag handle (tester feedback: too low).
     marginTop: -8,
+    // The sheet's `gap` does not reach inside the inner Pressable, so the header sat flush
+    // against the first option; give it its own breathing room.
+    marginBottom: spacing.lg,
   },
   title: {
     color: premiumSheet.textPrimary,
