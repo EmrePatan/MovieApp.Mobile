@@ -16,6 +16,8 @@ import { SeasonList } from './SeasonList';
 import { TvShowStatusPosterBar } from './TvShowStatusPosterBar';
 import { formatTvDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { TvShowDetailsResponse } from '../types';
+import { DetailFacts } from '../../shared/components/DetailFacts';
+import { useDetailCertification } from '../../shared/hooks/useDetailCertification';
 
 interface TvShowDetailContentProps {
   show: TvShowDetailsResponse;
@@ -24,9 +26,11 @@ interface TvShowDetailContentProps {
 export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
   const { t } = useTranslation();
   const galleryQuery = useTvShowGallery(show.id);
+  const certification = useDetailCertification(show.extras);
   const metadataLine = formatTvDetailMetadataLine({
     firstAirDate: show.firstAirDate,
     seasonCount: show.seasons.length,
+    certification,
   });
 
   return (
@@ -63,7 +67,11 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
         showPersonalRatingRow
       />
       </DetailHeaderStack>
-      <DetailOverview overview={show.overview} compactTop />
+      <DetailOverview
+        overview={show.overview}
+        tagline={show.extras?.tagline}
+        compactTop
+      />
       <SeasonList tvShowId={show.id} seasons={show.seasons} showTitle={show.title} />
       <ReviewsLinkRow
         contentType="tv"
@@ -72,6 +80,7 @@ export function TvShowDetailContent({ show }: TvShowDetailContentProps) {
       />
       <WhereToWatchRail contentType="tv" contentId={show.id} />
       <DetailKeywords keywords={show.keywords} />
+      <DetailFacts extras={show.extras} />
       <CatalogGallerySection
         query={galleryQuery}
         seeAllRoute={buildTvGalleryRoute(show.id)}

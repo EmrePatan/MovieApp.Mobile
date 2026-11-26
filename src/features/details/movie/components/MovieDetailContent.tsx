@@ -18,6 +18,9 @@ import { useMovieGallery } from '@/features/gallery/hooks/useGallery';
 import { buildMovieGalleryRoute } from '@/features/details/shared/routes';
 import { formatMovieDetailMetadataLine } from '../../shared/utils/format-detail-metadata';
 import type { MovieDetailsResponse } from '../types';
+import { DetailFacts } from '../../shared/components/DetailFacts';
+import { useDetailCertification } from '../../shared/hooks/useDetailCertification';
+
 interface MovieDetailContentProps {
   movie: MovieDetailsResponse;
 }
@@ -25,9 +28,11 @@ interface MovieDetailContentProps {
 export function MovieDetailContent({ movie }: MovieDetailContentProps) {
   const { t } = useTranslation();
   const galleryQuery = useMovieGallery(movie.id);
+  const certification = useDetailCertification(movie.extras);
   const metadataLine = formatMovieDetailMetadataLine({
     releaseDate: movie.releaseDate,
     runtimeMinutes: movie.runtimeMinutes,
+    certification,
   });
 
   return (
@@ -70,7 +75,11 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
         />
       </DetailPersonalRatingProvider>
       </DetailHeaderStack>
-      <DetailOverview overview={movie.overview} compactTop />
+      <DetailOverview
+        overview={movie.overview}
+        tagline={movie.extras?.tagline}
+        compactTop
+      />
       <ReviewsLinkRow
         contentType="movie"
         contentId={movie.id}
@@ -78,6 +87,7 @@ export function MovieDetailContent({ movie }: MovieDetailContentProps) {
       />
       <WhereToWatchRail contentType="movie" contentId={movie.id} />
       <DetailKeywords keywords={movie.keywords} />
+      <DetailFacts extras={movie.extras} />
       <CatalogGallerySection
         query={galleryQuery}
         seeAllRoute={buildMovieGalleryRoute(movie.id)}

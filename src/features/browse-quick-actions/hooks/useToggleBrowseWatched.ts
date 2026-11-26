@@ -32,6 +32,7 @@ import type {
 } from '@/features/watch-history/types';
 import { updateTvShowAggregateAllSeasonsWatched } from '@/features/watch-history/utils/tv-show-progress-cache';
 import { requestTvShowCompletionCelebration } from '@/features/watch-history/utils/tv-show-completion-celebration-requests';
+import { requestWatchHistoryHint } from '@/features/watch-history/utils/watch-history-hint-requests';
 import type { BrowseQuickActionsTarget } from '../types';
 
 async function clearPersonalRatingOnUnwatch(
@@ -112,6 +113,9 @@ export function useToggleBrowseWatched() {
         await clearPersonalRatingOnUnwatch(queryClient, 'tv', target.contentId);
       }
       await bulkUpdateTvShowWatchState(target.contentId, markingWatched);
+      if (markingWatched) {
+        requestWatchHistoryHint();
+      }
 
       await queryClient.invalidateQueries({
         queryKey: tvShowProgressQueryKey(target.contentId),

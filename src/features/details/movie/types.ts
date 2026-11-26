@@ -1,6 +1,7 @@
 import type { CollectionSummary } from '../collection/types';
 import type { DetailKeywordsApiPayload } from '../shared/types/catalog-keyword';
 import type { ExternalIdsResponse } from '../shared/types';
+import type { DetailExtras } from '../shared/types/detail-extras';
 
 export interface MovieDetailsResponse {
   id: string;
@@ -21,4 +22,5 @@ export interface MovieDetailsResponse {
   isReleased: boolean;
   canFollowForRelease: boolean;
   canSetReleaseAlert: boolean;
+  extras?: DetailExtras | null;
 }

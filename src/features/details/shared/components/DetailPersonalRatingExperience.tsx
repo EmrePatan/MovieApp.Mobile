@@ -19,6 +19,7 @@ import { useMyRating } from '@/features/ratings/hooks/useRatings';
 import type { RatingContentType } from '@/features/ratings/types';
 import { formatPersonalRatingOutOfFive } from '@/features/ratings/utils/format-personal-rating-display';
 import { useEpisodeWatchStatus } from '@/features/watch-history/hooks/useEpisodeWatchStatus';
+import { useHoldWatchHistoryHint } from '@/features/watch-history/hooks/useHoldWatchHistoryHint';
 import { useMovieWatchStatus } from '@/features/watch-history/hooks/useMovieWatchStatus';
 import { colors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
@@ -64,6 +65,7 @@ export function DetailPersonalRatingProvider({
   const [promptSessionKey, setPromptSessionKey] = useState(0);
   const [promptSheetBusy, setPromptSheetBusy] = useState(false);
   const closePromptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useHoldWatchHistoryHint(promptVisible);
 
   const clearPromptCloseTimeout = useCallback(() => {
     if (closePromptTimeoutRef.current) {

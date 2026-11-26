@@ -50,13 +50,17 @@ export function DetailGenres({ genres }: DetailGenresProps) {
   );
 }
 
+/** About four lines on a phone. */
+const OVERVIEW_PREVIEW_CHAR_LIMIT = 160;
+
 interface DetailOverviewProps {
   overview: string | null;
   /** When true, omits section top margin (e.g. directly after header stack). */
   compactTop?: boolean;
+  tagline?: string | null;
 }
 
-export function DetailOverview({ overview, compactTop = false }: DetailOverviewProps) {
+export function DetailOverview({ overview, compactTop = false, tagline }: DetailOverviewProps) {
   const { t } = useTranslation();
 
   if (!overview) {
@@ -75,8 +79,14 @@ export function DetailOverview({ overview, compactTop = false }: DetailOverviewP
         title={t('details.sections.overview')}
         compactSpacing
       />
+      {tagline ? (
+        <AppText variant="bodySmall" muted style={[styles.body, styles.tagline]}>
+          {tagline}
+        </AppText>
+      ) : null}
       <CollapsibleText
         text={overview}
+        previewCharLimit={OVERVIEW_PREVIEW_CHAR_LIMIT}
         style={styles.body}
         textStyle={styles.overviewText}
         toggleTestID="detail-overview-toggle"
@@ -127,6 +137,9 @@ const styles = StyleSheet.create({
   },
   overviewText: {
     lineHeight: 24,
+  },
+  tagline: {
+    fontStyle: 'italic',
   },
   item: {
     gap: 2,

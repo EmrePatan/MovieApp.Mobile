@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { BrowseQuickActionsProvider } from '@/features/browse-quick-actions/BrowseQuickActionsProvider';
 import { ratedDetailStackScreenOptions } from '@/features/details/shared/navigation/detail-stack-options';
+import { WatchHistoryHint } from '@/features/watch-history/components/WatchHistoryHint';
 import { colors } from '@/theme/colors';
 
 export default function AppShellLayout() {
@@ -51,6 +52,7 @@ export default function AppShellLayout() {
       <Stack.Screen name="person" />
       <Stack.Screen name="collection" />
     </Stack>
+    <WatchHistoryHint />
     </BrowseQuickActionsProvider>
   );
 }

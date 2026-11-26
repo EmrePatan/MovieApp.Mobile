@@ -1,5 +1,6 @@
 import type { DetailKeywordsApiPayload } from '../shared/types/catalog-keyword';
 import type { ExternalIdsResponse } from '../shared/types';
+import type { DetailExtras } from '../shared/types/detail-extras';
 
 export interface SeasonSummaryResponse {
   id: string;
@@ -28,4 +29,5 @@ export interface TvShowDetailsResponse {
   keywords?: DetailKeywordsApiPayload;
   seasons: SeasonSummaryResponse[];
   canFollow: boolean;
+  extras?: DetailExtras | null;
 }
