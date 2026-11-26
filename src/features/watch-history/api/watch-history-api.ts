@@ -93,8 +93,12 @@ export async function getRecentWatchHistory(
   page = 1,
   pageSize = 20,
   signal?: AbortSignal,
+  undated?: boolean,
 ): Promise<RecentWatchHistoryResponse> {
-  return api.get<RecentWatchHistoryResponse>(buildRecentWatchHistoryPath(page, pageSize), { signal });
+  return api.get<RecentWatchHistoryResponse>(
+    buildRecentWatchHistoryPath(page, pageSize, undated),
+    { signal },
+  );
 }
 
 export async function getTvShowProgress(

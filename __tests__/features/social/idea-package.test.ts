@@ -32,12 +32,12 @@ function episode(
 }
 
 describe('watch history grouping', () => {
-  it('collapses same-day episodes of one show and keeps single episodes plain', () => {
+  it('collapses same-month episodes of one show and keeps single episodes plain', () => {
     const rows = groupRecentWatchHistory([
       episode(15, '2026-11-23T20:00:00Z'),
-      episode(14, '2026-11-23T19:00:00Z'),
-      episode(13, '2026-11-23T18:00:00Z'),
-      episode(3, '2026-11-20T18:00:00Z'),
+      episode(14, '2026-11-16T19:00:00Z'),
+      episode(13, '2026-11-09T18:00:00Z'),
+      episode(3, '2026-10-26T18:00:00Z'),
     ]);
 
     expect(rows).toHaveLength(2);
